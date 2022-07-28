@@ -1,0 +1,5 @@
+# add 'agent-ios' and 'agent-mobile' label to all new issues
+agent-android:
+  - '.*'
+agent-mobile:
+  - '.*'

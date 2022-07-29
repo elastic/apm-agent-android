@@ -10,5 +10,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "APM Agent Android"
+rootProject.name = "APM Android Agent"
 include ':apm-agent-plugin'

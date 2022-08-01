@@ -1,12 +1,11 @@
-package co.elastic.apm.android.plugin;
+package co.elastic.apm.android.plugin
 
-import org.gradle.api.Plugin;
-import org.gradle.api.Project;
+import org.gradle.api.Plugin
+import org.gradle.api.Project
 
-public class ApmAndroidAgentPlugin implements Plugin<Project> {
+class ApmAndroidAgentPlugin : Plugin<Project> {
 
-    @Override
-    public void apply(Project project) {
+    override fun apply(project: Project) {
 
     }
 }

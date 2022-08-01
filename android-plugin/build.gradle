@@ -3,6 +3,9 @@ plugins {
     id 'org.jetbrains.kotlin.jvm'
 }
 
+targetCompatibility = jvmCompatibility
+sourceCompatibility = jvmCompatibility
+
 gradlePlugin {
     plugins {
         apmPlugin {

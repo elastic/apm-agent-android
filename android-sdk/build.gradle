@@ -30,8 +30,8 @@ android {
 }
 
 dependencies {
+    api "io.opentelemetry:opentelemetry-api"
     implementation platform("io.opentelemetry:opentelemetry-bom:$openTelemetry_version")
-    implementation "io.opentelemetry:opentelemetry-api"
     implementation "io.opentelemetry:opentelemetry-sdk"
     implementation "io.opentelemetry:opentelemetry-semconv"
     implementation "io.opentelemetry:opentelemetry-exporter-otlp"

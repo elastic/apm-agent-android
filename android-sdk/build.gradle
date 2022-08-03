@@ -30,7 +30,11 @@ android {
 }
 
 dependencies {
-
+    implementation platform("io.opentelemetry:opentelemetry-bom:$openTelemetry_version")
+    implementation "io.opentelemetry:opentelemetry-api"
+    implementation "io.opentelemetry:opentelemetry-sdk"
+    implementation "io.opentelemetry:opentelemetry-semconv"
+    implementation "io.opentelemetry:opentelemetry-exporter-otlp"
     implementation 'androidx.appcompat:appcompat:1.4.2'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test:runner:1.4.0'

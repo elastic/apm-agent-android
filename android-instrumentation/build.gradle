@@ -5,6 +5,9 @@ apply from: "$rootDir/publishing.gradle"
 
 dependencies {
     implementation "net.bytebuddy:byte-buddy:1.12.12"
+    implementation "com.squareup.okhttp3:okhttp:4.10.0"
+    implementation platform("io.opentelemetry:opentelemetry-bom:$openTelemetry_version")
+    implementation "io.opentelemetry:opentelemetry-api"
 }
 
 java {

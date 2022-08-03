@@ -1,5 +1,6 @@
 plugins {
     id 'java-gradle-plugin'
+    id 'com.github.gmazzo.buildconfig' version '3.1.0'
 }
 
 targetCompatibility = jvmCompatibility
@@ -7,6 +8,11 @@ sourceCompatibility = jvmCompatibility
 
 dependencies {
     implementation 'net.bytebuddy:byte-buddy-gradle-plugin:1.12.13-SNAPSHOT'
+}
+
+buildConfig {
+    packageName("${group}.generated")
+    buildConfigField("String", "SDK_DEPENDENCY_URI", "\"$group:android-sdk:$version\"")
 }
 
 gradlePlugin {

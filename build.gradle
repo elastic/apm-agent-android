@@ -6,5 +6,5 @@ plugins {
 
 ext {
     jvmCompatibility = JavaVersion.VERSION_1_8
-    openTelemetry_version = "1.15.0"
+    openTelemetry_version = "1.16.0"
 }

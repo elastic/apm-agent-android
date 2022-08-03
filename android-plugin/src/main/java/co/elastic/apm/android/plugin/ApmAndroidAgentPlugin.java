@@ -11,8 +11,9 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
 
     @Override
     public void apply(Project project) {
-        addSdkDependency(project);
         addBytebuddyPlugin(project);
+        addSdkDependency(project);
+        addInstrumentationDependency(project);
     }
 
     private void addBytebuddyPlugin(Project project) {
@@ -21,5 +22,9 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
 
     private void addSdkDependency(Project project) {
         project.getDependencies().add("implementation", BuildConfig.SDK_DEPENDENCY_URI);
+    }
+
+    private void addInstrumentationDependency(Project project) {
+        project.getDependencies().add("bytebuddy", BuildConfig.INSTRUMENTATION_DEPENDENCY_URI);
     }
 }

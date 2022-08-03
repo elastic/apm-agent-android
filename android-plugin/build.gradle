@@ -2,6 +2,7 @@ plugins {
     id 'java-gradle-plugin'
     id 'com.github.gmazzo.buildconfig' version '3.1.0'
 }
+apply from: "$rootDir/publishing.gradle"
 
 targetCompatibility = jvmCompatibility
 sourceCompatibility = jvmCompatibility

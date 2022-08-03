@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.library'
 }
+apply from: "$rootDir/publishing.gradle"
 
 android {
     compileSdk 32
@@ -22,6 +23,9 @@ android {
     compileOptions {
         sourceCompatibility jvmCompatibility
         targetCompatibility jvmCompatibility
+    }
+    publishing {
+        singleVariant('debug')
     }
 }
 

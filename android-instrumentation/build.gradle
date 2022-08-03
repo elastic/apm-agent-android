@@ -1,0 +1,13 @@
+plugins {
+    id 'java-library'
+}
+apply from: "$rootDir/publishing.gradle"
+
+dependencies {
+    implementation "net.bytebuddy:byte-buddy:1.12.12"
+}
+
+java {
+    sourceCompatibility = jvmCompatibility
+    targetCompatibility = jvmCompatibility
+}

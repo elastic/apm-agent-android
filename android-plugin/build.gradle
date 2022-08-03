@@ -5,6 +5,10 @@ plugins {
 targetCompatibility = jvmCompatibility
 sourceCompatibility = jvmCompatibility
 
+dependencies {
+    implementation 'net.bytebuddy:byte-buddy-gradle-plugin:1.12.13-SNAPSHOT'
+}
+
 gradlePlugin {
     plugins {
         apmPlugin {

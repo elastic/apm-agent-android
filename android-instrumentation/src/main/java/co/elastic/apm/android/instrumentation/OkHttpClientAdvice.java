@@ -8,6 +8,5 @@ public class OkHttpClientAdvice {
 
     @Advice.OnMethodEnter
     public static void enter(@Advice.Argument(0) OkHttpClient.Builder builder) {
-
     }
 }

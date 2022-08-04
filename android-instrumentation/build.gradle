@@ -1,16 +1,38 @@
 plugins {
-    id 'java-library'
+    id 'com.android.library'
 }
 apply from: "$rootDir/publishing.gradle"
 
+android {
+    compileSdk 32
+
+    defaultConfig {
+        minSdk 21
+        targetSdk 32
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility jvmCompatibility
+        targetCompatibility jvmCompatibility
+    }
+    publishing {
+        singleVariant('debug')
+    }
+}
+
 dependencies {
+    compileOnly project(':android-sdk')
     implementation "net.bytebuddy:byte-buddy:1.12.12"
     implementation "com.squareup.okhttp3:okhttp:4.10.0"
     implementation platform("io.opentelemetry:opentelemetry-bom:$openTelemetry_version")
     implementation "io.opentelemetry:opentelemetry-api"
-}
-
-java {
-    sourceCompatibility = jvmCompatibility
-    targetCompatibility = jvmCompatibility
 }

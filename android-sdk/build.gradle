@@ -31,6 +31,7 @@ android {
 
 dependencies {
     api "io.opentelemetry:opentelemetry-api"
+    compileOnly "com.squareup.okhttp3:okhttp:4.10.0"
     implementation platform("io.opentelemetry:opentelemetry-bom:$openTelemetry_version")
     implementation "io.opentelemetry:opentelemetry-sdk"
     implementation "io.opentelemetry:opentelemetry-semconv"

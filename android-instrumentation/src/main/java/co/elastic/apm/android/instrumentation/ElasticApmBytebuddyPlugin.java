@@ -4,13 +4,11 @@ import net.bytebuddy.build.Plugin;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.DynamicType;
-import net.bytebuddy.gradle.android.tools.TargetClasses;
 
 import java.io.IOException;
 
 import okhttp3.OkHttpClient;
 
-@TargetClasses(classNames = {"okhttp3/OkHttpClient$Builder.class"})
 public class ElasticApmBytebuddyPlugin implements Plugin {
 
     @Override

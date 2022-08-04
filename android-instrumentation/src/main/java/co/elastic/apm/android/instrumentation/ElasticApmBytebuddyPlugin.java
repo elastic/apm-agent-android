@@ -7,8 +7,6 @@ import net.bytebuddy.dynamic.DynamicType;
 
 import java.io.IOException;
 
-import okhttp3.OkHttpClient;
-
 public class ElasticApmBytebuddyPlugin implements Plugin {
 
     @Override
@@ -26,6 +24,6 @@ public class ElasticApmBytebuddyPlugin implements Plugin {
 
     @Override
     public boolean matches(TypeDescription target) {
-        return target.isAssignableTo(OkHttpClient.Builder.class);
+        return target.getTypeName().equals("okhttp3.OkHttpClient$Builder");
     }
 }

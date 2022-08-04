@@ -4,16 +4,21 @@ import net.bytebuddy.build.Plugin;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.DynamicType;
+import net.bytebuddy.gradle.android.tools.TargetClasses;
 
 import java.io.IOException;
 
+import okhttp3.OkHttpClient;
+
+@TargetClasses(classNames = {"okhttp3/OkHttpClient$Builder.class"})
 public class ElasticApmBytebuddyPlugin implements Plugin {
 
     @Override
     public DynamicType.Builder<?> apply(DynamicType.Builder<?> builder,
                                         TypeDescription typeDescription,
                                         ClassFileLocator classFileLocator) {
-        return null;
+        System.out.println("Type that matched: " + typeDescription.toString());//todo delete
+        return builder;
     }
 
     @Override
@@ -23,6 +28,6 @@ public class ElasticApmBytebuddyPlugin implements Plugin {
 
     @Override
     public boolean matches(TypeDescription target) {
-        return false;
+        return target.isAssignableTo(OkHttpClient.Builder.class);
     }
 }

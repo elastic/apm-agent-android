@@ -1,9 +1,6 @@
 package co.elastic.apm.android.sdk.okhttp;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
 import io.opentelemetry.api.trace.Span;
@@ -19,7 +16,11 @@ import okhttp3.Request;
 public class OtelOkhttpEventListener extends EventListener {
 
     private static final String SPAN_NAME_FORMAT = "%s %s";
-    private final Map<Request, Context> spanContexts = Collections.synchronizedMap(new HashMap<>());
+    private final OkhttpContextStore contextStore;
+
+    public OtelOkhttpEventListener(OkhttpContextStore contextStore) {
+        this.contextStore = contextStore;
+    }
 
     @Override
     public void callStart(Call call) {
@@ -38,7 +39,7 @@ public class OtelOkhttpEventListener extends EventListener {
         span.setAttribute(SemanticAttributes.HTTP_SCHEME, url.scheme());
         span.setAttribute(SemanticAttributes.HTTP_HOST, host);
         Context spanContext = currentContext.with(span);
-        spanContexts.put(request, spanContext);
+        contextStore.put(request, spanContext);
     }
 
     @Override
@@ -51,7 +52,7 @@ public class OtelOkhttpEventListener extends EventListener {
             if (isValid(span)) {
                 span.end();
             }
-            spanContexts.remove(request);
+            contextStore.remove(request);
         }
     }
 
@@ -67,7 +68,7 @@ public class OtelOkhttpEventListener extends EventListener {
                 span.recordException(ioe);
                 span.end();
             }
-            spanContexts.remove(request);
+            contextStore.remove(request);
         }
     }
 
@@ -75,7 +76,7 @@ public class OtelOkhttpEventListener extends EventListener {
         return span != null && span != Span.getInvalid();
     }
 
-    private Context getContext(Request request) {
-        return spanContexts.get(request);
+    Context getContext(Request request) {
+        return contextStore.get(request);
     }
 }

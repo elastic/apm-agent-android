@@ -31,12 +31,11 @@ android {
 
 dependencies {
     api "io.opentelemetry:opentelemetry-api"
-    compileOnly "com.squareup.okhttp3:okhttp:4.9.3"
+    api "com.squareup.okhttp3:okhttp:3.11.0"
     implementation platform("io.opentelemetry:opentelemetry-bom:$openTelemetry_version")
     implementation "io.opentelemetry:opentelemetry-sdk"
     implementation "io.opentelemetry:opentelemetry-semconv"
     implementation "io.opentelemetry:opentelemetry-exporter-otlp"
-    implementation 'androidx.appcompat:appcompat:1.4.2'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test:runner:1.4.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'

@@ -12,7 +12,7 @@ import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
-import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
+import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 
 public final class ElasticApmAgent {
@@ -60,7 +60,7 @@ public final class ElasticApmAgent {
                 .merge(Resource.create(Attributes.of(AttributeKey.stringKey("telemetry.sdk.language"), "java")));
 
         return SdkTracerProvider.builder()
-                .addSpanProcessor(SimpleSpanProcessor.create(getGrpcSpanExporter()))
+                .addSpanProcessor(BatchSpanProcessor.builder(getGrpcSpanExporter()).build())
                 .setResource(resource)
                 .build();
     }

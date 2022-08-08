@@ -2,6 +2,7 @@ package co.elastic.apm.android.sdk;
 
 import android.content.Context;
 
+import co.elastic.apm.android.sdk.otel.ElasticSpanExporter;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
@@ -13,6 +14,7 @@ import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
+import io.opentelemetry.sdk.trace.export.SpanExporter;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 
 public final class ElasticApmAgent {
@@ -60,17 +62,20 @@ public final class ElasticApmAgent {
                 .merge(Resource.create(Attributes.of(AttributeKey.stringKey("telemetry.sdk.language"), "java")));
 
         return SdkTracerProvider.builder()
-                .addSpanProcessor(BatchSpanProcessor.builder(getGrpcSpanExporter()).build())
+                .addSpanProcessor(BatchSpanProcessor.builder(getSpanExporter()).build())
                 .setResource(resource)
                 .build();
     }
 
-    private OtlpGrpcSpanExporter getGrpcSpanExporter() {
+    private SpanExporter getSpanExporter() {
+        SpanExporter original;
         if (endpoint == null) {
-            return OtlpGrpcSpanExporter.getDefault();
+            original = OtlpGrpcSpanExporter.getDefault();
+        } else {
+            original = OtlpGrpcSpanExporter.builder().setEndpoint(endpoint).build();
         }
 
-        return OtlpGrpcSpanExporter.builder().setEndpoint(endpoint).build();
+        return new ElasticSpanExporter(original);
     }
 
     private ContextPropagators getContextPropagator() {

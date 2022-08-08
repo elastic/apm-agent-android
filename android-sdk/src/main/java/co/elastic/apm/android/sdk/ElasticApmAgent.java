@@ -19,6 +19,7 @@ public final class ElasticApmAgent {
 
     private static ElasticApmAgent instance;
     private final Context appContext;
+    private final String endpoint;
     private Tracer tracer;
 
     public static Builder builder(Context appContext) {
@@ -40,6 +41,7 @@ public final class ElasticApmAgent {
 
     public Tracer getTracer() {
         if (tracer == null) {
+            verifyInitialization();
             tracer = GlobalOpenTelemetry.getTracer("ElasticApmAgent-tracer");
         }
 
@@ -48,6 +50,7 @@ public final class ElasticApmAgent {
 
     ElasticApmAgent(Builder builder) {
         appContext = builder.appContext;
+        endpoint = builder.endpoint;
     }
 
     private SdkTracerProvider getTracerProvider() {
@@ -57,9 +60,17 @@ public final class ElasticApmAgent {
                 .merge(Resource.create(Attributes.of(AttributeKey.stringKey("telemetry.sdk.language"), "java")));
 
         return SdkTracerProvider.builder()
-                .addSpanProcessor(SimpleSpanProcessor.create(OtlpGrpcSpanExporter.getDefault()))
+                .addSpanProcessor(SimpleSpanProcessor.create(getGrpcSpanExporter()))
                 .setResource(resource)
                 .build();
+    }
+
+    private OtlpGrpcSpanExporter getGrpcSpanExporter() {
+        if (endpoint == null) {
+            return OtlpGrpcSpanExporter.getDefault();
+        }
+
+        return OtlpGrpcSpanExporter.builder().setEndpoint(endpoint).build();
     }
 
     private ContextPropagators getContextPropagator() {
@@ -74,9 +85,15 @@ public final class ElasticApmAgent {
 
     public static class Builder {
         private final Context appContext;
+        private String endpoint;
 
-        public Builder(Context appContext) {
+        Builder(Context appContext) {
             this.appContext = appContext.getApplicationContext();
+        }
+
+        public Builder setEndpoint(String endpoint) {
+            this.endpoint = endpoint;
+            return this;
         }
 
         public ElasticApmAgent build() {

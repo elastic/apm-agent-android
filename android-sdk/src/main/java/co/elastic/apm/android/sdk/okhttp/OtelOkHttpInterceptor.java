@@ -10,11 +10,11 @@ import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class OtelOkhttpInterceptor implements Interceptor {
+public class OtelOkHttpInterceptor implements Interceptor {
 
-    private final OkhttpContextStore contextStore;
+    private final OkHttpContextStore contextStore;
 
-    public OtelOkhttpInterceptor(OkhttpContextStore contextStore) {
+    public OtelOkHttpInterceptor(OkHttpContextStore contextStore) {
         this.contextStore = contextStore;
     }
 

@@ -13,12 +13,12 @@ import okhttp3.EventListener;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
 
-public class OtelOkhttpEventListener extends EventListener {
+public class OtelOkHttpEventListener extends EventListener {
 
     private static final String SPAN_NAME_FORMAT = "%s %s";
-    private final OkhttpContextStore contextStore;
+    private final OkHttpContextStore contextStore;
 
-    public OtelOkhttpEventListener(OkhttpContextStore contextStore) {
+    public OtelOkHttpEventListener(OkHttpContextStore contextStore) {
         this.contextStore = contextStore;
     }
 

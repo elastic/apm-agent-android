@@ -7,7 +7,7 @@ import java.util.Map;
 import io.opentelemetry.context.Context;
 import okhttp3.Request;
 
-public class OkhttpContextStore {
+public class OkHttpContextStore {
 
     private final Map<Request, Context> spanContexts = Collections.synchronizedMap(new HashMap<>());
 

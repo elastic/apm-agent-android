@@ -16,7 +16,7 @@ import okhttp3.EventListener;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
 
-public class OtelEventListener extends EventListener {
+public class OtelOkhttpEventListener extends EventListener {
 
     private static final String SPAN_NAME_FORMAT = "%s %s";
     private final Map<Request, Context> spanContexts = Collections.synchronizedMap(new HashMap<>());

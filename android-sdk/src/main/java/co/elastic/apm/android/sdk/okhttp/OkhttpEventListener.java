@@ -29,7 +29,7 @@ public class OkhttpEventListener extends EventListener {
         String method = request.method();
         HttpUrl url = request.url();
         String host = url.host();
-        Span span = ElasticApmAgent.getTracer().spanBuilder(String.format(SPAN_NAME_FORMAT, method, host))
+        Span span = ElasticApmAgent.get().getTracer().spanBuilder(String.format(SPAN_NAME_FORMAT, method, host))
                 .setSpanKind(SpanKind.CLIENT)
                 .setParent(currentContext)
                 .startSpan();

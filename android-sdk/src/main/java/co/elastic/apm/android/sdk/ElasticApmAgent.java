@@ -52,6 +52,10 @@ public final class ElasticApmAgent {
         return tracer;
     }
 
+    public HttpSpanConfiguration getHttpSpanConfiguration() {
+        return httpSpanConfiguration;
+    }
+
     private ElasticApmAgent(Builder builder) {
         appContext = builder.appContext;
         endpoint = builder.endpoint;
@@ -91,16 +95,12 @@ public final class ElasticApmAgent {
         }
     }
 
-    public HttpSpanConfiguration getHttpSpanConfiguration() {
-        return httpSpanConfiguration;
-    }
-
     public static class Builder {
         private final Context appContext;
         private HttpSpanConfiguration httpSpanConfiguration;
         private String endpoint;
 
-        Builder(Context appContext) {
+        private Builder(Context appContext) {
             this.appContext = appContext.getApplicationContext();
         }
 

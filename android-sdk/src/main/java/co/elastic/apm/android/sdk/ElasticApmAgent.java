@@ -4,6 +4,7 @@ import android.content.Context;
 
 import co.elastic.apm.android.sdk.traces.http.HttpSpanConfiguration;
 import co.elastic.apm.android.sdk.traces.otel.exporter.ElasticSpanExporter;
+import co.elastic.apm.android.sdk.traces.otel.sampler.ExclusiveSampler;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
@@ -16,6 +17,7 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
+import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 
 public final class ElasticApmAgent {
@@ -68,7 +70,11 @@ public final class ElasticApmAgent {
                 .merge(Resource.create(Attributes.of(AttributeKey.stringKey("telemetry.sdk.name"), "android")))
                 .merge(Resource.create(Attributes.of(AttributeKey.stringKey("telemetry.sdk.language"), "java")));
 
+        ExclusiveSampler sampler = new ExclusiveSampler();
+        sampler.addAllRules(httpSpanConfiguration.exclusionRules);
+
         return SdkTracerProvider.builder()
+                .setSampler(Sampler.parentBased(sampler))
                 .addSpanProcessor(BatchSpanProcessor.builder(getSpanExporter()).build())
                 .setResource(resource)
                 .build();

@@ -1,16 +1,19 @@
 package co.elastic.apm.android.sdk.traces.http;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-import co.elastic.apm.android.sdk.traces.http.filtering.HttpSpanRule;
+import co.elastic.apm.android.sdk.traces.http.filtering.HttpExclusionRule;
+import co.elastic.apm.android.sdk.traces.http.filtering.OtelRequestsExclusionRule;
 
 public class HttpSpanConfiguration {
-    public final HttpSpanRule filterRule;
+    public final List<HttpExclusionRule> exclusionRules;
 
-    public HttpSpanConfiguration(HttpSpanRule filterRule) {
-        this.filterRule = filterRule;
+    public HttpSpanConfiguration(List<HttpExclusionRule> exclusionRule) {
+        this.exclusionRules = exclusionRule;
     }
 
     public static Builder builder() {
@@ -18,15 +21,15 @@ public class HttpSpanConfiguration {
     }
 
     public static class Builder {
-        private final Set<HttpSpanRule> filterRules = new HashSet<>(Collections.singleton(HttpSpanRule.getDefault()));
+        private final Set<HttpExclusionRule> exclusionRules = new HashSet<>(Collections.singleton(new OtelRequestsExclusionRule()));
 
-        public Builder addFilterRule(HttpSpanRule rule) {
-            filterRules.add(rule);
+        public Builder addExclusionRule(HttpExclusionRule rule) {
+            exclusionRules.add(rule);
             return this;
         }
 
         public HttpSpanConfiguration build() {
-            return new HttpSpanConfiguration(HttpSpanRule.composite(filterRules));
+            return new HttpSpanConfiguration(new ArrayList<>(exclusionRules));
         }
     }
 }

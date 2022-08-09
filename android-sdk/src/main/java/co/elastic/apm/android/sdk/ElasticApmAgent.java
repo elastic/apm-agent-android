@@ -2,7 +2,8 @@ package co.elastic.apm.android.sdk;
 
 import android.content.Context;
 
-import co.elastic.apm.android.sdk.otel.ElasticSpanExporter;
+import co.elastic.apm.android.sdk.traces.http.HttpSpanConfiguration;
+import co.elastic.apm.android.sdk.traces.otel.ElasticSpanExporter;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
@@ -22,6 +23,7 @@ public final class ElasticApmAgent {
     private static ElasticApmAgent instance;
     private final Context appContext;
     private final String endpoint;
+    private final HttpSpanConfiguration httpSpanConfiguration;
     private Tracer tracer;
 
     public static Builder builder(Context appContext) {
@@ -50,9 +52,10 @@ public final class ElasticApmAgent {
         return tracer;
     }
 
-    ElasticApmAgent(Builder builder) {
+    private ElasticApmAgent(Builder builder) {
         appContext = builder.appContext;
         endpoint = builder.endpoint;
+        httpSpanConfiguration = builder.httpSpanConfiguration;
     }
 
     private SdkTracerProvider getTracerProvider() {
@@ -88,8 +91,13 @@ public final class ElasticApmAgent {
         }
     }
 
+    public HttpSpanConfiguration getHttpSpanConfiguration() {
+        return httpSpanConfiguration;
+    }
+
     public static class Builder {
         private final Context appContext;
+        private HttpSpanConfiguration httpSpanConfiguration;
         private String endpoint;
 
         Builder(Context appContext) {
@@ -101,7 +109,15 @@ public final class ElasticApmAgent {
             return this;
         }
 
+        public Builder setHttpSpanConfiguration(HttpSpanConfiguration httpSpanConfiguration) {
+            this.httpSpanConfiguration = httpSpanConfiguration;
+            return this;
+        }
+
         public ElasticApmAgent build() {
+            if (httpSpanConfiguration == null) {
+                httpSpanConfiguration = HttpSpanConfiguration.builder().build();
+            }
             return new ElasticApmAgent(this);
         }
     }

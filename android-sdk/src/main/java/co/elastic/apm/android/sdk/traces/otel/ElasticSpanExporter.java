@@ -1,4 +1,4 @@
-package co.elastic.apm.android.sdk.otel;
+package co.elastic.apm.android.sdk.traces.otel;
 
 import java.util.ArrayList;
 import java.util.Collection;

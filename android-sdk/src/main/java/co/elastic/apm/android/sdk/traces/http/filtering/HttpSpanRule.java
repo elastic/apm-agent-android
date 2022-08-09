@@ -13,8 +13,8 @@ public interface HttpSpanRule {
         return MultiHttpSpanRule.create(rules);
     }
 
-    static HttpSpanRule allowAll() {
-        return SpanAllRule.INSTANCE;
+    static HttpSpanRule getDefault() {
+        return new OtelExportExclusionRule();
     }
 
     class HttpRequest {

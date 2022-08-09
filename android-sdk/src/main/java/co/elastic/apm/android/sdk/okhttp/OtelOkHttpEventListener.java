@@ -3,6 +3,10 @@ package co.elastic.apm.android.sdk.okhttp;
 import java.io.IOException;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
+import co.elastic.apm.android.sdk.traces.http.HttpSpanConfiguration;
+import co.elastic.apm.android.sdk.traces.http.LazyHttpSpanConfiguration;
+import co.elastic.apm.android.sdk.traces.http.filtering.HttpSpanRule;
+import co.elastic.apm.android.sdk.utility.Provider;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.StatusCode;
@@ -17,18 +21,26 @@ public class OtelOkHttpEventListener extends EventListener {
 
     private static final String SPAN_NAME_FORMAT = "%s %s";
     private final OkHttpContextStore contextStore;
+    private final Provider<HttpSpanConfiguration> httpSpanConfigurationProvider;
+    private HttpSpanRule httpSpanRule;
 
-    public OtelOkHttpEventListener(OkHttpContextStore contextStore) {
+    public OtelOkHttpEventListener(OkHttpContextStore contextStore, LazyHttpSpanConfiguration ruleProvider) {
         this.contextStore = contextStore;
+        this.httpSpanConfigurationProvider = ruleProvider;
     }
 
     @Override
     public void callStart(Call call) {
         super.callStart(call);
-        Context currentContext = Context.current();
         Request request = call.request();
         String method = request.method();
         HttpUrl url = request.url();
+
+        if (isNotSpannable(request, method, url)) {
+            return;
+        }
+
+        Context currentContext = Context.current();
         String host = url.host();
         Span span = ElasticApmAgent.get().getTracer().spanBuilder(String.format(SPAN_NAME_FORMAT, method, host))
                 .setSpanKind(SpanKind.CLIENT)
@@ -78,5 +90,18 @@ public class OtelOkHttpEventListener extends EventListener {
 
     Context getContext(Request request) {
         return contextStore.get(request);
+    }
+
+    private HttpSpanRule getHttpSpanRule() {
+        if (httpSpanRule == null) {
+            httpSpanRule = httpSpanConfigurationProvider.get().filterRule;
+        }
+
+        return httpSpanRule;
+    }
+
+    private boolean isNotSpannable(Request request, String method, HttpUrl url) {
+        HttpSpanRule.HttpRequest data = new HttpSpanRule.HttpRequest(method, url.url(), request.headers().toMultimap());
+        return !getHttpSpanRule().isSpannable(data);
     }
 }

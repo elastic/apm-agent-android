@@ -48,8 +48,6 @@ public class OtelOkHttpEventListener extends EventListener {
                 .startSpan();
         span.setAttribute(SemanticAttributes.HTTP_URL, url.toString());
         span.setAttribute(SemanticAttributes.HTTP_METHOD, method);
-        span.setAttribute(SemanticAttributes.HTTP_SCHEME, url.scheme());
-        span.setAttribute(SemanticAttributes.HTTP_HOST, host);
         Context spanContext = currentContext.with(span);
         contextStore.put(request, spanContext);
     }

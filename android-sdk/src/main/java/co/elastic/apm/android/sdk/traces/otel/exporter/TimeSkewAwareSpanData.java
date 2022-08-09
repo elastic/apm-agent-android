@@ -1,4 +1,4 @@
-package co.elastic.apm.android.sdk.traces.otel;
+package co.elastic.apm.android.sdk.traces.otel.exporter;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;

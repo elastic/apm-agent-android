@@ -3,7 +3,7 @@ package co.elastic.apm.android.sdk;
 import android.content.Context;
 
 import co.elastic.apm.android.sdk.traces.http.HttpSpanConfiguration;
-import co.elastic.apm.android.sdk.traces.otel.ElasticSpanExporter;
+import co.elastic.apm.android.sdk.traces.otel.exporter.ElasticSpanExporter;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;

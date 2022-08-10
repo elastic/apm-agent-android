@@ -1,12 +1,14 @@
 package co.elastic.apm.android.sdk;
 
 import android.content.Context;
+import android.os.Build;
+
+import java.lang.reflect.Field;
 
 import co.elastic.apm.android.sdk.traces.http.HttpSpanConfiguration;
 import co.elastic.apm.android.sdk.traces.otel.exporter.ElasticSpanExporter;
 import co.elastic.apm.android.sdk.traces.otel.processor.ElasticSpanProcessor;
 import io.opentelemetry.api.GlobalOpenTelemetry;
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
@@ -64,10 +66,16 @@ public final class ElasticApmAgent {
     }
 
     private SdkTracerProvider getTracerProvider() {
+        Attributes resourceAttributes = Attributes.builder()
+                .put(ResourceAttributes.SERVICE_NAME, appContext.getPackageName())
+                .put(ResourceAttributes.SERVICE_VERSION, getServiceVersion())
+                .put("telemetry.sdk.name", "android")
+                .put("telemetry.sdk.version", BuildConfig.APM_AGENT_VERSION)
+                .put("telemetry.sdk.language", "java")
+                .put(ResourceAttributes.OS_DESCRIPTION, getOsDescription())
+                .build();
         Resource resource = Resource.getDefault()
-                .merge(Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, appContext.getPackageName())))
-                .merge(Resource.create(Attributes.of(AttributeKey.stringKey("telemetry.sdk.name"), "android")))
-                .merge(Resource.create(Attributes.of(AttributeKey.stringKey("telemetry.sdk.language"), "java")));
+                .merge(Resource.create(resourceAttributes));
 
         ElasticSpanProcessor processor = new ElasticSpanProcessor(BatchSpanProcessor.builder(getSpanExporter()).build());
         processor.addAllExclusionRules(httpSpanConfiguration.exclusionRules);
@@ -76,6 +84,29 @@ public final class ElasticApmAgent {
                 .addSpanProcessor(processor)
                 .setResource(resource)
                 .build();
+    }
+
+    private String getOsDescription() {
+        StringBuilder descriptionBuilder = new StringBuilder();
+        descriptionBuilder.append("Android ");
+        descriptionBuilder.append(Build.VERSION.CODENAME);
+        descriptionBuilder.append(", API ");
+        descriptionBuilder.append(Build.VERSION.SDK_INT);
+        descriptionBuilder.append(", RELEASE ");
+        descriptionBuilder.append(Build.VERSION.RELEASE);
+        descriptionBuilder.append(", BUILD ");
+        descriptionBuilder.append(Build.VERSION.INCREMENTAL);
+        return descriptionBuilder.toString();
+    }
+
+    private String getServiceVersion() {
+        try {
+            Class<?> serviceBuildConfig = Class.forName(appContext.getPackageName() + ".BuildConfig");
+            Field versionNameField = serviceBuildConfig.getDeclaredField("VERSION_NAME");
+            return (String) versionNameField.get(serviceBuildConfig);
+        } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private SpanExporter getSpanExporter() {

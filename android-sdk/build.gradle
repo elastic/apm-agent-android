@@ -10,6 +10,8 @@ android {
         minSdk androidMinSdk
         targetSdk androidCompileSdk
 
+        buildConfigField("String", "APM_AGENT_VERSION", "\"${project.version}\"")
+
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }

@@ -12,7 +12,7 @@ import co.elastic.apm.android.sdk.traces.http.filtering.OtelRequestsExclusionRul
 public class HttpSpanConfiguration {
     public final List<HttpExclusionRule> exclusionRules;
 
-    public HttpSpanConfiguration(List<HttpExclusionRule> exclusionRule) {
+    private HttpSpanConfiguration(List<HttpExclusionRule> exclusionRule) {
         this.exclusionRules = exclusionRule;
     }
 
@@ -22,6 +22,9 @@ public class HttpSpanConfiguration {
 
     public static class Builder {
         private final Set<HttpExclusionRule> exclusionRules = new HashSet<>(Collections.singleton(new OtelRequestsExclusionRule()));
+
+        private Builder() {
+        }
 
         public Builder addExclusionRule(HttpExclusionRule rule) {
             exclusionRules.add(rule);

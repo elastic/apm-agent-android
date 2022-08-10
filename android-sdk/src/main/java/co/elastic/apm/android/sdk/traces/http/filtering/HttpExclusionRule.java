@@ -1,5 +1,7 @@
 package co.elastic.apm.android.sdk.traces.http.filtering;
 
+import androidx.annotation.NonNull;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -29,9 +31,9 @@ abstract public class HttpExclusionRule implements ElasticSpanProcessor.Exclusio
         }
     }
 
-    abstract boolean exclude(Request request);
+    public abstract boolean exclude(@NonNull Request request);
 
-    static class Request {
+    public static class Request {
         public final String method;
         public final URL url;
 

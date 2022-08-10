@@ -3,26 +3,25 @@ package co.elastic.apm.android.sdk.traces.http.filtering;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import co.elastic.apm.android.sdk.traces.otel.sampler.ExclusiveSampler;
-import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.trace.SpanKind;
+import co.elastic.apm.android.sdk.traces.otel.processor.ElasticSpanProcessor;
+import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 
-abstract public class HttpExclusionRule implements ExclusiveSampler.Rule {
+abstract public class HttpExclusionRule implements ElasticSpanProcessor.ExclusionRule {
 
     @Override
-    public boolean exclude(String spanName, SpanKind kind, Attributes attributes) {
-        String httpMethod = attributes.get(SemanticAttributes.HTTP_METHOD);
+    public boolean exclude(ReadableSpan span) {
+        String httpMethod = span.getAttribute(SemanticAttributes.HTTP_METHOD);
         if (httpMethod == null) {
             // Not an http-related Span.
             return false;
         }
 
-        return exclude(new Request(httpMethod, getUrl(attributes)));
+        return exclude(new Request(httpMethod, getUrl(span)));
     }
 
-    private URL getUrl(Attributes attributes) {
-        String urlString = attributes.get(SemanticAttributes.HTTP_URL);
+    private URL getUrl(ReadableSpan span) {
+        String urlString = span.getAttribute(SemanticAttributes.HTTP_URL);
         try {
             return new URL(urlString);
         } catch (MalformedURLException e) {

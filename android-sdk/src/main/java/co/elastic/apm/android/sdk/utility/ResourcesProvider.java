@@ -3,7 +3,11 @@ package co.elastic.apm.android.sdk.utility;
 import android.content.Context;
 import android.os.Build;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import java.lang.reflect.Field;
+import java.util.Locale;
 
 import co.elastic.apm.android.sdk.BuildConfig;
 import io.opentelemetry.api.common.Attributes;
@@ -19,6 +23,10 @@ public class ResourcesProvider {
                 .put("telemetry.sdk.version", BuildConfig.APM_AGENT_VERSION)
                 .put("telemetry.sdk.language", "java")
                 .put(ResourceAttributes.OS_DESCRIPTION, getOsDescription())
+                .put(ResourceAttributes.OS_TYPE, "linux")
+                .put(ResourceAttributes.OS_VERSION, Build.VERSION.RELEASE)
+                .put(ResourceAttributes.OS_NAME, Build.VERSION.CODENAME)
+                .put(ResourceAttributes.DEPLOYMENT_ENVIRONMENT, getDeploymentEnvironment(appContext))
                 .build();
     }
 
@@ -35,12 +43,57 @@ public class ResourcesProvider {
         return descriptionBuilder.toString();
     }
 
-    private static String getServiceVersion(Context appContext) {
+    private static String getDeploymentEnvironment(Context appContext) {
+        String flavor = getBuildFlavor(appContext);
+        String buildType = getBuildType(appContext);
+
+        if (flavor == null) {
+            return buildType;
+        }
+
+        return flavor + capitalize(buildType);
+    }
+
+    private static String capitalize(String value) {
+        return value.substring(0, 1).toUpperCase(Locale.US) + value.substring(1);
+    }
+
+    @NonNull
+    private static String getBuildType(Context appContext) {
+        Class<?> serviceBuildConfig = getBuildConfigClass(appContext);
+        return getField(serviceBuildConfig, "BUILD_TYPE");
+    }
+
+    @Nullable
+    private static String getBuildFlavor(Context appContext) {
+        Class<?> serviceBuildConfig = getBuildConfigClass(appContext);
         try {
-            Class<?> serviceBuildConfig = Class.forName(appContext.getPackageName() + ".BuildConfig");
-            Field versionNameField = serviceBuildConfig.getDeclaredField("VERSION_NAME");
-            return (String) versionNameField.get(serviceBuildConfig);
-        } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
+            return getField(serviceBuildConfig, "FLAVOR");
+        } catch (RuntimeException e) {
+            return null;
+        }
+    }
+
+    @NonNull
+    private static String getServiceVersion(Context appContext) {
+        Class<?> serviceBuildConfig = getBuildConfigClass(appContext);
+        return getField(serviceBuildConfig, "VERSION_NAME");
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T getField(Class<?> fromClass, String name) {
+        try {
+            Field field = fromClass.getDeclaredField(name);
+            return (T) field.get(fromClass);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static Class<?> getBuildConfigClass(Context appContext) {
+        try {
+            return Class.forName(appContext.getPackageName() + ".BuildConfig");
+        } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
     }

@@ -27,6 +27,9 @@ public class ResourcesProvider {
                 .put(ResourceAttributes.OS_VERSION, Build.VERSION.RELEASE)
                 .put(ResourceAttributes.OS_NAME, Build.VERSION.CODENAME)
                 .put(ResourceAttributes.DEPLOYMENT_ENVIRONMENT, getDeploymentEnvironment(appContext))
+                .put(ResourceAttributes.DEVICE_ID, DeviceIdProvider.getDeviceId(appContext))
+                .put(ResourceAttributes.DEVICE_MODEL_IDENTIFIER, Build.MODEL)
+                .put(ResourceAttributes.DEVICE_MANUFACTURER, Build.MANUFACTURER)
                 .build();
     }
 

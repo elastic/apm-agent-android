@@ -25,11 +25,11 @@ public class ResourcesProvider {
     private static String getOsDescription() {
         StringBuilder descriptionBuilder = new StringBuilder();
         descriptionBuilder.append("Android ");
-        descriptionBuilder.append(Build.VERSION.CODENAME);
-        descriptionBuilder.append(", API ");
-        descriptionBuilder.append(Build.VERSION.SDK_INT);
-        descriptionBuilder.append(", RELEASE ");
         descriptionBuilder.append(Build.VERSION.RELEASE);
+        descriptionBuilder.append(", API level ");
+        descriptionBuilder.append(Build.VERSION.SDK_INT);
+        descriptionBuilder.append(", NAME ");
+        descriptionBuilder.append(Build.VERSION.CODENAME);
         descriptionBuilder.append(", BUILD ");
         descriptionBuilder.append(Build.VERSION.INCREMENTAL);
         return descriptionBuilder.toString();

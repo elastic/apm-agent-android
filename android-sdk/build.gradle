@@ -37,7 +37,7 @@ dependencies {
     api "com.squareup.okhttp3:okhttp:3.11.0"
     implementation "io.opentelemetry:opentelemetry-exporter-otlp:$openTelemetry_version"
     implementation "io.opentelemetry:opentelemetry-semconv:1.16.0-alpha"
-    implementation 'androidx.annotation:annotation:1.4.0'
+    implementation "androidx.annotation:annotation:$androidAnnotations_version"
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test:runner:1.4.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'

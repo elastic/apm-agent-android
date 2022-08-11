@@ -9,4 +9,5 @@ ext {
     androidMinSdk = 21
     androidCompileSdk = 32
     openTelemetry_version = "1.16.0"
+    androidAnnotations_version = "1.4.0"
 }

@@ -94,10 +94,26 @@ public class ResourcesProvider {
     }
 
     private static Class<?> getBuildConfigClass(Context appContext) {
+        return getBuildConfigClass(appContext, 0, 2);
+    }
+
+    // TODO remove usage of BuildConfig
+    private static Class<?> getBuildConfigClass(Context appContext, int depth, int maxDepth) {
         try {
-            return Class.forName(appContext.getPackageName() + ".BuildConfig");
+            String packageName = appContext.getPackageName();
+            int cycles = depth;
+            while (cycles > 0) {
+                int lastDot = packageName.lastIndexOf('.');
+                packageName = packageName.substring(0, lastDot);
+                cycles--;
+            }
+            return Class.forName(packageName + ".BuildConfig");
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+            if (depth < maxDepth) {
+                return getBuildConfigClass(appContext, depth + 1, maxDepth);
+            } else {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

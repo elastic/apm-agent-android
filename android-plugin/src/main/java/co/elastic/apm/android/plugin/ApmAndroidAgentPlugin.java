@@ -11,7 +11,7 @@ import org.gradle.api.Project;
 import org.gradle.api.plugins.ExtensionContainer;
 import org.gradle.api.tasks.TaskProvider;
 
-import co.elastic.apm.android.plugin.tasks.ApplicationInfoGenerator;
+import co.elastic.apm.android.plugin.tasks.ApmInfoGenerator;
 import co.elastic.apm.generated.BuildConfig;
 
 class ApmAndroidAgentPlugin implements Plugin<Project> {
@@ -43,18 +43,16 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
 
         extension.onVariants(extension.selector().all(), applicationVariant -> {
             String variantName = applicationVariant.getName();
-            TaskProvider<ApplicationInfoGenerator> provider = project.getTasks()
-                    .register(variantName + "CreateApplicationInfo", ApplicationInfoGenerator.class);
-
-            provider.configure(applicationInfoGenerator -> {
-                applicationInfoGenerator.getOutputDir().set(project.getLayout().getBuildDirectory().dir(applicationInfoGenerator.getName()));
-                applicationInfoGenerator.getVariantName().set(variantName);
-                applicationInfoGenerator.getVersion().set(androidExtension.getDefaultConfig().getVersionName());
+            TaskProvider<ApmInfoGenerator> taskProvider = project.getTasks().register(variantName + "GenerateApmInfo", ApmInfoGenerator.class);
+            taskProvider.configure(apmInfoGenerator -> {
+                apmInfoGenerator.getVariantName().set(variantName);
+                apmInfoGenerator.getVersion().set(androidExtension.getDefaultConfig().getVersionName());
+                apmInfoGenerator.getOutputDir().set(project.getLayout().getBuildDirectory().dir(apmInfoGenerator.getName()));
             });
 
-            applicationVariant.getArtifacts().use(provider)
-                    .wiredWith(ApplicationInfoGenerator::getOutputDir)
-                    .toAppendTo(MultipleArtifact.ALL_CLASSES_DIRS.INSTANCE);
+            applicationVariant.getArtifacts().use(taskProvider)
+                    .wiredWith(ApmInfoGenerator::getOutputDir)
+                    .toAppendTo(MultipleArtifact.ASSETS.INSTANCE);
         });
     }
 }

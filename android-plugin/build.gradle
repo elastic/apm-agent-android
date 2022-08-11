@@ -9,7 +9,7 @@ sourceCompatibility = jvmCompatibility
 
 dependencies {
     implementation 'net.bytebuddy:byte-buddy-gradle-plugin:1.12.13-SNAPSHOT'
-    implementation project(':android-app-info')
+    implementation project(':android-tools')
     compileOnly "com.android.tools.build:gradle:7.1.3"
 }
 

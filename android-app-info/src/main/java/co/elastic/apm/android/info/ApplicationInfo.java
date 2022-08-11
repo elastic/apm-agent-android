@@ -5,11 +5,11 @@ import androidx.annotation.Keep;
 @Keep
 public class ApplicationInfo {
 
-    public String getVersion() {
+    public static String getVersion() {
         throw new UnsupportedOperationException();
     }
 
-    public String getVariantName() {
+    public static String getVariantName() {
         throw new UnsupportedOperationException();
     }
 }

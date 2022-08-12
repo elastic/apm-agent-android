@@ -38,7 +38,7 @@ dependencies {
     implementation 'com.blogspot.mydailyjava:weak-lock-free:0.18'
     implementation project(':android-common')
     implementation "io.opentelemetry:opentelemetry-exporter-otlp:$openTelemetry_version"
-    implementation "io.opentelemetry:opentelemetry-semconv:1.16.0-alpha"
+    implementation "io.opentelemetry:opentelemetry-semconv:$openTelemetry_version-alpha"
     implementation "androidx.annotation:annotation:$androidAnnotations_version"
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test:runner:1.4.0'

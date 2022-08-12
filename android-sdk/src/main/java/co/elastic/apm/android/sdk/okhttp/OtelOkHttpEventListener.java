@@ -31,7 +31,7 @@ public class OtelOkHttpEventListener extends EventListener {
 
         Context currentContext = Context.current();
         String host = url.host();
-        Span span = ElasticApmAgent.get().getTracer().spanBuilder(String.format(SPAN_NAME_FORMAT, method, host))
+        Span span = ElasticApmAgent.get().spanBuilder(String.format(SPAN_NAME_FORMAT, method, host))
                 .setSpanKind(SpanKind.CLIENT)
                 .setAttribute(SemanticAttributes.HTTP_URL, url.toString())
                 .setAttribute(SemanticAttributes.HTTP_METHOD, method)

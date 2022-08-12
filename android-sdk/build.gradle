@@ -35,7 +35,7 @@ dependencies {
     api "io.opentelemetry:opentelemetry-api:$openTelemetry_version"
     api "io.opentelemetry:opentelemetry-sdk:$openTelemetry_version"
     api "com.squareup.okhttp3:okhttp:3.11.0"
-    implementation project(':android-tools')
+    implementation project(':android-common')
     implementation "io.opentelemetry:opentelemetry-exporter-otlp:$openTelemetry_version"
     implementation "io.opentelemetry:opentelemetry-semconv:1.16.0-alpha"
     implementation "androidx.annotation:annotation:$androidAnnotations_version"

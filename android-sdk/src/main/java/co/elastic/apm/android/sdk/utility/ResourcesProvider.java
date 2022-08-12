@@ -8,7 +8,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 import co.elastic.apm.android.sdk.BuildConfig;
-import co.elastic.apm.android.tools.ApmInfo;
+import co.elastic.apm.android.common.ApmInfo;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 

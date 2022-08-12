@@ -1,4 +1,4 @@
-package co.elastic.apm.android.tools;
+package co.elastic.apm.android.common;
 
 public class ApmInfo {
     public static String KEY_VERSION = "version";

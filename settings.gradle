@@ -17,4 +17,4 @@ rootProject.name = "APM Android Agent"
 include ':android-plugin'
 include ':android-sdk'
 include ':android-instrumentation'
-include ':android-tools'
+include ':android-common'

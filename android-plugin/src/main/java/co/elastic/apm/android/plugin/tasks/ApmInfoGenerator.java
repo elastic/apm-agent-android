@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Properties;
 
-import co.elastic.apm.android.tools.ApmInfo;
+import co.elastic.apm.android.common.ApmInfo;
 
 public abstract class ApmInfoGenerator extends DefaultTask {
 

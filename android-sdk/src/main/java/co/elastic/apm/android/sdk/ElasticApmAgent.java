@@ -5,7 +5,7 @@ import android.content.Context;
 import co.elastic.apm.android.sdk.traces.http.HttpSpanConfiguration;
 import co.elastic.apm.android.sdk.traces.otel.exporter.ElasticSpanExporter;
 import co.elastic.apm.android.sdk.traces.otel.processor.ElasticSpanProcessor;
-import co.elastic.apm.android.sdk.utility.ResourcesProvider;
+import co.elastic.apm.android.sdk.utility.CommonResourcesProvider;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
@@ -62,8 +62,9 @@ public final class ElasticApmAgent {
     }
 
     private SdkTracerProvider getTracerProvider() {
+        CommonResourcesProvider resourcesProvider = new CommonResourcesProvider(appContext);
         Resource resource = Resource.getDefault()
-                .merge(Resource.create(ResourcesProvider.getCommonResourceAttributes(appContext)));
+                .merge(Resource.create(resourcesProvider.get()));
 
         ElasticSpanProcessor processor = new ElasticSpanProcessor(BatchSpanProcessor.builder(getSpanExporter()).build());
         processor.addAllExclusionRules(httpSpanConfiguration.exclusionRules);

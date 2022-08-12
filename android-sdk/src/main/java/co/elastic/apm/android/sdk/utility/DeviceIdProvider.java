@@ -7,11 +7,17 @@ import java.util.UUID;
 
 import co.elastic.apm.android.sdk.BuildConfig;
 
-public class DeviceIdProvider {
+public class DeviceIdProvider implements Provider<String> {
 
     private static final String DEVICE_ID_KEY = "device_id";
+    private final Context appContext;
 
-    public static String getDeviceId(Context appContext) {
+    public DeviceIdProvider(Context appContext) {
+        this.appContext = appContext;
+    }
+
+    @Override
+    public String get() {
         SharedPreferences sharedPreferences = getSharedPreferences(appContext);
         String deviceId = sharedPreferences.getString(DEVICE_ID_KEY, null);
 
@@ -23,11 +29,11 @@ public class DeviceIdProvider {
         return deviceId;
     }
 
-    private static void storeDeviceId(SharedPreferences sharedPreferences, String deviceId) {
+    private void storeDeviceId(SharedPreferences sharedPreferences, String deviceId) {
         sharedPreferences.edit().putString(DEVICE_ID_KEY, deviceId).apply();
     }
 
-    private static SharedPreferences getSharedPreferences(Context appContext) {
+    private SharedPreferences getSharedPreferences(Context appContext) {
         return appContext.getSharedPreferences(BuildConfig.LIBRARY_PACKAGE_NAME + ".prefs", Context.MODE_PRIVATE);
     }
 }

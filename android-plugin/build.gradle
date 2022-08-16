@@ -8,7 +8,7 @@ targetCompatibility = jvmCompatibility
 sourceCompatibility = jvmCompatibility
 
 dependencies {
-    implementation 'net.bytebuddy:byte-buddy-gradle-plugin:1.12.13-SNAPSHOT'
+    implementation "net.bytebuddy:byte-buddy-gradle-plugin:$bytebuddy_version"
     implementation project(':android-common')
     compileOnly "com.android.tools.build:gradle:7.1.3"
 }

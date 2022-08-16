@@ -31,5 +31,5 @@ android {
 
 dependencies {
     implementation project(':android-sdk')
-    implementation "net.bytebuddy:byte-buddy:1.12.12"
+    implementation "net.bytebuddy:byte-buddy:$bytebuddy_version"
 }

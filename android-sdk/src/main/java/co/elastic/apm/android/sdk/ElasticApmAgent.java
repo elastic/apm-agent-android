@@ -5,7 +5,7 @@ import android.content.Context;
 import co.elastic.apm.android.sdk.traces.http.HttpSpanConfiguration;
 import co.elastic.apm.android.sdk.traces.otel.exporter.ElasticSpanExporter;
 import co.elastic.apm.android.sdk.traces.otel.processor.ElasticSpanProcessor;
-import co.elastic.apm.android.sdk.utility.CommonResourcesProvider;
+import co.elastic.apm.android.sdk.data.providers.CommonResourcesProvider;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.Tracer;

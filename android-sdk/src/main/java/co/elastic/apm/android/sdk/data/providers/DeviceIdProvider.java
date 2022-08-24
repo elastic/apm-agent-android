@@ -1,4 +1,4 @@
-package co.elastic.apm.android.sdk.utility;
+package co.elastic.apm.android.sdk.data.providers;
 
 import android.content.Context;
 import android.content.SharedPreferences;

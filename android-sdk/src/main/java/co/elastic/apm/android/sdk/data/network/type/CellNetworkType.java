@@ -9,11 +9,11 @@ public class CellNetworkType implements NetworkType {
 
     @Override
     public String getName() {
-        return null;
+        return "cell";
     }
 
     @Override
     public String getSubTypeName() {
-        return null;
+        return subType;
     }
 }

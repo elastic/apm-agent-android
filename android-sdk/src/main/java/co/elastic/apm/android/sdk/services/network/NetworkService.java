@@ -9,7 +9,6 @@ import android.telephony.TelephonyManager;
 import androidx.annotation.NonNull;
 
 import co.elastic.apm.android.sdk.services.Service;
-import co.elastic.apm.android.sdk.services.ServiceNames;
 import co.elastic.apm.android.sdk.services.network.type.NetworkType;
 import co.elastic.apm.android.sdk.services.network.utils.CellSubTypeProvider;
 
@@ -36,7 +35,7 @@ public class NetworkService extends ConnectivityManager.NetworkCallback implemen
 
     @Override
     public String name() {
-        return ServiceNames.NETWORK;
+        return Service.Names.NETWORK;
     }
 
     public NetworkType getType() {

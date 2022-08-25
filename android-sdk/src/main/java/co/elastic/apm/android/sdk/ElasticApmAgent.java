@@ -3,6 +3,8 @@ package co.elastic.apm.android.sdk;
 import android.content.Context;
 
 import co.elastic.apm.android.sdk.attributes.AttributesCompose;
+import co.elastic.apm.android.sdk.services.ServiceManager;
+import co.elastic.apm.android.sdk.services.network.NetworkService;
 import co.elastic.apm.android.sdk.traces.http.HttpSpanConfiguration;
 import co.elastic.apm.android.sdk.traces.otel.exporter.ElasticSpanExporter;
 import co.elastic.apm.android.sdk.traces.otel.processor.ElasticSpanProcessor;
@@ -24,6 +26,7 @@ public final class ElasticApmAgent {
     private final String endpoint;
     private final HttpSpanConfiguration httpSpanConfiguration;
     private final AttributesCompose globalAttributes;
+    private final ServiceManager serviceManager;
     private Tracer tracer;
 
     public static Builder builder(Context appContext) {
@@ -55,6 +58,7 @@ public final class ElasticApmAgent {
         endpoint = builder.endpoint;
         globalAttributes = builder.globalAttributes;
         httpSpanConfiguration = builder.httpSpanConfiguration;
+        serviceManager = builder.serviceManager;
     }
 
     private SdkTracerProvider getTracerProvider() {
@@ -102,11 +106,14 @@ public final class ElasticApmAgent {
 
     public static class Builder {
         private final AttributesCompose globalAttributes;
+        private final ServiceManager serviceManager;
         private HttpSpanConfiguration httpSpanConfiguration;
         private String endpoint;
 
         private Builder(Context appContext) {
             globalAttributes = AttributesCompose.global(appContext);
+            serviceManager = new ServiceManager();
+            serviceManager.addService(new NetworkService(appContext));
         }
 
         public Builder setEndpoint(String endpoint) {

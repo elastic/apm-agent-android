@@ -3,6 +3,7 @@ package co.elastic.apm.android.sdk;
 import android.content.Context;
 
 import co.elastic.apm.android.sdk.attributes.AttributesCompose;
+import co.elastic.apm.android.sdk.providers.LazyProvider;
 import co.elastic.apm.android.sdk.services.Service;
 import co.elastic.apm.android.sdk.services.ServiceManager;
 import co.elastic.apm.android.sdk.services.network.NetworkService;
@@ -61,8 +62,8 @@ public final class ElasticApmAgent {
         return httpSpanConfiguration;
     }
 
-    public Service getService(String name) {
-        return serviceManager.getByName(name);
+    public <T extends Service> LazyProvider<T> getServiceProvider(String name) {
+        return serviceManager.getServiceProvider(name);
     }
 
     private ElasticApmAgent(Builder builder) {

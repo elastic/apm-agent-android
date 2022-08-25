@@ -1,6 +1,7 @@
 package co.elastic.apm.android.sdk.traces.http.attributes;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
+import co.elastic.apm.android.sdk.providers.LazyProvider;
 import co.elastic.apm.android.sdk.services.Service;
 import co.elastic.apm.android.sdk.services.network.NetworkService;
 import co.elastic.apm.android.sdk.services.network.data.CarrierInfo;
@@ -9,15 +10,15 @@ import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 
 public class CarrierHttpAttributes implements HttpAttributesVisitor {
-    private final NetworkService networkService;
+    private final LazyProvider<NetworkService> networkServiceProvider;
 
     public CarrierHttpAttributes() {
-        networkService = (NetworkService) ElasticApmAgent.get().getService(Service.Names.NETWORK);
+        networkServiceProvider = ElasticApmAgent.get().getServiceProvider(Service.Names.NETWORK);
     }
 
     @Override
     public void visit(AttributesBuilder builder, HttpRequest request) {
-        CarrierInfo carrierInfo = networkService.getCarrierInfo();
+        CarrierInfo carrierInfo = networkServiceProvider.get().getCarrierInfo();
         if (carrierInfo != null) {
             builder.put(SemanticAttributes.NET_HOST_CARRIER_NAME, carrierInfo.name);
             builder.put(SemanticAttributes.NET_HOST_CARRIER_MCC, carrierInfo.mcc);

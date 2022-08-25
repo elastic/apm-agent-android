@@ -1,4 +1,4 @@
-package co.elastic.apm.android.sdk.services.network.type;
+package co.elastic.apm.android.sdk.services.network.data.type;
 
 enum NoneNetworkType implements NetworkType {
     INSTANCE;

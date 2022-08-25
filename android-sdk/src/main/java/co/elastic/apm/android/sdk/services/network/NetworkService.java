@@ -7,9 +7,13 @@ import android.net.NetworkCapabilities;
 import android.telephony.TelephonyManager;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import org.jetbrains.annotations.NotNull;
 
 import co.elastic.apm.android.sdk.services.Service;
-import co.elastic.apm.android.sdk.services.network.type.NetworkType;
+import co.elastic.apm.android.sdk.services.network.data.CarrierInfo;
+import co.elastic.apm.android.sdk.services.network.data.type.NetworkType;
 import co.elastic.apm.android.sdk.services.network.utils.CellSubTypeProvider;
 
 public class NetworkService extends ConnectivityManager.NetworkCallback implements Service {
@@ -38,8 +42,24 @@ public class NetworkService extends ConnectivityManager.NetworkCallback implemen
         return Service.Names.NETWORK;
     }
 
+    @NotNull
     public NetworkType getType() {
         return networkType;
+    }
+
+    @Nullable
+    public CarrierInfo getCarrierInfo() {
+        if (!canQueryCarrierInfo()) {
+            return null;
+        }
+
+        String simOperator = telephonyManager.getSimOperator();
+        String mcc = simOperator.substring(0, 3);
+        String mnc = simOperator.substring(3);
+        return new CarrierInfo(telephonyManager.getSimOperatorName(),
+                mcc,
+                mnc,
+                telephonyManager.getSimCountryIso());
     }
 
     @Override
@@ -62,5 +82,9 @@ public class NetworkService extends ConnectivityManager.NetworkCallback implemen
     public void onLost(@NonNull Network network) {
         super.onLost(network);
         networkType = NetworkType.none();
+    }
+
+    private boolean canQueryCarrierInfo() {
+        return telephonyManager.getSimState() == TelephonyManager.SIM_STATE_READY;
     }
 }

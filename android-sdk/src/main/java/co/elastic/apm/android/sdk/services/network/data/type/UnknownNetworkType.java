@@ -1,4 +1,4 @@
-package co.elastic.apm.android.sdk.services.network.type;
+package co.elastic.apm.android.sdk.services.network.data.type;
 
 enum UnknownNetworkType implements NetworkType {
     INSTANCE;

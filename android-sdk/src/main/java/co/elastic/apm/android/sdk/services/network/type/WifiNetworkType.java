@@ -1,4 +1,4 @@
-package co.elastic.apm.android.sdk.data.network.type;
+package co.elastic.apm.android.sdk.services.network.type;
 
 enum WifiNetworkType implements NetworkType {
     INSTANCE;

@@ -1,4 +1,4 @@
-package co.elastic.apm.android.sdk.data.network.utils;
+package co.elastic.apm.android.sdk.services.network.utils;
 
 import android.telephony.TelephonyManager;
 

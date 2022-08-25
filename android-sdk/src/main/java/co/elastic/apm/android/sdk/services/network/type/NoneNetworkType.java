@@ -1,11 +1,11 @@
-package co.elastic.apm.android.sdk.data.network.type;
+package co.elastic.apm.android.sdk.services.network.type;
 
-enum UnknownNetworkType implements NetworkType {
+enum NoneNetworkType implements NetworkType {
     INSTANCE;
 
     @Override
     public String getName() {
-        return "unknown";
+        return "unavailable";
     }
 
     @Override

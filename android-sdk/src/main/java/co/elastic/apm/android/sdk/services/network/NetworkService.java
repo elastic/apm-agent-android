@@ -1,4 +1,4 @@
-package co.elastic.apm.android.sdk.data.network;
+package co.elastic.apm.android.sdk.services.network;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -8,26 +8,35 @@ import android.telephony.TelephonyManager;
 
 import androidx.annotation.NonNull;
 
-import co.elastic.apm.android.sdk.data.network.type.NetworkType;
-import co.elastic.apm.android.sdk.data.network.utils.CellSubTypeProvider;
+import co.elastic.apm.android.sdk.services.Service;
+import co.elastic.apm.android.sdk.services.ServiceNames;
+import co.elastic.apm.android.sdk.services.network.type.NetworkType;
+import co.elastic.apm.android.sdk.services.network.utils.CellSubTypeProvider;
 
-public class NetworkManager extends ConnectivityManager.NetworkCallback {
+public class NetworkService extends ConnectivityManager.NetworkCallback implements Service {
     private final ConnectivityManager connectivityManager;
     private final TelephonyManager telephonyManager;
     private NetworkType networkType = NetworkType.none();
 
-    public NetworkManager(Context context) {
+    public NetworkService(Context context) {
         Context appContext = context.getApplicationContext();
         connectivityManager = (ConnectivityManager) appContext.getSystemService(Context.CONNECTIVITY_SERVICE);
         telephonyManager = (TelephonyManager) appContext.getSystemService(Context.TELEPHONY_SERVICE);
     }
 
-    public void init() {
+    @Override
+    public void start() {
         connectivityManager.registerDefaultNetworkCallback(this);
     }
 
-    public void cleanUp() {
+    @Override
+    public void stop() {
         connectivityManager.unregisterNetworkCallback(this);
+    }
+
+    @Override
+    public String name() {
+        return ServiceNames.NETWORK;
     }
 
     public NetworkType getType() {

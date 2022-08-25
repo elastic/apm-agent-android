@@ -2,22 +2,20 @@ package co.elastic.apm.android.sdk.data.network.type;
 
 public interface NetworkType {
 
-    final class None implements NetworkType {
+    static NetworkType wifi() {
+        return WifiNetworkType.INSTANCE;
+    }
 
-        public static None INSTANCE = new None();
+    static NetworkType none() {
+        return NoneNetworkType.INSTANCE;
+    }
 
-        private None() {
-        }
+    static NetworkType unknown() {
+        return UnknownNetworkType.INSTANCE;
+    }
 
-        @Override
-        public String getName() {
-            return "unavailable";
-        }
-
-        @Override
-        public String getSubTypeName() {
-            return null;
-        }
+    static NetworkType cell(String subTypeName) {
+        return new CellNetworkType(subTypeName);
     }
 
     String getName();

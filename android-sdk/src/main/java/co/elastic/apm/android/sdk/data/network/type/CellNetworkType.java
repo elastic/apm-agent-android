@@ -1,6 +1,6 @@
 package co.elastic.apm.android.sdk.data.network.type;
 
-public class CellNetworkType implements NetworkType {
+public final class CellNetworkType implements NetworkType {
     private final String subType;
 
     public CellNetworkType(String subType) {

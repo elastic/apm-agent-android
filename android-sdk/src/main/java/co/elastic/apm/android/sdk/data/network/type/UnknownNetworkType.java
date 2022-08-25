@@ -1,11 +1,11 @@
 package co.elastic.apm.android.sdk.data.network.type;
 
-enum WifiNetworkType implements NetworkType {
+enum UnknownNetworkType implements NetworkType {
     INSTANCE;
 
     @Override
     public String getName() {
-        return "wifi";
+        return "unknown";
     }
 
     @Override

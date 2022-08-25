@@ -6,6 +6,7 @@ import co.elastic.apm.android.sdk.attributes.AttributesCompose;
 import co.elastic.apm.android.sdk.services.Service;
 import co.elastic.apm.android.sdk.services.ServiceManager;
 import co.elastic.apm.android.sdk.services.network.NetworkService;
+import co.elastic.apm.android.sdk.services.permissions.AndroidPermissionService;
 import co.elastic.apm.android.sdk.traces.http.HttpSpanConfiguration;
 import co.elastic.apm.android.sdk.traces.otel.exporter.ElasticSpanExporter;
 import co.elastic.apm.android.sdk.traces.otel.processor.ElasticSpanProcessor;
@@ -124,6 +125,7 @@ public final class ElasticApmAgent {
             globalAttributes = AttributesCompose.global(appContext);
             serviceManager = new ServiceManager();
             serviceManager.addService(new NetworkService(appContext));
+            serviceManager.addService(new AndroidPermissionService(appContext));
         }
 
         public Builder setEndpoint(String endpoint) {

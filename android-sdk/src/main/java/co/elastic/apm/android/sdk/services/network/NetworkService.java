@@ -11,15 +11,18 @@ import androidx.annotation.Nullable;
 
 import org.jetbrains.annotations.NotNull;
 
+import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.services.Service;
 import co.elastic.apm.android.sdk.services.network.data.CarrierInfo;
 import co.elastic.apm.android.sdk.services.network.data.type.NetworkType;
 import co.elastic.apm.android.sdk.services.network.utils.CellSubTypeProvider;
+import co.elastic.apm.android.sdk.services.permissions.AndroidPermissionService;
 
 public class NetworkService extends ConnectivityManager.NetworkCallback implements Service {
     private final ConnectivityManager connectivityManager;
     private final TelephonyManager telephonyManager;
     private NetworkType networkType = NetworkType.none();
+    private AndroidPermissionService permissionService;
 
     public NetworkService(Context context) {
         Context appContext = context.getApplicationContext();
@@ -70,7 +73,7 @@ public class NetworkService extends ConnectivityManager.NetworkCallback implemen
 
     private NetworkType getNetworkType(NetworkCapabilities networkCapabilities) {
         if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
-            return NetworkType.cell(CellSubTypeProvider.getSubtypeName(telephonyManager));
+            return NetworkType.cell(CellSubTypeProvider.getSubtypeName(telephonyManager, getPermissionService()));
         } else if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
             return NetworkType.wifi();
         } else {
@@ -86,5 +89,13 @@ public class NetworkService extends ConnectivityManager.NetworkCallback implemen
 
     private boolean canQueryCarrierInfo() {
         return telephonyManager.getSimState() == TelephonyManager.SIM_STATE_READY;
+    }
+
+    private AndroidPermissionService getPermissionService() {
+        if (permissionService == null) {
+            permissionService = (AndroidPermissionService) ElasticApmAgent.get().getService(Names.ANDROID_PERMISSIONS);
+        }
+
+        return permissionService;
     }
 }

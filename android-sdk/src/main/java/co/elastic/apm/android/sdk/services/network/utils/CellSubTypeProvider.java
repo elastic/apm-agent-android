@@ -1,9 +1,19 @@
 package co.elastic.apm.android.sdk.services.network.utils;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.telephony.TelephonyManager;
 
+import co.elastic.apm.android.sdk.services.permissions.AndroidPermissionService;
+
 public class CellSubTypeProvider {
-    public static String getSubtypeName(TelephonyManager telephonyManager) {
+
+    @SuppressLint("MissingPermission")
+    public static String getSubtypeName(TelephonyManager telephonyManager, AndroidPermissionService androidPermissionService) {
+        if (!androidPermissionService.isPermissionGranted(Manifest.permission.READ_PHONE_STATE)) {
+            return null;
+        }
+
         switch (telephonyManager.getDataNetworkType()) {
             case TelephonyManager.NETWORK_TYPE_GPRS:
                 return "GPRS";

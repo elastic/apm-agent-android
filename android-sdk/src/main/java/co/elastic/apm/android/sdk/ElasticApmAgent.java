@@ -2,7 +2,7 @@ package co.elastic.apm.android.sdk;
 
 import android.content.Context;
 
-import co.elastic.apm.android.sdk.data.attributes.AttributesCompose;
+import co.elastic.apm.android.sdk.attributes.AttributesCompose;
 import co.elastic.apm.android.sdk.traces.http.HttpSpanConfiguration;
 import co.elastic.apm.android.sdk.traces.otel.exporter.ElasticSpanExporter;
 import co.elastic.apm.android.sdk.traces.otel.processor.ElasticSpanProcessor;

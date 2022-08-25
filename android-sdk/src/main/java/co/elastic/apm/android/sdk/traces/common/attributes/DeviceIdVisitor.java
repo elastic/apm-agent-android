@@ -6,7 +6,7 @@ import android.content.SharedPreferences;
 import java.util.UUID;
 
 import co.elastic.apm.android.sdk.BuildConfig;
-import co.elastic.apm.android.sdk.data.attributes.AttributesBuilderVisitor;
+import co.elastic.apm.android.sdk.attributes.AttributesBuilderVisitor;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 

@@ -1,4 +1,4 @@
-package co.elastic.apm.android.sdk.data.attributes;
+package co.elastic.apm.android.sdk.attributes;
 
 import io.opentelemetry.api.common.AttributesBuilder;
 

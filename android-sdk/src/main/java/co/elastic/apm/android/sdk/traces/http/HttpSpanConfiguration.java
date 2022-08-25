@@ -6,14 +6,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import co.elastic.apm.android.sdk.attributes.AttributesCompose;
 import co.elastic.apm.android.sdk.traces.http.filtering.HttpExclusionRule;
 import co.elastic.apm.android.sdk.traces.http.filtering.OtelRequestsExclusionRule;
 
 public class HttpSpanConfiguration {
     public final List<HttpExclusionRule> exclusionRules;
+    public final AttributesCompose httpAttributes;
 
-    private HttpSpanConfiguration(List<HttpExclusionRule> exclusionRule) {
-        this.exclusionRules = exclusionRule;
+    private HttpSpanConfiguration(Builder builder) {
+        exclusionRules = new ArrayList<>(builder.exclusionRules);
+        httpAttributes = builder.httpAttributes;
     }
 
     public static Builder builder() {
@@ -22,8 +25,10 @@ public class HttpSpanConfiguration {
 
     public static class Builder {
         private final Set<HttpExclusionRule> exclusionRules = new HashSet<>(Collections.singleton(new OtelRequestsExclusionRule()));
+        private final AttributesCompose httpAttributes;
 
         private Builder() {
+            httpAttributes = null;
         }
 
         public Builder addExclusionRule(HttpExclusionRule rule) {
@@ -32,7 +37,7 @@ public class HttpSpanConfiguration {
         }
 
         public HttpSpanConfiguration build() {
-            return new HttpSpanConfiguration(new ArrayList<>(exclusionRules));
+            return new HttpSpanConfiguration(this);
         }
     }
 }

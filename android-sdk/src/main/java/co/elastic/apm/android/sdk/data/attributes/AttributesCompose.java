@@ -6,11 +6,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import co.elastic.apm.android.sdk.data.attributes.visitors.DeviceIdVisitor;
-import co.elastic.apm.android.sdk.data.attributes.visitors.DeviceInfoVisitor;
-import co.elastic.apm.android.sdk.data.attributes.visitors.OsDescriptorVisitor;
-import co.elastic.apm.android.sdk.data.attributes.visitors.SdkIdVisitor;
-import co.elastic.apm.android.sdk.data.attributes.visitors.ServiceIdVisitor;
+import co.elastic.apm.android.sdk.traces.common.attributes.DeviceIdVisitor;
+import co.elastic.apm.android.sdk.traces.common.attributes.DeviceInfoVisitor;
+import co.elastic.apm.android.sdk.traces.common.attributes.OsDescriptorVisitor;
+import co.elastic.apm.android.sdk.traces.common.attributes.SdkIdVisitor;
+import co.elastic.apm.android.sdk.traces.common.attributes.ServiceIdVisitor;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.sdk.resources.Resource;

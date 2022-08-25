@@ -1,4 +1,4 @@
-package co.elastic.apm.android.sdk.data.attributes.visitors;
+package co.elastic.apm.android.sdk.traces.common.attributes;
 
 import android.content.Context;
 import android.content.SharedPreferences;

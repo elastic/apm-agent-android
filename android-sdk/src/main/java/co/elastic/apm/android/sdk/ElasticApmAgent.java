@@ -21,7 +21,6 @@ import io.opentelemetry.sdk.trace.export.SpanExporter;
 public final class ElasticApmAgent {
 
     private static ElasticApmAgent instance;
-    private final Context appContext;
     private final String endpoint;
     private final HttpSpanConfiguration httpSpanConfiguration;
     private final AttributesCompose globalAttributes;
@@ -53,7 +52,6 @@ public final class ElasticApmAgent {
     }
 
     private ElasticApmAgent(Builder builder) {
-        appContext = builder.appContext;
         endpoint = builder.endpoint;
         globalAttributes = builder.globalAttributes;
         httpSpanConfiguration = builder.httpSpanConfiguration;
@@ -103,13 +101,11 @@ public final class ElasticApmAgent {
     }
 
     public static class Builder {
-        private final Context appContext;
         private final AttributesCompose globalAttributes;
         private HttpSpanConfiguration httpSpanConfiguration;
         private String endpoint;
 
         private Builder(Context appContext) {
-            this.appContext = appContext.getApplicationContext();
             globalAttributes = AttributesCompose.global(appContext);
         }
 

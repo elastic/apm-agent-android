@@ -43,7 +43,12 @@ public final class ElasticApmAgent {
                 .setTracerProvider(getTracerProvider())
                 .setPropagators(getContextPropagator())
                 .buildAndRegisterGlobal();
+        serviceManager.start();
         instance = this;
+    }
+
+    public void destroy() {
+        serviceManager.stop();
     }
 
     public SpanBuilder spanBuilder(String spanName) {

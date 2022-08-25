@@ -2,10 +2,10 @@ package co.elastic.apm.android.sdk;
 
 import android.content.Context;
 
+import co.elastic.apm.android.sdk.data.attributes.AttributesCompose;
 import co.elastic.apm.android.sdk.traces.http.HttpSpanConfiguration;
 import co.elastic.apm.android.sdk.traces.otel.exporter.ElasticSpanExporter;
 import co.elastic.apm.android.sdk.traces.otel.processor.ElasticSpanProcessor;
-import co.elastic.apm.android.sdk.data.providers.CommonResourcesProvider;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.Tracer;
@@ -24,6 +24,7 @@ public final class ElasticApmAgent {
     private final Context appContext;
     private final String endpoint;
     private final HttpSpanConfiguration httpSpanConfiguration;
+    private final AttributesCompose globalAttributes;
     private Tracer tracer;
 
     public static Builder builder(Context appContext) {
@@ -54,13 +55,13 @@ public final class ElasticApmAgent {
     private ElasticApmAgent(Builder builder) {
         appContext = builder.appContext;
         endpoint = builder.endpoint;
+        globalAttributes = builder.globalAttributes;
         httpSpanConfiguration = builder.httpSpanConfiguration;
     }
 
     private SdkTracerProvider getTracerProvider() {
-        CommonResourcesProvider resourcesProvider = new CommonResourcesProvider(appContext);
         Resource resource = Resource.getDefault()
-                .merge(Resource.create(resourcesProvider.get()));
+                .merge(globalAttributes.provideAsResource());
 
         ElasticSpanProcessor processor = new ElasticSpanProcessor(BatchSpanProcessor.builder(getSpanExporter()).build());
         processor.addAllExclusionRules(httpSpanConfiguration.exclusionRules);
@@ -103,11 +104,13 @@ public final class ElasticApmAgent {
 
     public static class Builder {
         private final Context appContext;
+        private final AttributesCompose globalAttributes;
         private HttpSpanConfiguration httpSpanConfiguration;
         private String endpoint;
 
         private Builder(Context appContext) {
             this.appContext = appContext.getApplicationContext();
+            globalAttributes = AttributesCompose.global(appContext);
         }
 
         public Builder setEndpoint(String endpoint) {

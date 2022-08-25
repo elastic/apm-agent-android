@@ -1,4 +1,4 @@
-package co.elastic.apm.android.sdk.data.providers;
+package co.elastic.apm.android.sdk.data.attributes.visitors;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -6,18 +6,25 @@ import android.content.SharedPreferences;
 import java.util.UUID;
 
 import co.elastic.apm.android.sdk.BuildConfig;
+import co.elastic.apm.android.sdk.data.attributes.AttributesBuilderVisitor;
+import io.opentelemetry.api.common.AttributesBuilder;
+import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 
-public class DeviceIdProvider implements Provider<String> {
+public class DeviceIdVisitor implements AttributesBuilderVisitor {
 
     private static final String DEVICE_ID_KEY = "device_id";
     private final Context appContext;
 
-    public DeviceIdProvider(Context appContext) {
+    public DeviceIdVisitor(Context appContext) {
         this.appContext = appContext;
     }
 
     @Override
-    public String get() {
+    public void visit(AttributesBuilder builder) {
+        builder.put(ResourceAttributes.DEVICE_ID, getId());
+    }
+
+    private String getId() {
         SharedPreferences sharedPreferences = getSharedPreferences(appContext);
         String deviceId = sharedPreferences.getString(DEVICE_ID_KEY, null);
 

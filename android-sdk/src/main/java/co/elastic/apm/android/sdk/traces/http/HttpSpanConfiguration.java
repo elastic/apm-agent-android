@@ -10,6 +10,8 @@ import java.util.Set;
 import co.elastic.apm.android.sdk.attributes.AttributesBuilderVisitor;
 import co.elastic.apm.android.sdk.attributes.AttributesCompose;
 import co.elastic.apm.android.sdk.traces.http.attributes.BasicHttpAttributesVisitor;
+import co.elastic.apm.android.sdk.traces.http.attributes.CarrierHttpAttributes;
+import co.elastic.apm.android.sdk.traces.http.attributes.ConnectionHttpAttributes;
 import co.elastic.apm.android.sdk.traces.http.attributes.HttpAttributesVisitor;
 import co.elastic.apm.android.sdk.traces.http.attributes.HttpAttributesVisitorWrapper;
 import co.elastic.apm.android.sdk.traces.http.data.HttpRequest;
@@ -46,6 +48,8 @@ public class HttpSpanConfiguration {
         private Builder() {
             exclusionRules.add(new OtelRequestsExclusionRule());
             httpAttributesVisitors.add(new BasicHttpAttributesVisitor());
+            httpAttributesVisitors.add(new CarrierHttpAttributes());
+            httpAttributesVisitors.add(new ConnectionHttpAttributes());
         }
 
         public Builder addExclusionRule(HttpExclusionRule rule) {

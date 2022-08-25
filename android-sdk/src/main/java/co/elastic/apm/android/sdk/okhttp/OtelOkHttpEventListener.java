@@ -3,11 +3,13 @@ package co.elastic.apm.android.sdk.okhttp;
 import java.io.IOException;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
+import co.elastic.apm.android.sdk.attributes.AttributesCompose;
+import co.elastic.apm.android.sdk.traces.http.HttpSpanConfiguration;
+import co.elastic.apm.android.sdk.traces.http.data.HttpRequest;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.context.Context;
-import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 import okhttp3.Call;
 import okhttp3.EventListener;
 import okhttp3.HttpUrl;
@@ -17,6 +19,7 @@ public class OtelOkHttpEventListener extends EventListener {
 
     private static final String SPAN_NAME_FORMAT = "%s %s";
     private final OkHttpContextStore contextStore;
+    private HttpSpanConfiguration configuration;
 
     public OtelOkHttpEventListener(OkHttpContextStore contextStore) {
         this.contextStore = contextStore;
@@ -31,10 +34,10 @@ public class OtelOkHttpEventListener extends EventListener {
 
         Context currentContext = Context.current();
         String host = url.host();
+        AttributesCompose attributes = getConfiguration().createHttpAttributesCompose(convertRequest(request));
         Span span = ElasticApmAgent.get().spanBuilder(String.format(SPAN_NAME_FORMAT, method, host))
                 .setSpanKind(SpanKind.CLIENT)
-                .setAttribute(SemanticAttributes.HTTP_URL, url.toString())
-                .setAttribute(SemanticAttributes.HTTP_METHOD, method)
+                .setAllAttributes(attributes.provide())
                 .setParent(currentContext)
                 .startSpan();
         Context spanContext = currentContext.with(span);
@@ -77,5 +80,17 @@ public class OtelOkHttpEventListener extends EventListener {
 
     Context getContext(Request request) {
         return contextStore.get(request);
+    }
+
+    private HttpRequest convertRequest(Request request) {
+        return new HttpRequest(request.method(), request.url().url());
+    }
+
+    private HttpSpanConfiguration getConfiguration() {
+        if (configuration == null) {
+            configuration = ElasticApmAgent.get().getHttpSpanConfiguration();
+        }
+
+        return configuration;
     }
 }

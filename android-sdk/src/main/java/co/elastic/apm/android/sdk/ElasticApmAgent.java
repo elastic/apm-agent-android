@@ -18,9 +18,9 @@ import io.opentelemetry.sdk.trace.export.SpanExporter;
 
 public final class ElasticApmAgent {
 
+    public final ElasticApmConfiguration configuration;
     private static ElasticApmAgent instance;
     private final Connectivity connectivity;
-    private final ElasticApmConfiguration configuration;
     private final ServiceManager serviceManager;
     private Tracer tracer;
 

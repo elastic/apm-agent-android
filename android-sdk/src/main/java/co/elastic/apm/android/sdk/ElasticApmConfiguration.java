@@ -9,7 +9,7 @@ import co.elastic.apm.android.sdk.services.permissions.AndroidPermissionService;
 import co.elastic.apm.android.sdk.traces.http.HttpSpanConfiguration;
 
 public final class ElasticApmConfiguration {
-    final HttpSpanConfiguration httpSpanConfiguration;
+    public final HttpSpanConfiguration httpSpanConfiguration;
     final AttributesCompose globalAttributes;
     final ServiceManager serviceManager;
 

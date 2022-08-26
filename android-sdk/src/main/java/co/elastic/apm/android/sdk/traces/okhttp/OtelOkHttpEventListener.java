@@ -88,7 +88,7 @@ public class OtelOkHttpEventListener extends EventListener {
 
     private HttpSpanConfiguration getConfiguration() {
         if (configuration == null) {
-            configuration = ElasticApmAgent.get().getHttpSpanConfiguration();
+            configuration = ElasticApmAgent.get().configuration.httpSpanConfiguration;
         }
 
         return configuration;

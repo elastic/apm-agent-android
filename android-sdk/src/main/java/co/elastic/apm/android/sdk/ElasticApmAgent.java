@@ -87,7 +87,7 @@ public final class ElasticApmAgent {
     }
 
     private SpanExporter getSpanExporter() {
-        return new ElasticSpanExporter(connectivity.getExporterProvider().getExporter());
+        return new ElasticSpanExporter(connectivity.getSpanExporter());
     }
 
     private ContextPropagators getContextPropagator() {

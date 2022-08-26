@@ -1,6 +1,6 @@
 package co.elastic.apm.android.sdk.traces.connectivity;
 
-import co.elastic.apm.android.sdk.traces.otel.exporter.provider.ExporterProvider;
+import io.opentelemetry.sdk.trace.export.SpanExporter;
 
 public interface Connectivity {
 
@@ -12,9 +12,9 @@ public interface Connectivity {
         return new BearerConnectivity(endpoint, token);
     }
 
-    static Connectivity custom(ExporterProvider exporterProvider) {
-        return new CustomConnectivity(exporterProvider);
+    static Connectivity custom(SpanExporter exporter) {
+        return new CustomConnectivity(exporter);
     }
 
-    ExporterProvider getExporterProvider();
+    SpanExporter getSpanExporter();
 }

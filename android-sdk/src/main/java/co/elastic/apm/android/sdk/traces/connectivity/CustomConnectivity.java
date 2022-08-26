@@ -5,7 +5,7 @@ import io.opentelemetry.sdk.trace.export.SpanExporter;
 public class CustomConnectivity implements Connectivity {
     private final SpanExporter spanExporter;
 
-    public CustomConnectivity(SpanExporter spanExporter) {
+    CustomConnectivity(SpanExporter spanExporter) {
         this.spanExporter = spanExporter;
     }
 

@@ -8,7 +8,7 @@ public class CommonConnectivity implements Connectivity {
     private final String endpoint;
     private String token;
 
-    public CommonConnectivity(String endpoint) {
+    CommonConnectivity(String endpoint) {
         this.endpoint = endpoint;
     }
 

@@ -95,7 +95,6 @@ public final class ElasticApmAgent {
 
     private Tracer getTracer() {
         if (tracer == null) {
-            verifyInitialization();
             tracer = GlobalOpenTelemetry.getTracer("ElasticApmAgent-tracer");
         }
 

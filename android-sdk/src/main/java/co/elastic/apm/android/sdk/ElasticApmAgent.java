@@ -7,6 +7,7 @@ import co.elastic.apm.android.sdk.services.Service;
 import co.elastic.apm.android.sdk.services.ServiceManager;
 import co.elastic.apm.android.sdk.services.network.NetworkService;
 import co.elastic.apm.android.sdk.services.permissions.AndroidPermissionService;
+import co.elastic.apm.android.sdk.traces.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.traces.http.HttpSpanConfiguration;
 import co.elastic.apm.android.sdk.traces.otel.exporter.ElasticSpanExporter;
 import co.elastic.apm.android.sdk.traces.otel.processor.ElasticSpanProcessor;
@@ -15,7 +16,6 @@ import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import io.opentelemetry.context.propagation.ContextPropagators;
-import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
@@ -25,14 +25,14 @@ import io.opentelemetry.sdk.trace.export.SpanExporter;
 public final class ElasticApmAgent {
 
     private static ElasticApmAgent instance;
-    private final String endpoint;
+    private final Connectivity connectivity;
     private final HttpSpanConfiguration httpSpanConfiguration;
     private final AttributesCompose globalAttributes;
     private final ServiceManager serviceManager;
     private Tracer tracer;
 
-    public static Builder builder(Context appContext) {
-        return new Builder(appContext);
+    public static Builder builder(Context appContext, Connectivity connectivity) {
+        return new Builder(appContext, connectivity);
     }
 
     public static ElasticApmAgent get() {
@@ -67,7 +67,7 @@ public final class ElasticApmAgent {
     }
 
     private ElasticApmAgent(Builder builder) {
-        endpoint = builder.endpoint;
+        connectivity = builder.connectivity;
         globalAttributes = builder.globalAttributes;
         httpSpanConfiguration = builder.httpSpanConfiguration;
         serviceManager = builder.serviceManager;
@@ -87,14 +87,7 @@ public final class ElasticApmAgent {
     }
 
     private SpanExporter getSpanExporter() {
-        SpanExporter original;
-        if (endpoint == null) {
-            original = OtlpGrpcSpanExporter.getDefault();
-        } else {
-            original = OtlpGrpcSpanExporter.builder().setEndpoint(endpoint).build();
-        }
-
-        return new ElasticSpanExporter(original);
+        return new ElasticSpanExporter(connectivity.getExporterProvider().getExporter());
     }
 
     private ContextPropagators getContextPropagator() {
@@ -119,19 +112,15 @@ public final class ElasticApmAgent {
     public static class Builder {
         private final AttributesCompose globalAttributes;
         private final ServiceManager serviceManager;
+        private final Connectivity connectivity;
         private HttpSpanConfiguration httpSpanConfiguration;
-        private String endpoint;
 
-        private Builder(Context appContext) {
+        private Builder(Context appContext, Connectivity connectivity) {
+            this.connectivity = connectivity;
             globalAttributes = AttributesCompose.global(appContext);
             serviceManager = new ServiceManager();
             serviceManager.addService(new NetworkService(appContext));
             serviceManager.addService(new AndroidPermissionService(appContext));
-        }
-
-        public Builder setEndpoint(String endpoint) {
-            this.endpoint = endpoint;
-            return this;
         }
 
         public Builder setHttpSpanConfiguration(HttpSpanConfiguration httpSpanConfiguration) {

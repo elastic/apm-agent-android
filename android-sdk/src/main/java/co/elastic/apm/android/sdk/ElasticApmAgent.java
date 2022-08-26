@@ -1,14 +1,8 @@
 package co.elastic.apm.android.sdk;
 
-import android.content.Context;
-
-import co.elastic.apm.android.sdk.attributes.AttributesCompose;
 import co.elastic.apm.android.sdk.services.Service;
 import co.elastic.apm.android.sdk.services.ServiceManager;
-import co.elastic.apm.android.sdk.services.network.NetworkService;
-import co.elastic.apm.android.sdk.services.permissions.AndroidPermissionService;
 import co.elastic.apm.android.sdk.traces.connectivity.Connectivity;
-import co.elastic.apm.android.sdk.traces.http.HttpSpanConfiguration;
 import co.elastic.apm.android.sdk.traces.otel.exporter.ElasticSpanExporter;
 import co.elastic.apm.android.sdk.traces.otel.processor.ElasticSpanProcessor;
 import io.opentelemetry.api.GlobalOpenTelemetry;
@@ -26,27 +20,26 @@ public final class ElasticApmAgent {
 
     private static ElasticApmAgent instance;
     private final Connectivity connectivity;
-    private final HttpSpanConfiguration httpSpanConfiguration;
-    private final AttributesCompose globalAttributes;
+    private final ElasticApmConfiguration configuration;
     private final ServiceManager serviceManager;
     private Tracer tracer;
-
-    public static Builder builder(Context appContext, Connectivity connectivity) {
-        return new Builder(appContext, connectivity);
-    }
 
     public static ElasticApmAgent get() {
         verifyInitialization();
         return instance;
     }
 
-    public void initialize() {
-        OpenTelemetrySdk.builder()
-                .setTracerProvider(getTracerProvider())
-                .setPropagators(getContextPropagator())
-                .buildAndRegisterGlobal();
-        serviceManager.start();
-        instance = this;
+    public synchronized static void initialize(Connectivity connectivity, ElasticApmConfiguration configuration) {
+        if (instance != null) {
+            throw new IllegalStateException("Already initialized");
+        }
+        instance = new ElasticApmAgent(connectivity, configuration);
+    }
+
+    private static void verifyInitialization() {
+        if (instance == null) {
+            throw new IllegalStateException("ElasticApmAgent hasn't been initialized");
+        }
     }
 
     public void destroy() {
@@ -58,27 +51,31 @@ public final class ElasticApmAgent {
         return getTracer().spanBuilder(spanName);
     }
 
-    public HttpSpanConfiguration getHttpSpanConfiguration() {
-        return httpSpanConfiguration;
-    }
-
     public <T extends Service> T getService(String name) {
         return serviceManager.getService(name);
     }
 
-    private ElasticApmAgent(Builder builder) {
-        connectivity = builder.connectivity;
-        globalAttributes = builder.globalAttributes;
-        httpSpanConfiguration = builder.httpSpanConfiguration;
-        serviceManager = builder.serviceManager;
+    ElasticApmAgent(Connectivity connectivity, ElasticApmConfiguration configuration) {
+        this.connectivity = connectivity;
+        this.configuration = configuration;
+        serviceManager = configuration.serviceManager;
+        serviceManager.start();
+        initializeOpentelemetry();
+    }
+
+    private void initializeOpentelemetry() {
+        OpenTelemetrySdk.builder()
+                .setTracerProvider(getTracerProvider())
+                .setPropagators(getContextPropagator())
+                .buildAndRegisterGlobal();
     }
 
     private SdkTracerProvider getTracerProvider() {
         Resource resource = Resource.getDefault()
-                .merge(globalAttributes.provideAsResource());
+                .merge(configuration.globalAttributes.provideAsResource());
 
         ElasticSpanProcessor processor = new ElasticSpanProcessor(BatchSpanProcessor.builder(getSpanExporter()).build());
-        processor.addAllExclusionRules(httpSpanConfiguration.exclusionRules);
+        processor.addAllExclusionRules(configuration.httpSpanConfiguration.exclusionRules);
 
         return SdkTracerProvider.builder()
                 .addSpanProcessor(processor)
@@ -101,38 +98,5 @@ public final class ElasticApmAgent {
         }
 
         return tracer;
-    }
-
-    private static void verifyInitialization() {
-        if (instance == null) {
-            throw new IllegalStateException("ElasticApmAgent hasn't been initialized");
-        }
-    }
-
-    public static class Builder {
-        private final AttributesCompose globalAttributes;
-        private final ServiceManager serviceManager;
-        private final Connectivity connectivity;
-        private HttpSpanConfiguration httpSpanConfiguration;
-
-        private Builder(Context appContext, Connectivity connectivity) {
-            this.connectivity = connectivity;
-            globalAttributes = AttributesCompose.global(appContext);
-            serviceManager = new ServiceManager();
-            serviceManager.addService(new NetworkService(appContext));
-            serviceManager.addService(new AndroidPermissionService(appContext));
-        }
-
-        public Builder setHttpSpanConfiguration(HttpSpanConfiguration httpSpanConfiguration) {
-            this.httpSpanConfiguration = httpSpanConfiguration;
-            return this;
-        }
-
-        public ElasticApmAgent build() {
-            if (httpSpanConfiguration == null) {
-                httpSpanConfiguration = HttpSpanConfiguration.builder().build();
-            }
-            return new ElasticApmAgent(this);
-        }
     }
 }

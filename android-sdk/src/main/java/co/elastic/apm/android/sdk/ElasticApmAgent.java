@@ -1,7 +1,6 @@
 package co.elastic.apm.android.sdk;
 
 import co.elastic.apm.android.sdk.services.Service;
-import co.elastic.apm.android.sdk.services.ServiceManager;
 import co.elastic.apm.android.sdk.traces.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.traces.otel.exporter.ElasticSpanExporter;
 import co.elastic.apm.android.sdk.traces.otel.processor.ElasticSpanProcessor;
@@ -21,7 +20,6 @@ public final class ElasticApmAgent {
     public final ElasticApmConfiguration configuration;
     private static ElasticApmAgent instance;
     private final Connectivity connectivity;
-    private final ServiceManager serviceManager;
     private Tracer tracer;
 
     public static ElasticApmAgent get() {
@@ -34,6 +32,7 @@ public final class ElasticApmAgent {
             throw new IllegalStateException("Already initialized");
         }
         instance = new ElasticApmAgent(connectivity, configuration);
+        instance.onInitializationFinished();
     }
 
     private static void verifyInitialization() {
@@ -43,7 +42,7 @@ public final class ElasticApmAgent {
     }
 
     public void destroy() {
-        serviceManager.stop();
+        configuration.serviceManager.stop();
         instance = null;
     }
 
@@ -52,14 +51,16 @@ public final class ElasticApmAgent {
     }
 
     public <T extends Service> T getService(String name) {
-        return serviceManager.getService(name);
+        return configuration.serviceManager.getService(name);
     }
 
     ElasticApmAgent(Connectivity connectivity, ElasticApmConfiguration configuration) {
         this.connectivity = connectivity;
         this.configuration = configuration;
-        serviceManager = configuration.serviceManager;
-        serviceManager.start();
+    }
+
+    private void onInitializationFinished() {
+        configuration.serviceManager.start();
         initializeOpentelemetry();
     }
 

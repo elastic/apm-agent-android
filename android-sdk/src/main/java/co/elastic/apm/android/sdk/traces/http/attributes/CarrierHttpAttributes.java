@@ -13,7 +13,7 @@ public class CarrierHttpAttributes implements HttpAttributesVisitor {
     private final LazyProvider<NetworkService> networkServiceProvider;
 
     public CarrierHttpAttributes() {
-        networkServiceProvider = ElasticApmAgent.get().getServiceProvider(Service.Names.NETWORK);
+        networkServiceProvider = LazyProvider.of(() -> ElasticApmAgent.get().getService(Service.Names.NETWORK));
     }
 
     @Override

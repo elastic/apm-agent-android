@@ -22,6 +22,7 @@ public class NetworkService extends ConnectivityManager.NetworkCallback implemen
     private final ConnectivityManager connectivityManager;
     private final TelephonyManager telephonyManager;
     private NetworkType networkType = NetworkType.none();
+    private AndroidPermissionService permissionService;
 
     public NetworkService(Context context) {
         Context appContext = context.getApplicationContext();
@@ -91,6 +92,10 @@ public class NetworkService extends ConnectivityManager.NetworkCallback implemen
     }
 
     private AndroidPermissionService getPermissionService() {
-        return ElasticApmAgent.get().<AndroidPermissionService>getServiceProvider(Names.ANDROID_PERMISSIONS).get();
+        if (permissionService == null) {
+            permissionService = ElasticApmAgent.get().getService(Names.ANDROID_PERMISSIONS);
+        }
+
+        return permissionService;
     }
 }

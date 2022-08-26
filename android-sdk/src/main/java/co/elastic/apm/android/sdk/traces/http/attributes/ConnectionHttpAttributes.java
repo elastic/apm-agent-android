@@ -13,7 +13,7 @@ public class ConnectionHttpAttributes implements HttpAttributesVisitor {
     private final LazyProvider<NetworkService> networkServiceProvider;
 
     public ConnectionHttpAttributes() {
-        networkServiceProvider = ElasticApmAgent.get().getServiceProvider(Service.Names.NETWORK);
+        networkServiceProvider = LazyProvider.of(() -> ElasticApmAgent.get().getService(Service.Names.NETWORK));
     }
 
     @Override

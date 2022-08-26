@@ -4,12 +4,8 @@ import io.opentelemetry.sdk.trace.export.SpanExporter;
 
 public interface Connectivity {
 
-    static Connectivity simple(String endpoint) {
-        return new SimpleConnectivity(endpoint);
-    }
-
-    static Connectivity token(String endpoint, String token) {
-        return new BearerConnectivity(endpoint, token);
+    static CommonConnectivity create(String endpoint) {
+        return new CommonConnectivity(endpoint);
     }
 
     static Connectivity custom(SpanExporter exporter) {

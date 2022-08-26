@@ -1,4 +1,4 @@
-package co.elastic.apm.android.sdk.okhttp;
+package co.elastic.apm.android.sdk.traces.okhttp;
 
 import com.blogspot.mydailyjava.weaklockfree.WeakConcurrentMap;
 

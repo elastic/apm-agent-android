@@ -2,9 +2,9 @@ package co.elastic.apm.android.instrumentation;
 
 import net.bytebuddy.asm.Advice;
 
-import co.elastic.apm.android.sdk.okhttp.OkHttpContextStore;
-import co.elastic.apm.android.sdk.okhttp.OtelOkHttpEventListener;
-import co.elastic.apm.android.sdk.okhttp.OtelOkHttpInterceptor;
+import co.elastic.apm.android.sdk.traces.okhttp.OkHttpContextStore;
+import co.elastic.apm.android.sdk.traces.okhttp.OtelOkHttpEventListener;
+import co.elastic.apm.android.sdk.traces.okhttp.OtelOkHttpInterceptor;
 import okhttp3.OkHttpClient;
 
 public class OkHttpClientAdvice {

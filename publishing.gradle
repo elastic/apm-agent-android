@@ -3,13 +3,15 @@ apply plugin: 'maven-publish'
 afterEvaluate {
     publishing {
         publications {
-            maven(MavenPublication) {
-                if (project.extensions.findByName("android") == null) {
-                    // it's a plain java project
-                    from components.java
-                } else {
-                    // it's an android project
-                    from components.debug
+            if (!project.plugins.hasPlugin("java-gradle-plugin")) {
+                maven(MavenPublication) {
+                    if (project.extensions.findByName("android") == null) {
+                        // it's a plain java project
+                        from components.java
+                    } else {
+                        // it's an android project
+                        from components.debug
+                    }
                 }
             }
         }

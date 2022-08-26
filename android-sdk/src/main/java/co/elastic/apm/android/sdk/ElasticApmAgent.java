@@ -51,6 +51,7 @@ public final class ElasticApmAgent {
 
     public void destroy() {
         serviceManager.stop();
+        instance = null;
     }
 
     public SpanBuilder spanBuilder(String spanName) {

@@ -27,12 +27,13 @@ public final class ElasticApmAgent {
         return instance;
     }
 
-    public synchronized static void initialize(Connectivity connectivity, ElasticApmConfiguration configuration) {
+    public synchronized static ElasticApmAgent initialize(Connectivity connectivity, ElasticApmConfiguration configuration) {
         if (instance != null) {
             throw new IllegalStateException("Already initialized");
         }
         instance = new ElasticApmAgent(connectivity, configuration);
         instance.onInitializationFinished();
+        return instance;
     }
 
     private static void verifyInitialization() {

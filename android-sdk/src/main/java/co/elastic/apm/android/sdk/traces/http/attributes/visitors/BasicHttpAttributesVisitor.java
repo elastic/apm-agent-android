@@ -1,5 +1,6 @@
-package co.elastic.apm.android.sdk.traces.http.attributes;
+package co.elastic.apm.android.sdk.traces.http.attributes.visitors;
 
+import co.elastic.apm.android.sdk.traces.http.attributes.HttpAttributesVisitor;
 import co.elastic.apm.android.sdk.traces.http.data.HttpRequest;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;

@@ -9,9 +9,9 @@ import java.util.Set;
 
 import co.elastic.apm.android.sdk.attributes.AttributesBuilderVisitor;
 import co.elastic.apm.android.sdk.attributes.AttributesCompose;
-import co.elastic.apm.android.sdk.traces.http.attributes.BasicHttpAttributesVisitor;
-import co.elastic.apm.android.sdk.traces.http.attributes.CarrierHttpAttributes;
-import co.elastic.apm.android.sdk.traces.http.attributes.ConnectionHttpAttributes;
+import co.elastic.apm.android.sdk.traces.http.attributes.visitors.BasicHttpAttributesVisitor;
+import co.elastic.apm.android.sdk.traces.http.attributes.visitors.CarrierHttpAttributes;
+import co.elastic.apm.android.sdk.traces.http.attributes.visitors.ConnectionHttpAttributes;
 import co.elastic.apm.android.sdk.traces.http.attributes.HttpAttributesVisitor;
 import co.elastic.apm.android.sdk.traces.http.attributes.HttpAttributesVisitorWrapper;
 import co.elastic.apm.android.sdk.traces.http.data.HttpRequest;

@@ -2,13 +2,22 @@
 
 Elastic APM Android Agent
 
+## Local testing
+
+In order to use a local version of this agent you'll need to publish it locally into your machine's
+maven local repo. In order to do that, simply open up a terminal in this project's root dir and
+run: `./gradlew publishToMavenLocal`. After that, you can apply this agent into an Android
+application project by following the "Set up" process defined below.
+
 ## Set up
 
 ```groovy
 // Android app's build.gradle file
 plugins {
     id "com.android.application"
-    id "co.elastic.apm.android" // Apply the Elastic android Gradle plugin to your App.
+    // Apply the Elastic android Gradle plugin to your App:
+    id "co.elastic.apm.android" version "[use latest version]"
+    // The latest version is defined in the `build.properties` file on the root of this project.
 }
 ```
 

@@ -13,16 +13,22 @@ import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 
 public class ServiceIdVisitor implements AttributesBuilderVisitor {
     private final Context appContext;
+    private final String serviceName;
+    private final String serviceVersion;
 
-    public ServiceIdVisitor(Context appContext) {
+    public ServiceIdVisitor(Context appContext, String serviceName, String serviceVersion) {
         this.appContext = appContext;
+        this.serviceName = serviceName;
+        this.serviceVersion = serviceVersion;
     }
 
     @Override
     public void visit(AttributesBuilder builder) {
         Properties apmInfoProperties = getApmInfoProperties(appContext);
-        builder.put(ResourceAttributes.SERVICE_NAME, appContext.getPackageName())
-                .put(ResourceAttributes.SERVICE_VERSION, apmInfoProperties.getProperty(ApmInfo.KEY_VERSION))
+        String serviceName = (this.serviceName != null) ? this.serviceName : appContext.getPackageName();
+        String serviceVersion = (this.serviceVersion != null) ? this.serviceVersion : apmInfoProperties.getProperty(ApmInfo.KEY_VERSION);
+        builder.put(ResourceAttributes.SERVICE_NAME, serviceName)
+                .put(ResourceAttributes.SERVICE_VERSION, serviceVersion)
                 .put(ResourceAttributes.DEPLOYMENT_ENVIRONMENT, apmInfoProperties.getProperty(ApmInfo.KEY_VARIANT_NAME));
     }
 

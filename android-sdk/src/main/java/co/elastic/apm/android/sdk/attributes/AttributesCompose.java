@@ -2,6 +2,8 @@ package co.elastic.apm.android.sdk.attributes;
 
 import android.content.Context;
 
+import androidx.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -22,12 +24,14 @@ public final class AttributesCompose {
         return new AttributesCompose(Arrays.asList(visitors));
     }
 
-    public static AttributesCompose global(Context appContext) {
+    public static AttributesCompose global(Context appContext,
+                                           @Nullable String serviceName,
+                                           @Nullable String serviceVersion) {
         return create(new DeviceIdVisitor(appContext),
                 new DeviceInfoVisitor(),
                 new OsDescriptorVisitor(),
                 new SdkIdVisitor(),
-                new ServiceIdVisitor(appContext));
+                new ServiceIdVisitor(appContext, serviceName, serviceVersion));
     }
 
     public AttributesCompose(List<AttributesBuilderVisitor> defaultVisitors) {

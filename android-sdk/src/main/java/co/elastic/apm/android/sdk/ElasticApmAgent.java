@@ -74,7 +74,7 @@ public final class ElasticApmAgent {
         serviceManager = new ServiceManager();
         serviceManager.addService(new NetworkService(appContext));
         serviceManager.addService(new AndroidPermissionService(appContext));
-        globalAttributes = AttributesCompose.global(appContext);
+        globalAttributes = AttributesCompose.global(appContext, configuration.serviceName, configuration.serviceVersion);
     }
 
     private void onInitializationFinished() {

@@ -17,7 +17,7 @@ plugins {
     id "com.android.application"
     // Apply the Elastic android Gradle plugin to your App:
     id "co.elastic.apm.android" version "[use latest version]"
-    // The latest version is defined in the `build.properties` file on the root of this project.
+    // The latest version is defined in the `gradle.properties` file on the root of this project.
 }
 ```
 

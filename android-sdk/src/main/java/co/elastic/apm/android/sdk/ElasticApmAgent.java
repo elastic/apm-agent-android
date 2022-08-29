@@ -94,7 +94,7 @@ public final class ElasticApmAgent {
                 .merge(globalAttributes.provideAsResource());
 
         ElasticSpanProcessor processor = new ElasticSpanProcessor(BatchSpanProcessor.builder(getSpanExporter()).build());
-        processor.addAllExclusionRules(configuration.httpSpanConfiguration.exclusionRules);
+        processor.addAllExclusionRules(configuration.httpTraceConfiguration.exclusionRules);
 
         return SdkTracerProvider.builder()
                 .addSpanProcessor(processor)

@@ -9,20 +9,20 @@ import java.util.Set;
 
 import co.elastic.apm.android.sdk.attributes.AttributesBuilderVisitor;
 import co.elastic.apm.android.sdk.attributes.AttributesCompose;
+import co.elastic.apm.android.sdk.traces.http.attributes.HttpAttributesVisitor;
+import co.elastic.apm.android.sdk.traces.http.attributes.HttpAttributesVisitorWrapper;
 import co.elastic.apm.android.sdk.traces.http.attributes.visitors.BasicHttpAttributesVisitor;
 import co.elastic.apm.android.sdk.traces.http.attributes.visitors.CarrierHttpAttributes;
 import co.elastic.apm.android.sdk.traces.http.attributes.visitors.ConnectionHttpAttributes;
-import co.elastic.apm.android.sdk.traces.http.attributes.HttpAttributesVisitor;
-import co.elastic.apm.android.sdk.traces.http.attributes.HttpAttributesVisitorWrapper;
 import co.elastic.apm.android.sdk.traces.http.data.HttpRequest;
 import co.elastic.apm.android.sdk.traces.http.filtering.HttpExclusionRule;
 import co.elastic.apm.android.sdk.traces.http.filtering.OtelRequestsExclusionRule;
 
-public class HttpSpanConfiguration {
+public class HttpTraceConfiguration {
     public final Collection<HttpExclusionRule> exclusionRules;
     private final Collection<HttpAttributesVisitor> httpAttributesVisitors;
 
-    private HttpSpanConfiguration(Builder builder) {
+    private HttpTraceConfiguration(Builder builder) {
         exclusionRules = Collections.unmodifiableCollection(builder.exclusionRules);
         httpAttributesVisitors = Collections.unmodifiableCollection(builder.httpAttributesVisitors);
     }
@@ -62,8 +62,8 @@ public class HttpSpanConfiguration {
             return this;
         }
 
-        public HttpSpanConfiguration build() {
-            return new HttpSpanConfiguration(this);
+        public HttpTraceConfiguration build() {
+            return new HttpTraceConfiguration(this);
         }
     }
 }

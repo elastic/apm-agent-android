@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.attributes.AttributesCompose;
-import co.elastic.apm.android.sdk.traces.http.HttpSpanConfiguration;
+import co.elastic.apm.android.sdk.traces.http.HttpTraceConfiguration;
 import co.elastic.apm.android.sdk.traces.http.data.HttpRequest;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
@@ -19,7 +19,7 @@ public class OtelOkHttpEventListener extends EventListener {
 
     private static final String SPAN_NAME_FORMAT = "%s %s";
     private final OkHttpContextStore contextStore;
-    private HttpSpanConfiguration configuration;
+    private HttpTraceConfiguration configuration;
 
     public OtelOkHttpEventListener(OkHttpContextStore contextStore) {
         this.contextStore = contextStore;
@@ -86,9 +86,9 @@ public class OtelOkHttpEventListener extends EventListener {
         return new HttpRequest(request.method(), request.url().url());
     }
 
-    private HttpSpanConfiguration getConfiguration() {
+    private HttpTraceConfiguration getConfiguration() {
         if (configuration == null) {
-            configuration = ElasticApmAgent.get().configuration.httpSpanConfiguration;
+            configuration = ElasticApmAgent.get().configuration.httpTraceConfiguration;
         }
 
         return configuration;

@@ -85,9 +85,9 @@ class MyApp extends android.app.Application {
 
 #### Filtering HTTP requests from getting traced
 
-You can avoid some requests from getting traced by creating your own `HttpExclusionRule`. For
-example this is an exclusion rule that prevents all requests with the host `127.0.0.1` from getting
-traced:
+By default, all of your app's HTTP requests will get traced. You can avoid some requests from
+getting traced by creating your own `HttpExclusionRule`. For example this is an exclusion rule that
+prevents all requests with the host `127.0.0.1` from getting traced:
 
 ```java
 class MyHttpExclusionRule extends HttpExclusionRule {
@@ -104,5 +104,27 @@ Then you'd need to add it to Elastic's Agent config through its `HttpTraceConfig
 ```java
 HttpTraceConfiguration.builder()
         .addExclusionRule(new MyHttpExclusionRule())
+        .build();
+```
+
+#### Adding extra attributes to your HTTP requests' spans
+
+If the HTTP span attributes provided by default aren't enough, you can attach your own
+`HttpAttributesVisitor` to add extra params to each HTTP request being traced. For example:
+
+```java
+class MyHttpAttributesVisitor implements HttpAttributesVisitor {
+
+    public void visit(AttributesBuilder attrsBuilder, HttpRequest request) {
+        attrsBuilder.put("my_custom_attr_key", "my_custom_attr_value");
+    }
+}
+```
+
+Then you'd need to add it to Elastic's Agent config through its `HttpTraceConfiguration` like so:
+
+```java
+HttpTraceConfiguration.builder()
+        .addHttpAttributesVisitor(new MyHttpAttributesVisitor())
         .build();
 ```

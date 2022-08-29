@@ -27,7 +27,7 @@ class MyApp extends android.app.Application {
 }
 ```
 
-## Configure
+## Configuration
 
 You can customize Elastic's APM agent by providing your own configuration when initializing it as
 shown below:

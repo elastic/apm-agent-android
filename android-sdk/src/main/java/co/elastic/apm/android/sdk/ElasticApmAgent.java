@@ -35,6 +35,10 @@ public final class ElasticApmAgent {
         return instance;
     }
 
+    public synchronized static ElasticApmAgent initialize(Context context, Connectivity connectivity) {
+        return initialize(context, connectivity, ElasticApmConfiguration.getDefault());
+    }
+
     public synchronized static ElasticApmAgent initialize(Context context, Connectivity connectivity, ElasticApmConfiguration configuration) {
         if (instance != null) {
             throw new IllegalStateException("Already initialized");

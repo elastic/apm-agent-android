@@ -41,6 +41,8 @@ class MyApp extends android.app.Application {
 You can customize Elastic's APM agent by providing your own configuration when initializing it as
 shown below:
 
+### General configuration
+
 ```java
 
 class MyApp extends android.app.Application {
@@ -48,10 +50,33 @@ class MyApp extends android.app.Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        Connectivity connectivity = Connectivity.create("http[s]://your.endpoint");
+        Connectivity connectivity = ...;
         ElasticApmConfiguration configuration = ElasticApmConfiguration.builder()
                 .setServiceName("my-custom-name") // Defaults to your app's package name.
-                .setServiceVersion("1.0.0") // Defaults to the version set in `android.defaultConfig.versionName` in the build.gradle file.
+                .setServiceVersion("1.0.0") // Defaults to the version set in `android.defaultConfig.versionName` in your app's build.gradle file.
+                .build();
+        ElasticApmAgent.initialize(this, connectivity, configuration);
+    }
+}
+```
+
+### Configuring HTTP tracing
+
+```java
+
+class MyApp extends android.app.Application {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Connectivity connectivity = ...;
+        // Create your own HttpTranceConfiguration:
+        HttpTraceConfiguration httpTraceConfiguration = HttpTraceConfiguration.builder()
+                // Make your changes to it before calling `build()`.
+                .build();
+        ElasticApmConfiguration configuration = ElasticApmConfiguration.builder()
+                // Pass it to the agent's config builder:
+                .setHttpTraceConfiguration(httpTraceConfiguration)
                 .build();
         ElasticApmAgent.initialize(this, connectivity, configuration);
     }

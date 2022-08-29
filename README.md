@@ -72,7 +72,7 @@ class MyApp extends android.app.Application {
         Connectivity connectivity = ...;
         // Create your own HttpTranceConfiguration:
         HttpTraceConfiguration httpTraceConfiguration = HttpTraceConfiguration.builder()
-                // Make your changes to it before calling `build()`.
+                // Make your changes to it before calling `build()` (more details below).
                 .build();
         ElasticApmConfiguration configuration = ElasticApmConfiguration.builder()
                 // Pass it to the agent's config builder:
@@ -81,4 +81,28 @@ class MyApp extends android.app.Application {
         ElasticApmAgent.initialize(this, connectivity, configuration);
     }
 }
+```
+
+#### Filtering HTTP requests from getting traced
+
+You can avoid some requests from getting traced by creating your own `HttpExclusionRule`. For
+example this is an exclusion rule that prevents all requests with the host `127.0.0.1` from getting
+traced:
+
+```java
+class MyHttpExclusionRule extends HttpExclusionRule {
+
+    @Override
+    public boolean exclude(HttpRequest request) {
+        return request.url.getHost().equals("127.0.0.1");
+    }
+}
+```
+
+Then you'd need to add it to Elastic's Agent config through its `HttpTraceConfiguration` like so:
+
+```java
+HttpTraceConfiguration.builder()
+        .addExclusionRule(new MyHttpExclusionRule())
+        .build();
 ```

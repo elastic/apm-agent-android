@@ -2,6 +2,7 @@ package co.elastic.apm.android.sdk;
 
 import android.content.Context;
 
+import co.elastic.apm.android.sdk.attributes.AttributesCompose;
 import co.elastic.apm.android.sdk.services.Service;
 import co.elastic.apm.android.sdk.services.ServiceManager;
 import co.elastic.apm.android.sdk.services.network.NetworkService;
@@ -26,6 +27,7 @@ public final class ElasticApmAgent {
     private static ElasticApmAgent instance;
     private final Connectivity connectivity;
     private final ServiceManager serviceManager;
+    private final AttributesCompose globalAttributes;
     private Tracer tracer;
 
     public static ElasticApmAgent get() {
@@ -68,6 +70,7 @@ public final class ElasticApmAgent {
         serviceManager = new ServiceManager();
         serviceManager.addService(new NetworkService(appContext));
         serviceManager.addService(new AndroidPermissionService(appContext));
+        globalAttributes = AttributesCompose.global(appContext);
     }
 
     private void onInitializationFinished() {
@@ -84,7 +87,7 @@ public final class ElasticApmAgent {
 
     private SdkTracerProvider getTracerProvider() {
         Resource resource = Resource.getDefault()
-                .merge(configuration.globalAttributes.provideAsResource());
+                .merge(globalAttributes.provideAsResource());
 
         ElasticSpanProcessor processor = new ElasticSpanProcessor(BatchSpanProcessor.builder(getSpanExporter()).build());
         processor.addAllExclusionRules(configuration.httpSpanConfiguration.exclusionRules);

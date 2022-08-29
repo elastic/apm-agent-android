@@ -1,18 +1,16 @@
 package co.elastic.apm.android.sdk;
 
-import android.content.Context;
-
 import co.elastic.apm.android.sdk.traces.http.HttpSpanConfiguration;
 
 public final class ElasticApmConfiguration {
     public final HttpSpanConfiguration httpSpanConfiguration;
 
-    public static Builder builder(Context appContext) {
-        return new Builder(appContext);
+    public static Builder builder() {
+        return new Builder();
     }
 
-    public static ElasticApmConfiguration getDefault(Context context) {
-        return builder(context).build();
+    public static ElasticApmConfiguration getDefault() {
+        return builder().build();
     }
 
     private ElasticApmConfiguration(Builder builder) {
@@ -22,8 +20,7 @@ public final class ElasticApmConfiguration {
     public static class Builder {
         private HttpSpanConfiguration httpSpanConfiguration;
 
-        private Builder(Context context) {
-            Context appContext = context.getApplicationContext();
+        private Builder() {
         }
 
         public Builder setHttpSpanConfiguration(HttpSpanConfiguration httpSpanConfiguration) {

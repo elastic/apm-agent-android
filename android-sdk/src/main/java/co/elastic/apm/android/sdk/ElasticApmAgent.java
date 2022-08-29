@@ -1,6 +1,11 @@
 package co.elastic.apm.android.sdk;
 
+import android.content.Context;
+
 import co.elastic.apm.android.sdk.services.Service;
+import co.elastic.apm.android.sdk.services.ServiceManager;
+import co.elastic.apm.android.sdk.services.network.NetworkService;
+import co.elastic.apm.android.sdk.services.permissions.AndroidPermissionService;
 import co.elastic.apm.android.sdk.traces.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.traces.otel.exporter.ElasticSpanExporter;
 import co.elastic.apm.android.sdk.traces.otel.processor.ElasticSpanProcessor;
@@ -20,6 +25,7 @@ public final class ElasticApmAgent {
     public final ElasticApmConfiguration configuration;
     private static ElasticApmAgent instance;
     private final Connectivity connectivity;
+    private final ServiceManager serviceManager;
     private Tracer tracer;
 
     public static ElasticApmAgent get() {
@@ -27,11 +33,11 @@ public final class ElasticApmAgent {
         return instance;
     }
 
-    public synchronized static ElasticApmAgent initialize(Connectivity connectivity, ElasticApmConfiguration configuration) {
+    public synchronized static ElasticApmAgent initialize(Context context, Connectivity connectivity, ElasticApmConfiguration configuration) {
         if (instance != null) {
             throw new IllegalStateException("Already initialized");
         }
-        instance = new ElasticApmAgent(connectivity, configuration);
+        instance = new ElasticApmAgent(context, connectivity, configuration);
         instance.onInitializationFinished();
         return instance;
     }
@@ -43,7 +49,7 @@ public final class ElasticApmAgent {
     }
 
     public void destroy() {
-        configuration.serviceManager.stop();
+        serviceManager.stop();
         instance = null;
     }
 
@@ -52,16 +58,20 @@ public final class ElasticApmAgent {
     }
 
     public <T extends Service> T getService(String name) {
-        return configuration.serviceManager.getService(name);
+        return serviceManager.getService(name);
     }
 
-    ElasticApmAgent(Connectivity connectivity, ElasticApmConfiguration configuration) {
+    ElasticApmAgent(Context context, Connectivity connectivity, ElasticApmConfiguration configuration) {
+        Context appContext = context.getApplicationContext();
         this.connectivity = connectivity;
         this.configuration = configuration;
+        serviceManager = new ServiceManager();
+        serviceManager.addService(new NetworkService(appContext));
+        serviceManager.addService(new AndroidPermissionService(appContext));
     }
 
     private void onInitializationFinished() {
-        configuration.serviceManager.start();
+        serviceManager.start();
         initializeOpentelemetry();
     }
 

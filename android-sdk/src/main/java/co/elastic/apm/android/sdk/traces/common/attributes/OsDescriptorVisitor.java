@@ -11,7 +11,6 @@ public class OsDescriptorVisitor implements AttributesBuilderVisitor {
     @Override
     public void visit(AttributesBuilder builder) {
         builder.put(ResourceAttributes.OS_DESCRIPTION, getOsDescription())
-                .put(ResourceAttributes.OS_TYPE, "linux")
                 .put(ResourceAttributes.OS_VERSION, Build.VERSION.RELEASE)
                 .put(ResourceAttributes.OS_NAME, "Android");
     }

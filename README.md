@@ -128,3 +128,17 @@ HttpTraceConfiguration.builder()
         .addHttpAttributesVisitor(new MyHttpAttributesVisitor())
         .build();
 ```
+
+## Attributes
+
+There are common attributes that the Elastic Agent gather for every Span, and those are
+listed [here](https://github.com/elastic/apm/tree/main/specs/agents/mobile).
+
+However, due to the nature of Android's OS when it comes to collect some device-related data, some
+of the above mentioned resources require the Host app (your app) to have some runtime permissions
+granted. If their corresponding permissions aren't granted, then they won't be collected and nothing
+will be sent for those attributes. Those are the following:
+
+|Attribute|Used in|Requires permission|
+|---|---|---|
+|`net.host.connection.subtype`|HTTP Spans|[READ_PHONE_STATE](https://developer.android.com/reference/android/Manifest.permission#READ_PHONE_STATE)|

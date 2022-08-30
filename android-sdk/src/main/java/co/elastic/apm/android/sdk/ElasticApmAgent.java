@@ -10,9 +10,6 @@ import co.elastic.apm.android.sdk.services.permissions.AndroidPermissionService;
 import co.elastic.apm.android.sdk.traces.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.traces.otel.exporter.ElasticSpanExporter;
 import co.elastic.apm.android.sdk.traces.otel.processor.ElasticSpanProcessor;
-import io.opentelemetry.api.GlobalOpenTelemetry;
-import io.opentelemetry.api.trace.SpanBuilder;
-import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
@@ -28,7 +25,6 @@ public final class ElasticApmAgent {
     private final Connectivity connectivity;
     private final ServiceManager serviceManager;
     private final AttributesCompose globalAttributes;
-    private Tracer tracer;
 
     public static ElasticApmAgent get() {
         verifyInitialization();
@@ -57,10 +53,6 @@ public final class ElasticApmAgent {
     public void destroy() {
         serviceManager.stop();
         instance = null;
-    }
-
-    public SpanBuilder spanBuilder(String spanName) {
-        return getTracer().spanBuilder(spanName);
     }
 
     public <T extends Service> T getService(String name) {
@@ -108,13 +100,5 @@ public final class ElasticApmAgent {
 
     private ContextPropagators getContextPropagator() {
         return ContextPropagators.create(W3CTraceContextPropagator.getInstance());
-    }
-
-    private Tracer getTracer() {
-        if (tracer == null) {
-            tracer = GlobalOpenTelemetry.getTracer("ElasticApmAgent-tracer");
-        }
-
-        return tracer;
     }
 }

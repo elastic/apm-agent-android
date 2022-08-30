@@ -4,11 +4,15 @@ import java.io.IOException;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.attributes.AttributesCompose;
+import co.elastic.apm.android.sdk.services.Service;
+import co.elastic.apm.android.sdk.services.metadata.ApmMetadataService;
 import co.elastic.apm.android.sdk.traces.http.HttpTraceConfiguration;
 import co.elastic.apm.android.sdk.traces.http.data.HttpRequest;
+import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 import okhttp3.Call;
 import okhttp3.EventListener;
@@ -18,8 +22,10 @@ import okhttp3.Request;
 public class OtelOkHttpEventListener extends EventListener {
 
     private static final String SPAN_NAME_FORMAT = "%s %s";
+    private static final String OKHTTP_TRACER_NAME = "OkHttp";
     private final OkHttpContextStore contextStore;
     private HttpTraceConfiguration configuration;
+    private Tracer okHttpTracer;
 
     public OtelOkHttpEventListener(OkHttpContextStore contextStore) {
         this.contextStore = contextStore;
@@ -35,7 +41,7 @@ public class OtelOkHttpEventListener extends EventListener {
         Context currentContext = Context.current();
         String host = url.host();
         AttributesCompose attributes = getConfiguration().createHttpAttributesCompose(convertRequest(request));
-        Span span = ElasticApmAgent.get().spanBuilder(String.format(SPAN_NAME_FORMAT, method, host))
+        Span span = getTracer().spanBuilder(String.format(SPAN_NAME_FORMAT, method, host))
                 .setSpanKind(SpanKind.CLIENT)
                 .setAllAttributes(attributes.provide())
                 .setParent(currentContext)
@@ -84,6 +90,21 @@ public class OtelOkHttpEventListener extends EventListener {
 
     private HttpRequest convertRequest(Request request) {
         return new HttpRequest(request.method(), request.url().url());
+    }
+
+    private Tracer getTracer() {
+        if (okHttpTracer == null) {
+            ApmMetadataService service = ElasticApmAgent.get().getService(Service.Names.METADATA);
+            String name = OKHTTP_TRACER_NAME;
+            String version = service.getOkHttpVersion();
+            if (version == null) {
+                okHttpTracer = GlobalOpenTelemetry.getTracer(name);
+            } else {
+                okHttpTracer = GlobalOpenTelemetry.getTracer(name, version);
+            }
+        }
+
+        return okHttpTracer;
     }
 
     private HttpTraceConfiguration getConfiguration() {

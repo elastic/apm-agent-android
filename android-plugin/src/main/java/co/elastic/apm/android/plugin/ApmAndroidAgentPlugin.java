@@ -9,13 +9,14 @@ import net.bytebuddy.build.gradle.android.ByteBuddyAndroidPlugin;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.artifacts.Dependency;
-import org.gradle.api.artifacts.DependencySet;
+import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.ModuleVersionIdentifier;
+import org.gradle.api.artifacts.ResolveException;
+import org.gradle.api.artifacts.ResolvedArtifact;
+import org.gradle.api.artifacts.ResolvedConfiguration;
 import org.gradle.api.plugins.ExtensionContainer;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.TaskProvider;
-
-import java.util.Objects;
 
 import co.elastic.apm.android.plugin.tasks.ApmInfoGenerator;
 import co.elastic.apm.generated.BuildConfig;
@@ -27,10 +28,10 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
     @Override
     public void apply(Project project) {
         this.project = project;
-        addBytebuddyPlugin(project);
-        addSdkDependency(project);
-        addInstrumentationDependency(project);
-        addApplicationInfoCreationTask(project);
+        addBytebuddyPlugin();
+        addSdkDependency();
+        addInstrumentationDependency();
+        addApplicationInfoCreationTask();
     }
 
     private void addBytebuddyPlugin() {
@@ -69,11 +70,16 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
 
     private Provider<String> getOkhttpVersion(ComponentImpl component) {
         return project.provider(() -> {
-            DependencySet allDependencies = component.getVariantDependencies().getRuntimeClasspath().getAllDependencies();
-            for (Dependency dependency : allDependencies) {
-                if (Objects.equals(dependency.getGroup(), "com.squareup.okhttp3") && dependency.getName().equals("okhttp")) {
-                    return dependency.getVersion();
+            Configuration runtimeClasspath = component.getVariantDependencies().getRuntimeClasspath();
+            ResolvedConfiguration resolvedConfiguration = runtimeClasspath.getResolvedConfiguration();
+            try {
+                for (ResolvedArtifact artifact : resolvedConfiguration.getResolvedArtifacts()) {
+                    ModuleVersionIdentifier identifier = artifact.getModuleVersion().getId();
+                    if (identifier.getGroup().equals("com.squareup.okhttp3") && identifier.getName().equals("okhttp")) {
+                        return identifier.getVersion();
+                    }
                 }
+            } catch (ResolveException ignored) {
             }
             return null;
         });

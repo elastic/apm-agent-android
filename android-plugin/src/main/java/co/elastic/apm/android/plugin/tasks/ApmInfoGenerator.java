@@ -4,6 +4,7 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
 
@@ -23,6 +24,7 @@ public abstract class ApmInfoGenerator extends DefaultTask {
     @Input
     public abstract Property<String> getVersion();
 
+    @Optional
     @Input
     public abstract Property<String> getOkHttpVersion();
 
@@ -35,7 +37,10 @@ public abstract class ApmInfoGenerator extends DefaultTask {
         Properties properties = new Properties();
         properties.put(ApmInfo.KEY_VARIANT_NAME, getVariantName().get());
         properties.put(ApmInfo.KEY_VERSION, getVersion().get());
-        properties.put(ApmInfo.KEY_SCOPE_OKHTTP_VERSION, getOkHttpVersion().get());
+        String okhttpVersion = getOkHttpVersion().getOrNull();
+        if (okhttpVersion != null) {
+            properties.put(ApmInfo.KEY_SCOPE_OKHTTP_VERSION, okhttpVersion);
+        }
 
         try (OutputStream outputStream = new FileOutputStream(propertiesFile)) {
             properties.store(outputStream, null);

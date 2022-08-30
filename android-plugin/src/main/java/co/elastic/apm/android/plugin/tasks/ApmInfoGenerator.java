@@ -35,8 +35,8 @@ public abstract class ApmInfoGenerator extends DefaultTask {
     public void execute() {
         File propertiesFile = new File(getOutputDir().get().getAsFile(), ApmInfo.ASSET_FILE_NAME);
         Properties properties = new Properties();
-        properties.put(ApmInfo.KEY_VARIANT_NAME, getVariantName().get());
-        properties.put(ApmInfo.KEY_VERSION, getVersion().get());
+        properties.put(ApmInfo.KEY_SERVICE_VARIANT_NAME, getVariantName().get());
+        properties.put(ApmInfo.KEY_SERVICE_VERSION, getVersion().get());
         String okhttpVersion = getOkHttpVersion().getOrNull();
         if (okhttpVersion != null) {
             properties.put(ApmInfo.KEY_SCOPE_OKHTTP_VERSION, okhttpVersion);

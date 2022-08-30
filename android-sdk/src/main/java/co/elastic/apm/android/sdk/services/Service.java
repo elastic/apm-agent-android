@@ -6,5 +6,6 @@ public interface Service extends Lifecycle {
     class Names {
         public static final String ANDROID_PERMISSIONS = "android-permissions";
         public static final String NETWORK = "network";
+        public static final String METADATA = "apm-metadata";
     }
 }

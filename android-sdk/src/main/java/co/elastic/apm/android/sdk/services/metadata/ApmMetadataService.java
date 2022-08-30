@@ -10,28 +10,29 @@ import java.io.InputStream;
 import java.util.Properties;
 
 import co.elastic.apm.android.common.ApmInfo;
+import co.elastic.apm.android.sdk.providers.LazyProvider;
 import co.elastic.apm.android.sdk.services.Service;
 
 public class ApmMetadataService implements Service {
-    private final Properties apmInfoProperties;
+    private final LazyProvider<Properties> apmInfoPropertiesProvider;
 
     public ApmMetadataService(Context appContext) {
-        apmInfoProperties = getApmInfoProperties(appContext);
+        apmInfoPropertiesProvider = LazyProvider.of(() -> getApmInfoProperties(appContext));
     }
 
     @NonNull
     public String getServiceVersion() {
-        return apmInfoProperties.getProperty(ApmInfo.KEY_SERVICE_VERSION);
+        return apmInfoPropertiesProvider.get().getProperty(ApmInfo.KEY_SERVICE_VERSION);
     }
 
     @NonNull
     public String getDeploymentEnvironment() {
-        return apmInfoProperties.getProperty(ApmInfo.KEY_SERVICE_VARIANT_NAME);
+        return apmInfoPropertiesProvider.get().getProperty(ApmInfo.KEY_SERVICE_VARIANT_NAME);
     }
 
     @Nullable
     public String getOkHttpVersion() {
-        return apmInfoProperties.getProperty(ApmInfo.KEY_SCOPE_OKHTTP_VERSION);
+        return apmInfoPropertiesProvider.get().getProperty(ApmInfo.KEY_SCOPE_OKHTTP_VERSION);
     }
 
     @Override

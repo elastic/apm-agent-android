@@ -29,6 +29,7 @@ public class ServiceIdVisitor implements AttributesBuilderVisitor {
         String serviceVersion = (this.serviceVersion != null) ? this.serviceVersion : apmInfoProperties.getProperty(ApmInfo.KEY_VERSION);
         builder.put(ResourceAttributes.SERVICE_NAME, serviceName)
                 .put(ResourceAttributes.SERVICE_VERSION, serviceVersion)
+                .put(ResourceAttributes.SERVICE_NAMESPACE, apmInfoProperties.getProperty(ApmInfo.KEY_SCOPE_OKHTTP_VERSION))
                 .put(ResourceAttributes.DEPLOYMENT_ENVIRONMENT, apmInfoProperties.getProperty(ApmInfo.KEY_VARIANT_NAME));
     }
 

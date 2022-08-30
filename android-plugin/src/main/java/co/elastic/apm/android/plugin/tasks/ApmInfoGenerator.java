@@ -23,6 +23,9 @@ public abstract class ApmInfoGenerator extends DefaultTask {
     @Input
     public abstract Property<String> getVersion();
 
+    @Input
+    public abstract Property<String> getOkHttpVersion();
+
     @OutputDirectory
     public abstract DirectoryProperty getOutputDir();
 
@@ -32,6 +35,7 @@ public abstract class ApmInfoGenerator extends DefaultTask {
         Properties properties = new Properties();
         properties.put(ApmInfo.KEY_VARIANT_NAME, getVariantName().get());
         properties.put(ApmInfo.KEY_VERSION, getVersion().get());
+        properties.put(ApmInfo.KEY_SCOPE_OKHTTP_VERSION, getOkHttpVersion().get());
 
         try (OutputStream outputStream = new FileOutputStream(propertiesFile)) {
             properties.store(outputStream, null);

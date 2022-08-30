@@ -13,7 +13,7 @@ public class OsDescriptorVisitor implements AttributesBuilderVisitor {
         builder.put(ResourceAttributes.OS_DESCRIPTION, getOsDescription())
                 .put(ResourceAttributes.OS_TYPE, "linux")
                 .put(ResourceAttributes.OS_VERSION, Build.VERSION.RELEASE)
-                .put(ResourceAttributes.OS_NAME, Build.VERSION.CODENAME);
+                .put(ResourceAttributes.OS_NAME, "Android");
     }
 
     private String getOsDescription() {
@@ -22,8 +22,6 @@ public class OsDescriptorVisitor implements AttributesBuilderVisitor {
         descriptionBuilder.append(Build.VERSION.RELEASE);
         descriptionBuilder.append(", API level ");
         descriptionBuilder.append(Build.VERSION.SDK_INT);
-        descriptionBuilder.append(", NAME ");
-        descriptionBuilder.append(Build.VERSION.CODENAME);
         descriptionBuilder.append(", BUILD ");
         descriptionBuilder.append(Build.VERSION.INCREMENTAL);
         return descriptionBuilder.toString();

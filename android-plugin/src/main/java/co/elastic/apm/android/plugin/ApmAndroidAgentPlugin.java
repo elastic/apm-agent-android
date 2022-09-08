@@ -43,7 +43,7 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
     }
 
     private void addInstrumentationDependency() {
-        project.getDependencies().add("bytebuddy", BuildConfig.INSTRUMENTATION_DEPENDENCY_URI);
+        project.getDependencies().add("byteBuddy", BuildConfig.INSTRUMENTATION_DEPENDENCY_URI);
     }
 
     private void addApplicationInfoCreationTask() {

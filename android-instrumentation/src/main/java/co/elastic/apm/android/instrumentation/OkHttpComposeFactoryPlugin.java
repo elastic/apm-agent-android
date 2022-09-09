@@ -1,5 +1,7 @@
 package co.elastic.apm.android.instrumentation;
 
+import static net.bytebuddy.matcher.ElementMatchers.not;
+
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.build.Plugin;
 import net.bytebuddy.description.type.TypeDescription;
@@ -14,8 +16,10 @@ import okhttp3.EventListener;
 public class OkHttpComposeFactoryPlugin implements Plugin {
     @Override
     public DynamicType.Builder<?> apply(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassFileLocator classFileLocator) {
-        return builder.method(ElementMatchers.isDeclaredBy(EventListener.class))
-                .intercept(Advice.to(OkHttpComposeAdvice.class));
+        return builder.method(ElementMatchers.isDeclaredBy(EventListener.class)
+                .and(not(ElementMatchers.isStatic()))
+                .and(not(ElementMatchers.isConstructor()))
+        ).intercept(Advice.to(OkHttpComposeAdvice.class));
     }
 
     @Override

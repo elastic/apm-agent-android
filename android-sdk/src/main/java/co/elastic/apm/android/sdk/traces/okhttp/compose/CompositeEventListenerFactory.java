@@ -3,6 +3,7 @@ package co.elastic.apm.android.sdk.traces.okhttp.compose;
 import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import okhttp3.Call;
@@ -11,8 +12,8 @@ import okhttp3.EventListener;
 public class CompositeEventListenerFactory implements EventListener.Factory {
     private final List<EventListener.Factory> factories;
 
-    public CompositeEventListenerFactory(List<EventListener.Factory> factories) {
-        this.factories = factories;
+    public CompositeEventListenerFactory(EventListener.Factory... factories) {
+        this.factories = Arrays.asList(factories);
     }
 
     @NonNull

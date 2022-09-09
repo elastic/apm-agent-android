@@ -1,5 +1,7 @@
 package co.elastic.apm.android.sdk.traces.okhttp;
 
+import androidx.annotation.NonNull;
+
 import java.io.IOException;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
@@ -27,7 +29,7 @@ public class OtelOkHttpEventListener extends EventListener {
     private HttpTraceConfiguration configuration;
     private Tracer okHttpTracer;
 
-    public OtelOkHttpEventListener(OkHttpContextStore contextStore) {
+    private OtelOkHttpEventListener(OkHttpContextStore contextStore) {
         this.contextStore = contextStore;
     }
 
@@ -113,5 +115,19 @@ public class OtelOkHttpEventListener extends EventListener {
         }
 
         return configuration;
+    }
+
+    public static class Factory implements EventListener.Factory {
+        private final OkHttpContextStore contextStore;
+
+        public Factory(OkHttpContextStore contextStore) {
+            this.contextStore = contextStore;
+        }
+
+        @NonNull
+        @Override
+        public EventListener create(@NonNull Call call) {
+            return new OtelOkHttpEventListener(contextStore);
+        }
     }
 }

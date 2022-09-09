@@ -24,7 +24,7 @@ public class CompositeEventListenerPlugin implements Plugin {
 
     @Override
     public void close() throws IOException {
-
+        // No operation.
     }
 
     @Override

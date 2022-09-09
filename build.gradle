@@ -10,5 +10,5 @@ ext {
     androidCompileSdk = 32
     openTelemetry_version = "1.16.0"
     androidAnnotations_version = "1.4.0"
-    bytebuddy_version = "1.12.15-SNAPSHOT"
+    bytebuddy_version = "1.12.16"
 }

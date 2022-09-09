@@ -1,4 +1,4 @@
-package co.elastic.apm.android.instrumentation;
+package co.elastic.apm.android.instrumentation.okhttp.client;
 
 import net.bytebuddy.asm.Advice;
 

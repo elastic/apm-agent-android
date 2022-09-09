@@ -1,4 +1,4 @@
-package co.elastic.apm.android.instrumentation;
+package co.elastic.apm.android.instrumentation.okhttp.client;
 
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.build.Plugin;
@@ -11,7 +11,7 @@ import java.io.IOException;
 
 import okhttp3.OkHttpClient;
 
-public class ElasticApmBytebuddyPlugin implements Plugin {
+public class OkHttpClientPlugin implements Plugin {
 
     @Override
     public DynamicType.Builder<?> apply(DynamicType.Builder<?> builder,

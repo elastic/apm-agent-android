@@ -1,4 +1,4 @@
-package co.elastic.apm.android.sdk.traces.okhttp;
+package co.elastic.apm.android.sdk.traces.http.impl.okhttp;
 
 import androidx.annotation.NonNull;
 

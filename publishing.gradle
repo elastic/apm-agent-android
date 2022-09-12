@@ -5,15 +5,17 @@ afterEvaluate {
         publications {
             if (!project.plugins.hasPlugin("java-gradle-plugin")) {
                 maven(MavenPublication) {
-                    if (project.extensions.findByName("android") == null) {
-                        // it's a plain java project
-                        from components.java
-                    } else {
-                        // it's an android project
+                    if (isAndroidProject()) {
                         from components.debug
+                    } else {
+                        from components.java
                     }
                 }
             }
         }
     }
+}
+
+private boolean isAndroidProject() {
+    project.extensions.findByName("android") != null
 }

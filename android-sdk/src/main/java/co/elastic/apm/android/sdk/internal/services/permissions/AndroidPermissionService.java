@@ -1,9 +1,9 @@
-package co.elastic.apm.android.sdk.services.permissions;
+package co.elastic.apm.android.sdk.internal.services.permissions;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
 
-import co.elastic.apm.android.sdk.services.Service;
+import co.elastic.apm.android.sdk.internal.services.Service;
 
 public class AndroidPermissionService implements Service {
     private final Context appContext;

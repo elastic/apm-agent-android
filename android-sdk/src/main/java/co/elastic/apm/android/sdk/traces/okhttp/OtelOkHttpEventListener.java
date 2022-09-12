@@ -6,8 +6,8 @@ import java.io.IOException;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.attributes.AttributesCompose;
-import co.elastic.apm.android.sdk.services.Service;
-import co.elastic.apm.android.sdk.services.metadata.ApmMetadataService;
+import co.elastic.apm.android.sdk.internal.services.Service;
+import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
 import co.elastic.apm.android.sdk.traces.http.HttpTraceConfiguration;
 import co.elastic.apm.android.sdk.traces.http.data.HttpRequest;
 import io.opentelemetry.api.GlobalOpenTelemetry;

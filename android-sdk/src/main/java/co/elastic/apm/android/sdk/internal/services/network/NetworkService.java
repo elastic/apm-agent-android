@@ -1,4 +1,4 @@
-package co.elastic.apm.android.sdk.services.network;
+package co.elastic.apm.android.sdk.internal.services.network;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -12,11 +12,11 @@ import androidx.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
-import co.elastic.apm.android.sdk.services.Service;
-import co.elastic.apm.android.sdk.services.network.data.CarrierInfo;
-import co.elastic.apm.android.sdk.services.network.data.type.NetworkType;
-import co.elastic.apm.android.sdk.services.network.utils.CellSubTypeProvider;
-import co.elastic.apm.android.sdk.services.permissions.AndroidPermissionService;
+import co.elastic.apm.android.sdk.internal.services.Service;
+import co.elastic.apm.android.sdk.internal.services.network.data.CarrierInfo;
+import co.elastic.apm.android.sdk.internal.services.network.data.type.NetworkType;
+import co.elastic.apm.android.sdk.internal.services.network.utils.CellSubTypeProvider;
+import co.elastic.apm.android.sdk.internal.services.permissions.AndroidPermissionService;
 
 public class NetworkService extends ConnectivityManager.NetworkCallback implements Service {
     private final ConnectivityManager connectivityManager;

@@ -3,11 +3,11 @@ package co.elastic.apm.android.sdk;
 import android.content.Context;
 
 import co.elastic.apm.android.sdk.attributes.AttributesCompose;
-import co.elastic.apm.android.sdk.services.Service;
-import co.elastic.apm.android.sdk.services.ServiceManager;
-import co.elastic.apm.android.sdk.services.metadata.ApmMetadataService;
-import co.elastic.apm.android.sdk.services.network.NetworkService;
-import co.elastic.apm.android.sdk.services.permissions.AndroidPermissionService;
+import co.elastic.apm.android.sdk.internal.services.Service;
+import co.elastic.apm.android.sdk.internal.services.ServiceManager;
+import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
+import co.elastic.apm.android.sdk.internal.services.network.NetworkService;
+import co.elastic.apm.android.sdk.internal.services.permissions.AndroidPermissionService;
 import co.elastic.apm.android.sdk.traces.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.traces.otel.exporter.ElasticSpanExporter;
 import co.elastic.apm.android.sdk.traces.otel.processor.ElasticSpanProcessor;

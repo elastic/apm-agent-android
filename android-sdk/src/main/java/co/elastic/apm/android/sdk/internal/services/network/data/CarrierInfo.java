@@ -1,4 +1,4 @@
-package co.elastic.apm.android.sdk.services.network.data;
+package co.elastic.apm.android.sdk.internal.services.network.data;
 
 public class CarrierInfo {
     public final String name;

@@ -1,4 +1,4 @@
-package co.elastic.apm.android.sdk.services;
+package co.elastic.apm.android.sdk.internal.services;
 
 import java.util.HashMap;
 

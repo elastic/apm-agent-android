@@ -1,4 +1,4 @@
-package co.elastic.apm.android.sdk.services.metadata;
+package co.elastic.apm.android.sdk.internal.services.metadata;
 
 import android.content.Context;
 
@@ -10,8 +10,8 @@ import java.io.InputStream;
 import java.util.Properties;
 
 import co.elastic.apm.android.common.ApmInfo;
+import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.providers.LazyProvider;
-import co.elastic.apm.android.sdk.services.Service;
 
 public class ApmMetadataService implements Service {
     private final LazyProvider<Properties> apmInfoPropertiesProvider;

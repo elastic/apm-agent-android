@@ -1,10 +1,10 @@
-package co.elastic.apm.android.sdk.services.network.utils;
+package co.elastic.apm.android.sdk.internal.services.network.utils;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.telephony.TelephonyManager;
 
-import co.elastic.apm.android.sdk.services.permissions.AndroidPermissionService;
+import co.elastic.apm.android.sdk.internal.services.permissions.AndroidPermissionService;
 
 public class CellSubTypeProvider {
 

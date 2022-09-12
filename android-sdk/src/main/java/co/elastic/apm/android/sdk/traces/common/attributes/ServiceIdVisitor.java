@@ -4,8 +4,8 @@ import android.content.Context;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.attributes.AttributesBuilderVisitor;
-import co.elastic.apm.android.sdk.services.Service;
-import co.elastic.apm.android.sdk.services.metadata.ApmMetadataService;
+import co.elastic.apm.android.sdk.internal.services.Service;
+import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 

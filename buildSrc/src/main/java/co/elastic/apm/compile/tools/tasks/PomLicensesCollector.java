@@ -13,7 +13,9 @@ import org.gradle.api.artifacts.result.ComponentArtifactsResult;
 import org.gradle.api.artifacts.result.ResolvedArtifactResult;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;
+import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.InputFiles;
+import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.maven.MavenModule;
@@ -39,6 +41,10 @@ public abstract class PomLicensesCollector extends DefaultTask {
 
     @InputFiles
     public abstract Property<Configuration> getRuntimeDependencies();
+
+    @Optional
+    @InputFile
+    public abstract RegularFileProperty getManualLicenseMapping();
 
     @OutputFile
     public abstract RegularFileProperty getLicensesFound();

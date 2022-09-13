@@ -31,7 +31,8 @@ public class PomReader {
         }
 
         Element license = (Element) licenses.item(0);
-        return extractItemValue(license, "name");
+        String name = extractItemValue(license, "name");
+        return LicensesIdsMatcher.findId(name);
     }
 
     private String extractItemValue(Element license, String itemName) {

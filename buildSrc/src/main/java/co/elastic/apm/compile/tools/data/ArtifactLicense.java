@@ -2,15 +2,15 @@ package co.elastic.apm.compile.tools.data;
 
 public class ArtifactLicense {
     public final String displayName;
-    public final String licenseName;
+    public final String licenseId;
 
     public ArtifactLicense(String displayName, String licenseName) {
         this.displayName = displayName;
-        this.licenseName = licenseName;
+        this.licenseId = licenseName;
     }
 
     public String serialize() {
-        return displayName + "|" + licenseName;
+        return displayName + "|" + licenseId;
     }
 
     public static ArtifactLicense parse(String line) {

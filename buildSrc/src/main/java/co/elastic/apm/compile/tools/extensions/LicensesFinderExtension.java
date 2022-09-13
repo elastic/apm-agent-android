@@ -1,15 +1,7 @@
 package co.elastic.apm.compile.tools.extensions;
 
-import org.gradle.api.file.RegularFileProperty;
-import org.gradle.api.model.ObjectFactory;
-
-import javax.inject.Inject;
+import java.io.File;
 
 public abstract class LicensesFinderExtension {
-    public final RegularFileProperty manualMappingFile;
-
-    @Inject
-    public LicensesFinderExtension(ObjectFactory objects) {
-        manualMappingFile = objects.fileProperty();
-    }
+    public File manualMappingFile;
 }

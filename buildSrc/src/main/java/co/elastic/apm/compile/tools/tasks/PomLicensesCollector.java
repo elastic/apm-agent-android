@@ -175,16 +175,17 @@ public abstract class PomLicensesCollector extends DefaultTask {
 
         for (ResolvedArtifact resolvedArtifact : resolvedArtifacts) {
             ModuleVersionIdentifier moduleId = resolvedArtifact.getModuleVersion().getId();
-            if (isDirectDependency(moduleId, externalDependenciesIds)) {
+            String moduleIdName = moduleId.getGroup() + ":" + moduleId.getName();
+            if (externalDependenciesIds.contains(moduleIdName)) {
+                externalDependenciesIds.remove(moduleIdName);
                 identifiers.add(resolvedArtifact.getId().getComponentIdentifier());
             }
         }
 
-        return identifiers;
-    }
+        if (!externalDependenciesIds.isEmpty()) {
+            throw new RuntimeException("POM files not found for the following dependencies: " + externalDependenciesIds);
+        }
 
-    private boolean isDirectDependency(ModuleVersionIdentifier moduleId, List<String> externalDependenciesIds) {
-        String moduleIdName = moduleId.getGroup() + ":" + moduleId.getName();
-        return externalDependenciesIds.contains(moduleIdName);
+        return identifiers;
     }
 }

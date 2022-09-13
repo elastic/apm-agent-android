@@ -39,7 +39,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import co.elastic.apm.compile.tools.data.ArtifactLicense;
 import co.elastic.apm.compile.tools.utils.PomReader;
 
-public abstract class PomLicensesCollector extends DefaultTask {
+public abstract class PomLicensesCollectorTask extends DefaultTask {
 
     @InputFiles
     public abstract Property<Configuration> getRuntimeDependencies();

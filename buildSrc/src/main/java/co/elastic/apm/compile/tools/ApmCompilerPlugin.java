@@ -6,7 +6,7 @@ import org.gradle.api.Project;
 import co.elastic.apm.compile.tools.extensions.LicensesFinderExtension;
 import co.elastic.apm.compile.tools.tasks.PomLicensesCollector;
 
-public class ApmProjectPlugin implements Plugin<Project> {
+public class ApmCompilerPlugin implements Plugin<Project> {
     private static final String EXTENSION_LICENSES_CONFIG = "licensesConfig";
 
     @Override

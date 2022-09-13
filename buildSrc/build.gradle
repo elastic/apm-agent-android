@@ -14,7 +14,7 @@ gradlePlugin {
     plugins {
         apmTools {
             id = 'co.elastic.apm.compile'
-            implementationClass = 'co.elastic.apm.compile.tools.ApmProjectPlugin'
+            implementationClass = 'co.elastic.apm.compile.tools.ApmCompilerPlugin'
         }
     }
 }

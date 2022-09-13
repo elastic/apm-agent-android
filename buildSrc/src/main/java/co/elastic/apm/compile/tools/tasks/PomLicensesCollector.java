@@ -88,6 +88,7 @@ public abstract class PomLicensesCollector extends DefaultTask {
                 }
                 mappedLicenses.put(dependencyUri, licenseId);
             }
+            reader.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -98,9 +99,15 @@ public abstract class PomLicensesCollector extends DefaultTask {
     private void writeToFile(File licensesFoundFile, List<ArtifactLicense> artifactLicenses) throws IOException {
         FileWriter fileWriter = new FileWriter(licensesFoundFile);
         PrintWriter printWriter = new PrintWriter(fileWriter);
+        boolean firstIteration = true;
 
         for (ArtifactLicense artifactLicense : artifactLicenses) {
-            printWriter.println(artifactLicense.serialize());
+            if (!firstIteration) {
+                printWriter.println();
+            } else {
+                firstIteration = false;
+            }
+            printWriter.print(artifactLicense.serialize());
         }
 
         printWriter.close();

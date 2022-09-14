@@ -1,10 +1,6 @@
 package co.elastic.apm.compile.tools.tasks;
 
 import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.artifacts.component.ComponentIdentifier;
-import org.gradle.api.artifacts.result.ArtifactResolutionResult;
-import org.gradle.api.artifacts.result.ArtifactResult;
-import org.gradle.api.artifacts.result.ComponentArtifactsResult;
 import org.gradle.api.artifacts.result.ResolvedArtifactResult;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;
@@ -13,8 +9,6 @@ import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
-import org.gradle.maven.MavenModule;
-import org.gradle.maven.MavenPomArtifact;
 import org.xml.sax.SAXException;
 
 import java.io.BufferedReader;
@@ -27,14 +21,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 import co.elastic.apm.compile.tools.data.ArtifactLicense;
 import co.elastic.apm.compile.tools.utils.PomReader;
 
-public abstract class PomLicensesCollectorTask extends BaseTask {
+public abstract class PomLicensesCollectorTask extends BasePomTask {
 
     @InputFiles
     public abstract Property<Configuration> getRuntimeDependencies();
@@ -49,13 +42,8 @@ public abstract class PomLicensesCollectorTask extends BaseTask {
     @SuppressWarnings("unchecked")
     @TaskAction
     public void action() {
-        ArtifactResolutionResult result = getProject().getDependencies().createArtifactResolutionQuery()
-                .forComponents(getComponentIdentifiers(getRuntimeDependencies().get()))
-                .withArtifacts(MavenModule.class, MavenPomArtifact.class)
-                .execute();
-
         try {
-            List<ArtifactLicense> artifactLicenses = extractLicenses(getPomArtifacts(result));
+            List<ArtifactLicense> artifactLicenses = extractLicenses(getPomArtifacts(getComponentIdentifiers(getRuntimeDependencies().get())));
             File licensesFoundFile = getLicensesFound().get().getAsFile();
             writeToFile(licensesFoundFile, artifactLicenses);
         } catch (ParserConfigurationException | SAXException | IOException e) {
@@ -108,21 +96,20 @@ public abstract class PomLicensesCollectorTask extends BaseTask {
         printWriter.close();
     }
 
-    private List<ArtifactLicense> extractLicenses(Map<ComponentIdentifier, ResolvedArtifactResult> pomArtifacts) throws ParserConfigurationException, SAXException, IOException {
+    private List<ArtifactLicense> extractLicenses(List<ResolvedArtifactResult> pomArtifacts) throws ParserConfigurationException, SAXException, IOException {
         Map<String, String> manualMappedLicenses = getManualMappedLicenses();
         List<ArtifactLicense> artifactLicenses = new ArrayList<>();
         List<String> notFoundLicenses = new ArrayList<>();
 
-        for (ComponentIdentifier pomArtifactKey : pomArtifacts.keySet()) {
-            String displayName = pomArtifactKey.getDisplayName();
+        for (ResolvedArtifactResult pomArtifact : pomArtifacts) {
+            String displayName = pomArtifact.getId().getComponentIdentifier().getDisplayName();
             String licenseName;
             if (manualMappedLicenses.containsKey(displayName)) {
                 licenseName = manualMappedLicenses.get(displayName);
             } else {
-                ResolvedArtifactResult pomArtifact = pomArtifacts.get(pomArtifactKey);
                 File pomFile = pomArtifact.getFile();
                 PomReader reader = new PomReader(pomFile);
-                licenseName = reader.getLicenseName();
+                licenseName = reader.getLicenseId();
             }
             if (licenseName != null) {
                 artifactLicenses.add(new ArtifactLicense(displayName, licenseName));
@@ -136,22 +123,5 @@ public abstract class PomLicensesCollectorTask extends BaseTask {
         }
 
         return artifactLicenses;
-    }
-
-    private Map<ComponentIdentifier, ResolvedArtifactResult> getPomArtifacts(ArtifactResolutionResult result) {
-        Map<ComponentIdentifier, ResolvedArtifactResult> results = new HashMap<>();
-
-        for (ComponentArtifactsResult component : result.getResolvedComponents()) {
-            Set<ArtifactResult> artifacts = component.getArtifacts(MavenPomArtifact.class);
-            ComponentIdentifier id = component.getId();
-            String displayName = id.getDisplayName();
-            if (!artifacts.iterator().hasNext()) {
-                throw new RuntimeException("No POM file found for: " + displayName);
-            }
-            ArtifactResult artifact = artifacts.iterator().next();
-            results.put(id, (ResolvedArtifactResult) artifact);
-        }
-
-        return results;
     }
 }

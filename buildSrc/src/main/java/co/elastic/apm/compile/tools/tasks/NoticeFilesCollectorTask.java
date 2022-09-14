@@ -1,5 +1,6 @@
 package co.elastic.apm.compile.tools.tasks;
 
+import org.apache.commons.io.FileUtils;
 import org.gradle.api.Action;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.component.ComponentIdentifier;
@@ -38,6 +39,11 @@ public abstract class NoticeFilesCollectorTask extends BaseTask {
 
     @TaskAction
     public void action() {
+        try {
+            FileUtils.cleanDirectory(getOutputDir().get().getAsFile());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         Configuration dependencies = getRuntimeDependencies().get();
         List<ComponentIdentifier> allDependenciesIds = getComponentIdentifiers(dependencies);
 

@@ -24,7 +24,7 @@ public class PomReader {
         }
     }
 
-    public String getLicenseName() {
+    public String getLicenseId() {
         NodeList licenses = document.getElementsByTagName("licenses");
         if (licenses.getLength() == 0) {
             return null;
@@ -41,5 +41,21 @@ public class PomReader {
 
     private String extractItemValue(Element license, String itemName) {
         return license.getElementsByTagName(itemName).item(0).getTextContent();
+    }
+
+    public String getName() {
+        return getRootItemValue("name");
+    }
+
+    public String getUrl() {
+        return getRootItemValue("url");
+    }
+
+    private String getRootItemValue(String itemName) {
+        NodeList name = document.getElementsByTagName(itemName);
+        if (name.getLength() == 0) {
+            return null;
+        }
+        return name.item(0).getTextContent();
     }
 }

@@ -1,8 +1,10 @@
 package co.elastic.apm.compile.tools.subplugins;
 
 import org.gradle.api.Project;
+import org.gradle.api.tasks.TaskProvider;
 
 import co.elastic.apm.compile.tools.tasks.NoticeFilesCollectorTask;
+import co.elastic.apm.compile.tools.tasks.NoticeMergerTask;
 import co.elastic.apm.compile.tools.tasks.PomLicensesCollectorTask;
 
 public class JarApmCompilerPlugin extends BasePlugin {
@@ -16,9 +18,14 @@ public class JarApmCompilerPlugin extends BasePlugin {
             task.getManualLicenseMapping().set(licensesConfig.manualMappingFile);
         });
 
-        project.getTasks().register("noticeFilesCollector", NoticeFilesCollectorTask.class, task -> {
+        TaskProvider<NoticeFilesCollectorTask> noticeCollector = project.getTasks().register("noticeFilesCollector", NoticeFilesCollectorTask.class, task -> {
             task.getRuntimeDependencies().set(project.getConfigurations().getByName("runtimeClasspath"));
             task.getOutputDir().set(project.getLayout().getBuildDirectory().dir(task.getName()));
+        });
+
+        project.getTasks().register("noticeFilesMerger", NoticeMergerTask.class, task -> {
+            task.getNoticeFilesDir().set(noticeCollector.flatMap(NoticeFilesCollectorTask::getOutputDir));
+            task.getOutputFile().set(project.getLayout().getBuildDirectory().file(task.getName() + "/" + "mergedNotice.txt"));
         });
     }
 }

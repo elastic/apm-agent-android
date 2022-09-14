@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import co.elastic.apm.compile.tools.data.ArtifactIdentification;
@@ -85,6 +86,8 @@ public abstract class NoticeMergerTask extends BasePomTask {
         for (ResolvedArtifactResult pomArtifact : pomArtifacts) {
             noticeInfos.add(createNoticeInfo(pomArtifact, files));
         }
+
+        noticeInfos.sort(Comparator.comparing(artifactNoticeInfo -> artifactNoticeInfo.id.getDisplayName()));
 
         return noticeInfos;
     }

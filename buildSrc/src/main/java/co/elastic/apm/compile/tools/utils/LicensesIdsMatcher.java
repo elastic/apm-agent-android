@@ -28,7 +28,7 @@ public class LicensesIdsMatcher {
                 continue;
             }
             if (distance == shortestDistance && matchingId != null) {
-                throw new RuntimeException("Ambiguous license ids for: " + licenseName + " (" + matchingId + ", " + id + ")");
+                throw new RuntimeException("Ambiguous license id match for: '" + licenseName + "' -> matching ids: (" + matchingId + ", " + id + ")");
             }
             if (distance == 0) {
                 return id;

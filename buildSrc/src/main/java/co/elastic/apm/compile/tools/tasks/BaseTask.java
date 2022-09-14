@@ -7,6 +7,7 @@ import org.gradle.api.artifacts.ExternalModuleDependency;
 import org.gradle.api.artifacts.ModuleVersionIdentifier;
 import org.gradle.api.artifacts.ResolvedArtifact;
 import org.gradle.api.artifacts.component.ComponentIdentifier;
+import org.gradle.api.tasks.Internal;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +44,7 @@ public class BaseTask extends DefaultTask {
         return identifiers;
     }
 
+    @Internal
     protected boolean isAndroidProject() {
         return getProject().getExtensions().findByName("android") != null;
     }

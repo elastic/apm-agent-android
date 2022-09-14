@@ -1,11 +1,6 @@
 package co.elastic.apm.compile.tools.tasks;
 
-import org.gradle.api.DefaultTask;
 import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.artifacts.Dependency;
-import org.gradle.api.artifacts.ExternalModuleDependency;
-import org.gradle.api.artifacts.ModuleVersionIdentifier;
-import org.gradle.api.artifacts.ResolvedArtifact;
 import org.gradle.api.artifacts.component.ComponentIdentifier;
 import org.gradle.api.artifacts.result.ArtifactResolutionResult;
 import org.gradle.api.artifacts.result.ArtifactResult;
@@ -39,7 +34,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import co.elastic.apm.compile.tools.data.ArtifactLicense;
 import co.elastic.apm.compile.tools.utils.PomReader;
 
-public abstract class PomLicensesCollectorTask extends DefaultTask {
+public abstract class PomLicensesCollectorTask extends BaseTask {
 
     @InputFiles
     public abstract Property<Configuration> getRuntimeDependencies();
@@ -55,7 +50,7 @@ public abstract class PomLicensesCollectorTask extends DefaultTask {
     @TaskAction
     public void action() {
         ArtifactResolutionResult result = getProject().getDependencies().createArtifactResolutionQuery()
-                .forComponents(getComponentIdentifiers())
+                .forComponents(getComponentIdentifiers(getRuntimeDependencies().get()))
                 .withArtifacts(MavenModule.class, MavenPomArtifact.class)
                 .execute();
 
@@ -158,34 +153,5 @@ public abstract class PomLicensesCollectorTask extends DefaultTask {
         }
 
         return results;
-    }
-
-    private List<ComponentIdentifier> getComponentIdentifiers() {
-        List<String> externalDependenciesIds = new ArrayList<>();
-
-        for (Dependency dependency : getRuntimeDependencies().get().getAllDependencies()) {
-            if (dependency instanceof ExternalModuleDependency) {
-                ExternalModuleDependency moduleDependency = (ExternalModuleDependency) dependency;
-                externalDependenciesIds.add(moduleDependency.getGroup() + ":" + moduleDependency.getName());
-            }
-        }
-
-        Set<ResolvedArtifact> resolvedArtifacts = getRuntimeDependencies().get().getResolvedConfiguration().getResolvedArtifacts();
-        List<ComponentIdentifier> identifiers = new ArrayList<>();
-
-        for (ResolvedArtifact resolvedArtifact : resolvedArtifacts) {
-            ModuleVersionIdentifier moduleId = resolvedArtifact.getModuleVersion().getId();
-            String moduleIdName = moduleId.getGroup() + ":" + moduleId.getName();
-            if (externalDependenciesIds.contains(moduleIdName)) {
-                externalDependenciesIds.remove(moduleIdName);
-                identifiers.add(resolvedArtifact.getId().getComponentIdentifier());
-            }
-        }
-
-        if (!externalDependenciesIds.isEmpty()) {
-            throw new RuntimeException("POM files not found for the following dependencies: " + externalDependenciesIds);
-        }
-
-        return identifiers;
     }
 }

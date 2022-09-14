@@ -2,6 +2,7 @@ package co.elastic.apm.compile.tools.subplugins;
 
 import org.gradle.api.Project;
 
+import co.elastic.apm.compile.tools.tasks.NoticeFilesCollectorTask;
 import co.elastic.apm.compile.tools.tasks.PomLicensesCollectorTask;
 
 public class JarApmCompilerPlugin extends BasePlugin {
@@ -13,6 +14,11 @@ public class JarApmCompilerPlugin extends BasePlugin {
             task.getRuntimeDependencies().set(project.getConfigurations().getByName("runtimeClasspath"));
             task.getLicensesFound().set(project.getLayout().getBuildDirectory().file(task.getName() + "/licenses.txt"));
             task.getManualLicenseMapping().set(licensesConfig.manualMappingFile);
+        });
+
+        project.getTasks().register("noticeFilesCollector", NoticeFilesCollectorTask.class, task -> {
+            task.getRuntimeDependencies().set(project.getConfigurations().getByName("runtimeClasspath"));
+            task.getOutputDir().set(project.getLayout().getBuildDirectory().dir(task.getName()));
         });
     }
 }

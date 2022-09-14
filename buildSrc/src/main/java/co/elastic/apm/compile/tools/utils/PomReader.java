@@ -32,7 +32,11 @@ public class PomReader {
 
         Element license = (Element) licenses.item(0);
         String name = extractItemValue(license, "name");
-        return LicensesIdsMatcher.findId(name);
+        String id = LicensesIdsMatcher.findId(name);
+        if (id == null) {
+            throw new RuntimeException("Couldn't find a license id for: " + name + " - it should be added to the 'licenses_ids.txt' file");
+        }
+        return id;
     }
 
     private String extractItemValue(Element license, String itemName) {

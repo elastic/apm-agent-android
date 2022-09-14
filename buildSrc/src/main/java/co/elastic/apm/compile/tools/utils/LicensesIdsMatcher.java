@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -16,16 +17,17 @@ public class LicensesIdsMatcher {
     public static String findId(String licenseName) {
         Map<String, String> ids = getIds();
         String matchingId = null;
-        int shortestDistance = 500;
+        String comparableName = curateLicenseName(licenseName);
+        int shortestDistance = (int) Math.ceil(comparableName.length() / 2.0);
         LevenshteinDistance distanceFinder = LevenshteinDistance.getDefaultInstance();
 
         for (String id : ids.keySet()) {
-            String value = ids.get(id);
-            int distance = distanceFinder.apply(licenseName, value);
+            String predefinedName = ids.get(id);
+            int distance = distanceFinder.apply(comparableName, predefinedName);
             if (distance > shortestDistance) {
                 continue;
             }
-            if (distance == shortestDistance) {
+            if (distance == shortestDistance && matchingId != null) {
                 throw new RuntimeException("Ambiguous license ids for: " + licenseName + " (" + matchingId + ", " + id + ")");
             }
             if (distance == 0) {
@@ -55,11 +57,11 @@ public class LicensesIdsMatcher {
             while (reader.ready()) {
                 String[] parts = reader.readLine().split("\\|");
                 String id = parts[0];
-                String description = parts[1];
+                String name = parts[1];
                 if (ids.containsKey(id)) {
                     throw new RuntimeException("Duplicated licence id: " + id);
                 }
-                ids.put(id, description);
+                ids.put(id, curateLicenseName(name));
             }
             reader.close();
         } catch (IOException e) {
@@ -67,5 +69,14 @@ public class LicensesIdsMatcher {
         }
 
         return ids;
+    }
+
+    /**
+     * Makes all lowercase trims spaces and removes common parts of most licenses names that add noise to the comparison.
+     */
+    private static String curateLicenseName(String licenseName) {
+        String curated = licenseName.toLowerCase(Locale.US);
+        return curated.replaceAll("version|license|software|the|,", "")
+                .replaceAll("[\\s\\t\\n]+", "");
     }
 }

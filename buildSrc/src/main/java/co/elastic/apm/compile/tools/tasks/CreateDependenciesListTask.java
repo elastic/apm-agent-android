@@ -133,14 +133,4 @@ public abstract class CreateDependenciesListTask extends BasePomTask {
             throw new RuntimeException(e);
         }
     }
-
-    private static class LicensedArtifact {
-        final ArtifactIdentification identification;
-        final ArtifactLicense license;
-
-        private LicensedArtifact(ArtifactIdentification identification, ArtifactLicense license) {
-            this.identification = identification;
-            this.license = license;
-        }
-    }
 }

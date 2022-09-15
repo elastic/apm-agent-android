@@ -17,7 +17,7 @@ public class TextUtils {
     public static void addSeparator(OutputStream out, Character character) {
         StringBuilder builder = new StringBuilder();
         builder.append("\n\n");
-        builder.append(String.valueOf(character).repeat(50));
+        builder.append(String.valueOf(character).repeat(79));
         builder.append("\n\n");
         TextUtils.writeText(out, builder.toString());
     }

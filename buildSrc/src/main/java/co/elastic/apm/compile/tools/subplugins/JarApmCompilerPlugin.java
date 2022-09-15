@@ -36,7 +36,7 @@ public class JarApmCompilerPlugin extends BasePlugin {
         });
 
         project.getTasks().register("createNoticeFile", CreateNoticeTask.class, task -> {
-            task.getMergedNoticeFiles().set(noticeFilesMerger.flatMap(NoticeMergerTask::getOutputFile));
+            task.getMergedNoticeFiles().from(noticeFilesMerger.flatMap(NoticeMergerTask::getOutputFile));
             task.getLicensedDependencies().set(licensesDependencies.flatMap(CreateDependenciesListTask::getOutputFile));
             task.getFoundLicensesIds().set(pomLicensesFinder.flatMap(PomLicensesCollectorTask::getLicensesFound));
             task.getOutputFile().set(project.getLayout().getBuildDirectory().file(task.getName() + "/" + "notice_file.txt"));

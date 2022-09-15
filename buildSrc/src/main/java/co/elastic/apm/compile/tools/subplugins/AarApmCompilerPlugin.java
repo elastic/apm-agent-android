@@ -8,6 +8,7 @@ import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskProvider;
 
 import co.elastic.apm.compile.tools.tasks.CreateDependenciesListTask;
+import co.elastic.apm.compile.tools.tasks.CreateNoticeTask;
 import co.elastic.apm.compile.tools.tasks.NoticeFilesCollectorTask;
 import co.elastic.apm.compile.tools.tasks.NoticeMergerTask;
 import co.elastic.apm.compile.tools.tasks.PomLicensesCollectorTask;
@@ -30,13 +31,19 @@ public class AarApmCompilerPlugin extends BasePlugin {
                 task.getRuntimeDependencies().set(component.getVariantDependencies().getRuntimeClasspath());
                 task.getOutputDir().set(project.getLayout().getBuildDirectory().dir(task.getName()));
             });
-            project.getTasks().register(variant.getName() + "NoticeFilesMerger", NoticeMergerTask.class, task -> {
+            TaskProvider<NoticeMergerTask> noticeFilesMerger = project.getTasks().register(variant.getName() + "NoticeFilesMerger", NoticeMergerTask.class, task -> {
                 task.getNoticeFilesDir().set(noticeCollector.flatMap(NoticeFilesCollectorTask::getOutputDir));
                 task.getOutputFile().set(project.getLayout().getBuildDirectory().file(task.getName() + "/" + "mergedNotice.txt"));
             });
-            project.getTasks().register(variant.getName() + "CreateDependenciesList", CreateDependenciesListTask.class, task -> {
+            TaskProvider<CreateDependenciesListTask> licensesDependencies = project.getTasks().register(variant.getName() + "CreateDependenciesList", CreateDependenciesListTask.class, task -> {
                 task.getLicensesFound().set(pomLicensesFinder.flatMap(PomLicensesCollectorTask::getLicensesFound));
                 task.getOutputFile().set(project.getLayout().getBuildDirectory().file(task.getName() + "/" + "licensed_dependencies.txt"));
+            });
+            project.getTasks().register(variant.getName() + "CreateNoticeFile", CreateNoticeTask.class, task -> {
+                task.getMergedNoticeFiles().from(noticeFilesMerger.flatMap(NoticeMergerTask::getOutputFile));
+                task.getLicensedDependencies().set(licensesDependencies.flatMap(CreateDependenciesListTask::getOutputFile));
+                task.getFoundLicensesIds().set(pomLicensesFinder.flatMap(PomLicensesCollectorTask::getLicensesFound));
+                task.getOutputFile().set(project.getLayout().getBuildDirectory().file(task.getName() + "/" + "notice_file.txt"));
             });
         });
     }

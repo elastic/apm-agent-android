@@ -1,7 +1,9 @@
 package co.elastic.apm.compile.tools.tasks;
 
+import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.tasks.InputFile;
+import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 
@@ -16,6 +18,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import co.elastic.apm.compile.tools.data.ArtifactLicense;
 import co.elastic.apm.compile.tools.utils.TextUtils;
@@ -25,8 +28,8 @@ public abstract class CreateNoticeTask extends BaseTask {
     @InputFile
     public abstract RegularFileProperty getLicensedDependencies();
 
-    @InputFile
-    public abstract RegularFileProperty getMergedNoticeFiles();
+    @InputFiles
+    public abstract ConfigurableFileCollection getMergedNoticeFiles();
 
     @InputFile
     public abstract RegularFileProperty getFoundLicensesIds();
@@ -37,12 +40,17 @@ public abstract class CreateNoticeTask extends BaseTask {
     @TaskAction
     public void action() {
         File licensesFile = getLicensedDependencies().get().getAsFile();
-        File mergedNoticesFile = getMergedNoticeFiles().get().getAsFile();
+        Set<File> mergedNoticesFile = getMergedNoticeFiles().getFiles();
         List<String> licenseIds = getLicenseIds();
 
         List<File> filesToMerge = new ArrayList<>();
         filesToMerge.add(licensesFile);
-        filesToMerge.add(mergedNoticesFile);
+        if (!mergedNoticesFile.isEmpty()) {
+            File first = mergedNoticesFile.iterator().next();
+            if (first != null && first.exists()) {
+                filesToMerge.add(first);
+            }
+        }
 
         try {
             OutputStream outputStream = new FileOutputStream(getOutputFile().get().getAsFile());

@@ -29,7 +29,7 @@ import co.elastic.apm.compile.tools.utils.TextUtils;
 
 public abstract class CreateDependenciesListTask extends BasePomTask {
 
-    private static final String LICENSE_TITLE_FORMAT = "\nThis product includes software licensed under the '%s' license from the following sources:\n";
+    private static final String LICENSE_TITLE_FORMAT = "This product includes software licensed under the '%s' license from the following sources:\n";
     private static final String DEPENDENCY_LINE_FORMAT = "\n - %s";
 
     @InputFile

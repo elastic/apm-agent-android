@@ -87,9 +87,10 @@ public abstract class NoticeMergerTask extends BasePomTask {
     }
 
     private ArtifactNoticeInfo createNoticeInfo(ResolvedArtifactResult pomArtifact, File[] files) {
-        String fileName = pomArtifact.getId().getComponentIdentifier().getDisplayName().replaceAll(":", "..");
+        String gradleUri = pomArtifact.getId().getComponentIdentifier().getDisplayName();
+        String fileName = gradleUri.replaceAll(":", "..");
         PomReader reader = new PomReader(pomArtifact.getFile());
-        ArtifactIdentification identification = new ArtifactIdentification(reader.getName(), reader.getUrl());
+        ArtifactIdentification identification = new ArtifactIdentification(reader.getName(), reader.getUrl(), gradleUri);
         File noticeFile = findFileWithName(files, fileName);
         return new ArtifactNoticeInfo(identification, noticeFile);
     }

@@ -55,9 +55,19 @@ public abstract class CreateDependenciesListTask extends BasePomTask {
                 TextUtils.writeText(stream, String.format(LICENSE_TITLE_FORMAT, license.name));
                 List<ArtifactIdentification> identifications = licensedArtifacts.get(license);
                 identifications.sort(Comparator.comparing(it -> it.name));
+                Map<String, List<ArtifactIdentification>> linesSet = new HashMap<>();
                 for (ArtifactIdentification identification : identifications) {
-                    addDependencyLine(stream, identification);
+                    String displayName = identification.getDisplayName();
+                    if (!linesSet.containsKey(displayName)) {
+                        addDependencyLine(stream, displayName);
+                        List<ArtifactIdentification> artifacts = new ArrayList<>();
+                        artifacts.add(identification);
+                        linesSet.put(displayName, artifacts);
+                    } else {
+                        linesSet.get(displayName).add(identification);
+                    }
                 }
+                verifyDuplicatedLines(linesSet);
             }
             stream.close();
         } catch (IOException e) {
@@ -65,8 +75,22 @@ public abstract class CreateDependenciesListTask extends BasePomTask {
         }
     }
 
-    private void addDependencyLine(OutputStream stream, ArtifactIdentification identification) {
-        TextUtils.writeText(stream, String.format(DEPENDENCY_LINE_FORMAT, identification.getDisplayName()));
+    private void verifyDuplicatedLines(Map<String, List<ArtifactIdentification>> linesSet) {
+        for (String displayName : linesSet.keySet()) {
+            List<ArtifactIdentification> identifications = linesSet.get(displayName);
+            if (identifications.size() > 1) {
+                List<String> uris = new ArrayList<>();
+                for (ArtifactIdentification identification : identifications) {
+                    uris.add(identification.gradleUri);
+                }
+                getProject().getLogger().warn("Found multiple artifacts with the same name: '" + displayName + "' " +
+                        "therefore only one was added to the list to avoid duplication. The artifacts -> " + uris);
+            }
+        }
+    }
+
+    private void addDependencyLine(OutputStream stream, String displayName) {
+        TextUtils.writeText(stream, String.format(DEPENDENCY_LINE_FORMAT, displayName));
     }
 
     private Map<License, List<ArtifactIdentification>> getLicensedArtifacts() {
@@ -80,7 +104,7 @@ public abstract class CreateDependenciesListTask extends BasePomTask {
             List<ResolvedArtifactResult> pomArtifacts = getPomArtifactsForGavs(licensesFound.get(id));
             for (ResolvedArtifactResult pomArtifact : pomArtifacts) {
                 PomReader reader = new PomReader(pomArtifact.getFile());
-                identifications.add(new ArtifactIdentification(reader.getName(), reader.getUrl()));
+                identifications.add(new ArtifactIdentification(reader.getName(), reader.getUrl(), pomArtifact.getId().getComponentIdentifier().getDisplayName()));
             }
             licencedArtifacts.put(license, identifications);
         }

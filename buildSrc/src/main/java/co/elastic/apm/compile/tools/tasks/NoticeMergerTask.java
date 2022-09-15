@@ -4,7 +4,7 @@ import org.gradle.api.artifacts.query.ArtifactResolutionQuery;
 import org.gradle.api.artifacts.result.ResolvedArtifactResult;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFileProperty;
-import org.gradle.api.tasks.InputFiles;
+import org.gradle.api.tasks.InputDirectory;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.SkipWhenEmpty;
 import org.gradle.api.tasks.TaskAction;
@@ -26,7 +26,7 @@ import co.elastic.apm.compile.tools.utils.PomReader;
 public abstract class NoticeMergerTask extends BasePomTask {
 
     @SkipWhenEmpty
-    @InputFiles
+    @InputDirectory
     public abstract DirectoryProperty getNoticeFilesDir();
 
     @OutputFile

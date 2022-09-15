@@ -1,6 +1,5 @@
 package co.elastic.apm.compile.tools.tasks;
 
-import org.gradle.api.artifacts.query.ArtifactResolutionQuery;
 import org.gradle.api.artifacts.result.ResolvedArtifactResult;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFileProperty;
@@ -15,13 +14,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 import co.elastic.apm.compile.tools.data.ArtifactIdentification;
+import co.elastic.apm.compile.tools.data.Gav;
 import co.elastic.apm.compile.tools.utils.PomReader;
+import co.elastic.apm.compile.tools.utils.TextUtils;
 
 public abstract class NoticeMergerTask extends BasePomTask {
 
@@ -49,11 +49,11 @@ public abstract class NoticeMergerTask extends BasePomTask {
         boolean firstIteration = true;
         for (ArtifactNoticeInfo artifact : artifacts) {
             if (!firstIteration) {
-                writeText(out, "\n--------------------------------------------------\n");
+                addSeparator(out);
             } else {
                 firstIteration = false;
             }
-            writeText(out, artifact.id.getDisplayName() + " NOTICE\n\n");
+            TextUtils.writeText(out, artifact.id.getDisplayName() + " NOTICE\n\n");
             InputStream in = new FileInputStream(artifact.noticeFile);
             int b;
             while ((b = in.read(buf)) >= 0)
@@ -63,8 +63,8 @@ public abstract class NoticeMergerTask extends BasePomTask {
         out.close();
     }
 
-    private void writeText(OutputStream stream, String text) throws IOException {
-        stream.write(text.getBytes(StandardCharsets.UTF_8));
+    private void addSeparator(OutputStream out) {
+        TextUtils.addSeparator(out, '-');
     }
 
     private List<ArtifactNoticeInfo> getNoticesInfo(File[] files) {
@@ -74,13 +74,7 @@ public abstract class NoticeMergerTask extends BasePomTask {
             gavs.add(new Gav(parts[0], parts[1], parts[2]));
         }
 
-        ArtifactResolutionQuery pomQuery = getPomBaseQuery();
-
-        for (Gav gav : gavs) {
-            pomQuery.forModule(gav.group, gav.artifactName, gav.version);
-        }
-
-        List<ResolvedArtifactResult> pomArtifacts = getPomArtifacts(pomQuery);
+        List<ResolvedArtifactResult> pomArtifacts = getPomArtifactsForGavs(gavs);
 
         List<ArtifactNoticeInfo> noticeInfos = new ArrayList<>();
         for (ResolvedArtifactResult pomArtifact : pomArtifacts) {
@@ -108,18 +102,6 @@ public abstract class NoticeMergerTask extends BasePomTask {
         }
 
         throw new RuntimeException("Could not find file named: " + fileName);
-    }
-
-    private static class Gav {
-        private final String group;
-        private final String artifactName;
-        private final String version;
-
-        private Gav(String group, String artifactName, String version) {
-            this.group = group;
-            this.artifactName = artifactName;
-            this.version = version;
-        }
     }
 
     private static class ArtifactNoticeInfo {

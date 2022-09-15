@@ -46,7 +46,7 @@ public class LicensesIdsMatcher {
     private static Map<String, String> findLicensesIds() {
         Map<String, String> ids = new HashMap<>();
 
-        Map<String, String> licenses = LicensesProvider.findLicenses();
+        Map<String, String> licenses = LicensesProvider.findLicensesMap();
         for (String id : licenses.keySet()) {
             ids.put(id, curateLicenseName(licenses.get(id)));
         }

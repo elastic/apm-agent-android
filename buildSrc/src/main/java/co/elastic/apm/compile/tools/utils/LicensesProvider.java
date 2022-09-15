@@ -4,13 +4,17 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import co.elastic.apm.compile.tools.data.License;
+
 public class LicensesProvider {
 
-    public static Map<String, String> findLicenses() {
+    public static Map<String, String> findLicensesMap() {
         Map<String, String> ids = new HashMap<>();
         InputStream resourceStream = LicensesIdsMatcher.class.getResourceAsStream("/licenses_ids.txt");
         BufferedReader reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(resourceStream)));
@@ -31,5 +35,16 @@ public class LicensesProvider {
         }
 
         return ids;
+    }
+
+    public static List<License> findLicenses() {
+        Map<String, String> licensesMap = findLicensesMap();
+        List<License> licenses = new ArrayList<>();
+
+        for (String id : licensesMap.keySet()) {
+            licenses.add(new License(id, licensesMap.get(id)));
+        }
+
+        return licenses;
     }
 }

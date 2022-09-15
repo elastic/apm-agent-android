@@ -39,7 +39,6 @@ public abstract class PomLicensesCollectorTask extends BasePomTask {
     @OutputFile
     public abstract RegularFileProperty getLicensesFound();
 
-    @SuppressWarnings("unchecked")
     @TaskAction
     public void action() {
         try {

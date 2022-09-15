@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import co.elastic.apm.compile.tools.data.ArtifactIdentification;
@@ -41,7 +42,7 @@ public abstract class CreateDependenciesListTask extends BasePomTask {
     public void action() {
         Map<License, List<ArtifactIdentification>> licensedArtifacts = getLicensedArtifacts();
         List<License> sortedLicenses = new ArrayList<>(licensedArtifacts.keySet());
-        sortedLicenses.sort(Comparator.comparing(it -> it.name));
+        sortedLicenses.sort(Comparator.comparing(it -> it.name.toLowerCase(Locale.US)));
 
         try {
             OutputStream stream = new FileOutputStream(getOutputFile().get().getAsFile());
@@ -54,7 +55,7 @@ public abstract class CreateDependenciesListTask extends BasePomTask {
                 }
                 TextUtils.writeText(stream, String.format(LICENSE_TITLE_FORMAT, license.name));
                 List<ArtifactIdentification> identifications = licensedArtifacts.get(license);
-                identifications.sort(Comparator.comparing(it -> it.name));
+                identifications.sort(Comparator.comparing(it -> it.name.toLowerCase(Locale.US)));
                 Map<String, List<ArtifactIdentification>> linesSet = new HashMap<>();
                 for (ArtifactIdentification identification : identifications) {
                     String displayName = identification.getDisplayName();

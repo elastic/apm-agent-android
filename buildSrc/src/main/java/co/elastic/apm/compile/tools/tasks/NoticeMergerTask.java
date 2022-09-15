@@ -17,6 +17,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 import co.elastic.apm.compile.tools.data.ArtifactIdentification;
 import co.elastic.apm.compile.tools.data.Gav;
@@ -81,7 +82,7 @@ public abstract class NoticeMergerTask extends BasePomTask {
             noticeInfos.add(createNoticeInfo(pomArtifact, files));
         }
 
-        noticeInfos.sort(Comparator.comparing(artifactNoticeInfo -> artifactNoticeInfo.id.getDisplayName()));
+        noticeInfos.sort(Comparator.comparing(artifactNoticeInfo -> artifactNoticeInfo.id.getDisplayName().toLowerCase(Locale.US)));
 
         return noticeInfos;
     }

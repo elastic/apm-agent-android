@@ -35,7 +35,7 @@ public class JarApmCompilerPlugin extends BaseSubprojectPlugin {
             task.getOutputFile().set(project.getLayout().getBuildDirectory().file(task.getName() + "/" + "licensed_dependencies.txt"));
         });
 
-        project.getTasks().register("createNoticeFile", CreateNoticeTask.class, task -> {
+        project.getTasks().register(TASK_CREATE_NOTICE_FILE_NAME, CreateNoticeTask.class, task -> {
             task.getMergedNoticeFiles().from(noticeFilesMerger.flatMap(NoticeMergerTask::getOutputFile));
             task.getLicensedDependencies().set(licensesDependencies.flatMap(CreateDependenciesListTask::getOutputFile));
             task.getFoundLicensesIds().set(pomLicensesFinder.flatMap(PomLicensesCollectorTask::getLicensesFound));

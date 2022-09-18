@@ -19,7 +19,7 @@ import java.util.Set;
 
 import co.elastic.apm.compile.tools.utils.TextUtils;
 
-public abstract class SubprojectLicensesMergerTask extends DefaultTask {
+public abstract class SubprojectPomLicensesMergerTask extends DefaultTask {
 
     @InputFiles
     public abstract ConfigurableFileCollection getSubprojectLicensedDependenciesFiles();

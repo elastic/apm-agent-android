@@ -4,6 +4,7 @@ import com.android.build.api.component.impl.ComponentImpl;
 import com.android.build.api.variant.AndroidComponentsExtension;
 import com.android.build.api.variant.Variant;
 
+import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskProvider;
 
@@ -39,7 +40,7 @@ public class AarApmCompilerPlugin extends BaseSubprojectPlugin {
                 task.getLicensesFound().set(pomLicensesFinder.flatMap(PomLicensesCollectorTask::getLicensesFound));
                 task.getOutputFile().set(project.getLayout().getBuildDirectory().file(task.getName() + "/" + "licensed_dependencies.txt"));
             });
-            project.getTasks().register(variant.getName() + "CreateNoticeFile", CreateNoticeTask.class, task -> {
+            project.getTasks().register(variant.getName() + StringUtils.capitalize(TASK_CREATE_NOTICE_FILE_NAME), CreateNoticeTask.class, task -> {
                 task.getMergedNoticeFiles().from(noticeFilesMerger.flatMap(NoticeMergerTask::getOutputFile));
                 task.getLicensedDependencies().set(licensesDependencies.flatMap(CreateDependenciesListTask::getOutputFile));
                 task.getFoundLicensesIds().set(pomLicensesFinder.flatMap(PomLicensesCollectorTask::getLicensesFound));

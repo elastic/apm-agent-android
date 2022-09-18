@@ -9,8 +9,8 @@ import org.gradle.api.tasks.TaskProvider;
 
 import co.elastic.apm.compile.tools.tasks.CreateDependenciesListTask;
 import co.elastic.apm.compile.tools.tasks.CreateNoticeTask;
-import co.elastic.apm.compile.tools.tasks.subprojects.NoticeFilesCollectorTask;
 import co.elastic.apm.compile.tools.tasks.NoticeMergerTask;
+import co.elastic.apm.compile.tools.tasks.subprojects.NoticeFilesCollectorTask;
 import co.elastic.apm.compile.tools.tasks.subprojects.PomLicensesCollectorTask;
 
 public class AarApmCompilerPlugin extends BaseSubprojectPlugin {

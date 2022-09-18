@@ -3,8 +3,8 @@ package co.elastic.apm.compile.tools;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 
-import co.elastic.apm.compile.tools.subplugins.AarApmCompilerPlugin;
-import co.elastic.apm.compile.tools.subplugins.JarApmCompilerPlugin;
+import co.elastic.apm.compile.tools.plugins.subprojects.AarApmCompilerPlugin;
+import co.elastic.apm.compile.tools.plugins.subprojects.JarApmCompilerPlugin;
 
 public class ApmCompilerPlugin implements Plugin<Project> {
 

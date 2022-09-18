@@ -1,4 +1,4 @@
-package co.elastic.apm.compile.tools.subplugins;
+package co.elastic.apm.compile.tools.plugins.subprojects;
 
 import com.android.build.api.component.impl.ComponentImpl;
 import com.android.build.api.variant.AndroidComponentsExtension;
@@ -9,11 +9,11 @@ import org.gradle.api.tasks.TaskProvider;
 
 import co.elastic.apm.compile.tools.tasks.CreateDependenciesListTask;
 import co.elastic.apm.compile.tools.tasks.CreateNoticeTask;
-import co.elastic.apm.compile.tools.tasks.NoticeFilesCollectorTask;
+import co.elastic.apm.compile.tools.tasks.subprojects.NoticeFilesCollectorTask;
 import co.elastic.apm.compile.tools.tasks.NoticeMergerTask;
-import co.elastic.apm.compile.tools.tasks.PomLicensesCollectorTask;
+import co.elastic.apm.compile.tools.tasks.subprojects.PomLicensesCollectorTask;
 
-public class AarApmCompilerPlugin extends BasePlugin {
+public class AarApmCompilerPlugin extends BaseSubprojectPlugin {
 
     @SuppressWarnings("unchecked")
     @Override

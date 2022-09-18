@@ -1,4 +1,4 @@
-package co.elastic.apm.compile.tools.tasks;
+package co.elastic.apm.compile.tools.tasks.subprojects;
 
 import org.gradle.api.artifacts.component.ComponentIdentifier;
 import org.gradle.api.artifacts.query.ArtifactResolutionQuery;
@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 
 import co.elastic.apm.compile.tools.data.Gav;
+import co.elastic.apm.compile.tools.tasks.BaseTask;
 
 public class BasePomTask extends BaseTask {
 

@@ -1,4 +1,4 @@
-package co.elastic.apm.compile.tools.tasks;
+package co.elastic.apm.compile.tools.tasks.subprojects;
 
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.result.ResolvedArtifactResult;

@@ -1,4 +1,4 @@
-package co.elastic.apm.compile.tools.tasks;
+package co.elastic.apm.compile.tools.tasks.subprojects;
 
 import org.apache.commons.io.FileUtils;
 import org.gradle.api.Action;
@@ -25,6 +25,8 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
+import co.elastic.apm.compile.tools.tasks.BaseTask;
 
 public abstract class NoticeFilesCollectorTask extends BaseTask {
 

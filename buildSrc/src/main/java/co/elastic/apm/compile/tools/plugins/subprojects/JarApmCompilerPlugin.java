@@ -1,15 +1,15 @@
-package co.elastic.apm.compile.tools.subplugins;
+package co.elastic.apm.compile.tools.plugins.subprojects;
 
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskProvider;
 
 import co.elastic.apm.compile.tools.tasks.CreateDependenciesListTask;
 import co.elastic.apm.compile.tools.tasks.CreateNoticeTask;
-import co.elastic.apm.compile.tools.tasks.NoticeFilesCollectorTask;
 import co.elastic.apm.compile.tools.tasks.NoticeMergerTask;
-import co.elastic.apm.compile.tools.tasks.PomLicensesCollectorTask;
+import co.elastic.apm.compile.tools.tasks.subprojects.NoticeFilesCollectorTask;
+import co.elastic.apm.compile.tools.tasks.subprojects.PomLicensesCollectorTask;
 
-public class JarApmCompilerPlugin extends BasePlugin {
+public class JarApmCompilerPlugin extends BaseSubprojectPlugin {
 
     @Override
     public void apply(Project project) {
@@ -41,5 +41,8 @@ public class JarApmCompilerPlugin extends BasePlugin {
             task.getFoundLicensesIds().set(pomLicensesFinder.flatMap(PomLicensesCollectorTask::getLicensesFound));
             task.getOutputFile().set(project.getLayout().getBuildDirectory().file(task.getName() + "/" + "notice_file.txt"));
         });
+
+        setUpLicensedDependencies(project, pomLicensesFinder);
+        setUpNoticeFilesProvider(project, noticeCollector);
     }
 }

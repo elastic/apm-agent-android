@@ -21,6 +21,7 @@ import java.util.Locale;
 
 import co.elastic.apm.compile.tools.data.ArtifactIdentification;
 import co.elastic.apm.compile.tools.data.Gav;
+import co.elastic.apm.compile.tools.tasks.subprojects.BasePomTask;
 import co.elastic.apm.compile.tools.utils.PomReader;
 import co.elastic.apm.compile.tools.utils.TextUtils;
 

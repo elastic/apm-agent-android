@@ -1,6 +1,7 @@
 plugins {
     id 'java-gradle-plugin'
     id 'com.github.gmazzo.buildconfig' version '3.1.0'
+    id 'co.elastic.apm.notice-producer'
 }
 apply from: "$rootDir/publishing.gradle"
 
@@ -18,6 +19,10 @@ buildConfig {
     packageName("${group}.generated")
     buildConfigField("String", "SDK_DEPENDENCY_URI", "\"$group:android-sdk:$version\"")
     buildConfigField("String", "INSTRUMENTATION_DEPENDENCY_URI", "\"$group:android-instrumentation:$version\"")
+}
+
+licensesConfig {
+    manualMappingFile = rootProject.file("manual_licenses_map.txt")
 }
 
 gradlePlugin {

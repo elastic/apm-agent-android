@@ -1,0 +1,3 @@
+net.bytebuddy:byte-buddy:1.12.16|apache_v2
+net.bytebuddy:byte-buddy-gradle-plugin:1.12.16|apache_v2
+org.slf4j:slf4j-api:2.0.0|mit

@@ -1,11 +1,12 @@
 package co.elastic.apm.compile.tools.tasks.subprojects;
 
+import static co.elastic.apm.compile.tools.utils.Constants.ARTIFACT_TYPE_ATTR;
+
 import org.apache.commons.io.FileUtils;
 import org.gradle.api.Action;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.component.ComponentIdentifier;
 import org.gradle.api.artifacts.result.ResolvedArtifactResult;
-import org.gradle.api.attributes.Attribute;
 import org.gradle.api.attributes.AttributeContainer;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.provider.Property;
@@ -30,7 +31,6 @@ import co.elastic.apm.compile.tools.tasks.BaseTask;
 
 public abstract class NoticeFilesCollectorTask extends BaseTask {
 
-    private static final Attribute<String> ARTIFACT_TYPE_ATTR = Attribute.of("artifactType", String.class);
     private static final Pattern NOTICE_FILE_NAME_PATTERN = Pattern.compile("^META-INF[/\\\\]([Nn][Oo][Tt][Ii][Cc][Ee])[^/\\\\]*");
 
     @InputFiles

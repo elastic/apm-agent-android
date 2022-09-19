@@ -42,9 +42,10 @@ public abstract class CreateNoticeTask extends BaseTask {
         File licensesFile = getLicensedDependencies().get().getAsFile();
         Set<File> mergedNoticesFile = getMergedNoticeFiles().getFiles();
         List<String> licenseIds = getLicenseIds();
-
         List<File> filesToMerge = new ArrayList<>();
-        filesToMerge.add(licensesFile);
+        if (licensesFile.length() > 0) {
+            filesToMerge.add(licensesFile);
+        }
         if (!mergedNoticesFile.isEmpty()) {
             File first = mergedNoticesFile.iterator().next();
             if (first != null && first.exists()) {
@@ -55,10 +56,14 @@ public abstract class CreateNoticeTask extends BaseTask {
         try {
             OutputStream outputStream = new FileOutputStream(getOutputFile().get().getAsFile());
             addToOutputStreamAndCloseInput(outputStream, getNoticeHeaderInputStream());
-            addPanelSeparator(outputStream);
-            addFilesContent(outputStream, filesToMerge);
-            addPanelSeparator(outputStream);
-            addLicenses(outputStream, licenseIds);
+            if (!filesToMerge.isEmpty()) {
+                addPanelSeparator(outputStream);
+                addFilesContent(outputStream, filesToMerge);
+            }
+            if (!licenseIds.isEmpty()) {
+                addPanelSeparator(outputStream);
+                addLicenses(outputStream, licenseIds);
+            }
             outputStream.close();
         } catch (IOException e) {
             throw new RuntimeException(e);

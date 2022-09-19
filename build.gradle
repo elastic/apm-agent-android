@@ -6,6 +6,7 @@ plugins {
 
 dependencies {
     noticeProducer project(":android-plugin")
+    noticeProducer project(":android-sdk")
 }
 
 ext {

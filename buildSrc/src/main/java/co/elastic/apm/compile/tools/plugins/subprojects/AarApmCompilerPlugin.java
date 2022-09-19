@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskProvider;
 
+import co.elastic.apm.compile.tools.extensions.AndroidApmExtension;
 import co.elastic.apm.compile.tools.tasks.CreateDependenciesListTask;
 import co.elastic.apm.compile.tools.tasks.CreateNoticeTask;
 import co.elastic.apm.compile.tools.tasks.NoticeMergerTask;
@@ -20,6 +21,8 @@ public class AarApmCompilerPlugin extends BaseSubprojectPlugin {
     @Override
     public void apply(Project project) {
         super.apply(project);
+        AndroidApmExtension apmExtension = project.getExtensions().create("androidNotice", AndroidApmExtension.class);
+
         AndroidComponentsExtension<?, ?, Variant> componentsExtension = project.getExtensions().getByType(AndroidComponentsExtension.class);
         componentsExtension.onVariants(componentsExtension.selector().all(), variant -> {
             ComponentImpl component = (ComponentImpl) variant;
@@ -40,12 +43,19 @@ public class AarApmCompilerPlugin extends BaseSubprojectPlugin {
                 task.getLicensesFound().set(pomLicensesFinder.flatMap(PomLicensesCollectorTask::getLicensesFound));
                 task.getOutputFile().set(project.getLayout().getBuildDirectory().file(task.getName() + "/" + "licensed_dependencies.txt"));
             });
-            project.getTasks().register(variant.getName() + StringUtils.capitalize(TASK_CREATE_NOTICE_FILE_NAME), CreateNoticeTask.class, task -> {
+            TaskProvider<CreateNoticeTask> createNotice = project.getTasks().register(variant.getName() + StringUtils.capitalize(TASK_CREATE_NOTICE_FILE_NAME), CreateNoticeTask.class, task -> {
                 task.getMergedNoticeFiles().from(noticeFilesMerger.flatMap(NoticeMergerTask::getOutputFile));
                 task.getLicensedDependencies().set(licensesDependencies.flatMap(CreateDependenciesListTask::getOutputFile));
                 task.getFoundLicensesIds().set(pomLicensesFinder.flatMap(PomLicensesCollectorTask::getLicensesFound));
                 task.getOutputFile().set(project.getLayout().getBuildDirectory().file(task.getName() + "/" + "notice_file.txt"));
             });
+            if (apmExtension.variantName.get().equals(variant.getName())) {
+                project.getTasks().register(TASK_CREATE_NOTICE_FILE_NAME, task -> {
+                    task.dependsOn(createNotice);
+                });
+                setUpLicensedDependencies(project, pomLicensesFinder);
+                setUpNoticeFilesProvider(project, noticeCollector);
+            }
         });
     }
 }

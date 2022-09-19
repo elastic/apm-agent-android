@@ -7,6 +7,8 @@ plugins {
 dependencies {
     noticeProducer project(":android-plugin")
     noticeProducer project(":android-sdk")
+    noticeProducer project(":android-common")
+    noticeProducer project(":android-instrumentation")
 }
 
 ext {

@@ -11,7 +11,8 @@ import io.opentelemetry.context.Scope;
 public class ActivityLifecycleAdvice {
 
     @Advice.OnMethodEnter
-    public static void onMethodEnter(@Advice.Local("elasticSpan") Span span, @Advice.Local("elasticScope") Scope scope) {
+    public static void onMethodEnter(@Advice.Local("elasticSpan") Span span,
+                                     @Advice.Local("elasticScope") Scope scope) {
         SpanBuilder spanBuilder = ElasticTracer.androidActivity().spanBuilder();
         span = spanBuilder.startSpan();
         scope = span.makeCurrent();

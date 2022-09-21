@@ -15,6 +15,7 @@ import co.elastic.apm.compile.tools.extensions.AndroidApmExtension;
 import co.elastic.apm.compile.tools.tasks.CreateDependenciesListTask;
 import co.elastic.apm.compile.tools.tasks.CreateNoticeTask;
 import co.elastic.apm.compile.tools.tasks.NoticeMergerTask;
+import co.elastic.apm.compile.tools.tasks.subprojects.CopySingleFileTask;
 import co.elastic.apm.compile.tools.tasks.subprojects.NoticeFilesCollectorTask;
 import co.elastic.apm.compile.tools.tasks.subprojects.PomLicensesCollectorTask;
 import co.elastic.apm.compile.tools.utils.Constants;
@@ -56,7 +57,10 @@ public class AarApmCompilerPlugin extends BaseSubprojectPlugin {
                 task.getOutputFile().set(project.getLayout().getBuildDirectory().file(task.getName() + "/" + "notice_file.txt"));
             });
             if (apmExtension.variantName.get().equals(variant.getName())) {
-                project.getTasks().register(TASK_CREATE_NOTICE_FILE_NAME, task -> task.dependsOn(createNotice));
+                project.getTasks().register(TASK_CREATE_NOTICE_FILE_NAME, CopySingleFileTask.class, task -> {
+                    task.getInputFile().set(createNotice.flatMap(CreateNoticeTask::getOutputFile));
+                    task.getOutputFile().set(project.getLayout().getProjectDirectory().file("src/main/resources/META-INF/NOTICE"));
+                });
                 setUpLicensedDependencies(project, pomLicensesFinder);
                 setUpNoticeFilesProvider(project, noticeCollector);
             }

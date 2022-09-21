@@ -1,6 +1,5 @@
 package co.elastic.apm.android.instrumentation.ui.lifecycle;
 
-import android.app.Activity;
 import android.os.Bundle;
 
 import net.bytebuddy.asm.Advice;
@@ -28,9 +27,10 @@ public class ActivityLifecyclePlugin implements Plugin {
 
     @Override
     public boolean matches(TypeDescription target) {
-        if (target.getPackage() != null && !target.getPackage().getActualName().startsWith("co.elastic.apm.opbeans")) {//todo get package name as arg
-            return false;
-        }
-        return !target.getSimpleName().startsWith("Hilt_") && target.isAssignableTo(Activity.class);
+//        if (target.getPackage() != null && !target.getPackage().getActualName().startsWith("co.elastic.apm.opbeans")) {//todo get package name as arg
+//            return false;
+//        }
+//        return !target.getSimpleName().startsWith("Hilt_") && target.isAssignableTo(Activity.class);
+        return target.getTypeName().equals("co.elastic.apm.opbeans.HomeActivity");
     }
 }

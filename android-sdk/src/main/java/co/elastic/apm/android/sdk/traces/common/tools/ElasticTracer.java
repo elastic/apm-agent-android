@@ -33,8 +33,7 @@ public class ElasticTracer implements Tracer {
 
     public static ElasticTracer okhttp() {
         ApmMetadataService service = ElasticApmAgent.get().getService(Service.Names.METADATA);
-        String version = service.getOkHttpVersion();
-        return create("OkHttp", version);
+        return create("OkHttp", service.getOkHttpVersion());
     }
 
     public static ElasticTracer androidActivity() {

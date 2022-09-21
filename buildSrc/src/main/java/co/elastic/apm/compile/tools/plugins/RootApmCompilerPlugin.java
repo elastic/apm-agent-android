@@ -46,7 +46,7 @@ public class RootApmCompilerPlugin extends BasePlugin {
             task.getMergedNoticeFiles().from(noticeFilesMerger.flatMap(NoticeMergerTask::getOutputFile));
             task.getLicensedDependencies().set(licensesDependencies.flatMap(CreateDependenciesListTask::getOutputFile));
             task.getFoundLicensesIds().set(pomLicenses.flatMap(SubprojectPomLicensesMergerTask::getMergedSubprojectLicensedDependencies));
-            task.getOutputFile().set(project.getLayout().getBuildDirectory().file(task.getName() + "/" + "notice_file.txt"));
+            task.getOutputFile().set(project.getLayout().getProjectDirectory().file("NOTICE"));
         });
     }
 

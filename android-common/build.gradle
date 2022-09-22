@@ -6,3 +6,8 @@ apply from: "$rootDir/publishing.gradle"
 
 targetCompatibility = jvmCompatibility
 sourceCompatibility = jvmCompatibility
+
+dependencies {
+    implementation "androidx.annotation:annotation:$androidAnnotations_version"
+    implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
+}

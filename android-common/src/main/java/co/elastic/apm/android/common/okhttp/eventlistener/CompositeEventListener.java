@@ -1,4 +1,4 @@
-package co.elastic.apm.android.sdk.traces.http.impl.okhttp.compose;
+package co.elastic.apm.android.common.okhttp.eventlistener;
 
 import androidx.annotation.NonNull;
 

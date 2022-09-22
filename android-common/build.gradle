@@ -8,6 +8,6 @@ targetCompatibility = jvmCompatibility
 sourceCompatibility = jvmCompatibility
 
 dependencies {
+    api "com.squareup.okhttp3:okhttp:$okhttp_version"
     implementation "androidx.annotation:annotation:$androidAnnotations_version"
-    implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
 }

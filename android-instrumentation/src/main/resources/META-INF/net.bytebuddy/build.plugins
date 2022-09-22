@@ -1,2 +1,1 @@
 co.elastic.apm.android.instrumentation.okhttp.client.OkHttpClientPlugin
-co.elastic.apm.android.instrumentation.okhttp.eventlistener.CompositeEventListenerPlugin

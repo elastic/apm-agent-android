@@ -63,9 +63,14 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
     }
 
     private void addOkhttpEventListenerGenerator(ApplicationVariant applicationVariant) {
+        ComponentImpl component = (ComponentImpl) applicationVariant;
         TaskProvider<OkHttpEventlistenerGenerator> taskProvider =
                 project.getTasks().register(applicationVariant.getName() + "GenerateOkhttpEventListener", OkHttpEventlistenerGenerator.class);
-        taskProvider.configure(task -> task.getOutputDir().set(project.getLayout().getBuildDirectory().dir(task.getName())));
+        taskProvider.configure(task -> {
+            task.getOutputDir().set(project.getLayout().getBuildDirectory().dir(task.getName()));
+            task.getAppRuntimeClasspath().from(component.getVariantDependencies().getRuntimeClasspath());
+            task.getJvmTargetVersion().set(androidExtension.getCompileOptions().getTargetCompatibility().toString());
+        });
         applicationVariant.getArtifacts().use(taskProvider)
                 .wiredWith(OkHttpEventlistenerGenerator::getOutputDir)
                 .toAppendTo(MultipleArtifact.ALL_CLASSES_DIRS.INSTANCE);

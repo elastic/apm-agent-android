@@ -19,4 +19,5 @@ ext {
     openTelemetry_version = "1.16.0"
     androidAnnotations_version = "1.4.0"
     bytebuddy_version = "1.12.17"
+    okhttp_version = '3.11.0'
 }

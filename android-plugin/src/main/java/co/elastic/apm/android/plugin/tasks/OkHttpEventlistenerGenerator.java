@@ -47,9 +47,7 @@ public abstract class OkHttpEventlistenerGenerator extends DefaultTask {
 
     @TaskAction
     public void action() {
-        String packageName = CompositeEventListener.class.getPackage().getName();
-        String simpleName = "Generated_" + CompositeEventListener.class.getSimpleName();
-        String name = packageName + "." + simpleName;
+        String name = CompositeEventListener.getGeneratedName();
         byte[] bytes = getByteBuddy().subclass(CompositeEventListener.class)
                 .name(name)
                 .method(ElementMatchers.isDeclaredBy(getEventListenerFromProject())

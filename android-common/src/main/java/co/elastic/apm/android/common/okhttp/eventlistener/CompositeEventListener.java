@@ -26,4 +26,8 @@ public class CompositeEventListener extends EventListener implements MethodCalle
             }
         }
     }
+
+    public static String getGeneratedName() {
+        return CompositeEventListener.class.getPackage().getName() + ".Generated_" + CompositeEventListener.class.getSimpleName();
+    }
 }

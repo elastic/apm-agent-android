@@ -1,7 +1,5 @@
 package co.elastic.apm.android.sdk.traces.common.tools;
 
-import android.os.Build;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -37,7 +35,11 @@ public class ElasticTracer implements Tracer {
     }
 
     public static ElasticTracer androidActivity() {
-        return create("Android Activity", String.valueOf(Build.VERSION.SDK_INT));
+        return create("Android Activity");
+    }
+
+    public static ElasticTracer androidFragment() {
+        return create("Android Fragment");
     }
 
     @Override

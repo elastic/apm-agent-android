@@ -1,4 +1,4 @@
-package co.elastic.apm.android.instrumentation.ui.lifecycle;
+package co.elastic.apm.android.instrumentation.ui.activities;
 
 import net.bytebuddy.asm.Advice;
 

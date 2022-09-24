@@ -1,14 +1,19 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'co.elastic.apm.android' version "$version"
 }
 
 android {
-    compileSdk 32
-
+    compileSdk androidCompileSdk
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
     defaultConfig {
         applicationId "co.elastic.apm.android.test"
-        minSdk 21
+        minSdk androidMinSdk
         targetSdk 32
         versionCode 1
         versionName "1.0"
@@ -35,5 +40,7 @@ dependencies {
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.5.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    testImplementation 'org.robolectric:robolectric:4.8'
     testImplementation 'junit:junit:4.13.2'
+    testImplementation "org.mockito:mockito-core:4.8.0"
 }

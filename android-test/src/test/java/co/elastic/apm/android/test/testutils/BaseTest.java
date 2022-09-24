@@ -10,6 +10,10 @@ import org.robolectric.RuntimeEnvironment;
 
 import java.util.List;
 
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
@@ -37,6 +41,15 @@ public class BaseTest {
     protected SpanExporter getSpanExporter() {
         SpanExporterProvider spanExporterProvider = (SpanExporterProvider) RuntimeEnvironment.getApplication();
         return spanExporterProvider.getSpanExporter();
+    }
+
+    protected void verifySuccessfulSpan(SpanData span) {
+        assertEquals(StatusCode.UNSET, span.getStatus().getStatusCode());
+    }
+
+    protected void verifyContextSource(Context context, SpanData source) {
+        SpanContext spanContext = Span.fromContext(context).getSpanContext();
+        assertEquals(spanContext, source.getSpanContext());
     }
 
     protected void verifyActivityMethodSpanName(SpanData span, ActivityMethod method) {

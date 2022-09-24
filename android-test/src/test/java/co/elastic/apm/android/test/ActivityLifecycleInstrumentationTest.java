@@ -24,11 +24,14 @@ public class ActivityLifecycleInstrumentationTest extends BaseTest {
     public void onCreate_wrapWithSpan() {
         try (ActivityController<MainActivity> controller = Robolectric.buildActivity(MainActivity.class)) {
             controller.setup();
+            MainActivity activity = controller.get();
 
             List<SpanData> sentSpans = getSentSpans();
             assertEquals(1, sentSpans.size());
             SpanData span = sentSpans.get(0);
+            verifySuccessfulSpan(span);
             verifyActivityMethodSpanName(span, ActivityMethod.ON_CREATE);
+            verifyContextSource(activity.getOnCreateSpanContext(), span);
         }
     }
 

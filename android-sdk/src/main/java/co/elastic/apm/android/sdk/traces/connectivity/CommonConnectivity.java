@@ -2,6 +2,8 @@ package co.elastic.apm.android.sdk.traces.connectivity;
 
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporterBuilder;
+import io.opentelemetry.sdk.trace.SpanProcessor;
+import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
 public class CommonConnectivity implements Connectivity {
@@ -12,8 +14,7 @@ public class CommonConnectivity implements Connectivity {
         this.endpoint = endpoint;
     }
 
-    @Override
-    public SpanExporter getSpanExporter() {
+    private SpanExporter getSpanExporter() {
         OtlpGrpcSpanExporterBuilder exporterBuilder = OtlpGrpcSpanExporter.builder().setEndpoint(endpoint);
         if (token != null) {
             exporterBuilder.addHeader("Authorization", "Bearer " + token);
@@ -24,5 +25,10 @@ public class CommonConnectivity implements Connectivity {
     public CommonConnectivity withAuthToken(String token) {
         this.token = token;
         return this;
+    }
+
+    @Override
+    public SpanProcessor getSpanProcessor() {
+        return BatchSpanProcessor.builder(getSpanExporter()).build();
     }
 }

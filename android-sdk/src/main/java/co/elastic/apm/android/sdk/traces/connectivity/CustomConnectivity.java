@@ -1,16 +1,16 @@
 package co.elastic.apm.android.sdk.traces.connectivity;
 
-import io.opentelemetry.sdk.trace.export.SpanExporter;
+import io.opentelemetry.sdk.trace.SpanProcessor;
 
 public class CustomConnectivity implements Connectivity {
-    private final SpanExporter spanExporter;
+    private final SpanProcessor processor;
 
-    CustomConnectivity(SpanExporter spanExporter) {
-        this.spanExporter = spanExporter;
+    CustomConnectivity(SpanProcessor processor) {
+        this.processor = processor;
     }
 
     @Override
-    public SpanExporter getSpanExporter() {
-        return spanExporter;
+    public SpanProcessor getSpanProcessor() {
+        return processor;
     }
 }

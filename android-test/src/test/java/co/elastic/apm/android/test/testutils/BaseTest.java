@@ -15,12 +15,12 @@ import io.opentelemetry.sdk.trace.export.SpanExporter;
 
 public class BaseTest {
 
-    protected enum ActivityMethodName {
+    protected enum ActivityMethod {
         ON_CREATE("$$robo$$android_app_Activity$performCreate");
 
         private final String robolectricName;
 
-        ActivityMethodName(String robolectricName) {
+        ActivityMethod(String robolectricName) {
             this.robolectricName = robolectricName;
         }
     }
@@ -39,7 +39,7 @@ public class BaseTest {
         return spanExporterProvider.getSpanExporter();
     }
 
-    protected void verifyActivityMethodSpanName(SpanData span, ActivityMethodName name) {
-        assertEquals(Activity.class.getName() + "->" + name.robolectricName, span.getName());
+    protected void verifyActivityMethodSpanName(SpanData span, ActivityMethod method) {
+        assertEquals(Activity.class.getName() + "->" + method.robolectricName, span.getName());
     }
 }

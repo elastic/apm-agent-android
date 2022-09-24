@@ -26,6 +26,7 @@ public class ActivityLifecycleInstrumentationTest extends BaseTest {
             SpanData span = getRecordedSpan();
 
             Spans.verify(span)
+                    .hasNoParent()
                     .isNamed(getSpanMethodName(ActivityMethod.ON_CREATE));
             Spans.verify(activity.getOnCreateSpanContext()).belongsTo(span);
         }

@@ -1,4 +1,4 @@
-package co.elastic.apm.android.test.testutils;
+package co.elastic.apm.android.test.testutils.spans;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;

@@ -1,4 +1,4 @@
-package co.elastic.apm.android.test.testutils;
+package co.elastic.apm.android.test.testutils.base;
 
 import static org.mockito.Mockito.mock;
 
@@ -10,6 +10,7 @@ import java.lang.reflect.Method;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.traces.connectivity.Connectivity;
+import co.elastic.apm.android.test.testutils.spans.SpanExporterProvider;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;

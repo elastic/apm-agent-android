@@ -1,4 +1,4 @@
-package co.elastic.apm.android.test.testutils;
+package co.elastic.apm.android.test.testutils.base;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
@@ -10,6 +10,7 @@ import org.robolectric.RuntimeEnvironment;
 
 import java.util.List;
 
+import co.elastic.apm.android.test.testutils.spans.SpanExporterProvider;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 

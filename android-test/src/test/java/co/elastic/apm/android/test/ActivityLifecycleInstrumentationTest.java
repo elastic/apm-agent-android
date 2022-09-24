@@ -8,9 +8,9 @@ import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
-import co.elastic.apm.android.test.testutils.BaseTest;
-import co.elastic.apm.android.test.testutils.BaseTestApplication;
-import co.elastic.apm.android.test.testutils.Spans;
+import co.elastic.apm.android.test.testutils.base.BaseTest;
+import co.elastic.apm.android.test.testutils.base.BaseTestApplication;
+import co.elastic.apm.android.test.testutils.spans.Spans;
 import io.opentelemetry.sdk.trace.data.SpanData;
 
 @Config(application = ActivityLifecycleInstrumentationTest.MainApp.class)

@@ -2,12 +2,18 @@ package co.elastic.apm.android.test.testutils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.context.Context;
+import io.opentelemetry.sdk.trace.data.EventData;
 import io.opentelemetry.sdk.trace.data.SpanData;
+import io.opentelemetry.sdk.trace.internal.data.ExceptionEventData;
 
 public class Spans {
 
@@ -24,6 +30,35 @@ public class Spans {
 
         SpanVerifier(SpanData span) {
             this.span = span;
+        }
+
+        public SpanVerifier hasError() {
+            assertEquals(StatusCode.ERROR, span.getStatus().getStatusCode());
+            return this;
+        }
+
+        public SpanVerifier hasRecordedException(Exception e) {
+            assertTrue(getRecordedExceptions().contains(e));
+            return this;
+        }
+
+        public SpanVerifier hasAmountOfRecordedExceptions(int amountOfExceptionsRecorded) {
+            assertEquals(amountOfExceptionsRecorded, getRecordedExceptions().size());
+            return this;
+        }
+
+        private List<Throwable> getRecordedExceptions() {
+            List<EventData> events = span.getEvents();
+            List<Throwable> exceptions = new ArrayList<>();
+
+            for (EventData event : events) {
+                if (event instanceof ExceptionEventData) {
+                    ExceptionEventData eventData = (ExceptionEventData) event;
+                    exceptions.add(eventData.getException());
+                }
+            }
+
+            return exceptions;
         }
 
         public SpanVerifier hasNoError() {

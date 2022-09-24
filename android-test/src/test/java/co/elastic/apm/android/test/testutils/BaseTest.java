@@ -1,5 +1,6 @@
 package co.elastic.apm.android.test.testutils;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 
 import android.app.Activity;
@@ -25,12 +26,14 @@ public class BaseTest {
     }
 
     @SuppressWarnings("unchecked")
-    protected List<SpanData> getSentSpans() {
+    protected List<SpanData> getRecordedSpans(int amountExpected) {
         SpanExporter spanExporter = getSpanExporter();
         ArgumentCaptor<List<SpanData>> captor = ArgumentCaptor.forClass(List.class);
         verify(spanExporter).export(captor.capture());
+        List<SpanData> spans = captor.getValue();
+        assertEquals(amountExpected, spans.size());
 
-        return captor.getValue();
+        return spans;
     }
 
     protected SpanExporter getSpanExporter() {
@@ -40,5 +43,9 @@ public class BaseTest {
 
     protected String getSpanMethodName(ActivityMethod method) {
         return Activity.class.getName() + "->" + method.robolectricName;
+    }
+
+    protected SpanData getRecordedSpan() {
+        return getRecordedSpans(1).get(0);
     }
 }

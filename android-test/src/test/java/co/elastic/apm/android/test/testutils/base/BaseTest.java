@@ -1,6 +1,7 @@
 package co.elastic.apm.android.test.testutils.base;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.Activity;
@@ -8,6 +9,8 @@ import android.app.Activity;
 import org.mockito.ArgumentCaptor;
 import org.robolectric.RuntimeEnvironment;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import co.elastic.apm.android.test.testutils.spans.SpanExporterProvider;
@@ -26,14 +29,29 @@ public class BaseTest {
         }
     }
 
-    @SuppressWarnings("unchecked")
     protected List<SpanData> getRecordedSpans(int amountExpected) {
         SpanExporter spanExporter = getSpanExporter();
-        ArgumentCaptor<List<SpanData>> captor = ArgumentCaptor.forClass(List.class);
-        verify(spanExporter).export(captor.capture());
-        List<SpanData> spans = captor.getValue();
+        List<SpanData> spans = getCapturedSpansOrderedByCreation(spanExporter, amountExpected);
         assertEquals(amountExpected, spans.size());
 
+        return spans;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<SpanData> getCapturedSpansOrderedByCreation(SpanExporter spanExporter, int amountExpected) {
+        List<SpanData> spans = new ArrayList<>();
+        ArgumentCaptor<List<SpanData>> captor = ArgumentCaptor.forClass(List.class);
+        verify(spanExporter, times(amountExpected)).export(captor.capture());
+        for (List<SpanData> list : captor.getAllValues()) {
+            if (list.size() > 1) {
+                // Since we're using SimpleSpanProcessor, each call to SpanExporter.export must contain
+                // only one span.
+                throw new IllegalStateException();
+            }
+            spans.add(list.get(0));
+        }
+
+        Collections.reverse(spans);
         return spans;
     }
 

@@ -26,7 +26,6 @@ public class ActivityLifecycleInstrumentationTest extends BaseTest {
             SpanData span = getRecordedSpan();
 
             Spans.verify(span)
-                    .hasNoError()
                     .isNamed(getSpanMethodName(ActivityMethod.ON_CREATE));
             Spans.verify(activity.getOnCreateSpanContext()).belongsTo(span);
         }
@@ -40,7 +39,7 @@ public class ActivityLifecycleInstrumentationTest extends BaseTest {
             } catch (IllegalStateException e) {
                 SpanData span = getRecordedSpan();
 
-                Spans.verify(span).hasError()
+                Spans.verifyFailed(span)
                         .hasAmountOfRecordedExceptions(1)
                         .hasRecordedException(e);
             }

@@ -8,19 +8,21 @@ import android.app.Activity;
 import org.mockito.ArgumentCaptor;
 import org.robolectric.RuntimeEnvironment;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
 public class BaseTest {
 
-    private Map<String, String> activityMethodNames = new HashMap<>();
+    protected enum ActivityMethodName {
+        ON_CREATE("$$robo$$android_app_Activity$performCreate");
 
-    public BaseTest() {
-        activityMethodNames.put("onCreate", "$$robo$$android_app_Activity$performCreate");
+        private final String robolectricName;
+
+        ActivityMethodName(String robolectricName) {
+            this.robolectricName = robolectricName;
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -37,8 +39,7 @@ public class BaseTest {
         return spanExporterProvider.getSpanExporter();
     }
 
-    protected void verifyActivityMethodSpanName(SpanData span, String methodName) {
-        String mappedName = activityMethodNames.get(methodName);
-        assertEquals(Activity.class.getName() + "->" + mappedName, span.getName());
+    protected void verifyActivityMethodSpanName(SpanData span, ActivityMethodName name) {
+        assertEquals(Activity.class.getName() + "->" + name.robolectricName, span.getName());
     }
 }

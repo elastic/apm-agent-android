@@ -28,7 +28,7 @@ public class ActivityLifecycleInstrumentationTest extends BaseTest {
             List<SpanData> sentSpans = getSentSpans();
             assertEquals(1, sentSpans.size());
             SpanData span = sentSpans.get(0);
-            verifyActivityMethodSpanName(span, "onCreate");
+            verifyActivityMethodSpanName(span, ActivityMethodName.ON_CREATE);
         }
     }
 

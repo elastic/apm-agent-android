@@ -4,11 +4,17 @@ import static org.mockito.Mockito.mock;
 
 import android.app.Application;
 
+import org.robolectric.TestLifecycleApplication;
+
+import java.lang.reflect.Method;
+
+import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.traces.connectivity.Connectivity;
+import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
-public class BaseTestApplication extends Application implements SpanExporterProvider {
+public class BaseTestApplication extends Application implements SpanExporterProvider, TestLifecycleApplication {
     protected final SpanExporter exporter;
 
     public BaseTestApplication() {
@@ -22,5 +28,21 @@ public class BaseTestApplication extends Application implements SpanExporterProv
 
     protected Connectivity getConnectivity() {
         return Connectivity.custom(SimpleSpanProcessor.create(exporter));
+    }
+
+    @Override
+    public void beforeTest(Method method) {
+
+    }
+
+    @Override
+    public void prepareTest(Object test) {
+
+    }
+
+    @Override
+    public void afterTest(Method method) {
+        ElasticApmAgent.get().destroy();
+        GlobalOpenTelemetry.resetForTest();
     }
 }

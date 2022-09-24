@@ -1,6 +1,5 @@
 package co.elastic.apm.android.test;
 
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
@@ -12,7 +11,6 @@ import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.test.testutils.BaseTest;
 import co.elastic.apm.android.test.testutils.BaseTestApplication;
 import co.elastic.apm.android.test.testutils.Spans;
-import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.sdk.trace.data.SpanData;
 
 @Config(application = ActivityLifecycleInstrumentationTest.MainApp.class)
@@ -47,12 +45,6 @@ public class ActivityLifecycleInstrumentationTest extends BaseTest {
                         .hasRecordedException(e);
             }
         }
-    }
-
-    @After
-    public void cleanUp() {
-        ElasticApmAgent.get().destroy();
-        GlobalOpenTelemetry.resetForTest();
     }
 
     public static class MainApp extends BaseTestApplication {

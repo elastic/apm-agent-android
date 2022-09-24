@@ -1,6 +1,5 @@
 package co.elastic.apm.android.test.testutils;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 
 import android.app.Activity;
@@ -10,10 +9,6 @@ import org.robolectric.RuntimeEnvironment;
 
 import java.util.List;
 
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.SpanContext;
-import io.opentelemetry.api.trace.StatusCode;
-import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
@@ -43,16 +38,7 @@ public class BaseTest {
         return spanExporterProvider.getSpanExporter();
     }
 
-    protected void verifySuccessfulSpan(SpanData span) {
-        assertEquals(StatusCode.UNSET, span.getStatus().getStatusCode());
-    }
-
-    protected void verifyContextSource(Context context, SpanData source) {
-        SpanContext spanContext = Span.fromContext(context).getSpanContext();
-        assertEquals(spanContext, source.getSpanContext());
-    }
-
-    protected void verifyActivityMethodSpanName(SpanData span, ActivityMethod method) {
-        assertEquals(Activity.class.getName() + "->" + method.robolectricName, span.getName());
+    protected String getSpanMethodName(ActivityMethod method) {
+        return Activity.class.getName() + "->" + method.robolectricName;
     }
 }

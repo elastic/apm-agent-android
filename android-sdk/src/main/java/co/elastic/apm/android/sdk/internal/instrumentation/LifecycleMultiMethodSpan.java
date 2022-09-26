@@ -27,7 +27,7 @@ public class LifecycleMultiMethodSpan {
         Span rootSpan = Span.current();
         Integer endedSpans = methodCount.getIfPresent(rootSpan);
         endedSpans++;
-        if (endedSpans == maxMethods) {
+        if (thrown != null || endedSpans == maxMethods) {
             endRootSpanAndCleanUp(rootSpan);
         } else {
             methodCount.put(rootSpan, endedSpans);

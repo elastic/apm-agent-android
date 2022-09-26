@@ -131,9 +131,12 @@ public class ActivityLifecycleInstrumentationTest extends BaseTest {
             try {
                 controller.setup();
             } catch (IllegalStateException e) {
-                SpanData span = getRecordedSpan();
+                List<SpanData> spans = getRecordedSpans(2);
+                SpanData rootSpan = spans.get(0);
+                SpanData onCreateSpan = spans.get(1);
 
-                Spans.verifyFailed(span)
+                Spans.verifyFailed(onCreateSpan)
+                        .isDirectChildOf(rootSpan)
                         .hasAmountOfRecordedExceptions(1)
                         .hasRecordedException(e);
             }

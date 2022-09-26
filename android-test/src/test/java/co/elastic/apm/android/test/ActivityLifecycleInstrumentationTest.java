@@ -104,6 +104,28 @@ public class ActivityLifecycleInstrumentationTest extends BaseTest {
     }
 
     @Test
+    public void onCreation_whenOnStartOnly_wrapWithSpan() {
+        try (ActivityController<MissingOnStartAndOnResumeActivity> controller = Robolectric.buildActivity(MissingOnStartAndOnResumeActivity.class)) {
+            controller.setup();
+            MissingOnStartAndOnResumeActivity activity = controller.get();
+
+            List<SpanData> spans = getRecordedSpans(2);
+
+            SpanData rootSpan = spans.get(0);
+            SpanData onCreateSpan = spans.get(1);
+
+            Spans.verify(rootSpan)
+                    .hasNoParent()
+                    .isNamed(getActivitySpanName(MissingOnStartAndOnResumeActivity.class, " - Creating"));
+
+            Spans.verify(onCreateSpan)
+                    .isNamed(getSpanMethodName(MissingOnStartAndOnResumeActivity.class, ActivityMethod.ON_CREATE))
+                    .isDirectChildOf(rootSpan);
+            Spans.verify(activity.getOnCreateSpanContext()).belongsTo(onCreateSpan);
+        }
+    }
+
+    @Test
     public void onCreate_recordException() {
         try (ActivityController<ErrorActivity> controller = Robolectric.buildActivity(ErrorActivity.class)) {
             try {

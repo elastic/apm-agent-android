@@ -1,10 +1,10 @@
-package co.elastic.apm.android.test
+package co.elastic.apm.android.test.activities
 
-import android.app.Activity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import io.opentelemetry.context.Context
 
-class ErrorHalfWayActivity : Activity() {
+class FullCreationActivity : AppCompatActivity() {
     var onCreateSpanContext: Context? = null
     var onStartSpanContext: Context? = null
     var onResumeSpanContext: Context? = null
@@ -17,7 +17,6 @@ class ErrorHalfWayActivity : Activity() {
     override fun onStart() {
         super.onStart()
         onStartSpanContext = Context.current()
-        throw IllegalStateException("Creating exception in onStart")
     }
 
     override fun onResume() {

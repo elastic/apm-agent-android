@@ -1,4 +1,4 @@
-package co.elastic.apm.android.test
+package co.elastic.apm.android.test.activities
 
 import android.app.Activity
 import android.os.Bundle

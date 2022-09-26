@@ -1,4 +1,4 @@
-package co.elastic.apm.android.test
+package co.elastic.apm.android.test.activities
 
 import androidx.appcompat.app.AppCompatActivity
 import io.opentelemetry.context.Context

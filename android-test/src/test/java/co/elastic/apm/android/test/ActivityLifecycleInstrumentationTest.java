@@ -12,6 +12,11 @@ import org.robolectric.annotation.Config;
 import java.util.List;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
+import co.elastic.apm.android.test.activities.ErrorActivity;
+import co.elastic.apm.android.test.activities.ErrorHalfWayActivity;
+import co.elastic.apm.android.test.activities.FullCreationActivity;
+import co.elastic.apm.android.test.activities.MissingOnResumeActivity;
+import co.elastic.apm.android.test.activities.MissingOnStartAndOnResumeActivity;
 import co.elastic.apm.android.test.testutils.base.BaseTest;
 import co.elastic.apm.android.test.testutils.base.BaseTestApplication;
 import co.elastic.apm.android.test.testutils.spans.Spans;

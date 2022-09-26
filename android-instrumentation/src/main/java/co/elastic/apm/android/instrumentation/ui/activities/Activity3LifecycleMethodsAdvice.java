@@ -4,7 +4,7 @@ import net.bytebuddy.asm.Advice;
 
 import co.elastic.apm.android.sdk.internal.instrumentation.LifecycleMultiMethodSpan;
 
-public class ActivityLifecycleAdvice {
+public class Activity3LifecycleMethodsAdvice {
 
     @Advice.OnMethodEnter
     public static void onMethodEnter(

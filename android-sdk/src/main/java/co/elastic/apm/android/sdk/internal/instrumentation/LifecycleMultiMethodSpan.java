@@ -12,9 +12,9 @@ import io.opentelemetry.context.Scope;
 public class LifecycleMultiMethodSpan {
     private static final WeakConcurrentMap<Span, Integer> methodCount = new WeakConcurrentMap.WithInlinedExpunction<>();
 
-    public static SpanWithScope onMethodEnter(Object owner) {
+    public static SpanWithScope onMethodEnter(Object owner, ElasticTracer tracer) {
         ensureRootSpanIsCreated(owner);
-        SpanBuilder spanBuilder = ElasticTracer.androidActivity().spanBuilder();
+        SpanBuilder spanBuilder = tracer.spanBuilder();
         Span span = spanBuilder.startSpan();
         Scope scope = span.makeCurrent();
 

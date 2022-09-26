@@ -1,7 +1,9 @@
 package co.elastic.apm.android.instrumentation.ui.fragments;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.fragment.app.Fragment;
 
@@ -15,8 +17,6 @@ import net.bytebuddy.matcher.ElementMatchers;
 
 import java.io.IOException;
 
-import co.elastic.apm.android.instrumentation.ui.activities.Activity3LifecycleMethodsAdvice;
-
 public class FragmentLifecyclePlugin implements Plugin {
     private final AndroidDescriptor androidDescriptor;
 
@@ -28,7 +28,12 @@ public class FragmentLifecyclePlugin implements Plugin {
     public DynamicType.Builder<?> apply(DynamicType.Builder<?> builder,
                                         TypeDescription typeDescription,
                                         ClassFileLocator classFileLocator) {
-        return builder.visit(Advice.to(Activity3LifecycleMethodsAdvice.class).on(ElementMatchers.named("onViewCreated").and(ElementMatchers.takesArguments(View.class, Bundle.class))));
+        return builder.visit(Advice.to(Fragment3LifecycleMethodAdvice.class).on(
+                        ElementMatchers.named("onCreate").and(ElementMatchers.takesArguments(Bundle.class))
+                                .or(ElementMatchers.named("onCreateView").and(ElementMatchers.takesArguments(LayoutInflater.class, ViewGroup.class, Bundle.class)))
+                                .or(ElementMatchers.named("onViewCreated").and(ElementMatchers.takesArguments(View.class, Bundle.class)))
+                )
+        );
     }
 
     @Override

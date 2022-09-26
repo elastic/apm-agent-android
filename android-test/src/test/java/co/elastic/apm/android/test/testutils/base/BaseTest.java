@@ -6,6 +6,8 @@ import static org.mockito.Mockito.verify;
 
 import android.app.Activity;
 
+import androidx.fragment.app.Fragment;
+
 import org.mockito.ArgumentCaptor;
 import org.robolectric.RuntimeEnvironment;
 
@@ -27,6 +29,18 @@ public class BaseTest {
         private final String name;
 
         ActivityMethod(String name) {
+            this.name = name;
+        }
+    }
+
+    protected enum FragmentMethod {
+        ON_CREATE("onCreate"),
+        ON_CREATE_VIEW("onCreateView"),
+        ON_VIEW_CREATED("onViewCreated");
+
+        private final String name;
+
+        FragmentMethod(String name) {
             this.name = name;
         }
     }
@@ -62,12 +76,16 @@ public class BaseTest {
         return spanExporterProvider.getSpanExporter();
     }
 
-    protected String getActivitySpanName(Class<? extends Activity> activityClass, String suffix) {
-        return activityClass.getName() + suffix;
+    protected String getClassSpanName(Class<?> theClass, String suffix) {
+        return theClass.getName() + suffix;
     }
 
     protected String getSpanMethodName(Class<? extends Activity> activityClass, ActivityMethod method) {
-        return getActivitySpanName(activityClass, "->" + method.name);
+        return getClassSpanName(activityClass, "->" + method.name);
+    }
+
+    protected String getSpanMethodName(Class<? extends Fragment> fragmentClass, FragmentMethod method) {
+        return getClassSpanName(fragmentClass, "->" + method.name);
     }
 
     protected SpanData getRecordedSpan() {

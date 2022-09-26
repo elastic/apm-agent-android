@@ -43,4 +43,5 @@ dependencies {
     testImplementation 'org.robolectric:robolectric:4.8'
     testImplementation 'junit:junit:4.13.2'
     testImplementation "org.mockito:mockito-core:4.8.0"
+    debugImplementation "androidx.fragment:fragment-testing:1.5.3"
 }

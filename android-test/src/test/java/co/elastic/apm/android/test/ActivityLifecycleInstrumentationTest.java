@@ -11,18 +11,17 @@ import org.robolectric.annotation.Config;
 
 import java.util.List;
 
-import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.test.activities.ErrorActivity;
 import co.elastic.apm.android.test.activities.ErrorHalfWayActivity;
 import co.elastic.apm.android.test.activities.FullCreationActivity;
 import co.elastic.apm.android.test.activities.MissingOnResumeActivity;
 import co.elastic.apm.android.test.activities.MissingOnStartAndOnResumeActivity;
+import co.elastic.apm.android.test.testutils.MainApp;
 import co.elastic.apm.android.test.testutils.base.BaseTest;
-import co.elastic.apm.android.test.testutils.base.BaseTestApplication;
 import co.elastic.apm.android.test.testutils.spans.Spans;
 import io.opentelemetry.sdk.trace.data.SpanData;
 
-@Config(application = ActivityLifecycleInstrumentationTest.MainApp.class)
+@Config(application = MainApp.class)
 @RunWith(RobolectricTestRunner.class)
 public class ActivityLifecycleInstrumentationTest extends BaseTest {
 
@@ -41,7 +40,7 @@ public class ActivityLifecycleInstrumentationTest extends BaseTest {
 
             Spans.verify(rootSpan)
                     .hasNoParent()
-                    .isNamed(getActivitySpanName(FullCreationActivity.class, " - Creating"));
+                    .isNamed(getClassSpanName(FullCreationActivity.class, " - Creating"));
 
             Spans.verify(onCreateSpan)
                     .isNamed(getSpanMethodName(FullCreationActivity.class, ActivityMethod.ON_CREATE))
@@ -74,7 +73,7 @@ public class ActivityLifecycleInstrumentationTest extends BaseTest {
 
             Spans.verify(rootSpan)
                     .hasNoParent()
-                    .isNamed(getActivitySpanName(MissingOnResumeActivity.class, " - Creating"));
+                    .isNamed(getClassSpanName(MissingOnResumeActivity.class, " - Creating"));
 
             Spans.verify(onCreateSpan)
                     .isNamed(getSpanMethodName(MissingOnResumeActivity.class, ActivityMethod.ON_CREATE))
@@ -101,7 +100,7 @@ public class ActivityLifecycleInstrumentationTest extends BaseTest {
 
             Spans.verify(rootSpan)
                     .hasNoParent()
-                    .isNamed(getActivitySpanName(MissingOnStartAndOnResumeActivity.class, " - Creating"));
+                    .isNamed(getClassSpanName(MissingOnStartAndOnResumeActivity.class, " - Creating"));
 
             Spans.verify(onCreateSpan)
                     .isNamed(getSpanMethodName(MissingOnStartAndOnResumeActivity.class, ActivityMethod.ON_CREATE))
@@ -123,7 +122,7 @@ public class ActivityLifecycleInstrumentationTest extends BaseTest {
 
             Spans.verify(rootSpan)
                     .hasNoParent()
-                    .isNamed(getActivitySpanName(MissingOnStartAndOnResumeActivity.class, " - Creating"));
+                    .isNamed(getClassSpanName(MissingOnStartAndOnResumeActivity.class, " - Creating"));
 
             Spans.verify(onCreateSpan)
                     .isNamed(getSpanMethodName(MissingOnStartAndOnResumeActivity.class, ActivityMethod.ON_CREATE))
@@ -148,7 +147,7 @@ public class ActivityLifecycleInstrumentationTest extends BaseTest {
 
                 Spans.verify(rootSpan)
                         .hasNoParent()
-                        .isNamed(getActivitySpanName(ErrorHalfWayActivity.class, " - Creating"));
+                        .isNamed(getClassSpanName(ErrorHalfWayActivity.class, " - Creating"));
 
                 Spans.verify(onCreateSpan)
                         .isNamed(getSpanMethodName(ErrorHalfWayActivity.class, ActivityMethod.ON_CREATE))
@@ -182,15 +181,6 @@ public class ActivityLifecycleInstrumentationTest extends BaseTest {
                         .hasAmountOfRecordedExceptions(1)
                         .hasRecordedException(e);
             }
-        }
-    }
-
-    public static class MainApp extends BaseTestApplication {
-
-        @Override
-        public void onCreate() {
-            super.onCreate();
-            ElasticApmAgent.initialize(this, getConnectivity());
         }
     }
 }

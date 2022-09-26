@@ -48,6 +48,8 @@ public class ActivityLifecyclePlugin implements Plugin {
         int lifecycleMethodCount = getLifecycleMethodCount(typeDescription);
 
         switch (lifecycleMethodCount) {
+            case 1:
+                return Activity1LifecycleMethodsAdvice.class;
             case 2:
                 return Activity2LifecycleMethodsAdvice.class;
             case 3:
@@ -59,6 +61,7 @@ public class ActivityLifecyclePlugin implements Plugin {
 
     private int getLifecycleMethodCount(TypeDescription typeDescription) {
         int foundMethods = 0;
+        int maxMethods = targetMethodNamesToDescriptors.size();
         for (MethodDescription.InDefinedShape declaredMethod : typeDescription.getDeclaredMethods()) {
             if (targetMethodNamesToDescriptors.containsKey(declaredMethod.getName())) {
                 String descriptor = targetMethodNamesToDescriptors.get(declaredMethod.getName());
@@ -66,7 +69,7 @@ public class ActivityLifecyclePlugin implements Plugin {
                     foundMethods++;
                 }
             }
-            if (foundMethods == 3) {
+            if (foundMethods == maxMethods) {
                 break;
             }
         }

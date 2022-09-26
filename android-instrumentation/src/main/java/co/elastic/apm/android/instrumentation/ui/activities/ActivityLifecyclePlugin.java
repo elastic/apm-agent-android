@@ -49,7 +49,7 @@ public class ActivityLifecyclePlugin implements Plugin {
 
         switch (lifecycleMethodCount) {
             case 1:
-                return Activity1LifecycleMethodsAdvice.class;
+                return Activity1LifecycleMethodAdvice.class;
             case 2:
                 return Activity2LifecycleMethodsAdvice.class;
             case 3:

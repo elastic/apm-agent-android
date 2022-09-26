@@ -1,5 +1,7 @@
 package co.elastic.apm.android.test;
 
+import static org.junit.Assert.assertNull;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
@@ -122,6 +124,41 @@ public class ActivityLifecycleInstrumentationTest extends BaseTest {
                     .isNamed(getSpanMethodName(MissingOnStartAndOnResumeActivity.class, ActivityMethod.ON_CREATE))
                     .isDirectChildOf(rootSpan);
             Spans.verify(activity.getOnCreateSpanContext()).belongsTo(onCreateSpan);
+        }
+    }
+
+    @Test
+    public void onCreation_whenInterruptedHalfwayByException_endRootSpan() {
+        try (ActivityController<ErrorHalfWayActivity> controller = Robolectric.buildActivity(ErrorHalfWayActivity.class)) {
+            try {
+                controller.setup();
+            } catch (IllegalStateException e) {
+                ErrorHalfWayActivity activity = controller.get();
+
+                List<SpanData> spans = getRecordedSpans(3);
+
+                SpanData rootSpan = spans.get(0);
+                SpanData onCreateSpan = spans.get(1);
+                SpanData onStartSpan = spans.get(2);
+
+                Spans.verify(rootSpan)
+                        .hasNoParent()
+                        .isNamed(getActivitySpanName(ErrorHalfWayActivity.class, " - Creating"));
+
+                Spans.verify(onCreateSpan)
+                        .isNamed(getSpanMethodName(ErrorHalfWayActivity.class, ActivityMethod.ON_CREATE))
+                        .isDirectChildOf(rootSpan);
+                Spans.verify(activity.getOnCreateSpanContext()).belongsTo(onCreateSpan);
+
+                Spans.verifyFailed(onStartSpan)
+                        .isNamed(getSpanMethodName(ErrorHalfWayActivity.class, ActivityMethod.ON_START))
+                        .hasAmountOfRecordedExceptions(1)
+                        .hasRecordedException(e)
+                        .isDirectChildOf(rootSpan);
+                Spans.verify(activity.getOnStartSpanContext()).belongsTo(onStartSpan);
+
+                assertNull(activity.getOnResumeSpanContext());
+            }
         }
     }
 

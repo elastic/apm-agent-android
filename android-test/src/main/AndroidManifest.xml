@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.APMAndroidAgent">
         <activity
-            android:name="co.elastic.apm.android.test.MainActivity"
+            android:name="co.elastic.apm.android.test.FullCreationActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

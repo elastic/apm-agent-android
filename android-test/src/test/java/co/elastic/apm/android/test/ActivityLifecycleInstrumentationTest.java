@@ -21,9 +21,9 @@ public class ActivityLifecycleInstrumentationTest extends BaseTest {
 
     @Test
     public void onCreation_wrapWithSpan() {
-        try (ActivityController<MainActivity> controller = Robolectric.buildActivity(MainActivity.class)) {
+        try (ActivityController<FullCreationActivity> controller = Robolectric.buildActivity(FullCreationActivity.class)) {
             controller.setup();
-            MainActivity activity = controller.get();
+            FullCreationActivity activity = controller.get();
 
             List<SpanData> spans = getRecordedSpans(4);
 
@@ -34,20 +34,20 @@ public class ActivityLifecycleInstrumentationTest extends BaseTest {
 
             Spans.verify(rootSpan)
                     .hasNoParent()
-                    .isNamed(getActivitySpanName(MainActivity.class, " - Creating"));
+                    .isNamed(getActivitySpanName(FullCreationActivity.class, " - Creating"));
 
             Spans.verify(onCreateSpan)
-                    .isNamed(getSpanMethodName(MainActivity.class, ActivityMethod.ON_CREATE))
+                    .isNamed(getSpanMethodName(FullCreationActivity.class, ActivityMethod.ON_CREATE))
                     .isDirectChildOf(rootSpan);
             Spans.verify(activity.getOnCreateSpanContext()).belongsTo(onCreateSpan);
 
             Spans.verify(onStartSpan)
-                    .isNamed(getSpanMethodName(MainActivity.class, ActivityMethod.ON_START))
+                    .isNamed(getSpanMethodName(FullCreationActivity.class, ActivityMethod.ON_START))
                     .isDirectChildOf(rootSpan);
             Spans.verify(activity.getOnStartSpanContext()).belongsTo(onStartSpan);
 
             Spans.verify(onResumeSpan)
-                    .isNamed(getSpanMethodName(MainActivity.class, ActivityMethod.ON_RESUME))
+                    .isNamed(getSpanMethodName(FullCreationActivity.class, ActivityMethod.ON_RESUME))
                     .isDirectChildOf(rootSpan);
             Spans.verify(activity.getOnResumeSpanContext()).belongsTo(onResumeSpan);
         }

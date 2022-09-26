@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import io.opentelemetry.context.Context
 
-class MainActivity : AppCompatActivity() {
+class FullCreationActivity : AppCompatActivity() {
     var onCreateSpanContext: Context? = null
     var onStartSpanContext: Context? = null
     var onResumeSpanContext: Context? = null

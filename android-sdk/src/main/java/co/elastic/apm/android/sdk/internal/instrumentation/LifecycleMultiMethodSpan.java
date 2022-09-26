@@ -13,7 +13,7 @@ public class LifecycleMultiMethodSpan {
     private static final WeakConcurrentMap<Span, Integer> methodCount = new WeakConcurrentMap.WithInlinedExpunction<>();
 
     public static SpanWithScope onMethodEnter(Object owner, ElasticTracer tracer) {
-        ensureRootSpanIsCreated(owner);
+        ensureRootSpanIsCreated(owner, tracer);
         SpanBuilder spanBuilder = tracer.spanBuilder();
         Span span = spanBuilder.startSpan();
         Scope scope = span.makeCurrent();
@@ -51,9 +51,9 @@ public class LifecycleMultiMethodSpan {
         methodCount.remove(rootSpan);
     }
 
-    private static void ensureRootSpanIsCreated(Object owner) {
+    private static void ensureRootSpanIsCreated(Object owner, ElasticTracer tracer) {
         if (Context.current() == Context.root()) {
-            SpanBuilder spanBuilder = ElasticTracer.androidActivity().spanBuilder(owner.getClass().getName() + " - Creating");
+            SpanBuilder spanBuilder = tracer.spanBuilder(owner.getClass().getName() + " - Creating");
             Span rootSpan = spanBuilder.startSpan();
             rootSpan.makeCurrent();
             methodCount.put(rootSpan, 0);

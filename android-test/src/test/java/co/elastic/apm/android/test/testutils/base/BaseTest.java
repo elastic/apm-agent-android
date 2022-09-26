@@ -24,10 +24,10 @@ public class BaseTest {
         ON_RESUME("onResume"),
         ON_START("onStart");
 
-        private final String robolectricName;
+        private final String name;
 
-        ActivityMethod(String robolectricName) {
-            this.robolectricName = robolectricName;
+        ActivityMethod(String name) {
+            this.name = name;
         }
     }
 
@@ -67,7 +67,7 @@ public class BaseTest {
     }
 
     protected String getSpanMethodName(Class<? extends Activity> activityClass, ActivityMethod method) {
-        return getActivitySpanName(activityClass, "->" + method.robolectricName);
+        return getActivitySpanName(activityClass, "->" + method.name);
     }
 
     protected SpanData getRecordedSpan() {

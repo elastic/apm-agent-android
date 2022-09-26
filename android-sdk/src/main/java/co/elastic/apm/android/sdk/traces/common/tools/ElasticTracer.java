@@ -52,7 +52,7 @@ public class ElasticTracer implements Tracer {
     }
 
     private String getCallerMethodId() {
-        StackTraceElement element = Thread.currentThread().getStackTrace()[4];
+        StackTraceElement element = Thread.currentThread().getStackTrace()[3];
         return element.getClassName() + "->" + element.getMethodName();
     }
 }

@@ -10,7 +10,7 @@ import org.mockito.ArgumentCaptor;
 import org.robolectric.RuntimeEnvironment;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import co.elastic.apm.android.test.testutils.spans.SpanExporterProvider;
@@ -20,7 +20,9 @@ import io.opentelemetry.sdk.trace.export.SpanExporter;
 public class BaseTest {
 
     protected enum ActivityMethod {
-        ON_CREATE("$$robo$$android_app_Activity$performCreate");
+        ON_CREATE("onCreate"),
+        ON_RESUME("onResume"),
+        ON_START("onStart");
 
         private final String robolectricName;
 
@@ -51,7 +53,7 @@ public class BaseTest {
             spans.add(list.get(0));
         }
 
-        Collections.reverse(spans);
+        spans.sort(Comparator.comparing(SpanData::getStartEpochNanos));
         return spans;
     }
 
@@ -60,8 +62,12 @@ public class BaseTest {
         return spanExporterProvider.getSpanExporter();
     }
 
-    protected String getSpanMethodName(ActivityMethod method) {
-        return Activity.class.getName() + "->" + method.robolectricName;
+    protected String getActivitySpanName(Class<? extends Activity> activityClass, String suffix) {
+        return activityClass.getName() + suffix;
+    }
+
+    protected String getSpanMethodName(Class<? extends Activity> activityClass, ActivityMethod method) {
+        return getActivitySpanName(activityClass, "->" + method.robolectricName);
     }
 
     protected SpanData getRecordedSpan() {

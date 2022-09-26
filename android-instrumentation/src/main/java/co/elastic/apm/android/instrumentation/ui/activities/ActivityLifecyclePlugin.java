@@ -24,7 +24,12 @@ public class ActivityLifecyclePlugin implements Plugin {
     public DynamicType.Builder<?> apply(DynamicType.Builder<?> builder,
                                         TypeDescription typeDescription,
                                         ClassFileLocator classFileLocator) {
-        return builder.visit(Advice.to(ActivityLifecycleAdvice.class).on(ElementMatchers.named("onCreate").and(ElementMatchers.takesArguments(Bundle.class))));
+        return builder.visit(Advice.to(ActivityLifecycleAdvice.class)
+                .on(ElementMatchers.named("onCreate").and(ElementMatchers.takesArguments(Bundle.class))
+                        .or(ElementMatchers.named("onResume").and(ElementMatchers.takesNoArguments()))
+                        .or(ElementMatchers.named("onStart").and(ElementMatchers.takesNoArguments()))
+                )
+        );
     }
 
     @Override

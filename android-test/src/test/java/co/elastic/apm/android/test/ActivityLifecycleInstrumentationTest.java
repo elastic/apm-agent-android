@@ -7,6 +7,8 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 
+import java.util.List;
+
 import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.test.testutils.base.BaseTest;
 import co.elastic.apm.android.test.testutils.base.BaseTestApplication;
@@ -18,17 +20,36 @@ import io.opentelemetry.sdk.trace.data.SpanData;
 public class ActivityLifecycleInstrumentationTest extends BaseTest {
 
     @Test
-    public void onCreate_wrapWithSpan() {
+    public void onCreation_wrapWithSpan() {
         try (ActivityController<MainActivity> controller = Robolectric.buildActivity(MainActivity.class)) {
             controller.setup();
             MainActivity activity = controller.get();
 
-            SpanData span = getRecordedSpan();
+            List<SpanData> spans = getRecordedSpans(4);
 
-            Spans.verify(span)
+            SpanData rootSpan = spans.get(0);
+            SpanData onCreateSpan = spans.get(1);
+            SpanData onStartSpan = spans.get(2);
+            SpanData onResumeSpan = spans.get(3);
+
+            Spans.verify(rootSpan)
                     .hasNoParent()
-                    .isNamed(getSpanMethodName(ActivityMethod.ON_CREATE));
-            Spans.verify(activity.getOnCreateSpanContext()).belongsTo(span);
+                    .isNamed(getActivitySpanName(MainActivity.class, " - Creating"));
+
+            Spans.verify(onCreateSpan)
+                    .isNamed(getSpanMethodName(MainActivity.class, ActivityMethod.ON_CREATE))
+                    .isDirectChildOf(rootSpan);
+            Spans.verify(activity.getOnCreateSpanContext()).belongsTo(onCreateSpan);
+
+            Spans.verify(onStartSpan)
+                    .isNamed(getSpanMethodName(MainActivity.class, ActivityMethod.ON_START))
+                    .isDirectChildOf(rootSpan);
+            Spans.verify(activity.getOnStartSpanContext()).belongsTo(onStartSpan);
+
+            Spans.verify(onResumeSpan)
+                    .isNamed(getSpanMethodName(MainActivity.class, ActivityMethod.ON_RESUME))
+                    .isDirectChildOf(rootSpan);
+            Spans.verify(activity.getOnResumeSpanContext()).belongsTo(onResumeSpan);
         }
     }
 

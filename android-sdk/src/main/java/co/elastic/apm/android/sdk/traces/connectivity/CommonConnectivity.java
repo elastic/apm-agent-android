@@ -1,5 +1,6 @@
 package co.elastic.apm.android.sdk.traces.connectivity;
 
+import co.elastic.apm.android.sdk.traces.otel.exporter.ElasticSpanExporter;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporterBuilder;
 import io.opentelemetry.sdk.trace.SpanProcessor;
@@ -19,7 +20,7 @@ public class CommonConnectivity implements Connectivity {
         if (token != null) {
             exporterBuilder.addHeader("Authorization", "Bearer " + token);
         }
-        return exporterBuilder.build();
+        return new ElasticSpanExporter(exporterBuilder.build());
     }
 
     public CommonConnectivity withAuthToken(String token) {

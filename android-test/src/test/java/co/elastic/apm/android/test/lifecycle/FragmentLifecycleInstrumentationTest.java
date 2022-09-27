@@ -1,4 +1,4 @@
-package co.elastic.apm.android.test;
+package co.elastic.apm.android.test.lifecycle;
 
 
 import static org.junit.Assert.assertNull;
@@ -18,13 +18,12 @@ import co.elastic.apm.android.test.fragments.OnCreateMissingFragment;
 import co.elastic.apm.android.test.fragments.OnCreateViewOnlyFragment;
 import co.elastic.apm.android.test.fragments.ViewlessCreationFragment;
 import co.elastic.apm.android.test.testutils.MainApp;
-import co.elastic.apm.android.test.testutils.base.BaseTest;
 import co.elastic.apm.android.test.testutils.spans.Spans;
 import io.opentelemetry.sdk.trace.data.SpanData;
 
 @Config(application = MainApp.class)
 @RunWith(RobolectricTestRunner.class)
-public class FragmentLifecycleInstrumentationTest extends BaseTest {
+public class FragmentLifecycleInstrumentationTest extends BaseLifecycleInstrumentationTest {
 
     @Test
     public void onCreation_wrapWithSpans() {
@@ -38,7 +37,7 @@ public class FragmentLifecycleInstrumentationTest extends BaseTest {
 
                 Spans.verify(rootSpan)
                         .hasNoParent()
-                        .isNamed(getClassSpanName(FullCreationFragment.class, " - Creating"));
+                        .isNamed(getRootLifecycleSpanName(FullCreationFragment.class));
 
                 Spans.verify(onCreateSpan)
                         .isDirectChildOf(rootSpan)
@@ -69,7 +68,7 @@ public class FragmentLifecycleInstrumentationTest extends BaseTest {
 
                 Spans.verify(rootSpan)
                         .hasNoParent()
-                        .isNamed(getClassSpanName(ViewlessCreationFragment.class, " - Creating"));
+                        .isNamed(getRootLifecycleSpanName(ViewlessCreationFragment.class));
 
                 Spans.verify(onCreateSpan)
                         .isDirectChildOf(rootSpan)
@@ -97,7 +96,7 @@ public class FragmentLifecycleInstrumentationTest extends BaseTest {
 
                 Spans.verify(rootSpan)
                         .hasNoParent()
-                        .isNamed(getClassSpanName(OnCreateMissingFragment.class, " - Creating"));
+                        .isNamed(getRootLifecycleSpanName(OnCreateMissingFragment.class));
 
                 Spans.verify(onCreateViewSpan)
                         .isDirectChildOf(rootSpan)
@@ -122,7 +121,7 @@ public class FragmentLifecycleInstrumentationTest extends BaseTest {
 
                 Spans.verify(rootSpan)
                         .hasNoParent()
-                        .isNamed(getClassSpanName(OnCreateViewOnlyFragment.class, " - Creating"));
+                        .isNamed(getRootLifecycleSpanName(OnCreateViewOnlyFragment.class));
 
                 Spans.verify(onCreateViewSpan)
                         .isDirectChildOf(rootSpan)
@@ -144,7 +143,7 @@ public class FragmentLifecycleInstrumentationTest extends BaseTest {
 
             Spans.verify(rootSpan)
                     .hasNoParent()
-                    .isNamed(getClassSpanName(ErrorFragment.class, " - Creating"));
+                    .isNamed(getRootLifecycleSpanName(ErrorFragment.class));
 
             Spans.verify(onCreateSpan)
                     .isDirectChildOf(rootSpan)

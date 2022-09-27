@@ -1,4 +1,4 @@
-package co.elastic.apm.android.test;
+package co.elastic.apm.android.test.lifecycle;
 
 import static org.junit.Assert.assertNull;
 
@@ -17,13 +17,12 @@ import co.elastic.apm.android.test.activities.FullCreationActivity;
 import co.elastic.apm.android.test.activities.MissingOnResumeActivity;
 import co.elastic.apm.android.test.activities.MissingOnStartAndOnResumeActivity;
 import co.elastic.apm.android.test.testutils.MainApp;
-import co.elastic.apm.android.test.testutils.base.BaseTest;
 import co.elastic.apm.android.test.testutils.spans.Spans;
 import io.opentelemetry.sdk.trace.data.SpanData;
 
 @Config(application = MainApp.class)
 @RunWith(RobolectricTestRunner.class)
-public class ActivityLifecycleInstrumentationTest extends BaseTest {
+public class ActivityLifecycleInstrumentationTest extends BaseLifecycleInstrumentationTest {
 
     @Test
     public void onCreation_wrapWithSpan() {
@@ -40,7 +39,7 @@ public class ActivityLifecycleInstrumentationTest extends BaseTest {
 
             Spans.verify(rootSpan)
                     .hasNoParent()
-                    .isNamed(getClassSpanName(FullCreationActivity.class, " - Creating"));
+                    .isNamed(getRootLifecycleSpanName(FullCreationActivity.class));
 
             Spans.verify(onCreateSpan)
                     .isNamed(getSpanMethodName(FullCreationActivity.class, ActivityMethod.ON_CREATE))
@@ -73,7 +72,7 @@ public class ActivityLifecycleInstrumentationTest extends BaseTest {
 
             Spans.verify(rootSpan)
                     .hasNoParent()
-                    .isNamed(getClassSpanName(MissingOnResumeActivity.class, " - Creating"));
+                    .isNamed(getRootLifecycleSpanName(MissingOnResumeActivity.class));
 
             Spans.verify(onCreateSpan)
                     .isNamed(getSpanMethodName(MissingOnResumeActivity.class, ActivityMethod.ON_CREATE))
@@ -100,7 +99,7 @@ public class ActivityLifecycleInstrumentationTest extends BaseTest {
 
             Spans.verify(rootSpan)
                     .hasNoParent()
-                    .isNamed(getClassSpanName(MissingOnStartAndOnResumeActivity.class, " - Creating"));
+                    .isNamed(getRootLifecycleSpanName(MissingOnStartAndOnResumeActivity.class));
 
             Spans.verify(onCreateSpan)
                     .isNamed(getSpanMethodName(MissingOnStartAndOnResumeActivity.class, ActivityMethod.ON_CREATE))
@@ -122,7 +121,7 @@ public class ActivityLifecycleInstrumentationTest extends BaseTest {
 
             Spans.verify(rootSpan)
                     .hasNoParent()
-                    .isNamed(getClassSpanName(MissingOnStartAndOnResumeActivity.class, " - Creating"));
+                    .isNamed(getRootLifecycleSpanName(MissingOnStartAndOnResumeActivity.class));
 
             Spans.verify(onCreateSpan)
                     .isNamed(getSpanMethodName(MissingOnStartAndOnResumeActivity.class, ActivityMethod.ON_CREATE))
@@ -147,7 +146,7 @@ public class ActivityLifecycleInstrumentationTest extends BaseTest {
 
                 Spans.verify(rootSpan)
                         .hasNoParent()
-                        .isNamed(getClassSpanName(ErrorHalfWayActivity.class, " - Creating"));
+                        .isNamed(getRootLifecycleSpanName(ErrorHalfWayActivity.class));
 
                 Spans.verify(onCreateSpan)
                         .isNamed(getSpanMethodName(ErrorHalfWayActivity.class, ActivityMethod.ON_CREATE))

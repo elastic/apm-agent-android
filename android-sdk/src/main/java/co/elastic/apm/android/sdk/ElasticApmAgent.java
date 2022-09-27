@@ -84,7 +84,7 @@ public final class ElasticApmAgent {
         Resource resource = Resource.getDefault()
                 .merge(globalAttributes.provideAsResource());
 
-        ElasticSpanProcessor processor = new ElasticSpanProcessor(connectivity.getSpanProcessor());
+        ElasticSpanProcessor processor = connectivity.getSpanProcessor();
         processor.addAllExclusionRules(configuration.httpTraceConfiguration.exclusionRules);
 
         return SdkTracerProvider.builder()

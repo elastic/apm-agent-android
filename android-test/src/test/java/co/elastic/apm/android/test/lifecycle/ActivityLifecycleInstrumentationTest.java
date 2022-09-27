@@ -42,17 +42,17 @@ public class ActivityLifecycleInstrumentationTest extends BaseLifecycleInstrumen
                     .isNamed(getRootLifecycleSpanName(FullCreationActivity.class));
 
             Spans.verify(onCreateSpan)
-                    .isNamed(getSpanMethodName(FullCreationActivity.class, ActivityMethod.ON_CREATE))
+                    .isNamed(getSpanMethodName(ActivityMethod.ON_CREATE))
                     .isDirectChildOf(rootSpan);
             Spans.verify(activity.getOnCreateSpanContext()).belongsTo(onCreateSpan);
 
             Spans.verify(onStartSpan)
-                    .isNamed(getSpanMethodName(FullCreationActivity.class, ActivityMethod.ON_START))
+                    .isNamed(getSpanMethodName(ActivityMethod.ON_START))
                     .isDirectChildOf(rootSpan);
             Spans.verify(activity.getOnStartSpanContext()).belongsTo(onStartSpan);
 
             Spans.verify(onResumeSpan)
-                    .isNamed(getSpanMethodName(FullCreationActivity.class, ActivityMethod.ON_RESUME))
+                    .isNamed(getSpanMethodName(ActivityMethod.ON_RESUME))
                     .isDirectChildOf(rootSpan);
             Spans.verify(activity.getOnResumeSpanContext()).belongsTo(onResumeSpan);
         }
@@ -75,12 +75,12 @@ public class ActivityLifecycleInstrumentationTest extends BaseLifecycleInstrumen
                     .isNamed(getRootLifecycleSpanName(MissingOnResumeActivity.class));
 
             Spans.verify(onCreateSpan)
-                    .isNamed(getSpanMethodName(MissingOnResumeActivity.class, ActivityMethod.ON_CREATE))
+                    .isNamed(getSpanMethodName(ActivityMethod.ON_CREATE))
                     .isDirectChildOf(rootSpan);
             Spans.verify(activity.getOnCreateSpanContext()).belongsTo(onCreateSpan);
 
             Spans.verify(onStartSpan)
-                    .isNamed(getSpanMethodName(MissingOnResumeActivity.class, ActivityMethod.ON_START))
+                    .isNamed(getSpanMethodName(ActivityMethod.ON_START))
                     .isDirectChildOf(rootSpan);
             Spans.verify(activity.getOnStartSpanContext()).belongsTo(onStartSpan);
         }
@@ -102,7 +102,7 @@ public class ActivityLifecycleInstrumentationTest extends BaseLifecycleInstrumen
                     .isNamed(getRootLifecycleSpanName(MissingOnStartAndOnResumeActivity.class));
 
             Spans.verify(onCreateSpan)
-                    .isNamed(getSpanMethodName(MissingOnStartAndOnResumeActivity.class, ActivityMethod.ON_CREATE))
+                    .isNamed(getSpanMethodName(ActivityMethod.ON_CREATE))
                     .isDirectChildOf(rootSpan);
             Spans.verify(activity.getOnCreateSpanContext()).belongsTo(onCreateSpan);
         }
@@ -124,7 +124,7 @@ public class ActivityLifecycleInstrumentationTest extends BaseLifecycleInstrumen
                     .isNamed(getRootLifecycleSpanName(MissingOnStartAndOnResumeActivity.class));
 
             Spans.verify(onCreateSpan)
-                    .isNamed(getSpanMethodName(MissingOnStartAndOnResumeActivity.class, ActivityMethod.ON_CREATE))
+                    .isNamed(getSpanMethodName(ActivityMethod.ON_CREATE))
                     .isDirectChildOf(rootSpan);
             Spans.verify(activity.getOnCreateSpanContext()).belongsTo(onCreateSpan);
         }
@@ -149,12 +149,12 @@ public class ActivityLifecycleInstrumentationTest extends BaseLifecycleInstrumen
                         .isNamed(getRootLifecycleSpanName(ErrorHalfWayActivity.class));
 
                 Spans.verify(onCreateSpan)
-                        .isNamed(getSpanMethodName(ErrorHalfWayActivity.class, ActivityMethod.ON_CREATE))
+                        .isNamed(getSpanMethodName(ActivityMethod.ON_CREATE))
                         .isDirectChildOf(rootSpan);
                 Spans.verify(activity.getOnCreateSpanContext()).belongsTo(onCreateSpan);
 
                 Spans.verifyFailed(onStartSpan)
-                        .isNamed(getSpanMethodName(ErrorHalfWayActivity.class, ActivityMethod.ON_START))
+                        .isNamed(getSpanMethodName(ActivityMethod.ON_START))
                         .hasAmountOfRecordedExceptions(1)
                         .hasRecordedException(e)
                         .isDirectChildOf(rootSpan);

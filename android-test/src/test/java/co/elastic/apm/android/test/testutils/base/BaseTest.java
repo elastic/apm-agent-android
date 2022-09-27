@@ -4,10 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import android.app.Activity;
-
-import androidx.fragment.app.Fragment;
-
 import org.mockito.ArgumentCaptor;
 import org.robolectric.RuntimeEnvironment;
 
@@ -20,30 +16,6 @@ import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
 public class BaseTest {
-
-    protected enum ActivityMethod {
-        ON_CREATE("onCreate"),
-        ON_RESUME("onResume"),
-        ON_START("onStart");
-
-        private final String name;
-
-        ActivityMethod(String name) {
-            this.name = name;
-        }
-    }
-
-    protected enum FragmentMethod {
-        ON_CREATE("onCreate"),
-        ON_CREATE_VIEW("onCreateView"),
-        ON_VIEW_CREATED("onViewCreated");
-
-        private final String name;
-
-        FragmentMethod(String name) {
-            this.name = name;
-        }
-    }
 
     protected List<SpanData> getRecordedSpans(int amountExpected) {
         SpanExporter spanExporter = getSpanExporter();
@@ -78,14 +50,6 @@ public class BaseTest {
 
     protected String getClassSpanName(Class<?> theClass, String suffix) {
         return theClass.getName() + suffix;
-    }
-
-    protected String getSpanMethodName(Class<? extends Activity> activityClass, ActivityMethod method) {
-        return getClassSpanName(activityClass, "->" + method.name);
-    }
-
-    protected String getSpanMethodName(Class<? extends Fragment> fragmentClass, FragmentMethod method) {
-        return getClassSpanName(fragmentClass, "->" + method.name);
     }
 
     protected SpanData getRecordedSpan() {

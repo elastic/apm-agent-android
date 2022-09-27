@@ -16,7 +16,7 @@ public class LifecycleMultiMethodSpan {
 
     public static SpanWithScope onMethodEnter(Object owner, Method method, ElasticTracer tracer) {
         ensureRootSpanIsCreated(owner, tracer);
-        SpanBuilder spanBuilder = tracer.spanBuilder(owner.getClass().getName() + "->" + method.getName());
+        SpanBuilder spanBuilder = tracer.spanBuilder(method.getName());
         Span span = spanBuilder.startSpan();
         Scope scope = span.makeCurrent();
 

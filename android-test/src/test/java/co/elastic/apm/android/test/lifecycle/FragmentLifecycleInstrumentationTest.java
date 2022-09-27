@@ -41,17 +41,17 @@ public class FragmentLifecycleInstrumentationTest extends BaseLifecycleInstrumen
 
                 Spans.verify(onCreateSpan)
                         .isDirectChildOf(rootSpan)
-                        .isNamed(getSpanMethodName(FullCreationFragment.class, FragmentMethod.ON_CREATE));
+                        .isNamed(getSpanMethodName(FragmentMethod.ON_CREATE));
                 Spans.verify(fragment.getOnCreateSpanContext()).belongsTo(onCreateSpan);
 
                 Spans.verify(onCreateViewSpan)
                         .isDirectChildOf(rootSpan)
-                        .isNamed(getSpanMethodName(FullCreationFragment.class, FragmentMethod.ON_CREATE_VIEW));
+                        .isNamed(getSpanMethodName(FragmentMethod.ON_CREATE_VIEW));
                 Spans.verify(fragment.getOnCreateViewSpanContext()).belongsTo(onCreateViewSpan);
 
                 Spans.verify(onViewCreatedSpan)
                         .isDirectChildOf(rootSpan)
-                        .isNamed(getSpanMethodName(FullCreationFragment.class, FragmentMethod.ON_VIEW_CREATED));
+                        .isNamed(getSpanMethodName(FragmentMethod.ON_VIEW_CREATED));
                 Spans.verify(fragment.getOnViewCreatedSpanContext()).belongsTo(onViewCreatedSpan);
             });
         }
@@ -72,12 +72,12 @@ public class FragmentLifecycleInstrumentationTest extends BaseLifecycleInstrumen
 
                 Spans.verify(onCreateSpan)
                         .isDirectChildOf(rootSpan)
-                        .isNamed(getSpanMethodName(ViewlessCreationFragment.class, FragmentMethod.ON_CREATE));
+                        .isNamed(getSpanMethodName(FragmentMethod.ON_CREATE));
                 Spans.verify(fragment.getOnCreateSpanContext()).belongsTo(onCreateSpan);
 
                 Spans.verify(onCreateViewSpan)
                         .isDirectChildOf(rootSpan)
-                        .isNamed(getSpanMethodName(ViewlessCreationFragment.class, FragmentMethod.ON_CREATE_VIEW));
+                        .isNamed(getSpanMethodName(FragmentMethod.ON_CREATE_VIEW));
                 Spans.verify(fragment.getOnCreateViewSpanContext()).belongsTo(onCreateViewSpan);
 
                 assertNull(fragment.getOnViewCreatedSpanContext());
@@ -100,12 +100,12 @@ public class FragmentLifecycleInstrumentationTest extends BaseLifecycleInstrumen
 
                 Spans.verify(onCreateViewSpan)
                         .isDirectChildOf(rootSpan)
-                        .isNamed(getSpanMethodName(OnCreateMissingFragment.class, FragmentMethod.ON_CREATE_VIEW));
+                        .isNamed(getSpanMethodName(FragmentMethod.ON_CREATE_VIEW));
                 Spans.verify(fragment.getOnCreateViewSpanContext()).belongsTo(onCreateViewSpan);
 
                 Spans.verify(onViewCreatedSpan)
                         .isDirectChildOf(rootSpan)
-                        .isNamed(getSpanMethodName(OnCreateMissingFragment.class, FragmentMethod.ON_VIEW_CREATED));
+                        .isNamed(getSpanMethodName(FragmentMethod.ON_VIEW_CREATED));
                 Spans.verify(fragment.getOnViewCreatedSpanContext()).belongsTo(onViewCreatedSpan);
             });
         }
@@ -125,7 +125,7 @@ public class FragmentLifecycleInstrumentationTest extends BaseLifecycleInstrumen
 
                 Spans.verify(onCreateViewSpan)
                         .isDirectChildOf(rootSpan)
-                        .isNamed(getSpanMethodName(OnCreateViewOnlyFragment.class, FragmentMethod.ON_CREATE_VIEW));
+                        .isNamed(getSpanMethodName(FragmentMethod.ON_CREATE_VIEW));
                 Spans.verify(fragment.getOnCreateViewSpanContext()).belongsTo(onCreateViewSpan);
             });
         }
@@ -147,13 +147,13 @@ public class FragmentLifecycleInstrumentationTest extends BaseLifecycleInstrumen
 
             Spans.verify(onCreateSpan)
                     .isDirectChildOf(rootSpan)
-                    .isNamed(getSpanMethodName(ErrorFragment.class, FragmentMethod.ON_CREATE));
+                    .isNamed(getSpanMethodName(FragmentMethod.ON_CREATE));
 
             Spans.verifyFailed(onCreateViewSpan)
                     .isDirectChildOf(rootSpan)
                     .hasAmountOfRecordedExceptions(1)
                     .hasRecordedException(e)
-                    .isNamed(getSpanMethodName(ErrorFragment.class, FragmentMethod.ON_CREATE_VIEW));
+                    .isNamed(getSpanMethodName(FragmentMethod.ON_CREATE_VIEW));
         }
     }
 }

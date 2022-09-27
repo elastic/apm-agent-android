@@ -12,6 +12,7 @@ import org.robolectric.annotation.Config;
 
 import java.util.List;
 
+import co.elastic.apm.android.test.fragments.ErrorFragment;
 import co.elastic.apm.android.test.fragments.FullCreationFragment;
 import co.elastic.apm.android.test.fragments.OnCreateMissingFragment;
 import co.elastic.apm.android.test.fragments.OnCreateViewOnlyFragment;
@@ -130,4 +131,31 @@ public class FragmentLifecycleInstrumentationTest extends BaseTest {
             });
         }
     }
+
+    @Test
+    public void onCreation_whenInterruptedHalfwayByException_endRootSpan() {
+        try {
+            FragmentScenario.launchInContainer(ErrorFragment.class);
+        } catch (NullPointerException e) {
+            List<SpanData> spans = getRecordedSpans(3);
+            SpanData rootSpan = spans.get(0);
+            SpanData onCreateSpan = spans.get(1);
+            SpanData onCreateViewSpan = spans.get(2);
+
+            Spans.verify(rootSpan)
+                    .hasNoParent()
+                    .isNamed(getClassSpanName(ErrorFragment.class, " - Creating"));
+
+            Spans.verify(onCreateSpan)
+                    .isDirectChildOf(rootSpan)
+                    .isNamed(getSpanMethodName(ErrorFragment.class, FragmentMethod.ON_CREATE));
+
+            Spans.verifyFailed(onCreateViewSpan)
+                    .isDirectChildOf(rootSpan)
+                    .hasAmountOfRecordedExceptions(1)
+                    .hasRecordedException(e)
+                    .isNamed(getSpanMethodName(ErrorFragment.class, FragmentMethod.ON_CREATE_VIEW));
+        }
+    }
 }
+

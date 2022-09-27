@@ -13,6 +13,7 @@ import org.robolectric.annotation.Config;
 import java.util.List;
 
 import co.elastic.apm.android.test.fragments.FullCreationFragment;
+import co.elastic.apm.android.test.fragments.OnCreateMissingFragment;
 import co.elastic.apm.android.test.fragments.ViewlessCreationFragment;
 import co.elastic.apm.android.test.testutils.MainApp;
 import co.elastic.apm.android.test.testutils.base.BaseTest;
@@ -79,6 +80,32 @@ public class FragmentLifecycleInstrumentationTest extends BaseTest {
                 Spans.verify(fragment.getOnCreateViewSpanContext()).belongsTo(onCreateViewSpan);
 
                 assertNull(fragment.getOnViewCreatedSpanContext());
+            });
+        }
+    }
+
+    @Test
+    public void onCreation_onCreateMissing_wrapOthersWithSpan() {
+        try (FragmentScenario<OnCreateMissingFragment> scenario = FragmentScenario.launchInContainer(OnCreateMissingFragment.class)) {
+            scenario.onFragment(fragment -> {
+                List<SpanData> spans = getRecordedSpans(3);
+                SpanData rootSpan = spans.get(0);
+                SpanData onCreateViewSpan = spans.get(1);
+                SpanData onViewCreatedSpan = spans.get(2);
+
+                Spans.verify(rootSpan)
+                        .hasNoParent()
+                        .isNamed(getClassSpanName(OnCreateMissingFragment.class, " - Creating"));
+
+                Spans.verify(onCreateViewSpan)
+                        .isDirectChildOf(rootSpan)
+                        .isNamed(getSpanMethodName(OnCreateMissingFragment.class, FragmentMethod.ON_CREATE_VIEW));
+                Spans.verify(fragment.getOnCreateViewSpanContext()).belongsTo(onCreateViewSpan);
+
+                Spans.verify(onViewCreatedSpan)
+                        .isDirectChildOf(rootSpan)
+                        .isNamed(getSpanMethodName(OnCreateMissingFragment.class, FragmentMethod.ON_VIEW_CREATED));
+                Spans.verify(fragment.getOnViewCreatedSpanContext()).belongsTo(onViewCreatedSpan);
             });
         }
     }

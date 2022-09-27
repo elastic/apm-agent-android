@@ -1,23 +1,16 @@
 package co.elastic.apm.android.instrumentation.ui.fragments;
 
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
 import androidx.fragment.app.Fragment;
 
-import net.bytebuddy.asm.Advice;
 import net.bytebuddy.build.AndroidDescriptor;
-import net.bytebuddy.build.Plugin;
 import net.bytebuddy.description.type.TypeDescription;
-import net.bytebuddy.dynamic.ClassFileLocator;
-import net.bytebuddy.dynamic.DynamicType;
-import net.bytebuddy.matcher.ElementMatchers;
 
-import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
-public class FragmentLifecyclePlugin implements Plugin {
+import co.elastic.apm.android.instrumentation.ui.common.BaseLifecycleMethodsPlugin;
+
+public class FragmentLifecyclePlugin extends BaseLifecycleMethodsPlugin {
     private final AndroidDescriptor androidDescriptor;
 
     public FragmentLifecyclePlugin(AndroidDescriptor androidDescriptor) {
@@ -25,20 +18,24 @@ public class FragmentLifecyclePlugin implements Plugin {
     }
 
     @Override
-    public DynamicType.Builder<?> apply(DynamicType.Builder<?> builder,
-                                        TypeDescription typeDescription,
-                                        ClassFileLocator classFileLocator) {
-        return builder.visit(Advice.to(Fragment3LifecycleMethodAdvice.class).on(
-                        ElementMatchers.named("onCreate").and(ElementMatchers.takesArguments(Bundle.class))
-                                .or(ElementMatchers.named("onCreateView").and(ElementMatchers.takesArguments(LayoutInflater.class, ViewGroup.class, Bundle.class)))
-                                .or(ElementMatchers.named("onViewCreated").and(ElementMatchers.takesArguments(View.class, Bundle.class)))
-                )
-        );
+    protected Class<?> getAdviceClass(int methodCount) {
+        switch (methodCount) {
+            case 2:
+                return Fragment2LifecycleMethodAdvice.class;
+            case 3:
+                return Fragment3LifecycleMethodAdvice.class;
+            default:
+                return null;
+        }
     }
 
     @Override
-    public void close() throws IOException {
-
+    protected Map<String, String> provideTargetNamesToDescriptors() {
+        Map<String, String> targets = new HashMap<>();
+        targets.put("onCreate", "(Landroid/os/Bundle;)V");
+        targets.put("onCreateView", "(Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;");
+        targets.put("onViewCreated", "(Landroid/view/View;Landroid/os/Bundle;)V");
+        return targets;
     }
 
     @Override

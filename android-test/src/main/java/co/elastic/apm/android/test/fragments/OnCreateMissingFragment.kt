@@ -8,15 +8,9 @@ import androidx.fragment.app.Fragment
 import co.elastic.apm.android.test.R
 import io.opentelemetry.context.Context
 
-class FullCreationFragment : Fragment(R.layout.fragment_generic_layout) {
-    var onCreateSpanContext: Context? = null
+class OnCreateMissingFragment : Fragment(R.layout.fragment_generic_layout) {
     var onCreateViewSpanContext: Context? = null
     var onViewCreatedSpanContext: Context? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        onCreateSpanContext = Context.current()
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,

@@ -14,6 +14,7 @@ import java.util.List;
 import co.elastic.apm.android.test.activities.ErrorActivity;
 import co.elastic.apm.android.test.activities.ErrorHalfWayActivity;
 import co.elastic.apm.android.test.activities.FullCreationActivity;
+import co.elastic.apm.android.test.activities.Hilt_InstrumentedActivity;
 import co.elastic.apm.android.test.activities.MissingOnResumeActivity;
 import co.elastic.apm.android.test.activities.MissingOnStartAndOnResumeActivity;
 import co.elastic.apm.android.test.testutils.MainApp;
@@ -162,6 +163,15 @@ public class ActivityLifecycleInstrumentationTest extends BaseLifecycleInstrumen
 
                 assertNull(activity.getOnResumeSpanContext());
             }
+        }
+    }
+
+    @Test
+    public void onCreation_whenActivityIsGeneratedByHilt_ignore() {
+        try (ActivityController<Hilt_InstrumentedActivity> controller = Robolectric.buildActivity(Hilt_InstrumentedActivity.class)) {
+            controller.setup();
+
+            getRecordedSpans(0);
         }
     }
 

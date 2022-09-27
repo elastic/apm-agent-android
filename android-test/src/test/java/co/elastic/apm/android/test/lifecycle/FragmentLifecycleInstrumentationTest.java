@@ -14,6 +14,7 @@ import java.util.List;
 
 import co.elastic.apm.android.test.fragments.ErrorFragment;
 import co.elastic.apm.android.test.fragments.FullCreationFragment;
+import co.elastic.apm.android.test.fragments.Hilt_InstrumentedFragment;
 import co.elastic.apm.android.test.fragments.OnCreateMissingFragment;
 import co.elastic.apm.android.test.fragments.OnCreateViewOnlyFragment;
 import co.elastic.apm.android.test.fragments.ViewlessCreationFragment;
@@ -128,6 +129,13 @@ public class FragmentLifecycleInstrumentationTest extends BaseLifecycleInstrumen
                         .isNamed(getSpanMethodName(FragmentMethod.ON_CREATE_VIEW));
                 Spans.verify(fragment.getOnCreateViewSpanContext()).belongsTo(onCreateViewSpan);
             });
+        }
+    }
+
+    @Test
+    public void onCreation_whenFragmentIsGeneratedBuHilt_ignore() {
+        try (FragmentScenario<Hilt_InstrumentedFragment> scenario = FragmentScenario.launchInContainer(Hilt_InstrumentedFragment.class)) {
+            getRecordedSpans(0);
         }
     }
 

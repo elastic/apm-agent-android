@@ -14,6 +14,7 @@ import java.util.List;
 
 import co.elastic.apm.android.test.fragments.FullCreationFragment;
 import co.elastic.apm.android.test.fragments.OnCreateMissingFragment;
+import co.elastic.apm.android.test.fragments.OnCreateViewOnlyFragment;
 import co.elastic.apm.android.test.fragments.ViewlessCreationFragment;
 import co.elastic.apm.android.test.testutils.MainApp;
 import co.elastic.apm.android.test.testutils.base.BaseTest;
@@ -106,6 +107,26 @@ public class FragmentLifecycleInstrumentationTest extends BaseTest {
                         .isDirectChildOf(rootSpan)
                         .isNamed(getSpanMethodName(OnCreateMissingFragment.class, FragmentMethod.ON_VIEW_CREATED));
                 Spans.verify(fragment.getOnViewCreatedSpanContext()).belongsTo(onViewCreatedSpan);
+            });
+        }
+    }
+
+    @Test
+    public void onCreation_whenOnlyOnCreateViewIsAvailable_ignoreOthers() {
+        try (FragmentScenario<OnCreateViewOnlyFragment> scenario = FragmentScenario.launchInContainer(OnCreateViewOnlyFragment.class)) {
+            scenario.onFragment(fragment -> {
+                List<SpanData> spans = getRecordedSpans(2);
+                SpanData rootSpan = spans.get(0);
+                SpanData onCreateViewSpan = spans.get(1);
+
+                Spans.verify(rootSpan)
+                        .hasNoParent()
+                        .isNamed(getClassSpanName(OnCreateViewOnlyFragment.class, " - Creating"));
+
+                Spans.verify(onCreateViewSpan)
+                        .isDirectChildOf(rootSpan)
+                        .isNamed(getSpanMethodName(OnCreateViewOnlyFragment.class, FragmentMethod.ON_CREATE_VIEW));
+                Spans.verify(fragment.getOnCreateViewSpanContext()).belongsTo(onCreateViewSpan);
             });
         }
     }

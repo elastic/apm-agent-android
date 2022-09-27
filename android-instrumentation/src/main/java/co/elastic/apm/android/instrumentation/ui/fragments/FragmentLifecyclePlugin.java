@@ -20,6 +20,8 @@ public class FragmentLifecyclePlugin extends BaseLifecycleMethodsPlugin {
     @Override
     protected Class<?> getAdviceClass(int methodCount) {
         switch (methodCount) {
+            case 1:
+                return Fragment1LifecycleMethodAdvice.class;
             case 2:
                 return Fragment2LifecycleMethodAdvice.class;
             case 3:

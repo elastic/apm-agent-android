@@ -2,6 +2,8 @@ package co.elastic.apm.android.sdk.internal.instrumentation;
 
 import com.blogspot.mydailyjava.weaklockfree.WeakConcurrentMap;
 
+import java.lang.reflect.Method;
+
 import co.elastic.apm.android.sdk.traces.common.tools.ElasticTracer;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanBuilder;
@@ -12,9 +14,9 @@ import io.opentelemetry.context.Scope;
 public class LifecycleMultiMethodSpan {
     private static final WeakConcurrentMap<Span, Integer> methodCount = new WeakConcurrentMap.WithInlinedExpunction<>();
 
-    public static SpanWithScope onMethodEnter(Object owner, ElasticTracer tracer) {
+    public static SpanWithScope onMethodEnter(Object owner, Method method, ElasticTracer tracer) {
         ensureRootSpanIsCreated(owner, tracer);
-        SpanBuilder spanBuilder = tracer.spanBuilder();
+        SpanBuilder spanBuilder = tracer.spanBuilder(owner.getClass().getName() + "->" + method.getName());
         Span span = spanBuilder.startSpan();
         Scope scope = span.makeCurrent();
 

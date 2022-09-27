@@ -46,13 +46,4 @@ public class ElasticTracer implements Tracer {
     public SpanBuilder spanBuilder(@NonNull String spanName) {
         return tracer.spanBuilder(spanName);
     }
-
-    public SpanBuilder spanBuilder() {
-        return spanBuilder(getCallerMethodId());
-    }
-
-    private String getCallerMethodId() {
-        StackTraceElement element = Thread.currentThread().getStackTrace()[4];
-        return element.getClassName() + "->" + element.getMethodName();
-    }
 }

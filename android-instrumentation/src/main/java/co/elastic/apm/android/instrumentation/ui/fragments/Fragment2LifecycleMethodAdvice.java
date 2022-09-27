@@ -13,8 +13,9 @@ public class Fragment2LifecycleMethodAdvice {
     @Advice.OnMethodEnter
     public static void onMethodEnter(
             @Advice.This Object owner,
+            @Advice.Origin Method method,
             @Advice.Local("elasticSpanWithScope") LifecycleMultiMethodSpan.SpanWithScope spanWithScope) {
-        spanWithScope = LifecycleMultiMethodSpan.onMethodEnter(owner, ElasticTracer.androidFragment());
+        spanWithScope = LifecycleMultiMethodSpan.onMethodEnter(owner, method, ElasticTracer.androidFragment());
     }
 
     @Advice.OnMethodExit(onThrowable = Throwable.class)

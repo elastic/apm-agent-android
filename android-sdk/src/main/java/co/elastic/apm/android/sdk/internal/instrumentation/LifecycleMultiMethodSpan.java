@@ -22,12 +22,16 @@ public class LifecycleMultiMethodSpan {
     }
 
     public static void onMethodExit(SpanWithScope spanWithScope, Throwable thrown, int maxMethods) {
+        onMethodExit(spanWithScope, thrown, maxMethods, false);
+    }
+
+    public static void onMethodExit(SpanWithScope spanWithScope, Throwable thrown, int maxMethods, boolean forceEndRoot) {
         endMethodSpan(spanWithScope, thrown);
 
         Span rootSpan = Span.current();
         Integer endedSpans = methodCount.getIfPresent(rootSpan);
         endedSpans++;
-        if (thrown != null || endedSpans == maxMethods) {
+        if (forceEndRoot || thrown != null || endedSpans == maxMethods) {
             endRootSpanAndCleanUp(rootSpan);
         } else {
             methodCount.put(rootSpan, endedSpans);

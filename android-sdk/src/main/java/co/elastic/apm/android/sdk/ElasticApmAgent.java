@@ -2,6 +2,8 @@ package co.elastic.apm.android.sdk;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+
 import co.elastic.apm.android.sdk.attributes.AttributesCompose;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
@@ -15,6 +17,7 @@ import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
+import io.opentelemetry.sdk.trace.SpanProcessor;
 
 public final class ElasticApmAgent {
 
@@ -84,13 +87,22 @@ public final class ElasticApmAgent {
         Resource resource = Resource.getDefault()
                 .merge(globalAttributes.provideAsResource());
 
-        ElasticSpanProcessor processor = connectivity.getSpanProcessor();
+        ElasticSpanProcessor processor = getProcessor();
         processor.addAllExclusionRules(configuration.httpTraceConfiguration.exclusionRules);
 
         return SdkTracerProvider.builder()
                 .addSpanProcessor(processor)
                 .setResource(resource)
                 .build();
+    }
+
+    @NonNull
+    private ElasticSpanProcessor getProcessor() {
+        SpanProcessor spanProcessor = connectivity.getSpanProcessor();
+        if (spanProcessor instanceof ElasticSpanProcessor) {
+            return (ElasticSpanProcessor) spanProcessor;
+        }
+        return new ElasticSpanProcessor(spanProcessor);
     }
 
     private ContextPropagators getContextPropagator() {

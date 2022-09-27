@@ -1,7 +1,6 @@
 package co.elastic.apm.android.sdk.traces.connectivity.custom;
 
 import co.elastic.apm.android.sdk.traces.connectivity.Connectivity;
-import co.elastic.apm.android.sdk.traces.otel.processor.ElasticSpanProcessor;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 
 public class CustomProcessorConnectivity implements Connectivity {
@@ -12,7 +11,7 @@ public class CustomProcessorConnectivity implements Connectivity {
     }
 
     @Override
-    public ElasticSpanProcessor getSpanProcessor() {
-        return new ElasticSpanProcessor(processor);
+    public SpanProcessor getSpanProcessor() {
+        return processor;
     }
 }

@@ -2,7 +2,6 @@ package co.elastic.apm.android.sdk.traces.connectivity;
 
 import co.elastic.apm.android.sdk.traces.connectivity.custom.CustomExporterConnectivity;
 import co.elastic.apm.android.sdk.traces.connectivity.custom.CustomProcessorConnectivity;
-import co.elastic.apm.android.sdk.traces.otel.processor.ElasticSpanProcessor;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
@@ -20,5 +19,5 @@ public interface Connectivity {
         return new CustomProcessorConnectivity(processor);
     }
 
-    ElasticSpanProcessor getSpanProcessor();
+    SpanProcessor getSpanProcessor();
 }

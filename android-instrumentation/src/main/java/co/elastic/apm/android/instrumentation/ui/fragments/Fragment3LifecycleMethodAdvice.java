@@ -2,7 +2,6 @@ package co.elastic.apm.android.instrumentation.ui.fragments;
 
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.implementation.bytecode.assign.Assigner;
-import net.bytebuddy.jar.asm.Type;
 
 import java.lang.reflect.Method;
 
@@ -24,7 +23,6 @@ public class Fragment3LifecycleMethodAdvice {
             @Advice.Return(typing = Assigner.Typing.DYNAMIC) Object returned,
             @Advice.Local("elasticSpanWithScope") LifecycleMultiMethodSpan.SpanWithScope spanWithScope,
             @Advice.Thrown Throwable thrown) {
-        System.out.println("Method description: " + Type.getMethodDescriptor(method));//todo delete
         boolean forceEndRoot = false;
         if (!method.getReturnType().equals(void.class)) {
             forceEndRoot = returned == null;

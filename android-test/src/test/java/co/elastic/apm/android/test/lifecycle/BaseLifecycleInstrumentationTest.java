@@ -37,6 +37,6 @@ public class BaseLifecycleInstrumentationTest extends BaseTest {
     }
 
     protected String getRootLifecycleSpanName(Class<?> theClass) {
-        return getClassSpanName(theClass, " - Creating");
+        return getClassSpanName(theClass, " - View appearing");
     }
 }

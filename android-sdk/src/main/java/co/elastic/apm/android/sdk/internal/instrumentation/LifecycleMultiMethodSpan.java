@@ -60,7 +60,7 @@ public class LifecycleMultiMethodSpan {
 
     private static void ensureRootSpanIsCreated(Object owner, ElasticTracer tracer) {
         if (SpanUtilities.runningSpanNotFound()) {
-            SpanBuilder spanBuilder = tracer.spanBuilder(owner.getClass().getName() + " - Creating");
+            SpanBuilder spanBuilder = tracer.spanBuilder(owner.getClass().getName() + " - View appearing");
             Span rootSpan = spanBuilder.startSpan();
             rootSpan.makeCurrent();
             methodCount.put(rootSpan, 0);

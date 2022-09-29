@@ -4,6 +4,7 @@ import com.blogspot.mydailyjava.weaklockfree.WeakConcurrentMap;
 
 import java.lang.reflect.Method;
 
+import co.elastic.apm.android.sdk.internal.otel.SpanUtilities;
 import co.elastic.apm.android.sdk.traces.common.tools.ElasticTracer;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanBuilder;
@@ -58,7 +59,7 @@ public class LifecycleMultiMethodSpan {
     }
 
     private static void ensureRootSpanIsCreated(Object owner, ElasticTracer tracer) {
-        if (Context.current() == Context.root()) {
+        if (SpanUtilities.runningSpanNotFound()) {
             SpanBuilder spanBuilder = tracer.spanBuilder(owner.getClass().getName() + " - Creating");
             Span rootSpan = spanBuilder.startSpan();
             rootSpan.makeCurrent();

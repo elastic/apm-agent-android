@@ -44,6 +44,13 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
 
     private void addSdkDependency() {
         project.getDependencies().add("implementation", BuildConfig.SDK_DEPENDENCY_URI);
+        if (kotlinPluginFound()) {
+            project.getDependencies().add("implementation", BuildConfig.SDK_KTX_DEPENDENCY_URI);
+        }
+    }
+
+    private boolean kotlinPluginFound() {
+        return project.getExtensions().findByName("kotlin") != null;
     }
 
     private void addInstrumentationDependency() {

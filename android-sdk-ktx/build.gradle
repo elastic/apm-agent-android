@@ -1,6 +1,6 @@
 plugins {
     id 'com.android.library'
-    id 'co.elastic.apm.notice-producer'
+    id 'org.jetbrains.kotlin.android'
 }
 apply from: "$rootDir/publishing.gradle"
 
@@ -30,14 +30,8 @@ android {
     }
 }
 
-licensesConfig {
-    manualMappingFile = rootProject.file("manual_licenses_map.txt")
-}
-
 dependencies {
+    api "io.opentelemetry:opentelemetry-extension-kotlin:$openTelemetry_version"
     implementation project(':android-sdk')
-    implementation project(':android-sdk-ktx')
-    implementation project(':android-common')
-    implementation "androidx.fragment:fragment:1.5.3"
-    implementation "net.bytebuddy:byte-buddy:$bytebuddy_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
 }

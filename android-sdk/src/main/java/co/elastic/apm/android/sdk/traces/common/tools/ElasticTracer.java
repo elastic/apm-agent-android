@@ -42,6 +42,10 @@ public class ElasticTracer implements Tracer {
         return create("Android Fragment");
     }
 
+    public static ElasticTracer coroutine() {
+        return create("Kotlin Coroutine");
+    }
+
     @Override
     public SpanBuilder spanBuilder(@NonNull String spanName) {
         return tracer.spanBuilder(spanName);

@@ -5,9 +5,9 @@ import org.slf4j.event.Level;
 import org.slf4j.helpers.LegacyAbstractLogger;
 import org.slf4j.helpers.MessageFormatter;
 
-public abstract class BaseLogger extends LegacyAbstractLogger {
+public abstract class BaseELogger extends LegacyAbstractLogger {
 
-    protected BaseLogger(String tag) {
+    protected BaseELogger(String tag) {
         name = tag;
     }
 

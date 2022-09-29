@@ -19,6 +19,8 @@ import org.gradle.api.plugins.ExtensionContainer;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.TaskProvider;
 
+import co.elastic.apm.android.common.internal.logging.Elog;
+import co.elastic.apm.android.plugin.logging.GradleLoggerFactory;
 import co.elastic.apm.android.plugin.tasks.ApmInfoGenerator;
 import co.elastic.apm.android.plugin.tasks.OkHttpEventlistenerGenerator;
 import co.elastic.apm.generated.BuildConfig;
@@ -31,6 +33,7 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
     @Override
     public void apply(Project project) {
         this.project = project;
+        Elog.init(new GradleLoggerFactory());
         androidExtension = project.getExtensions().getByType(BaseExtension.class);
         addBytebuddyPlugin();
         addSdkDependency();

@@ -4,9 +4,9 @@ import android.util.Log;
 
 import org.slf4j.event.Level;
 
-import co.elastic.apm.android.common.internal.logging.BaseLogger;
+import co.elastic.apm.android.common.internal.logging.BaseELogger;
 
-class AndroidLogger extends BaseLogger {
+class AndroidLogger extends BaseELogger {
 
     AndroidLogger(String tag) {
         super(tag);

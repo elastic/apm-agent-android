@@ -1,20 +1,25 @@
 package co.elastic.apm.android.common.internal.logging;
 
-import org.slf4j.ILoggerFactory;
+import androidx.annotation.NonNull;
+
 import org.slf4j.Logger;
 
 public class Elog {
 
-    private static ILoggerFactory loggerFactory;
+    private static ELoggerFactory loggerFactory;
 
-    public static void init(ILoggerFactory factory) {
+    public static void init(ELoggerFactory factory) {
         if (loggerFactory != null) {
             throw new IllegalStateException(Elog.class.getSimpleName() + " already initialized");
         }
         loggerFactory = factory;
     }
 
-    public static Logger getLogger(String name) {
+    public static Logger getLogger(@NonNull String name) {
         return loggerFactory.getLogger(name);
+    }
+
+    public static Logger getLogger() {
+        return loggerFactory.getDefaultLogger();
     }
 }

@@ -1,4 +1,4 @@
-package co.elastic.apm.android.sdk.internal.logging;
+package co.elastic.apm.android.common.internal.logging;
 
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;

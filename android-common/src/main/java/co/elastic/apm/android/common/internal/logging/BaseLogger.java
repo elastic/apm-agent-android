@@ -1,13 +1,13 @@
-package co.elastic.apm.android.sdk.internal.logging;
+package co.elastic.apm.android.common.internal.logging;
 
 import org.slf4j.Marker;
 import org.slf4j.event.Level;
 import org.slf4j.helpers.LegacyAbstractLogger;
 import org.slf4j.helpers.MessageFormatter;
 
-abstract class BaseLogger extends LegacyAbstractLogger {
+public abstract class BaseLogger extends LegacyAbstractLogger {
 
-    BaseLogger(String tag) {
+    protected BaseLogger(String tag) {
         name = tag;
     }
 

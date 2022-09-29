@@ -40,7 +40,6 @@ dependencies {
     api "io.opentelemetry:opentelemetry-api:$openTelemetry_version"
     api "io.opentelemetry:opentelemetry-sdk:$openTelemetry_version"
     api "com.squareup.okhttp3:okhttp:$okhttp_version"
-    implementation "org.slf4j:slf4j-api:2.0.0"
     implementation 'com.blogspot.mydailyjava:weak-lock-free:0.18'
     implementation project(':android-common')
     implementation "io.opentelemetry:opentelemetry-exporter-otlp:$openTelemetry_version"

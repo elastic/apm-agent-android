@@ -15,10 +15,11 @@ public final class SpanUtilities {
         if (runningSpanNotFound()) {
             return;
         }
+        Span current = Span.current();
         HistoryScope scope = HistoryScope.from(Context.current());
         if (scope != null) {
+            discard(current);
             scope.close();
-            discard(Span.current());
         }
     }
 

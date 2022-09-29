@@ -7,7 +7,9 @@ import androidx.annotation.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.attributes.AttributesCompose;
+import co.elastic.apm.android.sdk.internal.logging.AndroidLoggerFactory;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
@@ -44,6 +46,7 @@ public final class ElasticApmAgent {
         if (instance != null) {
             throw new IllegalStateException("Already initialized");
         }
+        Elog.init(new AndroidLoggerFactory());
         instance = new ElasticApmAgent(context, connectivity, configuration);
         instance.onInitializationFinished();
         return instance;

@@ -12,11 +12,13 @@ import org.robolectric.annotation.Config;
 import java.util.List;
 
 import co.elastic.apm.android.test.activities.ErrorActivity;
+import co.elastic.apm.android.test.activities.ErrorCoroutineActivity;
 import co.elastic.apm.android.test.activities.ErrorHalfWayActivity;
 import co.elastic.apm.android.test.activities.FullCreationActivity;
 import co.elastic.apm.android.test.activities.Hilt_InstrumentedActivity;
 import co.elastic.apm.android.test.activities.MissingOnResumeActivity;
 import co.elastic.apm.android.test.activities.MissingOnStartAndOnResumeActivity;
+import co.elastic.apm.android.test.activities.SimpleCoroutineActivity;
 import co.elastic.apm.android.test.testutils.MainApp;
 import co.elastic.apm.android.test.testutils.spans.Spans;
 import io.opentelemetry.sdk.trace.data.SpanData;
@@ -190,6 +192,43 @@ public class ActivityLifecycleInstrumentationTest extends BaseLifecycleInstrumen
                         .hasAmountOfRecordedExceptions(1)
                         .hasRecordedException(e);
             }
+        }
+    }
+
+    @Test
+    public void onCreation_whenCoroutineIsLaunched_createSpanForIt_and_preserveContext() {
+        try (ActivityController<SimpleCoroutineActivity> controller = Robolectric.buildActivity(SimpleCoroutineActivity.class)) {
+            controller.setup();
+
+            List<SpanData> spans = getRecordedSpans(4);
+
+            SpanData onCreateSpan = spans.get(1);
+            SpanData coroutineSpan = spans.get(2);
+            SpanData mySpan = spans.get(3);
+
+            Spans.verify(coroutineSpan)
+                    .isDirectChildOf(onCreateSpan)
+                    .isNamed("Coroutine");
+
+            Spans.verify(mySpan)
+                    .isDirectChildOf(coroutineSpan)
+                    .isNamed("My Span Inside Coroutine");
+        }
+    }
+
+    @Test
+    public void onCreation_whenCoroutineCrashes_recordException() {
+        try (ActivityController<ErrorCoroutineActivity> controller = Robolectric.buildActivity(ErrorCoroutineActivity.class)) {
+            controller.setup();
+            List<SpanData> spans = getRecordedSpans(3);
+
+            SpanData onCreateSpan = spans.get(1);
+            SpanData coroutineSpan = spans.get(2);
+
+            Spans.verifyFailed(coroutineSpan)
+                    .isDirectChildOf(onCreateSpan)
+                    .hasAmountOfRecordedExceptions(1)
+                    .isNamed("Coroutine");
         }
     }
 }

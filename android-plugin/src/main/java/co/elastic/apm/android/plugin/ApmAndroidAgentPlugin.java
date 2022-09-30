@@ -2,6 +2,7 @@ package co.elastic.apm.android.plugin;
 
 import com.android.build.api.artifact.MultipleArtifact;
 import com.android.build.api.component.impl.ComponentImpl;
+import com.android.build.api.instrumentation.InstrumentationScope;
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension;
 import com.android.build.api.variant.ApplicationVariant;
 import com.android.build.gradle.BaseExtension;
@@ -20,10 +21,12 @@ import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.TaskProvider;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
+import co.elastic.apm.android.plugin.instrumentation.ElasticLocalInstrumentationFactory;
 import co.elastic.apm.android.plugin.logging.GradleLoggerFactory;
 import co.elastic.apm.android.plugin.tasks.ApmInfoGenerator;
 import co.elastic.apm.android.plugin.tasks.OkHttpEventlistenerGenerator;
 import co.elastic.apm.generated.BuildConfig;
+import kotlin.Unit;
 
 class ApmAndroidAgentPlugin implements Plugin<Project> {
 
@@ -64,12 +67,17 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
         ExtensionContainer extensions = project.getExtensions();
         ApplicationAndroidComponentsExtension extension = extensions.getByType(ApplicationAndroidComponentsExtension.class);
 
-        extension.onVariants(extension.selector().all(), this::addTasksToVariant);
+        extension.onVariants(extension.selector().all(), this::enhanceVariant);
     }
 
-    private void addTasksToVariant(ApplicationVariant applicationVariant) {
+    private void enhanceVariant(ApplicationVariant applicationVariant) {
         addApmInfoGenerator(applicationVariant);
         addOkhttpEventListenerGenerator(applicationVariant);
+        addLocalRemapping(applicationVariant);
+    }
+
+    private void addLocalRemapping(ApplicationVariant applicationVariant) {
+        applicationVariant.getInstrumentation().transformClassesWith(ElasticLocalInstrumentationFactory.class, InstrumentationScope.PROJECT, none -> Unit.INSTANCE);
     }
 
     private void addOkhttpEventListenerGenerator(ApplicationVariant applicationVariant) {

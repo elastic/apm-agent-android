@@ -1,12 +1,12 @@
-package co.elastic.apm.android.instrumentation.generic;
+package co.elastic.apm.android.plugin.instrumentation.remapping;
 
-import net.bytebuddy.jar.asm.ClassVisitor;
-import net.bytebuddy.jar.asm.MethodVisitor;
-import net.bytebuddy.jar.asm.Opcodes;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
 public class CoroutineBuilderRemapper extends ClassVisitor {
 
-    protected CoroutineBuilderRemapper(ClassVisitor classVisitor) {
+    public CoroutineBuilderRemapper(ClassVisitor classVisitor) {
         super(Opcodes.ASM9, classVisitor);
     }
 

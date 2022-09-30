@@ -1,17 +1,14 @@
-package co.elastic.apm.android.instrumentation.generic;
+package co.elastic.apm.android.plugin.instrumentation.remapping;
 
-import net.bytebuddy.jar.asm.MethodVisitor;
-import net.bytebuddy.jar.asm.Opcodes;
-import net.bytebuddy.jar.asm.Type;
-
-import co.elastic.apm.android.sdk.instrumentation.CoroutineExtensionsKt;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
 public class CoroutineLaunchCallMethodRemapper extends MethodVisitor {
     private final String elasticLaunchOwner;
 
     protected CoroutineLaunchCallMethodRemapper(MethodVisitor methodVisitor) {
         super(Opcodes.ASM9, methodVisitor);
-        elasticLaunchOwner = Type.getInternalName(CoroutineExtensionsKt.class);
+        elasticLaunchOwner = "co/elastic/apm/android/sdk/instrumentation/CoroutineExtensionsKt";
     }
 
     @Override

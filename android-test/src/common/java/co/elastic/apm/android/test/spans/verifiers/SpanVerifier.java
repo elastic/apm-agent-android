@@ -1,4 +1,4 @@
-package co.elastic.apm.android.test.testutils.spans.verifiers;
+package co.elastic.apm.android.test.spans.verifiers;
 
 import io.opentelemetry.sdk.trace.data.SpanData;
 

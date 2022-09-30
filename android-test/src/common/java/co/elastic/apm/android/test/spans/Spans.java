@@ -1,9 +1,9 @@
-package co.elastic.apm.android.test.testutils.spans;
+package co.elastic.apm.android.test.spans;
 
 import static org.junit.Assert.assertEquals;
 
-import co.elastic.apm.android.test.testutils.spans.verifiers.FailedSpanVerifier;
-import co.elastic.apm.android.test.testutils.spans.verifiers.SuccessfulSpanVerifier;
+import co.elastic.apm.android.test.spans.verifiers.FailedSpanVerifier;
+import co.elastic.apm.android.test.spans.verifiers.SuccessfulSpanVerifier;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.context.Context;

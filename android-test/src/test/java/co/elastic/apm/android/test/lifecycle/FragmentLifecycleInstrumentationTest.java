@@ -19,7 +19,7 @@ import co.elastic.apm.android.test.fragments.OnCreateMissingFragment;
 import co.elastic.apm.android.test.fragments.OnCreateViewOnlyFragment;
 import co.elastic.apm.android.test.fragments.ViewlessCreationFragment;
 import co.elastic.apm.android.test.testutils.MainApp;
-import co.elastic.apm.android.test.testutils.spans.Spans;
+import co.elastic.apm.android.test.spans.Spans;
 import io.opentelemetry.sdk.trace.data.SpanData;
 
 @Config(application = MainApp.class)

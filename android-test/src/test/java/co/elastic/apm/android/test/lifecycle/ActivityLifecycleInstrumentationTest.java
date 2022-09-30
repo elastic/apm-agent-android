@@ -20,7 +20,7 @@ import co.elastic.apm.android.test.activities.MissingOnResumeActivity;
 import co.elastic.apm.android.test.activities.MissingOnStartAndOnResumeActivity;
 import co.elastic.apm.android.test.activities.SimpleCoroutineActivity;
 import co.elastic.apm.android.test.testutils.MainApp;
-import co.elastic.apm.android.test.testutils.spans.Spans;
+import co.elastic.apm.android.test.spans.Spans;
 import io.opentelemetry.sdk.trace.data.SpanData;
 
 @Config(application = MainApp.class)

@@ -20,4 +20,5 @@ ext {
     androidAnnotations_version = "1.4.0"
     bytebuddy_version = "1.12.18-SNAPSHOT"
     okhttp_version = '3.11.0'
+    espresso_version = '3.4.0'
 }

@@ -1,7 +1,5 @@
 package co.elastic.apm.android.test.testutils.base;
 
-import static org.mockito.Mockito.mock;
-
 import android.app.Application;
 
 import org.robolectric.TestLifecycleApplication;
@@ -13,17 +11,16 @@ import co.elastic.apm.android.sdk.traces.connectivity.Connectivity;
 import co.elastic.apm.android.test.testutils.spans.SpanExporterProvider;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
-import io.opentelemetry.sdk.trace.export.SpanExporter;
 
 public class BaseTestApplication extends Application implements SpanExporterProvider, TestLifecycleApplication {
-    protected final SpanExporter exporter;
+    protected final DummySpanExporter exporter;
 
     public BaseTestApplication() {
-        exporter = mock(SpanExporter.class);
+        exporter = new DummySpanExporter();
     }
 
     @Override
-    public SpanExporter getSpanExporter() {
+    public DummySpanExporter getSpanExporter() {
         return exporter;
     }
 

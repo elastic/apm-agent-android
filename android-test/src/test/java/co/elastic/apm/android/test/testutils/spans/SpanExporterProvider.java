@@ -1,7 +1,7 @@
 package co.elastic.apm.android.test.testutils.spans;
 
-import io.opentelemetry.sdk.trace.export.SpanExporter;
+import co.elastic.apm.android.test.testutils.base.DummySpanExporter;
 
 public interface SpanExporterProvider {
-    SpanExporter getSpanExporter();
+    DummySpanExporter getSpanExporter();
 }

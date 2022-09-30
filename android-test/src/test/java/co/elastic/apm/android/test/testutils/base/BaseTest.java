@@ -1,10 +1,7 @@
 package co.elastic.apm.android.test.testutils.base;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
-import org.mockito.ArgumentCaptor;
 import org.robolectric.RuntimeEnvironment;
 
 import java.util.ArrayList;
@@ -13,24 +10,20 @@ import java.util.List;
 
 import co.elastic.apm.android.test.testutils.spans.SpanExporterProvider;
 import io.opentelemetry.sdk.trace.data.SpanData;
-import io.opentelemetry.sdk.trace.export.SpanExporter;
 
 public class BaseTest {
 
     protected List<SpanData> getRecordedSpans(int amountExpected) {
-        SpanExporter spanExporter = getSpanExporter();
-        List<SpanData> spans = getCapturedSpansOrderedByCreation(spanExporter, amountExpected);
+        List<SpanData> spans = getCapturedSpansOrderedByCreation(getSpanExporter(), amountExpected);
         assertEquals(amountExpected, spans.size());
 
         return spans;
     }
 
     @SuppressWarnings("unchecked")
-    private List<SpanData> getCapturedSpansOrderedByCreation(SpanExporter spanExporter, int amountExpected) {
+    private List<SpanData> getCapturedSpansOrderedByCreation(DummySpanExporter spanExporter, int amountExpected) {
         List<SpanData> spans = new ArrayList<>();
-        ArgumentCaptor<List<SpanData>> captor = ArgumentCaptor.forClass(List.class);
-        verify(spanExporter, times(amountExpected)).export(captor.capture());
-        for (List<SpanData> list : captor.getAllValues()) {
+        for (List<SpanData> list : spanExporter.getCapturedSpans()) {
             if (list.size() > 1) {
                 // Since we're using SimpleSpanProcessor, each call to SpanExporter.export must contain
                 // only one span.
@@ -43,7 +36,7 @@ public class BaseTest {
         return spans;
     }
 
-    protected SpanExporter getSpanExporter() {
+    protected DummySpanExporter getSpanExporter() {
         SpanExporterProvider spanExporterProvider = (SpanExporterProvider) RuntimeEnvironment.getApplication();
         return spanExporterProvider.getSpanExporter();
     }

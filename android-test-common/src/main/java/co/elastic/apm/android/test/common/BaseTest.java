@@ -1,4 +1,4 @@
-package co.elastic.apm.android.test;
+package co.elastic.apm.android.test.common;
 
 import static org.junit.Assert.assertEquals;
 
@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import co.elastic.apm.android.test.utilities.DummySpanExporter;
+import co.elastic.apm.android.test.common.spans.SpanExporterCaptor;
 import io.opentelemetry.sdk.trace.data.SpanData;
 
 public abstract class BaseTest {
@@ -19,7 +19,7 @@ public abstract class BaseTest {
     }
 
     @SuppressWarnings("unchecked")
-    private List<SpanData> getCapturedSpansOrderedByCreation(DummySpanExporter spanExporter, int amountExpected) {
+    private List<SpanData> getCapturedSpansOrderedByCreation(SpanExporterCaptor spanExporter, int amountExpected) {
         List<SpanData> spans = new ArrayList<>();
         for (List<SpanData> list : spanExporter.getCapturedSpans()) {
             if (list.size() > 1) {
@@ -34,7 +34,7 @@ public abstract class BaseTest {
         return spans;
     }
 
-    protected abstract DummySpanExporter getSpanExporter();
+    protected abstract SpanExporterCaptor getSpanExporter();
 
     protected String getClassSpanName(Class<?> theClass, String suffix) {
         return theClass.getName() + suffix;

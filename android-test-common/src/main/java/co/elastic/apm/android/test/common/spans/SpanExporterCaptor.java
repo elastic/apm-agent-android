@@ -1,4 +1,4 @@
-package co.elastic.apm.android.test.utilities;
+package co.elastic.apm.android.test.common.spans;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -9,7 +9,7 @@ import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
-public class DummySpanExporter implements SpanExporter {
+public class SpanExporterCaptor implements SpanExporter {
     private final List<List<SpanData>> capturedSpans = new ArrayList<>();
 
     @Override

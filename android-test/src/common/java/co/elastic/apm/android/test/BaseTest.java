@@ -1,17 +1,15 @@
-package co.elastic.apm.android.test.testutils.base;
+package co.elastic.apm.android.test;
 
 import static org.junit.Assert.assertEquals;
-
-import org.robolectric.RuntimeEnvironment;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import co.elastic.apm.android.test.testutils.spans.SpanExporterProvider;
+import co.elastic.apm.android.test.utilities.DummySpanExporter;
 import io.opentelemetry.sdk.trace.data.SpanData;
 
-public class BaseTest {
+public abstract class BaseTest {
 
     protected List<SpanData> getRecordedSpans(int amountExpected) {
         List<SpanData> spans = getCapturedSpansOrderedByCreation(getSpanExporter(), amountExpected);
@@ -36,10 +34,7 @@ public class BaseTest {
         return spans;
     }
 
-    protected DummySpanExporter getSpanExporter() {
-        SpanExporterProvider spanExporterProvider = (SpanExporterProvider) RuntimeEnvironment.getApplication();
-        return spanExporterProvider.getSpanExporter();
-    }
+    protected abstract DummySpanExporter getSpanExporter();
 
     protected String getClassSpanName(Class<?> theClass, String suffix) {
         return theClass.getName() + suffix;

@@ -1,8 +1,8 @@
 package co.elastic.apm.android.test.lifecycle;
 
-import co.elastic.apm.android.test.testutils.base.BaseTest;
+import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
 
-public class BaseLifecycleInstrumentationTest extends BaseTest {
+public class BaseLifecycleInstrumentationTest extends BaseRobolectricTest {
 
     protected enum ActivityMethod {
         ON_CREATE("onCreate"),

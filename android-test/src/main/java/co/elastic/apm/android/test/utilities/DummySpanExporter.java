@@ -1,4 +1,4 @@
-package co.elastic.apm.android.test.testutils.base;
+package co.elastic.apm.android.test.utilities;
 
 import java.util.ArrayList;
 import java.util.Collection;

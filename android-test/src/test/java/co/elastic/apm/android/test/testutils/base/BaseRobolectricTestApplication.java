@@ -8,14 +8,15 @@ import java.lang.reflect.Method;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.traces.connectivity.Connectivity;
-import co.elastic.apm.android.test.testutils.spans.SpanExporterProvider;
+import co.elastic.apm.android.test.utilities.DummySpanExporter;
+import co.elastic.apm.android.test.utilities.SpanExporterProvider;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 
-public class BaseTestApplication extends Application implements SpanExporterProvider, TestLifecycleApplication {
-    protected final DummySpanExporter exporter;
+public class BaseRobolectricTestApplication extends Application implements SpanExporterProvider, TestLifecycleApplication {
+    private final DummySpanExporter exporter;
 
-    public BaseTestApplication() {
+    public BaseRobolectricTestApplication() {
         exporter = new DummySpanExporter();
     }
 

@@ -33,5 +33,6 @@ android {
 dependencies {
     api "io.opentelemetry:opentelemetry-extension-kotlin:$openTelemetry_version"
     implementation project(':android-sdk')
+    implementation project(':android-common')
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
 }

@@ -18,16 +18,27 @@
  */
 package co.elastic.apm.android.instrumentation.okhttp.eventlistener;
 
-import net.bytebuddy.asm.Advice;
+import net.bytebuddy.build.Plugin;
+import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.dynamic.ClassFileLocator;
+import net.bytebuddy.dynamic.DynamicType;
 
-import java.lang.reflect.Method;
+import java.io.IOException;
 
-import co.elastic.apm.android.common.MethodCaller;
+public class CompositeEventListenerFactoryPlugin implements Plugin {
 
-public class CompositeEventListenerAdvice {
+    @Override
+    public DynamicType.Builder<?> apply(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassFileLocator classFileLocator) {
+        return builder.visit(new CompositeEventListenerRemapper());
+    }
 
-    @Advice.OnMethodEnter
-    public static void onEnter(@Advice.This MethodCaller owner, @Advice.Origin Method self, @Advice.AllArguments Object[] args) {
-        owner.doCall(self, args);
+    @Override
+    public void close() throws IOException {
+        // No operation.
+    }
+
+    @Override
+    public boolean matches(TypeDescription target) {
+        return target.getTypeName().equals("co.elastic.apm.android.common.okhttp.eventlistener.CompositeEventListenerFactory");
     }
 }

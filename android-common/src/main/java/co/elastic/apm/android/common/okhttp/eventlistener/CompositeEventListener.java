@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.traces.http.impl.okhttp.compose;
+package co.elastic.apm.android.common.okhttp.eventlistener;
 
 import androidx.annotation.NonNull;
 
@@ -43,5 +43,9 @@ public class CompositeEventListener extends EventListener implements MethodCalle
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    public static String getGeneratedName() {
+        return CompositeEventListener.class.getPackage().getName() + ".Generated_" + CompositeEventListener.class.getSimpleName();
     }
 }

@@ -1,5 +1,7 @@
 # apm-agent-android
 
+# Work in progress ⚠️🚧
+
 Elastic APM Android Agent
 
 ## Local testing

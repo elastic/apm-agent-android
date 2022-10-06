@@ -7,6 +7,10 @@ apply from: "$rootDir/publishing.gradle"
 targetCompatibility = jvmCompatibility
 sourceCompatibility = jvmCompatibility
 
+licensesConfig {
+    manualMappingFile = rootProject.file("manual_licenses_map.txt")
+}
+
 dependencies {
     api "com.squareup.okhttp3:okhttp:$okhttp_version"
     implementation "androidx.annotation:annotation:$androidAnnotations_version"

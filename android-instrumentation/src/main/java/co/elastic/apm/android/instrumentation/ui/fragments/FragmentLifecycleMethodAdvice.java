@@ -20,6 +20,7 @@ public class FragmentLifecycleMethodAdvice {
 
     @Advice.OnMethodExit(onThrowable = Throwable.class)
     public static void onMethodExit(
+            @Advice.This Object owner,
             @Advice.Origin Method method,
             @Advice.Return(typing = Assigner.Typing.DYNAMIC) Object returned,
             @Advice.Local("elasticSpanWithScope") LifecycleMultiMethodSpan.SpanWithScope spanWithScope,
@@ -28,6 +29,6 @@ public class FragmentLifecycleMethodAdvice {
         if (!method.getReturnType().equals(void.class)) {
             endRoot = returned == null;
         }
-        LifecycleMultiMethodSpan.onMethodExit(spanWithScope, thrown, endRoot || method.isAnnotationPresent(LifecycleMultiMethodSpan.LastMethod.class));
+        LifecycleMultiMethodSpan.onMethodExit(owner, spanWithScope, thrown, endRoot || method.isAnnotationPresent(LifecycleMultiMethodSpan.LastMethod.class));
     }
 }

@@ -20,6 +20,7 @@ import co.elastic.apm.android.test.activities.MissingOnResumeActivity;
 import co.elastic.apm.android.test.activities.MissingOnStartAndOnResumeActivity;
 import co.elastic.apm.android.test.activities.NoLifecycleMethodsActivity;
 import co.elastic.apm.android.test.activities.SimpleCoroutineActivity;
+import co.elastic.apm.android.test.activities.TitleActivity;
 import co.elastic.apm.android.test.common.spans.Spans;
 import co.elastic.apm.android.test.testutils.MainApp;
 import io.opentelemetry.sdk.trace.data.SpanData;
@@ -267,6 +268,25 @@ public class ActivityLifecycleInstrumentationTest extends BaseLifecycleInstrumen
                     .isDirectChildOf(onCreateSpan)
                     .hasAmountOfRecordedExceptions(1)
                     .isNamed("Coroutine");
+        }
+    }
+
+    @Test
+    public void onCreation_whenTitleIsAvailable_useItForRootSpanName() {
+        try (ActivityController<TitleActivity> controller = Robolectric.buildActivity(TitleActivity.class)) {
+            controller.setup();
+            List<SpanData> spans = getRecordedSpans(2);
+
+            SpanData rootSpan = spans.get(0);
+            SpanData onCreateSpan = spans.get(1);
+
+            Spans.verify(rootSpan)
+                    .hasNoParent()
+                    .isNamed("A title - View appearing");
+
+            Spans.verify(onCreateSpan)
+                    .isDirectChildOf(rootSpan)
+                    .isNamed(getSpanMethodName(ActivityMethod.ON_CREATE));
         }
     }
 

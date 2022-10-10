@@ -19,9 +19,10 @@ public class ActivityLifecycleMethodAdvice {
 
     @Advice.OnMethodExit(onThrowable = Throwable.class)
     public static void onMethodExit(
+            @Advice.This Object owner,
             @Advice.Origin Method method,
             @Advice.Local("elasticSpanWithScope") LifecycleMultiMethodSpan.SpanWithScope spanWithScope,
             @Advice.Thrown Throwable thrown) {
-        LifecycleMultiMethodSpan.onMethodExit(spanWithScope, thrown, method.isAnnotationPresent(LifecycleMultiMethodSpan.LastMethod.class));
+        LifecycleMultiMethodSpan.onMethodExit(owner, spanWithScope, thrown, method.isAnnotationPresent(LifecycleMultiMethodSpan.LastMethod.class));
     }
 }

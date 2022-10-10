@@ -1,5 +1,7 @@
 package co.elastic.apm.android.sdk.internal.instrumentation;
 
+import android.app.Activity;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -14,6 +16,7 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 
 public class LifecycleMultiMethodSpan {
+    private static final String ROOT_SPAN_SUFFIX = " - View appearing";
 
     public static SpanWithScope onMethodEnter(String ownerName, String methodName, ElasticTracer tracer) {
         ensureRootSpanIsCreated(ownerName, tracer);
@@ -24,12 +27,22 @@ public class LifecycleMultiMethodSpan {
         return new SpanWithScope(span, scope);
     }
 
-    public static void onMethodExit(SpanWithScope spanWithScope, Throwable thrown, boolean endRoot) {
+    public static void onMethodExit(Object owner, SpanWithScope spanWithScope, Throwable thrown, boolean endRoot) {
         endMethodSpan(spanWithScope, thrown);
 
         Span rootSpan = Span.current();
         if (endRoot || thrown != null) {
+            trySetActivityTitleAsRootSpanName(owner, rootSpan);
             endRootSpanAndCleanUp(rootSpan);
+        }
+    }
+
+    private static void trySetActivityTitleAsRootSpanName(Object owner, Span rootSpan) {
+        if (owner instanceof Activity) {
+            CharSequence activityTitle = ((Activity) owner).getTitle();
+            if (activityTitle != null) {
+                rootSpan.updateName(activityTitle + ROOT_SPAN_SUFFIX);
+            }
         }
     }
 
@@ -51,7 +64,7 @@ public class LifecycleMultiMethodSpan {
 
     private static void ensureRootSpanIsCreated(String ownerName, ElasticTracer tracer) {
         if (SpanUtilities.runningSpanNotFound()) {
-            SpanBuilder spanBuilder = tracer.spanBuilder(ownerName + " - View appearing");
+            SpanBuilder spanBuilder = tracer.spanBuilder(ownerName + ROOT_SPAN_SUFFIX);
             Span rootSpan = spanBuilder.startSpan();
             rootSpan.makeCurrent();
         }

@@ -18,7 +18,6 @@ public abstract class BaseTest {
         return spans;
     }
 
-    @SuppressWarnings("unchecked")
     private List<SpanData> getCapturedSpansOrderedByCreation(SpanExporterCaptor spanExporter) {
         List<SpanData> spans = new ArrayList<>();
         for (List<SpanData> list : spanExporter.getCapturedSpans()) {

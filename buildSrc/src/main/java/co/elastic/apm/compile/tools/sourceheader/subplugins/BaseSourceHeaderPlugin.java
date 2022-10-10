@@ -16,7 +16,11 @@ public class BaseSourceHeaderPlugin implements Plugin<Project> {
         project.getPluginManager().apply(SpotlessPlugin.class);
         spotlessExtension = project.getExtensions().getByType(SpotlessExtension.class);
 
-        spotlessExtension.java(javaExtension -> javaExtension.licenseHeader("/*\n" +
+        spotlessExtension.java(javaExtension -> javaExtension.licenseHeader(getLicenseHeader()));
+    }
+
+    protected String getLicenseHeader() {
+        return "/*\n" +
                 " * Licensed to Elasticsearch B.V. under one or more contributor\n" +
                 " * license agreements. See the NOTICE file distributed with\n" +
                 " * this work for additional information regarding copyright\n" +
@@ -33,7 +37,7 @@ public class BaseSourceHeaderPlugin implements Plugin<Project> {
                 " * KIND, either express or implied.  See the License for the\n" +
                 " * specific language governing permissions and limitations\n" +
                 " * under the License.\n" +
-                " */\n"));
+                " */\n";
     }
 
     protected TaskProvider<Task> getSpotlessApply(Project project) {

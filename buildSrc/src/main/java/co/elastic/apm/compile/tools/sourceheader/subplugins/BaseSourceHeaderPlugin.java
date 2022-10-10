@@ -25,7 +25,7 @@ public class BaseSourceHeaderPlugin implements Plugin<Project> {
                 " * license agreements. See the NOTICE file distributed with\n" +
                 " * this work for additional information regarding copyright\n" +
                 " * ownership. Elasticsearch B.V. licenses this file to you under\n" +
-                " * the Apache License, Version 2.0 (the \" License \"); you may\n" +
+                " * the Apache License, Version 2.0 (the \"License\"); you may\n" +
                 " * not use this file except in compliance with the License.\n" +
                 " * You may obtain a copy of the License at\n" +
                 " *\n" +
@@ -33,7 +33,7 @@ public class BaseSourceHeaderPlugin implements Plugin<Project> {
                 " *\n" +
                 " * Unless required by applicable law or agreed to in writing,\n" +
                 " * software distributed under the License is distributed on an\n" +
-                " * \" AS IS \" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY\n" +
+                " * \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY\n" +
                 " * KIND, either express or implied.  See the License for the\n" +
                 " * specific language governing permissions and limitations\n" +
                 " * under the License.\n" +

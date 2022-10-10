@@ -17,11 +17,11 @@ gradlePlugin {
     plugins {
         apmTools {
             id = 'co.elastic.apm.notice-producer'
-            implementationClass = 'co.elastic.apm.compile.tools.ApmCompilerPlugin'
+            implementationClass = 'co.elastic.apm.compile.tools.notice.ApmCompilerPlugin'
         }
         apmToolsRoot {
             id = 'co.elastic.apm.root-notice-producer'
-            implementationClass = 'co.elastic.apm.compile.tools.plugins.RootApmCompilerPlugin'
+            implementationClass = 'co.elastic.apm.compile.tools.notice.plugins.RootApmCompilerPlugin'
         }
     }
 }

@@ -62,6 +62,43 @@ public class ActivityLifecycleInstrumentationTest extends BaseLifecycleInstrumen
     }
 
     @Test
+    public void onBringingBackToForeground_wrapWithSpan_onlyMethodsCalled() {
+        try (ActivityController<FullCreationActivity> controller = Robolectric.buildActivity(FullCreationActivity.class)) {
+            controller.setup();
+            FullCreationActivity activity = controller.get();
+
+            // Creation spans
+            getRecordedSpans(4);
+
+            // Backgrounding screen
+            controller.stop();
+
+            // Bringing back to the foreground
+            controller.resume();
+
+            List<SpanData> spans = getRecordedSpans(3);
+
+            SpanData rootSpan = spans.get(0);
+            SpanData onStartSpan = spans.get(1);
+            SpanData onResumeSpan = spans.get(2);
+
+            Spans.verify(rootSpan)
+                    .hasNoParent()
+                    .isNamed(getRootLifecycleSpanName(FullCreationActivity.class));
+
+            Spans.verify(onStartSpan)
+                    .isNamed(getSpanMethodName(ActivityMethod.ON_START))
+                    .isDirectChildOf(rootSpan);
+            Spans.verify(activity.getOnStartSpanContext()).belongsTo(onStartSpan);
+
+            Spans.verify(onResumeSpan)
+                    .isNamed(getSpanMethodName(ActivityMethod.ON_RESUME))
+                    .isDirectChildOf(rootSpan);
+            Spans.verify(activity.getOnResumeSpanContext()).belongsTo(onResumeSpan);
+        }
+    }
+
+    @Test
     public void onCreation_whenMissingOnResume_wrapWithSpan() {
         try (ActivityController<MissingOnResumeActivity> controller = Robolectric.buildActivity(MissingOnResumeActivity.class)) {
             controller.setup();

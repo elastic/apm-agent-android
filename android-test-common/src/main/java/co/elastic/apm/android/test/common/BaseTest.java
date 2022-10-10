@@ -12,14 +12,14 @@ import io.opentelemetry.sdk.trace.data.SpanData;
 public abstract class BaseTest {
 
     protected List<SpanData> getRecordedSpans(int amountExpected) {
-        List<SpanData> spans = getCapturedSpansOrderedByCreation(getSpanExporter(), amountExpected);
+        List<SpanData> spans = getCapturedSpansOrderedByCreation(getSpanExporter());
         assertEquals(amountExpected, spans.size());
 
         return spans;
     }
 
     @SuppressWarnings("unchecked")
-    private List<SpanData> getCapturedSpansOrderedByCreation(SpanExporterCaptor spanExporter, int amountExpected) {
+    private List<SpanData> getCapturedSpansOrderedByCreation(SpanExporterCaptor spanExporter) {
         List<SpanData> spans = new ArrayList<>();
         for (List<SpanData> list : spanExporter.getCapturedSpans()) {
             if (list.size() > 1) {
@@ -31,6 +31,7 @@ public abstract class BaseTest {
         }
 
         spans.sort(Comparator.comparing(SpanData::getStartEpochNanos));
+        spanExporter.clearCapturedSpans();
         return spans;
     }
 

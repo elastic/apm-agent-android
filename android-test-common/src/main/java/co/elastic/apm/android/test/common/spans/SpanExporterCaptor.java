@@ -31,4 +31,8 @@ public class SpanExporterCaptor implements SpanExporter {
     public List<List<SpanData>> getCapturedSpans() {
         return Collections.unmodifiableList(capturedSpans);
     }
+
+    public void clearCapturedSpans() {
+        capturedSpans.clear();
+    }
 }

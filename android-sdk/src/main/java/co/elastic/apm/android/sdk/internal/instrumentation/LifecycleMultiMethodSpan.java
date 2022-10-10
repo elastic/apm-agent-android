@@ -40,7 +40,7 @@ public class LifecycleMultiMethodSpan {
     private static void trySetActivityTitleAsRootSpanName(Object owner, Span rootSpan) {
         if (owner instanceof Activity) {
             CharSequence activityTitle = ((Activity) owner).getTitle();
-            if (activityTitle != null) {
+            if (activityTitle != null && !activityTitle.toString().isEmpty()) {
                 rootSpan.updateName(activityTitle + ROOT_SPAN_SUFFIX);
             }
         }

@@ -5,6 +5,8 @@ import com.diffplug.gradle.spotless.SpotlessPlugin;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.Task;
+import org.gradle.api.tasks.TaskProvider;
 
 public class BaseSourceHeaderPlugin implements Plugin<Project> {
     protected SpotlessExtension spotlessExtension;
@@ -32,5 +34,9 @@ public class BaseSourceHeaderPlugin implements Plugin<Project> {
                 " * specific language governing permissions and limitations\n" +
                 " * under the License.\n" +
                 " */\n"));
+    }
+
+    protected TaskProvider<Task> getSpotlessApply(Project project) {
+        return project.getTasks().named("spotlessApply");
     }
 }

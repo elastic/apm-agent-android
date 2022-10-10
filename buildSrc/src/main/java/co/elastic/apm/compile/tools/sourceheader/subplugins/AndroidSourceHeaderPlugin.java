@@ -8,5 +8,6 @@ public class AndroidSourceHeaderPlugin extends BaseSourceHeaderPlugin {
     public void apply(Project project) {
         super.apply(project);
         spotlessExtension.java(javaExtension -> javaExtension.target("src/*/java/**/*.java"));
+        project.afterEvaluate(it -> it.getTasks().getByName("preBuild", task -> task.dependsOn(getSpotlessApply(it))));
     }
 }

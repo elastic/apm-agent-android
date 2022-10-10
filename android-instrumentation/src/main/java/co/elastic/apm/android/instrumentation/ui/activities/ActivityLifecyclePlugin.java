@@ -2,6 +2,8 @@ package co.elastic.apm.android.instrumentation.ui.activities;
 
 import android.app.Activity;
 
+import androidx.annotation.NonNull;
+
 import net.bytebuddy.build.AndroidDescriptor;
 import net.bytebuddy.description.type.TypeDescription;
 
@@ -18,20 +20,6 @@ public class ActivityLifecyclePlugin extends BaseLifecycleMethodsPlugin {
     }
 
     @Override
-    protected Class<?> getAdviceClass(int methodCount) {
-        switch (methodCount) {
-            case 1:
-                return Activity1LifecycleMethodAdvice.class;
-            case 2:
-                return Activity2LifecycleMethodsAdvice.class;
-            case 3:
-                return Activity3LifecycleMethodsAdvice.class;
-            default:
-                return null;
-        }
-    }
-
-    @Override
     public boolean matches(TypeDescription target) {
         if (androidDescriptor.getTypeScope(target) == AndroidDescriptor.TypeScope.EXTERNAL) {
             return false;
@@ -39,8 +27,14 @@ public class ActivityLifecyclePlugin extends BaseLifecycleMethodsPlugin {
         return !target.getSimpleName().startsWith("Hilt_") && target.isAssignableTo(Activity.class);
     }
 
+    @NonNull
     @Override
-    protected Map<String, String> provideTargetNamesToDescriptors() {
+    protected Class<?> getAdviceClass() {
+        return ActivityLifecycleMethodAdvice.class;
+    }
+
+    @Override
+    protected Map<String, String> provideOrderedTargetNamesToDescriptors() {
         Map<String, String> targets = new HashMap<>();
         targets.put("onCreate", "(Landroid/os/Bundle;)V");
         targets.put("onStart", "()V");

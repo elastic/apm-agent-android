@@ -2,10 +2,12 @@ package co.elastic.apm.android.instrumentation.ui.activities;
 
 import net.bytebuddy.asm.Advice;
 
+import java.lang.reflect.Method;
+
 import co.elastic.apm.android.sdk.internal.instrumentation.LifecycleMultiMethodSpan;
 import co.elastic.apm.android.sdk.traces.common.tools.ElasticTracer;
 
-public class Activity2LifecycleMethodsAdvice {
+public class ActivityLifecycleMethodAdvice {
 
     @Advice.OnMethodEnter
     public static void onMethodEnter(
@@ -17,8 +19,9 @@ public class Activity2LifecycleMethodsAdvice {
 
     @Advice.OnMethodExit(onThrowable = Throwable.class)
     public static void onMethodExit(
+            @Advice.Origin Method method,
             @Advice.Local("elasticSpanWithScope") LifecycleMultiMethodSpan.SpanWithScope spanWithScope,
             @Advice.Thrown Throwable thrown) {
-        LifecycleMultiMethodSpan.onMethodExit(spanWithScope, thrown, 2);
+        LifecycleMultiMethodSpan.onMethodExit(spanWithScope, thrown, method.isAnnotationPresent(LifecycleMultiMethodSpan.LastMethod.class));
     }
 }

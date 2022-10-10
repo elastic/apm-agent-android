@@ -1,5 +1,6 @@
 package co.elastic.apm.android.instrumentation.ui.fragments;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import net.bytebuddy.build.AndroidDescriptor;
@@ -17,22 +18,14 @@ public class FragmentLifecyclePlugin extends BaseLifecycleMethodsPlugin {
         this.androidDescriptor = androidDescriptor;
     }
 
+    @NonNull
     @Override
-    protected Class<?> getAdviceClass(int methodCount) {
-        switch (methodCount) {
-            case 1:
-                return Fragment1LifecycleMethodAdvice.class;
-            case 2:
-                return Fragment2LifecycleMethodAdvice.class;
-            case 3:
-                return Fragment3LifecycleMethodAdvice.class;
-            default:
-                return null;
-        }
+    protected Class<?> getAdviceClass() {
+        return FragmentLifecycleMethodAdvice.class;
     }
 
     @Override
-    protected Map<String, String> provideTargetNamesToDescriptors() {
+    protected Map<String, String> provideOrderedTargetNamesToDescriptors() {
         Map<String, String> targets = new HashMap<>();
         targets.put("onCreate", "(Landroid/os/Bundle;)V");
         targets.put("onCreateView", "(Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;");

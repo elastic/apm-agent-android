@@ -8,7 +8,7 @@ import java.lang.reflect.Method;
 import co.elastic.apm.android.sdk.internal.instrumentation.LifecycleMultiMethodSpan;
 import co.elastic.apm.android.sdk.traces.common.tools.ElasticTracer;
 
-public class Fragment3LifecycleMethodAdvice {
+public class FragmentLifecycleMethodAdvice {
 
     @Advice.OnMethodEnter
     public static void onMethodEnter(
@@ -24,10 +24,10 @@ public class Fragment3LifecycleMethodAdvice {
             @Advice.Return(typing = Assigner.Typing.DYNAMIC) Object returned,
             @Advice.Local("elasticSpanWithScope") LifecycleMultiMethodSpan.SpanWithScope spanWithScope,
             @Advice.Thrown Throwable thrown) {
-        boolean forceEndRoot = false;
+        boolean endRoot = false;
         if (!method.getReturnType().equals(void.class)) {
-            forceEndRoot = returned == null;
+            endRoot = returned == null;
         }
-        LifecycleMultiMethodSpan.onMethodExit(spanWithScope, thrown, 3, forceEndRoot);
+        LifecycleMultiMethodSpan.onMethodExit(spanWithScope, thrown, endRoot || method.isAnnotationPresent(LifecycleMultiMethodSpan.LastMethod.class));
     }
 }

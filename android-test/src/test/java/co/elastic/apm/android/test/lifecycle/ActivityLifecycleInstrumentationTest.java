@@ -18,6 +18,7 @@ import co.elastic.apm.android.test.activities.FullCreationActivity;
 import co.elastic.apm.android.test.activities.Hilt_InstrumentedActivity;
 import co.elastic.apm.android.test.activities.MissingOnResumeActivity;
 import co.elastic.apm.android.test.activities.MissingOnStartAndOnResumeActivity;
+import co.elastic.apm.android.test.activities.NoLifecycleMethodsActivity;
 import co.elastic.apm.android.test.activities.SimpleCoroutineActivity;
 import co.elastic.apm.android.test.common.spans.Spans;
 import co.elastic.apm.android.test.testutils.MainApp;
@@ -266,6 +267,14 @@ public class ActivityLifecycleInstrumentationTest extends BaseLifecycleInstrumen
                     .isDirectChildOf(onCreateSpan)
                     .hasAmountOfRecordedExceptions(1)
                     .isNamed("Coroutine");
+        }
+    }
+
+    @Test
+    public void onCreation_whenNoLifecycleMethodsAvailable_doNothing() {
+        try (ActivityController<NoLifecycleMethodsActivity> controller = Robolectric.buildActivity(NoLifecycleMethodsActivity.class)) {
+            controller.setup();
+            getRecordedSpans(0);
         }
     }
 }

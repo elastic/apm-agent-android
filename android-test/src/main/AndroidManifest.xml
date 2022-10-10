@@ -20,7 +20,7 @@
         </activity>
 
         <activity
-            android:name=".activities.StuckCoroutineActivity"
+            android:name=".activities.CoroutineActivity"
             android:exported="true" />
     </application>
 

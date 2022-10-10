@@ -5,25 +5,30 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.test.espresso.IdlingResource
 import androidx.test.espresso.idling.CountingIdlingResource
+import co.elastic.apm.android.sdk.traces.common.tools.ElasticTracer
 import co.elastic.apm.android.test.activities.espresso.IdlingResourceProvider
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class StuckCoroutineActivity : AppCompatActivity(), IdlingResourceProvider {
+class CoroutineActivity : AppCompatActivity(), IdlingResourceProvider {
     private val idling = CountingIdlingResource("coroutine-idling-resource")
-    private val someFlow = flow {
-        emit(1)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         idling.increment()
         lifecycleScope.launch {
-            someFlow.collectLatest {
-                idling.decrement()
-            }
+            someSuspendFunction()
         }
+    }
+
+    private suspend fun someSuspendFunction() {
+        val span =
+            ElasticTracer.coroutine().spanBuilder("My span inside a coroutine").startSpan()
+
+        delay(10)
+
+        span.end()
+        idling.decrement()
     }
 
     override fun getIdlingResource(): IdlingResource {

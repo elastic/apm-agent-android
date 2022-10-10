@@ -4,9 +4,6 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.attributes.AttributesCompose;
 import co.elastic.apm.android.sdk.internal.logging.AndroidLoggerFactory;
@@ -15,7 +12,6 @@ import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
 import co.elastic.apm.android.sdk.internal.services.network.NetworkService;
 import co.elastic.apm.android.sdk.internal.services.permissions.AndroidPermissionService;
-import co.elastic.apm.android.sdk.traces.common.rules.DiscardExclusionRule;
 import co.elastic.apm.android.sdk.traces.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.traces.otel.processor.ElasticSpanProcessor;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
@@ -95,9 +91,7 @@ public final class ElasticApmAgent {
                 .merge(globalAttributes.provideAsResource());
 
         ElasticSpanProcessor processor = getProcessor();
-        List<ElasticSpanProcessor.ExclusionRule> exclusionRules = new ArrayList<>(configuration.httpTraceConfiguration.exclusionRules);
-        exclusionRules.add(new DiscardExclusionRule());
-        processor.addAllExclusionRules(exclusionRules);
+        processor.addAllExclusionRules(configuration.httpTraceConfiguration.exclusionRules);
 
         return SdkTracerProvider.builder()
                 .addSpanProcessor(processor)

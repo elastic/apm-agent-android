@@ -10,7 +10,6 @@ public class Elog {
 
     public static void init(ELoggerFactory factory) {
         if (loggerFactory != null) {
-            System.out.println("Already initialized");
             return;
         }
         loggerFactory = factory;

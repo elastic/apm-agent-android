@@ -19,6 +19,7 @@ import co.elastic.apm.android.test.activities.Hilt_InstrumentedActivity;
 import co.elastic.apm.android.test.activities.MissingOnResumeActivity;
 import co.elastic.apm.android.test.activities.MissingOnStartAndOnResumeActivity;
 import co.elastic.apm.android.test.activities.NoLifecycleMethodsActivity;
+import co.elastic.apm.android.test.activities.SimpleCoroutineActivity;
 import co.elastic.apm.android.test.activities.TitleActivity;
 import co.elastic.apm.android.test.common.spans.Spans;
 import co.elastic.apm.android.test.testutils.MainApp;
@@ -230,6 +231,22 @@ public class ActivityLifecycleInstrumentationTest extends BaseLifecycleInstrumen
                         .hasAmountOfRecordedExceptions(1)
                         .hasRecordedException(e);
             }
+        }
+    }
+
+    @Test
+    public void onCreation_whenCoroutineIsLaunched_preserveContext() {
+        try (ActivityController<SimpleCoroutineActivity> controller = Robolectric.buildActivity(SimpleCoroutineActivity.class)) {
+            controller.setup();
+
+            List<SpanData> spans = getRecordedSpans(3);
+
+            SpanData onCreateSpan = spans.get(1);
+            SpanData mySpan = spans.get(2);
+
+            Spans.verify(mySpan)
+                    .isDirectChildOf(onCreateSpan)
+                    .isNamed("My Span Inside Coroutine");
         }
     }
 

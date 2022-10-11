@@ -18,36 +18,38 @@
  */
 package co.elastic.apm.android.instrumentation.ui.common;
 
+import static net.bytebuddy.matcher.ElementMatchers.named;
+import static net.bytebuddy.matcher.ElementMatchers.returns;
+import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
+
 import androidx.annotation.NonNull;
 
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.asm.AsmVisitorWrapper;
 import net.bytebuddy.asm.MemberAttributeExtension;
 import net.bytebuddy.build.Plugin;
-import net.bytebuddy.description.NamedElement;
 import net.bytebuddy.description.annotation.AnnotationDescription;
 import net.bytebuddy.description.method.MethodDescription;
+import net.bytebuddy.description.method.ParameterDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.DynamicType;
-import net.bytebuddy.matcher.ElementMatchers;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
 import co.elastic.apm.android.sdk.internal.instrumentation.LifecycleMultiMethodSpan;
 
 public abstract class BaseLifecycleMethodsPlugin implements Plugin {
-    private Map<String, String> cachedTargetNamesToDescriptors = null;
-    private Junction<NamedElement.WithDescriptor> cachedMatcher = null;
+    private List<MethodIdentity> cachedTargetMethods = null;
+    private Junction<MethodDescription> cachedMatcher = null;
 
     @Override
     public DynamicType.Builder<?> apply(DynamicType.Builder<?> builder,
                                         TypeDescription typeDescription,
                                         ClassFileLocator classFileLocator) {
-        Junction<NamedElement.WithDescriptor> lastLifecycleMethodAvailable = getLastLifecycleMethodMatcher(typeDescription);
+        Junction<MethodDescription> lastLifecycleMethodAvailable = getLastLifecycleMethodMatcher(typeDescription);
         if (lastLifecycleMethodAvailable == null) {
             // No Operation.
             return builder;
@@ -64,24 +66,27 @@ public abstract class BaseLifecycleMethodsPlugin implements Plugin {
     @NonNull
     protected abstract Class<?> getAdviceClass();
 
-    protected abstract Map<String, String> provideOrderedTargetNamesToDescriptors();
+    /**
+     * Must return the list of lifecycle target methods in the order they are supposed to be
+     * called.
+     */
+    protected abstract List<MethodIdentity> provideOrderedTargetMethods();
 
     @Override
     public void close() {
         cachedMatcher = null;
-        cachedTargetNamesToDescriptors = null;
+        cachedTargetMethods = null;
     }
 
-    private Junction<NamedElement.WithDescriptor> getMethodsMatcher() {
+    private Junction<MethodDescription> getMethodsMatcher() {
         if (cachedMatcher == null) {
-            Junction<NamedElement.WithDescriptor> elementMatcher = null;
-            Map<String, String> targetNamesToDescriptors = getTargetNamesToDescriptors();
-            for (String methodName : targetNamesToDescriptors.keySet()) {
-                String descriptor = targetNamesToDescriptors.get(methodName);
+            Junction<MethodDescription> elementMatcher = null;
+            List<MethodIdentity> targetMethods = getTargetMethods();
+            for (MethodIdentity targetMethod : targetMethods) {
                 if (elementMatcher == null) {
-                    elementMatcher = getMethodMatcher(methodName, descriptor);
+                    elementMatcher = getMethodMatcher(targetMethod);
                 } else {
-                    elementMatcher = elementMatcher.or(getMethodMatcher(methodName, descriptor));
+                    elementMatcher = elementMatcher.or(getMethodMatcher(targetMethod));
                 }
             }
             cachedMatcher = elementMatcher;
@@ -90,35 +95,31 @@ public abstract class BaseLifecycleMethodsPlugin implements Plugin {
     }
 
     @NonNull
-    private Junction<NamedElement.WithDescriptor> getMethodMatcher(String methodName, String descriptor) {
-        return ElementMatchers.named(methodName).and(ElementMatchers.hasDescriptor(descriptor));
+    private Junction<MethodDescription> getMethodMatcher(MethodIdentity method) {
+        return named(method.name).and(takesArguments(method.argumentTypes)).and(returns(method.returnType));
     }
 
-    private Junction<NamedElement.WithDescriptor> getLastLifecycleMethodMatcher(TypeDescription typeDescription) {
-        int foundMethods = 0;
-        Map<String, String> targetNamesToDescriptors = getTargetNamesToDescriptors();
-        List<String> orderedMethodNames = new ArrayList<>(targetNamesToDescriptors.keySet());
-        Map<String, String> foundMethodNamesToDescriptor = new HashMap<>();
-        int maxMethods = targetNamesToDescriptors.size();
+    private Junction<MethodDescription> getLastLifecycleMethodMatcher(TypeDescription typeDescription) {
+        int foundMethodsCount = 0;
+        List<MethodIdentity> foundMethods = new ArrayList<>();
+        List<MethodIdentity> targetMethods = getTargetMethods();
+        int maxMethods = targetMethods.size();
         for (MethodDescription.InDefinedShape declaredMethod : typeDescription.getDeclaredMethods()) {
-            if (targetNamesToDescriptors.containsKey(declaredMethod.getName())) {
-                String descriptor = targetNamesToDescriptors.get(declaredMethod.getName());
-                if (declaredMethod.getDescriptor().equals(descriptor)) {
-                    foundMethodNamesToDescriptor.put(declaredMethod.getName(), descriptor);
-                    foundMethods++;
-                }
+            MethodIdentity methodIdentity = convert(declaredMethod);
+            if (targetMethods.contains(methodIdentity)) {
+                foundMethods.add(methodIdentity);
+                foundMethodsCount++;
             }
-            if (foundMethods == maxMethods) {
+            if (foundMethodsCount == maxMethods) {
                 break;
             }
         }
 
         // Looping backwards to get the last lifecycle methods first.
-        for (int i = orderedMethodNames.size() - 1; i >= 0; i--) {
-            String methodName = orderedMethodNames.get(i);
-            if (foundMethodNamesToDescriptor.containsKey(methodName)) {
-                // Return the latest lifecycle method available.
-                return getMethodMatcher(methodName, foundMethodNamesToDescriptor.get(methodName));
+        for (int i = targetMethods.size() - 1; i >= 0; i--) {
+            MethodIdentity method = targetMethods.get(i);
+            if (foundMethods.contains(method)) {
+                return getMethodMatcher(method);
             }
         }
 
@@ -126,10 +127,51 @@ public abstract class BaseLifecycleMethodsPlugin implements Plugin {
         return null;
     }
 
-    private Map<String, String> getTargetNamesToDescriptors() {
-        if (cachedTargetNamesToDescriptors == null) {
-            cachedTargetNamesToDescriptors = provideOrderedTargetNamesToDescriptors();
+    private MethodIdentity convert(MethodDescription.InDefinedShape methodDescription) {
+        List<TypeDescription> arguments = new ArrayList<>();
+        for (ParameterDescription.InDefinedShape parameter : methodDescription.getParameters()) {
+            arguments.add(parameter.getType().asErasure());
         }
-        return cachedTargetNamesToDescriptors;
+        return new MethodIdentity(methodDescription.getName(), methodDescription.getReturnType().asErasure(), arguments);
+    }
+
+    private List<MethodIdentity> getTargetMethods() {
+        if (cachedTargetMethods == null) {
+            cachedTargetMethods = provideOrderedTargetMethods();
+        }
+        return cachedTargetMethods;
+    }
+
+    protected static class MethodIdentity {
+        public final String name;
+        public final TypeDescription returnType;
+        public final List<TypeDescription> argumentTypes;
+
+        public static MethodIdentity create(String name, Class<?> returnType, Class<?>... argumentTypes) {
+            List<TypeDescription> arguments = new ArrayList<>();
+            for (Class<?> argumentType : argumentTypes) {
+                arguments.add(TypeDescription.ForLoadedType.of(argumentType));
+            }
+            return new MethodIdentity(name, TypeDescription.ForLoadedType.of(returnType), arguments);
+        }
+
+        private MethodIdentity(String name, TypeDescription returnType, List<TypeDescription> argumentTypes) {
+            this.name = name;
+            this.returnType = returnType;
+            this.argumentTypes = argumentTypes;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            MethodIdentity that = (MethodIdentity) o;
+            return Objects.equals(name, that.name) && Objects.equals(returnType, that.returnType) && Objects.equals(argumentTypes, that.argumentTypes);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name, returnType, argumentTypes);
+        }
     }
 }

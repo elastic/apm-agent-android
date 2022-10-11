@@ -18,14 +18,19 @@
  */
 package co.elastic.apm.android.instrumentation.ui.fragments;
 
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import net.bytebuddy.build.AndroidDescriptor;
 import net.bytebuddy.description.type.TypeDescription;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import co.elastic.apm.android.instrumentation.ui.common.BaseLifecycleMethodsPlugin;
 
@@ -43,12 +48,12 @@ public class FragmentLifecyclePlugin extends BaseLifecycleMethodsPlugin {
     }
 
     @Override
-    protected Map<String, String> provideOrderedTargetNamesToDescriptors() {
-        Map<String, String> targets = new HashMap<>();
-        targets.put("onCreate", "(Landroid/os/Bundle;)V");
-        targets.put("onCreateView", "(Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;");
-        targets.put("onViewCreated", "(Landroid/view/View;Landroid/os/Bundle;)V");
-        return targets;
+    protected List<MethodIdentity> provideOrderedTargetMethods() {
+        List<MethodIdentity> methods = new ArrayList<>();
+        methods.add(MethodIdentity.create("onCreate", void.class, Bundle.class));
+        methods.add(MethodIdentity.create("onCreateView", View.class, LayoutInflater.class, ViewGroup.class, Bundle.class));
+        methods.add(MethodIdentity.create("onViewCreated", void.class, View.class, Bundle.class));
+        return methods;
     }
 
     @Override

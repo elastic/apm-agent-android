@@ -34,6 +34,13 @@ import java.util.List;
 
 import co.elastic.apm.android.instrumentation.ui.common.BaseLifecycleMethodsPlugin;
 
+/**
+ * Instruments the following {@link Fragment} methods:
+ * - {@link Fragment#onCreate(android.os.Bundle)}
+ * - {@link Fragment#onCreateView(LayoutInflater, ViewGroup, Bundle)}
+ * - {@link Fragment#onViewCreated(View, Bundle)}
+ * To create a root span covering them all, as well as method-specific spans for each.
+ */
 public class FragmentLifecyclePlugin extends BaseLifecycleMethodsPlugin {
     private final AndroidDescriptor androidDescriptor;
 

@@ -31,6 +31,13 @@ import java.util.List;
 
 import co.elastic.apm.android.instrumentation.ui.common.BaseLifecycleMethodsPlugin;
 
+/**
+ * Instruments the following {@link Activity} methods:
+ * - {@link Activity#onCreate(android.os.Bundle)}
+ * - {@link Activity#onStart()}
+ * - {@link Activity#onResume()}
+ * To create a root span covering them all, as well as method-specific spans for each.
+ */
 public class ActivityLifecyclePlugin extends BaseLifecycleMethodsPlugin {
     private final AndroidDescriptor androidDescriptor;
 

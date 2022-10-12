@@ -36,6 +36,8 @@ licensesConfig {
 
 dependencies {
     implementation project(':android-sdk')
+    implementation project(':android-sdk-ktx')
     implementation project(':android-common')
+    implementation "androidx.fragment:fragment:1.5.3"
     implementation "net.bytebuddy:byte-buddy:$bytebuddy_version"
 }

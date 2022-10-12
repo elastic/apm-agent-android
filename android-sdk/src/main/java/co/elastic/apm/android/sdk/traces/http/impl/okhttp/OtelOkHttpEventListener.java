@@ -24,11 +24,9 @@ import java.io.IOException;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.attributes.AttributesCompose;
-import co.elastic.apm.android.sdk.internal.services.Service;
-import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
+import co.elastic.apm.android.sdk.traces.common.tools.ElasticTracer;
 import co.elastic.apm.android.sdk.traces.http.HttpTraceConfiguration;
 import co.elastic.apm.android.sdk.traces.http.data.HttpRequest;
-import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.StatusCode;
@@ -42,7 +40,6 @@ import okhttp3.Request;
 public class OtelOkHttpEventListener extends EventListener {
 
     private static final String SPAN_NAME_FORMAT = "%s %s";
-    private static final String OKHTTP_TRACER_NAME = "OkHttp";
     private final OkHttpContextStore contextStore;
     private HttpTraceConfiguration configuration;
     private Tracer okHttpTracer;
@@ -114,14 +111,7 @@ public class OtelOkHttpEventListener extends EventListener {
 
     private Tracer getTracer() {
         if (okHttpTracer == null) {
-            ApmMetadataService service = ElasticApmAgent.get().getService(Service.Names.METADATA);
-            String name = OKHTTP_TRACER_NAME;
-            String version = service.getOkHttpVersion();
-            if (version == null) {
-                okHttpTracer = GlobalOpenTelemetry.getTracer(name);
-            } else {
-                okHttpTracer = GlobalOpenTelemetry.getTracer(name, version);
-            }
+            okHttpTracer = ElasticTracer.okhttp();
         }
 
         return okHttpTracer;

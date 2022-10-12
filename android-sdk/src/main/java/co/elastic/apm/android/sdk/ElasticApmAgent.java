@@ -20,22 +20,24 @@ package co.elastic.apm.android.sdk;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+
+import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.attributes.AttributesCompose;
+import co.elastic.apm.android.sdk.internal.logging.AndroidLoggerFactory;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
 import co.elastic.apm.android.sdk.internal.services.network.NetworkService;
 import co.elastic.apm.android.sdk.internal.services.permissions.AndroidPermissionService;
 import co.elastic.apm.android.sdk.traces.connectivity.Connectivity;
-import co.elastic.apm.android.sdk.traces.otel.exporter.ElasticSpanExporter;
 import co.elastic.apm.android.sdk.traces.otel.processor.ElasticSpanProcessor;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
-import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
-import io.opentelemetry.sdk.trace.export.SpanExporter;
+import io.opentelemetry.sdk.trace.SpanProcessor;
 
 public final class ElasticApmAgent {
 
@@ -58,6 +60,7 @@ public final class ElasticApmAgent {
         if (instance != null) {
             throw new IllegalStateException("Already initialized");
         }
+        Elog.init(new AndroidLoggerFactory());
         instance = new ElasticApmAgent(context, connectivity, configuration);
         instance.onInitializationFinished();
         return instance;
@@ -105,7 +108,7 @@ public final class ElasticApmAgent {
         Resource resource = Resource.getDefault()
                 .merge(globalAttributes.provideAsResource());
 
-        ElasticSpanProcessor processor = new ElasticSpanProcessor(BatchSpanProcessor.builder(getSpanExporter()).build());
+        ElasticSpanProcessor processor = getProcessor();
         processor.addAllExclusionRules(configuration.httpTraceConfiguration.exclusionRules);
 
         return SdkTracerProvider.builder()
@@ -114,8 +117,13 @@ public final class ElasticApmAgent {
                 .build();
     }
 
-    private SpanExporter getSpanExporter() {
-        return new ElasticSpanExporter(connectivity.getSpanExporter());
+    @NonNull
+    private ElasticSpanProcessor getProcessor() {
+        SpanProcessor spanProcessor = connectivity.getSpanProcessor();
+        if (spanProcessor instanceof ElasticSpanProcessor) {
+            return (ElasticSpanProcessor) spanProcessor;
+        }
+        return new ElasticSpanProcessor(spanProcessor);
     }
 
     private ContextPropagators getContextPropagator() {

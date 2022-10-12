@@ -1,0 +1,43 @@
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+    id 'co.elastic.apm.notice-producer'
+}
+apply from: "$rootDir/publishing.gradle"
+
+android {
+    compileSdk androidCompileSdk
+
+    defaultConfig {
+        minSdk androidMinSdk
+        targetSdk androidCompileSdk
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility jvmCompatibility
+        targetCompatibility jvmCompatibility
+    }
+    publishing {
+        singleVariant('debug')
+    }
+}
+
+licensesConfig {
+    manualMappingFile = rootProject.file("manual_licenses_map.txt")
+}
+
+dependencies {
+    api "io.opentelemetry:opentelemetry-extension-kotlin:$openTelemetry_version"
+    implementation project(':android-sdk')
+    implementation project(':android-common')
+    compileOnly "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
+}

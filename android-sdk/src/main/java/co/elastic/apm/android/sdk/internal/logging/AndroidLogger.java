@@ -22,7 +22,9 @@ import android.util.Log;
 
 import org.slf4j.event.Level;
 
-class AndroidLogger extends BaseLogger {
+import co.elastic.apm.android.common.internal.logging.BaseELogger;
+
+class AndroidLogger extends BaseELogger {
 
     AndroidLogger(String tag) {
         super(tag);

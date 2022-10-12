@@ -16,19 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.traces.connectivity;
+package co.elastic.apm.android.plugin.instrumentation;
 
-import io.opentelemetry.sdk.trace.export.SpanExporter;
+import com.android.build.api.instrumentation.AsmClassVisitorFactory;
+import com.android.build.api.instrumentation.ClassContext;
+import com.android.build.api.instrumentation.ClassData;
+import com.android.build.api.instrumentation.InstrumentationParameters;
 
-public class CustomConnectivity implements Connectivity {
-    private final SpanExporter spanExporter;
+import org.objectweb.asm.ClassVisitor;
 
-    CustomConnectivity(SpanExporter spanExporter) {
-        this.spanExporter = spanExporter;
+import co.elastic.apm.android.plugin.instrumentation.remapping.CoroutineBuilderRemapper;
+
+public abstract class ElasticLocalInstrumentationFactory implements AsmClassVisitorFactory<InstrumentationParameters.None> {
+
+    @Override
+    public ClassVisitor createClassVisitor(ClassContext classContext, ClassVisitor classVisitor) {
+        return new CoroutineBuilderRemapper(classVisitor);
     }
 
     @Override
-    public SpanExporter getSpanExporter() {
-        return spanExporter;
+    public boolean isInstrumentable(ClassData classData) {
+        return true;
     }
 }

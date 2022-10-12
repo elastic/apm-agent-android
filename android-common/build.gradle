@@ -13,5 +13,6 @@ licensesConfig {
 
 dependencies {
     api "com.squareup.okhttp3:okhttp:$okhttp_version"
+    api "org.slf4j:slf4j-api:2.0.0"
     implementation "androidx.annotation:annotation:$androidAnnotations_version"
 }

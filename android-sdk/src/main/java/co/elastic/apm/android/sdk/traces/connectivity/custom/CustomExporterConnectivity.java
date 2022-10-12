@@ -16,32 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.logging;
+package co.elastic.apm.android.sdk.traces.connectivity.custom;
 
-import org.slf4j.Marker;
-import org.slf4j.event.Level;
-import org.slf4j.helpers.LegacyAbstractLogger;
-import org.slf4j.helpers.MessageFormatter;
+import co.elastic.apm.android.sdk.traces.connectivity.base.BatchProcessingConnectivity;
+import io.opentelemetry.sdk.trace.export.SpanExporter;
 
-abstract class BaseLogger extends LegacyAbstractLogger {
+public class CustomExporterConnectivity extends BatchProcessingConnectivity {
+    private final SpanExporter exporter;
 
-    BaseLogger(String tag) {
-        name = tag;
+    public CustomExporterConnectivity(SpanExporter exporter) {
+        this.exporter = exporter;
     }
 
     @Override
-    protected String getFullyQualifiedCallerName() {
-        return null;
+    protected SpanExporter provideSpanExporter() {
+        return exporter;
     }
-
-    @Override
-    protected void handleNormalizedLoggingCall(Level level, Marker marker, String msg, Object[] arguments, Throwable throwable) {
-        handleLoggingCall(
-                level,
-                MessageFormatter.arrayFormat(msg, arguments, throwable).getMessage(),
-                throwable
-        );
-    }
-
-    protected abstract void handleLoggingCall(Level level, String formattedMessage, Throwable throwable);
 }

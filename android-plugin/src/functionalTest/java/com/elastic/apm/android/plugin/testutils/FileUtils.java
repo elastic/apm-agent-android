@@ -16,37 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.elastic.apm.android.plugin;
-
-import com.elastic.apm.android.plugin.testutils.BaseFunctionalTest;
-
-import org.gradle.testkit.runner.BuildResult;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+package com.elastic.apm.android.plugin.testutils;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
-public class ApmAndroidAgentPluginTest extends BaseFunctionalTest {
+public class FileUtils {
 
-    @Rule
-    public TemporaryFolder projectTemporaryFolder = new TemporaryFolder();
-
-    @Before
-    public void setUp() {
-        addPlugin("com.android.application");
-        addPlugin("co.elastic.apm.android");
-    }
-
-    @Test
-    public void apmInfoGenerator_verifyDefaultValues() {
-        setUpProject();
-        BuildResult result = runGradle("assembleDebug");
-    }
-
-    @Override
-    protected File getProjectDir() {
-        return projectTemporaryFolder.getRoot();
+    public static void write(File file, String text) {
+        try {
+            Files.write(file.toPath(), text.getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

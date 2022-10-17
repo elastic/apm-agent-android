@@ -24,12 +24,10 @@ import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 
 public abstract class BaseFunctionalTest {
     protected File buildFile;
+    protected File androidManifest;
     private final BuildFileBuilder buildFileBuilder;
 
     protected BaseFunctionalTest() {
@@ -46,12 +44,31 @@ public abstract class BaseFunctionalTest {
         buildFileBuilder.addPlugin(id, version);
     }
 
-    protected void createBuildFile() {
-        try {
-            buildFile = new File(getProjectDir(), "build.gradle");
-            Files.write(buildFile.toPath(), buildFileBuilder.build().getBytes(StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+    protected void setUpProject() {
+        buildFile = createBuildFile();
+        androidManifest = createAndroidManifest();
+    }
+
+    private File createBuildFile() {
+        File file = new File(getProjectDir(), "build.gradle");
+        FileUtils.write(file, buildFileBuilder.build());
+        return file;
+    }
+
+    private File createAndroidManifest() {
+        File file = new File(getProjectDir(), "src/main/AndroidManifest.xml");
+        ensureExistingParentDir(file);
+        FileUtils.write(file, "<manifest/>");
+
+        return file;
+    }
+
+    private void ensureExistingParentDir(File file) {
+        if (!file.getParentFile().exists()) {
+            boolean created = file.getParentFile().mkdirs();
+            if (!created) {
+                throw new RuntimeException("Could not create parent dir for " + file);
+            }
         }
     }
 

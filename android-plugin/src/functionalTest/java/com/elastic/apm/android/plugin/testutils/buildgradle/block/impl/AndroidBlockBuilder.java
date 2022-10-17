@@ -36,6 +36,8 @@ public class AndroidBlockBuilder implements BlockBuilder {
         addNewLine(builder);
         builder.append("compileSdk ").append(compileSdkVersion);
         addNewLine(builder);
+        builder.append("namespace '").append(applicationId).append("'");
+        addNewLine(builder);
         builder.append("defaultConfig {");
         addNewLine(builder);
         builder.append("applicationId '").append(applicationId).append("'");

@@ -27,8 +27,8 @@ public class BuildFileBuilder {
     private final RepositoriesBlockBuilder repositoriesBlockBuilder = new RepositoriesBlockBuilder();
     private final AndroidBlockBuilder androidBlockBuilder;
 
-    public BuildFileBuilder(int androidCompileSdk, String applicationId) {
-        androidBlockBuilder = new AndroidBlockBuilder(androidCompileSdk, applicationId);
+    public BuildFileBuilder(int androidCompileSdk, String applicationId, String versionName) {
+        androidBlockBuilder = new AndroidBlockBuilder(androidCompileSdk, applicationId, versionName);
     }
 
     public BuildFileBuilder addPlugin(String pluginId, String pluginVersion) {

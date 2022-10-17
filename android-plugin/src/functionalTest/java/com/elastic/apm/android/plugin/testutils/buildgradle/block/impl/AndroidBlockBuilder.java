@@ -23,10 +23,12 @@ import com.elastic.apm.android.plugin.testutils.buildgradle.block.BlockBuilder;
 public class AndroidBlockBuilder implements BlockBuilder {
     private final int compileSdkVersion;
     private final String applicationId;
+    private final String versionName;
 
-    public AndroidBlockBuilder(int compileSdkVersion, String applicationId) {
+    public AndroidBlockBuilder(int compileSdkVersion, String applicationId, String versionName) {
         this.compileSdkVersion = compileSdkVersion;
         this.applicationId = applicationId;
+        this.versionName = versionName;
     }
 
     @Override
@@ -41,6 +43,10 @@ public class AndroidBlockBuilder implements BlockBuilder {
         builder.append("defaultConfig {");
         addNewLine(builder);
         builder.append("applicationId '").append(applicationId).append("'");
+        addNewLine(builder);
+        builder.append("minSdk 24");
+        addNewLine(builder);
+        builder.append("versionName '").append(versionName).append("'");
         addNewLine(builder);
         builder.append("}");
         addNewLine(builder);

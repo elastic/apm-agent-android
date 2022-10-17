@@ -35,7 +35,7 @@ import java.util.Properties;
 
 import co.elastic.apm.android.common.ApmInfo;
 
-public class ApmAndroidAgentPluginTest extends BaseFunctionalTest {
+public class CompilationConfigTest extends BaseFunctionalTest {
 
     @Rule
     public TemporaryFolder projectTemporaryFolder = new TemporaryFolder();

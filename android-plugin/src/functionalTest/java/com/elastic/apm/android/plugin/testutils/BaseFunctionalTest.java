@@ -34,6 +34,7 @@ import java.util.List;
 public abstract class BaseFunctionalTest {
     protected File buildFile;
     protected File androidManifest;
+    protected File gradleProperties;
     private final BuildFileBuilder buildFileBuilder;
 
     protected BaseFunctionalTest() {
@@ -55,6 +56,7 @@ public abstract class BaseFunctionalTest {
     protected void setUpProject() {
         buildFile = createBuildFile();
         androidManifest = createAndroidManifest();
+        gradleProperties = createGradleProperties();
     }
 
     private File createBuildFile() {
@@ -67,6 +69,14 @@ public abstract class BaseFunctionalTest {
         File file = new File(getProjectDir(), "src/main/AndroidManifest.xml");
         ensureExistingParentDir(file);
         FileUtils.write(file, "<manifest/>");
+
+        return file;
+    }
+
+    private File createGradleProperties() {
+        File file = new File(getProjectDir(), "gradle.properties");
+        ensureExistingParentDir(file);
+        FileUtils.write(file, "android.useAndroidX=true");
 
         return file;
     }

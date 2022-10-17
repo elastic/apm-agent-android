@@ -24,6 +24,7 @@ import com.android.build.api.instrumentation.InstrumentationScope;
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension;
 import com.android.build.api.variant.ApplicationVariant;
 import com.android.build.gradle.BaseExtension;
+import com.android.build.gradle.internal.publishing.AndroidArtifacts;
 
 import net.bytebuddy.build.gradle.android.ByteBuddyAndroidPlugin;
 
@@ -34,6 +35,7 @@ import org.gradle.api.artifacts.ModuleVersionIdentifier;
 import org.gradle.api.artifacts.ResolveException;
 import org.gradle.api.artifacts.ResolvedArtifact;
 import org.gradle.api.artifacts.ResolvedConfiguration;
+import org.gradle.api.file.FileCollection;
 import org.gradle.api.plugins.ExtensionContainer;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.TaskProvider;
@@ -104,12 +106,18 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
                 project.getTasks().register(applicationVariant.getName() + "GenerateOkhttpEventListener", OkHttpEventlistenerGenerator.class);
         taskProvider.configure(task -> {
             task.getOutputDir().set(project.getLayout().getBuildDirectory().dir(task.getName()));
-            task.getAppRuntimeClasspath().from(component.getVariantDependencies().getRuntimeClasspath());
+            task.getAppRuntimeClasspath().from(getVariantRuntimeClasspath(component));
             task.getJvmTargetVersion().set(androidExtension.getCompileOptions().getTargetCompatibility().toString());
         });
         applicationVariant.getArtifacts().use(taskProvider)
                 .wiredWith(OkHttpEventlistenerGenerator::getOutputDir)
                 .toAppendTo(MultipleArtifact.ALL_CLASSES_DIRS.INSTANCE);
+    }
+
+    private FileCollection getVariantRuntimeClasspath(ComponentImpl component) {
+        return component.getVariantDependencies().getArtifactFileCollection(AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH,
+                AndroidArtifacts.ArtifactScope.ALL,
+                AndroidArtifacts.ArtifactType.CLASSES_JAR);
     }
 
     private void addApmInfoGenerator(ApplicationVariant applicationVariant) {

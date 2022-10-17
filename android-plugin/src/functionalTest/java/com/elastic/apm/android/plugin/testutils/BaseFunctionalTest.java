@@ -22,8 +22,14 @@ import com.elastic.apm.android.plugin.testutils.buildgradle.BuildFileBuilder;
 
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
+import org.gradle.testkit.runner.UnexpectedBuildFailure;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public abstract class BaseFunctionalTest {
     protected File buildFile;
@@ -81,10 +87,18 @@ public abstract class BaseFunctionalTest {
     }
 
     protected BuildResult runGradle(String command) {
-        return GradleRunner.create()
-                .withPluginClasspath()
-                .withProjectDir(getProjectDir())
-                .withArguments(command.split("\\s+"))
-                .build();
+        try {
+            command += " --include-build " + Paths.get("..").toFile().getCanonicalPath();
+            List<String> commands = new ArrayList<>(Arrays.asList(command.split("\\s+")));
+            return GradleRunner.create()
+                    .withPluginClasspath()
+                    .withProjectDir(getProjectDir())
+                    .withArguments(commands)
+                    .build();
+        } catch (UnexpectedBuildFailure | IOException e) {
+            System.out.println("Build file:\n");
+            System.out.println(FileUtils.read(buildFile));
+            throw new RuntimeException(e);
+        }
     }
 }

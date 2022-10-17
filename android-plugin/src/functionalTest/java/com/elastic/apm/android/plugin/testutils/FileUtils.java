@@ -32,4 +32,13 @@ public class FileUtils {
             throw new RuntimeException(e);
         }
     }
+
+    public static String read(File file) {
+        try {
+            byte[] bytes = Files.readAllBytes(file.toPath());
+            return new String(bytes);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

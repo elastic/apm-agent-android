@@ -8,11 +8,14 @@ apply from: "$rootDir/publishing.gradle"
 targetCompatibility = jvmCompatibility
 sourceCompatibility = jvmCompatibility
 
+sourceSets.create('functionalTest')
+
 dependencies {
     implementation "net.bytebuddy:byte-buddy-gradle-plugin:$bytebuddy_version"
     implementation "net.bytebuddy:byte-buddy:$bytebuddy_version"
     implementation project(':android-common')
     compileOnly "com.android.tools.build:gradle:7.2.0"
+    functionalTestImplementation "junit:junit:$junit_version"
 }
 
 buildConfig {
@@ -21,8 +24,6 @@ buildConfig {
     buildConfigField("String", "SDK_KTX_DEPENDENCY_URI", "\"$group:android-sdk-ktx:$version\"")
     buildConfigField("String", "INSTRUMENTATION_DEPENDENCY_URI", "\"$group:android-instrumentation:$version\"")
 }
-
-sourceSets.create('functionalTest')
 
 tasks.register('functionalTest', Test) {
     group = 'verification'

@@ -6,6 +6,6 @@ targetCompatibility = jvmCompatibility
 sourceCompatibility = jvmCompatibility
 
 dependencies {
-    api 'junit:junit:4.13.2'
+    api "junit:junit:$junit_version"
     implementation "io.opentelemetry:opentelemetry-sdk:$openTelemetry_version"
 }

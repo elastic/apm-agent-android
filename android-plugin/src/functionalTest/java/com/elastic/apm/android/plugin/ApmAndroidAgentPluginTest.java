@@ -18,15 +18,22 @@
  */
 package com.elastic.apm.android.plugin;
 
+import static org.junit.Assert.assertEquals;
+
 import com.elastic.apm.android.plugin.testutils.BaseFunctionalTest;
 
-import org.gradle.testkit.runner.BuildResult;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
+import co.elastic.apm.android.common.ApmInfo;
 
 public class ApmAndroidAgentPluginTest extends BaseFunctionalTest {
 
@@ -42,7 +49,24 @@ public class ApmAndroidAgentPluginTest extends BaseFunctionalTest {
     @Test
     public void apmInfoGenerator_verifyDefaultValues() {
         setUpProject();
-        BuildResult result = runGradle("assembleDebug");
+
+        runGradle("assembleDebug");
+
+        verifyTaskIsSuccessful(":debugGenerateApmInfo");
+        File output = getBuildDirFile("intermediates/assets/debug/debugGenerateApmInfo/co_elastic_apm_android.properties");
+        Properties properties = loadProperties(output);
+        assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
+        assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_VARIANT_NAME));
+    }
+
+    private Properties loadProperties(File propertiesFile) {
+        Properties properties = new Properties();
+        try (InputStream is = new FileInputStream(propertiesFile)) {
+            properties.load(is);
+            return properties;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

@@ -28,6 +28,7 @@ dependencies {
     implementation project(':android-common')
     compileOnly "com.android.tools.build:gradle:7.2.0"
     functionalTestImplementation "junit:junit:$junit_version"
+    functionalTestImplementation project(':android-common')
     testPluginDependency "com.android.tools.build:gradle:7.2.0"
 }
 

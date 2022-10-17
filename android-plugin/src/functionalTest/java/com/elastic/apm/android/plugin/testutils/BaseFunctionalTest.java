@@ -18,10 +18,13 @@
  */
 package com.elastic.apm.android.plugin.testutils;
 
+import static org.junit.Assert.assertEquals;
+
 import com.elastic.apm.android.plugin.testutils.buildgradle.BuildFileBuilder;
 
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
+import org.gradle.testkit.runner.TaskOutcome;
 import org.gradle.testkit.runner.UnexpectedBuildFailure;
 
 import java.io.File;
@@ -36,6 +39,7 @@ public abstract class BaseFunctionalTest {
     protected File androidManifest;
     protected File gradleProperties;
     private final BuildFileBuilder buildFileBuilder;
+    private BuildResult latestResult;
 
     protected BaseFunctionalTest() {
         buildFileBuilder = new BuildFileBuilder(getAndroidCompileSdk(), getAndroidAppId(), "1.0");
@@ -98,11 +102,19 @@ public abstract class BaseFunctionalTest {
         return "com.example.app";
     }
 
-    protected BuildResult runGradle(String command) {
+    protected void verifyTaskIsSuccessful(String taskName) {
+        assertEquals(TaskOutcome.SUCCESS, latestResult.task(taskName).getOutcome());
+    }
+
+    protected File getBuildDirFile(String path) {
+        return new File(getProjectDir(), "build/" + path);
+    }
+
+    protected void runGradle(String command) {
         try {
             command += " --include-build " + Paths.get("..").toFile().getCanonicalPath();
             List<String> commands = new ArrayList<>(Arrays.asList(command.split("\\s+")));
-            return GradleRunner.create()
+            latestResult = GradleRunner.create()
                     .withPluginClasspath()
                     .withProjectDir(getProjectDir())
                     .withArguments(commands)

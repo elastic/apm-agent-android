@@ -22,6 +22,19 @@ buildConfig {
     buildConfigField("String", "INSTRUMENTATION_DEPENDENCY_URI", "\"$group:android-instrumentation:$version\"")
 }
 
+sourceSets.create('functionalTest')
+
+tasks.register('functionalTest', Test) {
+    group = 'verification'
+    testClassesDirs = sourceSets.functionalTest.output.classesDirs
+    classpath = sourceSets.functionalTest.runtimeClasspath
+    useJUnitPlatform()
+}
+
+gradlePlugin {
+    testSourceSets sourceSets.functionalTest
+}
+
 licensesConfig {
     manualMappingFile = rootProject.file("manual_licenses_map.txt")
 }

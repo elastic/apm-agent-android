@@ -20,9 +20,11 @@ package com.elastic.apm.android.plugin.testutils.buildgradle;
 
 import com.elastic.apm.android.plugin.testutils.buildgradle.block.impl.AndroidBlockBuilder;
 import com.elastic.apm.android.plugin.testutils.buildgradle.block.impl.PluginBlockBuilder;
+import com.elastic.apm.android.plugin.testutils.buildgradle.block.impl.RepositoriesBlockBuilder;
 
 public class BuildFileBuilder {
     private final PluginBlockBuilder pluginBlockBuilder = new PluginBlockBuilder();
+    private final RepositoriesBlockBuilder repositoriesBlockBuilder = new RepositoriesBlockBuilder();
     private final AndroidBlockBuilder androidBlockBuilder;
 
     public BuildFileBuilder(int androidCompileSdk, String applicationId) {
@@ -34,11 +36,18 @@ public class BuildFileBuilder {
         return this;
     }
 
+    public BuildFileBuilder addRepository(String repo) {
+        repositoriesBlockBuilder.addRepo(repo);
+        return this;
+    }
+
     public String build() {
         StringBuilder builder = new StringBuilder();
         builder.append(pluginBlockBuilder.build());
         addNewLine(builder);
         builder.append(androidBlockBuilder.build());
+        addNewLine(builder);
+        builder.append(repositoriesBlockBuilder.build());
 
         return builder.toString();
     }

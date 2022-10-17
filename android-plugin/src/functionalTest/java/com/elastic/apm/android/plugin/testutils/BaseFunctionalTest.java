@@ -38,6 +38,8 @@ public abstract class BaseFunctionalTest {
 
     protected BaseFunctionalTest() {
         buildFileBuilder = new BuildFileBuilder(getAndroidCompileSdk(), getAndroidAppId());
+        buildFileBuilder.addRepository("mavenCentral()");
+        buildFileBuilder.addRepository("google()");
     }
 
     protected abstract File getProjectDir();

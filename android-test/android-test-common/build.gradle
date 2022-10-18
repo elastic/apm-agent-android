@@ -1,0 +1,11 @@
+plugins {
+    id 'java-library'
+}
+
+targetCompatibility = JavaVersion.VERSION_1_8
+sourceCompatibility = JavaVersion.VERSION_1_8
+
+dependencies {
+    api 'junit:junit:4.13.2'
+    implementation "io.opentelemetry:opentelemetry-sdk:1.16.0"
+}

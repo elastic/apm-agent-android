@@ -20,6 +20,5 @@ include ':android-sdk'
 include ':android-instrumentation'
 include ':android-common'
 include ':android-sdk-ktx'
-include ':android-test-common'
 if (System.getenv("CONNECTED_TEST") != null)
     include ':android-test'

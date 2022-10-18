@@ -1,11 +1,11 @@
 plugins {
-    id 'com.android.application'
-    id 'org.jetbrains.kotlin.android'
-    id 'co.elastic.apm.android' version "$version"
+    id 'com.android.application' version '7.2.0'
+    id 'org.jetbrains.kotlin.android' version '1.7.10'
+    id 'co.elastic.apm.android'
 }
 
 android {
-    compileSdk androidCompileSdk
+    compileSdk 32
     testOptions {
         unitTests {
             includeAndroidResources = true
@@ -14,7 +14,7 @@ android {
     }
     defaultConfig {
         applicationId "co.elastic.apm.android.test"
-        minSdk androidMinSdk
+        minSdk 24
         targetSdk 32
         versionCode 1
         versionName "1.0"
@@ -35,6 +35,10 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+}
+
+ext {
+    espresso_version = '3.4.0'
 }
 
 dependencies {

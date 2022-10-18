@@ -125,8 +125,9 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
         String variantName = applicationVariant.getName();
         TaskProvider<ApmInfoGenerator> taskProvider = project.getTasks().register(variantName + "GenerateApmInfo", ApmInfoGenerator.class);
         taskProvider.configure(apmInfoGenerator -> {
+            apmInfoGenerator.getServiceName().convention(androidExtension.getDefaultConfig().getApplicationId());
+            apmInfoGenerator.getServiceVersion().convention(androidExtension.getDefaultConfig().getVersionName());
             apmInfoGenerator.getVariantName().set(variantName);
-            apmInfoGenerator.getVersion().set(androidExtension.getDefaultConfig().getVersionName());
             apmInfoGenerator.getOutputDir().set(project.getLayout().getBuildDirectory().dir(apmInfoGenerator.getName()));
             apmInfoGenerator.getOkHttpVersion().set(getOkhttpVersion(component));
         });

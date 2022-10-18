@@ -59,7 +59,7 @@ public abstract class BaseFunctionalTest {
     }
 
     protected ElasticBlockBuilder getDefaultElasticBlockBuilder() {
-        return buildFileBuilder.getAndroidBlockBuilder().getDefaultConfig().getElasticBlockBuilder();
+        return buildFileBuilder.getElasticBlockBuilder();
     }
 
     protected void setUpProject() {

@@ -56,8 +56,7 @@ public class CompilationConfigTest extends BaseFunctionalTest {
         File output = getBuildDirFile("intermediates/assets/debug/debugGenerateApmInfo/co_elastic_apm_android.properties");
         Properties properties = loadProperties(output);
         assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
-        assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
-        assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
+        assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_VARIANT_NAME));
     }
 
     private Properties loadProperties(File propertiesFile) {

@@ -45,7 +45,7 @@ public class ApmMetadataService implements Service {
 
     @NonNull
     public String getDeploymentEnvironment() {
-        return apmInfoPropertiesProvider.get().getProperty(ApmInfo.KEY_SERVICE_NAME);
+        return apmInfoPropertiesProvider.get().getProperty(ApmInfo.KEY_SERVICE_VARIANT_NAME);
     }
 
     @Nullable

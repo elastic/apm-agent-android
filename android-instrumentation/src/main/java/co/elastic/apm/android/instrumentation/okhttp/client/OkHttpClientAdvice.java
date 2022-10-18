@@ -34,6 +34,6 @@ public class OkHttpClientAdvice {
         OkHttpContextStore contextStore = new OkHttpContextStore();
         OtelOkHttpEventListener.Factory otelFactory = new OtelOkHttpEventListener.Factory(contextStore);
         builder.eventListenerFactory(new CompositeEventListenerFactory(otelFactory, builder.getEventListenerFactory$okhttp()));
-        builder.addInterceptor(new OtelOkHttpInterceptor(contextStore));
+        builder.interceptors().add(0, new OtelOkHttpInterceptor(contextStore));
     }
 }

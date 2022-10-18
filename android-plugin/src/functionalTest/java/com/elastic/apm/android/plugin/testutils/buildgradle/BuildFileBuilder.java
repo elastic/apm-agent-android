@@ -18,7 +18,7 @@
  */
 package com.elastic.apm.android.plugin.testutils.buildgradle;
 
-import com.elastic.apm.android.plugin.testutils.buildgradle.block.impl.AndroidBlockBuilder;
+import com.elastic.apm.android.plugin.testutils.buildgradle.block.impl.android.AndroidBlockBuilder;
 import com.elastic.apm.android.plugin.testutils.buildgradle.block.impl.PluginBlockBuilder;
 import com.elastic.apm.android.plugin.testutils.buildgradle.block.impl.RepositoriesBlockBuilder;
 

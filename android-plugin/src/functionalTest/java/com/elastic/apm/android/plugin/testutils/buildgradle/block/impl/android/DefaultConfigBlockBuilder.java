@@ -16,17 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.elastic.apm.android.plugin.testutils.buildgradle.block.impl;
+package com.elastic.apm.android.plugin.testutils.buildgradle.block.impl.android;
 
 import com.elastic.apm.android.plugin.testutils.buildgradle.block.BlockBuilder;
 
-public class AndroidBlockBuilder implements BlockBuilder {
-    private final int compileSdkVersion;
+public class DefaultConfigBlockBuilder implements BlockBuilder {
     private final String applicationId;
     private final String versionName;
 
-    public AndroidBlockBuilder(int compileSdkVersion, String applicationId, String versionName) {
-        this.compileSdkVersion = compileSdkVersion;
+    public DefaultConfigBlockBuilder(String applicationId, String versionName) {
         this.applicationId = applicationId;
         this.versionName = versionName;
     }
@@ -34,12 +32,6 @@ public class AndroidBlockBuilder implements BlockBuilder {
     @Override
     public String build() {
         StringBuilder builder = new StringBuilder();
-        builder.append("android {");
-        addNewLine(builder);
-        builder.append("compileSdk ").append(compileSdkVersion);
-        addNewLine(builder);
-        builder.append("namespace '").append(applicationId).append("'");
-        addNewLine(builder);
         builder.append("defaultConfig {");
         addNewLine(builder);
         builder.append("applicationId '").append(applicationId).append("'");
@@ -49,8 +41,7 @@ public class AndroidBlockBuilder implements BlockBuilder {
         builder.append("versionName '").append(versionName).append("'");
         addNewLine(builder);
         builder.append("}");
-        addNewLine(builder);
-        builder.append("}");
+
         return builder.toString();
     }
 

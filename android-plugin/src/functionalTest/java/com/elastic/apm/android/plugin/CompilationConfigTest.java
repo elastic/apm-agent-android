@@ -19,6 +19,7 @@
 package com.elastic.apm.android.plugin;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import com.elastic.apm.android.plugin.testutils.BaseFunctionalTest;
 
@@ -53,11 +54,17 @@ public class CompilationConfigTest extends BaseFunctionalTest {
         runGradle("assembleDebug");
 
         verifyTaskIsSuccessful(":debugGenerateApmInfo");
-        File output = getBuildDirFile("intermediates/assets/debug/debugGenerateApmInfo/co_elastic_apm_android.properties");
+        File output = getGeneratedPropertiesFile("debugGenerateApmInfo");
         Properties properties = loadProperties(output);
         assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
         assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
         assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
+        assertNull(properties.getProperty(ApmInfo.KEY_SERVER_URL));
+        assertNull(properties.getProperty(ApmInfo.KEY_SERVER_TOKEN));
+    }
+
+    private File getGeneratedPropertiesFile(String taskName) {
+        return getBuildDirFile("intermediates/assets/debug/" + taskName + "/" + ApmInfo.ASSET_FILE_NAME);
     }
 
     private Properties loadProperties(File propertiesFile) {

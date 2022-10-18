@@ -20,6 +20,7 @@ package co.elastic.apm.android.sdk.traces.http.impl.okhttp;
 
 import java.io.IOException;
 
+import co.elastic.apm.android.common.internal.logging.Elog;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.propagation.TextMapPropagator;
@@ -59,6 +60,7 @@ public class OtelOkHttpInterceptor implements Interceptor {
             if (carrier == null) {
                 return;
             }
+            Elog.getLogger().debug("Adding text map propagator header: " + key + ", value: " + value);
             carrier.addHeader(key, value);
         }
     }

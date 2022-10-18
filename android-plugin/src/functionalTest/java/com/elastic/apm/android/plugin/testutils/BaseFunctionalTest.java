@@ -19,6 +19,7 @@
 package com.elastic.apm.android.plugin.testutils;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import com.elastic.apm.android.plugin.testutils.buildgradle.BuildFileBuilder;
 import com.elastic.apm.android.plugin.testutils.buildgradle.block.impl.ElasticBlockBuilder;
@@ -111,22 +112,37 @@ public abstract class BaseFunctionalTest {
         assertEquals(TaskOutcome.SUCCESS, latestResult.task(taskName).getOutcome());
     }
 
+    protected void verifyOutputContains(String text) {
+        assertTrue(latestResult.getOutput().contains(text));
+    }
+
     protected File getBuildDirFile(String path) {
         return new File(getProjectDir(), "build/" + path);
     }
 
+    protected void runFailedGradle(String command) {
+        latestResult = getRunner(command).buildAndFail();
+    }
+
     protected void runGradle(String command) {
+        try {
+            latestResult = getRunner(command).build();
+        } catch (UnexpectedBuildFailure e) {
+            System.out.println("Build file:\n");
+            System.out.println(FileUtils.read(buildFile));
+            throw new RuntimeException(e);
+        }
+    }
+
+    private GradleRunner getRunner(String command) {
         try {
             command += " --include-build " + Paths.get("..").toFile().getCanonicalPath();
             List<String> commands = new ArrayList<>(Arrays.asList(command.split("\\s+")));
-            latestResult = GradleRunner.create()
+            return GradleRunner.create()
                     .withPluginClasspath()
                     .withProjectDir(getProjectDir())
-                    .withArguments(commands)
-                    .build();
-        } catch (UnexpectedBuildFailure | IOException e) {
-            System.out.println("Build file:\n");
-            System.out.println(FileUtils.read(buildFile));
+                    .withArguments(commands);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

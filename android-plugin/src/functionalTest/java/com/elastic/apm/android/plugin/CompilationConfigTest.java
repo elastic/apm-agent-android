@@ -48,23 +48,16 @@ public class CompilationConfigTest extends BaseFunctionalTest {
     }
 
     @Test
-    public void compileConfig_verifyDefaultValues() {
+    public void compileConfig_whenNoServerUrlIsSet_fail() {
         setUpProject();
 
-        runGradle("assembleDebug");
+        runFailedGradle("assembleDebug");
 
-        verifyTaskIsSuccessful(":debugGenerateApmInfo");
-        File output = getGeneratedPropertiesFile("debugGenerateApmInfo");
-        Properties properties = loadProperties(output);
-        assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
-        assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
-        assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
-        assertNull(properties.getProperty(ApmInfo.KEY_SERVER_URL));
-        assertNull(properties.getProperty(ApmInfo.KEY_SERVER_TOKEN));
+        verifyOutputContains("property 'serverUrl' doesn't have a configured value");
     }
 
     @Test
-    public void compileConfig_verifySettingServerUrl() {
+    public void compileConfig_verifyDefaultValues() {
         String serverUrl = "http://some.url";
         getDefaultElasticBlockBuilder().setServerUrl(serverUrl);
         setUpProject();
@@ -79,6 +72,26 @@ public class CompilationConfigTest extends BaseFunctionalTest {
         assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
         assertEquals(serverUrl, properties.getProperty(ApmInfo.KEY_SERVER_URL));
         assertNull(properties.getProperty(ApmInfo.KEY_SERVER_TOKEN));
+    }
+
+    @Test
+    public void compileConfig_verifySettingServerToken() {
+        String serverUrl = "http://server.url";
+        String serverToken = "some.token";
+        getDefaultElasticBlockBuilder().setServerToken(serverToken);
+        getDefaultElasticBlockBuilder().setServerUrl(serverUrl);
+        setUpProject();
+
+        runGradle("assembleDebug");
+
+        verifyTaskIsSuccessful(":debugGenerateApmInfo");
+        File output = getGeneratedPropertiesFile("debugGenerateApmInfo");
+        Properties properties = loadProperties(output);
+        assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
+        assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
+        assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
+        assertEquals(serverToken, properties.getProperty(ApmInfo.KEY_SERVER_TOKEN));
+        assertEquals(serverUrl, properties.getProperty(ApmInfo.KEY_SERVER_URL));
     }
 
     private File getGeneratedPropertiesFile(String taskName) {

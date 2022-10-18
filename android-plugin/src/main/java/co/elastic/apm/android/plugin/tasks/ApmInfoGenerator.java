@@ -50,6 +50,10 @@ public abstract class ApmInfoGenerator extends DefaultTask {
 
     @Optional
     @Input
+    public abstract Property<String> getServerToken();
+
+    @Optional
+    @Input
     public abstract Property<String> getOkHttpVersion();
 
     @OutputDirectory
@@ -63,6 +67,9 @@ public abstract class ApmInfoGenerator extends DefaultTask {
         properties.put(ApmInfo.KEY_SERVICE_VERSION, getServiceVersion().get());
         properties.put(ApmInfo.KEY_SERVICE_ENVIRONMENT, getVariantName().get());
         properties.put(ApmInfo.KEY_SERVER_URL, getServerUrl().get());
+        if (getServerToken().isPresent()) {
+            properties.put(ApmInfo.KEY_SERVER_TOKEN, getServerToken().get());
+        }
         String okhttpVersion = getOkHttpVersion().getOrNull();
         if (okhttpVersion != null) {
             properties.put(ApmInfo.KEY_SCOPE_OKHTTP_VERSION, okhttpVersion);

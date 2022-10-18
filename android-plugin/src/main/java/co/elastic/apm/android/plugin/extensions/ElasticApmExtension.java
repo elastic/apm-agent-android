@@ -22,4 +22,6 @@ import org.gradle.api.provider.Property;
 
 public abstract class ElasticApmExtension {
     public abstract Property<String> getServerUrl();
+
+    public abstract Property<String> getServerToken();
 }

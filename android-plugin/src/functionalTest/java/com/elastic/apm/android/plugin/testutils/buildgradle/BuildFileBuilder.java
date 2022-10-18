@@ -18,9 +18,9 @@
  */
 package com.elastic.apm.android.plugin.testutils.buildgradle;
 
-import com.elastic.apm.android.plugin.testutils.buildgradle.block.impl.android.AndroidBlockBuilder;
 import com.elastic.apm.android.plugin.testutils.buildgradle.block.impl.PluginBlockBuilder;
 import com.elastic.apm.android.plugin.testutils.buildgradle.block.impl.RepositoriesBlockBuilder;
+import com.elastic.apm.android.plugin.testutils.buildgradle.block.impl.android.AndroidBlockBuilder;
 
 public class BuildFileBuilder {
     private final PluginBlockBuilder pluginBlockBuilder = new PluginBlockBuilder();
@@ -39,6 +39,10 @@ public class BuildFileBuilder {
     public BuildFileBuilder addRepository(String repo) {
         repositoriesBlockBuilder.addRepo(repo);
         return this;
+    }
+
+    public AndroidBlockBuilder getAndroidBlockBuilder() {
+        return androidBlockBuilder;
     }
 
     public String build() {

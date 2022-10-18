@@ -21,6 +21,7 @@ package com.elastic.apm.android.plugin.testutils;
 import static org.junit.Assert.assertEquals;
 
 import com.elastic.apm.android.plugin.testutils.buildgradle.BuildFileBuilder;
+import com.elastic.apm.android.plugin.testutils.buildgradle.block.impl.ElasticBlockBuilder;
 
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
@@ -55,6 +56,10 @@ public abstract class BaseFunctionalTest {
 
     protected void addPlugin(String id, String version) {
         buildFileBuilder.addPlugin(id, version);
+    }
+
+    protected ElasticBlockBuilder getDefaultElasticBlockBuilder() {
+        return buildFileBuilder.getAndroidBlockBuilder().getDefaultConfig().getElasticBlockBuilder();
     }
 
     protected void setUpProject() {

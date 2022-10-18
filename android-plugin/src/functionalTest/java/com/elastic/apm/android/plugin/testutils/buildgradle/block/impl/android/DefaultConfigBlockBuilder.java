@@ -19,14 +19,20 @@
 package com.elastic.apm.android.plugin.testutils.buildgradle.block.impl.android;
 
 import com.elastic.apm.android.plugin.testutils.buildgradle.block.BlockBuilder;
+import com.elastic.apm.android.plugin.testutils.buildgradle.block.impl.ElasticBlockBuilder;
 
 public class DefaultConfigBlockBuilder implements BlockBuilder {
     private final String applicationId;
     private final String versionName;
+    private final ElasticBlockBuilder elasticBlockBuilder = new ElasticBlockBuilder();
 
     public DefaultConfigBlockBuilder(String applicationId, String versionName) {
         this.applicationId = applicationId;
         this.versionName = versionName;
+    }
+
+    public ElasticBlockBuilder getElasticBlockBuilder() {
+        return elasticBlockBuilder;
     }
 
     @Override
@@ -39,6 +45,8 @@ public class DefaultConfigBlockBuilder implements BlockBuilder {
         builder.append("minSdk 24");
         addNewLine(builder);
         builder.append("versionName '").append(versionName).append("'");
+        addNewLine(builder);
+        builder.append(elasticBlockBuilder.build());
         addNewLine(builder);
         builder.append("}");
 

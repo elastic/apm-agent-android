@@ -31,6 +31,10 @@ public class AndroidBlockBuilder implements BlockBuilder {
         defaultConfig = new DefaultConfigBlockBuilder(applicationId, versionName);
     }
 
+    public DefaultConfigBlockBuilder getDefaultConfig() {
+        return defaultConfig;
+    }
+
     @Override
     public String build() {
         StringBuilder builder = new StringBuilder();

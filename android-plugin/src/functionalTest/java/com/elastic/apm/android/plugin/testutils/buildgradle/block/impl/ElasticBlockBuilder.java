@@ -52,7 +52,7 @@ public class ElasticBlockBuilder implements BlockBuilder {
         for (String parameterName : parameters.keySet()) {
             String parameterValue = parameters.get(parameterName);
             addNewLine(builder);
-            builder.append(parameterName).append(" '").append(parameterValue).append("'");
+            builder.append(parameterName).append(" = '").append(parameterValue).append("'");
         }
         addNewLine(builder);
         builder.append("}");

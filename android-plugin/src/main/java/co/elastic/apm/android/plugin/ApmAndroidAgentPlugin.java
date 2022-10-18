@@ -41,6 +41,7 @@ import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.TaskProvider;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
+import co.elastic.apm.android.plugin.extensions.ElasticApmExtension;
 import co.elastic.apm.android.plugin.instrumentation.ElasticLocalInstrumentationFactory;
 import co.elastic.apm.android.plugin.logging.GradleLoggerFactory;
 import co.elastic.apm.android.plugin.tasks.ApmInfoGenerator;
@@ -52,11 +53,13 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
 
     private Project project;
     private BaseExtension androidExtension;
+    private ElasticApmExtension defaultExtension;
 
     @Override
     public void apply(Project project) {
         this.project = project;
         Elog.init(new GradleLoggerFactory());
+        defaultExtension = project.getExtensions().create("elasticApm", ElasticApmExtension.class);
         androidExtension = project.getExtensions().getByType(BaseExtension.class);
         addBytebuddyPlugin();
         addSdkDependency();
@@ -127,6 +130,7 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
         taskProvider.configure(apmInfoGenerator -> {
             apmInfoGenerator.getServiceName().convention(androidExtension.getDefaultConfig().getApplicationId());
             apmInfoGenerator.getServiceVersion().convention(androidExtension.getDefaultConfig().getVersionName());
+            apmInfoGenerator.getServerUrl().set(defaultExtension.getServerUrl());
             apmInfoGenerator.getVariantName().set(variantName);
             apmInfoGenerator.getOutputDir().set(project.getLayout().getBuildDirectory().dir(apmInfoGenerator.getName()));
             apmInfoGenerator.getOkHttpVersion().set(getOkhttpVersion(component));

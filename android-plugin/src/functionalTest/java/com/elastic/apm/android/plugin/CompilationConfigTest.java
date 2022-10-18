@@ -48,7 +48,7 @@ public class CompilationConfigTest extends BaseFunctionalTest {
     }
 
     @Test
-    public void apmInfoGenerator_verifyDefaultValues() {
+    public void compileConfig_verifyDefaultValues() {
         setUpProject();
 
         runGradle("assembleDebug");
@@ -60,6 +60,24 @@ public class CompilationConfigTest extends BaseFunctionalTest {
         assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
         assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
         assertNull(properties.getProperty(ApmInfo.KEY_SERVER_URL));
+        assertNull(properties.getProperty(ApmInfo.KEY_SERVER_TOKEN));
+    }
+
+    @Test
+    public void compileConfig_verifySettingServerUrl() {
+        String serverUrl = "http://some.url";
+        getDefaultElasticBlockBuilder().setServerUrl(serverUrl);
+        setUpProject();
+
+        runGradle("assembleDebug");
+
+        verifyTaskIsSuccessful(":debugGenerateApmInfo");
+        File output = getGeneratedPropertiesFile("debugGenerateApmInfo");
+        Properties properties = loadProperties(output);
+        assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
+        assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
+        assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
+        assertEquals(serverUrl, properties.getProperty(ApmInfo.KEY_SERVER_URL));
         assertNull(properties.getProperty(ApmInfo.KEY_SERVER_TOKEN));
     }
 

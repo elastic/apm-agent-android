@@ -54,8 +54,16 @@ public final class ElasticApmAgent {
         return instance;
     }
 
+    public static ElasticApmAgent initialize(Context context) {
+        return initialize(context, null, null);
+    }
+
+    public static ElasticApmAgent initialize(Context context, ElasticApmConfiguration configuration) {
+        return initialize(context, configuration, null);
+    }
+
     public static ElasticApmAgent initialize(Context context, Connectivity connectivity) {
-        return initialize(context, ElasticApmConfiguration.getDefault(), connectivity);
+        return initialize(context, null, connectivity);
     }
 
     public synchronized static ElasticApmAgent initialize(Context context, ElasticApmConfiguration configuration, Connectivity connectivity) {
@@ -69,7 +77,13 @@ public final class ElasticApmAgent {
         } else {
             connectivityProvider = Connectivity.getDefault();
         }
-        instance = new ElasticApmAgent(context, connectivityProvider, configuration);
+        ElasticApmConfiguration apmConfiguration;
+        if (configuration != null) {
+            apmConfiguration = configuration;
+        } else {
+            apmConfiguration = ElasticApmConfiguration.getDefault();
+        }
+        instance = new ElasticApmAgent(context, connectivityProvider, apmConfiguration);
         instance.onInitializationFinished();
         return instance;
     }

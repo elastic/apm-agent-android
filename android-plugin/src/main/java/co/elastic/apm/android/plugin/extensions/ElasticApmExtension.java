@@ -21,6 +21,8 @@ package co.elastic.apm.android.plugin.extensions;
 import org.gradle.api.provider.Property;
 
 public abstract class ElasticApmExtension {
+    public abstract Property<String> getServiceName();
+
     public abstract Property<String> getServerUrl();
 
     public abstract Property<String> getServerToken();

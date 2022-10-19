@@ -59,12 +59,17 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
     public void apply(Project project) {
         this.project = project;
         Elog.init(new GradleLoggerFactory());
-        defaultExtension = project.getExtensions().create("elasticApm", ElasticApmExtension.class);
         androidExtension = project.getExtensions().getByType(BaseExtension.class);
+        initializeElasticExtension(project);
         addBytebuddyPlugin();
         addSdkDependency();
         addInstrumentationDependency();
         addTasks();
+    }
+
+    private void initializeElasticExtension(Project project) {
+        defaultExtension = project.getExtensions().create("elasticApm", ElasticApmExtension.class);
+        defaultExtension.getServiceName().convention(project.provider(() -> androidExtension.getDefaultConfig().getApplicationId()));
     }
 
     private void addBytebuddyPlugin() {
@@ -128,7 +133,7 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
         String variantName = applicationVariant.getName();
         TaskProvider<ApmInfoGenerator> taskProvider = project.getTasks().register(variantName + "GenerateApmInfo", ApmInfoGenerator.class);
         taskProvider.configure(apmInfoGenerator -> {
-            apmInfoGenerator.getServiceName().convention(androidExtension.getDefaultConfig().getApplicationId());
+            apmInfoGenerator.getServiceName().set(defaultExtension.getServiceName());
             apmInfoGenerator.getServiceVersion().convention(androidExtension.getDefaultConfig().getVersionName());
             apmInfoGenerator.getServerUrl().set(defaultExtension.getServerUrl());
             apmInfoGenerator.getServerToken().set(defaultExtension.getServerToken());

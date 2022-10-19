@@ -113,6 +113,25 @@ public class CompilationConfigTest extends BaseFunctionalTest {
         assertEquals(serverUrl, properties.getProperty(ApmInfo.KEY_SERVER_URL));
     }
 
+    @Test
+    public void compileConfig_verifyOverridingServiceVersion() {
+        String serverUrl = "http://server.url";
+        String serviceVersion = "1.0.0";
+        getDefaultElasticBlockBuilder().setServiceVersion(serviceVersion);
+        getDefaultElasticBlockBuilder().setServerUrl(serverUrl);
+        setUpProject();
+
+        runGradle("assembleDebug");
+
+        verifyTaskIsSuccessful(":debugGenerateApmInfo");
+        File output = getGeneratedPropertiesFile("debugGenerateApmInfo");
+        Properties properties = loadProperties(output);
+        assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
+        assertEquals(serviceVersion, properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
+        assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
+        assertEquals(serverUrl, properties.getProperty(ApmInfo.KEY_SERVER_URL));
+    }
+
     private File getGeneratedPropertiesFile(String taskName) {
         return getBuildDirFile("intermediates/assets/debug/" + taskName + "/" + ApmInfo.ASSET_FILE_NAME);
     }

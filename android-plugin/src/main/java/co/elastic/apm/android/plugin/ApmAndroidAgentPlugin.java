@@ -70,6 +70,7 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
     private void initializeElasticExtension(Project project) {
         defaultExtension = project.getExtensions().create("elasticApm", ElasticApmExtension.class);
         defaultExtension.getServiceName().convention(project.provider(() -> androidExtension.getDefaultConfig().getApplicationId()));
+        defaultExtension.getServiceVersion().convention(project.provider(() -> androidExtension.getDefaultConfig().getVersionName()));
     }
 
     private void addBytebuddyPlugin() {
@@ -134,7 +135,7 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
         TaskProvider<ApmInfoGenerator> taskProvider = project.getTasks().register(variantName + "GenerateApmInfo", ApmInfoGenerator.class);
         taskProvider.configure(apmInfoGenerator -> {
             apmInfoGenerator.getServiceName().set(defaultExtension.getServiceName());
-            apmInfoGenerator.getServiceVersion().convention(androidExtension.getDefaultConfig().getVersionName());
+            apmInfoGenerator.getServiceVersion().set(defaultExtension.getServiceVersion());
             apmInfoGenerator.getServerUrl().set(defaultExtension.getServerUrl());
             apmInfoGenerator.getServerToken().set(defaultExtension.getServerToken());
             apmInfoGenerator.getVariantName().set(variantName);

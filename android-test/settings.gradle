@@ -1,6 +1,6 @@
 pluginManagement {
+    includeBuild '..'
     repositories {
-        mavenLocal()
         gradlePluginPortal()
         mavenCentral()
         google()
@@ -9,14 +9,9 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        mavenLocal()
         mavenCentral()
         google()
     }
 }
-rootProject.name = "APM Android Agent"
-include ':android-plugin'
-include ':android-sdk'
-include ':android-instrumentation'
-include ':android-common'
-include ':android-sdk-ktx'
+include ':android-test-common'
+includeBuild '..'

@@ -2,13 +2,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="co.elastic.apm.android.test">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".DefaultApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.APMAndroidAgent">
+        android:theme="@style/Theme.APMAndroidAgent"
+        android:usesCleartextTraffic="true">
         <activity
             android:name="co.elastic.apm.android.test.activities.FullCreationActivity"
             android:exported="true">
@@ -21,6 +24,9 @@
 
         <activity
             android:name=".activities.CoroutineActivity"
+            android:exported="true" />
+        <activity
+            android:name=".okhttp.NetworkCallingActivity"
             android:exported="true" />
     </application>
 

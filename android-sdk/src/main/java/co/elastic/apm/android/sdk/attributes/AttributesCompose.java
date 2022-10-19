@@ -49,7 +49,7 @@ public final class AttributesCompose {
                 new DeviceInfoVisitor(),
                 new OsDescriptorVisitor(),
                 new SdkIdVisitor(),
-                new ServiceIdVisitor(appContext, serviceName, serviceVersion));
+                new ServiceIdVisitor(serviceName, serviceVersion));
     }
 
     public AttributesCompose(List<AttributesBuilderVisitor> defaultVisitors) {

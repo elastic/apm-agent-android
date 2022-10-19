@@ -20,11 +20,13 @@ public abstract class BaseEspressoTest<T extends Activity> extends BaseTest {
     private IdlingResource idlingResource;
 
     @Rule
-    public ActivityScenarioRule<T> activityScenarioRule = new ActivityScenarioRule<T>(getActivityClass());
+    public ActivityScenarioRule<T> activityScenarioRule = new ActivityScenarioRule<>(getActivityClass());
 
     @Before
     public void setUp() {
+        onBefore();
         activityScenarioRule.getScenario().onActivity(activity -> {
+            onActivity(activity);
             spanExporterCaptor = ((DefaultApp) activity.getApplication()).getSpanExporter();
             if (activity instanceof IdlingResourceProvider) {
                 idlingResource = ((IdlingResourceProvider) activity).getIdlingResource();
@@ -33,8 +35,21 @@ public abstract class BaseEspressoTest<T extends Activity> extends BaseTest {
         });
     }
 
+    protected void onActivity(T activity) {
+
+    }
+
+    protected void onBefore() {
+
+    }
+
+    protected void onAfter() {
+
+    }
+
     @After
     public void cleanUp() {
+        onAfter();
         if (idlingResource != null) {
             IdlingRegistry.getInstance().unregister(idlingResource);
             idlingResource = null;

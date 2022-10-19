@@ -56,16 +56,14 @@ public final class ElasticApmAgent {
         return initialize(context, connectivity, ElasticApmConfiguration.getDefault());
     }
 
-    public static ElasticApmAgent initialize(Context context, Connectivity connectivity, ElasticApmConfiguration configuration) {
+    public synchronized static ElasticApmAgent initialize(Context context, Connectivity connectivity, ElasticApmConfiguration configuration) {
         if (instance != null) {
             throw new IllegalStateException("Already initialized");
         }
-        synchronized (ElasticApmAgent.class) {
-            Elog.init(new AndroidLoggerFactory());
-            instance = new ElasticApmAgent(context, connectivity, configuration);
-            instance.onInitializationFinished();
-            return instance;
-        }
+        Elog.init(new AndroidLoggerFactory());
+        instance = new ElasticApmAgent(context, connectivity, configuration);
+        instance.onInitializationFinished();
+        return instance;
     }
 
     private static void verifyInitialization() {

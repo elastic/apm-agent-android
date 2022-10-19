@@ -18,6 +18,11 @@
  */
 package co.elastic.apm.android.sdk.traces.connectivity;
 
+import co.elastic.apm.android.sdk.ElasticApmAgent;
+import co.elastic.apm.android.sdk.internal.services.Service;
+import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
+import co.elastic.apm.android.sdk.providers.LazyProvider;
+import co.elastic.apm.android.sdk.providers.Provider;
 import co.elastic.apm.android.sdk.traces.connectivity.custom.CustomExporterConnectivity;
 import co.elastic.apm.android.sdk.traces.connectivity.custom.CustomProcessorConnectivity;
 import io.opentelemetry.sdk.trace.SpanProcessor;
@@ -35,6 +40,18 @@ public interface Connectivity {
 
     static Connectivity custom(SpanProcessor processor) {
         return new CustomProcessorConnectivity(processor);
+    }
+
+    static Provider<Connectivity> getDefault() {
+        return LazyProvider.of(() -> {
+            ApmMetadataService service = ElasticApmAgent.get().getService(Service.Names.METADATA);
+            CommonConnectivity connectivity = Connectivity.create(service.getServerUrl());
+            String serverToken = service.getServerToken();
+            if (serverToken != null) {
+                connectivity.withAuthToken(serverToken);
+            }
+            return connectivity;
+        });
     }
 
     SpanProcessor getSpanProcessor();

@@ -18,7 +18,7 @@
  */
 package co.elastic.apm.android.sdk.providers;
 
-public class LazyProvider<T> {
+public class LazyProvider<T> implements Provider<T> {
     private final Provider<T> provider;
     private T object;
 
@@ -26,6 +26,7 @@ public class LazyProvider<T> {
         this.provider = provider;
     }
 
+    @Override
     public T get() {
         if (object == null) {
             object = provider.get();

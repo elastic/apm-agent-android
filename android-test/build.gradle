@@ -41,6 +41,10 @@ ext {
     espresso_version = '3.4.0'
 }
 
+elasticApm {
+    serverUrl = "http://localhost"
+}
+
 dependencies {
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.5.1'

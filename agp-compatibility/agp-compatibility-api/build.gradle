@@ -6,3 +6,9 @@ java {
     sourceCompatibility = jvmCompatibility
     targetCompatibility = jvmCompatibility
 }
+
+dependencies {
+    implementation gradleApi()
+    implementation project(':android-common')
+    compileOnly "com.android.tools.build:gradle:$androidGradlePlugin_baseVersion"
+}

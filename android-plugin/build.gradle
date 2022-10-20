@@ -26,7 +26,7 @@ dependencies {
     implementation "net.bytebuddy:byte-buddy-gradle-plugin:$bytebuddy_version"
     implementation "net.bytebuddy:byte-buddy:$bytebuddy_version"
     implementation project(':android-common')
-    compileOnly "com.android.tools.build:gradle:7.2.0"
+    compileOnly "com.android.tools.build:gradle:$androidGradlePlugin_baseVersion"
     functionalTestImplementation "junit:junit:$junit_version"
     functionalTestImplementation project(':android-common')
     testPluginDependency "com.android.tools.build:gradle:7.2.0"

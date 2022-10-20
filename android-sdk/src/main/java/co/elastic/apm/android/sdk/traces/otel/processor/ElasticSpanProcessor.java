@@ -52,7 +52,7 @@ public class ElasticSpanProcessor implements SpanProcessor {
 
     @Override
     public boolean isStartRequired() {
-        return original.isStartRequired();
+        return true;
     }
 
     @Override

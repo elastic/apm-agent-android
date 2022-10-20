@@ -6,9 +6,6 @@ import static org.junit.Assert.assertNull;
 import androidx.fragment.app.testing.FragmentScenario;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.util.List;
 
@@ -19,11 +16,8 @@ import co.elastic.apm.android.test.fragments.Hilt_InstrumentedFragment;
 import co.elastic.apm.android.test.fragments.OnCreateMissingFragment;
 import co.elastic.apm.android.test.fragments.OnCreateViewOnlyFragment;
 import co.elastic.apm.android.test.fragments.ViewlessCreationFragment;
-import co.elastic.apm.android.test.testutils.MainApp;
 import io.opentelemetry.sdk.trace.data.SpanData;
 
-@Config(application = MainApp.class)
-@RunWith(RobolectricTestRunner.class)
 public class FragmentLifecycleInstrumentationTest extends BaseLifecycleInstrumentationTest {
 
     @Test

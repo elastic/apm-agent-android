@@ -3,11 +3,8 @@ package co.elastic.apm.android.test.lifecycle;
 import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.android.controller.ActivityController;
-import org.robolectric.annotation.Config;
 
 import java.util.List;
 
@@ -22,11 +19,8 @@ import co.elastic.apm.android.test.activities.NoLifecycleMethodsActivity;
 import co.elastic.apm.android.test.activities.SimpleCoroutineActivity;
 import co.elastic.apm.android.test.activities.TitleActivity;
 import co.elastic.apm.android.test.common.spans.Spans;
-import co.elastic.apm.android.test.testutils.MainApp;
 import io.opentelemetry.sdk.trace.data.SpanData;
 
-@Config(application = MainApp.class)
-@RunWith(RobolectricTestRunner.class)
 public class ActivityLifecycleInstrumentationTest extends BaseLifecycleInstrumentationTest {
 
     @Test

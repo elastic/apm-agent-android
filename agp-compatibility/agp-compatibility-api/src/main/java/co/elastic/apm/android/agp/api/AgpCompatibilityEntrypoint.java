@@ -10,7 +10,7 @@ import java.util.ServiceLoader;
 import co.elastic.apm.android.common.internal.logging.Elog;
 
 public interface AgpCompatibilityEntrypoint {
-    String getIdentifier();
+    String getDescription();
 
     boolean isCompatible(CurrentVersion currentVersion);
 
@@ -27,7 +27,7 @@ public interface AgpCompatibilityEntrypoint {
 
         for (AgpCompatibilityEntrypoint entrypoint : entrypoints) {
             if (entrypoint.isCompatible(comparable)) {
-                Elog.getLogger().debug("Found AGP compatible entrypoint: {}", entrypoint.getIdentifier());
+                Elog.getLogger().debug("Found AGP compatible entrypoint with description: '{}'", entrypoint.getDescription());
                 return entrypoint.provideCompatibilityManager(project);
             }
         }

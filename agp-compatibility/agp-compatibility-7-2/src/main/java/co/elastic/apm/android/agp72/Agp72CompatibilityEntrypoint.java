@@ -11,8 +11,8 @@ import co.elastic.apm.android.agp.api.CurrentVersion;
 public class Agp72CompatibilityEntrypoint implements AgpCompatibilityEntrypoint {
 
     @Override
-    public String getIdentifier() {
-        return "agp_7.2.+";
+    public String getDescription() {
+        return "Agp compatible for 7.2+";
     }
 
     @Override

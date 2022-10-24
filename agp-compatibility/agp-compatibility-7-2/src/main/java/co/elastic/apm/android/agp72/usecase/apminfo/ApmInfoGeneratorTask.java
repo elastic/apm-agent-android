@@ -18,13 +18,24 @@
  */
 package co.elastic.apm.android.agp72.usecase.apminfo;
 
+import com.android.build.api.component.impl.ComponentImpl;
+import com.android.build.api.variant.Variant;
+
 import org.gradle.api.DefaultTask;
+import org.gradle.api.Project;
+import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.ModuleVersionIdentifier;
+import org.gradle.api.artifacts.ResolveException;
+import org.gradle.api.artifacts.ResolvedArtifact;
+import org.gradle.api.artifacts.ResolvedConfiguration;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.provider.Property;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.TaskProvider;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -32,6 +43,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Properties;
 
+import co.elastic.apm.android.agp.api.usecase.ApmInfoUseCase;
 import co.elastic.apm.android.common.ApmInfo;
 
 public abstract class ApmInfoGeneratorTask extends DefaultTask {
@@ -80,5 +92,38 @@ public abstract class ApmInfoGeneratorTask extends DefaultTask {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static TaskProvider<ApmInfoGeneratorTask> create(Project project, ApmInfoUseCase.Parameters parameters, Variant variant) {
+        String variantName = variant.getName();
+        TaskProvider<ApmInfoGeneratorTask> taskProvider = project.getTasks().register(variantName + "GenerateApmInfo", ApmInfoGeneratorTask.class);
+        taskProvider.configure(apmInfoGenerator -> {
+            apmInfoGenerator.getServiceName().set(parameters.getServiceName());
+            apmInfoGenerator.getServiceVersion().set(parameters.getServiceVersion());
+            apmInfoGenerator.getServerUrl().set(parameters.getServerUrl());
+            apmInfoGenerator.getVariantName().set(variantName);
+            apmInfoGenerator.getOutputDir().set(project.getLayout().getBuildDirectory().dir(apmInfoGenerator.getName()));
+            apmInfoGenerator.getOkHttpVersion().set(getOkhttpVersion(project, variant));
+        });
+
+        return taskProvider;
+    }
+
+    private static Provider<String> getOkhttpVersion(Project project, Variant variant) {
+        ComponentImpl component = (ComponentImpl) variant;
+        return project.provider(() -> {
+            Configuration runtimeClasspath = component.getVariantDependencies().getRuntimeClasspath();
+            ResolvedConfiguration resolvedConfiguration = runtimeClasspath.getResolvedConfiguration();
+            try {
+                for (ResolvedArtifact artifact : resolvedConfiguration.getResolvedArtifacts()) {
+                    ModuleVersionIdentifier identifier = artifact.getModuleVersion().getId();
+                    if (identifier.getGroup().equals("com.squareup.okhttp3") && identifier.getName().equals("okhttp")) {
+                        return identifier.getVersion();
+                    }
+                }
+            } catch (ResolveException ignored) {
+            }
+            return null;
+        });
     }
 }

@@ -16,30 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.agp.api;
+package co.elastic.apm.android.agp73;
 
-import com.android.build.api.AndroidPluginVersion;
+import org.gradle.api.Action;
+import org.gradle.api.Project;
 
-public class CurrentVersion {
-    private final AndroidPluginVersion current;
+import co.elastic.apm.android.agp.api.AgpCompatibilityManager;
+import co.elastic.apm.android.agp.api.usecase.ApmInfoUseCase;
+import co.elastic.apm.android.agp73.usecase.apminfo.ApmInfoUseCase73;
 
-    public CurrentVersion(AndroidPluginVersion current) {
-        this.current = current;
+public class Agp73CompatibilityManager extends AgpCompatibilityManager {
+
+    protected Agp73CompatibilityManager(Project project) {
+        super(project);
     }
 
-    public boolean isEqualTo(AndroidPluginVersion other) {
-        return current.compareTo(other) == 0;
-    }
-
-    public boolean isGreaterThan(AndroidPluginVersion other) {
-        return current.compareTo(other) > 0;
-    }
-
-    public boolean isLowerThan(AndroidPluginVersion other) {
-        return current.compareTo(other) < 0;
-    }
-
-    public boolean isEqualOrGreaterThan(AndroidPluginVersion other) {
-        return isEqualTo(other) || isGreaterThan(other);
+    @Override
+    public ApmInfoUseCase getApmInfoUseCase(Action<ApmInfoUseCase.Parameters> config) {
+        return createUseCase(ApmInfoUseCase73.class, ApmInfoUseCase.Parameters.class, config);
     }
 }

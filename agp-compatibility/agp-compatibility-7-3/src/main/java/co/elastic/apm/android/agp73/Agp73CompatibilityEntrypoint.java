@@ -16,30 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.agp.api;
+package co.elastic.apm.android.agp73;
 
 import com.android.build.api.AndroidPluginVersion;
 
-public class CurrentVersion {
-    private final AndroidPluginVersion current;
+import org.gradle.api.Project;
 
-    public CurrentVersion(AndroidPluginVersion current) {
-        this.current = current;
+import co.elastic.apm.android.agp.api.AgpCompatibilityEntrypoint;
+import co.elastic.apm.android.agp.api.AgpCompatibilityManager;
+import co.elastic.apm.android.agp.api.CurrentVersion;
+
+public class Agp73CompatibilityEntrypoint implements AgpCompatibilityEntrypoint {
+
+    @Override
+    public String getDescription() {
+        return "Agp compatible for 7.3+";
     }
 
-    public boolean isEqualTo(AndroidPluginVersion other) {
-        return current.compareTo(other) == 0;
+    @Override
+    public boolean isCompatible(CurrentVersion currentVersion) {
+        return currentVersion.isEqualOrGreaterThan(new AndroidPluginVersion(7, 3));
     }
 
-    public boolean isGreaterThan(AndroidPluginVersion other) {
-        return current.compareTo(other) > 0;
-    }
-
-    public boolean isLowerThan(AndroidPluginVersion other) {
-        return current.compareTo(other) < 0;
-    }
-
-    public boolean isEqualOrGreaterThan(AndroidPluginVersion other) {
-        return isEqualTo(other) || isGreaterThan(other);
+    @Override
+    public AgpCompatibilityManager provideCompatibilityManager(Project project) {
+        return new Agp73CompatibilityManager(project);
     }
 }

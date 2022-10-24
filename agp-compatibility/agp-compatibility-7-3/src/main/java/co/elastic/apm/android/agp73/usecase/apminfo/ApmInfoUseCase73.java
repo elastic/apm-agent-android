@@ -16,9 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.agp72.usecase.apminfo;
+package co.elastic.apm.android.agp73.usecase.apminfo;
 
-import com.android.build.api.artifact.MultipleArtifact;
 import com.android.build.api.variant.AndroidComponentsExtension;
 import com.android.build.api.variant.Variant;
 
@@ -26,8 +25,9 @@ import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskProvider;
 
 import co.elastic.apm.android.agp.api.usecase.ApmInfoUseCase;
+import co.elastic.apm.android.agp72.usecase.apminfo.ApmInfoGeneratorTask;
 
-public abstract class ApmInfoUseCase72 extends ApmInfoUseCase {
+public abstract class ApmInfoUseCase73 extends ApmInfoUseCase {
 
     @Override
     public void execute() {
@@ -41,8 +41,7 @@ public abstract class ApmInfoUseCase72 extends ApmInfoUseCase {
     }
 
     protected void attachTaskToVariant(Variant variant, TaskProvider<ApmInfoGeneratorTask> taskProvider) {
-        variant.getArtifacts().use(taskProvider)
-                .wiredWith(ApmInfoGeneratorTask::getOutputDir)
-                .toAppendTo(MultipleArtifact.ASSETS.INSTANCE);
+        variant.getSources().getAssets().addGeneratedSourceDirectory(taskProvider, ApmInfoGeneratorTask::getOutputDir);
     }
+
 }

@@ -47,8 +47,12 @@ public class ElasticSpanProcessor implements SpanProcessor {
 
     @Override
     public void onStart(Context parentContext, ReadWriteSpan span) {
-        span.setAttribute(SESSION_ID_ATTRIBUTE_KEY, sessionIdProvider.getSessionId());
+        span.setAttribute(SESSION_ID_ATTRIBUTE_KEY, getSessionId());
         original.onStart(parentContext, span);
+    }
+
+    private synchronized String getSessionId() {
+        return sessionIdProvider.getSessionId();
     }
 
     @Override

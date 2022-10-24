@@ -1,4 +1,4 @@
-package co.elastic.apm.android.agp;
+package co.elastic.apm.android.agp72;
 
 import org.gradle.api.Project;
 

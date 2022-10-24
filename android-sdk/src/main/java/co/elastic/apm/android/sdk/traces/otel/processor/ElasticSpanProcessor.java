@@ -24,6 +24,7 @@ import java.util.Set;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.traces.session.SessionIdProvider;
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
 import io.opentelemetry.sdk.trace.ReadableSpan;
@@ -33,7 +34,7 @@ public class ElasticSpanProcessor implements SpanProcessor {
     private final SpanProcessor original;
     private final Set<ExclusionRule> rules = new HashSet<>();
     private final SessionIdProvider sessionIdProvider;
-    private static final String SESSION_ID_ATTRIBUTE_KEY = "session.id";
+    private static final AttributeKey<String> SESSION_ID_ATTRIBUTE_KEY = AttributeKey.stringKey("session.id");
 
     public void addAllExclusionRules(Collection<? extends ExclusionRule> rules) {
         this.rules.addAll(rules);

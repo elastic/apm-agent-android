@@ -5,7 +5,7 @@ import com.android.build.api.AndroidPluginVersion;
 import org.gradle.api.Project;
 
 import co.elastic.apm.android.agp.api.AgpCompatibilityEntrypoint;
-import co.elastic.apm.android.agp.api.AgpCompatibleUseCase;
+import co.elastic.apm.android.agp.api.AgpCompatibilityManager;
 import co.elastic.apm.android.agp.api.CurrentVersion;
 
 public class Agp72CompatibilityEntrypoint implements AgpCompatibilityEntrypoint {
@@ -24,7 +24,7 @@ public class Agp72CompatibilityEntrypoint implements AgpCompatibilityEntrypoint 
     }
 
     @Override
-    public AgpCompatibleUseCase provideCompatibleUseCase(Project project) {
-        return new Agp72CompatibleUseCase();
+    public AgpCompatibilityManager provideCompatibilityManager(Project project) {
+        return new Agp72CompatibilityManager(project);
     }
 }

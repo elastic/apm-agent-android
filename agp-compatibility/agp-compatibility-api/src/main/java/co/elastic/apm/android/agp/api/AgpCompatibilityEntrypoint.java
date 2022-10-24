@@ -14,9 +14,9 @@ public interface AgpCompatibilityEntrypoint {
 
     boolean isCompatible(CurrentVersion currentVersion);
 
-    AgpCompatibleUseCase provideCompatibleUseCase(Project project);
+    AgpCompatibilityManager provideCompatibilityManager(Project project);
 
-    static AgpCompatibleUseCase findCompatibleUseCase(Project project) {
+    static AgpCompatibilityManager findCompatibleUseCase(Project project) {
         ServiceLoader<AgpCompatibilityEntrypoint> entrypoints = ServiceLoader.load(AgpCompatibilityEntrypoint.class);
         if (!entrypoints.iterator().hasNext()) {
             throw new IllegalStateException("No implementations found for " + AgpCompatibilityEntrypoint.class.getName());
@@ -28,7 +28,7 @@ public interface AgpCompatibilityEntrypoint {
         for (AgpCompatibilityEntrypoint entrypoint : entrypoints) {
             if (entrypoint.isCompatible(comparable)) {
                 Elog.getLogger().debug("Found AGP compatible entrypoint: {}", entrypoint.getIdentifier());
-                return entrypoint.provideCompatibleUseCase(project);
+                return entrypoint.provideCompatibilityManager(project);
             }
         }
 

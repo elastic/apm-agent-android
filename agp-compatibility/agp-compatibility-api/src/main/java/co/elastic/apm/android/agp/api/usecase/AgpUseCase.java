@@ -1,4 +1,4 @@
-package co.elastic.apm.android.agp.api;
+package co.elastic.apm.android.agp.api.usecase;
 
 public interface AgpUseCase {
 

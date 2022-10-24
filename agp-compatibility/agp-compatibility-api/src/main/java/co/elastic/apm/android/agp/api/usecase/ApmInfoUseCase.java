@@ -14,9 +14,6 @@ public abstract class ApmInfoUseCase extends AgpUseCase<ApmInfoUseCase.Parameter
         public abstract Provider<String> getServiceName();
 
         @Input
-        public abstract Property<String> getVariantName();
-
-        @Input
         public abstract Property<String> getServerUrl();
 
         @Input

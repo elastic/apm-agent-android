@@ -30,21 +30,14 @@ import net.bytebuddy.build.gradle.android.ByteBuddyAndroidPlugin;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.artifacts.ModuleVersionIdentifier;
-import org.gradle.api.artifacts.ResolveException;
-import org.gradle.api.artifacts.ResolvedArtifact;
-import org.gradle.api.artifacts.ResolvedConfiguration;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.plugins.ExtensionContainer;
-import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.TaskProvider;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.plugin.extensions.ElasticApmExtension;
 import co.elastic.apm.android.plugin.instrumentation.ElasticLocalInstrumentationFactory;
 import co.elastic.apm.android.plugin.logging.GradleLoggerFactory;
-import co.elastic.apm.android.plugin.tasks.ApmInfoGenerator;
 import co.elastic.apm.android.plugin.tasks.OkHttpEventlistenerGenerator;
 import co.elastic.apm.generated.BuildConfig;
 import kotlin.Unit;
@@ -65,6 +58,7 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
         addSdkDependency();
         addInstrumentationDependency();
         addTasks();
+        applyCompatibleUseCases();
     }
 
     private void initializeElasticExtension(Project project) {
@@ -100,7 +94,6 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
     }
 
     private void enhanceVariant(ApplicationVariant applicationVariant) {
-        addApmInfoGenerator(applicationVariant);
         addOkhttpEventListenerGenerator(applicationVariant);
         addLocalRemapping(applicationVariant);
     }
@@ -129,39 +122,7 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
                 AndroidArtifacts.ArtifactType.CLASSES_JAR);
     }
 
-    private void addApmInfoGenerator(ApplicationVariant applicationVariant) {
-        ComponentImpl component = (ComponentImpl) applicationVariant;
-        String variantName = applicationVariant.getName();
-        TaskProvider<ApmInfoGenerator> taskProvider = project.getTasks().register(variantName + "GenerateApmInfo", ApmInfoGenerator.class);
-        taskProvider.configure(apmInfoGenerator -> {
-            apmInfoGenerator.getServiceName().set(defaultExtension.getServiceName());
-            apmInfoGenerator.getServiceVersion().set(defaultExtension.getServiceVersion());
-            apmInfoGenerator.getServerUrl().set(defaultExtension.getServerUrl());
-            apmInfoGenerator.getServerToken().set(defaultExtension.getServerToken());
-            apmInfoGenerator.getVariantName().set(variantName);
-            apmInfoGenerator.getOutputDir().set(project.getLayout().getBuildDirectory().dir(apmInfoGenerator.getName()));
-            apmInfoGenerator.getOkHttpVersion().set(getOkhttpVersion(component));
-        });
+    private void applyCompatibleUseCases() {
 
-        applicationVariant.getArtifacts().use(taskProvider)
-                .wiredWith(ApmInfoGenerator::getOutputDir)
-                .toAppendTo(MultipleArtifact.ASSETS.INSTANCE);
-    }
-
-    private Provider<String> getOkhttpVersion(ComponentImpl component) {
-        return project.provider(() -> {
-            Configuration runtimeClasspath = component.getVariantDependencies().getRuntimeClasspath();
-            ResolvedConfiguration resolvedConfiguration = runtimeClasspath.getResolvedConfiguration();
-            try {
-                for (ResolvedArtifact artifact : resolvedConfiguration.getResolvedArtifacts()) {
-                    ModuleVersionIdentifier identifier = artifact.getModuleVersion().getId();
-                    if (identifier.getGroup().equals("com.squareup.okhttp3") && identifier.getName().equals("okhttp")) {
-                        return identifier.getVersion();
-                    }
-                }
-            } catch (ResolveException ignored) {
-            }
-            return null;
-        });
     }
 }

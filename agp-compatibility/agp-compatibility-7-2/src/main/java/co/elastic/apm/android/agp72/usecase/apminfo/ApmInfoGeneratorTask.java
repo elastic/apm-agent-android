@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.plugin.tasks;
+package co.elastic.apm.android.agp72.usecase.apminfo;
 
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
@@ -34,7 +34,7 @@ import java.util.Properties;
 
 import co.elastic.apm.android.common.ApmInfo;
 
-public abstract class ApmInfoGenerator extends DefaultTask {
+public abstract class ApmInfoGeneratorTask extends DefaultTask {
 
     @Input
     public abstract Property<String> getVariantName();

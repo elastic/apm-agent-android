@@ -34,7 +34,7 @@ public interface AgpCompatibilityEntrypoint {
 
     AgpCompatibilityManager provideCompatibilityManager(Project project);
 
-    static AgpCompatibilityManager findCompatibleUseCase(Project project) {
+    static AgpCompatibilityManager findCompatibleManager(Project project) {
         ServiceLoader<AgpCompatibilityEntrypoint> entrypoints = ServiceLoader.load(AgpCompatibilityEntrypoint.class);
         if (!entrypoints.iterator().hasNext()) {
             throw new IllegalStateException("No implementations found for " + AgpCompatibilityEntrypoint.class.getName());
@@ -50,6 +50,6 @@ public interface AgpCompatibilityEntrypoint {
             }
         }
 
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Could not find compatibility manager for " + currentVersion);
     }
 }

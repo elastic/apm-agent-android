@@ -126,7 +126,7 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
     }
 
     private void applyCompatibleUseCases() {
-        AgpCompatibilityManager compatibleUseCase = AgpCompatibilityEntrypoint.findCompatibleUseCase(project);
+        AgpCompatibilityManager compatibleUseCase = AgpCompatibilityEntrypoint.findCompatibleManager(project);
 
         ApmInfoUseCase apmInfoUseCase = compatibleUseCase.getApmInfoUseCase(parameters -> {
             parameters.getServiceName().set(defaultExtension.getServiceName());

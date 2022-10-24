@@ -34,6 +34,8 @@ import org.gradle.api.file.FileCollection;
 import org.gradle.api.plugins.ExtensionContainer;
 import org.gradle.api.tasks.TaskProvider;
 
+import co.elastic.apm.android.agp.api.AgpCompatibilityEntrypoint;
+import co.elastic.apm.android.agp.api.AgpCompatibilityManager;
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.plugin.extensions.ElasticApmExtension;
 import co.elastic.apm.android.plugin.instrumentation.ElasticLocalInstrumentationFactory;
@@ -123,6 +125,13 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
     }
 
     private void applyCompatibleUseCases() {
+        AgpCompatibilityManager compatibleUseCase = AgpCompatibilityEntrypoint.findCompatibleUseCase(project);
 
+        compatibleUseCase.getApmInfoUseCase(parameters -> {
+            parameters.getServiceName().set(defaultExtension.getServiceName());
+            parameters.getServiceVersion().set(defaultExtension.getServiceVersion());
+            parameters.getServerUrl().set(defaultExtension.getServerUrl());
+            parameters.getServerToken().set(defaultExtension.getServerToken());
+        });
     }
 }

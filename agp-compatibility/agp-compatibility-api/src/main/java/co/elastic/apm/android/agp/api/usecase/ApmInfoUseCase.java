@@ -1,7 +1,6 @@
 package co.elastic.apm.android.agp.api.usecase;
 
 import org.gradle.api.provider.Property;
-import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Optional;
 
@@ -11,7 +10,7 @@ public abstract class ApmInfoUseCase extends AgpUseCase<ApmInfoUseCase.Parameter
 
     public abstract static class Parameters implements AgpUseCase.Parameters {
         @Input
-        public abstract Provider<String> getServiceName();
+        public abstract Property<String> getServiceName();
 
         @Input
         public abstract Property<String> getServerUrl();

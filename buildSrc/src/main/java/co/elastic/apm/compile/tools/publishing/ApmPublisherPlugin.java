@@ -12,18 +12,18 @@ public class ApmPublisherPlugin extends BaseProjectTypePlugin {
     @Override
     protected void onAndroidLibraryFound() {
         PluginContainer plugins = project.getPlugins();
-        applyPluginsToSubproject(plugins);
+        applyCommonPlugins(plugins);
         plugins.apply(ApmAndroidPublisherPlugin.class);
     }
 
     @Override
     protected void onJavaLibraryFound() {
         PluginContainer plugins = project.getPlugins();
-        applyPluginsToSubproject(plugins);
+        applyCommonPlugins(plugins);
         plugins.apply(ApmJavaPublisherPlugin.class);
     }
 
-    private void applyPluginsToSubproject(PluginContainer plugins) {
+    private void applyCommonPlugins(PluginContainer plugins) {
         plugins.apply(MavenPublishPlugin.class);
     }
 }

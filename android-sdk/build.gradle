@@ -26,9 +26,6 @@ android {
         sourceCompatibility jvmCompatibility
         targetCompatibility jvmCompatibility
     }
-    publishing {
-        singleVariant('debug')
-    }
 }
 
 licensesConfig {

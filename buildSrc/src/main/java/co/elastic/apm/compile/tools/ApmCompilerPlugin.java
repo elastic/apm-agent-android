@@ -1,23 +1,17 @@
 package co.elastic.apm.compile.tools;
 
-import org.gradle.api.Plugin;
-import org.gradle.api.Project;
-
+import co.elastic.apm.compile.tools.base.BasePlugin;
 import co.elastic.apm.compile.tools.plugins.subprojects.AarApmCompilerPlugin;
 import co.elastic.apm.compile.tools.plugins.subprojects.JarApmCompilerPlugin;
 
-public class ApmCompilerPlugin implements Plugin<Project> {
+public class ApmCompilerPlugin extends BasePlugin {
 
     @Override
-    public void apply(Project project) {
-        if (isAndroidProject(project)) {
+    protected void onApply() {
+        if (isAndroidProject()) {
             project.getPlugins().apply(AarApmCompilerPlugin.class);
         } else {
             project.getPlugins().apply(JarApmCompilerPlugin.class);
         }
-    }
-
-    private boolean isAndroidProject(Project project) {
-        return project.getExtensions().findByName("android") != null;
     }
 }

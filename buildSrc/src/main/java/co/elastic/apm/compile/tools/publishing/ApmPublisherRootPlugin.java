@@ -27,6 +27,8 @@ public class ApmPublisherRootPlugin extends BasePlugin {
                     } else {
                         plugins.apply(ApmJavaPublisherPlugin.class);
                     }
+                } else {
+                    project.getLogger().info("Ignoring project '{}' from publishing", subproject.getName());
                 }
             });
         });

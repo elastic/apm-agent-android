@@ -3,7 +3,6 @@ plugins {
     id 'com.github.gmazzo.buildconfig' version '3.1.0'
     id 'co.elastic.apm.notice-producer'
 }
-apply from: "$rootDir/publishing.gradle"
 
 targetCompatibility = jvmCompatibility
 sourceCompatibility = jvmCompatibility

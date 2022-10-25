@@ -16,18 +16,6 @@ dependencies {
 
 gradlePlugin {
     plugins {
-        apmTools {
-            id = 'co.elastic.apm.notice-producer'
-            implementationClass = 'co.elastic.apm.compile.tools.NoticeProviderPlugin'
-        }
-        apmToolsRoot {
-            id = 'co.elastic.apm.root-notice-producer'
-            implementationClass = 'co.elastic.apm.compile.tools.plugins.RootNoticeProviderPlugin'
-        }
-        sourceHeaderPlugin {
-            id = "co.elastic.apm.source-header"
-            implementationClass = "co.elastic.apm.compile.tools.sourceheader.ApmSourceHeaderPlugin"
-        }
         publishingPlugin {
             id = 'co.elastic.apm.publishing'
             implementationClass = "co.elastic.apm.compile.tools.publishing.ApmPublisherRootPlugin"

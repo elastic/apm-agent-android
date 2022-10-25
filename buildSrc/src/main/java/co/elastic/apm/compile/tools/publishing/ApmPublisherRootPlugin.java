@@ -3,7 +3,9 @@ package co.elastic.apm.compile.tools.publishing;
 import org.gradle.api.plugins.PluginContainer;
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
 
+import co.elastic.apm.compile.tools.NoticeProviderPlugin;
 import co.elastic.apm.compile.tools.base.BasePlugin;
+import co.elastic.apm.compile.tools.plugins.RootNoticeProviderPlugin;
 import co.elastic.apm.compile.tools.publishing.extension.TargetProjectExtension;
 import co.elastic.apm.compile.tools.publishing.subprojects.ApmAndroidPublisherPlugin;
 import co.elastic.apm.compile.tools.publishing.subprojects.ApmJavaPublisherPlugin;
@@ -14,14 +16,14 @@ public class ApmPublisherRootPlugin extends BasePlugin {
 
     @Override
     protected void onApply() {
+        project.getPlugins().apply(RootNoticeProviderPlugin.class);
         project.subprojects(subproject -> {
             TargetProjectExtension extension = subproject.getExtensions().create(TARGET_PROJECT_EXTENSION_NAME, TargetProjectExtension.class);
 
             subproject.afterEvaluate(sameSubproject -> {
                 if (!extension.getDisablePublication().get()) {
                     PluginContainer plugins = subproject.getPlugins();
-                    plugins.apply(MavenPublishPlugin.class);
-                    plugins.apply(ApmSourceHeaderPlugin.class);
+                    applyPluginsToSubproject(plugins);
                     if (isAndroidProject(subproject)) {
                         plugins.apply(ApmAndroidPublisherPlugin.class);
                     } else {
@@ -32,5 +34,11 @@ public class ApmPublisherRootPlugin extends BasePlugin {
                 }
             });
         });
+    }
+
+    private void applyPluginsToSubproject(PluginContainer plugins) {
+        plugins.apply(MavenPublishPlugin.class);
+        plugins.apply(ApmSourceHeaderPlugin.class);
+        plugins.apply(NoticeProviderPlugin.class);
     }
 }

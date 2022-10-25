@@ -1,17 +1,18 @@
 package co.elastic.apm.compile.tools.sourceheader;
 
-import co.elastic.apm.compile.tools.base.BasePlugin;
+import co.elastic.apm.compile.tools.base.BaseProjectTypePlugin;
 import co.elastic.apm.compile.tools.sourceheader.subplugins.AndroidSourceHeaderPlugin;
 import co.elastic.apm.compile.tools.sourceheader.subplugins.JavaSourceHeaderPlugin;
 
-public class ApmSourceHeaderPlugin extends BasePlugin {
+public class ApmSourceHeaderPlugin extends BaseProjectTypePlugin {
 
     @Override
-    protected void onApply() {
-        if (isAndroidProject()) {
-            project.getPluginManager().apply(AndroidSourceHeaderPlugin.class);
-        } else {
-            project.getPluginManager().apply(JavaSourceHeaderPlugin.class);
-        }
+    protected void onAndroidLibraryFound() {
+        project.getPluginManager().apply(AndroidSourceHeaderPlugin.class);
+    }
+
+    @Override
+    protected void onJavaLibraryFound() {
+        project.getPluginManager().apply(JavaSourceHeaderPlugin.class);
     }
 }

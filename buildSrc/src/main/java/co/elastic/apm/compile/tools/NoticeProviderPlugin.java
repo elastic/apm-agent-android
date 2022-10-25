@@ -1,17 +1,18 @@
 package co.elastic.apm.compile.tools;
 
-import co.elastic.apm.compile.tools.base.BasePlugin;
+import co.elastic.apm.compile.tools.base.BaseProjectTypePlugin;
 import co.elastic.apm.compile.tools.plugins.subprojects.AarNoticeProviderPlugin;
 import co.elastic.apm.compile.tools.plugins.subprojects.JarNoticeProviderPlugin;
 
-public class NoticeProviderPlugin extends BasePlugin {
+public class NoticeProviderPlugin extends BaseProjectTypePlugin {
 
     @Override
-    protected void onApply() {
-        if (isAndroidProject()) {
-            project.getPlugins().apply(AarNoticeProviderPlugin.class);
-        } else {
-            project.getPlugins().apply(JarNoticeProviderPlugin.class);
-        }
+    protected void onAndroidLibraryFound() {
+        project.getPlugins().apply(AarNoticeProviderPlugin.class);
+    }
+
+    @Override
+    protected void onJavaLibraryFound() {
+        project.getPlugins().apply(JarNoticeProviderPlugin.class);
     }
 }

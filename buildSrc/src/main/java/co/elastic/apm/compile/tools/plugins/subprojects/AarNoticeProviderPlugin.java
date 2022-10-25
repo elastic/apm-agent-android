@@ -20,7 +20,7 @@ import co.elastic.apm.compile.tools.tasks.subprojects.NoticeFilesCollectorTask;
 import co.elastic.apm.compile.tools.tasks.subprojects.PomLicensesCollectorTask;
 import co.elastic.apm.compile.tools.utils.Constants;
 
-public class AarApmCompilerPlugin extends BaseSubprojectPlugin {
+public class AarNoticeProviderPlugin extends BaseSubprojectPlugin {
 
     @SuppressWarnings("unchecked")
     @Override

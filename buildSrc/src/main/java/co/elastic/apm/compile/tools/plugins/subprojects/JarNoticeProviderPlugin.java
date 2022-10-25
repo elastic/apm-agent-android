@@ -9,7 +9,7 @@ import co.elastic.apm.compile.tools.tasks.NoticeMergerTask;
 import co.elastic.apm.compile.tools.tasks.subprojects.NoticeFilesCollectorTask;
 import co.elastic.apm.compile.tools.tasks.subprojects.PomLicensesCollectorTask;
 
-public class JarApmCompilerPlugin extends BaseSubprojectPlugin {
+public class JarNoticeProviderPlugin extends BaseSubprojectPlugin {
 
     @Override
     public void apply(Project project) {

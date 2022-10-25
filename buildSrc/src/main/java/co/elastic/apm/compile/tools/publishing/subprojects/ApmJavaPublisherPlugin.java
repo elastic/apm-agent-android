@@ -6,9 +6,11 @@ public class ApmJavaPublisherPlugin extends BaseApmPublisherPlugin {
 
     @Override
     public void apply(Project project) {
-        if (!isAGradlePluginProject(project)) { // The "Gradle Plugin" plugin already creates its maven publication.
-            addMavenPublication(project, "java");
-        }
+        project.afterEvaluate(self -> {
+            if (!isAGradlePluginProject(self)) { // The "Gradle Plugin" plugin already creates its maven publication.
+                addMavenPublication(self, "java");
+            }
+        });
     }
 
     private boolean isAGradlePluginProject(Project project) {

@@ -79,6 +79,7 @@ public class AarApmCompilerPlugin extends BaseSubprojectPlugin {
         });
     }
 
+    @SuppressWarnings("unchecked")
     private void copyAttributes(AttributeContainer from, AttributeContainer to) {
         for (Attribute<?> attribute : from.keySet()) {
             Object value = from.getAttribute(attribute);

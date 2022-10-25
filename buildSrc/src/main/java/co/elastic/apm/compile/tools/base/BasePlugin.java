@@ -16,6 +16,10 @@ public abstract class BasePlugin implements Plugin<Project> {
     protected abstract void onApply();
 
     protected boolean isAndroidProject() {
+        return isAndroidProject(project);
+    }
+
+    protected boolean isAndroidProject(Project project) {
         return project.getExtensions().findByName("android") != null;
     }
 }

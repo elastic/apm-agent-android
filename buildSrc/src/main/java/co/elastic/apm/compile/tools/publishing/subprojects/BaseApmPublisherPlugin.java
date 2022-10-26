@@ -5,9 +5,20 @@ import org.gradle.api.Project;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.MavenPublication;
 
-public abstract class BaseApmPublisherPlugin implements Plugin<Project> {
+import java.util.Locale;
 
-    protected void addMavenPublication(Project project, String componentName) {
+public abstract class BaseApmPublisherPlugin implements Plugin<Project> {
+    protected Project project;
+
+    @Override
+    public final void apply(Project project) {
+        this.project = project;
+        onApply();
+    }
+
+    protected abstract void onApply();
+
+    protected void addMavenPublication(String componentName) {
         PublishingExtension mavenPublishExtension = project.getExtensions().getByType(PublishingExtension.class);
         mavenPublishExtension.getPublications().create("elasticPublication", MavenPublication.class, publication -> {
             publication.from(project.getComponents().findByName(componentName));
@@ -41,5 +52,14 @@ public abstract class BaseApmPublisherPlugin implements Plugin<Project> {
                 }));
             });
         });
+    }
+
+    protected boolean isRelease() {
+        String propertyName = "release";
+        if (!project.hasProperty(propertyName)) {
+            return false;
+        }
+        String release = (String) project.property(propertyName);
+        return release.toLowerCase(Locale.US).equals("true");
     }
 }

@@ -6,7 +6,7 @@ import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.MavenPublication;
 import org.gradle.plugins.signing.SigningExtension;
 
-import java.util.Locale;
+import co.elastic.apm.compile.tools.publishing.PublishingUtils;
 
 public abstract class BaseApmPublisherPlugin implements Plugin<Project> {
     protected Project project;
@@ -76,11 +76,6 @@ public abstract class BaseApmPublisherPlugin implements Plugin<Project> {
     }
 
     protected boolean isRelease() {
-        String propertyName = "release";
-        if (!project.hasProperty(propertyName)) {
-            return false;
-        }
-        String release = (String) project.property(propertyName);
-        return release.toLowerCase(Locale.US).equals("true");
+        return PublishingUtils.isRelease(project);
     }
 }

@@ -26,6 +26,8 @@ public class ApmPublisherPlugin extends BaseProjectTypePlugin {
 
     private void applyCommonPlugins(PluginContainer plugins) {
         plugins.apply(MavenPublishPlugin.class);
-        plugins.apply(SigningPlugin.class);
+        if (PublishingUtils.isRelease(project)) {
+            plugins.apply(SigningPlugin.class);
+        }
     }
 }

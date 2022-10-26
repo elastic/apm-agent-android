@@ -60,6 +60,8 @@ gradlePlugin {
         apmPlugin {
             id = 'co.elastic.apm.android'
             implementationClass = 'co.elastic.apm.android.plugin.ApmAndroidAgentPlugin'
+            displayName = "Elastic APM Android Agent"
+            description = project.description
         }
     }
 }

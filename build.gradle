@@ -4,14 +4,6 @@ plugins {
     id 'co.elastic.apm.publishing'
 }
 
-dependencies {
-    noticeProducer project(":android-plugin")
-    noticeProducer project(":android-sdk")
-    noticeProducer project(":android-sdk-ktx")
-    noticeProducer project(":android-common")
-    noticeProducer project(":android-instrumentation")
-}
-
 ext {
     jvmCompatibility = JavaVersion.VERSION_1_8
     androidMinSdk = 24

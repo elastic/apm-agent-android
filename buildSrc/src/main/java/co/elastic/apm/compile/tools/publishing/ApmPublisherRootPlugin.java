@@ -18,6 +18,7 @@ public class ApmPublisherRootPlugin implements Plugin<Project> {
             plugins.apply(ApmSourceHeaderPlugin.class);
             plugins.apply(NoticeProviderPlugin.class);
             plugins.apply(ApmPublisherPlugin.class);
+            project.getDependencies().add("noticeProducer", subproject);
         });
     }
 }

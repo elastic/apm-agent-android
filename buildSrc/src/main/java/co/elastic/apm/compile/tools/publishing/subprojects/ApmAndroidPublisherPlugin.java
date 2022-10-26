@@ -12,6 +12,6 @@ public class ApmAndroidPublisherPlugin extends BaseApmPublisherPlugin {
         String componentName = "release";
         androidExtension.getPublishing().singleVariant(componentName);
 
-        addMavenPublication(project, componentName);
+        project.afterEvaluate(self -> addMavenPublication(self, componentName));
     }
 }

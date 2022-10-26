@@ -12,6 +12,6 @@ public class AndroidSourceHeaderPlugin extends BaseSourceHeaderPlugin {
             kotlinExtension.licenseHeader(getLicenseHeader());
             kotlinExtension.target("src/*/java/**/*.kt");
         });
-        project.afterEvaluate(it -> it.getTasks().getByName("preBuild", task -> task.dependsOn(getSpotlessApply(it))));
+        project.afterEvaluate(self -> self.getTasks().getByName("preBuild", task -> task.dependsOn(getSpotlessApply(self))));
     }
 }

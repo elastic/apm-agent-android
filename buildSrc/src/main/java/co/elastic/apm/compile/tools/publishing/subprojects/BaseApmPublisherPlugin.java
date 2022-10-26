@@ -24,7 +24,9 @@ public abstract class BaseApmPublisherPlugin implements Plugin<Project> {
         mavenPublishExtension.getPublications().create("elasticPublication", MavenPublication.class, publication -> {
             publication.from(project.getComponents().findByName(componentName));
             configurePom(publication);
-            signPublication(publication);
+            if (isRelease()) {
+                signPublication(publication);
+            }
         });
     }
 

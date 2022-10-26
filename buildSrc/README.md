@@ -70,3 +70,46 @@ This work is triggered when building this project so there's nothing manual to b
 source headers are added using [this tool](https://github.com/diffplug/spotless) which is configured
 for both `java` and `kotlin` source files
 in [here](src/main/java/co/elastic/apm/compile/tools/sourceheader/subplugins).
+
+## Publishing
+
+The APM Android Agent project has several modules needed to be deployed. All of them, except for
+one, need to be deployed to maven central. The only exception is for the `android-plugin` module
+which has to go into the [Gradle Plugin Portal](https://plugins.gradle.org/).
+
+Both kinds of deployments are automatically configured for all the modules available in this
+project, this tool takes care of checking what are the types of the projects (either Java library,
+Android library or Gradle plugin) and sets their deployment configuration accordingly.
+
+### Publishing to Maven Central
+
+The Maven Central (Sonatype OSSRH Nexus) deployment is configured using the
+official [Maven Publish plugin](https://docs.gradle.org/current/userguide/publishing_maven.html),
+and the deploy task is handled by
+the [Gradle Nexus publish plugin](https://github.com/gradle-nexus/publish-plugin).
+
+#### Requirements
+
+Before executing the publishing command, the following signing environment variables must be set:
+
+- ORG_GRADLE_PROJECT_signingKey
+- ORG_GRADLE_PROJECT_signingPassword
+
+More info about those variables
+in [here](https://docs.gradle.org/current/userguide/signing_plugin.html#sec:in-memory-keys).
+
+As well as the following Sonatype credentials env vars:
+
+- ORG_GRADLE_PROJECT_sonatypeUsername
+- ORG_GRADLE_PROJECT_sonatypePassword
+
+More info on those, [here](https://github.com/gradle-nexus/publish-plugin)
+
+#### Triggering the deploy
+
+After the requirements are set up, the command needed to deploy all the non-gradle-plugin modules
+from this project is:
+
+```text
+./gradlew publishElasticPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
+```

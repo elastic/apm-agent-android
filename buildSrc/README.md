@@ -113,3 +113,30 @@ from this project is:
 ```text
 ./gradlew publishElasticPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
 ```
+
+### Publishing to the Gradle Plugin Portal
+
+The module `android-plugin` needs to go to the Gradle Plugin Portal, instead of Maven Central so
+that it can be applied easily into gradle projects. This tool already takes care of configuring
+[all the parameters needed for the deploy](https://plugins.gradle.org/docs/publish-plugin), but
+there's a couple of requirements needed prior to the publishing.
+
+#### Requirements
+
+This requirement is needed to be done only once, which is that a Gradle Plugin Portal account must
+be set up, [as explained here](https://docs.gradle.org/7.4/userguide/publishing_gradle_plugins.html)
+. This process will provide to values:
+
+- A publish key.
+- A publish secret.
+
+Needed to be passed later into the publishing command.
+
+#### Triggering the deploy
+
+After the requirements are set up, the command needed to deploy all the gradle-plugin modules from
+this project is:
+
+```text
+./gradlew publishPlugins -Pgradle.publish.key=<key> -Pgradle.publish.secret=<secret>
+```

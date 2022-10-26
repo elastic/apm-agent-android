@@ -2,7 +2,9 @@ package co.elastic.apm.android.test.common.spans.verifiers;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.sdk.trace.data.SpanData;
 
 @SuppressWarnings("unchecked")
@@ -28,6 +30,12 @@ public abstract class BaseSpanVerifier<T extends SpanVerifier<?>> implements Spa
     @Override
     public T hasNoParent() {
         assertFalse(span.getParentSpanContext().isValid());
+        return (T) this;
+    }
+
+    @Override
+    public T hasAttributeNamed(String attributeName) {
+        assertNotNull(span.getAttributes().get(AttributeKey.stringKey(attributeName)));
         return (T) this;
     }
 }

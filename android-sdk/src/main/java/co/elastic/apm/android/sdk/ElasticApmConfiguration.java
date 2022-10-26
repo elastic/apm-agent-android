@@ -19,11 +19,14 @@
 package co.elastic.apm.android.sdk;
 
 import co.elastic.apm.android.sdk.traces.http.HttpTraceConfiguration;
+import co.elastic.apm.android.sdk.traces.session.SessionIdProvider;
+import co.elastic.apm.android.sdk.traces.session.impl.DefaultSessionIdProvider;
 
 public final class ElasticApmConfiguration {
     public final HttpTraceConfiguration httpTraceConfiguration;
     public final String serviceName;
     public final String serviceVersion;
+    public final SessionIdProvider sessionIdProvider;
 
     public static Builder builder() {
         return new Builder();
@@ -37,12 +40,14 @@ public final class ElasticApmConfiguration {
         httpTraceConfiguration = builder.httpTraceConfiguration;
         serviceName = builder.serviceName;
         serviceVersion = builder.serviceVersion;
+        sessionIdProvider = builder.sessionIdProvider;
     }
 
     public static class Builder {
         private HttpTraceConfiguration httpTraceConfiguration;
         private String serviceName;
         private String serviceVersion;
+        private SessionIdProvider sessionIdProvider;
 
         private Builder() {
         }
@@ -62,9 +67,17 @@ public final class ElasticApmConfiguration {
             return this;
         }
 
+        public Builder setSessionIdProvider(SessionIdProvider sessionIdProvider) {
+            this.sessionIdProvider = sessionIdProvider;
+            return this;
+        }
+
         public ElasticApmConfiguration build() {
             if (httpTraceConfiguration == null) {
                 httpTraceConfiguration = HttpTraceConfiguration.builder().build();
+            }
+            if (sessionIdProvider == null) {
+                sessionIdProvider = new DefaultSessionIdProvider();
             }
             return new ElasticApmConfiguration(this);
         }

@@ -8,4 +8,6 @@ public interface SpanVerifier<T extends SpanVerifier<?>> {
     T isDirectChildOf(SpanData span);
 
     T hasNoParent();
+
+    T hasAttributeNamed(String attributeName);
 }

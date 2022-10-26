@@ -2,6 +2,7 @@ package co.elastic.apm.compile.tools.publishing;
 
 import org.gradle.api.plugins.PluginContainer;
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
+import org.gradle.plugins.signing.SigningPlugin;
 
 import co.elastic.apm.compile.tools.base.BaseProjectTypePlugin;
 import co.elastic.apm.compile.tools.publishing.subprojects.ApmAndroidPublisherPlugin;
@@ -25,5 +26,6 @@ public class ApmPublisherPlugin extends BaseProjectTypePlugin {
 
     private void applyCommonPlugins(PluginContainer plugins) {
         plugins.apply(MavenPublishPlugin.class);
+        plugins.apply(SigningPlugin.class);
     }
 }

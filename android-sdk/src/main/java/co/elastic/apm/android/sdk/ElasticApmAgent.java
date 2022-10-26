@@ -30,6 +30,8 @@ import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
 import co.elastic.apm.android.sdk.internal.services.network.NetworkService;
 import co.elastic.apm.android.sdk.internal.services.permissions.AndroidPermissionService;
+import co.elastic.apm.android.sdk.providers.Provider;
+import co.elastic.apm.android.sdk.providers.SimpleProvider;
 import co.elastic.apm.android.sdk.traces.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.traces.otel.processor.ElasticSpanProcessor;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
@@ -43,7 +45,7 @@ public final class ElasticApmAgent {
 
     public final ElasticApmConfiguration configuration;
     private static ElasticApmAgent instance;
-    private final Connectivity connectivity;
+    private final Provider<Connectivity> connectivityProvider;
     private final ServiceManager serviceManager;
     private final AttributesCompose globalAttributes;
 
@@ -52,16 +54,36 @@ public final class ElasticApmAgent {
         return instance;
     }
 
-    public synchronized static ElasticApmAgent initialize(Context context, Connectivity connectivity) {
-        return initialize(context, connectivity, ElasticApmConfiguration.getDefault());
+    public static ElasticApmAgent initialize(Context context) {
+        return initialize(context, null, null);
     }
 
-    public synchronized static ElasticApmAgent initialize(Context context, Connectivity connectivity, ElasticApmConfiguration configuration) {
+    public static ElasticApmAgent initialize(Context context, ElasticApmConfiguration configuration) {
+        return initialize(context, configuration, null);
+    }
+
+    public static ElasticApmAgent initialize(Context context, Connectivity connectivity) {
+        return initialize(context, null, connectivity);
+    }
+
+    public synchronized static ElasticApmAgent initialize(Context context, ElasticApmConfiguration configuration, Connectivity connectivity) {
         if (instance != null) {
             throw new IllegalStateException("Already initialized");
         }
         Elog.init(new AndroidLoggerFactory());
-        instance = new ElasticApmAgent(context, connectivity, configuration);
+        Provider<Connectivity> connectivityProvider;
+        if (connectivity != null) {
+            connectivityProvider = new SimpleProvider<>(connectivity);
+        } else {
+            connectivityProvider = Connectivity.getDefault();
+        }
+        ElasticApmConfiguration apmConfiguration;
+        if (configuration != null) {
+            apmConfiguration = configuration;
+        } else {
+            apmConfiguration = ElasticApmConfiguration.getDefault();
+        }
+        instance = new ElasticApmAgent(context, connectivityProvider, apmConfiguration);
         instance.onInitializationFinished();
         return instance;
     }
@@ -81,9 +103,9 @@ public final class ElasticApmAgent {
         return serviceManager.getService(name);
     }
 
-    ElasticApmAgent(Context context, Connectivity connectivity, ElasticApmConfiguration configuration) {
+    ElasticApmAgent(Context context, Provider<Connectivity> connectivityProvider, ElasticApmConfiguration configuration) {
         Context appContext = context.getApplicationContext();
-        this.connectivity = connectivity;
+        this.connectivityProvider = connectivityProvider;
         this.configuration = configuration;
         serviceManager = new ServiceManager();
         serviceManager.addService(new NetworkService(appContext));
@@ -119,7 +141,7 @@ public final class ElasticApmAgent {
 
     @NonNull
     private ElasticSpanProcessor getProcessor() {
-        SpanProcessor spanProcessor = connectivity.getSpanProcessor();
+        SpanProcessor spanProcessor = connectivityProvider.get().getSpanProcessor();
         if (spanProcessor instanceof ElasticSpanProcessor) {
             return (ElasticSpanProcessor) spanProcessor;
         }

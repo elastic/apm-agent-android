@@ -40,7 +40,17 @@ public abstract class ApmInfoGenerator extends DefaultTask {
     public abstract Property<String> getVariantName();
 
     @Input
-    public abstract Property<String> getVersion();
+    public abstract Property<String> getServiceName();
+
+    @Input
+    public abstract Property<String> getServerUrl();
+
+    @Input
+    public abstract Property<String> getServiceVersion();
+
+    @Optional
+    @Input
+    public abstract Property<String> getServerToken();
 
     @Optional
     @Input
@@ -53,8 +63,13 @@ public abstract class ApmInfoGenerator extends DefaultTask {
     public void execute() {
         File propertiesFile = new File(getOutputDir().get().getAsFile(), ApmInfo.ASSET_FILE_NAME);
         Properties properties = new Properties();
-        properties.put(ApmInfo.KEY_SERVICE_VARIANT_NAME, getVariantName().get());
-        properties.put(ApmInfo.KEY_SERVICE_VERSION, getVersion().get());
+        properties.put(ApmInfo.KEY_SERVICE_NAME, getServiceName().get());
+        properties.put(ApmInfo.KEY_SERVICE_VERSION, getServiceVersion().get());
+        properties.put(ApmInfo.KEY_SERVICE_ENVIRONMENT, getVariantName().get());
+        properties.put(ApmInfo.KEY_SERVER_URL, getServerUrl().get());
+        if (getServerToken().isPresent()) {
+            properties.put(ApmInfo.KEY_SERVER_TOKEN, getServerToken().get());
+        }
         String okhttpVersion = getOkHttpVersion().getOrNull();
         if (okhttpVersion != null) {
             properties.put(ApmInfo.KEY_SCOPE_OKHTTP_VERSION, okhttpVersion);

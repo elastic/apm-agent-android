@@ -16,26 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.providers;
+package co.elastic.apm.android.plugin.extensions;
 
-public class LazyProvider<T> implements Provider<T> {
-    private final Provider<T> provider;
-    private T object;
+import org.gradle.api.provider.Property;
 
-    public LazyProvider(Provider<T> provider) {
-        this.provider = provider;
-    }
+public abstract class ElasticApmExtension {
+    public abstract Property<String> getServiceName();
 
-    @Override
-    public T get() {
-        if (object == null) {
-            object = provider.get();
-        }
+    public abstract Property<String> getServiceVersion();
 
-        return object;
-    }
+    public abstract Property<String> getServerUrl();
 
-    public static <T> LazyProvider<T> of(Provider<T> provider) {
-        return new LazyProvider<>(provider);
-    }
+    public abstract Property<String> getServerToken();
 }

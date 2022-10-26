@@ -16,26 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.providers;
+package com.elastic.apm.android.plugin.testutils.buildgradle.block;
 
-public class LazyProvider<T> implements Provider<T> {
-    private final Provider<T> provider;
-    private T object;
-
-    public LazyProvider(Provider<T> provider) {
-        this.provider = provider;
-    }
-
-    @Override
-    public T get() {
-        if (object == null) {
-            object = provider.get();
-        }
-
-        return object;
-    }
-
-    public static <T> LazyProvider<T> of(Provider<T> provider) {
-        return new LazyProvider<>(provider);
-    }
+public interface BlockBuilder {
+    public String build();
 }

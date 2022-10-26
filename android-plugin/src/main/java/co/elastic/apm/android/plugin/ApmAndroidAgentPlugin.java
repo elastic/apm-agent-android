@@ -41,6 +41,7 @@ import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.TaskProvider;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
+import co.elastic.apm.android.plugin.extensions.ElasticApmExtension;
 import co.elastic.apm.android.plugin.instrumentation.ElasticLocalInstrumentationFactory;
 import co.elastic.apm.android.plugin.logging.GradleLoggerFactory;
 import co.elastic.apm.android.plugin.tasks.ApmInfoGenerator;
@@ -52,16 +53,24 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
 
     private Project project;
     private BaseExtension androidExtension;
+    private ElasticApmExtension defaultExtension;
 
     @Override
     public void apply(Project project) {
         this.project = project;
         Elog.init(new GradleLoggerFactory());
         androidExtension = project.getExtensions().getByType(BaseExtension.class);
+        initializeElasticExtension(project);
         addBytebuddyPlugin();
         addSdkDependency();
         addInstrumentationDependency();
         addTasks();
+    }
+
+    private void initializeElasticExtension(Project project) {
+        defaultExtension = project.getExtensions().create("elasticApm", ElasticApmExtension.class);
+        defaultExtension.getServiceName().convention(project.provider(() -> androidExtension.getDefaultConfig().getApplicationId()));
+        defaultExtension.getServiceVersion().convention(project.provider(() -> androidExtension.getDefaultConfig().getVersionName()));
     }
 
     private void addBytebuddyPlugin() {
@@ -125,8 +134,11 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
         String variantName = applicationVariant.getName();
         TaskProvider<ApmInfoGenerator> taskProvider = project.getTasks().register(variantName + "GenerateApmInfo", ApmInfoGenerator.class);
         taskProvider.configure(apmInfoGenerator -> {
+            apmInfoGenerator.getServiceName().set(defaultExtension.getServiceName());
+            apmInfoGenerator.getServiceVersion().set(defaultExtension.getServiceVersion());
+            apmInfoGenerator.getServerUrl().set(defaultExtension.getServerUrl());
+            apmInfoGenerator.getServerToken().set(defaultExtension.getServerToken());
             apmInfoGenerator.getVariantName().set(variantName);
-            apmInfoGenerator.getVersion().set(androidExtension.getDefaultConfig().getVersionName());
             apmInfoGenerator.getOutputDir().set(project.getLayout().getBuildDirectory().dir(apmInfoGenerator.getName()));
             apmInfoGenerator.getOkHttpVersion().set(getOkhttpVersion(component));
         });

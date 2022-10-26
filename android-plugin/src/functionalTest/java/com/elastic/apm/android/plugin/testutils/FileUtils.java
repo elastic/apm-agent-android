@@ -16,26 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.providers;
+package com.elastic.apm.android.plugin.testutils;
 
-public class LazyProvider<T> implements Provider<T> {
-    private final Provider<T> provider;
-    private T object;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
-    public LazyProvider(Provider<T> provider) {
-        this.provider = provider;
-    }
+public class FileUtils {
 
-    @Override
-    public T get() {
-        if (object == null) {
-            object = provider.get();
+    public static void write(File file, String text) {
+        try {
+            Files.write(file.toPath(), text.getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-
-        return object;
     }
 
-    public static <T> LazyProvider<T> of(Provider<T> provider) {
-        return new LazyProvider<>(provider);
+    public static String read(File file) {
+        try {
+            byte[] bytes = Files.readAllBytes(file.toPath());
+            return new String(bytes);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

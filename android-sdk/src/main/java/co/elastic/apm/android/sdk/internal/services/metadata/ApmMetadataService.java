@@ -39,13 +39,28 @@ public class ApmMetadataService implements Service {
     }
 
     @NonNull
+    public String getServiceName() {
+        return apmInfoPropertiesProvider.get().getProperty(ApmInfo.KEY_SERVICE_NAME);
+    }
+
+    @NonNull
     public String getServiceVersion() {
         return apmInfoPropertiesProvider.get().getProperty(ApmInfo.KEY_SERVICE_VERSION);
     }
 
     @NonNull
+    public String getServerUrl() {
+        return apmInfoPropertiesProvider.get().getProperty(ApmInfo.KEY_SERVER_URL);
+    }
+
+    @Nullable
+    public String getServerToken() {
+        return apmInfoPropertiesProvider.get().getProperty(ApmInfo.KEY_SERVER_TOKEN);
+    }
+
+    @NonNull
     public String getDeploymentEnvironment() {
-        return apmInfoPropertiesProvider.get().getProperty(ApmInfo.KEY_SERVICE_VARIANT_NAME);
+        return apmInfoPropertiesProvider.get().getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT);
     }
 
     @Nullable

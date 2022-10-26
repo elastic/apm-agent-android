@@ -40,5 +40,7 @@ found, and it should be placed in this location: `src/resources/licenses/[THE_ID
 created ID on step 1 must be the file name (without extensions, just the plain ID as defined before)
 .
 
+---
+
 After those 2 steps are done, the `createNoticeFile` task should be able to use this newly added
 license when handling dependencies that make use of it.

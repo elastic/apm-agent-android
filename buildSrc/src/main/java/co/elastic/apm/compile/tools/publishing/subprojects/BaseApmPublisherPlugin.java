@@ -32,9 +32,9 @@ public abstract class BaseApmPublisherPlugin implements Plugin<Project> {
 
     private void configurePom(MavenPublication publication) {
         publication.pom(mavenPom -> {
-            String repoUrl = "https://github.com/elastic/apm-agent-android";
+            String repoUrl = getRepositoryUrl();
             String organizationName = "Elastic Inc.";
-            String organizationUrl = "https://www.elastic.co";
+            String organizationUrl = getWebsiteUrl();
             mavenPom.getName().set(project.getGroup() + ":" + project.getName());
             mavenPom.getDescription().set(project.getDescription());
             mavenPom.getUrl().set(repoUrl);
@@ -65,6 +65,14 @@ public abstract class BaseApmPublisherPlugin implements Plugin<Project> {
     private void signPublication(MavenPublication publication) {
         SigningExtension signing = project.getExtensions().getByType(SigningExtension.class);
         signing.sign(publication);
+    }
+
+    protected String getWebsiteUrl() {
+        return "https://www.elastic.co";
+    }
+
+    protected String getRepositoryUrl() {
+        return "https://github.com/elastic/apm-agent-android";
     }
 
     protected boolean isRelease() {

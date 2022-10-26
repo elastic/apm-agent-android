@@ -10,8 +10,10 @@ public class ApmJavaPublisherPlugin extends BaseApmPublisherPlugin {
         project.afterEvaluate(self -> {
             if (!isAGradlePluginProject(self)) { // The "Gradle Plugin" plugin already creates its maven publication.
                 JavaPluginExtension java = project.getExtensions().getByType(JavaPluginExtension.class);
-                java.withJavadocJar();
-                java.withSourcesJar();
+                if (isRelease()) {
+                    java.withJavadocJar();
+                    java.withSourcesJar();
+                }
                 addMavenPublication("java");
             }
         });

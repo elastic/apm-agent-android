@@ -11,8 +11,10 @@ public class ApmAndroidPublisherPlugin extends BaseApmPublisherPlugin {
         LibraryExtension androidExtension = project.getExtensions().getByType(LibraryExtension.class);
         String componentName = "release";
         androidExtension.getPublishing().singleVariant(componentName, librarySingleVariant -> {
-            librarySingleVariant.withJavadocJar();
-            librarySingleVariant.withSourcesJar();
+            if (isRelease()) {
+                librarySingleVariant.withJavadocJar();
+                librarySingleVariant.withSourcesJar();
+            }
             return Unit.INSTANCE;
         });
 

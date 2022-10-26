@@ -7,18 +7,35 @@ import org.gradle.api.plugins.PluginContainer;
 import co.elastic.apm.compile.tools.NoticeProviderPlugin;
 import co.elastic.apm.compile.tools.plugins.RootNoticeProviderPlugin;
 import co.elastic.apm.compile.tools.sourceheader.ApmSourceHeaderPlugin;
+import io.github.gradlenexus.publishplugin.NexusPublishExtension;
+import io.github.gradlenexus.publishplugin.NexusPublishPlugin;
+import io.github.gradlenexus.publishplugin.NexusRepositoryContainer;
 
 public class ApmPublisherRootPlugin implements Plugin<Project> {
 
     @Override
     public void apply(Project project) {
-        project.getPlugins().apply(RootNoticeProviderPlugin.class);
+        applyRootPlugins(project.getPlugins());
+        configureMavenCentral(project);
         project.subprojects(subproject -> {
-            PluginContainer plugins = subproject.getPlugins();
-            plugins.apply(ApmSourceHeaderPlugin.class);
-            plugins.apply(NoticeProviderPlugin.class);
-            plugins.apply(ApmPublisherPlugin.class);
+            applySubprojectPlugins(subproject.getPlugins());
             project.getDependencies().add("noticeProducer", subproject);
         });
+    }
+
+    private void applySubprojectPlugins(PluginContainer subprojectPlugins) {
+        subprojectPlugins.apply(ApmSourceHeaderPlugin.class);
+        subprojectPlugins.apply(NoticeProviderPlugin.class);
+        subprojectPlugins.apply(ApmPublisherPlugin.class);
+    }
+
+    private void applyRootPlugins(PluginContainer plugins) {
+        plugins.apply(RootNoticeProviderPlugin.class);
+        plugins.apply(NexusPublishPlugin.class);
+    }
+
+    private void configureMavenCentral(Project project) {
+        NexusPublishExtension nexusPublishExtension = project.getExtensions().getByType(NexusPublishExtension.class);
+        nexusPublishExtension.repositories(NexusRepositoryContainer::sonatype);
     }
 }

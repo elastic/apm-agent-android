@@ -10,6 +10,18 @@ sourceCompatibility = jvmCompatibility
 
 sourceSets.create('functionalTest')
 
+configurations {
+    testPluginDependency {
+        canBeResolved(false)
+        canBeConsumed(false)
+    }
+    testPluginClasspath {
+        canBeConsumed(false)
+        canBeResolved(true)
+        extendsFrom(testPluginDependency)
+    }
+}
+
 dependencies {
     implementation "net.bytebuddy:byte-buddy-gradle-plugin:$bytebuddy_version"
     implementation "net.bytebuddy:byte-buddy:$bytebuddy_version"
@@ -20,6 +32,11 @@ dependencies {
     compileOnly "com.android.tools.build:gradle:$androidGradlePlugin_baseVersion"
     functionalTestImplementation "junit:junit:$junit_version"
     functionalTestImplementation project(':android-common')
+    testPluginDependency "com.android.tools.build:gradle:7.2.0"
+}
+
+tasks.withType(PluginUnderTestMetadata).configureEach {
+    pluginClasspath.from(configurations.testPluginClasspath)
 }
 
 buildConfig {

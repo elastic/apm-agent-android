@@ -43,7 +43,7 @@ public class CompilationConfigTest extends BaseFunctionalTest {
 
     @Before
     public void setUp() {
-        addPlugin("com.android.application", "7.2.0");
+        addPlugin("com.android.application");
         addPlugin("co.elastic.apm.android");
     }
 

@@ -81,6 +81,13 @@ Both kinds of deployments are automatically configured for all the modules avail
 project, this tool takes care of checking what are the types of the projects (either Java library,
 Android library or Gradle plugin) and sets their deployment configuration accordingly.
 
+### Publishing parameters
+
+- `Group ID`: It comes from the root "gradle.properties" file, it's a property named `group`.
+- `Artifact ID`: It's the module's dir name, for example, for the module `android-sdk`, its artifact
+  id will be `android-sdk`.
+- `Version`: It comes from the root "gradle.properties" file, it's a property named `version`.
+
 ### Publishing to Maven Central
 
 The Maven Central (Sonatype OSSRH Nexus) deployment is configured using the
@@ -124,13 +131,6 @@ the [legacy way](https://docs.gradle.org/current/userguide/plugins.html#sec:old_
 This tool already takes care of configuring
 [all the parameters needed for the deploy](https://plugins.gradle.org/docs/publish-plugin), but
 there's a couple of requirements needed prior to the publishing.
-
-#### Publishing parameters
-
-- Group ID: It comes from the root "gradle.properties" file, it's a property named `group`.
-- Artifact ID: It's the module's dir name, for example, for the module `android-sdk`, its artifact
-  id will be `android-sdk`.
-- Version: It comes from the root "gradle.properties" file, it's a property named `version`.
 
 #### Requirements
 

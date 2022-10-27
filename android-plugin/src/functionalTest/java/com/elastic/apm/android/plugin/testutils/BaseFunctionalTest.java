@@ -22,6 +22,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.elastic.apm.android.plugin.testutils.buildgradle.BuildFileBuilder;
+import com.elastic.apm.android.plugin.testutils.buildgradle.SettingsGradleBuilder;
 import com.elastic.apm.android.plugin.testutils.buildgradle.block.impl.ElasticBlockBuilder;
 
 import org.gradle.testkit.runner.BuildResult;
@@ -41,12 +42,17 @@ public abstract class BaseFunctionalTest {
     protected File androidManifest;
     protected File gradleProperties;
     private final BuildFileBuilder buildFileBuilder;
+    private final SettingsGradleBuilder settingsGradleBuilder;
     private BuildResult latestResult;
 
     protected BaseFunctionalTest() {
         buildFileBuilder = new BuildFileBuilder(getAndroidCompileSdk(), getAndroidAppId(), "1.0");
         buildFileBuilder.addRepository("mavenCentral()");
         buildFileBuilder.addRepository("google()");
+        settingsGradleBuilder = new SettingsGradleBuilder();
+        settingsGradleBuilder.getPluginManagementBlockBuilder().addRepository("gradlePluginPortal()");
+        settingsGradleBuilder.getPluginManagementBlockBuilder().addRepository("mavenCentral()");
+        settingsGradleBuilder.getPluginManagementBlockBuilder().addRepository("google()");
     }
 
     protected abstract File getProjectDir();
@@ -67,6 +73,7 @@ public abstract class BaseFunctionalTest {
         buildFile = createBuildFile();
         androidManifest = createAndroidManifest();
         gradleProperties = createGradleProperties();
+        createGradleSettings();
     }
 
     private File createBuildFile() {
@@ -87,6 +94,14 @@ public abstract class BaseFunctionalTest {
         File file = new File(getProjectDir(), "gradle.properties");
         ensureExistingParentDir(file);
         FileUtils.write(file, "android.useAndroidX=true");
+
+        return file;
+    }
+
+    private File createGradleSettings() {
+        File file = new File(getProjectDir(), "settings.gradle");
+        ensureExistingParentDir(file);
+        FileUtils.write(file, settingsGradleBuilder.build());
 
         return file;
     }
@@ -113,6 +128,7 @@ public abstract class BaseFunctionalTest {
     }
 
     protected void verifyOutputContains(String text) {
+        System.out.println("AAAA: " + latestResult.getOutput());//todo delete
         assertTrue(latestResult.getOutput().contains(text));
     }
 

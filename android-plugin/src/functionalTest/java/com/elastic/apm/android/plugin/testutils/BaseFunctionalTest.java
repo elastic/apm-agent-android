@@ -128,8 +128,12 @@ public abstract class BaseFunctionalTest {
     }
 
     protected void verifyOutputContains(String text) {
-        System.out.println("AAAA: " + latestResult.getOutput());//todo delete
-        assertTrue(latestResult.getOutput().contains(text));
+        try {
+            assertTrue(latestResult.getOutput().contains(text));
+        } catch (AssertionError e) {
+            System.out.println("Build output: " + latestResult.getOutput());
+            throw e;
+        }
     }
 
     protected File getBuildDirFile(String path) {
@@ -154,6 +158,7 @@ public abstract class BaseFunctionalTest {
         try {
             command += " --include-build " + Paths.get("..").toFile().getCanonicalPath();
             List<String> commands = new ArrayList<>(Arrays.asList(command.split("\\s+")));
+            commands.add("--stacktrace");
             return GradleRunner.create()
                     .withPluginClasspath()
                     .withProjectDir(getProjectDir())

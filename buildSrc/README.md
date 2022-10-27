@@ -125,6 +125,13 @@ This tool already takes care of configuring
 [all the parameters needed for the deploy](https://plugins.gradle.org/docs/publish-plugin), but
 there's a couple of requirements needed prior to the publishing.
 
+#### Publishing parameters
+
+- Group ID: It comes from the root "gradle.properties" file, it's a property named `group`.
+- Artifact ID: It's the module's dir name, for example, for the module `android-sdk`, its artifact
+  id will be `android-sdk`.
+- Version: It comes from the root "gradle.properties" file, it's a property named `version`.
+
 #### Requirements
 
 This requirement is needed to be done only once, which is that a Gradle Plugin Portal account must

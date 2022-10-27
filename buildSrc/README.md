@@ -128,7 +128,8 @@ there's a couple of requirements needed prior to the publishing.
 #### Requirements
 
 This requirement is needed to be done only once, which is that a Gradle Plugin Portal account must
-be set up, [as explained here](https://docs.gradle.org/7.4/userguide/publishing_gradle_plugins.html)
+be set up,
+[as explained here](https://docs.gradle.org/7.4/userguide/publishing_gradle_plugins.html#create_an_account_on_the_gradle_plugin_portal)
 . This process will provide to values:
 
 - A publish key.

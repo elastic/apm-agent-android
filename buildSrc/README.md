@@ -127,7 +127,7 @@ After the requirements are set up, the command needed to deploy all the non-grad
 from this project is:
 
 ```text
-./gradlew publishElasticPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
+./gradlew publishElasticPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository -Prelease=true
 ```
 
 ### Publishing to the Gradle Plugin Portal
@@ -159,5 +159,5 @@ After the requirements are set up, the command needed to deploy all the gradle-p
 this project is:
 
 ```text
-./gradlew publishPlugins -Pgradle.publish.key=<key> -Pgradle.publish.secret=<secret>
+./gradlew publishPlugins -Pgradle.publish.key=<key> -Pgradle.publish.secret=<secret> -Prelease=true
 ```

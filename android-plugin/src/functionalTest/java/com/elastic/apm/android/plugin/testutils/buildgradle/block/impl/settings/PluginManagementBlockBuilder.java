@@ -16,9 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.elastic.apm.android.plugin.testutils.buildgradle.block.impl;
+package com.elastic.apm.android.plugin.testutils.buildgradle.block.impl.settings;
 
 import com.elastic.apm.android.plugin.testutils.buildgradle.block.BlockBuilder;
+import com.elastic.apm.android.plugin.testutils.buildgradle.block.impl.RepositoriesBlockBuilder;
 
 public class PluginManagementBlockBuilder implements BlockBuilder {
     private final RepositoriesBlockBuilder repositoriesBlockBuilder = new RepositoriesBlockBuilder();

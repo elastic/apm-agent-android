@@ -16,28 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.elastic.apm.android.plugin.testutils.buildgradle;
+package com.elastic.apm.android.plugin.testutils.buildgradle.block.impl.settings;
 
-import com.elastic.apm.android.plugin.testutils.buildgradle.block.impl.settings.DependencyResolutionManagementBlockBuilder;
-import com.elastic.apm.android.plugin.testutils.buildgradle.block.impl.settings.PluginManagementBlockBuilder;
+import com.elastic.apm.android.plugin.testutils.buildgradle.block.BlockBuilder;
+import com.elastic.apm.android.plugin.testutils.buildgradle.block.impl.RepositoriesBlockBuilder;
 
-public class SettingsGradleBuilder {
-    private final PluginManagementBlockBuilder pluginManagementBlockBuilder = new PluginManagementBlockBuilder();
-    private final DependencyResolutionManagementBlockBuilder dependencyResolutionManagementBlockBuilder = new DependencyResolutionManagementBlockBuilder();
+public class DependencyResolutionManagementBlockBuilder implements BlockBuilder {
+    private final RepositoriesBlockBuilder repositoriesBlockBuilder = new RepositoriesBlockBuilder();
 
-    public PluginManagementBlockBuilder getPluginManagementBlockBuilder() {
-        return pluginManagementBlockBuilder;
+    public void addRepository(String repoName) {
+        repositoriesBlockBuilder.addRepo(repoName);
     }
 
-    public DependencyResolutionManagementBlockBuilder getDependencyResolutionManagementBlockBuilder() {
-        return dependencyResolutionManagementBlockBuilder;
-    }
-
+    @Override
     public String build() {
         StringBuilder builder = new StringBuilder();
-        builder.append(pluginManagementBlockBuilder.build());
+        builder.append("dependencyResolutionManagement {");
         addNewLine(builder);
-        builder.append(dependencyResolutionManagementBlockBuilder.build());
+        builder.append("repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)");
+        addNewLine(builder);
+        builder.append(repositoriesBlockBuilder.build());
+        addNewLine(builder);
+        builder.append("}");
         return builder.toString();
     }
 

@@ -1,7 +1,6 @@
 plugins {
     id 'java-library'
 }
-apply from: "$rootDir/publishing.gradle"
 
 java {
     sourceCompatibility = jvmCompatibility
@@ -11,5 +10,5 @@ java {
 dependencies {
     api gradleApi()
     api project(':android-common')
-    compileOnly "com.android.tools.build:gradle:$androidGradlePlugin_baseVersion"
+    compileOnly "com.android.tools.build:gradle:$androidGradlePlugin_version"
 }

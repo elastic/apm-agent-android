@@ -27,7 +27,7 @@ dependencies {
     implementation project(':agp-compatibility:agp-compatibility-api')
     implementation project(':agp-compatibility:agp-compatibility-7-2')
     implementation project(':agp-compatibility:agp-compatibility-7-3')
-    compileOnly "com.android.tools.build:gradle:$androidGradlePlugin_baseVersion"
+    compileOnly "com.android.tools.build:gradle:$androidGradlePlugin_version"
     functionalTestImplementation "junit:junit:$junit_version"
     functionalTestImplementation project(':android-common')
     testPluginDependency "com.android.tools.build:gradle:7.2.0"

@@ -9,7 +9,7 @@ pluginManagement {
     }
 }
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         mavenLocal()
         mavenCentral()
@@ -22,7 +22,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:7.2.0"
+        classpath "com.android.tools.build:gradle:$androidGradlePlugin_version"
     }
 }
 rootProject.name = "APM Android Agent"

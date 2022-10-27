@@ -18,30 +18,17 @@
  */
 package com.elastic.apm.android.plugin.testutils.buildgradle;
 
-import com.elastic.apm.android.plugin.testutils.buildgradle.block.impl.settings.DependencyResolutionManagementBlockBuilder;
-import com.elastic.apm.android.plugin.testutils.buildgradle.block.impl.settings.PluginManagementBlockBuilder;
+import com.elastic.apm.android.plugin.testutils.buildgradle.block.impl.PluginManagementBlockBuilder;
 
 public class SettingsGradleBuilder {
     private final PluginManagementBlockBuilder pluginManagementBlockBuilder = new PluginManagementBlockBuilder();
-    private final DependencyResolutionManagementBlockBuilder dependencyResolutionManagementBlockBuilder = new DependencyResolutionManagementBlockBuilder();
 
     public PluginManagementBlockBuilder getPluginManagementBlockBuilder() {
         return pluginManagementBlockBuilder;
     }
 
-    public DependencyResolutionManagementBlockBuilder getDependencyResolutionManagementBlockBuilder() {
-        return dependencyResolutionManagementBlockBuilder;
-    }
 
     public String build() {
-        StringBuilder builder = new StringBuilder();
-        builder.append(pluginManagementBlockBuilder.build());
-        addNewLine(builder);
-        builder.append(dependencyResolutionManagementBlockBuilder.build());
-        return builder.toString();
-    }
-
-    private void addNewLine(StringBuilder builder) {
-        builder.append("\n");
+        return pluginManagementBlockBuilder.build();
     }
 }

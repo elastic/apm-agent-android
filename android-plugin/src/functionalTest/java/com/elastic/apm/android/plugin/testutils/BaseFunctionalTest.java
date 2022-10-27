@@ -53,8 +53,6 @@ public abstract class BaseFunctionalTest {
         settingsGradleBuilder.getPluginManagementBlockBuilder().addRepository("gradlePluginPortal()");
         settingsGradleBuilder.getPluginManagementBlockBuilder().addRepository("mavenCentral()");
         settingsGradleBuilder.getPluginManagementBlockBuilder().addRepository("google()");
-        settingsGradleBuilder.getDependencyResolutionManagementBlockBuilder().addRepository("mavenCentral()");
-        settingsGradleBuilder.getDependencyResolutionManagementBlockBuilder().addRepository("google()");
     }
 
     protected abstract File getProjectDir();

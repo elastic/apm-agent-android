@@ -117,7 +117,11 @@ from this project is:
 ### Publishing to the Gradle Plugin Portal
 
 The module `android-plugin` needs to go to the Gradle Plugin Portal, instead of Maven Central so
-that it can be applied easily into gradle projects. This tool already takes care of configuring
+that it can be applied easily into gradle projects using
+the [Gradle Plugin DSL](https://docs.gradle.org/current/userguide/plugins.html#sec:plugins_block),
+which is the current way of doing so, otherwise people would have to apply our plugin using
+the [legacy way](https://docs.gradle.org/current/userguide/plugins.html#sec:old_plugin_application).
+This tool already takes care of configuring
 [all the parameters needed for the deploy](https://plugins.gradle.org/docs/publish-plugin), but
 there's a couple of requirements needed prior to the publishing.
 

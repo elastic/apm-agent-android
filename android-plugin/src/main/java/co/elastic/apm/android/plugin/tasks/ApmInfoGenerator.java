@@ -21,6 +21,7 @@ package co.elastic.apm.android.plugin.tasks;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.provider.Property;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputDirectory;
@@ -42,6 +43,7 @@ public abstract class ApmInfoGenerator extends DefaultTask {
     @Input
     public abstract Property<String> getServiceName();
 
+    @Optional
     @Input
     public abstract Property<String> getServerUrl();
 
@@ -89,27 +91,27 @@ public abstract class ApmInfoGenerator extends DefaultTask {
     }
 
     private String provideSecretToken() {
-        return provideValue(SECRET_TOKEN_ENVIRONMENT_VARIABLE, getSecretToken().get());
+        return provideValue(SECRET_TOKEN_ENVIRONMENT_VARIABLE, getSecretToken());
     }
 
     private String provideServiceName() {
-        return provideValue(SERVICE_NAME_ENVIRONMENT_VARIABLE, getServiceName().get());
+        return provideValue(SERVICE_NAME_ENVIRONMENT_VARIABLE, getServiceName());
     }
 
     private String provideServiceVersion() {
-        return provideValue(SERVICE_VERSION_ENVIRONMENT_VARIABLE, getServiceVersion().get());
+        return provideValue(SERVICE_VERSION_ENVIRONMENT_VARIABLE, getServiceVersion());
     }
 
     private String provideServerUrl() {
-        return provideValue(SERVER_URL_ENVIRONMENT_VARIABLE, getServerUrl().get());
+        return provideValue(SERVER_URL_ENVIRONMENT_VARIABLE, getServerUrl());
     }
 
-    private String provideValue(String environmentName, String defaultValue) {
+    private String provideValue(String environmentName, Provider<String> defaultValueProvider) {
         String environmentValue = System.getenv(environmentName);
         if (environmentValue != null) {
             return environmentValue;
         }
 
-        return defaultValue;
+        return defaultValueProvider.get();
     }
 }

@@ -57,7 +57,7 @@ public class CompilationConfigTest extends BaseFunctionalTest {
 
         runFailedGradle("assembleDebug");
 
-        verifyOutputContains("property 'serverUrl' doesn't have a configured value");
+        verifyOutputContains("'serverUrl' because it has no value available");
     }
 
     @Test
@@ -75,6 +75,24 @@ public class CompilationConfigTest extends BaseFunctionalTest {
         assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
         assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
         assertEquals(serverUrl, properties.getProperty(ApmInfo.KEY_SERVER_URL));
+        assertNull(properties.getProperty(ApmInfo.KEY_SERVER_SECRET_TOKEN));
+    }
+
+    @Test
+    public void compileConfig_whenNoServerUrlProvidedInGradle_useServerUrlFromEnvironmentVariable() {
+        String serverUrlEnv = "http://some.url";
+        environmentVariables.set("ELASTIC_APM_SERVER_URL", serverUrlEnv);
+        setUpProject();
+
+        runGradle("assembleDebug");
+
+        verifyTaskIsSuccessful(":debugGenerateApmInfo");
+        File output = getGeneratedPropertiesFile("debugGenerateApmInfo");
+        Properties properties = loadProperties(output);
+        assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
+        assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
+        assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
+        assertEquals(serverUrlEnv, properties.getProperty(ApmInfo.KEY_SERVER_URL));
         assertNull(properties.getProperty(ApmInfo.KEY_SERVER_SECRET_TOKEN));
     }
 

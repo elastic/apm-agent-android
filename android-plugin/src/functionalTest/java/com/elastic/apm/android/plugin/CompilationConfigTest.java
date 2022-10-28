@@ -140,6 +140,27 @@ public class CompilationConfigTest extends BaseFunctionalTest {
     }
 
     @Test
+    public void compileConfig_verifyOverridingServiceName_withEnvironmentVariable() {
+        String serverUrl = "http://server.url";
+        String serviceName = "My App";
+        String serviceNameEnv = "My App name from env";
+        environmentVariables.set("ELASTIC_APM_SERVICE_NAME", serviceNameEnv);
+        getDefaultElasticBlockBuilder().setServiceName(serviceName);
+        getDefaultElasticBlockBuilder().setServerUrl(serverUrl);
+        setUpProject();
+
+        runGradle("assembleDebug");
+
+        verifyTaskIsSuccessful(":debugGenerateApmInfo");
+        File output = getGeneratedPropertiesFile("debugGenerateApmInfo");
+        Properties properties = loadProperties(output);
+        assertEquals(serviceNameEnv, properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
+        assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
+        assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
+        assertEquals(serverUrl, properties.getProperty(ApmInfo.KEY_SERVER_URL));
+    }
+
+    @Test
     public void compileConfig_verifyOverridingServiceVersion() {
         String serverUrl = "http://server.url";
         String serviceVersion = "1.0.0";

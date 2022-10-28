@@ -59,6 +59,9 @@ public abstract class ApmInfoGenerator extends DefaultTask {
     @OutputDirectory
     public abstract DirectoryProperty getOutputDir();
 
+
+    private static final String SECRET_TOKEN_ENVIRONMENT_VARIABLE = "ELASTIC_APM_SECRET_TOKEN";
+
     @TaskAction
     public void execute() {
         File propertiesFile = new File(getOutputDir().get().getAsFile(), ApmInfo.ASSET_FILE_NAME);
@@ -68,7 +71,7 @@ public abstract class ApmInfoGenerator extends DefaultTask {
         properties.put(ApmInfo.KEY_SERVICE_ENVIRONMENT, getVariantName().get());
         properties.put(ApmInfo.KEY_SERVER_URL, getServerUrl().get());
         if (getSecretToken().isPresent()) {
-            properties.put(ApmInfo.KEY_SERVER_SECRET_TOKEN, getSecretToken().get());
+            properties.put(ApmInfo.KEY_SERVER_SECRET_TOKEN, provideSecretToken());
         }
         String okhttpVersion = getOkHttpVersion().getOrNull();
         if (okhttpVersion != null) {
@@ -80,5 +83,14 @@ public abstract class ApmInfoGenerator extends DefaultTask {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String provideSecretToken() {
+        String token = System.getenv(SECRET_TOKEN_ENVIRONMENT_VARIABLE);
+        if (token != null) {
+            return token;
+        }
+
+        return getSecretToken().get();
     }
 }

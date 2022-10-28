@@ -26,6 +26,7 @@ import com.elastic.apm.android.plugin.testutils.BaseFunctionalTest;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
@@ -37,6 +38,9 @@ import java.util.Properties;
 import co.elastic.apm.android.common.ApmInfo;
 
 public class CompilationConfigTest extends BaseFunctionalTest {
+
+    @Rule
+    public EnvironmentVariables environmentVariables = new EnvironmentVariables();
 
     @Rule
     public TemporaryFolder projectTemporaryFolder = new TemporaryFolder();
@@ -91,6 +95,28 @@ public class CompilationConfigTest extends BaseFunctionalTest {
         assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
         assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
         assertEquals(serverToken, properties.getProperty(ApmInfo.KEY_SERVER_SECRET_TOKEN));
+        assertEquals(serverUrl, properties.getProperty(ApmInfo.KEY_SERVER_URL));
+    }
+
+    @Test
+    public void compileConfig_verifyOverridingServerToken_withEnvironmentVariable() {
+        String serverUrl = "http://server.url";
+        String serverToken = "some.token";
+        String serverTokenEnv = "some.environment-provided.token";
+        environmentVariables.set("ELASTIC_APM_SECRET_TOKEN", serverTokenEnv);
+        getDefaultElasticBlockBuilder().setSecretToken(serverToken);
+        getDefaultElasticBlockBuilder().setServerUrl(serverUrl);
+        setUpProject();
+
+        runGradle("assembleDebug");
+
+        verifyTaskIsSuccessful(":debugGenerateApmInfo");
+        File output = getGeneratedPropertiesFile("debugGenerateApmInfo");
+        Properties properties = loadProperties(output);
+        assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
+        assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
+        assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
+        assertEquals(serverTokenEnv, properties.getProperty(ApmInfo.KEY_SERVER_SECRET_TOKEN));
         assertEquals(serverUrl, properties.getProperty(ApmInfo.KEY_SERVER_URL));
     }
 

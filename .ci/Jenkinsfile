@@ -12,6 +12,7 @@ pipeline {
     DOCKER_REGISTRY = 'docker.elastic.co'
     DOCKER_SECRET = 'secret/apm-team/ci/docker-registry/prod'
     HOME= "${env.WORKSPACE}"
+    GRADLE_USER_HOME = "${env.WORKSPACE}"
   }
   options {
     timeout(time: 1, unit: 'HOURS')

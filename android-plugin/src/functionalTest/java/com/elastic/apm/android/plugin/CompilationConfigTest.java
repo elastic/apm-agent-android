@@ -71,14 +71,14 @@ public class CompilationConfigTest extends BaseFunctionalTest {
         assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
         assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
         assertEquals(serverUrl, properties.getProperty(ApmInfo.KEY_SERVER_URL));
-        assertNull(properties.getProperty(ApmInfo.KEY_SERVER_TOKEN));
+        assertNull(properties.getProperty(ApmInfo.KEY_SERVER_SECRET_TOKEN));
     }
 
     @Test
     public void compileConfig_verifySettingServerToken() {
         String serverUrl = "http://server.url";
         String serverToken = "some.token";
-        getDefaultElasticBlockBuilder().setServerToken(serverToken);
+        getDefaultElasticBlockBuilder().setSecretToken(serverToken);
         getDefaultElasticBlockBuilder().setServerUrl(serverUrl);
         setUpProject();
 
@@ -90,7 +90,7 @@ public class CompilationConfigTest extends BaseFunctionalTest {
         assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
         assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
         assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
-        assertEquals(serverToken, properties.getProperty(ApmInfo.KEY_SERVER_TOKEN));
+        assertEquals(serverToken, properties.getProperty(ApmInfo.KEY_SERVER_SECRET_TOKEN));
         assertEquals(serverUrl, properties.getProperty(ApmInfo.KEY_SERVER_URL));
     }
 

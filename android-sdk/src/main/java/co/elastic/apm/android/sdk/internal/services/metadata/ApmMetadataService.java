@@ -55,7 +55,7 @@ public class ApmMetadataService implements Service {
 
     @Nullable
     public String getServerToken() {
-        return apmInfoPropertiesProvider.get().getProperty(ApmInfo.KEY_SERVER_TOKEN);
+        return apmInfoPropertiesProvider.get().getProperty(ApmInfo.KEY_SERVER_SECRET_TOKEN);
     }
 
     @NonNull

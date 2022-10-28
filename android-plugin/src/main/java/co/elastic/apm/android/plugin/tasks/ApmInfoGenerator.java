@@ -50,7 +50,7 @@ public abstract class ApmInfoGenerator extends DefaultTask {
 
     @Optional
     @Input
-    public abstract Property<String> getServerToken();
+    public abstract Property<String> getSecretToken();
 
     @Optional
     @Input
@@ -67,8 +67,8 @@ public abstract class ApmInfoGenerator extends DefaultTask {
         properties.put(ApmInfo.KEY_SERVICE_VERSION, getServiceVersion().get());
         properties.put(ApmInfo.KEY_SERVICE_ENVIRONMENT, getVariantName().get());
         properties.put(ApmInfo.KEY_SERVER_URL, getServerUrl().get());
-        if (getServerToken().isPresent()) {
-            properties.put(ApmInfo.KEY_SERVER_TOKEN, getServerToken().get());
+        if (getSecretToken().isPresent()) {
+            properties.put(ApmInfo.KEY_SERVER_SECRET_TOKEN, getSecretToken().get());
         }
         String okhttpVersion = getOkHttpVersion().getOrNull();
         if (okhttpVersion != null) {

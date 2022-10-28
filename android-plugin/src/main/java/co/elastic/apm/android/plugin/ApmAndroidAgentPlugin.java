@@ -137,7 +137,7 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
             apmInfoGenerator.getServiceName().set(defaultExtension.getServiceName());
             apmInfoGenerator.getServiceVersion().set(defaultExtension.getServiceVersion());
             apmInfoGenerator.getServerUrl().set(defaultExtension.getServerUrl());
-            apmInfoGenerator.getServerToken().set(defaultExtension.getServerToken());
+            apmInfoGenerator.getSecretToken().set(defaultExtension.getSecretToken());
             apmInfoGenerator.getVariantName().set(variantName);
             apmInfoGenerator.getOutputDir().set(project.getLayout().getBuildDirectory().dir(apmInfoGenerator.getName()));
             apmInfoGenerator.getOkHttpVersion().set(getOkhttpVersion(component));

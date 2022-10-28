@@ -27,5 +27,5 @@ public abstract class ElasticApmExtension {
 
     public abstract Property<String> getServerUrl();
 
-    public abstract Property<String> getServerToken();
+    public abstract Property<String> getSecretToken();
 }

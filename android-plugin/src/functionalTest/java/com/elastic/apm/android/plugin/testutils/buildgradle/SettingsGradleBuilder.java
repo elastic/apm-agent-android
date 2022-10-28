@@ -18,17 +18,32 @@
  */
 package com.elastic.apm.android.plugin.testutils.buildgradle;
 
+import com.elastic.apm.android.plugin.testutils.buildgradle.block.impl.BuildscriptBlockBuilder;
 import com.elastic.apm.android.plugin.testutils.buildgradle.block.impl.PluginManagementBlockBuilder;
 
 public class SettingsGradleBuilder {
     private final PluginManagementBlockBuilder pluginManagementBlockBuilder = new PluginManagementBlockBuilder();
 
+    private final BuildscriptBlockBuilder buildscriptBlockBuilder = new BuildscriptBlockBuilder();
+
     public PluginManagementBlockBuilder getPluginManagementBlockBuilder() {
         return pluginManagementBlockBuilder;
     }
 
+    public BuildscriptBlockBuilder getBuildscriptBlockBuilder() {
+        return buildscriptBlockBuilder;
+    }
 
     public String build() {
-        return pluginManagementBlockBuilder.build();
+        StringBuilder builder = new StringBuilder();
+        builder.append(pluginManagementBlockBuilder.build());
+        addNewLine(builder);
+        builder.append(buildscriptBlockBuilder.build());
+
+        return builder.toString();
+    }
+
+    private void addNewLine(StringBuilder builder) {
+        builder.append("\n");
     }
 }

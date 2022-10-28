@@ -33,8 +33,8 @@ public class BuildFileBuilder {
         androidBlockBuilder = new AndroidBlockBuilder(androidCompileSdk, applicationId, versionName);
     }
 
-    public BuildFileBuilder addPlugin(String pluginId, String pluginVersion) {
-        pluginBlockBuilder.addPlugin(pluginId, pluginVersion);
+    public BuildFileBuilder addPlugin(String pluginId) {
+        pluginBlockBuilder.addPlugin(pluginId);
         return this;
     }
 

@@ -150,4 +150,9 @@ public class CompilationConfigTest extends BaseFunctionalTest {
     protected File getProjectDir() {
         return projectTemporaryFolder.getRoot();
     }
+
+    @Override
+    protected String getAndroidGradlePluginVersion() {
+        return "7.2.0";
+    }
 }

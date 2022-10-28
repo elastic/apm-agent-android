@@ -23,34 +23,27 @@ import com.elastic.apm.android.plugin.testutils.buildgradle.block.BlockBuilder;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PluginBlockBuilder implements BlockBuilder {
-    private final List<Plugin> plugins = new ArrayList<>();
+public class DependenciesBlockBuilder implements BlockBuilder {
+    private final List<String> dependencies = new ArrayList<>();
+
+    public void addDependencyLine(String dependencyDeclaration) {
+        dependencies.add(dependencyDeclaration);
+    }
 
     @Override
     public String build() {
         StringBuilder builder = new StringBuilder();
-        for (Plugin plugin : plugins) {
-            builder.append("\n");
-            builder.append("apply plugin: '");
-            builder.append(plugin.id);
-            builder.append("'");
+        builder.append("dependencies {");
+        for (String dependency : dependencies) {
+            addNewLine(builder);
+            builder.append(dependency);
         }
-        builder.append("\n");
+        addNewLine(builder);
+        builder.append("}");
         return builder.toString();
     }
 
-    public void addPlugin(String pluginId) {
-        if (pluginId == null) {
-            throw new NullPointerException();
-        }
-        plugins.add(new Plugin(pluginId));
-    }
-
-    private static class Plugin {
-        private final String id;
-
-        private Plugin(String id) {
-            this.id = id;
-        }
+    private void addNewLine(StringBuilder builder) {
+        builder.append("\n");
     }
 }

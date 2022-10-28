@@ -20,37 +20,33 @@ package com.elastic.apm.android.plugin.testutils.buildgradle.block.impl;
 
 import com.elastic.apm.android.plugin.testutils.buildgradle.block.BlockBuilder;
 
-import java.util.ArrayList;
-import java.util.List;
+public class BuildscriptBlockBuilder implements BlockBuilder {
+    private final RepositoriesBlockBuilder repositoriesBlockBuilder = new RepositoriesBlockBuilder();
+    private final DependenciesBlockBuilder dependenciesBlockBuilder = new DependenciesBlockBuilder();
 
-public class PluginBlockBuilder implements BlockBuilder {
-    private final List<Plugin> plugins = new ArrayList<>();
+    public void addRepository(String repository) {
+        repositoriesBlockBuilder.addRepo(repository);
+    }
+
+    public void addDependency(String dependency) {
+        dependenciesBlockBuilder.addDependencyLine(dependency);
+    }
 
     @Override
     public String build() {
         StringBuilder builder = new StringBuilder();
-        for (Plugin plugin : plugins) {
-            builder.append("\n");
-            builder.append("apply plugin: '");
-            builder.append(plugin.id);
-            builder.append("'");
-        }
-        builder.append("\n");
+        builder.append("buildscript {");
+        addNewLine(builder);
+        builder.append(repositoriesBlockBuilder.build());
+        addNewLine(builder);
+        builder.append(dependenciesBlockBuilder.build());
+        addNewLine(builder);
+        builder.append("}");
+
         return builder.toString();
     }
 
-    public void addPlugin(String pluginId) {
-        if (pluginId == null) {
-            throw new NullPointerException();
-        }
-        plugins.add(new Plugin(pluginId));
-    }
-
-    private static class Plugin {
-        private final String id;
-
-        private Plugin(String id) {
-            this.id = id;
-        }
+    private void addNewLine(StringBuilder builder) {
+        builder.append("\n");
     }
 }

@@ -31,11 +31,14 @@ import org.gradle.testkit.runner.TaskOutcome;
 import org.gradle.testkit.runner.UnexpectedBuildFailure;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
 public abstract class BaseFunctionalTest {
     protected File buildFile;
@@ -53,16 +56,32 @@ public abstract class BaseFunctionalTest {
         settingsGradleBuilder.getPluginManagementBlockBuilder().addRepository("gradlePluginPortal()");
         settingsGradleBuilder.getPluginManagementBlockBuilder().addRepository("mavenCentral()");
         settingsGradleBuilder.getPluginManagementBlockBuilder().addRepository("google()");
+
+        settingsGradleBuilder.getBuildscriptBlockBuilder().addRepository("gradlePluginPortal()");
+        settingsGradleBuilder.getBuildscriptBlockBuilder().addRepository("mavenCentral()");
+        settingsGradleBuilder.getBuildscriptBlockBuilder().addRepository("google()");
+
+        File metadataFile = Paths.get("build", "pluginUnderTestMetadata", "plugin-under-test-metadata.properties").toFile();
+        try (InputStream metadataStream = new FileInputStream(metadataFile)) {
+            Properties properties = new Properties();
+            properties.load(metadataStream);
+            String localClasspath = properties.getProperty("implementation-classpath");
+            String[] classpath = localClasspath.split(File.pathSeparator);
+            for (String path : classpath) {
+                settingsGradleBuilder.getBuildscriptBlockBuilder().addDependency(String.format("classpath files('%s')", path));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        settingsGradleBuilder.getBuildscriptBlockBuilder().addDependency(String.format("classpath 'com.android.tools.build:gradle:%s'", getAndroidGradlePluginVersion()));
     }
 
     protected abstract File getProjectDir();
 
-    protected void addPlugin(String id) {
-        addPlugin(id, null);
-    }
+    protected abstract String getAndroidGradlePluginVersion();
 
-    protected void addPlugin(String id, String version) {
-        buildFileBuilder.addPlugin(id, version);
+    protected void addPlugin(String id) {
+        buildFileBuilder.addPlugin(id);
     }
 
     protected ElasticBlockBuilder getDefaultElasticBlockBuilder() {

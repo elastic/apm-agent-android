@@ -16,15 +16,6 @@ dependencyResolutionManagement {
         google()
     }
 }
-buildscript {
-    repositories {
-        mavenCentral()
-        google()
-    }
-    dependencies {
-        classpath "com.android.tools.build:gradle:$androidGradlePlugin_version"
-    }
-}
 rootProject.name = "APM Android Agent"
 include ':android-plugin'
 include ':android-sdk'

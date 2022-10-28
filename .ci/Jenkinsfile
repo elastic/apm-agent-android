@@ -34,8 +34,8 @@ pipeline {
         gitCheckout(basedir: "${BASE_DIR}", githubNotifyFirstTimeContributor: true)
         pipelineManager([ cancelPreviousRunningBuilds: [ when: 'PR' ] ])
         stash allowEmpty: true, name: 'source', useDefaultExcludes: false
+        dockerLogin(secret: "${DOCKER_SECRET}", registry: "${DOCKER_REGISTRY}")
       }
-      dockerLogin(secret: "${DOCKER_SECRET}", registry: "${DOCKER_REGISTRY}")
     }
     stage('Lint'){
       steps {

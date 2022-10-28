@@ -34,6 +34,7 @@ import java.io.OutputStream;
 import java.util.Properties;
 
 import co.elastic.apm.android.common.ApmInfo;
+import co.elastic.apm.android.common.internal.logging.Elog;
 
 public abstract class ApmInfoGenerator extends DefaultTask {
 
@@ -93,40 +94,45 @@ public abstract class ApmInfoGenerator extends DefaultTask {
     }
 
     private String provideSecretToken() {
-        return provideOptionalValue(SECRET_TOKEN_ENVIRONMENT_VARIABLE, getSecretToken());
+        return provideOptionalValue("secretToken", SECRET_TOKEN_ENVIRONMENT_VARIABLE, getSecretToken());
     }
 
     private String provideServiceName() {
-        return provideValue(SERVICE_NAME_ENVIRONMENT_VARIABLE, getServiceName());
+        return provideValue("serviceName", SERVICE_NAME_ENVIRONMENT_VARIABLE, getServiceName());
     }
 
     private String provideServiceVersion() {
-        return provideValue(SERVICE_VERSION_ENVIRONMENT_VARIABLE, getServiceVersion());
+        return provideValue("serviceVersion", SERVICE_VERSION_ENVIRONMENT_VARIABLE, getServiceVersion());
     }
 
     private String provideServerUrl() {
-        return provideValue(SERVER_URL_ENVIRONMENT_VARIABLE, getServerUrl());
+        return provideValue("serverUrl", SERVER_URL_ENVIRONMENT_VARIABLE, getServerUrl());
     }
 
-    private String provideValue(String environmentName, Provider<String> defaultValueProvider) {
+    private String provideValue(String id, String environmentName, Provider<String> defaultValueProvider) {
         String environmentValue = provideValueFromEnvironmentVariable(environmentName);
         if (environmentValue != null) {
+            Elog.getLogger().debug("Providing '{}' from the environment variable: '{}'", id, environmentName);
             return environmentValue;
         }
 
+        Elog.getLogger().debug("Providing '{}' from the gradle configuration", id);
         return defaultValueProvider.get();
     }
 
-    private String provideOptionalValue(String environmentName, Provider<String> defaultValueProvider) {
+    private String provideOptionalValue(String id, String environmentName, Provider<String> defaultValueProvider) {
         String environmentValue = provideValueFromEnvironmentVariable(environmentName);
         if (environmentValue != null) {
+            Elog.getLogger().debug("Providing '{}' from the environment variable: '{}'", id, environmentName);
             return environmentValue;
         }
 
         if (defaultValueProvider.isPresent()) {
+            Elog.getLogger().debug("Providing '{}' from the gradle configuration", id);
             return defaultValueProvider.get();
         }
 
+        Elog.getLogger().debug("Providing null for '{}'", id);
         return null;
     }
 

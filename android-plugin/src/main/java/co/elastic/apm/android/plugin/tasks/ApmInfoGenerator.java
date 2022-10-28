@@ -20,6 +20,7 @@ package co.elastic.apm.android.plugin.tasks;
 
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
+import org.gradle.api.internal.provider.MissingValueException;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.Input;
@@ -121,19 +122,12 @@ public abstract class ApmInfoGenerator extends DefaultTask {
     }
 
     private String provideOptionalValue(String id, String environmentName, Provider<String> defaultValueProvider) {
-        String environmentValue = provideValueFromEnvironmentVariable(environmentName);
-        if (environmentValue != null) {
-            Elog.getLogger().debug("Providing '{}' from the environment variable: '{}'", id, environmentName);
-            return environmentValue;
+        try {
+            return provideValue(id, environmentName, defaultValueProvider);
+        } catch (MissingValueException e) {
+            Elog.getLogger().debug("Providing null for '{}'", id);
+            return null;
         }
-
-        if (defaultValueProvider.isPresent()) {
-            Elog.getLogger().debug("Providing '{}' from the gradle configuration", id);
-            return defaultValueProvider.get();
-        }
-
-        Elog.getLogger().debug("Providing null for '{}'", id);
-        return null;
     }
 
     private String provideValueFromEnvironmentVariable(String environmentName) {

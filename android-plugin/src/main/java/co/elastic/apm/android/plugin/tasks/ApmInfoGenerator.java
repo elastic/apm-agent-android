@@ -74,10 +74,12 @@ public abstract class ApmInfoGenerator extends DefaultTask {
         properties.put(ApmInfo.KEY_SERVICE_NAME, provideServiceName());
         properties.put(ApmInfo.KEY_SERVICE_VERSION, provideServiceVersion());
         properties.put(ApmInfo.KEY_SERVER_URL, provideServerUrl());
-        if (getSecretToken().isPresent()) {
-            properties.put(ApmInfo.KEY_SERVER_SECRET_TOKEN, provideSecretToken());
-        }
         properties.put(ApmInfo.KEY_SERVICE_ENVIRONMENT, getVariantName().get());
+
+        String secretToken = provideSecretToken();
+        if (secretToken != null) {
+            properties.put(ApmInfo.KEY_SERVER_SECRET_TOKEN, secretToken);
+        }
         String okhttpVersion = getOkHttpVersion().getOrNull();
         if (okhttpVersion != null) {
             properties.put(ApmInfo.KEY_SCOPE_OKHTTP_VERSION, okhttpVersion);
@@ -91,7 +93,7 @@ public abstract class ApmInfoGenerator extends DefaultTask {
     }
 
     private String provideSecretToken() {
-        return provideValue(SECRET_TOKEN_ENVIRONMENT_VARIABLE, getSecretToken());
+        return provideOptionalValue(SECRET_TOKEN_ENVIRONMENT_VARIABLE, getSecretToken());
     }
 
     private String provideServiceName() {
@@ -107,11 +109,28 @@ public abstract class ApmInfoGenerator extends DefaultTask {
     }
 
     private String provideValue(String environmentName, Provider<String> defaultValueProvider) {
-        String environmentValue = System.getenv(environmentName);
+        String environmentValue = provideValueFromEnvironmentVariable(environmentName);
         if (environmentValue != null) {
             return environmentValue;
         }
 
         return defaultValueProvider.get();
+    }
+
+    private String provideOptionalValue(String environmentName, Provider<String> defaultValueProvider) {
+        String environmentValue = provideValueFromEnvironmentVariable(environmentName);
+        if (environmentValue != null) {
+            return environmentValue;
+        }
+
+        if (defaultValueProvider.isPresent()) {
+            return defaultValueProvider.get();
+        }
+
+        return null;
+    }
+
+    private String provideValueFromEnvironmentVariable(String environmentName) {
+        return System.getenv(environmentName);
     }
 }

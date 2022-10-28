@@ -97,6 +97,26 @@ public class CompilationConfigTest extends BaseFunctionalTest {
     }
 
     @Test
+    public void compileConfig_whenNoSecretTokenProvidedInGradle_useSecretTokenFromEnvironmentVariable() {
+        String serverUrl = "http://some.url";
+        getDefaultElasticBlockBuilder().setServerUrl(serverUrl);
+        String secretTokenEnv = "Some env secret token";
+        environmentVariables.set("ELASTIC_APM_SECRET_TOKEN", secretTokenEnv);
+        setUpProject();
+
+        runGradle("assembleDebug");
+
+        verifyTaskIsSuccessful(":debugGenerateApmInfo");
+        File output = getGeneratedPropertiesFile("debugGenerateApmInfo");
+        Properties properties = loadProperties(output);
+        assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
+        assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
+        assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
+        assertEquals(serverUrl, properties.getProperty(ApmInfo.KEY_SERVER_URL));
+        assertEquals(secretTokenEnv, properties.getProperty(ApmInfo.KEY_SERVER_SECRET_TOKEN));
+    }
+
+    @Test
     public void compileConfig_verifyOverridingServerUrl_withEnvironmentVariable() {
         String serverUrl = "http://some.url";
         String serverUrlEnv = "http://some.env.url";

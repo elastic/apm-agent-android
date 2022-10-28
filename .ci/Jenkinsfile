@@ -11,8 +11,6 @@ pipeline {
     PIPELINE_LOG_LEVEL = 'INFO'
     DOCKER_REGISTRY = 'docker.elastic.co'
     DOCKER_SECRET = 'secret/apm-team/ci/docker-registry/prod'
-    JAVA_HOME = "${env.HUDSON_HOME}/.java/java11"
-    PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
   }
   options {
     timeout(time: 1, unit: 'HOURS')

@@ -60,15 +60,16 @@ public abstract class ApmInfoGenerator extends DefaultTask {
     public abstract DirectoryProperty getOutputDir();
 
 
-    private static final String SECRET_TOKEN_ENVIRONMENT_VARIABLE = "ELASTIC_APM_SECRET_TOKEN";
     private static final String SERVICE_NAME_ENVIRONMENT_VARIABLE = "ELASTIC_APM_SERVICE_NAME";
+    private static final String SERVICE_VERSION_ENVIRONMENT_VARIABLE = "ELASTIC_APM_SERVICE_VERSION";
+    private static final String SECRET_TOKEN_ENVIRONMENT_VARIABLE = "ELASTIC_APM_SECRET_TOKEN";
 
     @TaskAction
     public void execute() {
         File propertiesFile = new File(getOutputDir().get().getAsFile(), ApmInfo.ASSET_FILE_NAME);
         Properties properties = new Properties();
         properties.put(ApmInfo.KEY_SERVICE_NAME, provideServiceName());
-        properties.put(ApmInfo.KEY_SERVICE_VERSION, getServiceVersion().get());
+        properties.put(ApmInfo.KEY_SERVICE_VERSION, provideServiceVersion());
         properties.put(ApmInfo.KEY_SERVICE_ENVIRONMENT, getVariantName().get());
         properties.put(ApmInfo.KEY_SERVER_URL, getServerUrl().get());
         if (getSecretToken().isPresent()) {
@@ -92,6 +93,10 @@ public abstract class ApmInfoGenerator extends DefaultTask {
 
     private String provideServiceName() {
         return provideValue(SERVICE_NAME_ENVIRONMENT_VARIABLE, getServiceName().get());
+    }
+
+    private String provideServiceVersion() {
+        return provideValue(SERVICE_VERSION_ENVIRONMENT_VARIABLE, getServiceVersion().get());
     }
 
     private String provideValue(String environmentName, String defaultValue) {

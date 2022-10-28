@@ -62,6 +62,7 @@ public abstract class ApmInfoGenerator extends DefaultTask {
 
     private static final String SERVICE_NAME_ENVIRONMENT_VARIABLE = "ELASTIC_APM_SERVICE_NAME";
     private static final String SERVICE_VERSION_ENVIRONMENT_VARIABLE = "ELASTIC_APM_SERVICE_VERSION";
+    private static final String SERVER_URL_ENVIRONMENT_VARIABLE = "ELASTIC_APM_SERVER_URL";
     private static final String SECRET_TOKEN_ENVIRONMENT_VARIABLE = "ELASTIC_APM_SECRET_TOKEN";
 
     @TaskAction
@@ -70,11 +71,11 @@ public abstract class ApmInfoGenerator extends DefaultTask {
         Properties properties = new Properties();
         properties.put(ApmInfo.KEY_SERVICE_NAME, provideServiceName());
         properties.put(ApmInfo.KEY_SERVICE_VERSION, provideServiceVersion());
-        properties.put(ApmInfo.KEY_SERVICE_ENVIRONMENT, getVariantName().get());
-        properties.put(ApmInfo.KEY_SERVER_URL, getServerUrl().get());
+        properties.put(ApmInfo.KEY_SERVER_URL, provideServerUrl());
         if (getSecretToken().isPresent()) {
             properties.put(ApmInfo.KEY_SERVER_SECRET_TOKEN, provideSecretToken());
         }
+        properties.put(ApmInfo.KEY_SERVICE_ENVIRONMENT, getVariantName().get());
         String okhttpVersion = getOkHttpVersion().getOrNull();
         if (okhttpVersion != null) {
             properties.put(ApmInfo.KEY_SCOPE_OKHTTP_VERSION, okhttpVersion);
@@ -97,6 +98,10 @@ public abstract class ApmInfoGenerator extends DefaultTask {
 
     private String provideServiceVersion() {
         return provideValue(SERVICE_VERSION_ENVIRONMENT_VARIABLE, getServiceVersion().get());
+    }
+
+    private String provideServerUrl() {
+        return provideValue(SERVER_URL_ENVIRONMENT_VARIABLE, getServerUrl().get());
     }
 
     private String provideValue(String environmentName, String defaultValue) {

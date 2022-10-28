@@ -9,6 +9,8 @@ pipeline {
     BASE_DIR = "src/github.com/elastic/${env.REPO}"
     JOB_GIT_CREDENTIALS = "f6c7695a-671e-4f4f-a331-acdce44ff9ba"
     PIPELINE_LOG_LEVEL = 'INFO'
+    DOCKER_REGISTRY = 'docker.elastic.co'
+    DOCKER_SECRET = 'secret/apm-team/ci/docker-registry/prod'
     JAVA_HOME = "${env.HUDSON_HOME}/.java/java11"
     PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
   }
@@ -33,12 +35,15 @@ pipeline {
         pipelineManager([ cancelPreviousRunningBuilds: [ when: 'PR' ] ])
         stash allowEmpty: true, name: 'source', useDefaultExcludes: false
       }
+      dockerLogin(secret: "${DOCKER_SECRET}", registry: "${DOCKER_REGISTRY}")
     }
     stage('Lint'){
       steps {
         withGithubNotify(context: "Lint") {
           dir("${BASE_DIR}"){
-            sh './gradlew lint'
+            androidSDK(){
+              sh './gradlew lint'
+            }
           }
         }
       }
@@ -47,7 +52,9 @@ pipeline {
       steps {
         withGithubNotify(context: "Build") {
           dir("${BASE_DIR}"){
-            sh './gradlew assemble'
+            androidSDK(){
+              sh './gradlew assemble'
+            }
           }
         }
       }
@@ -56,7 +63,9 @@ pipeline {
       steps {
         withGithubNotify(context: "Test") {
           dir("${BASE_DIR}"){
-            sh './gradlew test && ./gradlew -p "android-test" test'
+            androidSDK(){
+              sh './gradlew test && ./gradlew -p "android-test" test'
+            }
           }
         }
       }
@@ -66,5 +75,13 @@ pipeline {
     cleanup {
       notifyBuildResult(prComment: true)
     }
+  }
+}
+
+
+def androidSDK(Closure body){
+  // from https://github.com/docker-android-sdk/android-30
+  docker.image("docker.elastic.co/observability-ci/android-sdk:30").inside(){
+    body()
   }
 }

@@ -12,7 +12,7 @@ pipeline {
     DOCKER_REGISTRY = 'docker.elastic.co'
     DOCKER_SECRET = 'secret/apm-team/ci/docker-registry/prod'
     HOME= "${env.WORKSPACE}"
-    GRADLE_USER_HOME = "${env.WORKSPACE}"
+    GRADLE_USER_HOME = "${env.WORKSPACE}/.gradle"
   }
   options {
     timeout(time: 1, unit: 'HOURS')
@@ -35,6 +35,7 @@ pipeline {
         pipelineManager([ cancelPreviousRunningBuilds: [ when: 'PR' ] ])
         stash allowEmpty: true, name: 'source', useDefaultExcludes: false
         dockerLogin(secret: "${DOCKER_SECRET}", registry: "${DOCKER_REGISTRY}")
+        sh(label: 'Init Gradle HOME dir'; script: 'mkdir -p ${GRADLE_USER_HOME} && chmod 777 ${GRADLE_USER_HOME}')
       }
     }
     stage('Lint'){

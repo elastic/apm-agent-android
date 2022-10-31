@@ -75,7 +75,7 @@ def androidSDK(String cmd){
   // from https://github.com/docker-android-sdk/android-30
   sh(label: 'Run AndroidSDK', script: """
     docker run -i --rm \
-      -v "\${WORKSPACE}:/src" \
+      -v "\$(pwd):/src" \
       -w "/src" \
       -e HOME="/src" \
       -u "0:\$(id -g)" \

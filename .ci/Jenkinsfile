@@ -82,7 +82,7 @@ pipeline {
 
 def androidSDK(Closure body){
   // from https://github.com/docker-android-sdk/android-30
-  docker.image("docker.elastic.co/observability-ci/android-sdk:30").inside("-e HOME=${env.WORKSPACE} -u 0:\$(id -g)"){
+  docker.image("docker.elastic.co/observability-ci/android-sdk:30").withRun('-e HOME=$WORKSPACE -u "0:$(id -g)"'){
     body()
   }
 }

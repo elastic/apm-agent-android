@@ -46,9 +46,9 @@ public interface Connectivity {
         return LazyProvider.of(() -> {
             ApmMetadataService service = ElasticApmAgent.get().getService(Service.Names.METADATA);
             CommonConnectivity connectivity = Connectivity.create(service.getServerUrl());
-            String serverToken = service.getServerToken();
-            if (serverToken != null) {
-                connectivity.withAuthToken(serverToken);
+            String secretToken = service.getSecretToken();
+            if (secretToken != null) {
+                connectivity.withSecretToken(secretToken);
             }
             return connectivity;
         });

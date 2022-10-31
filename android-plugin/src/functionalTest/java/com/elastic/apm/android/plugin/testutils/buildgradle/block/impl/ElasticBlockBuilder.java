@@ -38,8 +38,8 @@ public class ElasticBlockBuilder implements BlockBuilder {
         parameters.put("serverUrl", serverUrl);
     }
 
-    public void setServerToken(String serverToken) {
-        parameters.put("serverToken", serverToken);
+    public void setSecretToken(String serverToken) {
+        parameters.put("secretToken", serverToken);
     }
 
     @Override

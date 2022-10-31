@@ -11,8 +11,6 @@ pipeline {
     PIPELINE_LOG_LEVEL = 'INFO'
     DOCKER_REGISTRY = 'docker.elastic.co'
     DOCKER_SECRET = 'secret/apm-team/ci/docker-registry/prod'
-    HOME= "${env.WORKSPACE}"
-    GRADLE_USER_HOME = "${env.WORKSPACE}/.gradle"
   }
   options {
     timeout(time: 1, unit: 'HOURS')
@@ -35,16 +33,13 @@ pipeline {
         pipelineManager([ cancelPreviousRunningBuilds: [ when: 'PR' ] ])
         stash allowEmpty: true, name: 'source', useDefaultExcludes: false
         dockerLogin(secret: "${DOCKER_SECRET}", registry: "${DOCKER_REGISTRY}")
-        sh(label: 'Init Gradle HOME dir', script: 'mkdir -p ${GRADLE_USER_HOME} && chmod 777 ${GRADLE_USER_HOME}')
       }
     }
     stage('Lint'){
       steps {
         withGithubNotify(context: "Lint") {
           dir("${BASE_DIR}"){
-            androidSDK(){
-              sh './gradlew lint'
-            }
+            androidSDK('./gradlew lint')
           }
         }
       }
@@ -53,9 +48,7 @@ pipeline {
       steps {
         withGithubNotify(context: "Build") {
           dir("${BASE_DIR}"){
-            androidSDK(){
-              sh './gradlew assemble'
-            }
+            androidSDK('./gradlew assemble')
           }
         }
       }
@@ -64,9 +57,7 @@ pipeline {
       steps {
         withGithubNotify(context: "Test") {
           dir("${BASE_DIR}"){
-            androidSDK(){
-              sh './gradlew test && ./gradlew -p "android-test" test'
-            }
+            androidSDK('./gradlew test && ./gradlew -p "android-test" test')
           }
         }
       }
@@ -80,10 +71,15 @@ pipeline {
 }
 
 
-def androidSDK(Closure body){
+def androidSDK(String cmd){
   // from https://github.com/docker-android-sdk/android-30
-  docker.image("docker.elastic.co/observability-ci/android-sdk:30")
-        .withRun('-v "$WORKSPACE:/src" -w "/src" -e HOME="/src" -u "0:$(id -g)"'){ c ->
-    body()
-  }
+  sh(label: 'Run AndroidSDK', scriptt: """
+    docker run -i --rm \
+      -v "\${WORKSPACE}:/src" \
+      -w "/src" \
+      -e HOME="/src" \
+      -u "0:\$(id -g)" \
+      docker.elastic.co/observability-ci/android-sdk:30 \
+      /bin/bash -c "${cmd}"
+  """)
 }

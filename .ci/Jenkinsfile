@@ -73,7 +73,7 @@ pipeline {
 
 def androidSDK(String cmd){
   // from https://github.com/docker-android-sdk/android-30
-  sh(label: 'Run AndroidSDK', scriptt: """
+  sh(label: 'Run AndroidSDK', script: """
     docker run -i --rm \
       -v "\${WORKSPACE}:/src" \
       -w "/src" \

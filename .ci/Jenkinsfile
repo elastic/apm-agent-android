@@ -80,6 +80,6 @@ def androidSDK(String cmd){
       -e HOME="/src" \
       -u "0:\$(id -g)" \
       docker.elastic.co/observability-ci/android-sdk:30 \
-      /bin/bash -c "pwd && ls -la && ${cmd}"
+      /bin/bash -c "${cmd}"
   """)
 }

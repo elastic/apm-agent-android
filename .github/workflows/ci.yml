@@ -13,7 +13,6 @@ jobs:
   process:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
       - uses: actions/checkout@v3
       - name: lint
         run: ./gradlew lint

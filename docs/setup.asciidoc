@@ -31,7 +31,7 @@ elasticApm {
     serverUrl = "https://your.elastic.server"
 
     // Optional
-    serviceName = "your app name" // defaults to your app's package name.
+    serviceName = "your app name" // defaults to your 'android.defaultConfig.applicationId' value.
     serviceVersion = "0.0.0" // defaults to your 'android.defaultConfig.versionName` value.
     secretToken = "your server auth token" // defaults to null.
 }

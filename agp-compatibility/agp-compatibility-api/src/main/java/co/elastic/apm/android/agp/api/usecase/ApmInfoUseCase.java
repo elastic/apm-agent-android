@@ -38,6 +38,6 @@ public abstract class ApmInfoUseCase extends AgpUseCase<ApmInfoUseCase.Parameter
 
         @Optional
         @Input
-        public abstract Property<String> getServerToken();
+        public abstract Property<String> getSecretToken();
     }
 }

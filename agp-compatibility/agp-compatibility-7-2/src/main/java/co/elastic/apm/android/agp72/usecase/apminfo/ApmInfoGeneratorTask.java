@@ -152,7 +152,7 @@ public abstract class ApmInfoGeneratorTask extends DefaultTask {
             apmInfoGenerator.getServiceName().set(parameters.getServiceName());
             apmInfoGenerator.getServiceVersion().set(parameters.getServiceVersion());
             apmInfoGenerator.getServerUrl().set(parameters.getServerUrl());
-            apmInfoGenerator.getServerToken().set(parameters.getServerToken());
+            apmInfoGenerator.getSecretToken().set(parameters.getSecretToken());
             apmInfoGenerator.getVariantName().set(variantName);
             apmInfoGenerator.getOutputDir().set(project.getLayout().getBuildDirectory().dir(apmInfoGenerator.getName()));
             apmInfoGenerator.getOkHttpVersion().set(getOkhttpVersion(project, variant));

@@ -55,4 +55,4 @@ class MyApp extends android.app.Application {
 }
 ----
 
-The example above shows the simplest way to configure the agent, if the default values don't suit your needs, you should take a look at the agent's configuration to get more details on how to tailor it to your project's needs.
+The example above shows the simplest way to configure the agent, if the default values don't suit your needs, you should take a look at the agent's <<configuration,configuration>> to get more details on how to tailor it to your project's needs.

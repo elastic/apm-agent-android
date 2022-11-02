@@ -1,0 +1,10 @@
+[[configuration]]
+== Configuration
+
+=== Gradle configuration
+
+This configuration, already shown in the <<setup,setup>>, allows you to provide values at compile time within your application's `build.gradle` file.
+
+It looks like the following:
+
+=== Runtime configuration

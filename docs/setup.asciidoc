@@ -1,2 +1,58 @@
 [[setup]]
 == Set up the Agent
+
+=== Gradle set up
+
+The first step is to add the Elastic Agent plugin to your application's `build.gradle` file as shown below
+
+[source,groovy]
+----
+// Android app's build.gradle file
+plugins {
+    id "com.android.application"
+    // You need to add the line below to add the agent plugin to your app, it must be added below the android app plugin declaration (`com.android.application`) as well as below the kotlin plugin declaration (if available).
+    id "co.elastic.apm.android" version "[latest_version]"
+}
+----
+
+After adding the agent plugin, you need to configure it to your needs.
+The minimal configuration is to set your Elastic server endpoint as shown below
+
+[source,groovy]
+----
+// Android app's build.gradle file
+plugins {
+    //...
+    id "co.elastic.apm.android" version "[latest_version]"
+}
+
+elasticApm {
+    // Minimal configuration
+    serverUrl = "https://your.elastic.server"
+
+    // Optional
+    serviceName = "your app name" // defaults to your app's package name.
+    serviceVersion = "0.0.0" // defaults to your 'android.defaultConfig.versionName` value.
+    secretToken = "your server auth token" // defaults to null.
+}
+----
+
+=== Application set up
+
+After your Gradle changes are done and your project synced with them, the Elastic agent needs to be initialized within your https://developer.android.com/reference/android/app/Application[Application] class as shown below
+
+[source,java]
+----
+// Your Application class
+
+class MyApp extends android.app.Application {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        ElasticApmAgent.initialize(this); // Initialize the Elastic APM agent once.
+    }
+}
+----
+
+The example above shows the simplest way to configure the agent, if the default values don't suit your needs, you should take a look at the agent's configuration to get more details on how to tailor it to your project's needs.

@@ -1,6 +1,7 @@
 [[configuration]]
 == Configuration
 
+[#_gradle_configuration]
 === Gradle configuration
 
 This configuration, already shown in the <<setup,setup>>, allows you to provide values at compile time within your application's `build.gradle` file.
@@ -40,3 +41,42 @@ All of the values provided in the Gradle configuration can be overridden by the 
 |===
 
 === Runtime configuration
+
+The runtime configuration is provided within your https://developer.android.com/reference/android/app/Application[Application] class at the time of initializing the Elastic agent.
+This configuration can override any previously-set compile time configuration.
+
+The way it works is by providing your own instance of the `ElasticApmConfiguration` class as shown below
+
+[source,java]
+----
+// Application class
+
+class MyApp extends android.app.Application {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        ElasticApmAgent.initialize(this, ElasticApmConfiguration.builder().build());
+    }
+}
+----
+
+==== Application id configuration
+
+You can provide your application name and version dynamically by setting those when building your `ElasticApmConfiguration` instance as show below
+
+[source,java]
+----
+class MyApp extends android.app.Application {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        ElasticApmConfiguration configuration = ElasticApmConfiguration.builder()
+                .setServiceName("my-custom-name")
+                .setServiceVersion("1.0.0")
+                .build();
+        ElasticApmAgent.initialize(this, configuration);
+    }
+}
+----

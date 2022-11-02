@@ -31,7 +31,7 @@ public class CommonConnectivity extends BatchProcessingConnectivity {
         this.endpoint = endpoint;
     }
 
-    public CommonConnectivity withAuthToken(String token) {
+    public CommonConnectivity withSecretToken(String token) {
         this.token = token;
         return this;
     }

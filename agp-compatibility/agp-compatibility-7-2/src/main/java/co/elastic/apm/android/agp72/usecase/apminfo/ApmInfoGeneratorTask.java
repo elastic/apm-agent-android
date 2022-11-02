@@ -29,6 +29,7 @@ import org.gradle.api.artifacts.ResolveException;
 import org.gradle.api.artifacts.ResolvedArtifact;
 import org.gradle.api.artifacts.ResolvedConfiguration;
 import org.gradle.api.file.DirectoryProperty;
+import org.gradle.api.internal.provider.MissingValueException;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.Input;
@@ -45,6 +46,7 @@ import java.util.Properties;
 
 import co.elastic.apm.android.agp.api.usecase.ApmInfoUseCase;
 import co.elastic.apm.android.common.ApmInfo;
+import co.elastic.apm.android.common.internal.logging.Elog;
 
 public abstract class ApmInfoGeneratorTask extends DefaultTask {
 
@@ -54,6 +56,7 @@ public abstract class ApmInfoGeneratorTask extends DefaultTask {
     @Input
     public abstract Property<String> getServiceName();
 
+    @Optional
     @Input
     public abstract Property<String> getServerUrl();
 
@@ -62,7 +65,7 @@ public abstract class ApmInfoGeneratorTask extends DefaultTask {
 
     @Optional
     @Input
-    public abstract Property<String> getServerToken();
+    public abstract Property<String> getSecretToken();
 
     @Optional
     @Input
@@ -71,16 +74,24 @@ public abstract class ApmInfoGeneratorTask extends DefaultTask {
     @OutputDirectory
     public abstract DirectoryProperty getOutputDir();
 
+
+    private static final String SERVICE_NAME_ENVIRONMENT_VARIABLE = "ELASTIC_APM_SERVICE_NAME";
+    private static final String SERVICE_VERSION_ENVIRONMENT_VARIABLE = "ELASTIC_APM_SERVICE_VERSION";
+    private static final String SERVER_URL_ENVIRONMENT_VARIABLE = "ELASTIC_APM_SERVER_URL";
+    private static final String SECRET_TOKEN_ENVIRONMENT_VARIABLE = "ELASTIC_APM_SECRET_TOKEN";
+
     @TaskAction
     public void execute() {
         File propertiesFile = new File(getOutputDir().get().getAsFile(), ApmInfo.ASSET_FILE_NAME);
         Properties properties = new Properties();
-        properties.put(ApmInfo.KEY_SERVICE_NAME, getServiceName().get());
-        properties.put(ApmInfo.KEY_SERVICE_VERSION, getServiceVersion().get());
+        properties.put(ApmInfo.KEY_SERVICE_NAME, provideServiceName());
+        properties.put(ApmInfo.KEY_SERVICE_VERSION, provideServiceVersion());
+        properties.put(ApmInfo.KEY_SERVER_URL, provideServerUrl());
         properties.put(ApmInfo.KEY_SERVICE_ENVIRONMENT, getVariantName().get());
-        properties.put(ApmInfo.KEY_SERVER_URL, getServerUrl().get());
-        if (getServerToken().isPresent()) {
-            properties.put(ApmInfo.KEY_SERVER_TOKEN, getServerToken().get());
+
+        String secretToken = provideSecretToken();
+        if (secretToken != null) {
+            properties.put(ApmInfo.KEY_SERVER_SECRET_TOKEN, secretToken);
         }
         String okhttpVersion = getOkHttpVersion().getOrNull();
         if (okhttpVersion != null) {
@@ -92,6 +103,46 @@ public abstract class ApmInfoGeneratorTask extends DefaultTask {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String provideSecretToken() {
+        return provideOptionalValue("secretToken", SECRET_TOKEN_ENVIRONMENT_VARIABLE, getSecretToken());
+    }
+
+    private String provideServiceName() {
+        return provideValue("serviceName", SERVICE_NAME_ENVIRONMENT_VARIABLE, getServiceName());
+    }
+
+    private String provideServiceVersion() {
+        return provideValue("serviceVersion", SERVICE_VERSION_ENVIRONMENT_VARIABLE, getServiceVersion());
+    }
+
+    private String provideServerUrl() {
+        return provideValue("serverUrl", SERVER_URL_ENVIRONMENT_VARIABLE, getServerUrl());
+    }
+
+    private String provideValue(String id, String environmentName, Provider<String> defaultValueProvider) {
+        String environmentValue = provideValueFromEnvironmentVariable(environmentName);
+        if (environmentValue != null) {
+            Elog.getLogger().debug("Providing '{}' from the environment variable: '{}'", id, environmentName);
+            return environmentValue;
+        }
+
+        Elog.getLogger().debug("Providing '{}' from the gradle configuration", id);
+        return defaultValueProvider.get();
+    }
+
+    private String provideOptionalValue(String id, String environmentName, Provider<String> defaultValueProvider) {
+        try {
+            return provideValue(id, environmentName, defaultValueProvider);
+        } catch (MissingValueException e) {
+            Elog.getLogger().debug("Providing null for '{}'", id);
+            return null;
+        }
+    }
+
+    private String provideValueFromEnvironmentVariable(String environmentName) {
+        return System.getenv(environmentName);
     }
 
     public static TaskProvider<ApmInfoGeneratorTask> create(Project project, ApmInfoUseCase.Parameters parameters, Variant variant) {

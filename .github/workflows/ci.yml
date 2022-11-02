@@ -1,0 +1,23 @@
+name: Continous Integration
+
+on:
+  pull_request:
+  push:
+    branches:
+      - "main"
+
+permissions:
+  contents: read
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: lint
+        run: ./gradlew lint
+      - name: Build
+        run: ./gradlew assemble
+      - name: Test
+        run: ./gradlew test && ./gradlew -p "android-test" test
+        

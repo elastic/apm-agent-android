@@ -17,6 +17,7 @@ dependencies {
     implementation project(':agp-compatibility:agp-compatibility-7-3')
     compileOnly "com.android.tools.build:gradle:$androidGradlePlugin_version"
     functionalTestImplementation "junit:junit:$junit_version"
+    functionalTestImplementation "com.github.stefanbirkner:system-rules:1.19.0"
     functionalTestImplementation project(':android-common')
 }
 

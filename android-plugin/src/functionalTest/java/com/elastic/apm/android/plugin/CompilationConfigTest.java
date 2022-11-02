@@ -26,6 +26,7 @@ import com.elastic.apm.android.plugin.testutils.BaseFunctionalTest;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
@@ -37,6 +38,9 @@ import java.util.Properties;
 import co.elastic.apm.android.common.ApmInfo;
 
 public class CompilationConfigTest extends BaseFunctionalTest {
+
+    @Rule
+    public EnvironmentVariables environmentVariables = new EnvironmentVariables();
 
     @Rule
     public TemporaryFolder projectTemporaryFolder = new TemporaryFolder();
@@ -53,7 +57,7 @@ public class CompilationConfigTest extends BaseFunctionalTest {
 
         runFailedGradle("assembleDebug");
 
-        verifyOutputContains("property 'serverUrl' doesn't have a configured value");
+        verifyOutputContains("'serverUrl' because it has no value available");
     }
 
     @Test
@@ -71,14 +75,52 @@ public class CompilationConfigTest extends BaseFunctionalTest {
         assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
         assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
         assertEquals(serverUrl, properties.getProperty(ApmInfo.KEY_SERVER_URL));
-        assertNull(properties.getProperty(ApmInfo.KEY_SERVER_TOKEN));
+        assertNull(properties.getProperty(ApmInfo.KEY_SERVER_SECRET_TOKEN));
     }
 
     @Test
-    public void compileConfig_verifySettingServerToken() {
-        String serverUrl = "http://server.url";
-        String serverToken = "some.token";
-        getDefaultElasticBlockBuilder().setServerToken(serverToken);
+    public void compileConfig_whenNoServerUrlProvidedInGradle_useServerUrlFromEnvironmentVariable() {
+        String serverUrlEnv = "http://some.url";
+        environmentVariables.set("ELASTIC_APM_SERVER_URL", serverUrlEnv);
+        setUpProject();
+
+        runGradle("assembleDebug");
+
+        verifyTaskIsSuccessful(":debugGenerateApmInfo");
+        File output = getGeneratedPropertiesFile("debugGenerateApmInfo");
+        Properties properties = loadProperties(output);
+        assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
+        assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
+        assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
+        assertEquals(serverUrlEnv, properties.getProperty(ApmInfo.KEY_SERVER_URL));
+        assertNull(properties.getProperty(ApmInfo.KEY_SERVER_SECRET_TOKEN));
+    }
+
+    @Test
+    public void compileConfig_whenNoSecretTokenProvidedInGradle_useSecretTokenFromEnvironmentVariable() {
+        String serverUrl = "http://some.url";
+        getDefaultElasticBlockBuilder().setServerUrl(serverUrl);
+        String secretTokenEnv = "Some env secret token";
+        environmentVariables.set("ELASTIC_APM_SECRET_TOKEN", secretTokenEnv);
+        setUpProject();
+
+        runGradle("assembleDebug");
+
+        verifyTaskIsSuccessful(":debugGenerateApmInfo");
+        File output = getGeneratedPropertiesFile("debugGenerateApmInfo");
+        Properties properties = loadProperties(output);
+        assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
+        assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
+        assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
+        assertEquals(serverUrl, properties.getProperty(ApmInfo.KEY_SERVER_URL));
+        assertEquals(secretTokenEnv, properties.getProperty(ApmInfo.KEY_SERVER_SECRET_TOKEN));
+    }
+
+    @Test
+    public void compileConfig_verifyOverridingServerUrl_withEnvironmentVariable() {
+        String serverUrl = "http://some.url";
+        String serverUrlEnv = "http://some.env.url";
+        environmentVariables.set("ELASTIC_APM_SERVER_URL", serverUrlEnv);
         getDefaultElasticBlockBuilder().setServerUrl(serverUrl);
         setUpProject();
 
@@ -90,7 +132,49 @@ public class CompilationConfigTest extends BaseFunctionalTest {
         assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
         assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
         assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
-        assertEquals(serverToken, properties.getProperty(ApmInfo.KEY_SERVER_TOKEN));
+        assertEquals(serverUrlEnv, properties.getProperty(ApmInfo.KEY_SERVER_URL));
+        assertNull(properties.getProperty(ApmInfo.KEY_SERVER_SECRET_TOKEN));
+    }
+
+    @Test
+    public void compileConfig_verifySettingServerToken() {
+        String serverUrl = "http://server.url";
+        String serverToken = "some.token";
+        getDefaultElasticBlockBuilder().setSecretToken(serverToken);
+        getDefaultElasticBlockBuilder().setServerUrl(serverUrl);
+        setUpProject();
+
+        runGradle("assembleDebug");
+
+        verifyTaskIsSuccessful(":debugGenerateApmInfo");
+        File output = getGeneratedPropertiesFile("debugGenerateApmInfo");
+        Properties properties = loadProperties(output);
+        assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
+        assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
+        assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
+        assertEquals(serverToken, properties.getProperty(ApmInfo.KEY_SERVER_SECRET_TOKEN));
+        assertEquals(serverUrl, properties.getProperty(ApmInfo.KEY_SERVER_URL));
+    }
+
+    @Test
+    public void compileConfig_verifyOverridingServerToken_withEnvironmentVariable() {
+        String serverUrl = "http://server.url";
+        String serverToken = "some.token";
+        String serverTokenEnv = "some.environment-provided.token";
+        environmentVariables.set("ELASTIC_APM_SECRET_TOKEN", serverTokenEnv);
+        getDefaultElasticBlockBuilder().setSecretToken(serverToken);
+        getDefaultElasticBlockBuilder().setServerUrl(serverUrl);
+        setUpProject();
+
+        runGradle("assembleDebug");
+
+        verifyTaskIsSuccessful(":debugGenerateApmInfo");
+        File output = getGeneratedPropertiesFile("debugGenerateApmInfo");
+        Properties properties = loadProperties(output);
+        assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
+        assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
+        assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
+        assertEquals(serverTokenEnv, properties.getProperty(ApmInfo.KEY_SERVER_SECRET_TOKEN));
         assertEquals(serverUrl, properties.getProperty(ApmInfo.KEY_SERVER_URL));
     }
 
@@ -114,6 +198,27 @@ public class CompilationConfigTest extends BaseFunctionalTest {
     }
 
     @Test
+    public void compileConfig_verifyOverridingServiceName_withEnvironmentVariable() {
+        String serverUrl = "http://server.url";
+        String serviceName = "My App";
+        String serviceNameEnv = "My App name from env";
+        environmentVariables.set("ELASTIC_APM_SERVICE_NAME", serviceNameEnv);
+        getDefaultElasticBlockBuilder().setServiceName(serviceName);
+        getDefaultElasticBlockBuilder().setServerUrl(serverUrl);
+        setUpProject();
+
+        runGradle("assembleDebug");
+
+        verifyTaskIsSuccessful(":debugGenerateApmInfo");
+        File output = getGeneratedPropertiesFile("debugGenerateApmInfo");
+        Properties properties = loadProperties(output);
+        assertEquals(serviceNameEnv, properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
+        assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
+        assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
+        assertEquals(serverUrl, properties.getProperty(ApmInfo.KEY_SERVER_URL));
+    }
+
+    @Test
     public void compileConfig_verifyOverridingServiceVersion() {
         String serverUrl = "http://server.url";
         String serviceVersion = "1.0.0";
@@ -128,6 +233,27 @@ public class CompilationConfigTest extends BaseFunctionalTest {
         Properties properties = loadProperties(output);
         assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
         assertEquals(serviceVersion, properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
+        assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
+        assertEquals(serverUrl, properties.getProperty(ApmInfo.KEY_SERVER_URL));
+    }
+
+    @Test
+    public void compileConfig_verifyOverridingServiceVersion_withEnvironmentVariable() {
+        String serverUrl = "http://server.url";
+        String serviceVersion = "1.0.0";
+        String serviceVersionEnv = "1.0.0 from env";
+        environmentVariables.set("ELASTIC_APM_SERVICE_VERSION", serviceVersionEnv);
+        getDefaultElasticBlockBuilder().setServiceVersion(serviceVersion);
+        getDefaultElasticBlockBuilder().setServerUrl(serverUrl);
+        setUpProject();
+
+        runGradle("assembleDebug");
+
+        verifyTaskIsSuccessful(":debugGenerateApmInfo");
+        File output = getGeneratedPropertiesFile("debugGenerateApmInfo");
+        Properties properties = loadProperties(output);
+        assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
+        assertEquals(serviceVersionEnv, properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
         assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
         assertEquals(serverUrl, properties.getProperty(ApmInfo.KEY_SERVER_URL));
     }

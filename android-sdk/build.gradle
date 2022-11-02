@@ -1,8 +1,6 @@
 plugins {
     id 'com.android.library'
-    id 'co.elastic.apm.notice-producer'
 }
-apply from: "$rootDir/publishing.gradle"
 
 android {
     compileSdk androidCompileSdk
@@ -26,9 +24,6 @@ android {
     compileOptions {
         sourceCompatibility jvmCompatibility
         targetCompatibility jvmCompatibility
-    }
-    publishing {
-        singleVariant('debug')
     }
 }
 

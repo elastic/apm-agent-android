@@ -20,7 +20,7 @@ import co.elastic.apm.compile.tools.tasks.subprojects.NoticeFilesCollectorTask;
 import co.elastic.apm.compile.tools.tasks.subprojects.PomLicensesCollectorTask;
 import co.elastic.apm.compile.tools.utils.Constants;
 
-public class AarApmCompilerPlugin extends BaseSubprojectPlugin {
+public class AarNoticeProviderPlugin extends BaseSubprojectPlugin {
 
     @SuppressWarnings("unchecked")
     @Override
@@ -79,6 +79,7 @@ public class AarApmCompilerPlugin extends BaseSubprojectPlugin {
         });
     }
 
+    @SuppressWarnings("unchecked")
     private void copyAttributes(AttributeContainer from, AttributeContainer to) {
         for (Attribute<?> attribute : from.keySet()) {
             Object value = from.getAttribute(attribute);

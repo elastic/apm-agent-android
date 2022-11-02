@@ -1,9 +1,7 @@
 plugins {
     id 'java-gradle-plugin'
     id 'com.github.gmazzo.buildconfig' version '3.1.0'
-    id 'co.elastic.apm.notice-producer'
 }
-apply from: "$rootDir/publishing.gradle"
 
 targetCompatibility = jvmCompatibility
 sourceCompatibility = jvmCompatibility
@@ -63,6 +61,8 @@ gradlePlugin {
         apmPlugin {
             id = 'co.elastic.apm.android'
             implementationClass = 'co.elastic.apm.android.plugin.ApmAndroidAgentPlugin'
+            displayName = "Elastic APM Android Agent"
+            description = project.description
         }
     }
 }

@@ -12,7 +12,7 @@ import co.elastic.apm.android.test.utilities.SpanExporterProvider;
 
 @Config(application = MainApp.class)
 @RunWith(RobolectricTestRunner.class)
-public class BaseRobolectricTest extends BaseTest {
+public abstract class BaseRobolectricTest extends BaseTest {
 
     @Override
     protected SpanExporterCaptor getSpanExporter() {

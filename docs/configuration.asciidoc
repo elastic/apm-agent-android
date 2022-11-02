@@ -7,4 +7,36 @@ This configuration, already shown in the <<setup,setup>>, allows you to provide 
 
 It looks like the following:
 
+[source,groovy]
+----
+elasticApm {
+    // Minimal configuration
+    serverUrl = "https://your.elastic.server"
+
+    // Optional
+    serviceName = "your app name" // defaults to your 'android.defaultConfig.applicationId' value.
+    serviceVersion = "0.0.0" // defaults to your 'android.defaultConfig.versionName` value.
+    secretToken = "your server auth token" // defaults to null.
+}
+----
+
+All of the values provided in the Gradle configuration can be overridden by the following environment variables
+
+|===
+|Config |Associated Environment variable
+
+|serviceName
+|`ELASTIC_APM_SERVICE_NAME`
+
+|serviceVersion
+|`ELASTIC_APM_SERVICE_VERSION`
+
+|serverUrl
+|`ELASTIC_APM_SERVER_URL`
+
+|secretToken
+|`ELASTIC_APM_SECRET_TOKEN`
+
+|===
+
 === Runtime configuration

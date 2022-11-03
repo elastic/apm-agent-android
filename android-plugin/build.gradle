@@ -6,33 +6,11 @@ plugins {
 targetCompatibility = jvmCompatibility
 sourceCompatibility = jvmCompatibility
 
-sourceSets.create('functionalTest')
-
-configurations {
-    testPluginDependency {
-        canBeResolved(false)
-        canBeConsumed(false)
-    }
-    testPluginClasspath {
-        canBeConsumed(false)
-        canBeResolved(true)
-        extendsFrom(testPluginDependency)
-    }
-}
-
 dependencies {
     implementation "net.bytebuddy:byte-buddy-gradle-plugin:$bytebuddy_version"
     implementation "net.bytebuddy:byte-buddy:$bytebuddy_version"
     implementation project(':android-common')
     compileOnly "com.android.tools.build:gradle:7.2.0"
-    functionalTestImplementation "junit:junit:$junit_version"
-    functionalTestImplementation "com.github.stefanbirkner:system-rules:1.19.0"
-    functionalTestImplementation project(':android-common')
-    testPluginDependency "com.android.tools.build:gradle:7.2.0"
-}
-
-tasks.withType(PluginUnderTestMetadata).configureEach {
-    pluginClasspath.from(configurations.testPluginClasspath)
 }
 
 buildConfig {
@@ -40,16 +18,6 @@ buildConfig {
     buildConfigField("String", "SDK_DEPENDENCY_URI", "\"$group:android-sdk:$version\"")
     buildConfigField("String", "SDK_KTX_DEPENDENCY_URI", "\"$group:android-sdk-ktx:$version\"")
     buildConfigField("String", "INSTRUMENTATION_DEPENDENCY_URI", "\"$group:android-instrumentation:$version\"")
-}
-
-tasks.register('functionalTest', Test) {
-    group = 'verification'
-    testClassesDirs = sourceSets.functionalTest.output.classesDirs
-    classpath = sourceSets.functionalTest.runtimeClasspath
-}
-
-gradlePlugin {
-    testSourceSets sourceSets.functionalTest
 }
 
 licensesConfig {

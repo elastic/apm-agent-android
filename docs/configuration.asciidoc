@@ -175,6 +175,48 @@ Those are the following:
 
 |===
 
+==== Session ID configuration
+
+The Elastic agent provides a "session ID" for every span it creates.
+The idea of a session is to provide a context that covers many transactions that a user did in order to fulfil their needs using an application.
+For most apps, a session could start when the user opens the app, and end when the user closes the app, or when the app is forced to get closed due to an unexpected error.
+But for other apps, such as a ticketing app for a queue in a bank for example, the app will always be open, but a session might start when a person starts the process to get a new ticket, and end when the ticket is printed.
+
+By default, the Elastic agent generates a session ID on every app launch and keeps it until the app is terminated, or generates a new one after an idle period of time of 30 minutes.
+
+If the aforementioned default behavior doesn't suit your needs, you can provide your own `SessionIdProvider` instance where you could return your own session IDs which will be generated based on your custom logic.
+For example:
+
+[source,java]
+----
+
+public class MyCustomSessionIdProvider implements SessionIdProvider {
+
+    @NonNull
+    @Override
+    public String getSessionId() {
+        // Your custom logic to decide which ID to return.
+    }
+}
+----
+
+And then you can set it to the Elastic agent like so:
+
+[source,java]
+----
+class MyApp extends android.app.Application {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        ElasticApmConfiguration configuration = ElasticApmConfiguration.builder()
+                .setSessionIdProvider(new MyCustomSessionIdProvider())
+                .build();
+        ElasticApmAgent.initialize(this, configuration);
+    }
+}
+----
+
 ==== Advanced configurable options
 
 The configurable parameters provided by the Elastic agent aim to help configuring common use cases in an easy way, in most of the cases it means to act as a facade between your application and the Open Telemetry Java SDK that this agent is built on top.

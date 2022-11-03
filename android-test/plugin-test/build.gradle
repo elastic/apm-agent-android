@@ -1,0 +1,15 @@
+plugins {
+    id 'java-gradle-plugin'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+dependencies {
+    implementation "co.elastic.apm:android-common"
+    implementation "co.elastic.apm:android-plugin"
+    testImplementation "junit:junit:$junit_version"
+    testImplementation "com.github.stefanbirkner:system-rules:1.19.0"
+}

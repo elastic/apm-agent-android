@@ -28,20 +28,46 @@ import co.elastic.apm.android.sdk.traces.connectivity.custom.CustomProcessorConn
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
+/**
+ * Provides an Open Telemetry {@link SpanProcessor} object which handles the APM backend connectivity.
+ */
 public interface Connectivity {
 
+    /**
+     * This function provides a convenient way of creating a common {@link Connectivity} object that
+     * requires and endpoint URL, and optionally a server secret token for Bearer authentication purposes.
+     * <p>
+     * An example of using this function to create a connectivity with a secret token:
+     *
+     * <pre>
+     *  {@code Connectivity myConnectivity = Connectivity.create("https://my.server.url").withSecretToken("my_bearer_token");}
+     * </pre>
+     *
+     * @param endpoint - The APM server URL.
+     */
     static CommonConnectivity create(String endpoint) {
         return new CommonConnectivity(endpoint);
     }
 
+    /**
+     * This function provides a convenient way to create a {@link Connectivity} with a custom Open Telemetry's {@link SpanExporter}
+     * which {@link SpanProcessor} will be a {@link io.opentelemetry.sdk.trace.export.BatchSpanProcessor}.
+     */
     static Connectivity custom(SpanExporter exporter) {
         return new CustomExporterConnectivity(exporter);
     }
 
+    /**
+     * This function provides a convenient way of creating a fully customized {@link Connectivity} object by providing
+     * a {@link SpanProcessor} directly. This option might come in handy to avoid having to create a custom {@link Connectivity} implementation.
+     */
     static Connectivity custom(SpanProcessor processor) {
         return new CustomProcessorConnectivity(processor);
     }
 
+    /**
+     * This function provides a {@link Connectivity} instance that uses the server parameters defined at compile time.
+     */
     static Provider<Connectivity> getDefault() {
         return LazyProvider.of(() -> {
             ApmMetadataService service = ElasticApmAgent.get().getService(Service.Names.METADATA);

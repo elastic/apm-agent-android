@@ -10,7 +10,8 @@ import co.elastic.apm.android.test.activities.espresso.IdlingResourceProvider
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class CoroutineActivity : AppCompatActivity(), IdlingResourceProvider {
+class CoroutineActivity : AppCompatActivity(),
+    IdlingResourceProvider {
     private val idling = CountingIdlingResource("coroutine-idling-resource")
 
     override fun onCreate(savedInstanceState: Bundle?) {

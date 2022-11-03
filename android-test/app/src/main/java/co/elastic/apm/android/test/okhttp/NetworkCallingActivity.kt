@@ -8,7 +8,8 @@ import co.elastic.apm.android.test.activities.espresso.IdlingResourceProvider
 import okhttp3.*
 import java.io.IOException
 
-class NetworkCallingActivity : AppCompatActivity(), IdlingResourceProvider {
+class NetworkCallingActivity : AppCompatActivity(),
+    IdlingResourceProvider {
     private val idling = CountingIdlingResource("okhttp")
 
     fun makeNetworkCall(mockServerUrl: HttpUrl) {

@@ -80,3 +80,97 @@ class MyApp extends android.app.Application {
     }
 }
 ----
+
+==== HTTP Configuration
+
+The agent provides a configuration object for HTTP-related spans named `HttpTraceConfiguration`.
+You can pass an instance of it to the `ElasticApmConfiguration` object when initializing the agent in order to customize how the HTTP spans should be handled.
+
+===== Filtering HTTP requests from getting traced
+
+By default, all of your app's HTTP requests will get traced.
+You can avoid some requests from getting traced by creating your own `HttpExclusionRule`.
+For example this is an exclusion rule that prevents all requests with the host `127.0.0.1` from getting traced:
+
+[source,java]
+----
+class MyHttpExclusionRule extends HttpExclusionRule {
+
+    @Override
+    public boolean exclude(HttpRequest request) {
+        return request.url.getHost().equals("127.0.0.1");
+    }
+}
+----
+
+Then you'd need to add it to Elastic's Agent config through its `HttpTraceConfiguration` like so:
+
+[source,java]
+----
+class MyApp extends android.app.Application {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        HttpTraceConfiguration httpConfig = HttpTraceConfiguration.builder()
+            .addExclusionRule(new MyHttpExclusionRule())
+            .build();
+        ElasticApmConfiguration configuration = ElasticApmConfiguration.builder()
+                .setHttpTraceConfiguration(httpConfig)
+                .build();
+        ElasticApmAgent.initialize(this, configuration);
+    }
+}
+----
+
+===== Adding extra attributes to your HTTP requests' spans
+
+If the HTTP span attributes https://github.com/elastic/apm/tree/main/specs/agents/mobile[provided by default] aren't enough, you can attach your own `HttpAttributesVisitor` to add extra params to each HTTP request being traced.
+For example:
+
+[source,java]
+----
+class MyHttpAttributesVisitor implements HttpAttributesVisitor {
+
+    public void visit(AttributesBuilder attrsBuilder, HttpRequest request) {
+        attrsBuilder.put("my_custom_attr_key", "my_custom_attr_value");
+    }
+}
+----
+
+Then you'd need to add it to Elastic's Agent config through its `HttpTraceConfiguration` like so:
+
+[source,java]
+----
+class MyApp extends android.app.Application {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        HttpTraceConfiguration httpConfig = HttpTraceConfiguration.builder()
+        .addHttpAttributesVisitor(new MyHttpAttributesVisitor())
+        .build();
+        ElasticApmConfiguration configuration = ElasticApmConfiguration.builder()
+                .setHttpTraceConfiguration(httpConfig)
+                .build();
+        ElasticApmAgent.initialize(this, configuration);
+    }
+}
+----
+
+==== Trace spans attributes notes
+
+There are common attributes that the Elastic Agent gather for every Span, and those are listed https://github.com/elastic/apm/tree/main/specs/agents/mobile[here].
+
+However, due to the nature of Android's OS when it comes to collect some device-related data, some of the above mentioned resources require the Host app (your app) to have some runtime permissions granted.
+If their corresponding permissions aren't granted, then they won't be collected and nothing will be sent for those attributes.
+Those are the following:
+
+|===
+|Attribute |Used in |Requires permission
+
+|`net.host.connection.subtype`
+|HTTP Spans
+|https://developer.android.com/reference/android/Manifest.permission#READ_PHONE_STATE[READ_PHONE_STATE]
+
+|===

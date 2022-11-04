@@ -1,27 +1,34 @@
 [[configuration]]
 == Configuration
 
-[#_gradle_configuration]
+[float]
 === Gradle configuration
 
-This configuration, already shown in the <<setup,setup>>, allows you to provide values at compile time within your application's `build.gradle` file.
-
-It looks like the following:
+Configure your application at compile time within your application's `build.gradle` file:
 
 [source,groovy]
 ----
+// Android app's build.gradle file
+plugins {
+    //...
+    id "co.elastic.apm.android" version "[latest_version]"
+}
+
 elasticApm {
     // Minimal configuration
     serverUrl = "https://your.elastic.server"
 
     // Optional
-    serviceName = "your app name" // defaults to your 'android.defaultConfig.applicationId' value.
-    serviceVersion = "0.0.0" // defaults to your 'android.defaultConfig.versionName` value.
-    secretToken = "your server auth token" // defaults to null.
+    serviceName = "your app name" <1>
+    serviceVersion = "0.0.0" <2>
+    secretToken = "your server auth token" <3>
 }
 ----
+<1> Defaults to your `android.defaultConfig.applicationId` value.
+<2> Defaults to your `android.defaultConfig.versionName` value.
+<3> Defaults to null.
 
-All of the values provided in the Gradle configuration can be overridden by the following environment variables
+All of the values provided in the Gradle configuration can be overridden with the following environment variables:
 
 |===
 |Config |Associated Environment variable
@@ -40,6 +47,7 @@ All of the values provided in the Gradle configuration can be overridden by the 
 
 |===
 
+[float]
 === Runtime configuration
 
 The runtime configuration is provided within your https://developer.android.com/reference/android/app/Application[Application] class at the time of initializing the Elastic agent.
@@ -61,6 +69,7 @@ class MyApp extends android.app.Application {
 }
 ----
 
+[float]
 ==== APM server connectivity
 
 The server connectivity parameters can be provided at compile time, either by using the gradle dsl configuration, or by providing the server connectivity related environment variables as mentioned above.
@@ -86,6 +95,7 @@ class MyApp extends android.app.Application {
 }
 ----
 
+[float]
 ==== Application id configuration
 
 You can provide your application name and version dynamically by setting those when building your `ElasticApmConfiguration` instance as show below
@@ -106,11 +116,13 @@ class MyApp extends android.app.Application {
 }
 ----
 
+[float]
 ==== HTTP Configuration
 
 The agent provides a configuration object for HTTP-related spans named `HttpTraceConfiguration`.
 You can pass an instance of it to the `ElasticApmConfiguration` object when initializing the agent in order to customize how the HTTP spans should be handled.
 
+[float]
 ===== Filtering HTTP requests from getting traced
 
 By default, all of your app's HTTP requests will get traced.
@@ -148,6 +160,7 @@ class MyApp extends android.app.Application {
 }
 ----
 
+[float]
 ===== Adding extra attributes to your HTTP requests' spans
 
 If the HTTP span attributes https://github.com/elastic/apm/tree/main/specs/agents/mobile[provided by default] aren't enough, you can attach your own `HttpAttributesVisitor` to add extra params to each HTTP request being traced.
@@ -183,6 +196,7 @@ class MyApp extends android.app.Application {
 }
 ----
 
+[float]
 ==== Trace spans attributes notes
 
 There are common attributes that the Elastic Agent gather for every Span, and those are listed https://github.com/elastic/apm/tree/main/specs/agents/mobile[here].
@@ -200,6 +214,7 @@ Those are the following:
 
 |===
 
+[float]
 ==== Session ID configuration
 
 The Elastic agent provides a "session ID" for every span it creates.
@@ -242,6 +257,7 @@ class MyApp extends android.app.Application {
 }
 ----
 
+[float]
 ==== Advanced configurable options
 
 The configurable parameters provided by the Elastic agent aim to help configuring common use cases in an easy way, in most of the cases it means to act as a facade between your application and the Open Telemetry Java SDK that this agent is built on top.

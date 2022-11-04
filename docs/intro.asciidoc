@@ -13,10 +13,10 @@ NOTE: The minimum supported Android Gradle Plugin version is 7.2.0
 
 The Agent auto-instruments <<supported-technologies>> and records interesting events, like spans for outgoing HTTP requests and UI rendering processes.
 To do this, it leverages the capability of the The Android Gradle Plugin API to instrument the bytecode of classes.
-This means that for the supported technologies, there are no code changes required.
+This means that for supported technologies, there are no code changes required.
 
 Spans are grouped in transactions -- by default, one for each outgoing HTTP request or UI rendering process.
-But it's possible to create custom transactions not associated with the ones supported by default, by using the https://opentelemetry.io/docs/instrumentation/java/manual/[Open Telemetry Java API], which is automatically provided to the Agent's host app.
+It's also possible to create custom transactions with the https://opentelemetry.io/docs/instrumentation/java/manual/[Open Telemetry Java API], which is automatically provided to the Agent's host app.
 Transactions and Spans are sent to the APM Server, where they're converted to a format suitable for Elasticsearch.
 You can then use the APM app in Kibana to gain insight into latency issues and error culprits within your application.
 

@@ -1,8 +1,17 @@
-plugins {
-    id 'com.android.application' version '7.2.0'
-    id 'org.jetbrains.kotlin.android' version '1.7.10'
-    id 'co.elastic.apm.android'
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:7.2.0"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.10"
+        classpath "co.elastic.apm:android-plugin"
+    }
 }
+apply plugin: 'com.android.application'
+apply plugin: 'org.jetbrains.kotlin.android'
+apply plugin: 'co.elastic.apm.android'
 
 android {
     compileSdk 32

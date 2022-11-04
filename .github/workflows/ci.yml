@@ -20,4 +20,10 @@ jobs:
         run: ./gradlew assemble
       - name: Test
         run: ./gradlew test && ./gradlew -p "android-test" test
-        
+      - name: Store test results
+        if: success() || failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: "build/test-results/test/TEST-*.xml"
+

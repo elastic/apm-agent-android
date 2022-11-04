@@ -1,7 +1,7 @@
 [[supported-technologies]]
 == Supported technologies
 
-The Elastic APM Android Agent is built on top of https://opentelemetry.io[Open Telemetry Java SDK], so it extends its functionality while also automatically instrumenting various APIs and frameworks.
+The Elastic APM Android agent is built on top of the https://opentelemetry.io[Open Telemetry Java SDK] -- extending its functionality while also automatically instrumenting various APIs and frameworks.
 This section lists all supported technologies.
 
 * <<supported-agp-versions>>
@@ -24,7 +24,7 @@ This section lists all supported technologies.
 === Languages
 
 The Java version is for the supported JDK, which is aligned with the JDK version supported by the Android Gradle plugin.
-Whereas for Kotlin, it refers to the Kotlin gradle plugin versions, also aligned to the ones supported by the Android Gradle plugin.
+The Kotlin version refers to the Kotlin gradle plugin versions, also aligned with the versions supported by the Android Gradle plugin.
 
 |===
 |Language |Supported versions
@@ -68,7 +68,7 @@ The spans are named after the schema `<method> <host>`, for example `GET elastic
 
 |OkHttp
 |3.11+
-|OkHttp-managed threads and also Kotlin coroutine related calls are automatically traced. Calls from tools using OkHttp (such as Retrofit) are automatically traced as well.
+|OkHttp-managed threads and Kotlin coroutine related calls are automatically traced. Calls from tools using OkHttp (such as Retrofit) are automatically traced as well.
 |0.1.0
 
 |===

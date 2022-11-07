@@ -20,8 +20,6 @@ jobs:
         run: ./gradlew assemble
       - name: Test
         run: ./gradlew test && ./gradlew -p "android-test" test
-      - name: Debug
-        run: find . -name 'TEST-*.xml' -ls
       - name: Store test results
         if: success() || failure()
         uses: actions/upload-artifact@v3

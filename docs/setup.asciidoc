@@ -63,4 +63,7 @@ class MyApp extends android.app.Application {
 ----
 <1> Initialize the Elastic APM agent once.
 
+After initializing the agent as shown above, you get by default automatic traces for all your OkHttp network requests, as well as traces for your https://developer.android.com/reference/android/app/Activity[Activities] and https://developer.android.com/reference/androidx/fragment/app/Fragment[Fragments] starting methods.
+All you need to do is to compile your application, run it and then check your configured Kibana APM dashboard for your new Android app's events!
+
 See <<configuration,configuration>> for details on how to tailor the Elastic APM agent to your project's needs.

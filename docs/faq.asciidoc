@@ -39,6 +39,3 @@ It also respects other transformations applied to your application at the same t
 === What if the agent doesn't support the technologies I'm using?
 
 The Agent is built on top of https://opentelemetry.io/docs/instrumentation/java/getting-started/[Open Telemetry] You can use its public API to create custom spans and transactions.
-
-To vote for prioritizing adding support for the technologies you are using, or TBD[get involved in the agent development]
-and contribute to the auto-instrumentation capabilities of the agent.

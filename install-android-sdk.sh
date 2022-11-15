@@ -24,11 +24,6 @@ rm ${COMMAND_LINE_TOOLS_ZIP}
 mv cmdline-tools latest
 ln -s ${SDKDIR}/cmdline-tools/latest ${SDKDIR}/tools
 
-echo Installing emulator...
-yes | ${ANDROID_HOME}/tools/bin/sdkmanager --install platform-tools emulator
-
 echo Installing platform SDK...
 yes | ${ANDROID_HOME}/tools/bin/sdkmanager --install "platforms;android-33"
 
-echo Starting ADB...
-${ANDROID_HOME}/platform-tools/adb devices

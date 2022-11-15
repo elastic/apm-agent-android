@@ -9,7 +9,7 @@ The agent auto-instruments known frameworks and libraries and records interestin
 To do this, it leverages the capability of the JVM to instrument the bytecode of classes.
 This means that no code changes are required for supported technologies.
 
-The agent automatically safely injects small pieces of code before and after interesting events to measure their duration and metadata like HTTP related information (like the URL, parameters, and headers).
+The agent automatically and safely injects small pieces of code before and after interesting events to measure their duration and metadata, like HTTP-related information, including the URL, parameters, and headers.
 
 These events, called Spans, are sent to the APM Server which converts them to a format suitable for Elasticsearch, and sends them to an Elasticsearch cluster.
 You can then use the APM app in Kibana to gain insight into latency issues and error culprits within your application.

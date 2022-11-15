@@ -50,7 +50,7 @@ All of the values provided in the Gradle configuration can be overridden with th
 [float]
 === Runtime configuration
 
-The runtime configuration is provided within your https://developer.android.com/reference/android/app/Application[Application] class at the time of initializing the Elastic agent.
+The runtime configuration is provided within your https://developer.android.com/reference/android/app/Application[Application] class when initializing the Elastic agent.
 This configuration overrides any previously-set compile time configuration.
 
 The way it works is by providing your own instance of the `ElasticApmConfiguration` class as shown below

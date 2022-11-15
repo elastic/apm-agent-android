@@ -8,7 +8,6 @@ The agent is built on top of https://opentelemetry.io/[OpenTelemetry],
 enabling you to add custom instrumentation with the
 https://opentelemetry.io/docs/instrumentation/java/manual/[Java API][OpenTelemetry Java API].
 
-NOTE: The minimum supported Android Gradle Plugin version is 7.2.0
 
 [float]
 [[how-it-works]]

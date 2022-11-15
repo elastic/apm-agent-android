@@ -127,7 +127,7 @@ You can pass an instance of it to the `ElasticApmConfiguration` object when init
 
 By default, all of your app's HTTP requests will get traced.
 You can avoid some requests from getting traced by creating your own `HttpExclusionRule`.
-For example this is an exclusion rule that prevents all requests with the host `127.0.0.1` from getting traced:
+For example, this is an exclusion rule that prevents all requests with the host `127.0.0.1` from getting traced:
 
 [source,java]
 ----

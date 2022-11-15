@@ -70,7 +70,7 @@ class MyApp extends android.app.Application {
 ----
 
 [float]
-==== APM server connectivity
+==== APM Server connectivity
 
 The server connectivity parameters can be provided at compile time, either by using the gradle dsl configuration, or by providing the server connectivity related environment variables as mentioned above.
 Later on, when the app is running, the connectivity parameters can be overriden by providing a custom `Connectivity` instance when initializing the Elastic agent.

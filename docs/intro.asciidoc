@@ -2,8 +2,11 @@
 == Introduction
 
 The Elastic APM Android Agent automatically measures the performance of your application and tracks errors.
-It has built-in support for popular frameworks and technologies.
-It's built on top of https://opentelemetry.io/[Open Telemetry], so you can make use of its https://opentelemetry.io/docs/instrumentation/java/manual/[Java API] to add custom instrumentation, though it aims to provide a default configuration that will suit a lot of common use cases, in order to help making the implementation as smooth as possible.
+It has a default configuration that suits most common use cases
+and built-in support for popular frameworks and technologies.
+The agent is built on top of https://opentelemetry.io/[OpenTelemetry],
+enabling you to add custom instrumentation with the
+https://opentelemetry.io/docs/instrumentation/java/manual/[Java API][OpenTelemetry Java API].
 
 NOTE: The minimum supported Android Gradle Plugin version is 7.2.0
 

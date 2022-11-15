@@ -7,7 +7,7 @@
 
 The agent auto-instruments known frameworks and libraries and records interesting events, like HTTP requests.
 To do this, it leverages the capability of the JVM to instrument the bytecode of classes.
-This means that for the supported technologies, there are no code changes required.
+This means that no code changes are required for supported technologies.
 
 The agent automatically safely injects small pieces of code before and after interesting events to measure their duration and metadata like HTTP related information (like the URL, parameters, and headers).
 

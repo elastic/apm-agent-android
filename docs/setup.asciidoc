@@ -50,7 +50,8 @@ elasticApm {
 <3> Defaults to null.
 
 [float]
-=== Application setup
+[[application-setup]]
+=== Set up your application
 
 After syncing your project with the Gradle changes above, the Elastic APM agent needs to be initialized within your https://developer.android.com/reference/android/app/Application[Application class].
 This example shows the simplest way to configure the agent:

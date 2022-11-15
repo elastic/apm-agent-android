@@ -26,7 +26,7 @@ Yes
 [[faq-bytecode-instrumentation-safety]]
 === How safe is bytecode instrumentation?
 
-Elastic APM is using the popular bytecode instrumentation library http://bytebuddy.net:[Byte Buddy], which takes care of the heavy lifting of dealing with actual bytecode and lets us write the instrumentation in pure Java.
+Elastic APM uses the popular bytecode instrumentation library http://bytebuddy.net:[Byte Buddy], which takes care of the heavy lifting of dealing with actual bytecode and lets us write the instrumentation in pure Java.
 
 Byte Buddy is widely used in popular Open Source projects, for example, Hibernate, Jackson, Mockito and is also commonly used by APM vendors.
 It is created by a Java Champion, awarded with the Dukes Choice award and currently downloaded over 75 million times a year.

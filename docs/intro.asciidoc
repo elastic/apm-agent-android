@@ -14,7 +14,7 @@ https://opentelemetry.io/docs/instrumentation/java/manual/[Java API][OpenTelemet
 === How does the Agent work?
 
 The Agent auto-instruments <<supported-technologies>> and records interesting events, like spans for outgoing HTTP requests and UI rendering processes.
-To do this, it leverages the capability of the The Android Gradle Plugin API to instrument the bytecode of classes.
+To do this, it leverages the capability of the Android Gradle plugin API to instrument the bytecode of classes.
 This means that for supported technologies, there are no code changes required.
 
 Spans are grouped in transactions -- by default, one for each outgoing HTTP request or UI rendering process.

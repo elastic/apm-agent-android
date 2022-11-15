@@ -96,7 +96,7 @@ class MyApp extends android.app.Application {
 ----
 
 [float]
-==== Application id configuration
+==== Application ID configuration
 
 You can provide your application name and version dynamically by setting those when building your `ElasticApmConfiguration` instance as show below:
 

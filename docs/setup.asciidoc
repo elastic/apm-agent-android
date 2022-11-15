@@ -8,7 +8,8 @@ Follow these steps to start reporting your Java application's performance to Ela
 3. <<compile-and-run>>.
 
 [float]
-=== Gradle setup
+[[gradle-setup]]
+=== Set up Gradle
 
 First, add the Elastic APM agent plugin to your application's `build.gradle` file as shown below:
 

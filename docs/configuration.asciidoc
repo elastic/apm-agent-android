@@ -199,11 +199,10 @@ class MyApp extends android.app.Application {
 [float]
 ==== Trace spans attributes notes
 
-There are common attributes that the Elastic Agent gather for every Span, and those are listed https://github.com/elastic/apm/tree/main/specs/agents/mobile[here].
-
-However, due to the nature of Android's OS when it comes to collect some device-related data, some of the above mentioned resources require the Host app (your app) to have some runtime permissions granted.
-If their corresponding permissions aren't granted, then they won't be collected and nothing will be sent for those attributes.
-Those are the following:
+There are https://github.com/elastic/apm/tree/main/specs/agents/mobile[common attributes] that the Elastic APM agent gathers for every Span.
+However, due to the nature of Android's OS, to collect some device-related data some of the above-mentioned resources require the Host app (your app) to have specific runtime permissions granted.
+If the corresponding permissions aren't granted, then the device data won't be collected, and nothing will be sent for those attributes.
+This table outlines the attributes and their corresponding permissions:
 
 |===
 |Attribute |Used in |Requires permission

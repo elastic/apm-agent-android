@@ -140,7 +140,7 @@ class MyHttpExclusionRule extends HttpExclusionRule {
 }
 ----
 
-Then you'd need to add it to Elastic's Agent config through its `HttpTraceConfiguration` like so:
+Then you'd need to add it to Elastic's Agent config through its `HttpTraceConfiguration`, like so:
 
 [source,java]
 ----

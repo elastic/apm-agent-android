@@ -1,6 +1,12 @@
 [[setup]]
 == Set up the Agent
 
+Follow these steps to start reporting your Java application's performance to Elastic APM:
+
+1. <<gradle-setup>>.
+2. <<application-setup>>.
+3. <<compile-and-run>>.
+
 [float]
 === Gradle setup
 

@@ -74,4 +74,9 @@ lint/generated/
 lint/outputs/
 lint/tmp/
 # lint/reports/
+
+# Deploy task
 .android-sdk
+
+# built documentation
+html_docs

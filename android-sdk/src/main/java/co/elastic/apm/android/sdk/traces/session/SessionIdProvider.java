@@ -18,6 +18,8 @@
  */
 package co.elastic.apm.android.sdk.traces.session;
 
+import androidx.annotation.NonNull;
+
 /**
  * Provides an identifier for all the {@link io.opentelemetry.api.trace.Span}s created during a
  * period of time. The idea of a session is to provide a context that covers many transactions
@@ -28,5 +30,6 @@ package co.elastic.apm.android.sdk.traces.session;
  * a person starts the process to get a new ticket, and end when the ticket is printed.
  */
 public interface SessionIdProvider {
+    @NonNull
     String getSessionId();
 }

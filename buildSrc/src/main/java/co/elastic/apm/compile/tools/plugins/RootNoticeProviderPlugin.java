@@ -11,7 +11,7 @@ import co.elastic.apm.compile.tools.tasks.NoticeMergerTask;
 import co.elastic.apm.compile.tools.tasks.rootproject.SubprojectNoticesCollectorTask;
 import co.elastic.apm.compile.tools.tasks.rootproject.SubprojectPomLicensesMergerTask;
 
-public class RootApmCompilerPlugin extends BasePlugin {
+public class RootNoticeProviderPlugin extends BaseNoticePlugin {
 
     @Override
     public void apply(Project project) {

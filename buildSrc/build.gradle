@@ -4,6 +4,7 @@ plugins {
 
 repositories {
     mavenCentral()
+    gradlePluginPortal()
     google()
 }
 
@@ -12,21 +13,16 @@ dependencies {
     implementation 'commons-io:commons-io:2.11.0'
     implementation "com.android.tools.build:gradle:7.2.0"
     implementation "com.diffplug.spotless:spotless-plugin-gradle:6.11.0"
+    implementation "org.jetbrains.dokka:dokka-gradle-plugin:1.6.10"
+    implementation "io.github.gradle-nexus:publish-plugin:1.1.0"
+    implementation 'com.gradle.publish:plugin-publish-plugin:1.0.0'
 }
 
 gradlePlugin {
     plugins {
-        apmTools {
-            id = 'co.elastic.apm.notice-producer'
-            implementationClass = 'co.elastic.apm.compile.tools.ApmCompilerPlugin'
-        }
-        apmToolsRoot {
-            id = 'co.elastic.apm.root-notice-producer'
-            implementationClass = 'co.elastic.apm.compile.tools.plugins.RootApmCompilerPlugin'
-        }
-        sourceHeaderPlugin {
-            id = "co.elastic.apm.source-header"
-            implementationClass = "co.elastic.apm.compile.tools.sourceheader.ApmSourceHeaderPlugin"
+        publishingPlugin {
+            id = 'co.elastic.apm.publishing'
+            implementationClass = "co.elastic.apm.compile.tools.publishing.ApmPublisherRootPlugin"
         }
     }
 }

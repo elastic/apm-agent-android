@@ -5,11 +5,11 @@ import org.gradle.api.attributes.LibraryElements;
 import org.gradle.api.tasks.TaskProvider;
 
 import co.elastic.apm.compile.tools.extensions.LicensesFinderExtension;
-import co.elastic.apm.compile.tools.plugins.BasePlugin;
+import co.elastic.apm.compile.tools.plugins.BaseNoticePlugin;
 import co.elastic.apm.compile.tools.tasks.subprojects.NoticeFilesCollectorTask;
 import co.elastic.apm.compile.tools.tasks.subprojects.PomLicensesCollectorTask;
 
-public class BaseSubprojectPlugin extends BasePlugin {
+public class BaseSubprojectPlugin extends BaseNoticePlugin {
 
     private static final String EXTENSION_LICENSES_CONFIG = "licensesConfig";
     protected LicensesFinderExtension licensesConfig;

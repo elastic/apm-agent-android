@@ -1,0 +1,30 @@
+name: Continous Integration
+
+on:
+  pull_request:
+  push:
+    branches:
+      - "main"
+
+permissions:
+  contents: read
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: lint
+        run: ./gradlew lint
+      - name: Build
+        run: ./gradlew assemble
+      - name: Test
+        run: ./gradlew test && ./gradlew -p "android-test" test
+      - name: Store test results
+        if: success() || failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: |
+            **/build/test-results/testRelease*/TEST-*.xml
+            **/build/test-results/test/TEST-*.xml

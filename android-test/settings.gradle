@@ -13,5 +13,7 @@ dependencyResolutionManagement {
         google()
     }
 }
+include ':app'
 include ':android-test-common'
+include ':plugin-test'
 includeBuild '..'

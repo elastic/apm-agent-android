@@ -1,5 +1,5 @@
 [[faq]]
-== Frequently Asked Questions
+== Frequently asked questions
 
 [float]
 [[faq-how-does-it-work]]

@@ -6,7 +6,7 @@ It has a default configuration that suits most common use cases
 and built-in support for popular frameworks and technologies.
 The agent is built on top of https://opentelemetry.io/[OpenTelemetry],
 enabling you to add custom instrumentation with the
-https://opentelemetry.io/docs/instrumentation/java/manual/[Java API][OpenTelemetry Java API].
+https://opentelemetry.io/docs/instrumentation/java/manual/[OpenTelemetry Java API].
 
 
 [float]

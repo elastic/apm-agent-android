@@ -21,8 +21,6 @@ package co.elastic.apm.android.plugin;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import androidx.annotation.NonNull;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -263,7 +261,6 @@ public class CompilationConfigTest extends BaseFunctionalTest {
         return getBuildDirFile(getRelativePathToGeneratedAssetFile(taskName));
     }
 
-    @NonNull
     protected String getRelativePathToGeneratedAssetFile(String taskName) {
         return "intermediates/assets/debug/" + taskName + "/" + ApmInfo.ASSET_FILE_NAME;
     }

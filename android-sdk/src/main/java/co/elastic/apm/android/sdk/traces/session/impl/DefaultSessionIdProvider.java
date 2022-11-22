@@ -18,6 +18,8 @@
  */
 package co.elastic.apm.android.sdk.traces.session.impl;
 
+import androidx.annotation.NonNull;
+
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -41,6 +43,7 @@ public class DefaultSessionIdProvider implements SessionIdProvider {
         this(new SystemCurrentTimeMillisProvider());
     }
 
+    @NonNull
     @Override
     public String getSessionId() {
         verifySessionExpiration();

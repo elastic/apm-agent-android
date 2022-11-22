@@ -6,8 +6,6 @@ plugins {
 targetCompatibility = jvmCompatibility
 sourceCompatibility = jvmCompatibility
 
-sourceSets.create('functionalTest')
-
 dependencies {
     implementation "net.bytebuddy:byte-buddy-gradle-plugin:$bytebuddy_version"
     implementation "net.bytebuddy:byte-buddy:$bytebuddy_version"
@@ -16,9 +14,6 @@ dependencies {
     implementation project(':agp-compatibility:agp-compatibility-7-2')
     implementation project(':agp-compatibility:agp-compatibility-7-3')
     compileOnly "com.android.tools.build:gradle:$androidGradlePlugin_version"
-    functionalTestImplementation "junit:junit:$junit_version"
-    functionalTestImplementation "com.github.stefanbirkner:system-rules:1.19.0"
-    functionalTestImplementation project(':android-common')
 }
 
 buildConfig {
@@ -26,16 +21,6 @@ buildConfig {
     buildConfigField("String", "SDK_DEPENDENCY_URI", "\"$group:android-sdk:$version\"")
     buildConfigField("String", "SDK_KTX_DEPENDENCY_URI", "\"$group:android-sdk-ktx:$version\"")
     buildConfigField("String", "INSTRUMENTATION_DEPENDENCY_URI", "\"$group:android-instrumentation:$version\"")
-}
-
-tasks.register('functionalTest', Test) {
-    group = 'verification'
-    testClassesDirs = sourceSets.functionalTest.output.classesDirs
-    classpath = sourceSets.functionalTest.runtimeClasspath
-}
-
-gradlePlugin {
-    testSourceSets sourceSets.functionalTest
 }
 
 licensesConfig {

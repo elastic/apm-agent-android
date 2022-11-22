@@ -1,0 +1,262 @@
+[[configuration]]
+== Configuration
+
+[float]
+=== Gradle configuration
+
+Configure your application at compile time within your application's `build.gradle` file:
+
+[source,groovy]
+----
+// Android app's build.gradle file
+plugins {
+    //...
+    id "co.elastic.apm.android" version "[latest_version]"
+}
+
+elasticApm {
+    // Minimal configuration
+    serverUrl = "https://your.elastic.server"
+
+    // Optional
+    serviceName = "your app name" <1>
+    serviceVersion = "0.0.0" <2>
+    secretToken = "your server auth token" <3>
+}
+----
+<1> Defaults to your `android.defaultConfig.applicationId` value.
+<2> Defaults to your `android.defaultConfig.versionName` value.
+<3> Defaults to null.
+
+All of the values provided in the Gradle configuration can be overridden with the following environment variables:
+
+|===
+|Config |Associated Environment variable
+
+|serviceName
+|`ELASTIC_APM_SERVICE_NAME`
+
+|serviceVersion
+|`ELASTIC_APM_SERVICE_VERSION`
+
+|serverUrl
+|`ELASTIC_APM_SERVER_URL`
+
+|secretToken
+|`ELASTIC_APM_SECRET_TOKEN`
+
+|===
+
+[float]
+=== Runtime configuration
+
+The runtime configuration is provided within your https://developer.android.com/reference/android/app/Application[Application] class when initializing the Elastic agent.
+This configuration overrides any previously-set compile time configuration.
+
+Runtime configuration works is by providing your own instance of the `ElasticApmConfiguration` class as shown below:
+
+[source,java]
+----
+// Application class
+
+class MyApp extends android.app.Application {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        ElasticApmAgent.initialize(this, ElasticApmConfiguration.builder().build());
+    }
+}
+----
+
+[float]
+==== APM Server connectivity
+
+The APM Server connectivity parameters can be provided at compile time, either by using the Gradle DSL configuration or by providing the APM Server connectivity-related environment variables as mentioned above.
+Later on, when the app is running, the connectivity parameters can be overridden by providing a custom `Connectivity` instance when initializing the Elastic agent.
+
+Once you've created your `Connectivity` instance, you can set it into the agent's initialization as show below:
+
+[source,java]
+----
+class MyApp extends android.app.Application {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Connectivity myCustomConnectivity = Connectivity.custom(/*params*/);
+        ElasticApmAgent.initialize(this, myCustomConnectivity);
+
+        // Optionally if you also define a custom configuration:
+        // ElasticApmAgent.initialize(this, ElasticApmConfiguration.builder().build(), myCustomConnectivity);
+    }
+}
+----
+
+[float]
+==== Application ID configuration
+
+You can provide your application name and version dynamically by setting those when building your `ElasticApmConfiguration` instance as show below:
+
+[source,java]
+----
+class MyApp extends android.app.Application {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        ElasticApmConfiguration configuration = ElasticApmConfiguration.builder()
+                .setServiceName("my-custom-name")
+                .setServiceVersion("1.0.0")
+                .build();
+        ElasticApmAgent.initialize(this, configuration);
+    }
+}
+----
+
+[float]
+==== HTTP Configuration
+
+The agent provides a configuration object for HTTP-related spans named `HttpTraceConfiguration`.
+You can pass an instance of it to the `ElasticApmConfiguration` object when initializing the agent in order to customize how the HTTP spans should be handled.
+
+[float]
+===== Filtering HTTP requests from getting traced
+
+By default, all of your app's HTTP requests will get traced.
+You can avoid some requests from getting traced by creating your own `HttpExclusionRule`.
+For example, this is an exclusion rule that prevents all requests with the host `127.0.0.1` from getting traced:
+
+[source,java]
+----
+class MyHttpExclusionRule extends HttpExclusionRule {
+
+    @Override
+    public boolean exclude(HttpRequest request) {
+        return request.url.getHost().equals("127.0.0.1");
+    }
+}
+----
+
+Then you'd need to add it to Elastic's Agent config through its `HttpTraceConfiguration`, like so:
+
+[source,java]
+----
+class MyApp extends android.app.Application {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        HttpTraceConfiguration httpConfig = HttpTraceConfiguration.builder()
+            .addExclusionRule(new MyHttpExclusionRule())
+            .build();
+        ElasticApmConfiguration configuration = ElasticApmConfiguration.builder()
+                .setHttpTraceConfiguration(httpConfig)
+                .build();
+        ElasticApmAgent.initialize(this, configuration);
+    }
+}
+----
+
+[float]
+===== Adding extra attributes to your HTTP requests' spans
+
+If the HTTP span attributes https://github.com/elastic/apm/tree/main/specs/agents/mobile[provided by default] aren't enough, you can attach your own `HttpAttributesVisitor` to add extra params to each HTTP request being traced.
+For example:
+
+[source,java]
+----
+class MyHttpAttributesVisitor implements HttpAttributesVisitor {
+
+    public void visit(AttributesBuilder attrsBuilder, HttpRequest request) {
+        attrsBuilder.put("my_custom_attr_key", "my_custom_attr_value");
+    }
+}
+----
+
+Then you'd need to add it to Elastic's Agent config through its `HttpTraceConfiguration`, like so:
+
+[source,java]
+----
+class MyApp extends android.app.Application {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        HttpTraceConfiguration httpConfig = HttpTraceConfiguration.builder()
+        .addHttpAttributesVisitor(new MyHttpAttributesVisitor())
+        .build();
+        ElasticApmConfiguration configuration = ElasticApmConfiguration.builder()
+                .setHttpTraceConfiguration(httpConfig)
+                .build();
+        ElasticApmAgent.initialize(this, configuration);
+    }
+}
+----
+
+[float]
+==== Trace spans attributes notes
+
+There are https://github.com/elastic/apm/tree/main/specs/agents/mobile[common attributes] that the Elastic APM agent gathers for every Span.
+However, due to the nature of Android's OS, to collect some device-related data some of the above-mentioned resources require the Host app (your app) to have specific runtime permissions granted.
+If the corresponding permissions aren't granted, then the device data won't be collected, and nothing will be sent for those attributes.
+This table outlines the attributes and their corresponding permissions:
+
+|===
+|Attribute |Used in |Requires permission
+
+|`net.host.connection.subtype`
+|HTTP Spans
+|https://developer.android.com/reference/android/Manifest.permission#READ_PHONE_STATE[READ_PHONE_STATE]
+
+|===
+
+[float]
+==== Session ID configuration
+
+The Elastic agent provides a "session ID" for every span it creates.
+The idea of a session is to provide a context that covers many transactions that a user did in order to fulfil their needs using an application.
+For most apps, a session could start when the user opens the app, and end when the user closes the app, or when the app is forced to get closed due to an unexpected error.
+But for other apps, such as a ticketing app for a queue in a bank for example, the app will always be open, but a session might start when a person starts the process to get a new ticket, and end when the ticket is printed.
+
+By default, the Elastic agent generates a session ID on every app launch and keeps it until the app is terminated, or generates a new one after an idle period of time of 30 minutes.
+
+If the aforementioned default behavior doesn't suit your needs, you can provide your own `SessionIdProvider` instance where you could return your own session IDs which will be generated based on your custom logic.
+For example:
+
+[source,java]
+----
+
+public class MyCustomSessionIdProvider implements SessionIdProvider {
+
+    @NonNull
+    @Override
+    public String getSessionId() {
+        // Your custom logic to decide which ID to return.
+    }
+}
+----
+
+And then you can set it to the Elastic agent like so:
+
+[source,java]
+----
+class MyApp extends android.app.Application {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        ElasticApmConfiguration configuration = ElasticApmConfiguration.builder()
+                .setSessionIdProvider(new MyCustomSessionIdProvider())
+                .build();
+        ElasticApmAgent.initialize(this, configuration);
+    }
+}
+----
+
+[float]
+==== Advanced configurable options
+
+The configurable parameters provided by the Elastic APM agent aim to help configuring common use cases in an easy way, in most of the cases it means to act as a facade between your application and the Open Telemetry Java SDK that this agent is built on top.
+If your project requires to configure more advanced aspects of the overall APM processes, you could directly apply that configuration using the https://opentelemetry.io/docs/instrumentation/java/getting-started/[Open Telemetry SDK], which becomes available for you to use within your project by adding the Elastic agent plugin, as explained in <<setup,the agent setup guide>>.
+Said configuration will be used by the Elastic agent for the https://opentelemetry.io/docs/concepts/signals/[signals] it sends out of the box.

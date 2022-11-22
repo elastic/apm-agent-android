@@ -13,3 +13,7 @@ dependencies {
     testImplementation "junit:junit:$junit_version"
     testImplementation "com.github.stefanbirkner:system-rules:1.19.0"
 }
+
+test {
+    systemProperty "androidGradlePlugin_version", "${project.findProperty("androidGradlePlugin_version")}"
+}

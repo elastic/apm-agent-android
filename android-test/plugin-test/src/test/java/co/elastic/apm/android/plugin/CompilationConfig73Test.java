@@ -18,19 +18,9 @@
  */
 package co.elastic.apm.android.plugin;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assume.assumeThat;
-
-import org.junit.Before;
-
 import co.elastic.apm.android.common.ApmInfo;
 
 public class CompilationConfig73Test extends CompilationConfigTest {
-
-    @Before
-    public void onBefore() {
-        assumeThat(System.getProperty("androidGradlePlugin_version"), is("7.3.0"));
-    }
 
     @Override
     protected String getAndroidGradlePluginVersion() {

@@ -1,6 +1,6 @@
 pluginManagement {
-    includeBuild '..'
     repositories {
+        mavenLocal()
         gradlePluginPortal()
         mavenCentral()
         google()
@@ -9,6 +9,7 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        mavenLocal()
         mavenCentral()
         google()
     }
@@ -16,4 +17,3 @@ dependencyResolutionManagement {
 include ':app'
 include ':android-test-common'
 include ':plugin-test'
-includeBuild '..'

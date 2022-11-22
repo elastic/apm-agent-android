@@ -1,6 +1,13 @@
+Properties agentProperties = new Properties()
+File propertiesFile = new File(rootDir, '../gradle.properties')
+propertiesFile.withInputStream {
+    agentProperties.load(it)
+}
+
 ext {
     junit_version = '4.13.2'
     espresso_version = '3.4.0'
+    agent_version = agentProperties["version"]
 }
 
 task clean(type: Delete) {

@@ -50,10 +50,12 @@ public abstract class BaseFunctionalTest {
 
     protected BaseFunctionalTest() {
         buildFileBuilder = new BuildFileBuilder(getAndroidCompileSdk(), getAndroidAppId(), "1.0");
+        buildFileBuilder.addRepository("mavenLocal()");
         buildFileBuilder.addRepository("mavenCentral()");
         buildFileBuilder.addRepository("google()");
         settingsGradleBuilder = new SettingsGradleBuilder();
 
+        settingsGradleBuilder.getBuildscriptBlockBuilder().addRepository("mavenLocal()");
         settingsGradleBuilder.getBuildscriptBlockBuilder().addRepository("gradlePluginPortal()");
         settingsGradleBuilder.getBuildscriptBlockBuilder().addRepository("mavenCentral()");
         settingsGradleBuilder.getBuildscriptBlockBuilder().addRepository("google()");
@@ -171,16 +173,10 @@ public abstract class BaseFunctionalTest {
     }
 
     private GradleRunner getRunner(String command) {
-        try {
-            command += " --include-build " + Paths.get("..").toFile().getCanonicalPath();
-            List<String> commands = new ArrayList<>(Arrays.asList(command.split("\\s+")));
-            commands.add("--stacktrace");
-            return GradleRunner.create()
-                    .withPluginClasspath()
-                    .withProjectDir(getProjectDir())
-                    .withArguments(commands);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        List<String> commands = new ArrayList<>(Arrays.asList(command.split("\\s+")));
+        commands.add("--stacktrace");
+        return GradleRunner.create()
+                .withProjectDir(getProjectDir())
+                .withArguments(commands);
     }
 }

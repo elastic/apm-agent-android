@@ -21,10 +21,6 @@ package co.elastic.apm.android.plugin.testutils;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import com.elastic.apm.android.plugin.testutils.buildgradle.BuildFileBuilder;
-import com.elastic.apm.android.plugin.testutils.buildgradle.SettingsGradleBuilder;
-import com.elastic.apm.android.plugin.testutils.buildgradle.block.impl.ElasticBlockBuilder;
-
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
@@ -43,8 +39,6 @@ import java.util.Properties;
 import co.elastic.apm.android.plugin.testutils.buildgradle.BuildFileBuilder;
 import co.elastic.apm.android.plugin.testutils.buildgradle.block.impl.ElasticBlockBuilder;
 import co.elastic.apm.android.plugin.testutils.buildgradle.block.impl.settings.SettingsGradleBuilder;
-
-import java.util.Properties;
 
 public abstract class BaseFunctionalTest {
     protected File buildFile;

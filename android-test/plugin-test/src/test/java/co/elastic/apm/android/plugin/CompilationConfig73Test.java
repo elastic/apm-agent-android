@@ -18,6 +18,8 @@
  */
 package co.elastic.apm.android.plugin;
 
+import co.elastic.apm.android.common.ApmInfo;
+
 public class CompilationConfig73Test extends CompilationConfigTest {
 
     @Override
@@ -27,6 +29,6 @@ public class CompilationConfig73Test extends CompilationConfigTest {
 
     @Override
     protected String getRelativePathToGeneratedAssetFile(String taskName) {
-        return super.getRelativePathToGeneratedAssetFile(taskName);
+        return "ASSETS/" + taskName + "/" + ApmInfo.ASSET_FILE_NAME;
     }
 }

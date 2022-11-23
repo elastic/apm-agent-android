@@ -1,3 +1,5 @@
+import org.gradle.api.initialization.resolve.RepositoriesMode
+
 pluginManagement {
     repositories {
         mavenLocal()
@@ -20,3 +22,6 @@ include ':android-sdk'
 include ':android-instrumentation'
 include ':android-common'
 include ':android-sdk-ktx'
+include ':agp-compatibility:agp-compatibility-api'
+include ':agp-compatibility:agp-compatibility-7-2'
+include ':agp-compatibility:agp-compatibility-7-3'

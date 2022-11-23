@@ -1,12 +1,13 @@
 buildscript {
     repositories {
+        mavenLocal()
         google()
         mavenCentral()
     }
     dependencies {
         classpath "com.android.tools.build:gradle:7.2.0"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.10"
-        classpath "co.elastic.apm:android-plugin"
+        classpath "co.elastic.apm:android-plugin:$agent_version"
     }
 }
 apply plugin: 'com.android.application'

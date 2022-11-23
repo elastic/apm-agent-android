@@ -68,7 +68,7 @@ if the author does not have commit access, should "Squash and merge".
 You can run the following command to run all the unit tests available:
 
 ```text
-./gradlew test && ./gradlew -p "android-test" test
+./tests.sh
 ```
 
 ### Releasing

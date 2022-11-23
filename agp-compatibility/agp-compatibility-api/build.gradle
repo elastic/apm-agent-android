@@ -1,0 +1,14 @@
+plugins {
+    id 'java-library'
+}
+
+java {
+    sourceCompatibility = jvmCompatibility
+    targetCompatibility = jvmCompatibility
+}
+
+dependencies {
+    api gradleApi()
+    api project(':android-common')
+    compileOnly "com.android.tools.build:gradle:$androidGradlePlugin_version"
+}

@@ -8,8 +8,8 @@ java {
 }
 
 dependencies {
-    implementation "co.elastic.apm:android-plugin"
-    testImplementation "co.elastic.apm:android-common"
+    implementation "co.elastic.apm:android-plugin:$agent_version"
+    testImplementation "co.elastic.apm:android-common:$agent_version"
     testImplementation "junit:junit:$junit_version"
     testImplementation "com.github.stefanbirkner:system-rules:1.19.0"
 }

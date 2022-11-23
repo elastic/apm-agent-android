@@ -19,7 +19,7 @@ jobs:
       - name: Build
         run: ./gradlew assemble
       - name: Test
-        run: ./gradlew test && ./gradlew -p "android-test" test
+        run: ./tests.sh
       - name: Store test results
         if: success() || failure()
         uses: actions/upload-artifact@v3

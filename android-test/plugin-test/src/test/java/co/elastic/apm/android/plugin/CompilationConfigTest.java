@@ -258,7 +258,11 @@ public class CompilationConfigTest extends BaseFunctionalTest {
     }
 
     private File getGeneratedPropertiesFile(String taskName) {
-        return getBuildDirFile("intermediates/assets/debug/" + taskName + "/" + ApmInfo.ASSET_FILE_NAME);
+        return getBuildDirFile(getRelativePathToGeneratedAssetFile(taskName));
+    }
+
+    protected String getRelativePathToGeneratedAssetFile(String taskName) {
+        return "intermediates/assets/debug/" + taskName + "/" + ApmInfo.ASSET_FILE_NAME;
     }
 
     private Properties loadProperties(File propertiesFile) {

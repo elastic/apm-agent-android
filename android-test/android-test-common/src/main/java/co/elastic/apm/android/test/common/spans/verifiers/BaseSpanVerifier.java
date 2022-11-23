@@ -38,4 +38,16 @@ public abstract class BaseSpanVerifier<T extends SpanVerifier<?>> implements Spa
         assertNotNull(span.getAttributes().get(AttributeKey.stringKey(attributeName)));
         return (T) this;
     }
+
+    @Override
+    public T hasResource(String resourceName) {
+        assertNotNull(span.getResource().getAttribute(AttributeKey.stringKey(resourceName)));
+        return (T) this;
+    }
+
+    @Override
+    public T hasResource(String resourceName, String resourceValue) {
+        assertEquals(resourceValue, span.getResource().getAttribute(AttributeKey.stringKey(resourceName)));
+        return (T) this;
+    }
 }

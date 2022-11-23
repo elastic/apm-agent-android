@@ -36,7 +36,7 @@ public class DefaultConfigBlockBuilder implements BlockBuilder {
         addNewLine(builder);
         builder.append("applicationId '").append(applicationId).append("'");
         addNewLine(builder);
-        builder.append("minSdk 24");
+        builder.append("minSdk 26");
         addNewLine(builder);
         builder.append("versionName '").append(versionName).append("'");
         addNewLine(builder);

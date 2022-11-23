@@ -20,6 +20,16 @@ This section lists all supported technologies.
 |===
 
 [float]
+[[supported-android-runtime-versions]]
+=== Android runtime versions
+
+|===
+|Supported versions
+
+| API >= 26
+|===
+
+[float]
 [[supported-languages]]
 === Languages
 

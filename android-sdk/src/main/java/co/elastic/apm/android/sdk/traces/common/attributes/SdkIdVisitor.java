@@ -29,6 +29,7 @@ public class SdkIdVisitor implements AttributesBuilderVisitor {
     public void visit(AttributesBuilder builder) {
         builder.put(ResourceAttributes.TELEMETRY_SDK_NAME, "android")
                 .put(ResourceAttributes.TELEMETRY_SDK_VERSION, BuildConfig.APM_AGENT_VERSION)
+                .put("type", "mobile")
                 .put(ResourceAttributes.TELEMETRY_SDK_LANGUAGE, "java");
     }
 }

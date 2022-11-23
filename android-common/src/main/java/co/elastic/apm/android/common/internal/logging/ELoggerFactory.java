@@ -23,9 +23,15 @@ import org.slf4j.Logger;
 
 public abstract class ELoggerFactory implements ILoggerFactory {
 
-    public Logger getDefaultLogger() {
-        return getLogger(getDefaultName());
+    public Logger getLogger(Class<?> type) {
+        return getLogger(getId() + " - " + type.getName());
     }
 
-    protected abstract String getDefaultName();
+    public Logger getDefaultLogger() {
+        return getLogger(getId());
+    }
+
+    protected String getId() {
+        return "ELASTIC_AGENT";
+    }
 }

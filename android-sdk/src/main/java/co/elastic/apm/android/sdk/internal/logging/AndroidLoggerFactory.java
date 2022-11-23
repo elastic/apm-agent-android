@@ -28,9 +28,4 @@ public class AndroidLoggerFactory extends ELoggerFactory {
     public Logger getLogger(String name) {
         return new AndroidLogger(name);
     }
-
-    @Override
-    protected String getDefaultName() {
-        return "[ELASTIC_AGENT]";
-    }
 }

@@ -95,11 +95,15 @@ public class PostDeployTask extends DefaultTask {
 
             String line;
             while ((line = reader.readLine()) != null) {
-                output.append(line + "\n");
+                output.append(line).append("\n");
             }
 
-            process.waitFor();
-            System.out.println(output);
+            int exitCode = process.waitFor();
+            if (exitCode == 0) {
+                System.out.println(output);
+            } else {
+                throw new RuntimeException(output.toString());
+            }
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }

@@ -5,6 +5,7 @@ The Elastic APM Android agent is built on top of the https://opentelemetry.io[Op
 This section lists all supported technologies.
 
 * <<supported-agp-versions>>
+* <<supported-android-runtime-versions>>
 * <<supported-languages>>
 * <<supported-ui-frameworks>>
 * <<supported-networking-frameworks>>
@@ -17,6 +18,16 @@ This section lists all supported technologies.
 |Supported versions
 
 | >= 7.2.0
+|===
+
+[float]
+[[supported-android-runtime-versions]]
+=== Android runtime versions
+
+|===
+|Supported versions
+
+| API >= 26
 |===
 
 [float]

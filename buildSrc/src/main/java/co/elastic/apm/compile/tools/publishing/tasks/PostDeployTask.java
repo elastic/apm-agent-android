@@ -1,7 +1,6 @@
 package co.elastic.apm.compile.tools.publishing.tasks;
 
 import org.gradle.api.DefaultTask;
-import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.TaskAction;
 
 import java.io.File;
@@ -30,13 +29,13 @@ public class PostDeployTask extends DefaultTask {
     }
 
     private void setGitTag(String version) {
-        logger().info("Setting git tag to: " + version);
+        log("Setting git tag to: " + version);
         runCommand("git tag " + version);
         runCommand("git push --tags");
     }
 
     private void updateVersion(File gradlePropertiesFile, Properties properties, String newVersion) {
-        logger().info("Updating version to: " + newVersion);
+        log("Updating version to: " + newVersion);
         properties.setProperty("version", newVersion);
         saveProperties(properties, gradlePropertiesFile);
         runCommand("git commit -m \"Preparing for the next release\"");
@@ -44,13 +43,13 @@ public class PostDeployTask extends DefaultTask {
     }
 
     private String bumpMinorVersion(String version) {
-        logger().info("Bumping minor version for: " + version);
+        log("Bumping minor version for: " + version);
         Matcher minorVersionMatcher = MINOR_VERSION_PATTERN.matcher(version);
         if (minorVersionMatcher.find()) {
             int currentMinorVersion = Integer.parseInt(version.substring(minorVersionMatcher.start(), minorVersionMatcher.end()));
-            logger().info("Current minor version is: " + currentMinorVersion);
+            log("Current minor version is: " + currentMinorVersion);
             String newVersion = version.replaceFirst(MINOR_VERSION_PATTERN.pattern(), String.valueOf(currentMinorVersion + 1));
-            logger().info("The new version is: " + newVersion);
+            log("The new version is: " + newVersion);
             return newVersion;
         } else {
             throw new IllegalArgumentException("Could not find minor version in: " + version);
@@ -79,8 +78,8 @@ public class PostDeployTask extends DefaultTask {
         return getProject().file("gradle.properties");
     }
 
-    private Logger logger() {
-        return getProject().getLogger();
+    private void log(String message) {
+        getProject().getLogger().lifecycle(message);
     }
 
     private void runCommand(String command) {

@@ -40,7 +40,7 @@ public class PostDeployTask extends DefaultTask {
         log("Updating version to: " + newVersion);
         properties.setProperty("version", newVersion);
         saveProperties(properties, gradlePropertiesFile);
-        runCommand("git commit -m \"Preparing for the next release\"");
+        runCommand("git commit -a -m \"Preparing for the next release\"");
         runCommand("git push");
     }
 

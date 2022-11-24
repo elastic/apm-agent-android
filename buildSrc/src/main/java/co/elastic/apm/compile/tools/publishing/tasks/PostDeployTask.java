@@ -3,11 +3,13 @@ package co.elastic.apm.compile.tools.publishing.tasks;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.tasks.TaskAction;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -83,13 +85,22 @@ public class PostDeployTask extends DefaultTask {
     }
 
     private void runCommand(String command) {
-        ProcessBuilder pb = new ProcessBuilder(command.split("\\s+"));
-        pb.inheritIO();
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        processBuilder.command("bash", "-c", command);
+
         try {
-            Process p = pb.start();
-            int exitStatus = p.waitFor();
-            System.out.println(exitStatus);
-        } catch (InterruptedException | IOException e) {
+            Process process = processBuilder.start();
+            StringBuilder output = new StringBuilder();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                output.append(line + "\n");
+            }
+
+            process.waitFor();
+            System.out.println(output);
+        } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
     }

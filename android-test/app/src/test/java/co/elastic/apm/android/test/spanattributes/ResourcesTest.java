@@ -8,6 +8,7 @@ import org.robolectric.util.ReflectionHelpers;
 
 import java.util.List;
 
+import co.elastic.apm.android.test.BuildConfig;
 import co.elastic.apm.android.test.common.spans.Spans;
 import co.elastic.apm.android.test.testutils.MainApp;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
@@ -81,7 +82,7 @@ public class ResourcesTest extends BaseRobolectricTest {
         SpanData customSpan = captureSpan();
 
         Spans.verify(customSpan)
-                .hasResource("deployment.environment", "debug");
+                .hasResource("deployment.environment", (BuildConfig.DEBUG) ? "debug" : "release");
     }
 
     @Test

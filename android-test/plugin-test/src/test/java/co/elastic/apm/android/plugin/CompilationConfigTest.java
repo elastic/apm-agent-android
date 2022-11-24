@@ -28,15 +28,11 @@ import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
 
 import co.elastic.apm.android.common.ApmInfo;
-import co.elastic.apm.android.plugin.testutils.BaseFunctionalTest;
 
-public class CompilationConfigTest extends BaseFunctionalTest {
+public class CompilationConfigTest extends BaseAssetsVerificationTest {
 
     @Rule
     public EnvironmentVariables environmentVariables = new EnvironmentVariables();
@@ -68,8 +64,7 @@ public class CompilationConfigTest extends BaseFunctionalTest {
         runGradle("assembleDebug");
 
         verifyTaskIsSuccessful(":debugGenerateApmInfo");
-        File output = getGeneratedPropertiesFile("debugGenerateApmInfo");
-        Properties properties = loadProperties(output);
+        Properties properties = getGeneratedProperties("debug");
         assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
         assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
         assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
@@ -86,8 +81,7 @@ public class CompilationConfigTest extends BaseFunctionalTest {
         runGradle("assembleDebug");
 
         verifyTaskIsSuccessful(":debugGenerateApmInfo");
-        File output = getGeneratedPropertiesFile("debugGenerateApmInfo");
-        Properties properties = loadProperties(output);
+        Properties properties = getGeneratedProperties("debug");
         assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
         assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
         assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
@@ -106,8 +100,7 @@ public class CompilationConfigTest extends BaseFunctionalTest {
         runGradle("assembleDebug");
 
         verifyTaskIsSuccessful(":debugGenerateApmInfo");
-        File output = getGeneratedPropertiesFile("debugGenerateApmInfo");
-        Properties properties = loadProperties(output);
+        Properties properties = getGeneratedProperties("debug");
         assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
         assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
         assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
@@ -126,8 +119,7 @@ public class CompilationConfigTest extends BaseFunctionalTest {
         runGradle("assembleDebug");
 
         verifyTaskIsSuccessful(":debugGenerateApmInfo");
-        File output = getGeneratedPropertiesFile("debugGenerateApmInfo");
-        Properties properties = loadProperties(output);
+        Properties properties = getGeneratedProperties("debug");
         assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
         assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
         assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
@@ -146,8 +138,7 @@ public class CompilationConfigTest extends BaseFunctionalTest {
         runGradle("assembleDebug");
 
         verifyTaskIsSuccessful(":debugGenerateApmInfo");
-        File output = getGeneratedPropertiesFile("debugGenerateApmInfo");
-        Properties properties = loadProperties(output);
+        Properties properties = getGeneratedProperties("debug");
         assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
         assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
         assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
@@ -168,8 +159,7 @@ public class CompilationConfigTest extends BaseFunctionalTest {
         runGradle("assembleDebug");
 
         verifyTaskIsSuccessful(":debugGenerateApmInfo");
-        File output = getGeneratedPropertiesFile("debugGenerateApmInfo");
-        Properties properties = loadProperties(output);
+        Properties properties = getGeneratedProperties("debug");
         assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
         assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
         assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
@@ -188,8 +178,7 @@ public class CompilationConfigTest extends BaseFunctionalTest {
         runGradle("assembleDebug");
 
         verifyTaskIsSuccessful(":debugGenerateApmInfo");
-        File output = getGeneratedPropertiesFile("debugGenerateApmInfo");
-        Properties properties = loadProperties(output);
+        Properties properties = getGeneratedProperties("debug");
         assertEquals(serviceName, properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
         assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
         assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
@@ -209,8 +198,7 @@ public class CompilationConfigTest extends BaseFunctionalTest {
         runGradle("assembleDebug");
 
         verifyTaskIsSuccessful(":debugGenerateApmInfo");
-        File output = getGeneratedPropertiesFile("debugGenerateApmInfo");
-        Properties properties = loadProperties(output);
+        Properties properties = getGeneratedProperties("debug");
         assertEquals(serviceNameEnv, properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
         assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
         assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
@@ -228,8 +216,7 @@ public class CompilationConfigTest extends BaseFunctionalTest {
         runGradle("assembleDebug");
 
         verifyTaskIsSuccessful(":debugGenerateApmInfo");
-        File output = getGeneratedPropertiesFile("debugGenerateApmInfo");
-        Properties properties = loadProperties(output);
+        Properties properties = getGeneratedProperties("debug");
         assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
         assertEquals(serviceVersion, properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
         assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
@@ -249,30 +236,11 @@ public class CompilationConfigTest extends BaseFunctionalTest {
         runGradle("assembleDebug");
 
         verifyTaskIsSuccessful(":debugGenerateApmInfo");
-        File output = getGeneratedPropertiesFile("debugGenerateApmInfo");
-        Properties properties = loadProperties(output);
+        Properties properties = getGeneratedProperties("debug");
         assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
         assertEquals(serviceVersionEnv, properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
         assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
         assertEquals(serverUrl, properties.getProperty(ApmInfo.KEY_SERVER_URL));
-    }
-
-    private File getGeneratedPropertiesFile(String taskName) {
-        return getBuildDirFile(getRelativePathToGeneratedAssetFile(taskName));
-    }
-
-    protected String getRelativePathToGeneratedAssetFile(String taskName) {
-        return "intermediates/assets/debug/" + taskName + "/" + ApmInfo.ASSET_FILE_NAME;
-    }
-
-    private Properties loadProperties(File propertiesFile) {
-        Properties properties = new Properties();
-        try (InputStream is = new FileInputStream(propertiesFile)) {
-            properties.load(is);
-            return properties;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Override

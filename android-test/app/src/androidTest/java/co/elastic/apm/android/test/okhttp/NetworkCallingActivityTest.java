@@ -24,6 +24,8 @@ public class NetworkCallingActivityTest extends BaseEspressoTest<NetworkCallingA
 
     @Test
     public void whenOtherOkhttpInterceptorsAreSet_propagateParentContext() throws InterruptedException {
+        activity.makeNetworkCall(mockUrl);
+
         RecordedRequest recordedRequest = mockWebServer.takeRequest(1, TimeUnit.SECONDS);
 
         assertNotNull(recordedRequest.getHeader("MY-HEADER"));
@@ -31,17 +33,12 @@ public class NetworkCallingActivityTest extends BaseEspressoTest<NetworkCallingA
     }
 
     @Override
-    protected void onActivity(NetworkCallingActivity activity) {
-        activity.makeNetworkCall(mockUrl);
-    }
-
-    @Override
     protected void onBefore() {
         mockWebServer = new MockWebServer();
-        mockWebServer.enqueue(new MockResponse().setResponseCode(200));
         try {
             mockWebServer.start();
             mockUrl = mockWebServer.url("/");
+            mockWebServer.enqueue(new MockResponse().setBody("{}").setResponseCode(200));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

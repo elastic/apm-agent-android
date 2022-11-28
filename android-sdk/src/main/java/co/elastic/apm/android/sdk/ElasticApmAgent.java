@@ -27,9 +27,9 @@ import co.elastic.apm.android.sdk.attributes.AttributesCompose;
 import co.elastic.apm.android.sdk.internal.logging.AndroidLoggerFactory;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
+import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService;
 import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
 import co.elastic.apm.android.sdk.internal.services.network.NetworkService;
-import co.elastic.apm.android.sdk.internal.services.permissions.AndroidPermissionService;
 import co.elastic.apm.android.sdk.providers.Provider;
 import co.elastic.apm.android.sdk.providers.SimpleProvider;
 import co.elastic.apm.android.sdk.traces.connectivity.Connectivity;
@@ -109,7 +109,7 @@ public final class ElasticApmAgent {
         this.configuration = configuration;
         serviceManager = new ServiceManager();
         serviceManager.addService(new NetworkService(appContext));
-        serviceManager.addService(new AndroidPermissionService(appContext));
+        serviceManager.addService(new AppInfoService(appContext));
         serviceManager.addService(new ApmMetadataService(appContext));
         globalAttributes = AttributesCompose.global(appContext, configuration.serviceName, configuration.serviceVersion);
     }

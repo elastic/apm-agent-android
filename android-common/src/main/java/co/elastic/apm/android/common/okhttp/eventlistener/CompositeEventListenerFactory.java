@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import co.elastic.apm.android.common.internal.logging.Elog;
 import okhttp3.Call;
 import okhttp3.EventListener;
 
@@ -37,6 +38,7 @@ public class CompositeEventListenerFactory implements EventListener.Factory {
     @NonNull
     @Override
     public EventListener create(@NonNull Call call) {
+        Elog.getLogger().debug("Creating OkHttp event listener");
         List<EventListener> listeners = new ArrayList<>();
 
         for (EventListener.Factory factory : factories) {

@@ -25,10 +25,13 @@ import net.bytebuddy.dynamic.DynamicType;
 
 import java.io.IOException;
 
+import co.elastic.apm.android.common.internal.logging.Elog;
+
 public class CompositeEventListenerFactoryPlugin implements Plugin {
 
     @Override
     public DynamicType.Builder<?> apply(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassFileLocator classFileLocator) {
+        Elog.getLogger().debug("Remapping to generated CompositeEventListener");
         return builder.visit(new CompositeEventListenerRemapper());
     }
 

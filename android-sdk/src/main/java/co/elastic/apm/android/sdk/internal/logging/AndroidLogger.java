@@ -23,6 +23,7 @@ import android.util.Log;
 import org.slf4j.event.Level;
 
 import co.elastic.apm.android.common.internal.logging.BaseELogger;
+import co.elastic.apm.android.sdk.BuildConfig;
 
 class AndroidLogger extends BaseELogger {
 
@@ -53,12 +54,12 @@ class AndroidLogger extends BaseELogger {
 
     @Override
     public boolean isTraceEnabled() {
-        return true;
+        return BuildConfig.DEBUG;
     }
 
     @Override
     public boolean isDebugEnabled() {
-        return true;
+        return BuildConfig.DEBUG;
     }
 
     @Override

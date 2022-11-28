@@ -29,9 +29,4 @@ public class GradleLoggerFactory extends ELoggerFactory {
     public Logger getLogger(String name) {
         return Logging.getLogger(name);
     }
-
-    @Override
-    protected String getDefaultName() {
-        return "[ELASTIC_AGENT]";
-    }
 }

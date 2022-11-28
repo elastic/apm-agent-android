@@ -18,6 +18,7 @@ import co.elastic.apm.android.test.common.spans.SpanExporterCaptor;
 public abstract class BaseEspressoTest<T extends Activity> extends BaseTest {
     private SpanExporterCaptor spanExporterCaptor;
     private IdlingResource idlingResource;
+    protected T activity;
 
     @Rule
     public ActivityScenarioRule<T> activityScenarioRule = new ActivityScenarioRule<>(getActivityClass());
@@ -26,12 +27,13 @@ public abstract class BaseEspressoTest<T extends Activity> extends BaseTest {
     public void setUp() {
         onBefore();
         activityScenarioRule.getScenario().onActivity(activity -> {
-            onActivity(activity);
             spanExporterCaptor = ((DefaultApp) activity.getApplication()).getSpanExporter();
             if (activity instanceof IdlingResourceProvider) {
                 idlingResource = ((IdlingResourceProvider) activity).getIdlingResource();
                 IdlingRegistry.getInstance().register(idlingResource);
             }
+            this.activity = activity;
+            onActivity(activity);
         });
     }
 

@@ -34,8 +34,14 @@ public abstract class BaseSpanVerifier<T extends SpanVerifier<?>> implements Spa
     }
 
     @Override
-    public T hasAttributeNamed(String attributeName) {
+    public T hasAttribute(String attributeName) {
         assertNotNull(span.getAttributes().get(AttributeKey.stringKey(attributeName)));
+        return (T) this;
+    }
+
+    @Override
+    public T hasAttribute(String attributeName, String attributeValue) {
+        assertEquals(attributeValue, span.getAttributes().get(AttributeKey.stringKey(attributeName)));
         return (T) this;
     }
 

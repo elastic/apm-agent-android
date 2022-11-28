@@ -9,7 +9,9 @@ public interface SpanVerifier<T extends SpanVerifier<?>> {
 
     T hasNoParent();
 
-    T hasAttributeNamed(String attributeName);
+    T hasAttribute(String attributeName);
+
+    T hasAttribute(String attributeName, String attributeValue);
 
     T hasResource(String resourceName);
 

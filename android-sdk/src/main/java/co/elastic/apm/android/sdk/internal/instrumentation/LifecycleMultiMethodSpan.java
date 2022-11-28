@@ -25,6 +25,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.otel.SpanUtilities;
 import co.elastic.apm.android.sdk.traces.common.tools.ElasticTracer;
 import io.opentelemetry.api.trace.Span;
@@ -37,6 +38,7 @@ public class LifecycleMultiMethodSpan {
     private static final String ROOT_SPAN_SUFFIX = " - View appearing";
 
     public static SpanWithScope onMethodEnter(String ownerName, String methodName, ElasticTracer tracer) {
+        Elog.getLogger().debug("Entering lifecycle method '{}' in '{}'", methodName, ownerName);
         ensureRootSpanIsCreated(ownerName, tracer);
         SpanBuilder spanBuilder = tracer.spanBuilder(methodName);
         Span span = spanBuilder.startSpan();
@@ -46,6 +48,7 @@ public class LifecycleMultiMethodSpan {
     }
 
     public static void onMethodExit(Object owner, SpanWithScope spanWithScope, Throwable thrown, boolean endRoot) {
+        Elog.getLogger().debug("Exiting lifecycle method from {} - endRoot: {}, thrown: {}", owner, endRoot, thrown);
         endMethodSpan(spanWithScope, thrown);
 
         Span rootSpan = Span.current();
@@ -82,6 +85,7 @@ public class LifecycleMultiMethodSpan {
 
     private static void ensureRootSpanIsCreated(String ownerName, ElasticTracer tracer) {
         if (SpanUtilities.runningSpanNotFound()) {
+            Elog.getLogger().debug("Creating root span for {}", ownerName);
             SpanBuilder spanBuilder = tracer.spanBuilder(ownerName + ROOT_SPAN_SUFFIX);
             Span rootSpan = spanBuilder.startSpan();
             rootSpan.makeCurrent();

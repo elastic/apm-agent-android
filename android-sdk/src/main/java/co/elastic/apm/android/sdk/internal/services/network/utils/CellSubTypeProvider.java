@@ -22,13 +22,13 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.telephony.TelephonyManager;
 
-import co.elastic.apm.android.sdk.internal.services.permissions.AndroidPermissionService;
+import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService;
 
 public class CellSubTypeProvider {
 
     @SuppressLint("MissingPermission")
-    public static String getSubtypeName(TelephonyManager telephonyManager, AndroidPermissionService androidPermissionService) {
-        if (!androidPermissionService.isPermissionGranted(Manifest.permission.READ_PHONE_STATE)) {
+    public static String getSubtypeName(TelephonyManager telephonyManager, AppInfoService appInfoService) {
+        if (!appInfoService.isPermissionGranted(Manifest.permission.READ_PHONE_STATE)) {
             return null;
         }
 

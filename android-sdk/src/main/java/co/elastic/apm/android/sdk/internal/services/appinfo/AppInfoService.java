@@ -16,22 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.services.permissions;
+package co.elastic.apm.android.sdk.internal.services.appinfo;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 
 import co.elastic.apm.android.sdk.internal.services.Service;
 
-public class AndroidPermissionService implements Service {
+public class AppInfoService implements Service {
     private final Context appContext;
 
-    public AndroidPermissionService(Context appContext) {
+    public AppInfoService(Context appContext) {
         this.appContext = appContext;
     }
 
     public boolean isPermissionGranted(String permissionName) {
         return appContext.checkSelfPermission(permissionName) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    public boolean isInDebugMode() {
+        return (appContext.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
     }
 
     @Override
@@ -46,6 +51,6 @@ public class AndroidPermissionService implements Service {
 
     @Override
     public String name() {
-        return Service.Names.ANDROID_PERMISSIONS;
+        return Service.Names.APP_INFO;
     }
 }

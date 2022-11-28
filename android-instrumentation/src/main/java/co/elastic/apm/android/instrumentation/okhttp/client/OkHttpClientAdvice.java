@@ -20,6 +20,7 @@ package co.elastic.apm.android.instrumentation.okhttp.client;
 
 import net.bytebuddy.asm.Advice;
 
+import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.common.okhttp.eventlistener.CompositeEventListenerFactory;
 import co.elastic.apm.android.sdk.traces.http.impl.okhttp.OkHttpContextStore;
 import co.elastic.apm.android.sdk.traces.http.impl.okhttp.OtelOkHttpEventListener;
@@ -31,6 +32,7 @@ public class OkHttpClientAdvice {
     @SuppressWarnings("KotlinInternalInJava")
     @Advice.OnMethodEnter
     public static void enter(@Advice.Argument(0) OkHttpClient.Builder builder) {
+        Elog.getLogger().debug("Instrumenting OkHttpClient");
         OkHttpContextStore contextStore = new OkHttpContextStore();
         OtelOkHttpEventListener.Factory otelFactory = new OtelOkHttpEventListener.Factory(contextStore);
         builder.eventListenerFactory(new CompositeEventListenerFactory(otelFactory, builder.getEventListenerFactory$okhttp()));

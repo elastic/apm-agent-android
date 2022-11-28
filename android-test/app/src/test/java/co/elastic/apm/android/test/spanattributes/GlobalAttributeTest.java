@@ -8,18 +8,30 @@ import co.elastic.apm.android.test.common.spans.Spans;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
 import io.opentelemetry.sdk.trace.data.SpanData;
 
-public class SessionIdSpanAttributeTest extends BaseRobolectricTest {
+public class GlobalAttributeTest extends BaseRobolectricTest {
 
     @Test
     public void whenASpanIsCreated_verifyItHasSessionIdAsParam() {
+        SpanData customSpan = getSpanData();
+
+        Spans.verify(customSpan)
+                .hasAttribute("session.id");
+    }
+
+    @Test
+    public void whenASpanIsCreated_verifyItHasTypeMobileAsParam() {
+        SpanData customSpan = getSpanData();
+
+        Spans.verify(customSpan)
+                .hasAttribute("type", "mobile");
+    }
+
+    private SpanData getSpanData() {
         SpanAttrHost host = new SpanAttrHost();
 
         host.methodWithSpan();
 
         List<SpanData> spans = getRecordedSpans(1);
-        SpanData customSpan = spans.get(0);
-
-        Spans.verify(customSpan)
-                .hasAttributeNamed("session.id");
+        return spans.get(0);
     }
 }

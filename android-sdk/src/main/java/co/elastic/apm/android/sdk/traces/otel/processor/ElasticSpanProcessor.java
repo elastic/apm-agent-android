@@ -35,6 +35,8 @@ public class ElasticSpanProcessor implements SpanProcessor {
     private final Set<ExclusionRule> rules = new HashSet<>();
     private final SessionIdProvider sessionIdProvider;
     private static final AttributeKey<String> SESSION_ID_ATTRIBUTE_KEY = AttributeKey.stringKey("session.id");
+    private static final AttributeKey<String> TRANSACTION_TYPE_ATTRIBUTE_KEY = AttributeKey.stringKey("type");
+    private static final String TRANSACTION_TYPE_VALUE = "mobile";
 
     public void addAllExclusionRules(Collection<? extends ExclusionRule> rules) {
         this.rules.addAll(rules);
@@ -48,6 +50,7 @@ public class ElasticSpanProcessor implements SpanProcessor {
     @Override
     public void onStart(Context parentContext, ReadWriteSpan span) {
         span.setAttribute(SESSION_ID_ATTRIBUTE_KEY, getSessionId());
+        span.setAttribute(TRANSACTION_TYPE_ATTRIBUTE_KEY, TRANSACTION_TYPE_VALUE);
         original.onStart(parentContext, span);
     }
 

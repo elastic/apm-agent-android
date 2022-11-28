@@ -125,14 +125,6 @@ public class ResourcesTest extends BaseRobolectricTest {
                 .hasResource("process.runtime.version", RUNTIME_VERSION);
     }
 
-    @Test
-    public void whenASpanIsCreated_typeIsSet() {
-        SpanData customSpan = captureSpan();
-
-        Spans.verify(customSpan)
-                .hasResource("type", "mobile");
-    }
-
     private SpanData captureSpan() {
         SpanAttrHost host = new SpanAttrHost();
 

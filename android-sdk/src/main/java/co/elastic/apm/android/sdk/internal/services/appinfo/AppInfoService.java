@@ -19,6 +19,7 @@
 package co.elastic.apm.android.sdk.internal.services.appinfo;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 
 import co.elastic.apm.android.sdk.internal.services.Service;
@@ -32,6 +33,10 @@ public class AppInfoService implements Service {
 
     public boolean isPermissionGranted(String permissionName) {
         return appContext.checkSelfPermission(permissionName) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    public boolean isInDebugMode() {
+        return (appContext.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
     }
 
     @Override

@@ -23,12 +23,20 @@ import android.util.Log;
 import org.slf4j.event.Level;
 
 import co.elastic.apm.android.common.internal.logging.BaseELogger;
-import co.elastic.apm.android.sdk.BuildConfig;
+import co.elastic.apm.android.sdk.ElasticApmAgent;
+import co.elastic.apm.android.sdk.internal.services.Service;
+import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService;
+import co.elastic.apm.android.sdk.providers.LazyProvider;
 
 class AndroidLogger extends BaseELogger {
+    private final LazyProvider<Boolean> appIsDebuggable;
 
     AndroidLogger(String tag) {
         super(tag);
+        appIsDebuggable = LazyProvider.of(() -> {
+            AppInfoService service = ElasticApmAgent.get().getService(Service.Names.APP_INFO);
+            return service.isInDebugMode();
+        });
     }
 
     @Override
@@ -54,12 +62,12 @@ class AndroidLogger extends BaseELogger {
 
     @Override
     public boolean isTraceEnabled() {
-        return BuildConfig.DEBUG;
+        return appIsDebuggable.get();
     }
 
     @Override
     public boolean isDebugEnabled() {
-        return BuildConfig.DEBUG;
+        return appIsDebuggable.get();
     }
 
     @Override

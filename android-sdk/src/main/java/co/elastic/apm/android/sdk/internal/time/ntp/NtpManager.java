@@ -24,6 +24,7 @@ import androidx.annotation.VisibleForTesting;
 
 import java.io.IOException;
 
+import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.concurrency.BackgroundExecutor;
 import co.elastic.apm.android.sdk.internal.concurrency.Result;
 import co.elastic.apm.android.sdk.internal.concurrency.impl.SimpleBackgroundExecutor;
@@ -44,6 +45,10 @@ public final class NtpManager implements BackgroundExecutor.Callback<Void> {
 
     public void initialize() {
         trueTimeWrapper.withSharedPreferencesCache();
+        if (trueTimeWrapper.isInitialized()) {
+            Elog.getLogger().info("NTP already initialized");
+            return;
+        }
         executor.execute(() -> {
             try {
                 trueTimeWrapper.initialize();

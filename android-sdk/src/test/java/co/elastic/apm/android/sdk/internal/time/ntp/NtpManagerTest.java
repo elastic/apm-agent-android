@@ -18,6 +18,8 @@
  */
 package co.elastic.apm.android.sdk.internal.time.ntp;
 
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import org.junit.Before;
@@ -29,10 +31,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.io.IOException;
 
 import co.elastic.apm.android.sdk.internal.concurrency.BackgroundExecutor;
+import co.elastic.apm.android.sdk.testutils.BaseTest;
 import co.elastic.apm.android.sdk.testutils.ImmediateBackgroundExecutor;
 
 @RunWith(MockitoJUnitRunner.class)
-public class NtpManagerTest {
+public class NtpManagerTest extends BaseTest {
 
     @Mock
     public TrueTimeWrapper trueTimeWrapper;
@@ -58,5 +61,15 @@ public class NtpManagerTest {
         ntpManager.initialize();
 
         verify(trueTimeWrapper).initialize();
+    }
+
+    @Test
+    public void whenInitializing_avoidReinitializing() throws IOException {
+        doReturn(true).when(trueTimeWrapper).isInitialized();
+
+        ntpManager.initialize();
+
+        verify(trueTimeWrapper).withSharedPreferencesCache();
+        verify(trueTimeWrapper, never()).initialize();
     }
 }

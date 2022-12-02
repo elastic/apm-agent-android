@@ -27,9 +27,10 @@ import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
 
+import co.elastic.apm.android.sdk.testutils.BaseTest;
 import co.elastic.apm.android.sdk.traces.session.SessionIdProvider;
 
-public class DefaultSessionIdProviderTest {
+public class DefaultSessionIdProviderTest extends BaseTest {
 
     @Test
     public void whenSessionIdIsRequested_provideNonEmptyId() {

@@ -23,13 +23,19 @@ import co.elastic.apm.android.sdk.internal.concurrency.BackgroundWork;
 import co.elastic.apm.android.sdk.internal.concurrency.Result;
 
 public class ImmediateBackgroundExecutor implements BackgroundExecutor {
+    private int executions = 0;
 
     @Override
     public <T> void execute(BackgroundWork<T> work, Callback<T> callback) {
+        executions++;
         try {
             callback.onFinish(Result.success(work.execute()));
         } catch (Throwable t) {
             callback.onFinish(Result.error(t));
         }
+    }
+
+    public int getExecutions() {
+        return executions;
     }
 }

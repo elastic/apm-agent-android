@@ -18,6 +18,7 @@
  */
 package co.elastic.apm.android.sdk.internal.time.ntp;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -30,7 +31,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
 
-import co.elastic.apm.android.sdk.internal.concurrency.BackgroundExecutor;
 import co.elastic.apm.android.sdk.testutils.BaseTest;
 import co.elastic.apm.android.sdk.testutils.ImmediateBackgroundExecutor;
 
@@ -40,7 +40,7 @@ public class NtpManagerTest extends BaseTest {
     @Mock
     public TrueTimeWrapper trueTimeWrapper;
 
-    private final BackgroundExecutor immediateExecutor = new ImmediateBackgroundExecutor();
+    private final ImmediateBackgroundExecutor immediateExecutor = new ImmediateBackgroundExecutor();
 
     private NtpManager ntpManager;
 
@@ -61,6 +61,7 @@ public class NtpManagerTest extends BaseTest {
         ntpManager.initialize();
 
         verify(trueTimeWrapper).initialize();
+        assertEquals(1, immediateExecutor.getExecutions());
     }
 
     @Test

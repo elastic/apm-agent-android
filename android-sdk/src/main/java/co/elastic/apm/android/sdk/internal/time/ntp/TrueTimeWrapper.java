@@ -16,32 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.time;
+package co.elastic.apm.android.sdk.internal.time.ntp;
 
-import static org.mockito.Mockito.verify;
+import android.content.Context;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import com.instacart.library.truetime.TrueTime;
 
-@RunWith(MockitoJUnitRunner.class)
-public class NtpManagerTest {
+import java.io.IOException;
+import java.util.Date;
 
-    @Mock
-    public TrueTimeWrapper trueTimeWrapper;
-    private NtpManager ntpManager;
+public class TrueTimeWrapper {
+    private final Context context;
 
-    @Before
-    public void setUp() {
-        ntpManager = new NtpManager(trueTimeWrapper);
+    public TrueTimeWrapper(Context context) {
+        this.context = context;
     }
 
-    @Test
-    public void whenInitializing_setUpSharedPreferenceCache() {
-        ntpManager.initialize();
+    public void initialize() throws IOException {
+        TrueTime.build().initialize();
+    }
 
-        verify(trueTimeWrapper).withSharedPreferencesCache();
+    public void withSharedPreferencesCache() {
+        TrueTime.build().withSharedPreferencesCache(context);
+    }
+
+    public boolean isInitialized() {
+        return TrueTime.isInitialized();
+    }
+
+    public Date now() throws IllegalStateException {
+        return TrueTime.now();
     }
 }

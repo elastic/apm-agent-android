@@ -16,25 +16,46 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.time;
+package co.elastic.apm.android.sdk.internal.time.ntp;
 
 import android.content.Context;
 
 import androidx.annotation.VisibleForTesting;
 
-public final class NtpManager {
+import java.io.IOException;
+
+import co.elastic.apm.android.sdk.internal.concurrency.BackgroundExecutor;
+import co.elastic.apm.android.sdk.internal.concurrency.Result;
+import co.elastic.apm.android.sdk.internal.concurrency.impl.SimpleBackgroundExecutor;
+
+public final class NtpManager implements BackgroundExecutor.Callback<Void> {
     private final TrueTimeWrapper trueTimeWrapper;
+    private final BackgroundExecutor executor;
 
     @VisibleForTesting()
-    public NtpManager(TrueTimeWrapper trueTimeWrapper) {
+    public NtpManager(TrueTimeWrapper trueTimeWrapper, BackgroundExecutor executor) {
         this.trueTimeWrapper = trueTimeWrapper;
+        this.executor = executor;
     }
 
     public NtpManager(Context context) {
-        this(new TrueTimeWrapper(context));
+        this(new TrueTimeWrapper(context), new SimpleBackgroundExecutor());
     }
 
     public void initialize() {
         trueTimeWrapper.withSharedPreferencesCache();
+        executor.execute(() -> {
+            try {
+                trueTimeWrapper.initialize();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            return null;
+        }, this);
+    }
+
+    @Override
+    public void onFinish(Result<Void> result) {
+
     }
 }

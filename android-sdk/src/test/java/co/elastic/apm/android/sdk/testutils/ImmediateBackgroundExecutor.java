@@ -16,35 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.time;
+package co.elastic.apm.android.sdk.testutils;
 
-import android.content.Context;
+import co.elastic.apm.android.sdk.internal.concurrency.BackgroundExecutor;
+import co.elastic.apm.android.sdk.internal.concurrency.BackgroundWork;
+import co.elastic.apm.android.sdk.internal.concurrency.Result;
 
-import com.instacart.library.truetime.TrueTime;
+public class ImmediateBackgroundExecutor implements BackgroundExecutor {
 
-import java.io.IOException;
-import java.util.Date;
-
-public class TrueTimeWrapper {
-    private final Context context;
-
-    public TrueTimeWrapper(Context context) {
-        this.context = context;
-    }
-
-    public void initialize() throws IOException {
-        TrueTime.build().initialize();
-    }
-
-    public void withSharedPreferencesCache() {
-        TrueTime.build().withSharedPreferencesCache(context);
-    }
-
-    public boolean isInitialized() {
-        return TrueTime.isInitialized();
-    }
-
-    public Date now() throws IllegalStateException {
-        return TrueTime.now();
+    @Override
+    public <T> void execute(BackgroundWork<T> work, Callback<T> callback) {
+        try {
+            callback.onFinish(Result.success(work.execute()));
+        } catch (Throwable t) {
+            callback.onFinish(Result.error(t));
+        }
     }
 }

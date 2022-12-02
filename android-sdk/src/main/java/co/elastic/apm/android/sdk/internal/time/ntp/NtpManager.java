@@ -49,6 +49,7 @@ public final class NtpManager implements BackgroundExecutor.Callback<Void> {
             Elog.getLogger().info("NTP already initialized");
             return;
         }
+        Elog.getLogger().info("About to initialize the NTP");
         executor.execute(() -> {
             try {
                 trueTimeWrapper.initialize();
@@ -61,6 +62,10 @@ public final class NtpManager implements BackgroundExecutor.Callback<Void> {
 
     @Override
     public void onFinish(Result<Void> result) {
-
+        if (result.isSuccess) {
+            Elog.getLogger().info("NTP successfully initialized");
+        } else {
+            Elog.getLogger().info("NTP failed to initialize", result.error);
+        }
     }
 }

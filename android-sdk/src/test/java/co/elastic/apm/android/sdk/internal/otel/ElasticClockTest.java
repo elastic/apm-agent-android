@@ -18,33 +18,41 @@
  */
 package co.elastic.apm.android.sdk.internal.otel;
 
-import androidx.annotation.VisibleForTesting;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
 import co.elastic.apm.android.sdk.internal.time.ntp.TrueTimeWrapper;
-import io.opentelemetry.sdk.common.Clock;
+import co.elastic.apm.android.sdk.testutils.BaseTest;
 
-public class ElasticClock implements Clock {
-    private final TrueTimeWrapper trueTimeWrapper;
-    private final SystemTimeProvider systemTimeProvider;
+@RunWith(MockitoJUnitRunner.class)
+public class ElasticClockTest extends BaseTest {
 
-    @VisibleForTesting
-    public ElasticClock(TrueTimeWrapper trueTimeWrapper, SystemTimeProvider systemTimeProvider) {
-        this.trueTimeWrapper = trueTimeWrapper;
-        this.systemTimeProvider = systemTimeProvider;
+    @Mock
+    public TrueTimeWrapper trueTimeWrapper;
+
+    @Mock
+    public SystemTimeProvider systemTimeProvider;
+    private ElasticClock elasticClock;
+
+    @Before
+    public void setUp() {
+        elasticClock = new ElasticClock(trueTimeWrapper, systemTimeProvider);
     }
 
-    public ElasticClock(TrueTimeWrapper trueTimeWrapper) {
-        this(trueTimeWrapper, new SystemTimeProvider());
-    }
+    @Test
+    public void whenProvidingNanoTime_returnSystemNanoTime() {
+        long nanoTime = 123;
+        doReturn(nanoTime).when(systemTimeProvider).getNanoTime();
 
-    @Override
-    public long now() {
-        return 0;
-    }
-
-    @Override
-    public long nanoTime() {
-        return systemTimeProvider.getNanoTime();
+        assertEquals(nanoTime, elasticClock.nanoTime());
+        verify(systemTimeProvider).getNanoTime();
     }
 }

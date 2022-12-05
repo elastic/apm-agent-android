@@ -28,6 +28,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.concurrent.TimeUnit;
+
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
 import co.elastic.apm.android.sdk.internal.time.ntp.TrueTimeWrapper;
 import co.elastic.apm.android.sdk.testutils.BaseTest;
@@ -54,5 +56,15 @@ public class ElasticClockTest extends BaseTest {
 
         assertEquals(nanoTime, elasticClock.nanoTime());
         verify(systemTimeProvider).getNanoTime();
+    }
+
+    @Test
+    public void whenProvidingNow_withNoTrueTimeAvailable_returnSystemCurrentTimeInNanos() {
+        long systemTimeMillis = 12345;
+        long systemTimeNanos = TimeUnit.MILLISECONDS.toNanos(systemTimeMillis);
+        doReturn(systemTimeMillis).when(systemTimeProvider).getCurrentTimeMillis();
+        doReturn(false).when(trueTimeWrapper).isInitialized();
+
+        assertEquals(systemTimeNanos, elasticClock.now());
     }
 }

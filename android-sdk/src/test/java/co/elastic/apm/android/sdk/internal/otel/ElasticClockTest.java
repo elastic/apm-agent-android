@@ -28,6 +28,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
@@ -66,5 +67,16 @@ public class ElasticClockTest extends BaseTest {
         doReturn(false).when(trueTimeWrapper).isInitialized();
 
         assertEquals(systemTimeNanos, elasticClock.now());
+    }
+
+    @Test
+    public void whenProvidingNow_withTrueTimeAvailable_returnTrueTimeInNanos() {
+        long trueTimeMillis = 12345;
+        Date trueTimeNow = new Date(trueTimeMillis);
+        long trueTimeNanos = TimeUnit.MILLISECONDS.toNanos(trueTimeMillis);
+        doReturn(true).when(trueTimeWrapper).isInitialized();
+        doReturn(trueTimeNow).when(trueTimeWrapper).now();
+
+        assertEquals(trueTimeNanos, elasticClock.now());
     }
 }

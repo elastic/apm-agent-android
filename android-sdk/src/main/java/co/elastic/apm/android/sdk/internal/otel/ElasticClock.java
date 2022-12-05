@@ -42,6 +42,9 @@ public class ElasticClock implements Clock {
 
     @Override
     public long now() {
+        if (trueTimeWrapper.isInitialized()) {
+            return TimeUnit.MILLISECONDS.toNanos(trueTimeWrapper.now().getTime());
+        }
         return TimeUnit.MILLISECONDS.toNanos(systemTimeProvider.getCurrentTimeMillis());
     }
 

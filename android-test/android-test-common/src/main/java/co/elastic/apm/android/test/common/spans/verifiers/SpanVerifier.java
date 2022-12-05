@@ -16,4 +16,6 @@ public interface SpanVerifier<T extends SpanVerifier<?>> {
     T hasResource(String resourceName);
 
     T hasResource(String resourceName, String resourceValue);
+
+    T startedAt(long timeInNanoseconds);
 }

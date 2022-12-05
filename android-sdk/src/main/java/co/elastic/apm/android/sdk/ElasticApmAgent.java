@@ -140,6 +140,7 @@ public final class ElasticApmAgent {
         processor.addAllExclusionRules(configuration.httpTraceConfiguration.exclusionRules);
 
         return SdkTracerProvider.builder()
+                .setClock(ntpManager.getClock())
                 .addSpanProcessor(processor)
                 .setResource(resource)
                 .build();

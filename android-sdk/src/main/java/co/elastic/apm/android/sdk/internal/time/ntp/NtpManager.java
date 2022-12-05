@@ -29,6 +29,7 @@ import co.elastic.apm.android.sdk.internal.concurrency.BackgroundExecutor;
 import co.elastic.apm.android.sdk.internal.concurrency.Result;
 import co.elastic.apm.android.sdk.internal.concurrency.impl.SimpleBackgroundExecutor;
 import co.elastic.apm.android.sdk.internal.otel.ElasticClock;
+import io.opentelemetry.sdk.common.Clock;
 
 public final class NtpManager implements BackgroundExecutor.Callback<Void> {
     private final TrueTimeWrapper trueTimeWrapper;
@@ -62,7 +63,7 @@ public final class NtpManager implements BackgroundExecutor.Callback<Void> {
         }, this);
     }
 
-    public ElasticClock getClock() {
+    public Clock getClock() {
         if (clock == null) {
             clock = new ElasticClock(trueTimeWrapper);
         }

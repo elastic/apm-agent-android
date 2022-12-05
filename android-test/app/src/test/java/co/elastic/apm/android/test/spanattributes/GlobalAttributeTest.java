@@ -1,10 +1,14 @@
 package co.elastic.apm.android.test.spanattributes;
 
+import static org.mockito.Mockito.verify;
+
 import org.junit.Test;
 
 import java.util.List;
 
+import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.test.common.spans.Spans;
+import co.elastic.apm.android.test.testutils.TestElasticClock;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
 import io.opentelemetry.sdk.trace.data.SpanData;
 
@@ -24,6 +28,23 @@ public class GlobalAttributeTest extends BaseRobolectricTest {
 
         Spans.verify(customSpan)
                 .hasAttribute("type", "mobile");
+    }
+
+    @Test
+    public void whenASpanIsCreated_itHasTimestampSetFromElasticClock() {
+        long startTimeFromElasticClock = 123456789;
+        NtpManager ntpManager = getAgentDependenciesProvider().getNtpManager();
+        TestElasticClock clock = (TestElasticClock) ntpManager.getClock();
+        clock.setForcedNow(startTimeFromElasticClock);
+        SpanData span = getSpanData();
+
+        Spans.verify(span)
+                .startedAt(startTimeFromElasticClock);
+    }
+
+    @Test
+    public void whenASpanIsCreated_itHasInitializedTheNtpManager() {
+        verify(getAgentDependenciesProvider().getNtpManager()).initialize();
     }
 
     private SpanData getSpanData() {

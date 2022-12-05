@@ -22,6 +22,7 @@ import androidx.annotation.VisibleForTesting;
 
 import java.util.concurrent.TimeUnit;
 
+import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
 import co.elastic.apm.android.sdk.internal.time.ntp.TrueTimeWrapper;
 import io.opentelemetry.sdk.common.Clock;
@@ -43,8 +44,10 @@ public class ElasticClock implements Clock {
     @Override
     public long now() {
         if (trueTimeWrapper.isInitialized()) {
+            Elog.getLogger().info("Returning true time");
             return TimeUnit.MILLISECONDS.toNanos(trueTimeWrapper.now().getTime());
         }
+        Elog.getLogger().info("Returning system time");
         return TimeUnit.MILLISECONDS.toNanos(systemTimeProvider.getCurrentTimeMillis());
     }
 

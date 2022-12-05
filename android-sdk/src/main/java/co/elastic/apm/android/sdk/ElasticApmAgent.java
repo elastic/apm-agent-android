@@ -30,6 +30,7 @@ import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService;
 import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
 import co.elastic.apm.android.sdk.internal.services.network.NetworkService;
+import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.sdk.providers.Provider;
 import co.elastic.apm.android.sdk.providers.SimpleProvider;
 import co.elastic.apm.android.sdk.traces.connectivity.Connectivity;
@@ -48,6 +49,7 @@ public final class ElasticApmAgent {
     private final Provider<Connectivity> connectivityProvider;
     private final ServiceManager serviceManager;
     private final AttributesCompose globalAttributes;
+    private final NtpManager ntpManager;
 
     public static ElasticApmAgent get() {
         verifyInitialization();
@@ -107,6 +109,8 @@ public final class ElasticApmAgent {
         Context appContext = context.getApplicationContext();
         this.connectivityProvider = connectivityProvider;
         this.configuration = configuration;
+        ntpManager = new NtpManager(context);
+        ntpManager.initialize();
         serviceManager = new ServiceManager();
         serviceManager.addService(new NetworkService(appContext));
         serviceManager.addService(new AppInfoService(appContext));

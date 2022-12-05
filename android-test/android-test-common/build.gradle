@@ -26,8 +26,6 @@ android {
 }
 
 dependencies {
-    api "co.elastic.apm:android-sdk:$agent_version"
     api "junit:junit:$junit_version"
-    api "org.mockito:mockito-core:$mockito_version"
-    api "org.mockito:mockito-inline:$mockito_version"
+    implementation "io.opentelemetry:opentelemetry-sdk:1.16.0"
 }

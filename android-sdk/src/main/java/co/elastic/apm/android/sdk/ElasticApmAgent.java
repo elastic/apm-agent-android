@@ -24,6 +24,7 @@ import androidx.annotation.NonNull;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.attributes.AttributesCompose;
+import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.logging.AndroidLoggerFactory;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
@@ -105,11 +106,12 @@ public final class ElasticApmAgent {
         return serviceManager.getService(name);
     }
 
-    ElasticApmAgent(Context context, Provider<Connectivity> connectivityProvider, ElasticApmConfiguration configuration) {
+    private ElasticApmAgent(Context context, Provider<Connectivity> connectivityProvider, ElasticApmConfiguration configuration) {
         Context appContext = context.getApplicationContext();
+        AgentDependenciesInjector injector = AgentDependenciesInjector.get(context);
         this.connectivityProvider = connectivityProvider;
         this.configuration = configuration;
-        ntpManager = new NtpManager(context);
+        ntpManager = injector.getNtpManager();
         serviceManager = new ServiceManager();
         serviceManager.addService(new NetworkService(appContext));
         serviceManager.addService(new AppInfoService(appContext));

@@ -1,9 +1,29 @@
 plugins {
-    id 'java-library'
+    id 'com.android.library' version "$agp_version"
 }
 
-targetCompatibility = JavaVersion.VERSION_1_8
-sourceCompatibility = JavaVersion.VERSION_1_8
+android {
+    compileSdk androidCompileSdk
+
+    defaultConfig {
+        minSdk androidMinSdk
+        targetSdk androidCompileSdk
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility jvmCompatibility
+        targetCompatibility jvmCompatibility
+    }
+}
 
 dependencies {
     api "junit:junit:$junit_version"

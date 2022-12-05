@@ -24,7 +24,7 @@ public abstract class BaseEspressoTest<T extends Activity> extends BaseTest {
     public ActivityScenarioRule<T> activityScenarioRule = new ActivityScenarioRule<>(getActivityClass());
 
     @Before
-    public void setUp() {
+    public void baseSetUp() {
         onBefore();
         activityScenarioRule.getScenario().onActivity(activity -> {
             spanExporterCaptor = ((DefaultApp) activity.getApplication()).getSpanExporter();

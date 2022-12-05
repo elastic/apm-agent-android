@@ -5,7 +5,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:7.2.0"
+        classpath "com.android.tools.build:gradle:$agp_version"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.10"
         classpath "co.elastic.apm:android-plugin:$agent_version"
     }
@@ -15,7 +15,7 @@ apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'co.elastic.apm.android'
 
 android {
-    compileSdk 32
+    compileSdk androidCompileSdk
     testOptions {
         unitTests {
             includeAndroidResources = true
@@ -27,8 +27,8 @@ android {
     }
     defaultConfig {
         applicationId "co.elastic.apm.android.test"
-        minSdk 26
-        targetSdk 32
+        minSdk androidMinSdk
+        targetSdk androidCompileSdk
         versionCode 1
         versionName "1.0"
 
@@ -42,11 +42,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility jvmCompatibility
+        targetCompatibility jvmCompatibility
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = jvmCompatibility.toString()
     }
 }
 

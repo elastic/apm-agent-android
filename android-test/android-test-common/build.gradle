@@ -27,5 +27,5 @@ android {
 
 dependencies {
     api "junit:junit:$junit_version"
-    implementation "io.opentelemetry:opentelemetry-sdk:1.16.0"
+    api "co.elastic.apm:android-sdk:$agent_version"
 }

@@ -44,10 +44,10 @@ public class ElasticClock implements Clock {
     @Override
     public long now() {
         if (trueTimeWrapper.isInitialized()) {
-            Elog.getLogger().info("Returning true time");
+            Elog.getLogger().debug("Returning true time");
             return TimeUnit.MILLISECONDS.toNanos(trueTimeWrapper.now().getTime());
         }
-        Elog.getLogger().info("Returning system time");
+        Elog.getLogger().debug("Returning system time");
         return TimeUnit.MILLISECONDS.toNanos(systemTimeProvider.getCurrentTimeMillis());
     }
 

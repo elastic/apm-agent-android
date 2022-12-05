@@ -5,13 +5,9 @@ propertiesFile.withInputStream {
 }
 
 ext {
-    jvmCompatibility = JavaVersion.VERSION_1_8
     junit_version = '4.13.2'
     espresso_version = '3.4.0'
     mockito_version = '4.9.0'
-    agp_version = '7.2.0'
-    androidCompileSdk = 32
-    androidMinSdk = 26
     agent_version = agentProperties["version"]
 }
 

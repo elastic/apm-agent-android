@@ -110,7 +110,6 @@ public final class ElasticApmAgent {
         this.connectivityProvider = connectivityProvider;
         this.configuration = configuration;
         ntpManager = new NtpManager(context);
-        ntpManager.initialize();
         serviceManager = new ServiceManager();
         serviceManager.addService(new NetworkService(appContext));
         serviceManager.addService(new AppInfoService(appContext));
@@ -119,6 +118,7 @@ public final class ElasticApmAgent {
     }
 
     private void onInitializationFinished() {
+        ntpManager.initialize();
         serviceManager.start();
         initializeOpentelemetry();
     }

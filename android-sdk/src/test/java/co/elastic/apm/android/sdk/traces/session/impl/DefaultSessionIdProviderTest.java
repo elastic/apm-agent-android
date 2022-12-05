@@ -106,7 +106,7 @@ public class DefaultSessionIdProviderTest extends BaseTest {
     }
 
     private DefaultSessionIdProvider getSessionIdProvider() {
-        return getSessionIdProvider(new SystemTimeProvider());
+        return getSessionIdProvider(SystemTimeProvider.get());
     }
 
     private DefaultSessionIdProvider getSessionIdProvider(SystemTimeProvider systemTimeProvider) {

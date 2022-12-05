@@ -20,6 +20,19 @@ package co.elastic.apm.android.sdk.internal.time;
 
 public class SystemTimeProvider {
 
+    private static SystemTimeProvider INSTANCE;
+
+    public static SystemTimeProvider get() {
+        if (INSTANCE == null) {
+            INSTANCE = new SystemTimeProvider();
+        }
+
+        return INSTANCE;
+    }
+
+    private SystemTimeProvider() {
+    }
+
     public long getCurrentTimeMillis() {
         return System.currentTimeMillis();
     }

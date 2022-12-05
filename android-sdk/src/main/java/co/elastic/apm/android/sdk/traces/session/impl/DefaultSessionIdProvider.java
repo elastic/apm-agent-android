@@ -41,7 +41,7 @@ public class DefaultSessionIdProvider implements SessionIdProvider {
     }
 
     public DefaultSessionIdProvider() {
-        this(new SystemTimeProvider());
+        this(SystemTimeProvider.get());
     }
 
     @NonNull

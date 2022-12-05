@@ -38,7 +38,7 @@ public class ElasticClock implements Clock {
     }
 
     public ElasticClock(TrueTimeWrapper trueTimeWrapper) {
-        this(trueTimeWrapper, new SystemTimeProvider());
+        this(trueTimeWrapper, SystemTimeProvider.get());
     }
 
     @Override

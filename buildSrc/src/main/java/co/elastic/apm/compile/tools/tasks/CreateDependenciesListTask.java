@@ -56,7 +56,7 @@ public abstract class CreateDependenciesListTask extends BasePomTask {
                 }
                 TextUtils.writeText(stream, String.format(LICENSE_TITLE_FORMAT, license.name));
                 List<ArtifactIdentification> identifications = licensedArtifacts.get(license);
-                identifications.sort(Comparator.comparing(it -> it.name.toLowerCase(Locale.US)));
+                identifications.sort(Comparator.comparing(it -> getIdName(it).toLowerCase(Locale.US)));
                 Map<String, List<ArtifactIdentification>> linesSet = new HashMap<>();
                 for (ArtifactIdentification identification : identifications) {
                     String displayName = identification.getDisplayName();
@@ -74,6 +74,16 @@ public abstract class CreateDependenciesListTask extends BasePomTask {
             stream.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private String getIdName(ArtifactIdentification it) {
+        if (it.name != null) {
+            return it.name;
+        } else if (it.getDisplayName() != null) {
+            return it.getDisplayName();
+        } else {
+            return it.gradleUri;
         }
     }
 

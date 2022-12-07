@@ -9,7 +9,7 @@ import org.gradle.api.artifacts.component.ComponentIdentifier;
 import org.gradle.api.artifacts.result.ResolvedArtifactResult;
 import org.gradle.api.attributes.AttributeContainer;
 import org.gradle.api.file.DirectoryProperty;
-import org.gradle.api.provider.Property;
+import org.gradle.api.provider.ListProperty;
 import org.gradle.api.specs.Spec;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.OutputDirectory;
@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -34,7 +35,7 @@ public abstract class NoticeFilesCollectorTask extends BaseTask {
     private static final Pattern NOTICE_FILE_NAME_PATTERN = Pattern.compile("^META-INF[/\\\\]([Nn][Oo][Tt][Ii][Cc][Ee])[^/\\\\]*");
 
     @InputFiles
-    public abstract Property<Configuration> getRuntimeDependencies();
+    public abstract ListProperty<Configuration> getRuntimeDependencies();
 
     @OutputDirectory
     public abstract DirectoryProperty getOutputDir();
@@ -46,14 +47,22 @@ public abstract class NoticeFilesCollectorTask extends BaseTask {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        Configuration dependencies = getRuntimeDependencies().get();
-        List<ComponentIdentifier> allDependenciesIds = getComponentIdentifiers(dependencies);
+        List<Configuration> dependencyConfigs = getRuntimeDependencies().get();
+        List<ComponentIdentifier> allDependenciesIds = new ArrayList<>();
+        Set<ResolvedArtifactResult> jarArtifacts = new HashSet<>();
 
-        Set<ResolvedArtifactResult> jarArtifacts = dependencies.getIncoming().artifactView(configuration -> {
-            configuration.setLenient(false);
-            configuration.attributes(new JarAttributeAction());
-            configuration.componentFilter(new ExternalComponentsSpec(allDependenciesIds));
-        }).getArtifacts().getArtifacts();
+        for (Configuration dependencies : dependencyConfigs) {
+            List<ComponentIdentifier> componentIdentifiers = getComponentIdentifiers(dependencies);
+            Set<ResolvedArtifactResult> localJarArtifacts = dependencies.getIncoming().artifactView(configuration -> {
+                configuration.setLenient(false);
+                configuration.attributes(new JarAttributeAction());
+                configuration.componentFilter(new ExternalComponentsSpec(componentIdentifiers));
+            }).getArtifacts().getArtifacts();
+
+            jarArtifacts.addAll(localJarArtifacts);
+            allDependenciesIds.addAll(componentIdentifiers);
+        }
+
 
         List<ComponentIdentifier> foundFor = extractNoticeFiles(jarArtifacts);
         allDependenciesIds.removeAll(foundFor);

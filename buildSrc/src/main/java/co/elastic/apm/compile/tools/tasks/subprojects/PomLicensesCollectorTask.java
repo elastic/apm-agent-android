@@ -1,8 +1,10 @@
 package co.elastic.apm.compile.tools.tasks.subprojects;
 
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.component.ComponentIdentifier;
 import org.gradle.api.artifacts.result.ResolvedArtifactResult;
 import org.gradle.api.file.RegularFileProperty;
+import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.InputFiles;
@@ -19,8 +21,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -30,7 +34,7 @@ import co.elastic.apm.compile.tools.utils.PomReader;
 public abstract class PomLicensesCollectorTask extends BasePomTask {
 
     @InputFiles
-    public abstract Property<Configuration> getRuntimeDependencies();
+    public abstract ListProperty<Configuration> getRuntimeDependencies();
 
     @Optional
     @InputFile
@@ -42,7 +46,13 @@ public abstract class PomLicensesCollectorTask extends BasePomTask {
     @TaskAction
     public void action() {
         try {
-            List<ArtifactLicense> artifactLicenses = extractLicenses(getPomArtifacts(getComponentIdentifiers(getRuntimeDependencies().get())));
+            Set<ComponentIdentifier> componentIdentifiers = new HashSet<>();
+
+            for (Configuration dependencies : getRuntimeDependencies().get()) {
+                componentIdentifiers.addAll(getComponentIdentifiers(dependencies));
+            }
+
+            List<ArtifactLicense> artifactLicenses = extractLicenses(getPomArtifacts(componentIdentifiers));
             File licensesFoundFile = getLicensesFound().get().getAsFile();
             writeToFile(licensesFoundFile, artifactLicenses);
         } catch (ParserConfigurationException | SAXException | IOException e) {

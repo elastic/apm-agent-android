@@ -25,6 +25,7 @@ import kotlin.Unit;
 @SuppressWarnings("unchecked")
 public class EmbeddingDependenciesPlugin implements Plugin<Project> {
 
+    public static final String EMBEDDED_CLASSPATH_NAME = "embeddedClasspath";
     private static final Attribute<String> ARTIFACT_TYPE_ATTRIBUTE = Attribute.of("artifactType", String.class);
 
     @Override
@@ -64,7 +65,7 @@ public class EmbeddingDependenciesPlugin implements Plugin<Project> {
             configuration.setCanBeConsumed(false);
             configuration.setCanBeResolved(false);
         });
-        Configuration classpath = project.getConfigurations().create("embeddedClasspath", configuration -> {
+        Configuration classpath = project.getConfigurations().create(EMBEDDED_CLASSPATH_NAME, configuration -> {
             configuration.setCanBeResolved(true);
             configuration.setCanBeConsumed(false);
             configuration.extendsFrom(embedded);

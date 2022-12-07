@@ -11,6 +11,8 @@ import org.gradle.api.attributes.Attribute;
 import org.gradle.api.attributes.AttributeContainer;
 import org.gradle.api.tasks.TaskProvider;
 
+import java.util.List;
+
 import co.elastic.apm.compile.tools.extensions.AndroidApmExtension;
 import co.elastic.apm.compile.tools.tasks.CreateDependenciesListTask;
 import co.elastic.apm.compile.tools.tasks.CreateNoticeTask;
@@ -33,13 +35,14 @@ public class AarNoticeProviderPlugin extends BaseSubprojectPlugin {
             ComponentImpl component = (ComponentImpl) variant;
             Configuration runtimeClasspath = component.getVariantDependencies().getRuntimeClasspath();
             Configuration apmToolsClasspath = wrapConfiguration(project, variant, runtimeClasspath);
+            List<Configuration> runtimeConfigs = getRuntimeConfigurations(project, apmToolsClasspath);
             TaskProvider<PomLicensesCollectorTask> pomLicensesFinder = project.getTasks().register(variant.getName() + "DependenciesLicencesFinder", PomLicensesCollectorTask.class, task -> {
-                task.getRuntimeDependencies().set(apmToolsClasspath);
+                task.getRuntimeDependencies().set(runtimeConfigs);
                 task.getLicensesFound().set(project.getLayout().getBuildDirectory().file(task.getName() + "/licenses.txt"));
                 task.getManualLicenseMapping().set(licensesConfig.manualMappingFile);
             });
             TaskProvider<NoticeFilesCollectorTask> noticeCollector = project.getTasks().register(variant.getName() + "NoticeFilesCollector", NoticeFilesCollectorTask.class, task -> {
-                task.getRuntimeDependencies().set(apmToolsClasspath);
+                task.getRuntimeDependencies().set(runtimeConfigs);
                 task.getOutputDir().set(project.getLayout().getBuildDirectory().dir(task.getName()));
             });
             TaskProvider<NoticeMergerTask> noticeFilesMerger = project.getTasks().register(variant.getName() + "NoticeFilesMerger", NoticeMergerTask.class, task -> {

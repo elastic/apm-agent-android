@@ -18,6 +18,10 @@ public class ArtifactIdentification {
             displayName += " (" + url + ")";
         }
 
+        if (displayName == null) {
+            return gradleUri;
+        }
+
         return displayName;
     }
 }

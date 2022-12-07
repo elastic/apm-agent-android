@@ -30,5 +30,9 @@ gradlePlugin {
             id = 'co.elastic.apm.publishing'
             implementationClass = "co.elastic.apm.compile.tools.publishing.ApmPublisherRootPlugin"
         }
+        dependencyEmbedderPlugin {
+            id = 'co.elastic.apm.dependency.embedder'
+            implementationClass = "co.elastic.apm.compile.tools.embedding.EmbeddingDependenciesPlugin"
+        }
     }
 }

@@ -1,8 +1,5 @@
 package co.elastic.apm.compile.tools.embedding;
 
-import static co.elastic.apm.compile.tools.embedding.transforms.AarGradleTransformAction.ARTIFACT_TYPE_ATTRIBUTE;
-import static co.elastic.apm.compile.tools.embedding.transforms.AarGradleTransformAction.ELASTIC_JAR;
-
 import com.android.build.api.artifact.MultipleArtifact;
 import com.android.build.api.variant.AndroidComponentsExtension;
 import com.android.build.api.variant.Variant;
@@ -10,6 +7,7 @@ import com.android.build.api.variant.Variant;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.attributes.Attribute;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.FileCollection;
@@ -22,12 +20,12 @@ import java.io.File;
 import java.util.concurrent.Callable;
 
 import co.elastic.apm.compile.tools.embedding.tasks.EmbeddedClassesGathererTask;
-import co.elastic.apm.compile.tools.embedding.transforms.AarGradleTransformAction;
-import co.elastic.apm.compile.tools.embedding.transforms.ElasticJarAttrMatchingStrategyConfigurationAction;
 import kotlin.Unit;
 
 @SuppressWarnings("unchecked")
 public class EmbeddingDependenciesPlugin implements Plugin<Project> {
+
+    private static final Attribute<String> ARTIFACT_TYPE_ATTRIBUTE = Attribute.of("artifactType", String.class);
 
     @Override
     public void apply(Project project) {
@@ -70,13 +68,10 @@ public class EmbeddingDependenciesPlugin implements Plugin<Project> {
             configuration.setCanBeResolved(true);
             configuration.setCanBeConsumed(false);
             configuration.extendsFrom(embedded);
-            configuration.getAttributes().attribute(ARTIFACT_TYPE_ATTRIBUTE, ELASTIC_JAR);
+            configuration.getAttributes().attribute(ARTIFACT_TYPE_ATTRIBUTE, "android-classes");
         });
         Configuration compileOnly = project.getConfigurations().getByName("compileOnly");
         compileOnly.extendsFrom(embedded);
-
-        project.getDependencies().registerTransform(AarGradleTransformAction.class, new AarGradleTransformAction.ConfigurationAction());
-        project.getDependencies().getAttributesSchema().attribute(ARTIFACT_TYPE_ATTRIBUTE, new ElasticJarAttrMatchingStrategyConfigurationAction());
 
         return classpath;
     }

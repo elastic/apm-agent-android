@@ -40,6 +40,10 @@ public class TrueTimeWrapper {
         TrueTime.build().withSharedPreferencesCache(context);
     }
 
+    public void withRootDispersionMax(float rootDispersionMax) {
+        TrueTime.build().withRootDispersionMax(rootDispersionMax);
+    }
+
     public boolean isInitialized() {
         return TrueTime.isInitialized();
     }

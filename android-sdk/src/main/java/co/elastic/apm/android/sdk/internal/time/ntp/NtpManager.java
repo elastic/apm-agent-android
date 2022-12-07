@@ -48,6 +48,7 @@ public final class NtpManager implements BackgroundExecutor.Callback<Void> {
 
     public void initialize() {
         trueTimeWrapper.withSharedPreferencesCache();
+        trueTimeWrapper.withRootDispersionMax(200);
         if (trueTimeWrapper.isInitialized()) {
             Elog.getLogger().info("NTP already initialized");
             return;

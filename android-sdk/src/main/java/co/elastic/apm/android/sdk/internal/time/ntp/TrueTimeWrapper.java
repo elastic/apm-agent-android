@@ -51,4 +51,8 @@ public class TrueTimeWrapper {
     public Date now() throws IllegalStateException {
         return TrueTime.now();
     }
+
+    public void clearCachedInfo() {
+        TrueTime.clearCachedInfo();
+    }
 }

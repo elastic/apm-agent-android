@@ -1,8 +1,14 @@
 package co.elastic.apm.compile.tools.plugins.subprojects;
 
+import static co.elastic.apm.compile.tools.embedding.EmbeddingDependenciesPlugin.EMBEDDED_CLASSPATH_NAME;
+
 import org.gradle.api.Project;
+import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.attributes.LibraryElements;
 import org.gradle.api.tasks.TaskProvider;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import co.elastic.apm.compile.tools.extensions.LicensesFinderExtension;
 import co.elastic.apm.compile.tools.plugins.BaseNoticePlugin;
@@ -43,5 +49,16 @@ public class BaseSubprojectPlugin extends BaseNoticePlugin {
 
         project.getArtifacts().add(noticeFilesName, noticesCollectorProvider.flatMap(NoticeFilesCollectorTask::getOutputDir),
                 configurablePublishArtifact -> configurablePublishArtifact.builtBy(noticesCollectorProvider));
+    }
+
+    protected List<Configuration> getRuntimeConfigurations(Project project, Configuration classpath) {
+        List<Configuration> configurations = new ArrayList<>();
+        configurations.add(classpath);
+        Configuration embeddedClasspath = project.getConfigurations().findByName(EMBEDDED_CLASSPATH_NAME);
+        if (embeddedClasspath != null) {
+            configurations.add(embeddedClasspath);
+        }
+
+        return configurations;
     }
 }

@@ -23,6 +23,7 @@ import androidx.annotation.NonNull;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
 import co.elastic.apm.android.sdk.traces.session.SessionIdProvider;
 
 /**
@@ -31,16 +32,16 @@ import co.elastic.apm.android.sdk.traces.session.SessionIdProvider;
  * then a new session id is generated.
  */
 public class DefaultSessionIdProvider implements SessionIdProvider {
-    private final CurrentTimeMillisProvider currentTimeMillisProvider;
+    private final SystemTimeProvider systemTimeProvider;
     private long expireTimeMillis;
     private String sessionId;
 
-    DefaultSessionIdProvider(CurrentTimeMillisProvider currentTimeMillisProvider) {
-        this.currentTimeMillisProvider = currentTimeMillisProvider;
+    DefaultSessionIdProvider(SystemTimeProvider systemTimeProvider) {
+        this.systemTimeProvider = systemTimeProvider;
     }
 
     public DefaultSessionIdProvider() {
-        this(new SystemCurrentTimeMillisProvider());
+        this(SystemTimeProvider.get());
     }
 
     @NonNull
@@ -55,7 +56,7 @@ public class DefaultSessionIdProvider implements SessionIdProvider {
     }
 
     private void verifySessionExpiration() {
-        if (currentTimeMillisProvider.getCurrentTimeMillis() >= expireTimeMillis) {
+        if (systemTimeProvider.getCurrentTimeMillis() >= expireTimeMillis) {
             sessionId = null;
         }
     }
@@ -65,6 +66,6 @@ public class DefaultSessionIdProvider implements SessionIdProvider {
     }
 
     private void scheduleExpireTime() {
-        expireTimeMillis = currentTimeMillisProvider.getCurrentTimeMillis() + TimeUnit.MINUTES.toMillis(30);
+        expireTimeMillis = systemTimeProvider.getCurrentTimeMillis() + TimeUnit.MINUTES.toMillis(30);
     }
 }

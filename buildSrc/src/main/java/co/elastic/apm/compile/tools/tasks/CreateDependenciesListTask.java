@@ -56,7 +56,7 @@ public abstract class CreateDependenciesListTask extends BasePomTask {
                 }
                 TextUtils.writeText(stream, String.format(LICENSE_TITLE_FORMAT, license.name));
                 List<ArtifactIdentification> identifications = licensedArtifacts.get(license);
-                identifications.sort(Comparator.comparing(it -> it.name.toLowerCase(Locale.US)));
+                identifications.sort(Comparator.comparing(it -> it.getDisplayName().toLowerCase(Locale.US)));
                 Map<String, List<ArtifactIdentification>> linesSet = new HashMap<>();
                 for (ArtifactIdentification identification : identifications) {
                     String displayName = identification.getDisplayName();

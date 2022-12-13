@@ -9,6 +9,7 @@ import org.gradle.maven.MavenModule;
 import org.gradle.maven.MavenPomArtifact;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -17,7 +18,7 @@ import co.elastic.apm.compile.tools.tasks.BaseTask;
 
 public class BasePomTask extends BaseTask {
 
-    protected List<ResolvedArtifactResult> getPomArtifacts(List<ComponentIdentifier> fromIds) {
+    protected List<ResolvedArtifactResult> getPomArtifacts(Collection<ComponentIdentifier> fromIds) {
         return getPomArtifacts(getPomBaseQuery().forComponents(fromIds));
     }
 

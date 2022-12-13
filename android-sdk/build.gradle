@@ -1,5 +1,6 @@
 plugins {
     id 'com.android.library'
+    id 'co.elastic.apm.dependency.embedder'
 }
 
 android {
@@ -40,6 +41,8 @@ dependencies {
     implementation "io.opentelemetry:opentelemetry-exporter-otlp:$openTelemetry_version"
     implementation "io.opentelemetry:opentelemetry-semconv:$openTelemetry_version-alpha"
     implementation "androidx.annotation:annotation:$androidAnnotations_version"
+    embedded 'com.github.instacart.truetime-android:library:3.5'
+    testImplementation "org.mockito:mockito-core:4.9.0"
     testImplementation "junit:junit:$junit_version"
     androidTestImplementation 'androidx.test:runner:1.4.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'

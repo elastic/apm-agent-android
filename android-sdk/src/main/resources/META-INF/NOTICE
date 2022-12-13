@@ -6,6 +6,7 @@ Copyright 2018-2022 Elasticsearch B.V.
 This product includes software licensed under the 'Apache License Version 2.0' license from the following sources:
 
  - Android Support Library Annotations (https://developer.android.com/jetpack/androidx/releases/annotation#1.4.0)
+ - com.github.instacart.truetime-android:library:3.5
  - okhttp (https://square.github.io/okhttp/)
  - OpenTelemetry Java (https://github.com/open-telemetry/opentelemetry-java)
  - Weakly referenced lock-free data structures (https://github.com/raphw/weak-lock-free)

@@ -16,12 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.traces.session.impl;
+package co.elastic.apm.android.sdk.internal.concurrency;
 
-public class SystemCurrentTimeMillisProvider implements CurrentTimeMillisProvider {
-
-    @Override
-    public long getCurrentTimeMillis() {
-        return System.currentTimeMillis();
-    }
+public interface BackgroundWork<T> {
+    T execute();
 }

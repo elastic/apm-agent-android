@@ -22,14 +22,18 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
 
+import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
+import co.elastic.apm.android.sdk.testutils.BaseTest;
 import co.elastic.apm.android.sdk.traces.session.SessionIdProvider;
 
-public class DefaultSessionIdProviderTest {
+public class DefaultSessionIdProviderTest extends BaseTest {
 
     @Test
     public void whenSessionIdIsRequested_provideNonEmptyId() {
@@ -51,13 +55,13 @@ public class DefaultSessionIdProviderTest {
     @Test
     public void whenSessionIdIsRequestedAgainAfter30Min_provideNewId_andKeepItWhenLessThan30MinsTimePassed() {
         int initialTime = 1_000_000;
-        TestCurrentTimeMillisProvider currentTimeMillisProvider = new TestCurrentTimeMillisProvider(initialTime);
-        DefaultSessionIdProvider sessionIdProvider = getSessionIdProvider(currentTimeMillisProvider);
+        SystemTimeProvider systemTimeProvider = getSystemTimeProvider(initialTime);
+        DefaultSessionIdProvider sessionIdProvider = getSessionIdProvider(systemTimeProvider);
 
         String firstId = sessionIdProvider.getSessionId();
 
         // Should change after 30 mins
-        currentTimeMillisProvider.timeMillis += TimeUnit.MINUTES.toMillis(30);
+        addTimeInMillis(systemTimeProvider, TimeUnit.MINUTES.toMillis(30));
 
         String secondId = sessionIdProvider.getSessionId();
 
@@ -65,50 +69,47 @@ public class DefaultSessionIdProviderTest {
 
         // Should keep the new id for other 30 mins
 
-        currentTimeMillisProvider.timeMillis += TimeUnit.MINUTES.toMillis(10);
+        addTimeInMillis(systemTimeProvider, TimeUnit.MINUTES.toMillis(10));
 
         assertEquals(secondId, sessionIdProvider.getSessionId());
+    }
+
+    private void addTimeInMillis(SystemTimeProvider systemTimeProvider, long extraTimeInMillis) {
+        doReturn(systemTimeProvider.getCurrentTimeMillis() + extraTimeInMillis).when(systemTimeProvider).getCurrentTimeMillis();
+    }
+
+    private SystemTimeProvider getSystemTimeProvider(long initialCurrentTimeMillis) {
+        SystemTimeProvider mock = mock(SystemTimeProvider.class);
+        doReturn(initialCurrentTimeMillis).when(mock).getCurrentTimeMillis();
+        return mock;
     }
 
     @Test
     public void whenSessionIdIsRequested_timeoutShouldResetToKeepTheSameIdForOther30mins() {
         int initialTime = 1_000_000;
-        TestCurrentTimeMillisProvider currentTimeMillisProvider = new TestCurrentTimeMillisProvider(initialTime);
-        DefaultSessionIdProvider sessionIdProvider = getSessionIdProvider(currentTimeMillisProvider);
+        SystemTimeProvider systemTimeProvider = getSystemTimeProvider(initialTime);
+        DefaultSessionIdProvider sessionIdProvider = getSessionIdProvider(systemTimeProvider);
 
         String firstId = sessionIdProvider.getSessionId();
 
         // Forward just before 30 mins.
-        currentTimeMillisProvider.timeMillis += TimeUnit.MINUTES.toMillis(29);
+        addTimeInMillis(systemTimeProvider, TimeUnit.MINUTES.toMillis(29));
 
         assertEquals(firstId, sessionIdProvider.getSessionId());
 
         // Timeout should reset after the previous call to request the id.
 
         // Forward another 29 mins:
-        currentTimeMillisProvider.timeMillis += TimeUnit.MINUTES.toMillis(29);
+        addTimeInMillis(systemTimeProvider, TimeUnit.MINUTES.toMillis(29));
 
         assertEquals(firstId, sessionIdProvider.getSessionId());
     }
 
     private DefaultSessionIdProvider getSessionIdProvider() {
-        return getSessionIdProvider(new SystemCurrentTimeMillisProvider());
+        return getSessionIdProvider(SystemTimeProvider.get());
     }
 
-    private DefaultSessionIdProvider getSessionIdProvider(CurrentTimeMillisProvider currentTimeMillisProvider) {
-        return new DefaultSessionIdProvider(currentTimeMillisProvider);
-    }
-
-    private static class TestCurrentTimeMillisProvider implements CurrentTimeMillisProvider {
-        private long timeMillis;
-
-        private TestCurrentTimeMillisProvider(long timeMillis) {
-            this.timeMillis = timeMillis;
-        }
-
-        @Override
-        public long getCurrentTimeMillis() {
-            return timeMillis;
-        }
+    private DefaultSessionIdProvider getSessionIdProvider(SystemTimeProvider systemTimeProvider) {
+        return new DefaultSessionIdProvider(systemTimeProvider);
     }
 }

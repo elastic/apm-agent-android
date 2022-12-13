@@ -16,25 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.traces.otel.exporter;
+package co.elastic.apm.android.sdk.internal.concurrency;
 
-import java.util.concurrent.TimeUnit;
+public final class Result<T> {
+    public final T value;
+    public final Throwable error;
+    public final boolean isSuccess;
 
-import io.opentelemetry.api.common.AttributeKey;
-import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.sdk.trace.data.DelegatingSpanData;
-import io.opentelemetry.sdk.trace.data.SpanData;
-
-class TimeSkewAwareSpanData extends DelegatingSpanData {
-
-    protected TimeSkewAwareSpanData(SpanData delegate) {
-        super(delegate);
+    private Result(T result, Throwable error, boolean isSuccess) {
+        this.value = result;
+        this.error = error;
+        this.isSuccess = isSuccess;
     }
 
-    @Override
-    public Resource getResource() {
-        return super.getResource()
-                .merge(Resource.create(Attributes.of(AttributeKey.longKey("telemetry.sdk.elastic_export_timestamp"), TimeUnit.MILLISECONDS.toNanos(System.currentTimeMillis()))));
+    public static <T> Result<T> success(T value) {
+        return new Result<>(value, null, true);
+    }
+
+    public static <T> Result<T> error(Throwable error) {
+        return new Result<>(null, error, false);
     }
 }

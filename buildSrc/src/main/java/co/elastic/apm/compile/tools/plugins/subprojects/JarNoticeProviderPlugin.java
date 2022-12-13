@@ -1,7 +1,10 @@
 package co.elastic.apm.compile.tools.plugins.subprojects;
 
 import org.gradle.api.Project;
+import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.tasks.TaskProvider;
+
+import java.util.List;
 
 import co.elastic.apm.compile.tools.tasks.CreateDependenciesListTask;
 import co.elastic.apm.compile.tools.tasks.CreateNoticeTask;
@@ -14,14 +17,15 @@ public class JarNoticeProviderPlugin extends BaseSubprojectPlugin {
     @Override
     public void apply(Project project) {
         super.apply(project);
+        List<Configuration> runtimeClasspath = getRuntimeConfigurations(project, project.getConfigurations().getByName("runtimeClasspath"));
         TaskProvider<PomLicensesCollectorTask> pomLicensesFinder = project.getTasks().register("dependenciesLicencesFinder", PomLicensesCollectorTask.class, task -> {
-            task.getRuntimeDependencies().set(project.getConfigurations().getByName("runtimeClasspath"));
+            task.getRuntimeDependencies().set(runtimeClasspath);
             task.getLicensesFound().set(project.getLayout().getBuildDirectory().file(task.getName() + "/licenses.txt"));
             task.getManualLicenseMapping().set(licensesConfig.manualMappingFile);
         });
 
         TaskProvider<NoticeFilesCollectorTask> noticeCollector = project.getTasks().register("noticeFilesCollector", NoticeFilesCollectorTask.class, task -> {
-            task.getRuntimeDependencies().set(project.getConfigurations().getByName("runtimeClasspath"));
+            task.getRuntimeDependencies().set(runtimeClasspath);
             task.getOutputDir().set(project.getLayout().getBuildDirectory().dir(task.getName()));
         });
 

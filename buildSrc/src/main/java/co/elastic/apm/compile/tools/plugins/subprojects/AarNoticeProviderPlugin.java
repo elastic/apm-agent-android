@@ -18,6 +18,7 @@ import co.elastic.apm.compile.tools.tasks.CreateDependenciesListTask;
 import co.elastic.apm.compile.tools.tasks.CreateNoticeTask;
 import co.elastic.apm.compile.tools.tasks.NoticeMergerTask;
 import co.elastic.apm.compile.tools.tasks.subprojects.CopySingleFileTask;
+import co.elastic.apm.compile.tools.tasks.subprojects.DependenciesHasherTask;
 import co.elastic.apm.compile.tools.tasks.subprojects.NoticeFilesCollectorTask;
 import co.elastic.apm.compile.tools.tasks.subprojects.PomLicensesCollectorTask;
 import co.elastic.apm.compile.tools.utils.Constants;
@@ -36,6 +37,10 @@ public class AarNoticeProviderPlugin extends BaseSubprojectPlugin {
             Configuration runtimeClasspath = component.getVariantDependencies().getRuntimeClasspath();
             Configuration apmToolsClasspath = wrapConfiguration(project, variant, runtimeClasspath);
             List<Configuration> runtimeConfigs = getRuntimeConfigurations(project, apmToolsClasspath);
+            project.getTasks().register(variant.getName() + "DependenciesHasher", DependenciesHasherTask.class, task -> {
+                task.getRuntimeDependencies().set(runtimeConfigs);
+                task.getOutputFile().set(project.getLayout().getBuildDirectory().file(task.getName() + "/" + "dependencies_hash.txt"));
+            });
             TaskProvider<PomLicensesCollectorTask> pomLicensesFinder = project.getTasks().register(variant.getName() + "DependenciesLicencesFinder", PomLicensesCollectorTask.class, task -> {
                 task.getRuntimeDependencies().set(runtimeConfigs);
                 task.getLicensesFound().set(project.getLayout().getBuildDirectory().file(task.getName() + "/licenses.txt"));

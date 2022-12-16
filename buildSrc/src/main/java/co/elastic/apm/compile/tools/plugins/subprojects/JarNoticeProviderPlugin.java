@@ -9,6 +9,7 @@ import java.util.List;
 import co.elastic.apm.compile.tools.tasks.CreateDependenciesListTask;
 import co.elastic.apm.compile.tools.tasks.CreateNoticeTask;
 import co.elastic.apm.compile.tools.tasks.NoticeMergerTask;
+import co.elastic.apm.compile.tools.tasks.subprojects.DependenciesHasherTask;
 import co.elastic.apm.compile.tools.tasks.subprojects.NoticeFilesCollectorTask;
 import co.elastic.apm.compile.tools.tasks.subprojects.PomLicensesCollectorTask;
 
@@ -18,12 +19,15 @@ public class JarNoticeProviderPlugin extends BaseSubprojectPlugin {
     public void apply(Project project) {
         super.apply(project);
         List<Configuration> runtimeClasspath = getRuntimeConfigurations(project, project.getConfigurations().getByName("runtimeClasspath"));
+        project.getTasks().register("dependenciesHasher", DependenciesHasherTask.class, task -> {
+            task.getRuntimeDependencies().set(runtimeClasspath);
+            task.getOutputFile().set(project.getLayout().getBuildDirectory().file(task.getName() + "/" + "dependencies_hash.txt"));
+        });
         TaskProvider<PomLicensesCollectorTask> pomLicensesFinder = project.getTasks().register("dependenciesLicencesFinder", PomLicensesCollectorTask.class, task -> {
             task.getRuntimeDependencies().set(runtimeClasspath);
             task.getLicensesFound().set(project.getLayout().getBuildDirectory().file(task.getName() + "/licenses.txt"));
             task.getManualLicenseMapping().set(licensesConfig.manualMappingFile);
         });
-
         TaskProvider<NoticeFilesCollectorTask> noticeCollector = project.getTasks().register("noticeFilesCollector", NoticeFilesCollectorTask.class, task -> {
             task.getRuntimeDependencies().set(runtimeClasspath);
             task.getOutputDir().set(project.getLayout().getBuildDirectory().dir(task.getName()));

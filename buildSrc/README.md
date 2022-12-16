@@ -15,6 +15,7 @@ Table of Contents
 
 * [Creating NOTICE files](#creating-notice-files)
     * [Troubleshooting](#troubleshooting)
+* [Verifying NOTICE files](#verifying-notice-files)
 * [Adding source headers](#adding-source-headers)
 * [Publishing](#publishing)
     * [Publishing parameters](#publishing-parameters)

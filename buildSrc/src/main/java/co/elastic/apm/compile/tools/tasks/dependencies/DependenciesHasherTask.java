@@ -1,4 +1,4 @@
-package co.elastic.apm.compile.tools.tasks.subprojects;
+package co.elastic.apm.compile.tools.tasks.dependencies;
 
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.component.ComponentIdentifier;
@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import co.elastic.apm.compile.tools.tasks.subprojects.BasePomTask;
 import co.elastic.apm.compile.tools.utils.TextUtils;
 
 /**

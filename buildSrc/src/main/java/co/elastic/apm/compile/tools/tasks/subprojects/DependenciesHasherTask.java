@@ -45,7 +45,7 @@ public abstract class DependenciesHasherTask extends BasePomTask {
     private List<String> extractUrisAlphabeticallyOrdered(List<ResolvedArtifactResult> artifacts) {
         List<String> uris = new ArrayList<>();
         for (ResolvedArtifactResult artifact : artifacts) {
-            uris.add(artifact.getId().getDisplayName().toLowerCase(Locale.US));
+            uris.add(artifact.getId().getComponentIdentifier().getDisplayName().toLowerCase(Locale.US));
         }
         Collections.sort(uris);
         return uris;

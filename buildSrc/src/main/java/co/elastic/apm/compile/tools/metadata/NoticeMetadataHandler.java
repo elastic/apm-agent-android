@@ -38,6 +38,10 @@ public class NoticeMetadataHandler {
         this.properties = properties;
     }
 
+    public String getDependenciesHash() {
+        return properties.getProperty(PROPERTY_DEPENDENCIES_HASH);
+    }
+
     public void setDependenciesHash(String dependenciesHash) {
         properties.setProperty(PROPERTY_DEPENDENCIES_HASH, dependenciesHash);
     }

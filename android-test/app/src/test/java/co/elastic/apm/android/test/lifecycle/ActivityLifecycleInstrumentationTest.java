@@ -8,7 +8,6 @@ import org.robolectric.android.controller.ActivityController;
 
 import java.util.List;
 
-import co.elastic.apm.android.test.activities.EmptyTitleActivity;
 import co.elastic.apm.android.test.activities.ErrorActivity;
 import co.elastic.apm.android.test.activities.ErrorHalfWayActivity;
 import co.elastic.apm.android.test.activities.FullCreationActivity;
@@ -245,7 +244,7 @@ public class ActivityLifecycleInstrumentationTest extends BaseLifecycleInstrumen
     }
 
     @Test
-    public void onCreation_whenTitleIsAvailable_useItForRootSpanName() {
+    public void onCreation_whenTitleIsAvailable_keepPreviouslySetSpanName() {
         try (ActivityController<TitleActivity> controller = Robolectric.buildActivity(TitleActivity.class)) {
             controller.setup();
             List<SpanData> spans = getRecordedSpans(2);
@@ -255,26 +254,7 @@ public class ActivityLifecycleInstrumentationTest extends BaseLifecycleInstrumen
 
             Spans.verify(rootSpan)
                     .hasNoParent()
-                    .isNamed("A title - View appearing");
-
-            Spans.verify(onCreateSpan)
-                    .isDirectChildOf(rootSpan)
-                    .isNamed(getSpanMethodName(ActivityMethod.ON_CREATE));
-        }
-    }
-
-    @Test
-    public void onCreation_whenTitleIsAvailableButEmpty_useClassNameForRootSpanName() {
-        try (ActivityController<EmptyTitleActivity> controller = Robolectric.buildActivity(EmptyTitleActivity.class)) {
-            controller.setup();
-            List<SpanData> spans = getRecordedSpans(2);
-
-            SpanData rootSpan = spans.get(0);
-            SpanData onCreateSpan = spans.get(1);
-
-            Spans.verify(rootSpan)
-                    .hasNoParent()
-                    .isNamed(getRootLifecycleSpanName(EmptyTitleActivity.class));
+                    .isNamed(getRootLifecycleSpanName(TitleActivity.class));
 
             Spans.verify(onCreateSpan)
                     .isDirectChildOf(rootSpan)

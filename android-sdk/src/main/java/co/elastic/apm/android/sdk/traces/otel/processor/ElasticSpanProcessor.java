@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.traces.session.SessionIdProvider;
 import io.opentelemetry.api.common.AttributeKey;
@@ -51,6 +52,7 @@ public class ElasticSpanProcessor implements SpanProcessor {
     public void onStart(Context parentContext, ReadWriteSpan span) {
         span.setAttribute(SESSION_ID_ATTRIBUTE_KEY, getSessionId());
         span.setAttribute(TRANSACTION_TYPE_ATTRIBUTE_KEY, TRANSACTION_TYPE_VALUE);
+        Elog.getLogger().debug("Starting span: '{}', within context: '{}'", span, parentContext);
         original.onStart(parentContext, span);
     }
 
@@ -66,8 +68,10 @@ public class ElasticSpanProcessor implements SpanProcessor {
     @Override
     public void onEnd(ReadableSpan span) {
         if (shouldExclude(span)) {
+            Elog.getLogger().debug("Excluding span: {}", span);
             return;
         }
+        Elog.getLogger().debug("Ending span: {}", span);
         original.onEnd(span);
     }
 

@@ -85,8 +85,9 @@ public class LifecycleMultiMethodSpan {
 
     private static void ensureRootSpanIsCreated(String ownerName, ElasticTracer tracer) {
         if (SpanUtilities.runningSpanNotFound()) {
-            Elog.getLogger().debug("Creating root span for {}", ownerName);
-            SpanBuilder spanBuilder = tracer.spanBuilder(ownerName + ROOT_SPAN_SUFFIX);
+            String spanName = ownerName.substring(ownerName.lastIndexOf('.') + 1);
+            Elog.getLogger().debug("Creating root span named {} for {}", spanName, ownerName);
+            SpanBuilder spanBuilder = tracer.spanBuilder(spanName + ROOT_SPAN_SUFFIX);
             Span rootSpan = spanBuilder.startSpan();
             rootSpan.makeCurrent();
         }

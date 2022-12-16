@@ -18,6 +18,7 @@ import co.elastic.apm.compile.tools.tasks.CreateDependenciesListTask;
 import co.elastic.apm.compile.tools.tasks.CreateNoticeTask;
 import co.elastic.apm.compile.tools.tasks.NoticeMergerTask;
 import co.elastic.apm.compile.tools.tasks.dependencies.DependenciesHasherTask;
+import co.elastic.apm.compile.tools.tasks.dependencies.DependenciesVerifierTask;
 import co.elastic.apm.compile.tools.tasks.subprojects.CopySingleFileTask;
 import co.elastic.apm.compile.tools.tasks.subprojects.NoticeFilesCollectorTask;
 import co.elastic.apm.compile.tools.tasks.subprojects.PomLicensesCollectorTask;
@@ -69,6 +70,9 @@ public class AarNoticeProviderPlugin extends BaseSubprojectPlugin {
                 project.getTasks().register(TASK_CREATE_NOTICE_FILE_NAME, CopySingleFileTask.class, task -> {
                     task.getInputFile().set(createNotice.flatMap(CreateNoticeTask::getOutputFile));
                     task.getOutputFile().set(project.getLayout().getProjectDirectory().file("src/main/resources/META-INF/NOTICE"));
+                });
+                project.getTasks().register(TASK_VERIFY_NOTICE_FILE_NAME, DependenciesVerifierTask.class, task -> {
+                    task.getDependenciesHashFile().set(dependenciesHasher.flatMap(DependenciesHasherTask::getOutputFile));
                 });
                 setUpLicensedDependencies(project, pomLicensesFinder);
                 setUpNoticeFilesProvider(project, noticeCollector);

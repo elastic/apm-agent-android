@@ -1,5 +1,6 @@
 package co.elastic.apm.compile.tools.tasks;
 
+import org.apache.commons.io.FileUtils;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.tasks.InputFile;
@@ -15,12 +16,14 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
 import co.elastic.apm.compile.tools.data.ArtifactLicense;
+import co.elastic.apm.compile.tools.metadata.NoticeMetadataHandler;
 import co.elastic.apm.compile.tools.utils.TextUtils;
 
 public abstract class CreateNoticeTask extends BaseTask {
@@ -34,8 +37,18 @@ public abstract class CreateNoticeTask extends BaseTask {
     @InputFile
     public abstract RegularFileProperty getFoundLicensesIds();
 
+    @InputFile
+    public abstract RegularFileProperty getDependenciesHashFile();
+
     @OutputFile
     public abstract RegularFileProperty getOutputFile();
+
+    @OutputFile
+    public abstract RegularFileProperty getMetadataOutputFile();
+
+    public CreateNoticeTask() {
+        getMetadataOutputFile().set(NoticeMetadataHandler.getMetadataFile(getProject()));
+    }
 
     @TaskAction
     public void action() {
@@ -65,6 +78,20 @@ public abstract class CreateNoticeTask extends BaseTask {
                 addLicenses(outputStream, licenseIds);
             }
             outputStream.close();
+            saveMetadata();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void saveMetadata() {
+        File metadataFile = getMetadataOutputFile().get().getAsFile();
+        File dependenciesHashFile = getDependenciesHashFile().get().getAsFile();
+        try {
+            String dependenciesHash = FileUtils.readFileToString(dependenciesHashFile, StandardCharsets.UTF_8);
+            NoticeMetadataHandler noticeMetadataHandler = NoticeMetadataHandler.create();
+            noticeMetadataHandler.setDependenciesHash(dependenciesHash);
+            noticeMetadataHandler.save(metadataFile);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

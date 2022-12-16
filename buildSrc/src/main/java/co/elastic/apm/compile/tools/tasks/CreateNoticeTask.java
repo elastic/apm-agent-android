@@ -1,10 +1,12 @@
 package co.elastic.apm.compile.tools.tasks;
 
 import org.apache.commons.io.FileUtils;
+import org.gradle.api.Project;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.InputFiles;
+import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 
@@ -38,6 +40,7 @@ public abstract class CreateNoticeTask extends BaseTask {
     public abstract RegularFileProperty getFoundLicensesIds();
 
     @InputFile
+    @Optional
     public abstract RegularFileProperty getDependenciesHashFile();
 
     @OutputFile
@@ -85,8 +88,13 @@ public abstract class CreateNoticeTask extends BaseTask {
     }
 
     private void saveMetadata() {
-        File metadataFile = getMetadataOutputFile().get().getAsFile();
+        if (!getDependenciesHashFile().isPresent()) {
+            Project project = getProject();
+            project.getLogger().lifecycle("Skipping metadata saving for project: " + project.getName());
+            return;
+        }
         File dependenciesHashFile = getDependenciesHashFile().get().getAsFile();
+        File metadataFile = getMetadataOutputFile().get().getAsFile();
         try {
             String dependenciesHash = FileUtils.readFileToString(dependenciesHashFile, StandardCharsets.UTF_8);
             NoticeMetadataHandler noticeMetadataHandler = NoticeMetadataHandler.create();

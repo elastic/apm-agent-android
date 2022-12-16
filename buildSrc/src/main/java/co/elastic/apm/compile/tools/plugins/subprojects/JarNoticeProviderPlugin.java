@@ -19,7 +19,7 @@ public class JarNoticeProviderPlugin extends BaseSubprojectPlugin {
     public void apply(Project project) {
         super.apply(project);
         List<Configuration> runtimeClasspath = getRuntimeConfigurations(project, project.getConfigurations().getByName("runtimeClasspath"));
-        project.getTasks().register("dependenciesHasher", DependenciesHasherTask.class, task -> {
+        TaskProvider<DependenciesHasherTask> dependenciesHasher = project.getTasks().register("dependenciesHasher", DependenciesHasherTask.class, task -> {
             task.getRuntimeDependencies().set(runtimeClasspath);
             task.getOutputFile().set(project.getLayout().getBuildDirectory().file(task.getName() + "/" + "dependencies_hash.txt"));
         });
@@ -47,6 +47,7 @@ public class JarNoticeProviderPlugin extends BaseSubprojectPlugin {
             task.getMergedNoticeFiles().from(noticeFilesMerger.flatMap(NoticeMergerTask::getOutputFile));
             task.getLicensedDependencies().set(licensesDependencies.flatMap(CreateDependenciesListTask::getOutputFile));
             task.getFoundLicensesIds().set(pomLicensesFinder.flatMap(PomLicensesCollectorTask::getLicensesFound));
+            task.getDependenciesHashFile().set(dependenciesHasher.flatMap(DependenciesHasherTask::getOutputFile));
             task.getOutputFile().set(project.getLayout().getProjectDirectory().file("src/main/resources/META-INF/NOTICE"));
         });
 

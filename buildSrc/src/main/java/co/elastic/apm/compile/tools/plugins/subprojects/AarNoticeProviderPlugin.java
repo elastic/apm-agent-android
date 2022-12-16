@@ -37,7 +37,7 @@ public class AarNoticeProviderPlugin extends BaseSubprojectPlugin {
             Configuration runtimeClasspath = component.getVariantDependencies().getRuntimeClasspath();
             Configuration apmToolsClasspath = wrapConfiguration(project, variant, runtimeClasspath);
             List<Configuration> runtimeConfigs = getRuntimeConfigurations(project, apmToolsClasspath);
-            project.getTasks().register(variant.getName() + "DependenciesHasher", DependenciesHasherTask.class, task -> {
+            TaskProvider<DependenciesHasherTask> dependenciesHasher = project.getTasks().register(variant.getName() + "DependenciesHasher", DependenciesHasherTask.class, task -> {
                 task.getRuntimeDependencies().set(runtimeConfigs);
                 task.getOutputFile().set(project.getLayout().getBuildDirectory().file(task.getName() + "/" + "dependencies_hash.txt"));
             });
@@ -62,6 +62,7 @@ public class AarNoticeProviderPlugin extends BaseSubprojectPlugin {
                 task.getMergedNoticeFiles().from(noticeFilesMerger.flatMap(NoticeMergerTask::getOutputFile));
                 task.getLicensedDependencies().set(licensesDependencies.flatMap(CreateDependenciesListTask::getOutputFile));
                 task.getFoundLicensesIds().set(pomLicensesFinder.flatMap(PomLicensesCollectorTask::getLicensesFound));
+                task.getDependenciesHashFile().set(dependenciesHasher.flatMap(DependenciesHasherTask::getOutputFile));
                 task.getOutputFile().set(project.getLayout().getBuildDirectory().file(task.getName() + "/" + "notice_file.txt"));
             });
             if (apmExtension.variantName.get().equals(variant.getName())) {

@@ -1,5 +1,7 @@
 package co.elastic.apm.compile.tools.tasks.dependencies;
 
+import static co.elastic.apm.compile.tools.plugins.BaseNoticePlugin.TASK_CREATE_NOTICE_FILE_NAME;
+
 import org.apache.commons.io.FileUtils;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
@@ -27,12 +29,15 @@ public abstract class DependenciesVerifierTask extends DefaultTask {
     public void execute() {
         File dependencyHashFile = getDependenciesHashFile().get().getAsFile();
         File noticePropertiesFile = NoticeMetadataHandler.getMetadataFile(getProject()).getAsFile();
+        if (!noticePropertiesFile.exists()) {
+            throw new GradleException("No NOTICE file has been created for this project, run the `" + TASK_CREATE_NOTICE_FILE_NAME + "` task to generate it.");
+        }
         NoticeMetadataHandler noticeMetadataHandler = NoticeMetadataHandler.read(noticePropertiesFile);
         String currentDependenciesHash = readDependenciesHash(dependencyHashFile);
         String lastStoredDependenciesHash = noticeMetadataHandler.getDependenciesHash();
 
         if (!Objects.equals(currentDependenciesHash, lastStoredDependenciesHash)) {
-            throw new GradleException("The NOTICE file is outdated, run the `createNoticeFile` task to re-generate it.");
+            throw new GradleException("The NOTICE file is outdated, run the `" + TASK_CREATE_NOTICE_FILE_NAME + "` task to re-generate it.");
         }
     }
 

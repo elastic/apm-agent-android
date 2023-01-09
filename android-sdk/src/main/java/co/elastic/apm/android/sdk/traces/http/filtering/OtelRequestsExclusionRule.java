@@ -26,6 +26,6 @@ public class OtelRequestsExclusionRule extends HttpExclusionRule {
 
     @Override
     public boolean exclude(@NonNull HttpRequest request) {
-        return request.url.getPath().startsWith("/opentelemetry.proto.collector.trace.v1.TraceService");
+        return request.url.getPath().startsWith("/opentelemetry.proto.collector");
     }
 }

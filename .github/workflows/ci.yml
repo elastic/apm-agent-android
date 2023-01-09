@@ -20,6 +20,8 @@ jobs:
       - uses: actions/checkout@v3
       - name: lint
         run: ./gradlew lint
+      - name: Verify OSS compliance
+        run: ./gradlew verifyNoticeFile
       - name: Build
         run: ./gradlew assemble
       - name: Test

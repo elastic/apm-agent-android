@@ -22,11 +22,11 @@ import co.elastic.apm.android.sdk.traces.connectivity.Connectivity;
 import io.opentelemetry.sdk.metrics.export.MetricReader;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 
-public class CustomProcessorConnectivity implements Connectivity {
+public class CustomConnectivity implements Connectivity {
     private final SpanProcessor spanProcessor;
     private final MetricReader metricReader;
 
-    public CustomProcessorConnectivity(SpanProcessor spanProcessor, MetricReader metricReader) {
+    public CustomConnectivity(SpanProcessor spanProcessor, MetricReader metricReader) {
         this.spanProcessor = spanProcessor;
         this.metricReader = metricReader;
     }

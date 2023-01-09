@@ -18,8 +18,6 @@
  */
 package co.elastic.apm.android.sdk.internal.instrumentation;
 
-import android.app.Activity;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -47,23 +45,13 @@ public class LifecycleMultiMethodSpan {
         return new SpanWithScope(span, scope);
     }
 
-    public static void onMethodExit(Object owner, SpanWithScope spanWithScope, Throwable thrown, boolean endRoot) {
-        Elog.getLogger().debug("Exiting lifecycle method from {} - endRoot: {}, thrown: {}", owner, endRoot, thrown);
+    public static void onMethodExit(String ownerName, SpanWithScope spanWithScope, Throwable thrown, boolean endRoot) {
+        Elog.getLogger().debug("Exiting lifecycle method from {} - endRoot: {}, thrown: {}", ownerName, endRoot, thrown);
         endMethodSpan(spanWithScope, thrown);
 
         Span rootSpan = Span.current();
         if (endRoot || thrown != null) {
-            trySetActivityTitleAsRootSpanName(owner, rootSpan);
             endRootSpanAndCleanUp(rootSpan);
-        }
-    }
-
-    private static void trySetActivityTitleAsRootSpanName(Object owner, Span rootSpan) {
-        if (owner instanceof Activity) {
-            CharSequence activityTitle = ((Activity) owner).getTitle();
-            if (activityTitle != null && !activityTitle.toString().isEmpty()) {
-                rootSpan.updateName(activityTitle + ROOT_SPAN_SUFFIX);
-            }
         }
     }
 
@@ -85,8 +73,9 @@ public class LifecycleMultiMethodSpan {
 
     private static void ensureRootSpanIsCreated(String ownerName, ElasticTracer tracer) {
         if (SpanUtilities.runningSpanNotFound()) {
-            Elog.getLogger().debug("Creating root span for {}", ownerName);
-            SpanBuilder spanBuilder = tracer.spanBuilder(ownerName + ROOT_SPAN_SUFFIX);
+            String spanName = ownerName.substring(ownerName.lastIndexOf('.') + 1);
+            Elog.getLogger().debug("Creating root span named {} for {}", spanName, ownerName);
+            SpanBuilder spanBuilder = tracer.spanBuilder(spanName + ROOT_SPAN_SUFFIX);
             Span rootSpan = spanBuilder.startSpan();
             rootSpan.makeCurrent();
         }

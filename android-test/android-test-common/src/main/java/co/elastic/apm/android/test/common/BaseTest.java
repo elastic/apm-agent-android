@@ -36,10 +36,6 @@ public abstract class BaseTest {
 
     protected abstract SpanExporterCaptor getSpanExporter();
 
-    protected String getClassSpanName(Class<?> theClass, String suffix) {
-        return theClass.getName() + suffix;
-    }
-
     protected SpanData getRecordedSpan() {
         return getRecordedSpans(1).get(0);
     }

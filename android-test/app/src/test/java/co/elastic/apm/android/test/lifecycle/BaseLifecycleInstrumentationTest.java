@@ -37,6 +37,6 @@ public abstract class BaseLifecycleInstrumentationTest extends BaseRobolectricTe
     }
 
     protected String getRootLifecycleSpanName(Class<?> theClass) {
-        return getClassSpanName(theClass, " - View appearing");
+        return theClass.getSimpleName() + " - View appearing";
     }
 }

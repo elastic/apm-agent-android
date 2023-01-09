@@ -26,6 +26,7 @@ import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.traces.session.SessionIdProvider;
 import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
 import io.opentelemetry.sdk.trace.ReadableSpan;
@@ -52,6 +53,7 @@ public class ElasticSpanProcessor implements SpanProcessor {
     public void onStart(Context parentContext, ReadWriteSpan span) {
         span.setAttribute(SESSION_ID_ATTRIBUTE_KEY, getSessionId());
         span.setAttribute(TRANSACTION_TYPE_ATTRIBUTE_KEY, TRANSACTION_TYPE_VALUE);
+        span.setStatus(StatusCode.OK);
         Elog.getLogger().debug("Starting span: '{}', within context: '{}'", span, parentContext);
         original.onStart(parentContext, span);
     }

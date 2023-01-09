@@ -1,6 +1,6 @@
 package co.elastic.apm.android.test.common.spans.verifiers;
 
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertEquals;
 
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.sdk.trace.data.SpanData;
@@ -8,6 +8,6 @@ import io.opentelemetry.sdk.trace.data.SpanData;
 public class SuccessfulSpanVerifier extends BaseSpanVerifier<SuccessfulSpanVerifier> {
     public SuccessfulSpanVerifier(SpanData span) {
         super(span);
-        assertNotEquals(StatusCode.ERROR, span.getStatus().getStatusCode());
+        assertEquals(StatusCode.OK, span.getStatus().getStatusCode());
     }
 }

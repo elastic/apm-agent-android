@@ -39,6 +39,7 @@ import co.elastic.apm.android.sdk.traces.otel.processor.ElasticSpanProcessor;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.SpanProcessor;
@@ -126,22 +127,30 @@ public final class ElasticApmAgent {
     }
 
     private void initializeOpentelemetry() {
+        Resource resource = Resource.getDefault()
+                .merge(globalAttributes.provideAsResource());
         OpenTelemetrySdk.builder()
-                .setTracerProvider(getTracerProvider())
+                .setTracerProvider(getTracerProvider(resource))
+                .setMeterProvider(getMeterProvider(resource))
                 .setPropagators(getContextPropagator())
                 .buildAndRegisterGlobal();
     }
 
-    private SdkTracerProvider getTracerProvider() {
-        Resource resource = Resource.getDefault()
-                .merge(globalAttributes.provideAsResource());
-
+    private SdkTracerProvider getTracerProvider(Resource resource) {
         ElasticSpanProcessor processor = getProcessor();
         processor.addAllExclusionRules(configuration.httpTraceConfiguration.exclusionRules);
 
         return SdkTracerProvider.builder()
                 .setClock(ntpManager.getClock())
                 .addSpanProcessor(processor)
+                .setResource(resource)
+                .build();
+    }
+
+    private SdkMeterProvider getMeterProvider(Resource resource) {
+        return SdkMeterProvider.builder()
+                .setClock(ntpManager.getClock())
+                .registerMetricReader(connectivityProvider.get().getMetricReader())
                 .setResource(resource)
                 .build();
     }

@@ -18,18 +18,26 @@
  */
 package co.elastic.apm.android.sdk.traces.connectivity.custom;
 
-import co.elastic.apm.android.sdk.traces.connectivity.base.BatchProcessingConnectivity;
+import co.elastic.apm.android.sdk.traces.connectivity.base.DefaultProcessingConnectivity;
+import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
-public class CustomExporterConnectivity extends BatchProcessingConnectivity {
-    private final SpanExporter exporter;
+public class CustomExporterConnectivity extends DefaultProcessingConnectivity {
+    private final SpanExporter spanExporter;
+    private final MetricExporter metricExporter;
 
-    public CustomExporterConnectivity(SpanExporter exporter) {
-        this.exporter = exporter;
+    public CustomExporterConnectivity(SpanExporter exporter, MetricExporter metricExporter) {
+        this.spanExporter = exporter;
+        this.metricExporter = metricExporter;
     }
 
     @Override
     protected SpanExporter provideSpanExporter() {
-        return exporter;
+        return spanExporter;
+    }
+
+    @Override
+    protected MetricExporter provideMetricExporter() {
+        return metricExporter;
     }
 }

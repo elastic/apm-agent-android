@@ -18,12 +18,19 @@
  */
 package co.elastic.apm.android.sdk.traces.connectivity;
 
-import co.elastic.apm.android.sdk.traces.connectivity.base.BatchProcessingConnectivity;
+import androidx.annotation.NonNull;
+
+import co.elastic.apm.android.sdk.traces.connectivity.base.DefaultProcessingConnectivity;
+import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
+import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporterBuilder;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporterBuilder;
+import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
-public class CommonConnectivity extends BatchProcessingConnectivity {
+public class CommonConnectivity extends DefaultProcessingConnectivity {
+    private final static String AUTHORIZATION_HEADER_NAME = "Authorization";
+    private final static String BEARER_TOKEN_FORMAT = "Bearer %s";
     private final String endpoint;
     private String token;
 
@@ -40,8 +47,22 @@ public class CommonConnectivity extends BatchProcessingConnectivity {
     protected SpanExporter provideSpanExporter() {
         OtlpGrpcSpanExporterBuilder exporterBuilder = OtlpGrpcSpanExporter.builder().setEndpoint(endpoint);
         if (token != null) {
-            exporterBuilder.addHeader("Authorization", "Bearer " + token);
+            exporterBuilder.addHeader(AUTHORIZATION_HEADER_NAME, getBearerToken());
         }
         return exporterBuilder.build();
+    }
+
+    @Override
+    protected MetricExporter provideMetricExporter() {
+        OtlpGrpcMetricExporterBuilder exporterBuilder = OtlpGrpcMetricExporter.builder().setEndpoint(endpoint);
+        if (token != null) {
+            exporterBuilder.addHeader(AUTHORIZATION_HEADER_NAME, getBearerToken());
+        }
+        return exporterBuilder.build();
+    }
+
+    @NonNull
+    private String getBearerToken() {
+        return String.format(BEARER_TOKEN_FORMAT, token);
     }
 }

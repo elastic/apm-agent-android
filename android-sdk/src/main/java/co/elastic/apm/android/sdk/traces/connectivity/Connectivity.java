@@ -25,6 +25,8 @@ import co.elastic.apm.android.sdk.providers.LazyProvider;
 import co.elastic.apm.android.sdk.providers.Provider;
 import co.elastic.apm.android.sdk.traces.connectivity.custom.CustomExporterConnectivity;
 import co.elastic.apm.android.sdk.traces.connectivity.custom.CustomProcessorConnectivity;
+import io.opentelemetry.sdk.metrics.export.MetricExporter;
+import io.opentelemetry.sdk.metrics.export.MetricReader;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
@@ -50,19 +52,19 @@ public interface Connectivity {
     }
 
     /**
-     * This function provides a convenient way to create a {@link Connectivity} with a custom Open Telemetry's {@link SpanExporter}
+     * This function provides a convenient way to create a {@link Connectivity} with a custom Open Telemetry's {@link SpanExporter} and {@link MetricExporter}
      * which {@link SpanProcessor} will be a {@link io.opentelemetry.sdk.trace.export.BatchSpanProcessor}.
      */
-    static Connectivity custom(SpanExporter exporter) {
-        return new CustomExporterConnectivity(exporter);
+    static Connectivity custom(SpanExporter spanExporter, MetricExporter metricExporter) {
+        return new CustomExporterConnectivity(spanExporter, metricExporter);
     }
 
     /**
      * This function provides a convenient way of creating a fully customized {@link Connectivity} object by providing
-     * a {@link SpanProcessor} directly. This option might come in handy to avoid having to create a custom {@link Connectivity} implementation.
+     * a {@link SpanProcessor} and a {@link MetricReader} directly. This option might come in handy to avoid having to create a custom {@link Connectivity} implementation.
      */
-    static Connectivity custom(SpanProcessor processor) {
-        return new CustomProcessorConnectivity(processor);
+    static Connectivity custom(SpanProcessor spanProcessor, MetricReader metricReader) {
+        return new CustomProcessorConnectivity(spanProcessor, metricReader);
     }
 
     /**
@@ -81,4 +83,6 @@ public interface Connectivity {
     }
 
     SpanProcessor getSpanProcessor();
+
+    MetricReader getMetricReader();
 }

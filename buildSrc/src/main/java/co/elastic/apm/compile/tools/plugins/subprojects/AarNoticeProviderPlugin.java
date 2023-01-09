@@ -17,6 +17,8 @@ import co.elastic.apm.compile.tools.extensions.AndroidApmExtension;
 import co.elastic.apm.compile.tools.tasks.CreateDependenciesListTask;
 import co.elastic.apm.compile.tools.tasks.CreateNoticeTask;
 import co.elastic.apm.compile.tools.tasks.NoticeMergerTask;
+import co.elastic.apm.compile.tools.tasks.dependencies.DependenciesHasherTask;
+import co.elastic.apm.compile.tools.tasks.dependencies.DependenciesVerifierTask;
 import co.elastic.apm.compile.tools.tasks.subprojects.CopySingleFileTask;
 import co.elastic.apm.compile.tools.tasks.subprojects.NoticeFilesCollectorTask;
 import co.elastic.apm.compile.tools.tasks.subprojects.PomLicensesCollectorTask;
@@ -36,6 +38,10 @@ public class AarNoticeProviderPlugin extends BaseSubprojectPlugin {
             Configuration runtimeClasspath = component.getVariantDependencies().getRuntimeClasspath();
             Configuration apmToolsClasspath = wrapConfiguration(project, variant, runtimeClasspath);
             List<Configuration> runtimeConfigs = getRuntimeConfigurations(project, apmToolsClasspath);
+            TaskProvider<DependenciesHasherTask> dependenciesHasher = project.getTasks().register(variant.getName() + "DependenciesHasher", DependenciesHasherTask.class, task -> {
+                task.getRuntimeDependencies().set(runtimeConfigs);
+                task.getOutputFile().set(project.getLayout().getBuildDirectory().file(task.getName() + "/" + "dependencies_hash.txt"));
+            });
             TaskProvider<PomLicensesCollectorTask> pomLicensesFinder = project.getTasks().register(variant.getName() + "DependenciesLicencesFinder", PomLicensesCollectorTask.class, task -> {
                 task.getRuntimeDependencies().set(runtimeConfigs);
                 task.getLicensesFound().set(project.getLayout().getBuildDirectory().file(task.getName() + "/licenses.txt"));
@@ -57,12 +63,16 @@ public class AarNoticeProviderPlugin extends BaseSubprojectPlugin {
                 task.getMergedNoticeFiles().from(noticeFilesMerger.flatMap(NoticeMergerTask::getOutputFile));
                 task.getLicensedDependencies().set(licensesDependencies.flatMap(CreateDependenciesListTask::getOutputFile));
                 task.getFoundLicensesIds().set(pomLicensesFinder.flatMap(PomLicensesCollectorTask::getLicensesFound));
+                task.getDependenciesHashFile().set(dependenciesHasher.flatMap(DependenciesHasherTask::getOutputFile));
                 task.getOutputFile().set(project.getLayout().getBuildDirectory().file(task.getName() + "/" + "notice_file.txt"));
             });
             if (apmExtension.variantName.get().equals(variant.getName())) {
                 project.getTasks().register(TASK_CREATE_NOTICE_FILE_NAME, CopySingleFileTask.class, task -> {
                     task.getInputFile().set(createNotice.flatMap(CreateNoticeTask::getOutputFile));
                     task.getOutputFile().set(project.getLayout().getProjectDirectory().file("src/main/resources/META-INF/NOTICE"));
+                });
+                project.getTasks().register(TASK_VERIFY_NOTICE_FILE_NAME, DependenciesVerifierTask.class, task -> {
+                    task.getDependenciesHashFile().set(dependenciesHasher.flatMap(DependenciesHasherTask::getOutputFile));
                 });
                 setUpLicensedDependencies(project, pomLicensesFinder);
                 setUpNoticeFilesProvider(project, noticeCollector);

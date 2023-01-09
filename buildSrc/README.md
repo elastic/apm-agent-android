@@ -15,6 +15,7 @@ Table of Contents
 
 * [Creating NOTICE files](#creating-notice-files)
     * [Troubleshooting](#troubleshooting)
+* [Verifying NOTICE files](#verifying-notice-files)
 * [Adding source headers](#adding-source-headers)
 * [Publishing](#publishing)
     * [Publishing parameters](#publishing-parameters)
@@ -27,7 +28,9 @@ Each subproject will get a new gradle task named `createNoticeFile` which takes 
 all of its direct dependencies, then checking their POM files looking for their licenses, and then
 it looks at their artifact files looking for NOTICE files to be merged (if any). Once all this
 information is gathered, the subproject NOTICE file is generated and placed
-in `subproject-dir/src/main/resources/META-INF/NOTICE`.
+in `subproject-dir/src/main/resources/META-INF/NOTICE`. Alongside the NOTICE files, there's also a
+metadata file generated and placed in `subproject-dir/metadata/notice.properties`, which contains
+information about the latest generated NOTICE file than can be verified later on.
 
 The root project will also get its own `createNoticeFile` task, though it will be slightly different
 than the one for its subprojects since it won't collect its own dependencies, but instead it will
@@ -72,6 +75,14 @@ licensesConfig {
     manualMappingFile = "path/to/the/mappings/file.txt"
 }
 ```
+
+## Verifying NOTICE files
+
+NOTICE files need to be kept updated on dependencies changes, for this purpose each will get a new
+gradle task named `verifyNoticeFile` which ideally should be run in a CI pipeline in order to
+confirm that the existing NOTICE files are valid in regards to their project's dependencies. If
+there's an issue, then the `createNoticeFile` task will have to be run so that the new NOTICE files
+can be tracked and pushed into the repo.
 
 ## Adding source headers
 

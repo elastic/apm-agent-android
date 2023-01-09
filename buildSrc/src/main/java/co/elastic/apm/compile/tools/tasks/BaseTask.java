@@ -10,10 +10,21 @@ import org.gradle.api.artifacts.component.ComponentIdentifier;
 import org.gradle.api.tasks.Internal;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 public class BaseTask extends DefaultTask {
+
+    protected List<ComponentIdentifier> getComponentIdentifiers(List<Configuration> configurations) {
+        Set<ComponentIdentifier> componentIdentifiers = new HashSet<>();
+
+        for (Configuration dependencies : configurations) {
+            componentIdentifiers.addAll(getComponentIdentifiers(dependencies));
+        }
+
+        return new ArrayList<>(componentIdentifiers);
+    }
 
     protected List<ComponentIdentifier> getComponentIdentifiers(Configuration dependencies) {
         List<String> externalDependenciesIds = new ArrayList<>();

@@ -21,10 +21,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -46,11 +44,7 @@ public abstract class PomLicensesCollectorTask extends BasePomTask {
     @TaskAction
     public void action() {
         try {
-            Set<ComponentIdentifier> componentIdentifiers = new HashSet<>();
-
-            for (Configuration dependencies : getRuntimeDependencies().get()) {
-                componentIdentifiers.addAll(getComponentIdentifiers(dependencies));
-            }
+            List<ComponentIdentifier> componentIdentifiers = getComponentIdentifiers(getRuntimeDependencies().get());
 
             List<ArtifactLicense> artifactLicenses = extractLicenses(getPomArtifacts(componentIdentifiers));
             File licensesFoundFile = getLicensesFound().get().getAsFile();

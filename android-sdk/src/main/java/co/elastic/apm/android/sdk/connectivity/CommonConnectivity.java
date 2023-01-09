@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.traces.connectivity;
+package co.elastic.apm.android.sdk.connectivity;
 
 import androidx.annotation.NonNull;
 
-import co.elastic.apm.android.sdk.traces.connectivity.base.DefaultProcessingConnectivity;
+import co.elastic.apm.android.sdk.connectivity.base.DefaultProcessingConnectivity;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporterBuilder;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;

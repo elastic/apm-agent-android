@@ -16,28 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.traces.connectivity.custom;
+package co.elastic.apm.android.sdk.connectivity.base;
 
-import co.elastic.apm.android.sdk.traces.connectivity.base.DefaultProcessingConnectivity;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
+import io.opentelemetry.sdk.metrics.export.MetricReader;
+import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
+import io.opentelemetry.sdk.trace.SpanProcessor;
+import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
-public class CustomExporterConnectivity extends DefaultProcessingConnectivity {
-    private final SpanExporter spanExporter;
-    private final MetricExporter metricExporter;
+public abstract class DefaultProcessingConnectivity extends BaseConnectivity {
 
-    public CustomExporterConnectivity(SpanExporter exporter, MetricExporter metricExporter) {
-        this.spanExporter = exporter;
-        this.metricExporter = metricExporter;
+    @Override
+    protected SpanProcessor provideSpanProcessor(SpanExporter exporter) {
+        return BatchSpanProcessor.builder(exporter).build();
     }
 
     @Override
-    protected SpanExporter provideSpanExporter() {
-        return spanExporter;
-    }
-
-    @Override
-    protected MetricExporter provideMetricExporter() {
-        return metricExporter;
+    protected MetricReader provideMetricReader(MetricExporter exporter) {
+        return PeriodicMetricReader.create(exporter);
     }
 }

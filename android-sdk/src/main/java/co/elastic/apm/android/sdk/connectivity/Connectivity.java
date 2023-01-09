@@ -16,15 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.traces.connectivity;
+package co.elastic.apm.android.sdk.connectivity;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
+import co.elastic.apm.android.sdk.connectivity.custom.CustomConnectivity;
+import co.elastic.apm.android.sdk.connectivity.custom.CustomExporterConnectivity;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
 import co.elastic.apm.android.sdk.providers.LazyProvider;
 import co.elastic.apm.android.sdk.providers.Provider;
-import co.elastic.apm.android.sdk.traces.connectivity.custom.CustomConnectivity;
-import co.elastic.apm.android.sdk.traces.connectivity.custom.CustomExporterConnectivity;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.metrics.export.MetricReader;
 import io.opentelemetry.sdk.trace.SpanProcessor;

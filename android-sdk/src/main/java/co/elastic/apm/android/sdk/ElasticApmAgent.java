@@ -24,6 +24,7 @@ import androidx.annotation.NonNull;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.attributes.AttributesCompose;
+import co.elastic.apm.android.sdk.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.logging.AndroidLoggerFactory;
 import co.elastic.apm.android.sdk.internal.services.Service;
@@ -34,7 +35,6 @@ import co.elastic.apm.android.sdk.internal.services.network.NetworkService;
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.sdk.providers.Provider;
 import co.elastic.apm.android.sdk.providers.SimpleProvider;
-import co.elastic.apm.android.sdk.traces.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.traces.otel.processor.ElasticSpanProcessor;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import io.opentelemetry.context.propagation.ContextPropagators;

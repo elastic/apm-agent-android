@@ -3,8 +3,12 @@ package co.elastic.apm.android.test.common.metrics.verifiers;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.sdk.metrics.data.MetricData;
+import io.opentelemetry.sdk.metrics.data.PointData;
 
 public class MetricVerifier {
     private final MetricData metric;
@@ -20,6 +24,12 @@ public class MetricVerifier {
 
     public MetricVerifier hasResource(String resourceName, String resourceValue) {
         assertEquals(resourceValue, metric.getResource().getAttribute(AttributeKey.stringKey(resourceName)));
+        return this;
+    }
+
+    public MetricVerifier startedAt(long timeInNanoseconds) {
+        List<PointData> points = new ArrayList<>(metric.getData().getPoints());
+        assertEquals(timeInNanoseconds, points.get(0).getEpochNanos());
         return this;
     }
 }

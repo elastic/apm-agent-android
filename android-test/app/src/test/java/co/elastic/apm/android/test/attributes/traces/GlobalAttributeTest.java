@@ -9,7 +9,6 @@ import java.util.List;
 
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.sdk.traces.common.tools.ElasticTracer;
-import co.elastic.apm.android.test.attributes.traces.SpanAttrHost;
 import co.elastic.apm.android.test.common.spans.Spans;
 import co.elastic.apm.android.test.testutils.TestElasticClock;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;

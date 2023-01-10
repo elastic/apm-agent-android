@@ -13,10 +13,12 @@ import org.junit.Rule;
 import co.elastic.apm.android.test.DefaultApp;
 import co.elastic.apm.android.test.activities.espresso.IdlingResourceProvider;
 import co.elastic.apm.android.test.common.BaseTest;
+import co.elastic.apm.android.test.common.metrics.MetricExporterCaptor;
 import co.elastic.apm.android.test.common.spans.SpanExporterCaptor;
 
 public abstract class BaseEspressoTest<T extends Activity> extends BaseTest {
     private SpanExporterCaptor spanExporterCaptor;
+    private MetricExporterCaptor metricExporterCaptor;
     private IdlingResource idlingResource;
     protected T activity;
 
@@ -27,7 +29,9 @@ public abstract class BaseEspressoTest<T extends Activity> extends BaseTest {
     public void baseSetUp() {
         onBefore();
         activityScenarioRule.getScenario().onActivity(activity -> {
-            spanExporterCaptor = ((DefaultApp) activity.getApplication()).getSpanExporter();
+            DefaultApp application = (DefaultApp) activity.getApplication();
+            spanExporterCaptor = application.getSpanExporter();
+            metricExporterCaptor = application.getMetricExporter();
             if (activity instanceof IdlingResourceProvider) {
                 idlingResource = ((IdlingResourceProvider) activity).getIdlingResource();
                 IdlingRegistry.getInstance().register(idlingResource);
@@ -61,6 +65,11 @@ public abstract class BaseEspressoTest<T extends Activity> extends BaseTest {
     @Override
     protected SpanExporterCaptor getSpanExporter() {
         return spanExporterCaptor;
+    }
+
+    @Override
+    protected MetricExporterCaptor getMetricExporter() {
+        return metricExporterCaptor;
     }
 
     protected abstract Class<T> getActivityClass();

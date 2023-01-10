@@ -37,7 +37,7 @@ public abstract class BaseTest {
     }
 
     protected List<MetricData> getRecordedMetrics(int amountExpected) {
-        List<MetricData> metrics = findCapturedMetrics(getMetricExporterCaptor());
+        List<MetricData> metrics = findCapturedMetrics(getMetricExporter());
         assertEquals(amountExpected, metrics.size());
 
         return metrics;
@@ -58,9 +58,13 @@ public abstract class BaseTest {
 
     protected abstract SpanExporterCaptor getSpanExporter();
 
-    protected abstract MetricExporterCaptor getMetricExporterCaptor();
+    protected abstract MetricExporterCaptor getMetricExporter();
 
     protected SpanData getRecordedSpan() {
         return getRecordedSpans(1).get(0);
+    }
+
+    protected MetricData getRecorderMetric() {
+        return getRecordedMetrics(1).get(0);
     }
 }

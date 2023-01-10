@@ -15,6 +15,7 @@ import co.elastic.apm.android.sdk.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.test.common.metrics.MetricExporterCaptor;
+import co.elastic.apm.android.test.common.metrics.MetricsFlusher;
 import co.elastic.apm.android.test.common.spans.SpanExporterCaptor;
 import co.elastic.apm.android.test.providers.ExportersProvider;
 import co.elastic.apm.android.test.testutils.AgentDependenciesProvider;
@@ -64,7 +65,10 @@ public class BaseRobolectricTestApplication extends Application implements Expor
     }
 
     protected Connectivity getConnectivity() {
-        return Connectivity.custom(SimpleSpanProcessor.create(spanExporter), PeriodicMetricReader.create(metricExporter));
+        PeriodicMetricReader metricReader = PeriodicMetricReader.create(metricExporter);
+        MetricsFlusher flusher = new MetricsFlusher(metricReader);
+        metricExporter.setFlusher(flusher);
+        return Connectivity.custom(SimpleSpanProcessor.create(spanExporter), metricReader);
     }
 
     @Override

@@ -5,6 +5,7 @@ import android.app.Application;
 import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
 import co.elastic.apm.android.test.common.metrics.MetricExporterCaptor;
+import co.elastic.apm.android.test.common.metrics.MetricsFlusher;
 import co.elastic.apm.android.test.common.spans.SpanExporterCaptor;
 import co.elastic.apm.android.test.providers.ExportersProvider;
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
@@ -21,7 +22,10 @@ public class DefaultApp extends Application implements ExportersProvider {
     }
 
     protected Connectivity getConnectivity() {
-        return Connectivity.custom(SimpleSpanProcessor.create(spanExporter), PeriodicMetricReader.create(metricExporter));
+        PeriodicMetricReader metricReader = PeriodicMetricReader.create(metricExporter);
+        MetricsFlusher flusher = new MetricsFlusher(metricReader);
+        metricExporter.setFlusher(flusher);
+        return Connectivity.custom(SimpleSpanProcessor.create(spanExporter), metricReader);
     }
 
     public DefaultApp() {

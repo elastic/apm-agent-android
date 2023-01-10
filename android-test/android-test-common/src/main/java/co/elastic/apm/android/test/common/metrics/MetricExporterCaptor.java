@@ -14,6 +14,7 @@ import io.opentelemetry.sdk.metrics.export.MetricExporter;
 public class MetricExporterCaptor implements MetricExporter {
 
     private final List<List<MetricData>> capturedMetrics = new ArrayList<>();
+    private MetricsFlusher flusher;
 
     @Override
     public CompletableResultCode export(Collection<MetricData> metrics) {
@@ -23,6 +24,7 @@ public class MetricExporterCaptor implements MetricExporter {
 
     @Override
     public CompletableResultCode flush() {
+        flusher.flush();
         return CompletableResultCode.ofSuccess();
     }
 
@@ -37,10 +39,14 @@ public class MetricExporterCaptor implements MetricExporter {
 
     @Override
     public AggregationTemporality getAggregationTemporality(InstrumentType instrumentType) {
-        return null;
+        return AggregationTemporality.CUMULATIVE;
     }
 
     public void clearCapturedMetrics() {
         capturedMetrics.clear();
+    }
+
+    public void setFlusher(MetricsFlusher flusher) {
+        this.flusher = flusher;
     }
 }

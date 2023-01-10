@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import co.elastic.apm.android.test.common.metrics.MetricExporterCaptor;
 import co.elastic.apm.android.test.common.spans.SpanExporterCaptor;
+import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.trace.data.SpanData;
 
 public abstract class BaseTest {
@@ -34,7 +36,29 @@ public abstract class BaseTest {
         return spans;
     }
 
+    protected List<MetricData> getRecordedMetrics(int amountExpected) {
+        List<MetricData> metrics = findCapturedMetrics(getMetricExporterCaptor());
+        assertEquals(amountExpected, metrics.size());
+
+        return metrics;
+    }
+
+    private List<MetricData> findCapturedMetrics(MetricExporterCaptor metricExporter) {
+        List<MetricData> metrics = new ArrayList<>();
+        List<List<MetricData>> capturedMetrics = metricExporter.getCapturedMetrics();
+
+        for (List<MetricData> list : capturedMetrics) {
+            metrics.addAll(list);
+        }
+
+        metricExporter.clearCapturedMetrics();
+
+        return metrics;
+    }
+
     protected abstract SpanExporterCaptor getSpanExporter();
+
+    protected abstract MetricExporterCaptor getMetricExporterCaptor();
 
     protected SpanData getRecordedSpan() {
         return getRecordedSpans(1).get(0);

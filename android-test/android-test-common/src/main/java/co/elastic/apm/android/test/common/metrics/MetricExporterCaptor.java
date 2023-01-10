@@ -39,4 +39,8 @@ public class MetricExporterCaptor implements MetricExporter {
     public AggregationTemporality getAggregationTemporality(InstrumentType instrumentType) {
         return null;
     }
+
+    public void clearCapturedMetrics() {
+        capturedMetrics.clear();
+    }
 }

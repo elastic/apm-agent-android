@@ -1,4 +1,4 @@
-package co.elastic.apm.android.test.spanattributes;
+package co.elastic.apm.android.test.attributes.traces;
 
 import android.os.Build;
 

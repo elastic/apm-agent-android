@@ -22,7 +22,9 @@ import org.gradle.api.Action;
 import org.gradle.api.Project;
 
 import co.elastic.apm.android.agp.api.AgpCompatibilityManager;
+import co.elastic.apm.android.agp.api.tools.ClasspathProvider;
 import co.elastic.apm.android.agp.api.usecase.ApmInfoUseCase;
+import co.elastic.apm.android.agp72.tools.ClasspathProvider72;
 import co.elastic.apm.android.agp72.usecase.apminfo.ApmInfoUseCase72;
 
 public class Agp72CompatibilityManager extends AgpCompatibilityManager {
@@ -34,5 +36,10 @@ public class Agp72CompatibilityManager extends AgpCompatibilityManager {
     @Override
     public ApmInfoUseCase getApmInfoUseCase(Action<ApmInfoUseCase.Parameters> config) {
         return createUseCase(ApmInfoUseCase72.class, ApmInfoUseCase.Parameters.class, config);
+    }
+
+    @Override
+    public ClasspathProvider getClasspathProvider() {
+        return new ClasspathProvider72();
     }
 }

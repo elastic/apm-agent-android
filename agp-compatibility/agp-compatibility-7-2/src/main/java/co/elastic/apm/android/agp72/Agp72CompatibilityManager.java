@@ -29,6 +29,8 @@ import co.elastic.apm.android.agp72.usecase.apminfo.ApmInfoUseCase72;
 
 public class Agp72CompatibilityManager extends AgpCompatibilityManager {
 
+    protected ClasspathProvider72 classpathProvider;
+
     protected Agp72CompatibilityManager(Project project) {
         super(project);
     }
@@ -40,6 +42,9 @@ public class Agp72CompatibilityManager extends AgpCompatibilityManager {
 
     @Override
     public ClasspathProvider getClasspathProvider() {
-        return new ClasspathProvider72();
+        if (classpathProvider == null) {
+            classpathProvider = new ClasspathProvider72();
+        }
+        return classpathProvider;
     }
 }

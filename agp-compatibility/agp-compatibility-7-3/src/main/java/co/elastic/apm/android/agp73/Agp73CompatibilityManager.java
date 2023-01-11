@@ -29,6 +29,8 @@ import co.elastic.apm.android.agp73.usecase.apminfo.ApmInfoUseCase73;
 
 public class Agp73CompatibilityManager extends AgpCompatibilityManager {
 
+    protected ClasspathProvider73 classpathProvider;
+
     protected Agp73CompatibilityManager(Project project) {
         super(project);
     }
@@ -40,6 +42,9 @@ public class Agp73CompatibilityManager extends AgpCompatibilityManager {
 
     @Override
     public ClasspathProvider getClasspathProvider() {
-        return new ClasspathProvider73();
+        if (classpathProvider == null) {
+            classpathProvider = new ClasspathProvider73();
+        }
+        return classpathProvider;
     }
 }

@@ -25,10 +25,7 @@ import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
 import androidx.annotation.NonNull;
 
 import net.bytebuddy.asm.Advice;
-import net.bytebuddy.asm.AsmVisitorWrapper;
-import net.bytebuddy.asm.MemberAttributeExtension;
 import net.bytebuddy.build.Plugin;
-import net.bytebuddy.description.annotation.AnnotationDescription;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.method.ParameterDescription;
 import net.bytebuddy.description.type.TypeDescription;
@@ -39,8 +36,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import co.elastic.apm.android.sdk.internal.instrumentation.LifecycleMultiMethodSpan;
-
 public abstract class BaseLifecycleMethodsPlugin implements Plugin {
     private List<MethodIdentity> cachedTargetMethods = null;
     private Junction<MethodDescription> cachedMatcher = null;
@@ -49,18 +44,15 @@ public abstract class BaseLifecycleMethodsPlugin implements Plugin {
     public DynamicType.Builder<?> apply(DynamicType.Builder<?> builder,
                                         TypeDescription typeDescription,
                                         ClassFileLocator classFileLocator) {
-        Junction<MethodDescription> lastLifecycleMethodAvailable = getLastLifecycleMethodMatcher(typeDescription);
+        MethodIdentity lastLifecycleMethodAvailable = getLastLifecycleMethod(typeDescription);
         if (lastLifecycleMethodAvailable == null) {
             // No Operation.
             return builder;
         }
 
-        AnnotationDescription lastMethodAnnotation = AnnotationDescription.Builder.ofType(LifecycleMultiMethodSpan.LastMethod.class).build();
-        AsmVisitorWrapper annotator = new MemberAttributeExtension.ForMethod().annotateMethod(lastMethodAnnotation).on(lastLifecycleMethodAvailable);
-
         return builder
-                .visit(annotator)
-                .visit(Advice.to(getAdviceClass()).on(getMethodsMatcher()));
+                .visit(Advice.withCustomMapping().bind(IsLastLifecycleMethod.class, true).to(getAdviceClass()).on(getMethodMatcher(lastLifecycleMethodAvailable)))
+                .visit(Advice.withCustomMapping().bind(IsLastLifecycleMethod.class, false).to(getAdviceClass()).on(getMethodsMatcher(lastLifecycleMethodAvailable)));
     }
 
     @NonNull
@@ -78,11 +70,14 @@ public abstract class BaseLifecycleMethodsPlugin implements Plugin {
         cachedTargetMethods = null;
     }
 
-    private Junction<MethodDescription> getMethodsMatcher() {
+    private Junction<MethodDescription> getMethodsMatcher(MethodIdentity excludeThisMethod) {
         if (cachedMatcher == null) {
             Junction<MethodDescription> elementMatcher = null;
             List<MethodIdentity> targetMethods = getTargetMethods();
             for (MethodIdentity targetMethod : targetMethods) {
+                if (targetMethod.equals(excludeThisMethod)) {
+                    continue;
+                }
                 if (elementMatcher == null) {
                     elementMatcher = getMethodMatcher(targetMethod);
                 } else {
@@ -99,7 +94,7 @@ public abstract class BaseLifecycleMethodsPlugin implements Plugin {
         return named(method.name).and(takesArguments(method.argumentTypes)).and(returns(method.returnType));
     }
 
-    private Junction<MethodDescription> getLastLifecycleMethodMatcher(TypeDescription typeDescription) {
+    private MethodIdentity getLastLifecycleMethod(TypeDescription typeDescription) {
         int foundMethodsCount = 0;
         List<MethodIdentity> foundMethods = new ArrayList<>();
         List<MethodIdentity> targetMethods = getTargetMethods();
@@ -119,7 +114,7 @@ public abstract class BaseLifecycleMethodsPlugin implements Plugin {
         for (int i = targetMethods.size() - 1; i >= 0; i--) {
             MethodIdentity method = targetMethods.get(i);
             if (foundMethods.contains(method)) {
-                return getMethodMatcher(method);
+                return method;
             }
         }
 

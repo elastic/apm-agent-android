@@ -43,7 +43,7 @@ public class FragmentLifecycleMethodAdvice {
             @Advice.Origin("#r") String returnType,
             @Advice.Return(typing = Assigner.Typing.DYNAMIC) Object returned,
             @Advice.Local("elasticSpanWithScope") LifecycleMultiMethodSpan.SpanWithScope spanWithScope,
-            @IsLastLifecycleMethod Boolean isLastMethod,
+            @IsLastLifecycleMethod boolean isLastMethod,
             @Advice.Thrown Throwable thrown) {
         boolean endRoot = false;
         if (!Objects.equals(returnType, "void")) {

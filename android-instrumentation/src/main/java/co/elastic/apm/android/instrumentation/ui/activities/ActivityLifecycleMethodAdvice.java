@@ -38,7 +38,7 @@ public class ActivityLifecycleMethodAdvice {
     public static void onMethodExit(
             @Advice.Origin("#t") String ownerName,
             @Advice.Local("elasticSpanWithScope") LifecycleMultiMethodSpan.SpanWithScope spanWithScope,
-            @IsLastLifecycleMethod Boolean isLastMethod,
+            @IsLastLifecycleMethod boolean isLastMethod,
             @Advice.Thrown Throwable thrown) {
         LifecycleMultiMethodSpan.onMethodExit(ownerName, spanWithScope, thrown, isLastMethod);
     }

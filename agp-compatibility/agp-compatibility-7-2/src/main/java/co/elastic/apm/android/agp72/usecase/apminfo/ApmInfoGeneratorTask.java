@@ -18,7 +18,6 @@
  */
 package co.elastic.apm.android.agp72.usecase.apminfo;
 
-import com.android.build.api.component.impl.ComponentImpl;
 import com.android.build.api.variant.Variant;
 
 import org.gradle.api.DefaultTask;
@@ -44,6 +43,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Properties;
 
+import co.elastic.apm.android.agp.api.tools.ClasspathProvider;
 import co.elastic.apm.android.agp.api.usecase.ApmInfoUseCase;
 import co.elastic.apm.android.common.ApmInfo;
 import co.elastic.apm.android.common.internal.logging.Elog;
@@ -148,6 +148,7 @@ public abstract class ApmInfoGeneratorTask extends DefaultTask {
     public static TaskProvider<ApmInfoGeneratorTask> create(Project project, ApmInfoUseCase.Parameters parameters, Variant variant) {
         String variantName = variant.getName();
         TaskProvider<ApmInfoGeneratorTask> taskProvider = project.getTasks().register(variantName + "GenerateApmInfo", ApmInfoGeneratorTask.class);
+        ClasspathProvider classpathProvider = parameters.getClasspathProvider().get();
         taskProvider.configure(apmInfoGenerator -> {
             apmInfoGenerator.getServiceName().set(parameters.getServiceName());
             apmInfoGenerator.getServiceVersion().set(parameters.getServiceVersion());
@@ -155,17 +156,15 @@ public abstract class ApmInfoGeneratorTask extends DefaultTask {
             apmInfoGenerator.getSecretToken().set(parameters.getSecretToken());
             apmInfoGenerator.getVariantName().set(variantName);
             apmInfoGenerator.getOutputDir().set(project.getLayout().getBuildDirectory().dir(apmInfoGenerator.getName()));
-            apmInfoGenerator.getOkHttpVersion().set(getOkhttpVersion(project, variant));
+            apmInfoGenerator.getOkHttpVersion().set(getOkhttpVersion(project, classpathProvider.getRuntimeConfiguration(variant)));
         });
 
         return taskProvider;
     }
 
-    private static Provider<String> getOkhttpVersion(Project project, Variant variant) {
-        ComponentImpl component = (ComponentImpl) variant;
+    private static Provider<String> getOkhttpVersion(Project project, Configuration runtimeConfiguration) {
         return project.provider(() -> {
-            Configuration runtimeClasspath = component.getVariantDependencies().getRuntimeClasspath();
-            ResolvedConfiguration resolvedConfiguration = runtimeClasspath.getResolvedConfiguration();
+            ResolvedConfiguration resolvedConfiguration = runtimeConfiguration.getResolvedConfiguration();
             try {
                 for (ResolvedArtifact artifact : resolvedConfiguration.getResolvedArtifacts()) {
                     ModuleVersionIdentifier identifier = artifact.getModuleVersion().getId();

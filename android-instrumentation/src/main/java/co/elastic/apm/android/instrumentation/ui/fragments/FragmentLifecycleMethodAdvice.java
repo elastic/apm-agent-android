@@ -22,6 +22,7 @@ import net.bytebuddy.asm.Advice;
 import net.bytebuddy.implementation.bytecode.assign.Assigner;
 
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 import co.elastic.apm.android.sdk.internal.instrumentation.LifecycleMultiMethodSpan;
 import co.elastic.apm.android.sdk.traces.common.tools.ElasticTracer;
@@ -39,12 +40,13 @@ public class FragmentLifecycleMethodAdvice {
     @Advice.OnMethodExit(onThrowable = Throwable.class)
     public static void onMethodExit(
             @Advice.Origin("#t") String ownerName,
+            @Advice.Origin("#r") String returnType,
             @Advice.Origin Method method,
             @Advice.Return(typing = Assigner.Typing.DYNAMIC) Object returned,
             @Advice.Local("elasticSpanWithScope") LifecycleMultiMethodSpan.SpanWithScope spanWithScope,
             @Advice.Thrown Throwable thrown) {
         boolean endRoot = false;
-        if (!method.getReturnType().equals(void.class)) {
+        if (!Objects.equals(returnType, "void")) {
             endRoot = returned == null;
         }
         LifecycleMultiMethodSpan.onMethodExit(ownerName, spanWithScope, thrown, endRoot || method.isAnnotationPresent(LifecycleMultiMethodSpan.LastMethod.class));

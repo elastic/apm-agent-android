@@ -4,6 +4,7 @@ import com.android.build.api.variant.Variant;
 
 import org.gradle.api.Action;
 import org.gradle.api.artifacts.ArtifactView;
+import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.attributes.Attribute;
 import org.gradle.api.file.FileCollection;
 
@@ -23,8 +24,13 @@ public class ClasspathProvider73 implements ClasspathProvider, Action<ArtifactVi
         return runtimeClasspath;
     }
 
+    @Override
+    public Configuration getRuntimeConfiguration(Variant variant) {
+        return variant.getRuntimeConfiguration();
+    }
+
     private FileCollection findClasspath(Variant variant) {
-        return variant.getRuntimeConfiguration().getIncoming()
+        return getRuntimeConfiguration(variant).getIncoming()
                 .artifactView(this)
                 .getArtifacts()
                 .getArtifactFiles();

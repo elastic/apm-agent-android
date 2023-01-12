@@ -11,7 +11,7 @@ android {
         targetSdk androidCompileSdk
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles "consumer-rules.pro"
+        consumerProguardFiles "../shared-rules.pro"
     }
 
     buildTypes {

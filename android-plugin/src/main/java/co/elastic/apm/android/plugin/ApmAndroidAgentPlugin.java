@@ -19,23 +19,21 @@
 package co.elastic.apm.android.plugin;
 
 import com.android.build.api.artifact.MultipleArtifact;
-import com.android.build.api.component.impl.ComponentImpl;
 import com.android.build.api.instrumentation.InstrumentationScope;
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension;
 import com.android.build.api.variant.ApplicationVariant;
 import com.android.build.gradle.BaseExtension;
-import com.android.build.gradle.internal.publishing.AndroidArtifacts;
 
 import net.bytebuddy.build.gradle.android.ByteBuddyAndroidPlugin;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.file.FileCollection;
 import org.gradle.api.plugins.ExtensionContainer;
 import org.gradle.api.tasks.TaskProvider;
 
 import co.elastic.apm.android.agp.api.AgpCompatibilityEntrypoint;
 import co.elastic.apm.android.agp.api.AgpCompatibilityManager;
+import co.elastic.apm.android.agp.api.tools.ClasspathProvider;
 import co.elastic.apm.android.agp.api.usecase.ApmInfoUseCase;
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.plugin.extensions.ElasticApmExtension;
@@ -50,12 +48,14 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
     private Project project;
     private BaseExtension androidExtension;
     private ElasticApmExtension defaultExtension;
+    private AgpCompatibilityManager compatibleManager;
 
     @Override
     public void apply(Project project) {
         this.project = project;
         Elog.init(new GradleLoggerFactory());
         androidExtension = project.getExtensions().getByType(BaseExtension.class);
+        compatibleManager = AgpCompatibilityEntrypoint.findCompatibleManager(project);
         initializeElasticExtension(project);
         addBytebuddyPlugin();
         addSdkDependency();
@@ -97,7 +97,7 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
     }
 
     private void enhanceVariant(ApplicationVariant applicationVariant) {
-        addOkhttpEventListenerGenerator(applicationVariant);
+        addOkhttpEventListenerGenerator(applicationVariant, compatibleManager.getClasspathProvider());
         addLocalRemapping(applicationVariant);
     }
 
@@ -105,13 +105,12 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
         applicationVariant.getInstrumentation().transformClassesWith(ElasticLocalInstrumentationFactory.class, InstrumentationScope.PROJECT, none -> Unit.INSTANCE);
     }
 
-    private void addOkhttpEventListenerGenerator(ApplicationVariant applicationVariant) {
-        ComponentImpl component = (ComponentImpl) applicationVariant;
+    private void addOkhttpEventListenerGenerator(ApplicationVariant applicationVariant, ClasspathProvider classpathProvider) {
         TaskProvider<OkHttpEventlistenerGenerator> taskProvider =
                 project.getTasks().register(applicationVariant.getName() + "GenerateOkhttpEventListener", OkHttpEventlistenerGenerator.class);
         taskProvider.configure(task -> {
             task.getOutputDir().set(project.getLayout().getBuildDirectory().dir(task.getName()));
-            task.getAppRuntimeClasspath().from(getVariantRuntimeClasspath(component));
+            task.getAppRuntimeClasspath().from(classpathProvider.getRuntimeClasspath(applicationVariant));
             task.getJvmTargetVersion().set(androidExtension.getCompileOptions().getTargetCompatibility().toString());
         });
         applicationVariant.getArtifacts().use(taskProvider)
@@ -119,20 +118,13 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
                 .toAppendTo(MultipleArtifact.ALL_CLASSES_DIRS.INSTANCE);
     }
 
-    private FileCollection getVariantRuntimeClasspath(ComponentImpl component) {
-        return component.getVariantDependencies().getArtifactFileCollection(AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH,
-                AndroidArtifacts.ArtifactScope.ALL,
-                AndroidArtifacts.ArtifactType.CLASSES_JAR);
-    }
-
     private void applyCompatibleUseCases() {
-        AgpCompatibilityManager compatibleUseCase = AgpCompatibilityEntrypoint.findCompatibleManager(project);
-
-        ApmInfoUseCase apmInfoUseCase = compatibleUseCase.getApmInfoUseCase(parameters -> {
+        ApmInfoUseCase apmInfoUseCase = compatibleManager.getApmInfoUseCase(parameters -> {
             parameters.getServiceName().set(defaultExtension.getServiceName());
             parameters.getServiceVersion().set(defaultExtension.getServiceVersion());
             parameters.getServerUrl().set(defaultExtension.getServerUrl());
             parameters.getSecretToken().set(defaultExtension.getSecretToken());
+            parameters.getClasspathProvider().set(compatibleManager.getClasspathProvider());
         });
         apmInfoUseCase.execute();
     }

@@ -1,5 +1,7 @@
 package co.elastic.apm.compile.tools.embedding;
 
+import static co.elastic.apm.compile.tools.utils.Constants.ARTIFACT_TYPE_ATTR;
+
 import com.android.build.api.artifact.MultipleArtifact;
 import com.android.build.api.variant.AndroidComponentsExtension;
 import com.android.build.api.variant.Variant;
@@ -7,7 +9,6 @@ import com.android.build.api.variant.Variant;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.attributes.Attribute;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.FileCollection;
@@ -26,7 +27,6 @@ import kotlin.Unit;
 public class EmbeddingDependenciesPlugin implements Plugin<Project> {
 
     public static final String EMBEDDED_CLASSPATH_NAME = "embeddedClasspath";
-    private static final Attribute<String> ARTIFACT_TYPE_ATTRIBUTE = Attribute.of("artifactType", String.class);
 
     @Override
     public void apply(Project project) {
@@ -69,7 +69,7 @@ public class EmbeddingDependenciesPlugin implements Plugin<Project> {
             configuration.setCanBeResolved(true);
             configuration.setCanBeConsumed(false);
             configuration.extendsFrom(embedded);
-            configuration.getAttributes().attribute(ARTIFACT_TYPE_ATTRIBUTE, "android-classes");
+            configuration.getAttributes().attribute(ARTIFACT_TYPE_ATTR, "android-classes");
         });
         Configuration compileOnly = project.getConfigurations().getByName("compileOnly");
         compileOnly.extendsFrom(embedded);

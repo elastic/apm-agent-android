@@ -21,6 +21,7 @@ package co.elastic.apm.android.agp.api;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 
+import co.elastic.apm.android.agp.api.tools.ClasspathProvider;
 import co.elastic.apm.android.agp.api.usecase.ApmInfoUseCase;
 import co.elastic.apm.android.agp.api.usecase.base.AgpUseCase;
 
@@ -43,4 +44,6 @@ public abstract class AgpCompatibilityManager {
     }
 
     public abstract ApmInfoUseCase getApmInfoUseCase(Action<ApmInfoUseCase.Parameters> config);
+
+    public abstract ClasspathProvider getClasspathProvider();
 }

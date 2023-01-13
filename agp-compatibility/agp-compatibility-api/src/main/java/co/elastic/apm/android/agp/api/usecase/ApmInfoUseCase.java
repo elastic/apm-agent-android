@@ -22,6 +22,7 @@ import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Optional;
 
+import co.elastic.apm.android.agp.api.tools.ClasspathProvider;
 import co.elastic.apm.android.agp.api.usecase.base.AgpUseCase;
 
 public abstract class ApmInfoUseCase extends AgpUseCase<ApmInfoUseCase.Parameters> {
@@ -35,6 +36,9 @@ public abstract class ApmInfoUseCase extends AgpUseCase<ApmInfoUseCase.Parameter
 
         @Input
         public abstract Property<String> getServiceVersion();
+
+        @Input
+        public abstract Property<ClasspathProvider> getClasspathProvider();
 
         @Optional
         @Input

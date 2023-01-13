@@ -18,11 +18,6 @@
  */
 package co.elastic.apm.android.sdk.internal.instrumentation;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.otel.SpanUtilities;
 import co.elastic.apm.android.sdk.traces.common.tools.ElasticTracer;
@@ -89,11 +84,5 @@ public class LifecycleMultiMethodSpan {
             this.span = span;
             this.scope = scope;
         }
-    }
-
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.METHOD)
-    public @interface LastMethod {
-
     }
 }

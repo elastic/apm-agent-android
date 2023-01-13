@@ -16,20 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.traces.connectivity.base;
+package co.elastic.apm.android.sdk.connectivity.custom;
 
-import co.elastic.apm.android.sdk.traces.connectivity.Connectivity;
-import io.opentelemetry.sdk.trace.SpanProcessor;
+import co.elastic.apm.android.sdk.connectivity.base.DefaultProcessingConnectivity;
+import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
-public abstract class BaseConnectivity implements Connectivity {
+public class CustomExporterConnectivity extends DefaultProcessingConnectivity {
+    private final SpanExporter spanExporter;
+    private final MetricExporter metricExporter;
 
-    @Override
-    public SpanProcessor getSpanProcessor() {
-        return provideSpanProcessor(provideSpanExporter());
+    public CustomExporterConnectivity(SpanExporter exporter, MetricExporter metricExporter) {
+        this.spanExporter = exporter;
+        this.metricExporter = metricExporter;
     }
 
-    protected abstract SpanProcessor provideSpanProcessor(SpanExporter exporter);
+    @Override
+    protected SpanExporter provideSpanExporter() {
+        return spanExporter;
+    }
 
-    protected abstract SpanExporter provideSpanExporter();
+    @Override
+    protected MetricExporter provideMetricExporter() {
+        return metricExporter;
+    }
 }

@@ -1,25 +1,20 @@
-package co.elastic.apm.android.test.spanattributes;
+package co.elastic.apm.android.test.attributes.traces;
 
-import android.os.Build;
+import static co.elastic.apm.android.test.attributes.common.ResourcesApp.DEVICE_MANUFACTURER;
+import static co.elastic.apm.android.test.attributes.common.ResourcesApp.DEVICE_MODEL_NAME;
+import static co.elastic.apm.android.test.attributes.common.ResourcesApp.RUNTIME_VERSION;
 
 import org.junit.Test;
 import org.robolectric.annotation.Config;
-import org.robolectric.util.ReflectionHelpers;
-
-import java.util.List;
 
 import co.elastic.apm.android.test.BuildConfig;
+import co.elastic.apm.android.test.attributes.common.ResourcesApp;
 import co.elastic.apm.android.test.common.spans.Spans;
-import co.elastic.apm.android.test.testutils.MainApp;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
 import io.opentelemetry.sdk.trace.data.SpanData;
 
-@Config(application = ResourcesTest.ResourcesApp.class)
+@Config(application = ResourcesApp.class)
 public class ResourcesTest extends BaseRobolectricTest {
-
-    public static final String RUNTIME_VERSION = "0.0.0";
-    public static final String DEVICE_MODEL_NAME = "Universe E10";
-    public static final String DEVICE_MANUFACTURER = "Droidlastic";
 
     @Test
     public void whenASpanIsCreated_serviceNameIsSet() {
@@ -130,17 +125,6 @@ public class ResourcesTest extends BaseRobolectricTest {
 
         host.methodWithSpan();
 
-        List<SpanData> spans = getRecordedSpans(1);
-        return spans.get(0);
-    }
-
-    public static class ResourcesApp extends MainApp {
-        @Override
-        public void onCreate() {
-            ReflectionHelpers.setStaticField(Build.class, "MODEL", DEVICE_MODEL_NAME);
-            ReflectionHelpers.setStaticField(Build.class, "MANUFACTURER", DEVICE_MANUFACTURER);
-            System.setProperty("java.vm.version", RUNTIME_VERSION);
-            super.onCreate();
-        }
+        return getRecordedSpan();
     }
 }

@@ -6,10 +6,11 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import co.elastic.apm.android.test.common.BaseTest;
+import co.elastic.apm.android.test.common.metrics.MetricExporterCaptor;
 import co.elastic.apm.android.test.common.spans.SpanExporterCaptor;
+import co.elastic.apm.android.test.providers.ExportersProvider;
 import co.elastic.apm.android.test.testutils.AgentDependenciesProvider;
 import co.elastic.apm.android.test.testutils.MainApp;
-import co.elastic.apm.android.test.utilities.SpanExporterProvider;
 
 @Config(application = MainApp.class)
 @RunWith(RobolectricTestRunner.class)
@@ -17,11 +18,19 @@ public abstract class BaseRobolectricTest extends BaseTest {
 
     @Override
     protected SpanExporterCaptor getSpanExporter() {
-        SpanExporterProvider spanExporterProvider = (SpanExporterProvider) RuntimeEnvironment.getApplication();
-        return spanExporterProvider.getSpanExporter();
+        return getExporterProvider().getSpanExporter();
+    }
+
+    @Override
+    protected MetricExporterCaptor getMetricExporter() {
+        return getExporterProvider().getMetricExporter();
     }
 
     protected AgentDependenciesProvider getAgentDependenciesProvider() {
         return (AgentDependenciesProvider) RuntimeEnvironment.getApplication();
+    }
+
+    private ExportersProvider getExporterProvider() {
+        return (ExportersProvider) RuntimeEnvironment.getApplication();
     }
 }

@@ -1,4 +1,4 @@
-package co.elastic.apm.android.test.spanattributes
+package co.elastic.apm.android.test.attributes.traces
 
 import co.elastic.apm.android.sdk.traces.common.tools.ElasticTracer
 

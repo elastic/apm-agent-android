@@ -3,13 +3,17 @@ package co.elastic.apm.android.test;
 import android.app.Application;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
-import co.elastic.apm.android.sdk.traces.connectivity.Connectivity;
+import co.elastic.apm.android.sdk.connectivity.Connectivity;
+import co.elastic.apm.android.test.common.metrics.MetricExporterCaptor;
+import co.elastic.apm.android.test.common.metrics.MetricsFlusher;
 import co.elastic.apm.android.test.common.spans.SpanExporterCaptor;
-import co.elastic.apm.android.test.utilities.SpanExporterProvider;
+import co.elastic.apm.android.test.providers.ExportersProvider;
+import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 
-public class DefaultApp extends Application implements SpanExporterProvider {
-    private final SpanExporterCaptor exporter;
+public class DefaultApp extends Application implements ExportersProvider {
+    private final SpanExporterCaptor spanExporter;
+    private final MetricExporterCaptor metricExporter;
 
     @Override
     public void onCreate() {
@@ -18,15 +22,24 @@ public class DefaultApp extends Application implements SpanExporterProvider {
     }
 
     protected Connectivity getConnectivity() {
-        return Connectivity.custom(SimpleSpanProcessor.create(exporter));
+        PeriodicMetricReader metricReader = PeriodicMetricReader.create(metricExporter);
+        MetricsFlusher flusher = new MetricsFlusher(metricReader);
+        metricExporter.setFlusher(flusher);
+        return Connectivity.custom(SimpleSpanProcessor.create(spanExporter), metricReader);
     }
 
     public DefaultApp() {
-        exporter = new SpanExporterCaptor();
+        spanExporter = new SpanExporterCaptor();
+        metricExporter = new MetricExporterCaptor();
     }
 
     @Override
     public SpanExporterCaptor getSpanExporter() {
-        return exporter;
+        return spanExporter;
+    }
+
+    @Override
+    public MetricExporterCaptor getMetricExporter() {
+        return metricExporter;
     }
 }

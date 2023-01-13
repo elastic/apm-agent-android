@@ -1,4 +1,4 @@
-package co.elastic.apm.android.test.spanattributes;
+package co.elastic.apm.android.test.attributes.traces;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
@@ -15,23 +15,7 @@ import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.sdk.trace.data.SpanData;
 
-public class GlobalAttributeTest extends BaseRobolectricTest {
-
-    @Test
-    public void whenASpanIsCreated_verifyItHasSessionIdAsParam() {
-        SpanData customSpan = getSpanData();
-
-        Spans.verify(customSpan)
-                .hasAttribute("session.id");
-    }
-
-    @Test
-    public void whenASpanIsCreated_verifyItHasTypeMobileAsParam() {
-        SpanData customSpan = getSpanData();
-
-        Spans.verify(customSpan)
-                .hasAttribute("type", "mobile");
-    }
+public class ClockTest extends BaseRobolectricTest {
 
     @Test
     public void whenASpanIsCreated_itHasTimestampSetFromElasticClock() {

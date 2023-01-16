@@ -27,4 +27,14 @@ public class LogVerifier {
         assertEquals(timeInNanoseconds, log.getEpochNanos());
         return this;
     }
+
+    public LogVerifier hasAttribute(String attrName) {
+        assertNotNull(log.getAttributes().get(AttributeKey.stringKey(attrName)));
+        return this;
+    }
+
+    public LogVerifier hasAttribute(String attrName, String attrValue) {
+        assertEquals(attrValue, log.getAttributes().get(AttributeKey.stringKey(attrName)));
+        return this;
+    }
 }

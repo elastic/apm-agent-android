@@ -9,4 +9,12 @@ class LogAttrHost {
         val logRecordBuilder = logger.logRecordBuilder()
         logRecordBuilder.setBody("The log body").emit()
     }
+
+    fun methodWithEvent() {
+        val logger = GlobalLoggerProvider.get().loggerBuilder("my-event-logger")
+            .setEventDomain("device")
+            .build()
+        logger.eventBuilder("My event name")
+            .emit()
+    }
 }

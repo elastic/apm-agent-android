@@ -34,6 +34,7 @@ import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.sdk.providers.Provider;
 import co.elastic.apm.android.sdk.providers.SimpleProvider;
 import co.elastic.apm.android.sdk.traces.otel.processor.ElasticSpanProcessor;
+import io.opentelemetry.api.logs.GlobalLoggerProvider;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
@@ -149,11 +150,13 @@ public final class ElasticApmAgent {
     }
 
     private SdkLoggerProvider getLoggerProvider(Resource resource) {
-        return SdkLoggerProvider.builder()
+        SdkLoggerProvider loggerProvider = SdkLoggerProvider.builder()
                 .setResource(resource)
                 .setClock(ntpManager.getClock())
                 .addLogRecordProcessor(connectivityProvider.get().getLogProcessor())
                 .build();
+        GlobalLoggerProvider.set(loggerProvider);
+        return loggerProvider;
     }
 
     private SdkMeterProvider getMeterProvider(Resource resource) {

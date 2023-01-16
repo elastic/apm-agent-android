@@ -1,32 +1,32 @@
-package co.elastic.apm.android.test.attributes.metrics;
+package co.elastic.apm.android.test.attributes.logs;
 
 import org.junit.Test;
 
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
-import co.elastic.apm.android.test.common.metrics.Metrics;
+import co.elastic.apm.android.test.common.logs.Logs;
 import co.elastic.apm.android.test.testutils.TestElasticClock;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
-import io.opentelemetry.sdk.metrics.data.MetricData;
+import io.opentelemetry.sdk.logs.data.LogRecordData;
 
 public class ClockTest extends BaseRobolectricTest {
 
     @Test
-    public void whenAMetricIsCreated_itHasTimestampSetFromElasticClock() {
+    public void whenALogIsCreated_itHasTimestampSetFromElasticClock() {
         long startTimeFromElasticClock = 123456789;
         NtpManager ntpManager = getAgentDependenciesProvider().getNtpManager();
         TestElasticClock clock = (TestElasticClock) ntpManager.getClock();
         clock.setForcedNow(startTimeFromElasticClock);
-        MetricData metric = captureMetric();
+        LogRecordData log = captureLog();
 
-        Metrics.verify(metric)
+        Logs.verify(log)
                 .startedAt(startTimeFromElasticClock);
     }
 
-    private MetricData captureMetric() {
-        MetricAttrHost host = new MetricAttrHost();
+    private LogRecordData captureLog() {
+        LogAttrHost host = new LogAttrHost();
 
-        host.methodWithCounter();
+        host.methodWithLog();
 
-        return getRecorderMetric();
+        return getRecordedLog();
     }
 }

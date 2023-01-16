@@ -88,6 +88,10 @@ public abstract class BaseTest {
         return getRecordedSpans(1).get(0);
     }
 
+    protected LogRecordData getRecordedLog() {
+        return getRecordedLogs(1).get(0);
+    }
+
     protected MetricData getRecorderMetric() {
         return getRecordedMetrics(1).get(0);
     }

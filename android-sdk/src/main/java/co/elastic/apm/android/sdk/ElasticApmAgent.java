@@ -135,9 +135,9 @@ public final class ElasticApmAgent {
     }
 
     private void initializeOpentelemetry() {
-        Attributes globalResourceAttr = AttributesCreator.from(getResourceAttributesVisitor()).create();
+        Attributes resourceAttrs = AttributesCreator.from(getResourceAttributesVisitor()).create();
         Resource resource = Resource.getDefault()
-                .merge(Resource.create(globalResourceAttr));
+                .merge(Resource.create(resourceAttrs));
 
         OpenTelemetrySdk.builder()
                 .setTracerProvider(getTracerProvider(resource))

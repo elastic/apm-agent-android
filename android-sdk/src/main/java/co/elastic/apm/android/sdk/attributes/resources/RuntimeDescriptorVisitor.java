@@ -16,31 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.traces.common.attributes;
-
-import android.os.Build;
+package co.elastic.apm.android.sdk.attributes.resources;
 
 import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 
-public class OsDescriptorVisitor implements AttributesVisitor {
+public class RuntimeDescriptorVisitor implements AttributesVisitor {
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public void visit(AttributesBuilder builder) {
-        builder.put(ResourceAttributes.OS_DESCRIPTION, getOsDescription())
-                .put(ResourceAttributes.OS_VERSION, Build.VERSION.RELEASE)
-                .put(ResourceAttributes.OS_NAME, "Android");
-    }
-
-    private String getOsDescription() {
-        StringBuilder descriptionBuilder = new StringBuilder();
-        descriptionBuilder.append("Android ");
-        descriptionBuilder.append(Build.VERSION.RELEASE);
-        descriptionBuilder.append(", API level ");
-        descriptionBuilder.append(Build.VERSION.SDK_INT);
-        descriptionBuilder.append(", BUILD ");
-        descriptionBuilder.append(Build.VERSION.INCREMENTAL);
-        return descriptionBuilder.toString();
+        builder.put(ResourceAttributes.PROCESS_RUNTIME_NAME, "Android Runtime")
+                .put(ResourceAttributes.PROCESS_RUNTIME_VERSION, System.getProperty("java.vm.version"));
     }
 }

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.traces.common.attributes;
+package co.elastic.apm.android.sdk.attributes.resources;
 
 import co.elastic.apm.android.sdk.BuildConfig;
 import co.elastic.apm.android.sdk.attributes.AttributesVisitor;

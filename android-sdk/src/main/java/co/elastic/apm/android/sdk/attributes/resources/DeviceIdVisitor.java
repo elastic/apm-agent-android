@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.traces.common.attributes;
+package co.elastic.apm.android.sdk.attributes.resources;
 
 import android.content.Context;
 import android.content.SharedPreferences;

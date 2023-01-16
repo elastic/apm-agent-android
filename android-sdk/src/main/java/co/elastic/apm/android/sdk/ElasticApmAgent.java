@@ -20,8 +20,6 @@ package co.elastic.apm.android.sdk;
 
 import android.content.Context;
 
-import androidx.annotation.NonNull;
-
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.attributes.AttributesCompose;
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
@@ -39,6 +37,7 @@ import co.elastic.apm.android.sdk.traces.otel.processor.ElasticSpanProcessor;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.logs.SdkLoggerProvider;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
@@ -132,12 +131,14 @@ public final class ElasticApmAgent {
         OpenTelemetrySdk.builder()
                 .setTracerProvider(getTracerProvider(resource))
                 .setMeterProvider(getMeterProvider(resource))
+                .setLoggerProvider(getLoggerProvider(resource))
                 .setPropagators(getContextPropagator())
                 .buildAndRegisterGlobal();
     }
 
     private SdkTracerProvider getTracerProvider(Resource resource) {
-        ElasticSpanProcessor processor = getProcessor();
+        SpanProcessor spanProcessor = connectivityProvider.get().getSpanProcessor();
+        ElasticSpanProcessor processor = new ElasticSpanProcessor(spanProcessor);
         processor.addAllExclusionRules(configuration.httpTraceConfiguration.exclusionRules);
 
         return SdkTracerProvider.builder()
@@ -147,21 +148,20 @@ public final class ElasticApmAgent {
                 .build();
     }
 
+    private SdkLoggerProvider getLoggerProvider(Resource resource) {
+        return SdkLoggerProvider.builder()
+                .setResource(resource)
+                .setClock(ntpManager.getClock())
+                .addLogRecordProcessor(connectivityProvider.get().getLogProcessor())
+                .build();
+    }
+
     private SdkMeterProvider getMeterProvider(Resource resource) {
         return SdkMeterProvider.builder()
                 .setClock(ntpManager.getClock())
                 .registerMetricReader(connectivityProvider.get().getMetricReader())
                 .setResource(resource)
                 .build();
-    }
-
-    @NonNull
-    private ElasticSpanProcessor getProcessor() {
-        SpanProcessor spanProcessor = connectivityProvider.get().getSpanProcessor();
-        if (spanProcessor instanceof ElasticSpanProcessor) {
-            return (ElasticSpanProcessor) spanProcessor;
-        }
-        return new ElasticSpanProcessor(spanProcessor);
     }
 
     private ContextPropagators getContextPropagator() {

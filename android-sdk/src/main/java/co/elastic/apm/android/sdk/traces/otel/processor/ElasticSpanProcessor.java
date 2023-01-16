@@ -32,7 +32,7 @@ import io.opentelemetry.sdk.trace.ReadWriteSpan;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 
-public class ElasticSpanProcessor implements SpanProcessor {
+public final class ElasticSpanProcessor implements SpanProcessor {
     private final SpanProcessor original;
     private final Set<ExclusionRule> rules = new HashSet<>();
     private final SessionIdProvider sessionIdProvider;

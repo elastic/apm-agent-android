@@ -16,35 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.attributes.resources;
+package co.elastic.apm.android.sdk.attributes.impl;
 
-import java.util.UUID;
+import java.util.List;
 
-import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
-import co.elastic.apm.android.sdk.internal.services.Service;
-import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
 import io.opentelemetry.api.common.AttributesBuilder;
-import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 
-public class DeviceIdVisitor implements AttributesVisitor {
+public final class ComposeAttributesVisitor implements AttributesVisitor {
+    private final List<AttributesVisitor> visitors;
 
-    private static final String DEVICE_ID_KEY = "device_id";
+    public ComposeAttributesVisitor(List<AttributesVisitor> visitors) {
+        this.visitors = visitors;
+    }
 
     @Override
     public void visit(AttributesBuilder builder) {
-        builder.put(ResourceAttributes.DEVICE_ID, getId());
-    }
-
-    private String getId() {
-        PreferencesService preferences = ElasticApmAgent.get().getService(Service.Names.PREFERENCES);
-        String deviceId = preferences.retrieve(DEVICE_ID_KEY);
-
-        if (deviceId == null) {
-            deviceId = UUID.randomUUID().toString();
-            preferences.store(DEVICE_ID_KEY, deviceId);
+        for (AttributesVisitor visitor : visitors) {
+            visitor.visit(builder);
         }
-
-        return deviceId;
     }
 }

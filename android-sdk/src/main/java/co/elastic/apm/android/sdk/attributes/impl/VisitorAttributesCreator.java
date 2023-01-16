@@ -16,23 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.attributes;
+package co.elastic.apm.android.sdk.attributes.impl;
 
-import java.util.Arrays;
-import java.util.List;
-
-import co.elastic.apm.android.sdk.attributes.impl.ComposeAttributesVisitor;
+import co.elastic.apm.android.sdk.attributes.AttributesCreator;
+import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
+import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 
-public interface AttributesVisitor {
+public final class VisitorAttributesCreator implements AttributesCreator {
+    private final AttributesVisitor visitor;
 
-    static ComposeAttributesVisitor compose(AttributesVisitor... visitors) {
-        return compose(Arrays.asList(visitors));
+    public VisitorAttributesCreator(AttributesVisitor visitor) {
+        this.visitor = visitor;
     }
 
-    static ComposeAttributesVisitor compose(List<AttributesVisitor> visitors) {
-        return new ComposeAttributesVisitor(visitors);
+    @Override
+    public Attributes create() {
+        AttributesBuilder builder = Attributes.builder();
+        visitor.visit(builder);
+        return builder.build();
     }
-
-    void visit(AttributesBuilder builder);
 }

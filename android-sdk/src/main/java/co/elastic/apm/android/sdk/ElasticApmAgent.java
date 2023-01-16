@@ -21,7 +21,14 @@ package co.elastic.apm.android.sdk;
 import android.content.Context;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
-import co.elastic.apm.android.sdk.attributes.AttributesCompose;
+import co.elastic.apm.android.sdk.attributes.AttributesCreator;
+import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
+import co.elastic.apm.android.sdk.attributes.resources.DeviceIdVisitor;
+import co.elastic.apm.android.sdk.attributes.resources.DeviceInfoVisitor;
+import co.elastic.apm.android.sdk.attributes.resources.OsDescriptorVisitor;
+import co.elastic.apm.android.sdk.attributes.resources.RuntimeDescriptorVisitor;
+import co.elastic.apm.android.sdk.attributes.resources.SdkIdVisitor;
+import co.elastic.apm.android.sdk.attributes.resources.ServiceIdVisitor;
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.logging.AndroidLoggerFactory;
@@ -30,10 +37,12 @@ import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService;
 import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
 import co.elastic.apm.android.sdk.internal.services.network.NetworkService;
+import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.sdk.providers.Provider;
 import co.elastic.apm.android.sdk.providers.SimpleProvider;
 import co.elastic.apm.android.sdk.traces.otel.processor.ElasticSpanProcessor;
+import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.logs.GlobalLoggerProvider;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import io.opentelemetry.context.propagation.ContextPropagators;
@@ -50,7 +59,6 @@ public final class ElasticApmAgent {
     private static ElasticApmAgent instance;
     private final Provider<Connectivity> connectivityProvider;
     private final ServiceManager serviceManager;
-    private final AttributesCompose globalAttributes;
     private final NtpManager ntpManager;
 
     public static ElasticApmAgent get() {
@@ -117,7 +125,7 @@ public final class ElasticApmAgent {
         serviceManager.addService(new NetworkService(appContext));
         serviceManager.addService(new AppInfoService(appContext));
         serviceManager.addService(new ApmMetadataService(appContext));
-        globalAttributes = AttributesCompose.global(appContext, configuration.serviceName, configuration.serviceVersion);
+        serviceManager.addService(new PreferencesService(appContext));
     }
 
     private void onInitializationFinished() {
@@ -127,14 +135,27 @@ public final class ElasticApmAgent {
     }
 
     private void initializeOpentelemetry() {
+        Attributes globalResourceAttr = AttributesCreator.from(getResourceAttributesVisitor()).create();
         Resource resource = Resource.getDefault()
-                .merge(globalAttributes.provideAsResource());
+                .merge(Resource.create(globalResourceAttr));
+
         OpenTelemetrySdk.builder()
                 .setTracerProvider(getTracerProvider(resource))
                 .setMeterProvider(getMeterProvider(resource))
                 .setLoggerProvider(getLoggerProvider(resource))
                 .setPropagators(getContextPropagator())
                 .buildAndRegisterGlobal();
+    }
+
+    private AttributesVisitor getResourceAttributesVisitor() {
+        return AttributesVisitor.compose(
+                new DeviceIdVisitor(),
+                new DeviceInfoVisitor(),
+                new OsDescriptorVisitor(),
+                new RuntimeDescriptorVisitor(),
+                new SdkIdVisitor(),
+                new ServiceIdVisitor()
+        );
     }
 
     private SdkTracerProvider getTracerProvider(Resource resource) {

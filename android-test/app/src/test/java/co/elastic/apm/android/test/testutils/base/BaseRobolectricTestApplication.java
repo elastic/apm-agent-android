@@ -14,6 +14,7 @@ import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
+import co.elastic.apm.android.test.common.logs.LogRecordExporterCaptor;
 import co.elastic.apm.android.test.common.metrics.MetricExporterCaptor;
 import co.elastic.apm.android.test.common.metrics.MetricsFlusher;
 import co.elastic.apm.android.test.common.spans.SpanExporterCaptor;
@@ -22,12 +23,14 @@ import co.elastic.apm.android.test.testutils.AgentDependenciesProvider;
 import co.elastic.apm.android.test.testutils.TestElasticClock;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.sdk.common.Clock;
+import io.opentelemetry.sdk.logs.export.SimpleLogRecordProcessor;
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 
 public class BaseRobolectricTestApplication extends Application implements ExportersProvider,
         TestLifecycleApplication, AgentDependenciesProvider {
     private final SpanExporterCaptor spanExporter;
+    private final LogRecordExporterCaptor logRecordExporter;
     private final MetricExporterCaptor metricExporter;
     private AgentDependenciesInjector injector;
     private NtpManager ntpManager;
@@ -35,6 +38,7 @@ public class BaseRobolectricTestApplication extends Application implements Expor
     public BaseRobolectricTestApplication() {
         spanExporter = new SpanExporterCaptor();
         metricExporter = new MetricExporterCaptor();
+        logRecordExporter = new LogRecordExporterCaptor();
         setUpAgentDependencies();
     }
 
@@ -64,11 +68,18 @@ public class BaseRobolectricTestApplication extends Application implements Expor
         return metricExporter;
     }
 
+    @Override
+    public LogRecordExporterCaptor getLogRecordExporter() {
+        return logRecordExporter;
+    }
+
     protected Connectivity getConnectivity() {
         PeriodicMetricReader metricReader = PeriodicMetricReader.create(metricExporter);
         MetricsFlusher flusher = new MetricsFlusher(metricReader);
         metricExporter.setFlusher(flusher);
-        return Connectivity.custom(SimpleSpanProcessor.create(spanExporter), metricReader);
+        return Connectivity.custom(SimpleSpanProcessor.create(spanExporter),
+                SimpleLogRecordProcessor.create(logRecordExporter),
+                metricReader);
     }
 
     @Override

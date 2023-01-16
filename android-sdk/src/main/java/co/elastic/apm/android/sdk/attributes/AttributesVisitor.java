@@ -20,7 +20,7 @@ package co.elastic.apm.android.sdk.attributes;
 
 import io.opentelemetry.api.common.AttributesBuilder;
 
-public interface AttributesBuilderVisitor {
+public interface AttributesVisitor {
 
     void visit(AttributesBuilder builder);
 }

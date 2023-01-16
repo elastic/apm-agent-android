@@ -20,11 +20,11 @@ package co.elastic.apm.android.sdk.traces.common.attributes;
 
 import android.os.Build;
 
-import co.elastic.apm.android.sdk.attributes.AttributesBuilderVisitor;
+import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 
-public class OsDescriptorVisitor implements AttributesBuilderVisitor {
+public class OsDescriptorVisitor implements AttributesVisitor {
 
     @Override
     public void visit(AttributesBuilder builder) {

@@ -19,11 +19,11 @@
 package co.elastic.apm.android.sdk.traces.common.attributes;
 
 import co.elastic.apm.android.sdk.BuildConfig;
-import co.elastic.apm.android.sdk.attributes.AttributesBuilderVisitor;
+import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 
-public class SdkIdVisitor implements AttributesBuilderVisitor {
+public class SdkIdVisitor implements AttributesVisitor {
 
     @Override
     public void visit(AttributesBuilder builder) {

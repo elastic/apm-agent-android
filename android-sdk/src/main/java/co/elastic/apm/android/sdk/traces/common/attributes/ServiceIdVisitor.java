@@ -19,13 +19,13 @@
 package co.elastic.apm.android.sdk.traces.common.attributes;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
-import co.elastic.apm.android.sdk.attributes.AttributesBuilderVisitor;
+import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 
-public class ServiceIdVisitor implements AttributesBuilderVisitor {
+public class ServiceIdVisitor implements AttributesVisitor {
     private final String serviceName;
     private final String serviceVersion;
 

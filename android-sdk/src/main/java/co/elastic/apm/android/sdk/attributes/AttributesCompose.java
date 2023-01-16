@@ -37,9 +37,9 @@ import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.sdk.resources.Resource;
 
 public final class AttributesCompose {
-    private final List<AttributesBuilderVisitor> visitors = new ArrayList<>();
+    private final List<AttributesVisitor> visitors = new ArrayList<>();
 
-    public static AttributesCompose create(AttributesBuilderVisitor... visitors) {
+    public static AttributesCompose create(AttributesVisitor... visitors) {
         return new AttributesCompose(Arrays.asList(visitors));
     }
 
@@ -54,13 +54,13 @@ public final class AttributesCompose {
                 new ServiceIdVisitor(serviceName, serviceVersion));
     }
 
-    public AttributesCompose(List<AttributesBuilderVisitor> defaultVisitors) {
+    public AttributesCompose(List<AttributesVisitor> defaultVisitors) {
         if (defaultVisitors != null) {
             visitors.addAll(defaultVisitors);
         }
     }
 
-    public void addVisitor(AttributesBuilderVisitor visitor) {
+    public void addVisitor(AttributesVisitor visitor) {
         if (visitor == null) {
             throw new NullPointerException();
         }
@@ -70,7 +70,7 @@ public final class AttributesCompose {
     public Attributes provide() {
         AttributesBuilder builder = Attributes.builder();
 
-        for (AttributesBuilderVisitor visitor : visitors) {
+        for (AttributesVisitor visitor : visitors) {
             visitor.visit(builder);
         }
 

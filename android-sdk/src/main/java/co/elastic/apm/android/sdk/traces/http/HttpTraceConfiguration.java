@@ -25,7 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import co.elastic.apm.android.sdk.attributes.AttributesBuilderVisitor;
+import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
 import co.elastic.apm.android.sdk.attributes.AttributesCompose;
 import co.elastic.apm.android.sdk.traces.http.attributes.HttpAttributesVisitor;
 import co.elastic.apm.android.sdk.traces.http.attributes.HttpAttributesVisitorWrapper;
@@ -46,7 +46,7 @@ public class HttpTraceConfiguration {
     }
 
     public AttributesCompose createHttpAttributesCompose(HttpRequest request) {
-        List<AttributesBuilderVisitor> visitors = new ArrayList<>();
+        List<AttributesVisitor> visitors = new ArrayList<>();
 
         for (HttpAttributesVisitor httpVisitor : httpAttributesVisitors) {
             visitors.add(new HttpAttributesVisitorWrapper(request, httpVisitor));

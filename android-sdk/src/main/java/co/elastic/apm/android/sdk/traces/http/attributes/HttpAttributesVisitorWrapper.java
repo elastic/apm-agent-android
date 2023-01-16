@@ -18,11 +18,11 @@
  */
 package co.elastic.apm.android.sdk.traces.http.attributes;
 
-import co.elastic.apm.android.sdk.attributes.AttributesBuilderVisitor;
+import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
 import co.elastic.apm.android.sdk.traces.http.data.HttpRequest;
 import io.opentelemetry.api.common.AttributesBuilder;
 
-public class HttpAttributesVisitorWrapper implements AttributesBuilderVisitor {
+public class HttpAttributesVisitorWrapper implements AttributesVisitor {
     private final HttpRequest request;
     private final HttpAttributesVisitor visitor;
 

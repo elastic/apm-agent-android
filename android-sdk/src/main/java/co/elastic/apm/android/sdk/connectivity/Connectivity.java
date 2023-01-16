@@ -25,6 +25,7 @@ import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
 import co.elastic.apm.android.sdk.providers.LazyProvider;
 import co.elastic.apm.android.sdk.providers.Provider;
+import io.opentelemetry.sdk.logs.LogRecordProcessor;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.metrics.export.MetricReader;
 import io.opentelemetry.sdk.trace.SpanProcessor;
@@ -83,6 +84,8 @@ public interface Connectivity {
     }
 
     SpanProcessor getSpanProcessor();
+
+    LogRecordProcessor getLogProcessor();
 
     MetricReader getMetricReader();
 }

@@ -23,6 +23,7 @@ import android.content.Context;
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.attributes.AttributesCreator;
 import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
+import co.elastic.apm.android.sdk.attributes.common.SessionAttributesVisitor;
 import co.elastic.apm.android.sdk.attributes.resources.DeviceIdVisitor;
 import co.elastic.apm.android.sdk.attributes.resources.DeviceInfoVisitor;
 import co.elastic.apm.android.sdk.attributes.resources.OsDescriptorVisitor;
@@ -136,11 +137,12 @@ public final class ElasticApmAgent {
 
     private void initializeOpentelemetry() {
         Attributes resourceAttrs = AttributesCreator.from(getResourceAttributesVisitor()).create();
+        AttributesVisitor globalAttributesVisitor = new SessionAttributesVisitor();
         Resource resource = Resource.getDefault()
                 .merge(Resource.create(resourceAttrs));
 
         OpenTelemetrySdk.builder()
-                .setTracerProvider(getTracerProvider(resource))
+                .setTracerProvider(getTracerProvider(resource, globalAttributesVisitor))
                 .setMeterProvider(getMeterProvider(resource))
                 .setLoggerProvider(getLoggerProvider(resource))
                 .setPropagators(getContextPropagator())
@@ -158,9 +160,9 @@ public final class ElasticApmAgent {
         );
     }
 
-    private SdkTracerProvider getTracerProvider(Resource resource) {
+    private SdkTracerProvider getTracerProvider(Resource resource, AttributesVisitor commonAttrVisitor) {
         SpanProcessor spanProcessor = connectivityProvider.get().getSpanProcessor();
-        ElasticSpanProcessor processor = new ElasticSpanProcessor(spanProcessor);
+        ElasticSpanProcessor processor = new ElasticSpanProcessor(spanProcessor, commonAttrVisitor);
         processor.addAllExclusionRules(configuration.httpTraceConfiguration.exclusionRules);
 
         return SdkTracerProvider.builder()

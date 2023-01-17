@@ -23,8 +23,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
-import co.elastic.apm.android.sdk.ElasticApmAgent;
-import co.elastic.apm.android.sdk.traces.session.SessionIdProvider;
+import co.elastic.apm.android.sdk.attributes.AttributesCreator;
+import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.context.Context;
@@ -34,9 +34,8 @@ import io.opentelemetry.sdk.trace.SpanProcessor;
 
 public final class ElasticSpanProcessor implements SpanProcessor {
     private final SpanProcessor original;
+    private final AttributesVisitor commonAttributesVisitor;
     private final Set<ExclusionRule> rules = new HashSet<>();
-    private final SessionIdProvider sessionIdProvider;
-    private static final AttributeKey<String> SESSION_ID_ATTRIBUTE_KEY = AttributeKey.stringKey("session.id");
     private static final AttributeKey<String> TRANSACTION_TYPE_ATTRIBUTE_KEY = AttributeKey.stringKey("type");
     private static final String TRANSACTION_TYPE_VALUE = "mobile";
 
@@ -44,22 +43,18 @@ public final class ElasticSpanProcessor implements SpanProcessor {
         this.rules.addAll(rules);
     }
 
-    public ElasticSpanProcessor(SpanProcessor original) {
+    public ElasticSpanProcessor(SpanProcessor original, AttributesVisitor commonAttributesVisitor) {
         this.original = original;
-        sessionIdProvider = ElasticApmAgent.get().configuration.sessionIdProvider;
+        this.commonAttributesVisitor = commonAttributesVisitor;
     }
 
     @Override
     public void onStart(Context parentContext, ReadWriteSpan span) {
-        span.setAttribute(SESSION_ID_ATTRIBUTE_KEY, getSessionId());
+        span.setAllAttributes(AttributesCreator.from(commonAttributesVisitor).create());
         span.setAttribute(TRANSACTION_TYPE_ATTRIBUTE_KEY, TRANSACTION_TYPE_VALUE);
         span.setStatus(StatusCode.OK);
         Elog.getLogger().debug("Starting span: '{}', within context: '{}'", span, parentContext);
         original.onStart(parentContext, span);
-    }
-
-    private synchronized String getSessionId() {
-        return sessionIdProvider.getSessionId();
     }
 
     @Override

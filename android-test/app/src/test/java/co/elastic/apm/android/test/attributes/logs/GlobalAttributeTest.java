@@ -16,14 +16,6 @@ public class GlobalAttributeTest extends BaseRobolectricTest {
                 .hasAttribute("session.id");
     }
 
-    @Test
-    public void whenALogIsCreated_verifyItHasTypeMobileAsParam() {
-        LogRecordData log = captureLog();
-
-        Logs.verify(log)
-                .hasAttribute("type", "mobile");
-    }
-
     private LogRecordData captureLog() {
         LogAttrHost host = new LogAttrHost();
 

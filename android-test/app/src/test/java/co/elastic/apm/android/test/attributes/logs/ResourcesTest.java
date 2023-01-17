@@ -20,7 +20,7 @@ public class ResourcesTest extends BaseRobolectricTest {
     public void whenALogIsCreated_serviceNameIsSet() {
         LogRecordData log = captureLog();
 
-        Logs.verify(log)
+        Logs.verifyRecord(log)
                 .hasResource("service.name", "my-app");
     }
 
@@ -28,7 +28,7 @@ public class ResourcesTest extends BaseRobolectricTest {
     public void whenALogIsCreated_serviceVersionIsSet() {
         LogRecordData log = captureLog();
 
-        Logs.verify(log)
+        Logs.verifyRecord(log)
                 .hasResource("service.version", "1.0");
     }
 
@@ -36,7 +36,7 @@ public class ResourcesTest extends BaseRobolectricTest {
     public void whenALogIsCreated_agentNameIsSet() {
         LogRecordData log = captureLog();
 
-        Logs.verify(log)
+        Logs.verifyRecord(log)
                 .hasResource("telemetry.sdk.name", "android");
     }
 
@@ -44,7 +44,7 @@ public class ResourcesTest extends BaseRobolectricTest {
     public void whenALogIsCreated_agentVersionIsSet() {
         LogRecordData log = captureLog();
 
-        Logs.verify(log)
+        Logs.verifyRecord(log)
                 .hasResource("telemetry.sdk.version", System.getProperty("agentVersion"));
     }
 
@@ -52,7 +52,7 @@ public class ResourcesTest extends BaseRobolectricTest {
     public void whenALogIsCreated_osDescriptionIsSet() {
         LogRecordData log = captureLog();
 
-        Logs.verify(log)
+        Logs.verifyRecord(log)
                 .hasResource("os.description", "Android 12, API level 32, BUILD unknown");
     }
 
@@ -60,7 +60,7 @@ public class ResourcesTest extends BaseRobolectricTest {
     public void whenALogIsCreated_osNameIsSet() {
         LogRecordData log = captureLog();
 
-        Logs.verify(log)
+        Logs.verifyRecord(log)
                 .hasResource("os.name", "Android");
     }
 
@@ -68,7 +68,7 @@ public class ResourcesTest extends BaseRobolectricTest {
     public void whenALogIsCreated_osVersionSet() {
         LogRecordData log = captureLog();
 
-        Logs.verify(log)
+        Logs.verifyRecord(log)
                 .hasResource("os.version", "12");
     }
 
@@ -76,7 +76,7 @@ public class ResourcesTest extends BaseRobolectricTest {
     public void whenALogIsCreated_deploymentEnvironmentIsSet() {
         LogRecordData log = captureLog();
 
-        Logs.verify(log)
+        Logs.verifyRecord(log)
                 .hasResource("deployment.environment", (BuildConfig.DEBUG) ? "debug" : "release");
     }
 
@@ -84,7 +84,7 @@ public class ResourcesTest extends BaseRobolectricTest {
     public void whenALogIsCreated_deviceIdIsSet() {
         LogRecordData log = captureLog();
 
-        Logs.verify(log)
+        Logs.verifyRecord(log)
                 .hasResource("device.id");
     }
 
@@ -92,7 +92,7 @@ public class ResourcesTest extends BaseRobolectricTest {
     public void whenALogIsCreated_deviceModelIdIsSet() {
         LogRecordData log = captureLog();
 
-        Logs.verify(log)
+        Logs.verifyRecord(log)
                 .hasResource("device.model.identifier", DEVICE_MODEL_NAME);
     }
 
@@ -100,7 +100,7 @@ public class ResourcesTest extends BaseRobolectricTest {
     public void whenALogIsCreated_deviceModelManufacturerIsSet() {
         LogRecordData log = captureLog();
 
-        Logs.verify(log)
+        Logs.verifyRecord(log)
                 .hasResource("device.manufacturer", DEVICE_MANUFACTURER);
     }
 
@@ -108,7 +108,7 @@ public class ResourcesTest extends BaseRobolectricTest {
     public void whenALogIsCreated_processRuntimeNameIsSet() {
         LogRecordData log = captureLog();
 
-        Logs.verify(log)
+        Logs.verifyRecord(log)
                 .hasResource("process.runtime.name", "Android Runtime");
     }
 
@@ -116,7 +116,7 @@ public class ResourcesTest extends BaseRobolectricTest {
     public void whenALogIsCreated_processRuntimeVersionIsSet() {
         LogRecordData log = captureLog();
 
-        Logs.verify(log)
+        Logs.verifyRecord(log)
                 .hasResource("process.runtime.version", RUNTIME_VERSION);
     }
 

@@ -18,6 +18,10 @@
  */
 package co.elastic.apm.android.sdk.logs;
 
+import co.elastic.apm.android.sdk.attributes.AttributesCreator;
+import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.logs.LogRecordProcessor;
@@ -25,14 +29,22 @@ import io.opentelemetry.sdk.logs.ReadWriteLogRecord;
 
 public final class ElasticLogRecordProcessor implements LogRecordProcessor {
     private final LogRecordProcessor original;
+    private final AttributesVisitor commonAttributesVisitor;
 
-    public ElasticLogRecordProcessor(LogRecordProcessor original) {
+    public ElasticLogRecordProcessor(LogRecordProcessor original, AttributesVisitor commonAttributesVisitor) {
         this.original = original;
+        this.commonAttributesVisitor = commonAttributesVisitor;
     }
 
     @Override
     public void onEmit(Context context, ReadWriteLogRecord logRecord) {
+        setAllAttributes(logRecord, AttributesCreator.from(commonAttributesVisitor).create());
         original.onEmit(context, logRecord);
+    }
+
+    private void setAllAttributes(ReadWriteLogRecord logRecord, Attributes attributes) {
+        attributes.forEach((attributeKey, value) ->
+                logRecord.setAttribute((AttributeKey<Object>) attributeKey, value));
     }
 
     @Override

@@ -19,7 +19,6 @@
 package co.elastic.apm.android.sdk.internal.exceptions;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -34,13 +33,8 @@ import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 public final class ElasticExceptionHandler implements Thread.UncaughtExceptionHandler {
     private final Thread.UncaughtExceptionHandler wrapped;
 
-    @VisibleForTesting
-    public ElasticExceptionHandler(Thread.UncaughtExceptionHandler wrapped) {
-        this.wrapped = wrapped;
-    }
-
     public ElasticExceptionHandler() {
-        this(Thread.getDefaultUncaughtExceptionHandler());
+        this.wrapped = Thread.getDefaultUncaughtExceptionHandler();
     }
 
     @Override

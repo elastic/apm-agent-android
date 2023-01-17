@@ -40,6 +40,7 @@ import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
 import co.elastic.apm.android.sdk.internal.services.network.NetworkService;
 import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
+import co.elastic.apm.android.sdk.logs.ElasticLogRecordProcessor;
 import co.elastic.apm.android.sdk.providers.Provider;
 import co.elastic.apm.android.sdk.providers.SimpleProvider;
 import co.elastic.apm.android.sdk.traces.otel.processor.ElasticSpanProcessor;
@@ -48,6 +49,7 @@ import io.opentelemetry.api.logs.GlobalLoggerProvider;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.logs.LogRecordProcessor;
 import io.opentelemetry.sdk.logs.SdkLoggerProvider;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.resources.Resource;
@@ -143,8 +145,8 @@ public final class ElasticApmAgent {
 
         OpenTelemetrySdk.builder()
                 .setTracerProvider(getTracerProvider(resource, globalAttributesVisitor))
+                .setLoggerProvider(getLoggerProvider(resource, globalAttributesVisitor))
                 .setMeterProvider(getMeterProvider(resource))
-                .setLoggerProvider(getLoggerProvider(resource))
                 .setPropagators(getContextPropagator())
                 .buildAndRegisterGlobal();
     }
@@ -172,11 +174,13 @@ public final class ElasticApmAgent {
                 .build();
     }
 
-    private SdkLoggerProvider getLoggerProvider(Resource resource) {
+    private SdkLoggerProvider getLoggerProvider(Resource resource, AttributesVisitor commonAttrVisitor) {
+        LogRecordProcessor logProcessor = connectivityProvider.get().getLogProcessor();
+        ElasticLogRecordProcessor elasticProcessor = new ElasticLogRecordProcessor(logProcessor, commonAttrVisitor);
         SdkLoggerProvider loggerProvider = SdkLoggerProvider.builder()
                 .setResource(resource)
                 .setClock(ntpManager.getClock())
-                .addLogRecordProcessor(connectivityProvider.get().getLogProcessor())
+                .addLogRecordProcessor(elasticProcessor)
                 .build();
         GlobalLoggerProvider.set(loggerProvider);
         return loggerProvider;

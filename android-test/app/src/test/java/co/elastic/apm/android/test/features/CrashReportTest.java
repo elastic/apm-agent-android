@@ -1,13 +1,10 @@
 package co.elastic.apm.android.test.features;
 
 import org.junit.Test;
-import org.robolectric.Robolectric;
-import org.robolectric.android.controller.ActivityController;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import co.elastic.apm.android.test.activities.ErrorActivity;
 import co.elastic.apm.android.test.common.logs.Logs;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
@@ -16,22 +13,19 @@ public class CrashReportTest extends BaseRobolectricTest {
 
     @Test
     public void whenCrashHappens_captureLogEvent() {
-        try (ActivityController<ErrorActivity> controller = Robolectric.buildActivity(ErrorActivity.class)) {
-            try {
-                controller.setup();
-            } catch (IllegalStateException e) {
-                LogRecordData log = getRecordedLog();
+        IllegalStateException exception = new IllegalStateException("Custom exception");
+        Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), exception);
 
-                Logs.verifyException(log)
-                        .isNamed("crash")
-                        .hasExceptionMessage("Creating exception")
-                        .hasExceptionType(IllegalStateException.class.getName())
-                        .hasStacktrace(stackTraceToString(e));
-            }
-        }
+        LogRecordData log = getRecordedLog();
+
+        Logs.verifyException(log)
+                .isNamed("crash")
+                .hasExceptionMessage("Custom exception")
+                .hasStacktrace(stackTraceToString(exception))
+                .hasExceptionType("java.lang.IllegalStateException");
     }
 
-    public String stackTraceToString(Throwable throwable) {
+    private String stackTraceToString(Throwable throwable) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
 

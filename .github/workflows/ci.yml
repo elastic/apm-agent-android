@@ -14,14 +14,18 @@ env:
   DOCKER_REGISTRY_SECRET: 'secret/observability-team/ci/docker-registry/prod'
 
 jobs:
-  process:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: lint
         run: ./gradlew lint
+  compliance:
+      - uses: actions/checkout@v3
       - name: Verify OSS compliance
         run: ./gradlew verifyNoticeFile
+  test:
+      - uses: actions/checkout@v3
       - name: Build
         run: ./gradlew assemble
       - name: Test

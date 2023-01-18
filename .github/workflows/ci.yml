@@ -22,13 +22,6 @@ jobs:
         run: ./gradlew assemble
       - name: Test
         run: ./tests.sh
-      - name: Publish snaphosts
-        uses: elastic/apm-pipeline-library/.github/actions/snapshoty-simple@feature/use-snapshoty-with-docker
-        with:
-          config: '.ci/snapshoty.yml'
-          vaultUrl: ${{ secrets.VAULT_ADDR }}
-          vaultRoleId: ${{ secrets.VAULT_ROLE_ID }}
-          vaultSecretId: ${{ secrets.VAULT_SECRET_ID }}
       - name: Store test results
         if: success() || failure()
         uses: actions/upload-artifact@v3

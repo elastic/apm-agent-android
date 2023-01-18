@@ -29,7 +29,7 @@ import java.util.Properties;
 
 import co.elastic.apm.android.common.ApmInfo;
 import co.elastic.apm.android.sdk.internal.services.Service;
-import co.elastic.apm.android.sdk.providers.LazyProvider;
+import co.elastic.apm.android.sdk.internal.providers.LazyProvider;
 
 public class ApmMetadataService implements Service {
     private final LazyProvider<Properties> apmInfoPropertiesProvider;

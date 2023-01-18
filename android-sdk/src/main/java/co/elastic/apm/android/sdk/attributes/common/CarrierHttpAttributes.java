@@ -16,19 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.traces.http.attributes.visitors;
+package co.elastic.apm.android.sdk.attributes.common;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
+import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
 import co.elastic.apm.android.sdk.internal.providers.LazyProvider;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.network.NetworkService;
 import co.elastic.apm.android.sdk.internal.services.network.data.CarrierInfo;
-import co.elastic.apm.android.sdk.traces.http.attributes.HttpAttributesVisitor;
-import co.elastic.apm.android.sdk.traces.http.data.HttpRequest;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 
-public class CarrierHttpAttributes implements HttpAttributesVisitor {
+public class CarrierHttpAttributes implements AttributesVisitor {
     private final LazyProvider<NetworkService> networkServiceProvider;
 
     public CarrierHttpAttributes() {
@@ -36,7 +35,7 @@ public class CarrierHttpAttributes implements HttpAttributesVisitor {
     }
 
     @Override
-    public void visit(AttributesBuilder builder, HttpRequest request) {
+    public void visit(AttributesBuilder builder) {
         CarrierInfo carrierInfo = networkServiceProvider.get().getCarrierInfo();
         if (carrierInfo != null) {
             builder.put(SemanticAttributes.NET_HOST_CARRIER_NAME, carrierInfo.name);

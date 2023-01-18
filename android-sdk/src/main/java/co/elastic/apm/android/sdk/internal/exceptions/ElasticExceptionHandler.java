@@ -36,9 +36,19 @@ public final class ElasticExceptionHandler implements Thread.UncaughtExceptionHa
 
     public static ElasticExceptionHandler getInstance() {
         if (INSTANCE == null) {
-            INSTANCE = new ElasticExceptionHandler();
+            Thread.UncaughtExceptionHandler existingHandler = Thread.getDefaultUncaughtExceptionHandler();
+            if (existingHandler instanceof ElasticExceptionHandler) {
+                // Needed for tests
+                INSTANCE = (ElasticExceptionHandler) existingHandler;
+            } else {
+                INSTANCE = new ElasticExceptionHandler();
+            }
         }
         return INSTANCE;
+    }
+
+    public static void resetForTest() {
+        INSTANCE = null;
     }
 
     private ElasticExceptionHandler() {

@@ -110,7 +110,8 @@ public final class ElasticApmAgent {
         }
     }
 
-    public void destroy() {
+    public void resetForTest() {
+        ElasticExceptionHandler.resetForTest();
         serviceManager.stop();
         instance = null;
     }

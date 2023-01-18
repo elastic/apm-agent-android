@@ -16,19 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.traces.common.attributes;
+package co.elastic.apm.android.sdk.attributes.impl;
 
-import android.os.Build;
+import java.util.List;
 
-import co.elastic.apm.android.sdk.attributes.AttributesBuilderVisitor;
+import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
 import io.opentelemetry.api.common.AttributesBuilder;
-import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 
-public class DeviceInfoVisitor implements AttributesBuilderVisitor {
+public final class ComposeAttributesVisitor implements AttributesVisitor {
+    private final List<AttributesVisitor> visitors;
+
+    public ComposeAttributesVisitor(List<AttributesVisitor> visitors) {
+        this.visitors = visitors;
+    }
 
     @Override
     public void visit(AttributesBuilder builder) {
-        builder.put(ResourceAttributes.DEVICE_MODEL_IDENTIFIER, Build.MODEL)
-                .put(ResourceAttributes.DEVICE_MANUFACTURER, Build.MANUFACTURER);
+        for (AttributesVisitor visitor : visitors) {
+            visitor.visit(builder);
+        }
     }
 }

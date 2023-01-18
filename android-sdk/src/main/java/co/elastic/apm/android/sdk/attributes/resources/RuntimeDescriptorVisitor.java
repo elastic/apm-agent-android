@@ -16,19 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.traces.common.attributes;
+package co.elastic.apm.android.sdk.attributes.resources;
 
-import co.elastic.apm.android.sdk.BuildConfig;
-import co.elastic.apm.android.sdk.attributes.AttributesBuilderVisitor;
+import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 
-public class SdkIdVisitor implements AttributesBuilderVisitor {
+public class RuntimeDescriptorVisitor implements AttributesVisitor {
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public void visit(AttributesBuilder builder) {
-        builder.put(ResourceAttributes.TELEMETRY_SDK_NAME, "android")
-                .put(ResourceAttributes.TELEMETRY_SDK_VERSION, BuildConfig.APM_AGENT_VERSION)
-                .put(ResourceAttributes.TELEMETRY_SDK_LANGUAGE, "java");
+        builder.put(ResourceAttributes.PROCESS_RUNTIME_NAME, "Android Runtime")
+                .put(ResourceAttributes.PROCESS_RUNTIME_VERSION, System.getProperty("java.vm.version"));
     }
 }

@@ -6,8 +6,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import co.elastic.apm.android.test.common.logs.LogRecordExporterCaptor;
 import co.elastic.apm.android.test.common.metrics.MetricExporterCaptor;
 import co.elastic.apm.android.test.common.spans.SpanExporterCaptor;
+import io.opentelemetry.sdk.logs.data.LogRecordData;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.trace.data.SpanData;
 
@@ -36,6 +38,25 @@ public abstract class BaseTest {
         return spans;
     }
 
+    protected List<LogRecordData> getRecordedLogs(int amountExpected) {
+        List<LogRecordData> logs = findCapturedLogsOrderedByCreation(getLogRecordExporter());
+        assertEquals(amountExpected, logs.size());
+
+        return logs;
+    }
+
+    private List<LogRecordData> findCapturedLogsOrderedByCreation(LogRecordExporterCaptor logRecordExporter) {
+        List<LogRecordData> logs = new ArrayList<>();
+
+        for (List<LogRecordData> capturedLogs : logRecordExporter.getCapturedLogs()) {
+            logs.addAll(capturedLogs);
+        }
+
+        logs.sort(Comparator.comparing(LogRecordData::getEpochNanos));
+        logRecordExporter.clearCapturedLogs();
+        return logs;
+    }
+
     protected List<MetricData> getRecordedMetrics(int amountExpected) {
         List<MetricData> metrics = findCapturedMetrics(getMetricExporter());
         assertEquals(amountExpected, metrics.size());
@@ -61,8 +82,14 @@ public abstract class BaseTest {
 
     protected abstract MetricExporterCaptor getMetricExporter();
 
+    protected abstract LogRecordExporterCaptor getLogRecordExporter();
+
     protected SpanData getRecordedSpan() {
         return getRecordedSpans(1).get(0);
+    }
+
+    protected LogRecordData getRecordedLog() {
+        return getRecordedLogs(1).get(0);
     }
 
     protected MetricData getRecorderMetric() {

@@ -21,10 +21,13 @@ package co.elastic.apm.android.sdk.connectivity;
 import androidx.annotation.NonNull;
 
 import co.elastic.apm.android.sdk.connectivity.base.DefaultProcessingConnectivity;
+import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporter;
+import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporterBuilder;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporterBuilder;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporterBuilder;
+import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
@@ -46,6 +49,15 @@ public class CommonConnectivity extends DefaultProcessingConnectivity {
     @Override
     protected SpanExporter provideSpanExporter() {
         OtlpGrpcSpanExporterBuilder exporterBuilder = OtlpGrpcSpanExporter.builder().setEndpoint(endpoint);
+        if (token != null) {
+            exporterBuilder.addHeader(AUTHORIZATION_HEADER_NAME, getBearerToken());
+        }
+        return exporterBuilder.build();
+    }
+
+    @Override
+    protected LogRecordExporter provideLogExporter() {
+        OtlpGrpcLogRecordExporterBuilder exporterBuilder = OtlpGrpcLogRecordExporter.builder().setEndpoint(endpoint);
         if (token != null) {
             exporterBuilder.addHeader(AUTHORIZATION_HEADER_NAME, getBearerToken());
         }

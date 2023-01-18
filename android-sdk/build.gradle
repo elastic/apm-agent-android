@@ -35,10 +35,12 @@ licensesConfig {
 dependencies {
     api "io.opentelemetry:opentelemetry-api:$openTelemetry_version"
     api "io.opentelemetry:opentelemetry-sdk:$openTelemetry_version"
+    api "io.opentelemetry:opentelemetry-sdk-logs:$openTelemetry_version-alpha"
     api "com.squareup.okhttp3:okhttp:$okhttp_version"
     implementation 'com.blogspot.mydailyjava:weak-lock-free:0.18'
     implementation project(':android-common')
     implementation "io.opentelemetry:opentelemetry-exporter-otlp:$openTelemetry_version"
+    implementation "io.opentelemetry:opentelemetry-exporter-otlp-logs:$openTelemetry_version-alpha"
     implementation "io.opentelemetry:opentelemetry-semconv:$openTelemetry_version-alpha"
     implementation "androidx.annotation:annotation:$androidAnnotations_version"
     embedded 'com.github.instacart.truetime-android:library:3.5'

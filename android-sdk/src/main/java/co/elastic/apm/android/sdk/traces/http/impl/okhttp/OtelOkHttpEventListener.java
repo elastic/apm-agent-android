@@ -24,7 +24,8 @@ import java.io.IOException;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.ElasticApmAgent;
-import co.elastic.apm.android.sdk.attributes.AttributesCompose;
+import co.elastic.apm.android.sdk.attributes.AttributesCreator;
+import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
 import co.elastic.apm.android.sdk.traces.common.tools.ElasticTracer;
 import co.elastic.apm.android.sdk.traces.http.HttpTraceConfiguration;
 import co.elastic.apm.android.sdk.traces.http.data.HttpRequest;
@@ -60,10 +61,10 @@ public class OtelOkHttpEventListener extends EventListener {
 
         Context currentContext = Context.current();
         String host = url.host();
-        AttributesCompose attributes = getConfiguration().createHttpAttributesCompose(convertRequest(request));
+        AttributesVisitor httpAttributes = getConfiguration().createHttpAttributesVisitor(convertRequest(request));
         Span span = getTracer().spanBuilder(String.format(SPAN_NAME_FORMAT, method, host))
                 .setSpanKind(SpanKind.CLIENT)
-                .setAllAttributes(attributes.provide())
+                .setAllAttributes(AttributesCreator.from(httpAttributes).create())
                 .setParent(currentContext)
                 .startSpan();
         Context spanContext = currentContext.with(span);

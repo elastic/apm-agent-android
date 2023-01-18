@@ -16,23 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.traces.http.attributes;
+package co.elastic.apm.android.sdk.attributes.impl;
 
+import co.elastic.apm.android.sdk.attributes.AttributesCreator;
 import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
-import co.elastic.apm.android.sdk.traces.http.data.HttpRequest;
+import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 
-public class HttpAttributesVisitorWrapper implements AttributesVisitor {
-    private final HttpRequest request;
-    private final HttpAttributesVisitor visitor;
+public final class VisitorAttributesCreator implements AttributesCreator {
+    private final AttributesVisitor visitor;
 
-    public HttpAttributesVisitorWrapper(HttpRequest request, HttpAttributesVisitor visitor) {
-        this.request = request;
+    public VisitorAttributesCreator(AttributesVisitor visitor) {
         this.visitor = visitor;
     }
 
     @Override
-    public void visit(AttributesBuilder builder) {
-        visitor.visit(builder, request);
+    public Attributes create() {
+        AttributesBuilder builder = Attributes.builder();
+        visitor.visit(builder);
+        return builder.build();
     }
 }

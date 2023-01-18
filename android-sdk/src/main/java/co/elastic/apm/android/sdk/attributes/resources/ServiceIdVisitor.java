@@ -16,22 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.traces.common.attributes;
+package co.elastic.apm.android.sdk.attributes.resources;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
-import co.elastic.apm.android.sdk.attributes.AttributesBuilderVisitor;
+import co.elastic.apm.android.sdk.ElasticApmConfiguration;
+import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 
-public class ServiceIdVisitor implements AttributesBuilderVisitor {
+public class ServiceIdVisitor implements AttributesVisitor {
     private final String serviceName;
     private final String serviceVersion;
 
-    public ServiceIdVisitor(String serviceName, String serviceVersion) {
-        this.serviceName = serviceName;
-        this.serviceVersion = serviceVersion;
+    public ServiceIdVisitor() {
+        ElasticApmConfiguration configuration = ElasticApmAgent.get().configuration;
+        this.serviceName = configuration.serviceName;
+        this.serviceVersion = configuration.serviceVersion;
     }
 
     @Override

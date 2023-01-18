@@ -18,6 +18,9 @@
  */
 package co.elastic.apm.android.sdk.connectivity.base;
 
+import io.opentelemetry.sdk.logs.LogRecordProcessor;
+import io.opentelemetry.sdk.logs.export.BatchLogRecordProcessor;
+import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.metrics.export.MetricReader;
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
@@ -30,6 +33,11 @@ public abstract class DefaultProcessingConnectivity extends BaseConnectivity {
     @Override
     protected SpanProcessor provideSpanProcessor(SpanExporter exporter) {
         return BatchSpanProcessor.builder(exporter).build();
+    }
+
+    @Override
+    protected LogRecordProcessor provideLogProcessor(LogRecordExporter exporter) {
+        return BatchLogRecordProcessor.builder(exporter).build();
     }
 
     @Override

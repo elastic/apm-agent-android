@@ -1,0 +1,64 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *	http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package co.elastic.apm.android.sdk.logs;
+
+import co.elastic.apm.android.sdk.attributes.AttributesCreator;
+import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.sdk.common.CompletableResultCode;
+import io.opentelemetry.sdk.logs.LogRecordProcessor;
+import io.opentelemetry.sdk.logs.ReadWriteLogRecord;
+
+public final class ElasticLogRecordProcessor implements LogRecordProcessor {
+    private final LogRecordProcessor original;
+    private final AttributesVisitor commonAttributesVisitor;
+
+    public ElasticLogRecordProcessor(LogRecordProcessor original, AttributesVisitor commonAttributesVisitor) {
+        this.original = original;
+        this.commonAttributesVisitor = commonAttributesVisitor;
+    }
+
+    @Override
+    public void onEmit(Context context, ReadWriteLogRecord logRecord) {
+        setAllAttributes(logRecord, AttributesCreator.from(commonAttributesVisitor).create());
+        original.onEmit(context, logRecord);
+    }
+
+    private void setAllAttributes(ReadWriteLogRecord logRecord, Attributes attributes) {
+        attributes.forEach((attributeKey, value) ->
+                logRecord.setAttribute((AttributeKey<Object>) attributeKey, value));
+    }
+
+    @Override
+    public CompletableResultCode shutdown() {
+        return original.shutdown();
+    }
+
+    @Override
+    public CompletableResultCode forceFlush() {
+        return original.forceFlush();
+    }
+
+    @Override
+    public void close() {
+        original.close();
+    }
+}

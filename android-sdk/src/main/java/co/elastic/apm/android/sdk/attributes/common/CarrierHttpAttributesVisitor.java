@@ -27,10 +27,10 @@ import co.elastic.apm.android.sdk.internal.services.network.data.CarrierInfo;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 
-public class CarrierHttpAttributes implements AttributesVisitor {
+public class CarrierHttpAttributesVisitor implements AttributesVisitor {
     private final LazyProvider<NetworkService> networkServiceProvider;
 
-    public CarrierHttpAttributes() {
+    public CarrierHttpAttributesVisitor() {
         networkServiceProvider = LazyProvider.of(() -> ElasticApmAgent.get().getService(Service.Names.NETWORK));
     }
 

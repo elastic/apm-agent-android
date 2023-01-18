@@ -20,9 +20,13 @@ package co.elastic.apm.android.sdk;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.attributes.AttributesCreator;
 import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
+import co.elastic.apm.android.sdk.attributes.common.CarrierHttpAttributesVisitor;
+import co.elastic.apm.android.sdk.attributes.common.ConnectionHttpAttributesVisitor;
 import co.elastic.apm.android.sdk.attributes.common.SessionAttributesVisitor;
 import co.elastic.apm.android.sdk.attributes.resources.DeviceIdVisitor;
 import co.elastic.apm.android.sdk.attributes.resources.DeviceInfoVisitor;
@@ -146,7 +150,7 @@ public final class ElasticApmAgent {
 
     private void initializeOpentelemetry() {
         Attributes resourceAttrs = AttributesCreator.from(getResourceAttributesVisitor()).create();
-        AttributesVisitor globalAttributesVisitor = new SessionAttributesVisitor();
+        AttributesVisitor globalAttributesVisitor = getGlobalAttributesVisitor();
         Resource resource = Resource.getDefault()
                 .merge(Resource.create(resourceAttrs));
 
@@ -156,6 +160,15 @@ public final class ElasticApmAgent {
                 .setMeterProvider(getMeterProvider(resource))
                 .setPropagators(getContextPropagator())
                 .buildAndRegisterGlobal();
+    }
+
+    @NonNull
+    private AttributesVisitor getGlobalAttributesVisitor() {
+        return AttributesVisitor.compose(
+                new SessionAttributesVisitor(),
+                new CarrierHttpAttributesVisitor(),
+                new ConnectionHttpAttributesVisitor()
+        );
     }
 
     private AttributesVisitor getResourceAttributesVisitor() {

@@ -24,12 +24,17 @@ jobs:
         run: ./gradlew lint
 
   compliance:
+    runs-on: ubuntu-latest
+    steps:
       - uses: actions/checkout@v3
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
       - name: Verify OSS compliance
         run: ./gradlew verifyNoticeFile
+
   test:
+    runs-on: ubuntu-latest
+    steps:
       - uses: actions/checkout@v3
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2

@@ -140,7 +140,7 @@ public final class ElasticApmAgent {
     }
 
     private void initializeCrashReports() {
-        Thread.setDefaultUncaughtExceptionHandler(new ElasticExceptionHandler());
+        Thread.setDefaultUncaughtExceptionHandler(ElasticExceptionHandler.getInstance());
     }
 
     private void initializeOpentelemetry() {

@@ -32,8 +32,16 @@ import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 
 public final class ElasticExceptionHandler implements Thread.UncaughtExceptionHandler {
     private final Thread.UncaughtExceptionHandler wrapped;
+    private static ElasticExceptionHandler INSTANCE;
 
-    public ElasticExceptionHandler() {
+    public static ElasticExceptionHandler getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new ElasticExceptionHandler();
+        }
+        return INSTANCE;
+    }
+
+    private ElasticExceptionHandler() {
         this.wrapped = Thread.getDefaultUncaughtExceptionHandler();
     }
 

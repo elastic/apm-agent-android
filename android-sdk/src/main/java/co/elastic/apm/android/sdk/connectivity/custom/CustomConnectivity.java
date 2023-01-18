@@ -19,21 +19,29 @@
 package co.elastic.apm.android.sdk.connectivity.custom;
 
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
+import io.opentelemetry.sdk.logs.LogRecordProcessor;
 import io.opentelemetry.sdk.metrics.export.MetricReader;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 
 public class CustomConnectivity implements Connectivity {
     private final SpanProcessor spanProcessor;
+    private final LogRecordProcessor logProcessor;
     private final MetricReader metricReader;
 
-    public CustomConnectivity(SpanProcessor spanProcessor, MetricReader metricReader) {
+    public CustomConnectivity(SpanProcessor spanProcessor, LogRecordProcessor logProcessor, MetricReader metricReader) {
         this.spanProcessor = spanProcessor;
+        this.logProcessor = logProcessor;
         this.metricReader = metricReader;
     }
 
     @Override
     public SpanProcessor getSpanProcessor() {
         return spanProcessor;
+    }
+
+    @Override
+    public LogRecordProcessor getLogProcessor() {
+        return logProcessor;
     }
 
     @Override

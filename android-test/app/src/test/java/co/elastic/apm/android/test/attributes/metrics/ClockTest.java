@@ -11,7 +11,7 @@ import io.opentelemetry.sdk.metrics.data.MetricData;
 public class ClockTest extends BaseRobolectricTest {
 
     @Test
-    public void whenASpanIsCreated_itHasTimestampSetFromElasticClock() {
+    public void whenAMetricIsCreated_itHasTimestampSetFromElasticClock() {
         long startTimeFromElasticClock = 123456789;
         NtpManager ntpManager = getAgentDependenciesProvider().getNtpManager();
         TestElasticClock clock = (TestElasticClock) ntpManager.getClock();

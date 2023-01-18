@@ -18,9 +18,21 @@
  */
 package co.elastic.apm.android.sdk.attributes;
 
+import java.util.Arrays;
+import java.util.List;
+
+import co.elastic.apm.android.sdk.attributes.impl.ComposeAttributesVisitor;
 import io.opentelemetry.api.common.AttributesBuilder;
 
-public interface AttributesBuilderVisitor {
+public interface AttributesVisitor {
+
+    static ComposeAttributesVisitor compose(AttributesVisitor... visitors) {
+        return compose(Arrays.asList(visitors));
+    }
+
+    static ComposeAttributesVisitor compose(List<AttributesVisitor> visitors) {
+        return new ComposeAttributesVisitor(visitors);
+    }
 
     void visit(AttributesBuilder builder);
 }

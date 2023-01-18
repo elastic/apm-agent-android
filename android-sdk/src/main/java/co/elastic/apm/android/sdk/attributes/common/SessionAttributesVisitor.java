@@ -16,23 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.traces.http.attributes;
+package co.elastic.apm.android.sdk.attributes.common;
 
+import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
-import co.elastic.apm.android.sdk.traces.http.data.HttpRequest;
+import co.elastic.apm.android.sdk.traces.session.SessionIdProvider;
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.AttributesBuilder;
 
-public class HttpAttributesVisitorWrapper implements AttributesVisitor {
-    private final HttpRequest request;
-    private final HttpAttributesVisitor visitor;
+public class SessionAttributesVisitor implements AttributesVisitor {
+    private static final AttributeKey<String> SESSION_ID_ATTRIBUTE_KEY = AttributeKey.stringKey("session.id");
+    private final SessionIdProvider sessionIdProvider;
 
-    public HttpAttributesVisitorWrapper(HttpRequest request, HttpAttributesVisitor visitor) {
-        this.request = request;
-        this.visitor = visitor;
+    public SessionAttributesVisitor() {
+        sessionIdProvider = ElasticApmAgent.get().configuration.sessionIdProvider;
     }
 
     @Override
     public void visit(AttributesBuilder builder) {
-        visitor.visit(builder, request);
+        builder.put(SESSION_ID_ATTRIBUTE_KEY, getSessionId());
+    }
+
+    private synchronized String getSessionId() {
+        return sessionIdProvider.getSessionId();
     }
 }

@@ -16,18 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.traces.common.attributes;
+package co.elastic.apm.android.sdk.attributes.resources;
 
-import co.elastic.apm.android.sdk.attributes.AttributesBuilderVisitor;
+import java.util.UUID;
+
+import co.elastic.apm.android.sdk.ElasticApmAgent;
+import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
+import co.elastic.apm.android.sdk.internal.services.Service;
+import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 
-public class RuntimeDescriptorVisitor implements AttributesBuilderVisitor {
+public class DeviceIdVisitor implements AttributesVisitor {
 
-    @SuppressWarnings("ConstantConditions")
+    private static final String DEVICE_ID_KEY = "device_id";
+
     @Override
     public void visit(AttributesBuilder builder) {
-        builder.put(ResourceAttributes.PROCESS_RUNTIME_NAME, "Android Runtime")
-                .put(ResourceAttributes.PROCESS_RUNTIME_VERSION, System.getProperty("java.vm.version"));
+        builder.put(ResourceAttributes.DEVICE_ID, getId());
+    }
+
+    private String getId() {
+        PreferencesService preferences = ElasticApmAgent.get().getService(Service.Names.PREFERENCES);
+        String deviceId = preferences.retrieve(DEVICE_ID_KEY);
+
+        if (deviceId == null) {
+            deviceId = UUID.randomUUID().toString();
+            preferences.store(DEVICE_ID_KEY, deviceId);
+        }
+
+        return deviceId;
     }
 }

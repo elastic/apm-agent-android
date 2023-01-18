@@ -16,23 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.traces.http.attributes;
+package co.elastic.apm.android.sdk.attributes.resources;
 
+import co.elastic.apm.android.sdk.BuildConfig;
 import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
-import co.elastic.apm.android.sdk.traces.http.data.HttpRequest;
 import io.opentelemetry.api.common.AttributesBuilder;
+import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 
-public class HttpAttributesVisitorWrapper implements AttributesVisitor {
-    private final HttpRequest request;
-    private final HttpAttributesVisitor visitor;
-
-    public HttpAttributesVisitorWrapper(HttpRequest request, HttpAttributesVisitor visitor) {
-        this.request = request;
-        this.visitor = visitor;
-    }
+public class SdkIdVisitor implements AttributesVisitor {
 
     @Override
     public void visit(AttributesBuilder builder) {
-        visitor.visit(builder, request);
+        builder.put(ResourceAttributes.TELEMETRY_SDK_NAME, "android")
+                .put(ResourceAttributes.TELEMETRY_SDK_VERSION, BuildConfig.APM_AGENT_VERSION)
+                .put(ResourceAttributes.TELEMETRY_SDK_LANGUAGE, "java");
     }
 }

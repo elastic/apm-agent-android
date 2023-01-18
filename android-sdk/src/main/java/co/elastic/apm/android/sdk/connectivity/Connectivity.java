@@ -25,9 +25,14 @@ import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
 import co.elastic.apm.android.sdk.providers.LazyProvider;
 import co.elastic.apm.android.sdk.providers.Provider;
+import io.opentelemetry.sdk.logs.LogRecordProcessor;
+import io.opentelemetry.sdk.logs.export.BatchLogRecordProcessor;
+import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.metrics.export.MetricReader;
+import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
 import io.opentelemetry.sdk.trace.SpanProcessor;
+import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
 /**
@@ -52,19 +57,19 @@ public interface Connectivity {
     }
 
     /**
-     * This function provides a convenient way to create a {@link Connectivity} with a custom Open Telemetry's {@link SpanExporter} and {@link MetricExporter}
-     * which {@link SpanProcessor} will be a {@link io.opentelemetry.sdk.trace.export.BatchSpanProcessor}.
+     * This function provides a convenient way to create a {@link Connectivity} with a custom Open Telemetry's {@link SpanExporter}, {@link LogRecordExporter} and {@link MetricExporter}
+     * which processors will be {@link BatchSpanProcessor}, {@link BatchLogRecordProcessor} and {@link PeriodicMetricReader} respectively.
      */
-    static Connectivity custom(SpanExporter spanExporter, MetricExporter metricExporter) {
-        return new CustomExporterConnectivity(spanExporter, metricExporter);
+    static Connectivity custom(SpanExporter spanExporter, LogRecordExporter logExporter, MetricExporter metricExporter) {
+        return new CustomExporterConnectivity(spanExporter, logExporter, metricExporter);
     }
 
     /**
      * This function provides a convenient way of creating a fully customized {@link Connectivity} object by providing
-     * a {@link SpanProcessor} and a {@link MetricReader} directly. This option might come in handy to avoid having to create a custom {@link Connectivity} implementation.
+     * a {@link SpanProcessor}, {@link LogRecordProcessor} and a {@link MetricReader} directly. This option might come in handy to avoid having to create a custom {@link Connectivity} implementation.
      */
-    static Connectivity custom(SpanProcessor spanProcessor, MetricReader metricReader) {
-        return new CustomConnectivity(spanProcessor, metricReader);
+    static Connectivity custom(SpanProcessor spanProcessor, LogRecordProcessor logProcessor, MetricReader metricReader) {
+        return new CustomConnectivity(spanProcessor, logProcessor, metricReader);
     }
 
     /**
@@ -83,6 +88,8 @@ public interface Connectivity {
     }
 
     SpanProcessor getSpanProcessor();
+
+    LogRecordProcessor getLogProcessor();
 
     MetricReader getMetricReader();
 }

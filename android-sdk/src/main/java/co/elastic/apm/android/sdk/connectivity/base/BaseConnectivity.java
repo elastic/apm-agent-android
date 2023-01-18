@@ -19,6 +19,8 @@
 package co.elastic.apm.android.sdk.connectivity.base;
 
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
+import io.opentelemetry.sdk.logs.LogRecordProcessor;
+import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.metrics.export.MetricReader;
 import io.opentelemetry.sdk.trace.SpanProcessor;
@@ -32,6 +34,11 @@ public abstract class BaseConnectivity implements Connectivity {
     }
 
     @Override
+    public LogRecordProcessor getLogProcessor() {
+        return provideLogProcessor(provideLogExporter());
+    }
+
+    @Override
     public MetricReader getMetricReader() {
         return provideMetricReader(provideMetricExporter());
     }
@@ -39,6 +46,10 @@ public abstract class BaseConnectivity implements Connectivity {
     protected abstract SpanProcessor provideSpanProcessor(SpanExporter exporter);
 
     protected abstract SpanExporter provideSpanExporter();
+
+    protected abstract LogRecordProcessor provideLogProcessor(LogRecordExporter exporter);
+
+    protected abstract LogRecordExporter provideLogExporter();
 
     protected abstract MetricReader provideMetricReader(MetricExporter exporter);
 

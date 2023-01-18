@@ -28,6 +28,7 @@ import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
 import co.elastic.apm.android.sdk.attributes.common.CarrierHttpAttributesVisitor;
 import co.elastic.apm.android.sdk.attributes.common.ConnectionHttpAttributesVisitor;
 import co.elastic.apm.android.sdk.attributes.common.SessionAttributesVisitor;
+import co.elastic.apm.android.sdk.attributes.impl.ComposeAttributesVisitor;
 import co.elastic.apm.android.sdk.attributes.resources.DeviceIdVisitor;
 import co.elastic.apm.android.sdk.attributes.resources.DeviceInfoVisitor;
 import co.elastic.apm.android.sdk.attributes.resources.OsDescriptorVisitor;
@@ -150,7 +151,7 @@ public final class ElasticApmAgent {
 
     private void initializeOpentelemetry() {
         Attributes resourceAttrs = AttributesCreator.from(getResourceAttributesVisitor()).create();
-        AttributesVisitor globalAttributesVisitor = getGlobalAttributesVisitor();
+        AttributesVisitor globalAttributesVisitor = new SessionAttributesVisitor();
         Resource resource = Resource.getDefault()
                 .merge(Resource.create(resourceAttrs));
 
@@ -165,7 +166,6 @@ public final class ElasticApmAgent {
     @NonNull
     private AttributesVisitor getGlobalAttributesVisitor() {
         return AttributesVisitor.compose(
-                new SessionAttributesVisitor(),
                 new CarrierHttpAttributesVisitor(),
                 new ConnectionHttpAttributesVisitor()
         );
@@ -184,7 +184,12 @@ public final class ElasticApmAgent {
 
     private SdkTracerProvider getTracerProvider(Resource resource, AttributesVisitor commonAttrVisitor) {
         SpanProcessor spanProcessor = connectivityProvider.get().getSpanProcessor();
-        ElasticSpanProcessor processor = new ElasticSpanProcessor(spanProcessor, commonAttrVisitor);
+        ComposeAttributesVisitor spanAttributesVisitor = AttributesVisitor.compose(
+                commonAttrVisitor,
+                new CarrierHttpAttributesVisitor(),
+                new ConnectionHttpAttributesVisitor()
+        );
+        ElasticSpanProcessor processor = new ElasticSpanProcessor(spanProcessor, spanAttributesVisitor);
         processor.addAllExclusionRules(configuration.httpTraceConfiguration.exclusionRules);
 
         return SdkTracerProvider.builder()

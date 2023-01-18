@@ -18,14 +18,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
       - name: lint
         run: ./gradlew lint
+
   compliance:
       - uses: actions/checkout@v3
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
       - name: Verify OSS compliance
         run: ./gradlew verifyNoticeFile
   test:
       - uses: actions/checkout@v3
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
       - name: Build
         run: ./gradlew assemble
       - name: Test

@@ -23,7 +23,7 @@ jobs:
       - name: Test
         run: ./tests.sh
       - name: Publish snaphosts
-        uses: elastic/apm-pipeline-library/.github/actions/snapshoty-simple@current
+        uses: elastic/apm-pipeline-library/.github/actions/snapshoty-simple@feature/use-snapshoty-with-docker
         with:
           config: '.ci/snapshoty.yml'
           vaultUrl: ${{ secrets.VAULT_ADDR }}

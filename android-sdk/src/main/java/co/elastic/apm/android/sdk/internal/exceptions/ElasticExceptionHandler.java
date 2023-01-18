@@ -22,6 +22,7 @@ import androidx.annotation.NonNull;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.concurrent.TimeUnit;
 
 import io.opentelemetry.api.logs.EventBuilder;
 import io.opentelemetry.api.logs.GlobalLoggerProvider;
@@ -60,7 +61,7 @@ public final class ElasticExceptionHandler implements Thread.UncaughtExceptionHa
         SdkLoggerProvider loggerProvider = getLoggerProvider();
 
         emitCrashEvent(getCrashReporter(loggerProvider), e);
-        loggerProvider.forceFlush();
+        loggerProvider.forceFlush().join(5, TimeUnit.SECONDS);
 
         if (wrapped != null) {
             wrapped.uncaughtException(t, e);

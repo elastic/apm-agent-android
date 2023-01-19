@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -145,6 +146,18 @@ public class DefaultSessionIdProviderTest extends BaseTest implements Provider<P
         DefaultSessionIdProvider sessionIdProvider = getSessionIdProvider(timeProvider);
 
         assertNotEquals(existingSessionId, sessionIdProvider.getSessionId());
+    }
+
+    @Test
+    public void whenANewSessionIdIsGenerated_storeItInPreferences() {
+        long initialSystemTime = 1_000_000_000;
+        SystemTimeProvider timeProvider = getSystemTimeProvider(initialSystemTime);
+
+        DefaultSessionIdProvider sessionIdProvider = getSessionIdProvider(timeProvider);
+
+        String generatedSessionId = sessionIdProvider.getSessionId();
+        verify(preferencesService).store(KEY_SESSION_ID, generatedSessionId);
+        verify(preferencesService).store(KEY_SESSION_ID_EXPIRATION_TIME, initialSystemTime + TimeUnit.MINUTES.toMillis(30));
     }
 
     private DefaultSessionIdProvider getSessionIdProvider() {

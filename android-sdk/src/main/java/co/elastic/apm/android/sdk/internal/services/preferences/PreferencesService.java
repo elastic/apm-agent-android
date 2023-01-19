@@ -47,6 +47,10 @@ public class PreferencesService implements Service {
         preferences.edit().putString(key, value).apply();
     }
 
+    public void store(String key, long value) {
+        preferences.edit().putLong(key, value).apply();
+    }
+
     @Nullable
     public String retrieveString(String key) {
         return preferences.getString(key, null);

@@ -25,15 +25,25 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
 
+import co.elastic.apm.android.sdk.internal.providers.LazyProvider;
+import co.elastic.apm.android.sdk.internal.providers.Provider;
+import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
 import co.elastic.apm.android.sdk.session.SessionIdProvider;
 import co.elastic.apm.android.sdk.testutils.BaseTest;
 
-public class DefaultSessionIdProviderTest extends BaseTest {
+public class DefaultSessionIdProviderTest extends BaseTest implements Provider<PreferencesService> {
+    private PreferencesService preferencesService;
+
+    @Before
+    public void setUp() {
+        preferencesService = mock(PreferencesService.class);
+    }
 
     @Test
     public void whenSessionIdIsRequested_provideNonEmptyId() {
@@ -110,6 +120,11 @@ public class DefaultSessionIdProviderTest extends BaseTest {
     }
 
     private DefaultSessionIdProvider getSessionIdProvider(SystemTimeProvider systemTimeProvider) {
-        return new DefaultSessionIdProvider(systemTimeProvider);
+        return new DefaultSessionIdProvider(systemTimeProvider, LazyProvider.of(this));
+    }
+
+    @Override
+    public PreferencesService get() {
+        return preferencesService;
     }
 }

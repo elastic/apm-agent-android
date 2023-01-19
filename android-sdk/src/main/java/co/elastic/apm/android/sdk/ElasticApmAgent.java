@@ -20,6 +20,8 @@ package co.elastic.apm.android.sdk;
 
 import android.content.Context;
 
+import androidx.annotation.RestrictTo;
+
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.attributes.AttributesCreator;
 import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
@@ -37,6 +39,7 @@ import co.elastic.apm.android.sdk.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.internal.exceptions.ElasticExceptionHandler;
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.logging.AndroidLoggerFactory;
+import co.elastic.apm.android.sdk.internal.providers.LazyProvider;
 import co.elastic.apm.android.sdk.internal.providers.Provider;
 import co.elastic.apm.android.sdk.internal.providers.SimpleProvider;
 import co.elastic.apm.android.sdk.internal.services.Service;
@@ -119,8 +122,14 @@ public final class ElasticApmAgent {
         instance = null;
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     public <T extends Service> T getService(String name) {
         return serviceManager.getService(name);
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    public static <T extends Service> Provider<T> getServiceProvider(String name) {
+        return LazyProvider.of(() -> get().getService(name));
     }
 
     private ElasticApmAgent(Context context, Provider<Connectivity> connectivityProvider, ElasticApmConfiguration configuration) {

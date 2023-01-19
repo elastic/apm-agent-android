@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.traces.session.impl;
+package co.elastic.apm.android.sdk.session.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -30,8 +30,8 @@ import org.junit.Test;
 import java.util.concurrent.TimeUnit;
 
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
+import co.elastic.apm.android.sdk.session.SessionIdProvider;
 import co.elastic.apm.android.sdk.testutils.BaseTest;
-import co.elastic.apm.android.sdk.traces.session.SessionIdProvider;
 
 public class DefaultSessionIdProviderTest extends BaseTest {
 

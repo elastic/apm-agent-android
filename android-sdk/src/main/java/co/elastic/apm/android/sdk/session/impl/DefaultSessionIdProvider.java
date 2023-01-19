@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.traces.session.impl;
+package co.elastic.apm.android.sdk.session.impl;
 
 import androidx.annotation.NonNull;
 
@@ -24,7 +24,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
-import co.elastic.apm.android.sdk.traces.session.SessionIdProvider;
+import co.elastic.apm.android.sdk.session.SessionIdProvider;
 
 /**
  * Provides an in-memory id that has a 30 mins timeout that gets reset on every call to

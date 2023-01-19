@@ -19,8 +19,8 @@
 package co.elastic.apm.android.sdk;
 
 import co.elastic.apm.android.sdk.traces.http.HttpTraceConfiguration;
-import co.elastic.apm.android.sdk.traces.session.SessionIdProvider;
-import co.elastic.apm.android.sdk.traces.session.impl.DefaultSessionIdProvider;
+import co.elastic.apm.android.sdk.session.SessionIdProvider;
+import co.elastic.apm.android.sdk.session.impl.DefaultSessionIdProvider;
 
 public final class ElasticApmConfiguration {
     public final HttpTraceConfiguration httpTraceConfiguration;

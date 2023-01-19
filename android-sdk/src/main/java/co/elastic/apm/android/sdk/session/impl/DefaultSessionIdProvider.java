@@ -36,6 +36,7 @@ import co.elastic.apm.android.sdk.session.SessionIdProvider;
  * then a new session id is generated.
  */
 public class DefaultSessionIdProvider implements SessionIdProvider {
+    private static final String KEY_SESSION_ID = "session_id";
     private final SystemTimeProvider systemTimeProvider;
     private final Provider<PreferencesService> preferencesServiceProvider;
     private long expireTimeMillis;
@@ -55,7 +56,12 @@ public class DefaultSessionIdProvider implements SessionIdProvider {
     public String getSessionId() {
         verifySessionExpiration();
         if (sessionId == null) {
-            sessionId = generateSessionId();
+            String storedId = preferencesServiceProvider.get().retrieve(KEY_SESSION_ID);
+            if (storedId == null) {
+                sessionId = generateSessionId();
+            } else {
+                sessionId = storedId;
+            }
         }
         scheduleExpireTime();
         return sessionId;

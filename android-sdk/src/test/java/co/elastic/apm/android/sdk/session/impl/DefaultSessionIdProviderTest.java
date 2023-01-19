@@ -39,6 +39,7 @@ import co.elastic.apm.android.sdk.testutils.BaseTest;
 
 public class DefaultSessionIdProviderTest extends BaseTest implements Provider<PreferencesService> {
     private PreferencesService preferencesService;
+    private static final String KEY_SESSION_ID = "session_id";
 
     @Before
     public void setUp() {
@@ -113,6 +114,14 @@ public class DefaultSessionIdProviderTest extends BaseTest implements Provider<P
         addTimeInMillis(systemTimeProvider, TimeUnit.MINUTES.toMillis(29));
 
         assertEquals(firstId, sessionIdProvider.getSessionId());
+    }
+
+    @Test
+    public void whenThereIsASessionIdStored_reuseIt() {
+        String existingSessionId = "abcd";
+        doReturn(existingSessionId).when(preferencesService).retrieve(KEY_SESSION_ID);
+
+        assertEquals(existingSessionId, getSessionIdProvider().getSessionId());
     }
 
     private DefaultSessionIdProvider getSessionIdProvider() {

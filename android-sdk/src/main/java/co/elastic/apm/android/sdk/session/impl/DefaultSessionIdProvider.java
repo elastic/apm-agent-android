@@ -32,9 +32,11 @@ import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
 import co.elastic.apm.android.sdk.session.SessionIdProvider;
 
 /**
- * Provides an in-memory id that has a 30 mins timeout that gets reset on every call to
+ * Provides an ID that has a 30 mins timeout that gets reset on every call to
  * {@link SessionIdProvider#getSessionId()} - If 30 mins or more have passed since the last call,
  * then a new session id is generated.
+ * <p>
+ * The session ID is persisted until the timeout completes, even after an app relaunch.
  */
 public class DefaultSessionIdProvider implements SessionIdProvider, Initializable {
     private static final String KEY_SESSION_ID = "session_id";

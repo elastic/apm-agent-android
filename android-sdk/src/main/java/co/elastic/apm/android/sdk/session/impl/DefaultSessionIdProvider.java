@@ -74,12 +74,20 @@ public class DefaultSessionIdProvider implements SessionIdProvider, Initializabl
 
     private String generateSessionId() {
         String generatedId = UUID.randomUUID().toString();
-        preferencesServiceProvider.get().store(KEY_SESSION_ID, generatedId);
+        persistSessionId(generatedId);
         return generatedId;
     }
 
     private void scheduleExpireTime() {
         expireTimeMillis = systemTimeProvider.getCurrentTimeMillis() + TimeUnit.MINUTES.toMillis(30);
+        persistExpirationTime(expireTimeMillis);
+    }
+
+    protected void persistSessionId(String generatedId) {
+        preferencesServiceProvider.get().store(KEY_SESSION_ID, generatedId);
+    }
+
+    protected void persistExpirationTime(long expireTimeMillis) {
         preferencesServiceProvider.get().store(KEY_SESSION_ID_EXPIRATION_TIME, expireTimeMillis);
     }
 

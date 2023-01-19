@@ -20,8 +20,6 @@ package co.elastic.apm.android.sdk;
 
 import android.content.Context;
 
-import androidx.annotation.NonNull;
-
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.attributes.AttributesCreator;
 import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
@@ -161,14 +159,6 @@ public final class ElasticApmAgent {
                 .setMeterProvider(getMeterProvider(resource))
                 .setPropagators(getContextPropagator())
                 .buildAndRegisterGlobal();
-    }
-
-    @NonNull
-    private AttributesVisitor getGlobalAttributesVisitor() {
-        return AttributesVisitor.compose(
-                new CarrierHttpAttributesVisitor(),
-                new ConnectionHttpAttributesVisitor()
-        );
     }
 
     private AttributesVisitor getResourceAttributesVisitor() {

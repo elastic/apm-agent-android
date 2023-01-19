@@ -31,6 +31,7 @@ import co.elastic.apm.android.sdk.attributes.resources.RuntimeDescriptorVisitor;
 import co.elastic.apm.android.sdk.attributes.resources.SdkIdVisitor;
 import co.elastic.apm.android.sdk.attributes.resources.ServiceIdVisitor;
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
+import co.elastic.apm.android.sdk.internal.exceptions.ElasticExceptionHandler;
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.logging.AndroidLoggerFactory;
 import co.elastic.apm.android.sdk.internal.services.Service;
@@ -109,7 +110,8 @@ public final class ElasticApmAgent {
         }
     }
 
-    public void destroy() {
+    public void resetForTest() {
+        ElasticExceptionHandler.resetForTest();
         serviceManager.stop();
         instance = null;
     }
@@ -135,6 +137,11 @@ public final class ElasticApmAgent {
         ntpManager.initialize();
         serviceManager.start();
         initializeOpentelemetry();
+        initializeCrashReports();
+    }
+
+    private void initializeCrashReports() {
+        Thread.setDefaultUncaughtExceptionHandler(ElasticExceptionHandler.getInstance());
     }
 
     private void initializeOpentelemetry() {

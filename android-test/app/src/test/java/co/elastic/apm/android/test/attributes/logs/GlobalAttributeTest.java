@@ -12,7 +12,7 @@ public class GlobalAttributeTest extends BaseRobolectricTest {
     public void whenALogIsCreated_verifyItHasSessionIdAsParam() {
         LogRecordData log = captureLog();
 
-        Logs.verify(log)
+        Logs.verifyRecord(log)
                 .hasAttribute("session.id");
     }
 

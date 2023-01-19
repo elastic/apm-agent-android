@@ -18,7 +18,7 @@ public class ClockTest extends BaseRobolectricTest {
         clock.setForcedNow(startTimeFromElasticClock);
         LogRecordData log = captureLog();
 
-        Logs.verify(log)
+        Logs.verifyRecord(log)
                 .startedAt(startTimeFromElasticClock);
     }
 
@@ -30,7 +30,7 @@ public class ClockTest extends BaseRobolectricTest {
         clock.setForcedNow(startTimeFromElasticClock);
         LogRecordData event = captureEvent();
 
-        Logs.verify(event)
+        Logs.verifyRecord(event)
                 .startedAt(startTimeFromElasticClock);
     }
 

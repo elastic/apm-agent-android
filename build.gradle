@@ -10,7 +10,7 @@ ext {
     androidCompileSdk = 32
     openTelemetry_version = "1.22.0"
     androidAnnotations_version = "1.4.0"
-    bytebuddy_version = "1.12.18"
+    bytebuddy_version = "1.12.22"
     okhttp_version = '3.11.0'
     junit_version = '4.13.2'
 }

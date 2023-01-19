@@ -37,10 +37,12 @@ import co.elastic.apm.android.sdk.session.SessionIdProvider;
  */
 public class DefaultSessionIdProvider implements SessionIdProvider {
     private static final String KEY_SESSION_ID = "session_id";
+    private static final String KEY_SESSION_ID_EXPIRATION_TIME = "session_id_expiration_time";
     private final SystemTimeProvider systemTimeProvider;
     private final Provider<PreferencesService> preferencesServiceProvider;
     private long expireTimeMillis;
     private String sessionId;
+    private boolean storedDataChecked = false;
 
     DefaultSessionIdProvider(SystemTimeProvider systemTimeProvider, Provider<PreferencesService> preferencesServiceProvider) {
         this.systemTimeProvider = systemTimeProvider;
@@ -54,17 +56,21 @@ public class DefaultSessionIdProvider implements SessionIdProvider {
     @NonNull
     @Override
     public String getSessionId() {
+        checkStoredData();
         verifySessionExpiration();
         if (sessionId == null) {
-            String storedId = preferencesServiceProvider.get().retrieve(KEY_SESSION_ID);
-            if (storedId == null) {
-                sessionId = generateSessionId();
-            } else {
-                sessionId = storedId;
-            }
+            sessionId = generateSessionId();
         }
         scheduleExpireTime();
         return sessionId;
+    }
+
+    private synchronized void checkStoredData() {
+        if (!storedDataChecked) {
+            storedDataChecked = true;
+            expireTimeMillis = preferencesServiceProvider.get().retrieveLong(KEY_SESSION_ID_EXPIRATION_TIME, 0);
+            sessionId = preferencesServiceProvider.get().retrieveString(KEY_SESSION_ID);
+        }
     }
 
     private void verifySessionExpiration() {

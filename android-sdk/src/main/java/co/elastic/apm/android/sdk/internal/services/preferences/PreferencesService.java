@@ -48,8 +48,12 @@ public class PreferencesService implements Service {
     }
 
     @Nullable
-    public String retrieve(String key) {
+    public String retrieveString(String key) {
         return preferences.getString(key, null);
+    }
+
+    public long retrieveLong(String key, long defaultValue) {
+        return preferences.getLong(key, defaultValue);
     }
 
     @Override

@@ -22,6 +22,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
@@ -40,6 +42,7 @@ import co.elastic.apm.android.sdk.testutils.BaseTest;
 public class DefaultSessionIdProviderTest extends BaseTest implements Provider<PreferencesService> {
     private PreferencesService preferencesService;
     private static final String KEY_SESSION_ID = "session_id";
+    private static final String KEY_SESSION_ID_EXPIRATION_TIME = "session_id_expiration_time";
 
     @Before
     public void setUp() {
@@ -117,11 +120,31 @@ public class DefaultSessionIdProviderTest extends BaseTest implements Provider<P
     }
 
     @Test
-    public void whenThereIsASessionIdStored_reuseIt() {
+    public void whenThereIsASessionIdStored_andItHasNotExpired_reuseIt() {
         String existingSessionId = "abcd";
-        doReturn(existingSessionId).when(preferencesService).retrieve(KEY_SESSION_ID);
+        long existingExpireTimeMillis = 1_000_000_000;
+        long initialSystemTime = existingExpireTimeMillis - 1;
+        SystemTimeProvider timeProvider = getSystemTimeProvider(initialSystemTime);
+        doReturn(existingSessionId).when(preferencesService).retrieveString(KEY_SESSION_ID);
+        doReturn(existingExpireTimeMillis).when(preferencesService).retrieveLong(eq(KEY_SESSION_ID_EXPIRATION_TIME), anyLong());
 
-        assertEquals(existingSessionId, getSessionIdProvider().getSessionId());
+        DefaultSessionIdProvider sessionIdProvider = getSessionIdProvider(timeProvider);
+
+        assertEquals(existingSessionId, sessionIdProvider.getSessionId());
+    }
+
+    @Test
+    public void whenThereIsASessionIdStored_andItsExpired_createNewSessionId() {
+        String existingSessionId = "12345";
+        long existingExpireTimeMillis = 1_000_000_000;
+        long initialSystemTime = existingExpireTimeMillis + 1;
+        SystemTimeProvider timeProvider = getSystemTimeProvider(initialSystemTime);
+        doReturn(existingSessionId).when(preferencesService).retrieveString(KEY_SESSION_ID);
+        doReturn(existingExpireTimeMillis).when(preferencesService).retrieveLong(eq(KEY_SESSION_ID_EXPIRATION_TIME), anyLong());
+
+        DefaultSessionIdProvider sessionIdProvider = getSessionIdProvider(timeProvider);
+
+        assertNotEquals(existingSessionId, sessionIdProvider.getSessionId());
     }
 
     private DefaultSessionIdProvider getSessionIdProvider() {

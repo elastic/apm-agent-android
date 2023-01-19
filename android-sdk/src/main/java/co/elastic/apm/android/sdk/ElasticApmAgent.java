@@ -36,6 +36,7 @@ import co.elastic.apm.android.sdk.attributes.resources.RuntimeDescriptorVisitor;
 import co.elastic.apm.android.sdk.attributes.resources.SdkIdVisitor;
 import co.elastic.apm.android.sdk.attributes.resources.ServiceIdVisitor;
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
+import co.elastic.apm.android.sdk.internal.api.Initializable;
 import co.elastic.apm.android.sdk.internal.exceptions.ElasticExceptionHandler;
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.logging.AndroidLoggerFactory;
@@ -150,6 +151,13 @@ public final class ElasticApmAgent {
         serviceManager.start();
         initializeOpentelemetry();
         initializeCrashReports();
+        initializeSessionIdProvider();
+    }
+
+    private void initializeSessionIdProvider() {
+        if (configuration.sessionIdProvider instanceof Initializable) {
+            ((Initializable) configuration.sessionIdProvider).initialize();
+        }
     }
 
     private void initializeCrashReports() {

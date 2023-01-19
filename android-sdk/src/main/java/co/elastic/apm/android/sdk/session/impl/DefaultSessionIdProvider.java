@@ -24,6 +24,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
+import co.elastic.apm.android.sdk.internal.api.Initializable;
 import co.elastic.apm.android.sdk.internal.providers.Provider;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
@@ -35,14 +36,13 @@ import co.elastic.apm.android.sdk.session.SessionIdProvider;
  * {@link SessionIdProvider#getSessionId()} - If 30 mins or more have passed since the last call,
  * then a new session id is generated.
  */
-public class DefaultSessionIdProvider implements SessionIdProvider {
+public class DefaultSessionIdProvider implements SessionIdProvider, Initializable {
     private static final String KEY_SESSION_ID = "session_id";
     private static final String KEY_SESSION_ID_EXPIRATION_TIME = "session_id_expiration_time";
     private final SystemTimeProvider systemTimeProvider;
     private final Provider<PreferencesService> preferencesServiceProvider;
     private long expireTimeMillis;
     private String sessionId;
-    private boolean storedDataChecked = false;
 
     DefaultSessionIdProvider(SystemTimeProvider systemTimeProvider, Provider<PreferencesService> preferencesServiceProvider) {
         this.systemTimeProvider = systemTimeProvider;
@@ -56,21 +56,12 @@ public class DefaultSessionIdProvider implements SessionIdProvider {
     @NonNull
     @Override
     public String getSessionId() {
-        checkStoredData();
         verifySessionExpiration();
         if (sessionId == null) {
             sessionId = generateSessionId();
         }
         scheduleExpireTime();
         return sessionId;
-    }
-
-    private synchronized void checkStoredData() {
-        if (!storedDataChecked) {
-            storedDataChecked = true;
-            expireTimeMillis = preferencesServiceProvider.get().retrieveLong(KEY_SESSION_ID_EXPIRATION_TIME, 0);
-            sessionId = preferencesServiceProvider.get().retrieveString(KEY_SESSION_ID);
-        }
     }
 
     private void verifySessionExpiration() {
@@ -85,5 +76,12 @@ public class DefaultSessionIdProvider implements SessionIdProvider {
 
     private void scheduleExpireTime() {
         expireTimeMillis = systemTimeProvider.getCurrentTimeMillis() + TimeUnit.MINUTES.toMillis(30);
+    }
+
+    @Override
+    public void initialize() {
+        PreferencesService preferencesService = preferencesServiceProvider.get();
+        expireTimeMillis = preferencesService.retrieveLong(KEY_SESSION_ID_EXPIRATION_TIME, 0);
+        sessionId = preferencesService.retrieveString(KEY_SESSION_ID);
     }
 }

@@ -152,7 +152,9 @@ public class DefaultSessionIdProviderTest extends BaseTest implements Provider<P
     }
 
     private DefaultSessionIdProvider getSessionIdProvider(SystemTimeProvider systemTimeProvider) {
-        return new DefaultSessionIdProvider(systemTimeProvider, LazyProvider.of(this));
+        DefaultSessionIdProvider sessionIdProvider = new DefaultSessionIdProvider(systemTimeProvider, LazyProvider.of(this));
+        sessionIdProvider.initialize();
+        return sessionIdProvider;
     }
 
     @Override

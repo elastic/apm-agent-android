@@ -26,7 +26,7 @@ import co.elastic.apm.android.common.internal.logging.BaseELogger;
 import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService;
-import co.elastic.apm.android.sdk.providers.LazyProvider;
+import co.elastic.apm.android.sdk.internal.providers.LazyProvider;
 
 class AndroidLogger extends BaseELogger {
     private final LazyProvider<Boolean> appIsDebuggable;

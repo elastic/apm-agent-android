@@ -16,27 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.traces.http.attributes.visitors;
+package co.elastic.apm.android.sdk.attributes.common;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
-import co.elastic.apm.android.sdk.providers.LazyProvider;
+import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
+import co.elastic.apm.android.sdk.internal.providers.LazyProvider;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.network.NetworkService;
 import co.elastic.apm.android.sdk.internal.services.network.data.type.NetworkType;
-import co.elastic.apm.android.sdk.traces.http.attributes.HttpAttributesVisitor;
-import co.elastic.apm.android.sdk.traces.http.data.HttpRequest;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 
-public class ConnectionHttpAttributes implements HttpAttributesVisitor {
+public class ConnectionHttpAttributesVisitor implements AttributesVisitor {
     private final LazyProvider<NetworkService> networkServiceProvider;
 
-    public ConnectionHttpAttributes() {
+    public ConnectionHttpAttributesVisitor() {
         networkServiceProvider = LazyProvider.of(() -> ElasticApmAgent.get().getService(Service.Names.NETWORK));
     }
 
     @Override
-    public void visit(AttributesBuilder builder, HttpRequest request) {
+    public void visit(AttributesBuilder builder) {
         NetworkType networkType = networkServiceProvider.get().getType();
         builder.put(SemanticAttributes.NET_HOST_CONNECTION_TYPE, networkType.getName());
         if (networkType.getSubTypeName() != null) {

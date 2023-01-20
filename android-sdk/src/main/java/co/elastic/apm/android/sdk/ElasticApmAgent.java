@@ -23,7 +23,10 @@ import android.content.Context;
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.attributes.AttributesCreator;
 import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
+import co.elastic.apm.android.sdk.attributes.common.CarrierHttpAttributesVisitor;
+import co.elastic.apm.android.sdk.attributes.common.ConnectionHttpAttributesVisitor;
 import co.elastic.apm.android.sdk.attributes.common.SessionAttributesVisitor;
+import co.elastic.apm.android.sdk.attributes.impl.ComposeAttributesVisitor;
 import co.elastic.apm.android.sdk.attributes.resources.DeviceIdVisitor;
 import co.elastic.apm.android.sdk.attributes.resources.DeviceInfoVisitor;
 import co.elastic.apm.android.sdk.attributes.resources.OsDescriptorVisitor;
@@ -34,6 +37,8 @@ import co.elastic.apm.android.sdk.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.internal.exceptions.ElasticExceptionHandler;
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.logging.AndroidLoggerFactory;
+import co.elastic.apm.android.sdk.internal.providers.Provider;
+import co.elastic.apm.android.sdk.internal.providers.SimpleProvider;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService;
@@ -42,8 +47,6 @@ import co.elastic.apm.android.sdk.internal.services.network.NetworkService;
 import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.sdk.logs.ElasticLogRecordProcessor;
-import co.elastic.apm.android.sdk.providers.Provider;
-import co.elastic.apm.android.sdk.providers.SimpleProvider;
 import co.elastic.apm.android.sdk.traces.otel.processor.ElasticSpanProcessor;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.logs.GlobalLoggerProvider;
@@ -171,7 +174,12 @@ public final class ElasticApmAgent {
 
     private SdkTracerProvider getTracerProvider(Resource resource, AttributesVisitor commonAttrVisitor) {
         SpanProcessor spanProcessor = connectivityProvider.get().getSpanProcessor();
-        ElasticSpanProcessor processor = new ElasticSpanProcessor(spanProcessor, commonAttrVisitor);
+        ComposeAttributesVisitor spanAttributesVisitor = AttributesVisitor.compose(
+                commonAttrVisitor,
+                new CarrierHttpAttributesVisitor(),
+                new ConnectionHttpAttributesVisitor()
+        );
+        ElasticSpanProcessor processor = new ElasticSpanProcessor(spanProcessor, spanAttributesVisitor);
         processor.addAllExclusionRules(configuration.httpTraceConfiguration.exclusionRules);
 
         return SdkTracerProvider.builder()

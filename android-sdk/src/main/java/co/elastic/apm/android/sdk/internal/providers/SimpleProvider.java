@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.providers;
+package co.elastic.apm.android.sdk.internal.providers;
 
 public class SimpleProvider<T> implements Provider<T> {
     private final T object;

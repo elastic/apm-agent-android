@@ -106,7 +106,8 @@ public class NetworkService extends ConnectivityManager.NetworkCallback implemen
     }
 
     private boolean canQueryCarrierInfo() {
-        return telephonyManager.getSimState() == TelephonyManager.SIM_STATE_READY;
+        return telephonyManager.getSimState() == TelephonyManager.SIM_STATE_READY
+                && telephonyManager.getSimOperator() != null;
     }
 
     private AppInfoService getAppInfoService() {

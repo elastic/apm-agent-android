@@ -22,6 +22,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.telephony.TelephonyManager;
 
+import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService;
 
 public class CellSubTypeProvider {
@@ -29,6 +30,7 @@ public class CellSubTypeProvider {
     @SuppressLint("MissingPermission")
     public static String getSubtypeName(TelephonyManager telephonyManager, AppInfoService appInfoService) {
         if (!appInfoService.isPermissionGranted(Manifest.permission.READ_PHONE_STATE)) {
+            Elog.getLogger().info("Not collecting cell network subtype due to permission missing");
             return null;
         }
 

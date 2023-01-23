@@ -24,6 +24,7 @@ elasticApm {
     secretToken = "your server auth token" <3>
 }
 ----
+
 <1> Defaults to your `android.defaultConfig.applicationId` value.
 <2> Defaults to your `android.defaultConfig.versionName` value.
 <3> Defaults to null.
@@ -53,7 +54,7 @@ All of the values provided in the Gradle configuration can be overridden with th
 The runtime configuration is provided within your https://developer.android.com/reference/android/app/Application[Application] class when initializing the Elastic agent.
 This configuration overrides any previously-set compile time configuration.
 
-Runtime configuration works is by providing your own instance of the `ElasticApmConfiguration` class as shown below:
+Runtime configuration works by providing your own instance of the `ElasticApmConfiguration` class as shown below:
 
 [source,java]
 ----

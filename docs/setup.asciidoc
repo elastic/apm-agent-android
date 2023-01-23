@@ -84,3 +84,4 @@ After initializing the agent as shown above, you'll automatically create traces 
 You'll also get crash reports sent automatically for when an unexpected error occurs in your app, and these events, as well as the traces already mentioned, will contain a "Session ID" that links the related events together in order to quickly get a narrowed view of any issue and its root cause.
 
 Head over to the **APM app in {kib}** to see your Android application events, or see <<configuration,configuration>> for details on how to tailor the Elastic APM agent to your project's needs.
+Optionally, you can take a look at <<manual-instrumentation, manual instrumentation>> in case you need to create your own transactions as well.

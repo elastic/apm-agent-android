@@ -38,7 +38,7 @@ public class DeviceIdVisitor implements AttributesVisitor {
 
     private String getId() {
         PreferencesService preferences = ElasticApmAgent.get().getService(Service.Names.PREFERENCES);
-        String deviceId = preferences.retrieve(DEVICE_ID_KEY);
+        String deviceId = preferences.retrieveString(DEVICE_ID_KEY);
 
         if (deviceId == null) {
             deviceId = UUID.randomUUID().toString();

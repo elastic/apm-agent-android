@@ -20,7 +20,7 @@ package co.elastic.apm.android.sdk.attributes.common;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
-import co.elastic.apm.android.sdk.traces.session.SessionIdProvider;
+import co.elastic.apm.android.sdk.session.SessionIdProvider;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.AttributesBuilder;
 

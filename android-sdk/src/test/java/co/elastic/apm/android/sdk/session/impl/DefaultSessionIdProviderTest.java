@@ -16,24 +16,39 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.traces.session.impl;
+package co.elastic.apm.android.sdk.session.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
 
+import co.elastic.apm.android.sdk.internal.providers.LazyProvider;
+import co.elastic.apm.android.sdk.internal.providers.Provider;
+import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
+import co.elastic.apm.android.sdk.session.SessionIdProvider;
 import co.elastic.apm.android.sdk.testutils.BaseTest;
-import co.elastic.apm.android.sdk.traces.session.SessionIdProvider;
 
-public class DefaultSessionIdProviderTest extends BaseTest {
+public class DefaultSessionIdProviderTest extends BaseTest implements Provider<PreferencesService> {
+    private PreferencesService preferencesService;
+    private static final String KEY_SESSION_ID = "session_id";
+    private static final String KEY_SESSION_ID_EXPIRATION_TIME = "session_id_expiration_time";
+
+    @Before
+    public void setUp() {
+        preferencesService = mock(PreferencesService.class);
+    }
 
     @Test
     public void whenSessionIdIsRequested_provideNonEmptyId() {
@@ -105,11 +120,58 @@ public class DefaultSessionIdProviderTest extends BaseTest {
         assertEquals(firstId, sessionIdProvider.getSessionId());
     }
 
+    @Test
+    public void whenThereIsASessionIdStored_andItHasNotExpired_reuseIt() {
+        String existingSessionId = "abcd";
+        long existingExpireTimeMillis = 1_000_000_000;
+        long initialSystemTime = existingExpireTimeMillis - 1;
+        SystemTimeProvider timeProvider = getSystemTimeProvider(initialSystemTime);
+        doReturn(existingSessionId).when(preferencesService).retrieveString(KEY_SESSION_ID);
+        doReturn(existingExpireTimeMillis).when(preferencesService).retrieveLong(eq(KEY_SESSION_ID_EXPIRATION_TIME), anyLong());
+
+        DefaultSessionIdProvider sessionIdProvider = getSessionIdProvider(timeProvider);
+
+        assertEquals(existingSessionId, sessionIdProvider.getSessionId());
+    }
+
+    @Test
+    public void whenThereIsASessionIdStored_andItsExpired_createNewSessionId() {
+        String existingSessionId = "12345";
+        long existingExpireTimeMillis = 1_000_000_000;
+        long initialSystemTime = existingExpireTimeMillis + 1;
+        SystemTimeProvider timeProvider = getSystemTimeProvider(initialSystemTime);
+        doReturn(existingSessionId).when(preferencesService).retrieveString(KEY_SESSION_ID);
+        doReturn(existingExpireTimeMillis).when(preferencesService).retrieveLong(eq(KEY_SESSION_ID_EXPIRATION_TIME), anyLong());
+
+        DefaultSessionIdProvider sessionIdProvider = getSessionIdProvider(timeProvider);
+
+        assertNotEquals(existingSessionId, sessionIdProvider.getSessionId());
+    }
+
+    @Test
+    public void whenANewSessionIdIsGenerated_storeItInPreferences() {
+        long initialSystemTime = 1_000_000_000;
+        SystemTimeProvider timeProvider = getSystemTimeProvider(initialSystemTime);
+
+        DefaultSessionIdProvider sessionIdProvider = getSessionIdProvider(timeProvider);
+
+        String generatedSessionId = sessionIdProvider.getSessionId();
+        verify(preferencesService).store(KEY_SESSION_ID, generatedSessionId);
+        verify(preferencesService).store(KEY_SESSION_ID_EXPIRATION_TIME, initialSystemTime + TimeUnit.MINUTES.toMillis(30));
+    }
+
     private DefaultSessionIdProvider getSessionIdProvider() {
         return getSessionIdProvider(SystemTimeProvider.get());
     }
 
     private DefaultSessionIdProvider getSessionIdProvider(SystemTimeProvider systemTimeProvider) {
-        return new DefaultSessionIdProvider(systemTimeProvider);
+        DefaultSessionIdProvider sessionIdProvider = new DefaultSessionIdProvider(systemTimeProvider, LazyProvider.of(this));
+        sessionIdProvider.initialize();
+        return sessionIdProvider;
+    }
+
+    @Override
+    public PreferencesService get() {
+        return preferencesService;
     }
 }

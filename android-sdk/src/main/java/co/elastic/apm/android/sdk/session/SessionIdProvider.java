@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.traces.session;
+package co.elastic.apm.android.sdk.session;
 
 import androidx.annotation.NonNull;
 

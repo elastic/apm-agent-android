@@ -1,7 +1,7 @@
 [[setup]]
 == Set up the Agent
 
-Follow these steps to start reporting your Java application's performance to Elastic APM:
+Follow these steps to start reporting your Android application's performance to Elastic APM:
 
 1. <<gradle-setup>>.
 2. <<application-setup>>.
@@ -11,7 +11,7 @@ Follow these steps to start reporting your Java application's performance to Ela
 [[gradle-setup]]
 === Set up Gradle
 
-First, add the Elastic APM agent plugin to your application's `build.gradle` file as shown below:
+First, add the https://plugins.gradle.org/plugin/co.elastic.apm.android[Elastic APM agent plugin] to your application's `build.gradle` file as shown below:
 
 [source,groovy]
 ----
@@ -21,8 +21,8 @@ plugins {
     id "co.elastic.apm.android" version "[latest_version]" <1>
 }
 ----
-<1> The Elastic plugin declaration must be added below the Android app plugin declaration (`com.android.application`)
-and below the Kotlin plugin declaration (if used).
+
+<1> The Elastic plugin declaration must be added below the Android app plugin declaration (`com.android.application`) and below the Kotlin plugin declaration (if used).
 
 After adding the agent plugin, configure it.
 A minimal configuration sets the Elastic APM Server endpoint as shown below:
@@ -45,6 +45,7 @@ elasticApm {
     secretToken = "your server auth token" <3>
 }
 ----
+
 <1> Defaults to your `android.defaultConfig.applicationId` value.
 <2> Defaults to your `android.defaultConfig.versionName` value.
 <3> Defaults to null.
@@ -69,15 +70,16 @@ class MyApp extends android.app.Application {
     }
 }
 ----
+
 <1> Initialize the Elastic APM agent once.
 
 [float]
 [[compile-and-run]]
 === Compile and run
 
-All that's left is to compile and run your application. That's it!
+All that's left is to compile and run your application.
+That's it!
 
 After initializing the agent as shown above, you'll automatically create traces for all OkHttp network requests and for all https://developer.android.com/reference/android/app/Activity[Activity] and https://developer.android.com/reference/androidx/fragment/app/Fragment[Fragment] starting methods.
 
-Head over to the **APM app in {kib}** to see your Android application events,
-or see <<configuration,configuration>> for details on how to tailor the Elastic APM agent to your project's needs.
+Head over to the **APM app in {kib}** to see your Android application events, or see <<configuration,configuration>> for details on how to tailor the Elastic APM agent to your project's needs.

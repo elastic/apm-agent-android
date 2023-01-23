@@ -81,7 +81,7 @@ All that's left is to compile and run your application.
 That's it!
 
 After initializing the agent as shown above, you'll automatically create traces for all OkHttp network requests (including those created by tools that make use of OkHttp, such as Retrofit) and for all https://developer.android.com/reference/android/app/Activity[Activity] and https://developer.android.com/reference/androidx/fragment/app/Fragment[Fragment] starting methods.
-You'll also get crash reports sent automatically for when an unexpected error occurs in your app, and these events, as well as the traces already mentioned, will contain a "Session ID" that links the related events together in order to quickly get a narrowed view of any issue and its root cause.
+You'll also get crash reports sent automatically for when an unexpected error occurs in your app, and these events, as well as the traces already mentioned, will contain a "Session ID" that links the related events together in order to quickly get a clear view of any issue and its root cause.
 
 Head over to the **APM app in {kib}** to see your Android application events, or see <<configuration,configuration>> for details on how to tailor the Elastic APM agent to your project's needs.
 Optionally, you can take a look at <<manual-instrumentation, manual instrumentation>> in case you need to create your own transactions as well.

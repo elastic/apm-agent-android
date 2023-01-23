@@ -207,7 +207,7 @@ This table outlines the attributes and their corresponding permissions:
 |Attribute |Used in |Requires permission
 
 |`net.host.connection.subtype`
-|HTTP Spans
+|All Spans
 |https://developer.android.com/reference/android/Manifest.permission#READ_PHONE_STATE[READ_PHONE_STATE]
 
 |===

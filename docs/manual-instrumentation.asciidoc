@@ -1,0 +1,26 @@
+[[manual-instrumentation]]
+== Manual Instrumentation
+
+The Elastic APM Android Agent automatically instruments <<supported-technologies>>, creating spans for interesting events for each case, and some of those automated spans can be <<configuration,configured>> to better suit different app's needs.
+However, if you need to create your own, custom spans, metrics and logs, you can do so by accessing the https://opentelemetry.io/docs/instrumentation/java/manual/[OpenTelemetry Java SDK APIs] that this agent is built on top of.
+
+[float]
+[[opentelemetry-entrypoint]]
+=== OpenTelemetry Entrypoint
+
+After completing the <<setup,setup>> process, the Agent will have configured the OpenTelemetry entrypoint and made it globally accessible.
+In order to access to the configured OpenTelemetry instance you need to use the `GlobalOpenTelemetry` class as shown below.
+
+[source,java]
+----
+class MyClass {
+
+    // Example of how to obtain an OpenTelemetry tracer to create custom Spans.
+    public void myMethod() {
+        Tracer tracer = GlobalOpenTelemetry.getTracer("my-tracer-scope-name");
+        // You can use your tracer instance as explained in OpenTelemetry's span creation guide: https://opentelemetry.io/docs/instrumentation/java/manual/#create-spans
+    }
+}
+----
+
+In a similar way you can create other types of https://opentelemetry.io/docs/concepts/signals/[signals] by accessing their entrypoints through the GlobalOpenTelemetry class, for example for custom metrics, you can use: `GlobalOpenTelemetry.getMeter("my-metric-scope-name")` and follow https://opentelemetry.io/docs/instrumentation/java/manual/#metrics[OpenTelemetry's guide] on creating manual metrics.

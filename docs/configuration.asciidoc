@@ -257,6 +257,6 @@ class MyApp extends android.app.Application {
 [float]
 ==== Advanced configurable options
 
-The configurable parameters provided by the Elastic APM agent aim to help configuring common use cases in an easy way, in most of the cases it means to act as a facade between your application and the Open Telemetry Java SDK that this agent is built on top.
-If your project requires to configure more advanced aspects of the overall APM processes, you could directly apply that configuration using the https://opentelemetry.io/docs/instrumentation/java/getting-started/[Open Telemetry SDK], which becomes available for you to use within your project by adding the Elastic agent plugin, as explained in <<setup,the agent setup guide>>.
+The configurable parameters provided by the Elastic APM agent aim to help configuring common use cases in an easy way, in most of the cases it means to act as a facade between your application and the OpenTelemetry Java SDK that this agent is built on top.
+If your project requires to configure more advanced aspects of the overall APM processes, you could directly apply that configuration using the https://opentelemetry.io/docs/instrumentation/java/getting-started/[OpenTelemetry SDK], which becomes available for you to use within your project by adding the Elastic agent plugin, as explained in <<setup,the agent setup guide>>.
 Said configuration will be used by the Elastic agent for the https://opentelemetry.io/docs/concepts/signals/[signals] it sends out of the box.

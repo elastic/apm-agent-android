@@ -9,10 +9,6 @@ on:
 permissions:
   contents: read
 
-env:
-  GCS_ACCOUNT_SECRET: 'secret/observability-team/ci/snapshoty'
-  DOCKER_REGISTRY_SECRET: 'secret/observability-team/ci/docker-registry/prod'
-
 jobs:
   process:
     runs-on: ubuntu-latest
@@ -26,33 +22,6 @@ jobs:
         run: ./gradlew assemble
       - name: Test
         run: ./tests.sh
-      - uses: elastic/apm-pipeline-library/.github/actions/docker-login@current
-        with:
-          registry: docker.elastic.co
-          secret: ${{ env.DOCKER_REGISTRY_SECRET }}
-          url: ${{ secrets.VAULT_ADDR }}
-          roleId: ${{ secrets.VAULT_ROLE_ID }}
-          secretId: ${{ secrets.VAULT_SECRET_ID }}
-      - uses: hashicorp/vault-action@v2
-        with:
-          url: ${{ secrets.VAULT_ADDR }}
-          roleId: ${{ secrets.VAULT_ROLE_ID }}
-          secretId: ${{ secrets.VAULT_SECRET_ID }}
-          method: approle
-          secrets: |
-            ${{ env.GCS_ACCOUNT_SECRET }} client_email | GCS_CLIENT_EMAIL ;
-            ${{ env.GCS_ACCOUNT_SECRET }} private_key | GCS_PRIVATE_KEY ;
-            ${{ env.GCS_ACCOUNT_SECRET }} private_key_id | GCS_PRIVATE_KEY_ID ;
-            ${{ env.GCS_ACCOUNT_SECRET }} project_id | GCS_PROJECT
-      - name: Publish snaphosts
-        uses: elastic/apm-pipeline-library/.github/actions/snapshoty@current
-        with:
-          config: '.ci/snapshoty.yml'
-          bucketName: 'oblt-artifacts'
-          gcsClientEmail: '${{ env.GCS_CLIENT_EMAIL }}'
-          gcsPrivateKey: '${{ env.GCS_PRIVATE_KEY }}'
-          gcsPrivateKeyId: '${{ env.GCS_PRIVATE_KEY_ID }}'
-          gcsProject: '${{ env.GCS_PROJECT }}'
       - name: Store test results
         if: success() || failure()
         uses: actions/upload-artifact@v3

@@ -5,6 +5,7 @@ on:
   workflow_run:
     workflows:
       - Continous Integration
+      - snapshoty
       - test-reporter
     types: [completed]
 

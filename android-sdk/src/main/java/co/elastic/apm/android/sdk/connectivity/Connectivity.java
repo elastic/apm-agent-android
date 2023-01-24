@@ -36,7 +36,7 @@ import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
 /**
- * Provides an Open Telemetry {@link SpanProcessor} object which handles the APM backend connectivity.
+ * Provides an OpenTelemetry {@link SpanProcessor} object which handles the APM backend connectivity.
  */
 public interface Connectivity {
 
@@ -57,7 +57,7 @@ public interface Connectivity {
     }
 
     /**
-     * This function provides a convenient way to create a {@link Connectivity} with a custom Open Telemetry's {@link SpanExporter}, {@link LogRecordExporter} and {@link MetricExporter}
+     * This function provides a convenient way to create a {@link Connectivity} with a custom OpenTelemetry's {@link SpanExporter}, {@link LogRecordExporter} and {@link MetricExporter}
      * which processors will be {@link BatchSpanProcessor}, {@link BatchLogRecordProcessor} and {@link PeriodicMetricReader} respectively.
      */
     static Connectivity custom(SpanExporter spanExporter, LogRecordExporter logExporter, MetricExporter metricExporter) {

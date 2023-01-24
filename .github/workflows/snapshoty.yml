@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Publish snaphosts
-        uses: elastic/apm-pipeline-library/.github/actions/snapshoty-simple@feature/use-snapshoty-with-docker
+        uses: elastic/apm-pipeline-library/.github/actions/snapshoty-simple@current
         with:
           config: '.ci/snapshoty.yml'
           vaultUrl: ${{ secrets.VAULT_ADDR }}

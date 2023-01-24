@@ -91,5 +91,3 @@ All of these events will contain a "Session ID" that links related events togeth
 
 If you need to customize the Elastic APM agent to your project's needs, see <<configuration,configuration>>. If you need to create your own custom transactions, see <<manual-instrumentation, manual instrumentation>>.
 
-Head over to the **APM app in {kib}** to see your Android application events, or see <<configuration,configuration>> for details on how to tailor the Elastic APM agent to your project's needs.
-Optionally, you can take a look at <<manual-instrumentation, manual instrumentation>> in case you need to create your own transactions as well.

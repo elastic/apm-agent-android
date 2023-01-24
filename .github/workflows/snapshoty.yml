@@ -12,6 +12,9 @@ jobs:
   process:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+      - name: Assemble
+        run: ./gradlew assemble
       - name: Publish snaphosts
         uses: elastic/apm-pipeline-library/.github/actions/snapshoty-simple@current
         with:

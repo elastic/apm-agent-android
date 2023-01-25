@@ -33,12 +33,27 @@ public class ApmPublisherRootPlugin implements Plugin<Project> {
     }
 
     private void configureVersion(Project project) {
-        if (project.hasProperty(PROPERTY_VERSION_OVERRIDE)) {
-            String versionOverride = (String) project.property(PROPERTY_VERSION_OVERRIDE);
+        String versionOverride = getVersionOverride(project);
+        if (versionOverride != null) {
             System.out.println("Overriding version with: '" + versionOverride + "'");
             project.setVersion(versionOverride);
             project.subprojects(subproject -> subproject.setVersion(versionOverride));
         }
+    }
+
+    private String getVersionOverride(Project project) {
+        if (!project.hasProperty(PROPERTY_VERSION_OVERRIDE)) {
+            return null;
+        }
+        String property = (String) project.property(PROPERTY_VERSION_OVERRIDE);
+        if (property == null) {
+            return null;
+        }
+        property = property.trim();
+        if (property.isEmpty()) {
+            return null;
+        }
+        return property;
     }
 
     private void addPostDeployTask(Project project) {

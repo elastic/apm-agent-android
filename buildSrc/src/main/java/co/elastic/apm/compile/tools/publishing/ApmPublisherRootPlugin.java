@@ -4,6 +4,8 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.PluginContainer;
 
+import java.time.Duration;
+
 import co.elastic.apm.compile.tools.NoticeProviderPlugin;
 import co.elastic.apm.compile.tools.plugins.RootNoticeProviderPlugin;
 import co.elastic.apm.compile.tools.publishing.tasks.PostDeployTask;
@@ -45,5 +47,7 @@ public class ApmPublisherRootPlugin implements Plugin<Project> {
     private void configureMavenCentral(Project project) {
         NexusPublishExtension nexusPublishExtension = project.getExtensions().getByType(NexusPublishExtension.class);
         nexusPublishExtension.repositories(NexusRepositoryContainer::sonatype);
+        nexusPublishExtension.getClientTimeout().set(Duration.ofMinutes(10));
+        nexusPublishExtension.getConnectTimeout().set(Duration.ofMinutes(10));
     }
 }

@@ -49,5 +49,9 @@ public class ApmPublisherRootPlugin implements Plugin<Project> {
         nexusPublishExtension.repositories(NexusRepositoryContainer::sonatype);
         nexusPublishExtension.getClientTimeout().set(Duration.ofMinutes(10));
         nexusPublishExtension.getConnectTimeout().set(Duration.ofMinutes(10));
+        nexusPublishExtension.transitionCheckOptions(transitionCheckOptions -> {
+            transitionCheckOptions.getMaxRetries().set(200);
+            transitionCheckOptions.getDelayBetween().set(Duration.ofSeconds(15));
+        });
     }
 }

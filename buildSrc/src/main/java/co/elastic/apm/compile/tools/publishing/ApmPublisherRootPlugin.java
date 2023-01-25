@@ -16,8 +16,11 @@ import io.github.gradlenexus.publishplugin.NexusRepositoryContainer;
 
 public class ApmPublisherRootPlugin implements Plugin<Project> {
 
+    private final static String PROPERTY_VERSION_OVERRIDE = "version_override";
+
     @Override
     public void apply(Project project) {
+        configureVersion(project);
         applyRootPlugins(project.getPlugins());
         addPostDeployTask(project);
         configureMavenCentral(project);
@@ -27,6 +30,15 @@ public class ApmPublisherRootPlugin implements Plugin<Project> {
                 project.getDependencies().add("noticeProducer", subproject);
             }
         });
+    }
+
+    private void configureVersion(Project project) {
+        if (project.hasProperty(PROPERTY_VERSION_OVERRIDE)) {
+            String versionOverride = (String) project.property(PROPERTY_VERSION_OVERRIDE);
+            System.out.println("Overriding version with: '" + versionOverride + "'");
+            project.setVersion(versionOverride);
+            project.subprojects(subproject -> subproject.setVersion(versionOverride));
+        }
     }
 
     private void addPostDeployTask(Project project) {

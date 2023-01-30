@@ -52,7 +52,7 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
     }
 
     @Test
-    public void verifyHttpSpanStructure() {
+    public void verifyHttpSpanStructure_whenSucceeded() {
         executeSuccessfulHttpCall();
 
         List<SpanData> spans = getRecordedSpans(2);
@@ -61,6 +61,21 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
         Spans.verify(httpSpan)
                 .isNamed("GET localhost")
                 .isOfKind(SpanKind.CLIENT)
+                .hasAttribute("http.url", "http://localhost:" + webServer.getPort() + "/")
+                .hasAttribute("http.method", "GET");
+    }
+
+    @Test
+    public void verifyHttpSpanStructure_whenFailed() {
+        executeFailedHttpCall();
+
+        List<SpanData> spans = getRecordedSpans(2);
+        SpanData httpSpan = spans.get(1);
+
+        Spans.verifyFailed(httpSpan)
+                .isNamed("GET localhost")
+                .isOfKind(SpanKind.CLIENT)
+                .hasAmountOfRecordedExceptions(1)
                 .hasAttribute("http.url", "http://localhost:" + webServer.getPort() + "/")
                 .hasAttribute("http.method", "GET");
     }
@@ -129,8 +144,16 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
     }
 
     private void executeFailedHttpCall() {
-        webServer.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_DURING_RESPONSE_BODY));
-        executeHttpCall();
+        webServer.enqueue(new MockResponse()
+                .setBody("{}")
+                .setSocketPolicy(SocketPolicy.DISCONNECT_DURING_RESPONSE_BODY));
+        Response response = executeHttpCall();
+        try {
+            response.body().string();
+            fail();
+        } catch (IOException e) {
+            assertEquals("unexpected end of stream", e.getMessage());
+        }
     }
 
     private Response executeHttpCall() {

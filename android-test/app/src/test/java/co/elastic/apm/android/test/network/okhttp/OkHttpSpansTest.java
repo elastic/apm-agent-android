@@ -82,10 +82,12 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
         SpanData httpSpan = spans.get(1);
 
         Spans.verify(transactionSpan)
+                .isNamed("Transaction - GET localhost")
                 .isOfKind(SpanKind.INTERNAL)
                 .hasNoParent();
 
         Spans.verify(httpSpan)
+                .isNamed("GET localhost")
                 .isOfKind(SpanKind.CLIENT)
                 .isDirectChildOf(transactionSpan);
     }

@@ -107,17 +107,6 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
     public void whenThereIsNoParentSpanContext_wrapHttpSpanWithTransactionSpan_forSuccessfulCall() {
         executeSuccessfulHttpCall();
 
-        verifyWrappedSpanCase();
-    }
-
-    @Test
-    public void whenThereIsNoParentSpanContext_wrapHttpSpanWithTransactionSpan_forFailedCall() {
-        executeFailedHttpCall();
-
-        verifyWrappedSpanCase();
-    }
-
-    private void verifyWrappedSpanCase() {
         List<SpanData> spans = getRecordedSpans(2);
 
         SpanData transactionSpan = spans.get(0);
@@ -129,6 +118,25 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
                 .hasNoParent();
 
         Spans.verify(httpSpan)
+                .isOfKind(SpanKind.CLIENT)
+                .isDirectChildOf(transactionSpan);
+    }
+
+    @Test
+    public void whenThereIsNoParentSpanContext_wrapHttpSpanWithTransactionSpan_forFailedCall() {
+        executeFailedHttpCall();
+
+        List<SpanData> spans = getRecordedSpans(2);
+
+        SpanData transactionSpan = spans.get(0);
+        SpanData httpSpan = spans.get(1);
+
+        Spans.verify(transactionSpan)
+                .isNamed("Transaction - GET localhost")
+                .isOfKind(SpanKind.INTERNAL)
+                .hasNoParent();
+
+        Spans.verifyFailed(httpSpan)
                 .isOfKind(SpanKind.CLIENT)
                 .isDirectChildOf(transactionSpan);
     }

@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
 import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.sdk.trace.data.SpanData;
 
 @SuppressWarnings("unchecked")
@@ -60,6 +61,12 @@ public abstract class BaseSpanVerifier<T extends SpanVerifier<?>> implements Spa
     @Override
     public T startedAt(long timeInNanoseconds) {
         assertEquals(timeInNanoseconds, span.getStartEpochNanos());
+        return (T) this;
+    }
+
+    @Override
+    public T isOfKind(SpanKind kind) {
+        assertEquals(kind, span.getKind());
         return (T) this;
     }
 }

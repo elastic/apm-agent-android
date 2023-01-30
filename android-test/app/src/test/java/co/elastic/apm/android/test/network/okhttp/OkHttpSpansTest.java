@@ -13,9 +13,11 @@ import java.util.List;
 import co.elastic.apm.android.sdk.traces.common.tools.ElasticTracer;
 import co.elastic.apm.android.sdk.traces.http.impl.okhttp.OkHttpContextStore;
 import co.elastic.apm.android.sdk.traces.http.impl.okhttp.OtelOkHttpEventListener;
+import co.elastic.apm.android.sdk.traces.http.impl.okhttp.OtelOkHttpInterceptor;
 import co.elastic.apm.android.test.common.spans.Spans;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import okhttp3.OkHttpClient;
@@ -35,7 +37,7 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
         OkHttpContextStore contextStore = new OkHttpContextStore();
         client = new OkHttpClient.Builder()
                 .eventListenerFactory(new OtelOkHttpEventListener.Factory(contextStore))
-//                .addInterceptor(new OtelOkHttpInterceptor(contextStore))
+                .addInterceptor(new OtelOkHttpInterceptor(contextStore))
                 .build();
 
         request = new Request.Builder()
@@ -68,6 +70,24 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
 
         Spans.verify(httpSpan)
                 .isDirectChildOf(parentSpanData);
+    }
+
+    @Test
+    public void whenThereIsNoParentSpanContext_wrapHttpSpanWithTransactionSpan() {
+        executeHttpCall();
+
+        List<SpanData> spans = getRecordedSpans(2);
+
+        SpanData transactionSpan = spans.get(0);
+        SpanData httpSpan = spans.get(1);
+
+        Spans.verify(transactionSpan)
+                .isOfKind(SpanKind.INTERNAL)
+                .hasNoParent();
+
+        Spans.verify(httpSpan)
+                .isOfKind(SpanKind.CLIENT)
+                .isDirectChildOf(transactionSpan);
     }
 
     private void executeHttpCall() {

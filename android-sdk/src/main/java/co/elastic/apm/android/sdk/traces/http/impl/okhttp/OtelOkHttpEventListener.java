@@ -29,11 +29,13 @@ import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
 import co.elastic.apm.android.sdk.traces.common.tools.ElasticTracer;
 import co.elastic.apm.android.sdk.traces.http.HttpTraceConfiguration;
 import co.elastic.apm.android.sdk.traces.http.data.HttpRequest;
+import co.elastic.apm.android.sdk.traces.http.impl.okhttp.utils.WrapperSpanCloser;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
+import io.opentelemetry.context.ContextKey;
 import okhttp3.Call;
 import okhttp3.EventListener;
 import okhttp3.HttpUrl;
@@ -42,6 +44,8 @@ import okhttp3.Request;
 public class OtelOkHttpEventListener extends EventListener {
 
     private static final String SPAN_NAME_FORMAT = "%s %s";
+    private static final String TRANSACTION_SPAN_NAME_FORMAT = "Transaction - " + SPAN_NAME_FORMAT;
+    private static final ContextKey<WrapperSpanCloser> WRAPPER_CLOSER_KEY = ContextKey.named("wrapper-closer");
     private final OkHttpContextStore contextStore;
     private HttpTraceConfiguration configuration;
     private Tracer okHttpTracer;
@@ -58,17 +62,40 @@ public class OtelOkHttpEventListener extends EventListener {
         Elog.getLogger().debug("Intercepting OkHttp request: {}", request.url());
         String method = request.method();
         HttpUrl url = request.url();
-
-        Context currentContext = Context.current();
         String host = url.host();
+        Tracer okhttpTracer = getTracer();
+
+        Context parentContext = Context.current();
+        Span wrapperSpan = null;
+        if (thereIsNoParentSpan(parentContext)) {
+            wrapperSpan = createWrapperSpan(okhttpTracer, method, host);
+            parentContext = parentContext.with(wrapperSpan);
+        }
+
         AttributesVisitor httpAttributes = getConfiguration().createHttpAttributesVisitor(convertRequest(request));
-        Span span = getTracer().spanBuilder(String.format(SPAN_NAME_FORMAT, method, host))
+        Span span = okhttpTracer.spanBuilder(String.format(SPAN_NAME_FORMAT, method, host))
                 .setSpanKind(SpanKind.CLIENT)
                 .setAllAttributes(AttributesCreator.from(httpAttributes).create())
-                .setParent(currentContext)
+                .setParent(parentContext)
                 .startSpan();
-        Context spanContext = currentContext.with(span);
+        Context spanContext = parentContext.with(span);
+
+        if (wrapperSpan != null) {
+            // Attaching the wrapper span to end it right after the http span is ended.
+            spanContext = spanContext.with(WRAPPER_CLOSER_KEY, wrapperSpan::end);
+        }
+
         contextStore.put(request, spanContext);
+    }
+
+    private Span createWrapperSpan(Tracer okhttpTracer, String method, String host) {
+        Elog.getLogger().info("Creating wrapper span");
+        return okhttpTracer.spanBuilder(String.format(TRANSACTION_SPAN_NAME_FORMAT, method, host))
+                .startSpan();
+    }
+
+    private boolean thereIsNoParentSpan(Context parentContext) {
+        return parentContext == Context.root();
     }
 
     @Override
@@ -81,7 +108,7 @@ public class OtelOkHttpEventListener extends EventListener {
         if (context != null) {
             Span span = Span.fromContext(context);
             if (isValid(span)) {
-                span.end();
+                endSpan(span, context);
             }
             contextStore.remove(request);
         }
@@ -99,9 +126,22 @@ public class OtelOkHttpEventListener extends EventListener {
             if (isValid(span)) {
                 span.setStatus(StatusCode.ERROR);
                 span.recordException(ioe);
-                span.end();
+                endSpan(span, context);
             }
             contextStore.remove(request);
+        }
+    }
+
+    private void endSpan(Span span, Context context) {
+        span.end();
+        endWrapperIfAny(context);
+    }
+
+    private void endWrapperIfAny(Context context) {
+        WrapperSpanCloser wrapperSpanCloser = context.get(WRAPPER_CLOSER_KEY);
+        if (wrapperSpanCloser != null) {
+            Elog.getLogger().info("Closing wrapper span");
+            wrapperSpanCloser.closeWrapper();
         }
     }
 

@@ -25,6 +25,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.SocketPolicy;
 
 public class OkHttpSpansTest extends BaseRobolectricTest {
     private MockWebServer webServer;
@@ -43,7 +44,6 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
         request = new Request.Builder()
                 .url(webServer.url("/"))
                 .build();
-        webServer.enqueue(new MockResponse().setResponseCode(200).setBody("{}"));
     }
 
     @After
@@ -53,7 +53,7 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
 
     @Test
     public void verifyHttpSpanStructure() {
-        executeHttpCall();
+        executeSuccessfulHttpCall();
 
         List<SpanData> spans = getRecordedSpans(2);
         SpanData httpSpan = spans.get(1);
@@ -70,7 +70,7 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
         String existingSpanName = "SomeSpan";
         Span parentSpan = ElasticTracer.create("SomeScope").spanBuilder(existingSpanName).startSpan();
         try (Scope ignored = parentSpan.makeCurrent()) {
-            executeHttpCall();
+            executeSuccessfulHttpCall();
         } finally {
             parentSpan.end();
         }
@@ -89,9 +89,20 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
     }
 
     @Test
-    public void whenThereIsNoParentSpanContext_wrapHttpSpanWithTransactionSpan() {
-        executeHttpCall();
+    public void whenThereIsNoParentSpanContext_wrapHttpSpanWithTransactionSpan_forSuccessfulCall() {
+        executeSuccessfulHttpCall();
 
+        verifyWrappedSpanCase();
+    }
+
+    @Test
+    public void whenThereIsNoParentSpanContext_wrapHttpSpanWithTransactionSpan_forFailedCall() {
+        executeFailedHttpCall();
+
+        verifyWrappedSpanCase();
+    }
+
+    private void verifyWrappedSpanCase() {
         List<SpanData> spans = getRecordedSpans(2);
 
         SpanData transactionSpan = spans.get(0);
@@ -107,13 +118,27 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
                 .isDirectChildOf(transactionSpan);
     }
 
-    private void executeHttpCall() {
+    private void executeSuccessfulHttpCall() {
+        webServer.enqueue(new MockResponse().setResponseCode(200).setBody("{}"));
         try {
-            Response response = client.newCall(request).execute();
+            Response response = executeHttpCall();
             assertEquals("{}", response.body().string());
         } catch (IOException e) {
-            e.printStackTrace();
             fail(e.getMessage());
+        }
+    }
+
+    private void executeFailedHttpCall() {
+        webServer.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_DURING_RESPONSE_BODY));
+        executeHttpCall();
+    }
+
+    private Response executeHttpCall() {
+        try {
+            return client.newCall(request).execute();
+        } catch (IOException e) {
+            fail(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 }

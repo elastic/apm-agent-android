@@ -52,6 +52,20 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
     }
 
     @Test
+    public void verifyHttpSpanStructure() {
+        executeHttpCall();
+
+        List<SpanData> spans = getRecordedSpans(2);
+        SpanData httpSpan = spans.get(1);
+
+        Spans.verify(httpSpan)
+                .isNamed("GET localhost")
+                .isOfKind(SpanKind.CLIENT)
+                .hasAttribute("http.url", "http://localhost:" + webServer.getPort() + "/")
+                .hasAttribute("http.method", "GET");
+    }
+
+    @Test
     public void whenThereIsAnExistingSpanContext_createHttpSpanOnly() {
         Span parentSpan = ElasticTracer.create("SomeScope").spanBuilder("SomeSpan").startSpan();
         try (Scope ignored = parentSpan.makeCurrent()) {
@@ -87,7 +101,6 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
                 .hasNoParent();
 
         Spans.verify(httpSpan)
-                .isNamed("GET localhost")
                 .isOfKind(SpanKind.CLIENT)
                 .isDirectChildOf(transactionSpan);
     }

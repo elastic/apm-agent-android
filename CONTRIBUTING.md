@@ -73,4 +73,12 @@ You can run the following command to run all the unit tests available:
 
 ### Releasing
 
-// To do: Release process
+The release steps have been defined in `.ci/release.sh` which it gets triggered within the BuildKite context.
+
+Releases are triggered manually using GitHub actions, and the GitHub action is the one contacting BuildKite.
+To run a release then
+* Navigate to the [GitHub job](https://github.com/elastic/apm-agent-android/actions/workflows/release.yml)
+* Choose Run workflow.
+* Fill the form and click `Run workflow` and wait for a few minutes to complete
+
+And email/slack message will be sent with the outcome.

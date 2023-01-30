@@ -1,0 +1,47 @@
+---
+name: release
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch_specifier:
+        description: The branch to release ex. main or 0.6.
+        required: true
+        default: "main"
+        type: string
+
+      target_specifier:
+        description: Specify which repo to deploy, all by default.
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - "all"
+          - "mavenCentral"
+          - "pluginPortal"
+
+      version_override_specifier:
+        description: If set, this version will override the agent's gradle.properties version
+        required: false
+        type: string
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Run Release
+        uses: elastic/apm-pipeline-library/.github/actions/buildkite@current
+        with:
+          vaultUrl: ${{ secrets.VAULT_ADDR }}
+          vaultRoleId: ${{ secrets.VAULT_ROLE_ID }}
+          vaultSecretId: ${{ secrets.VAULT_SECRET_ID }}
+          pipeline: observability-release-agent
+          waitFor: true
+          printBuildLogs: false
+          ## TODO: extra arguments to be passed to the build system
+          ## such as branch_specifier and target_specifier

@@ -67,7 +67,8 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
 
     @Test
     public void whenThereIsAnExistingSpanContext_createHttpSpanOnly() {
-        Span parentSpan = ElasticTracer.create("SomeScope").spanBuilder("SomeSpan").startSpan();
+        String existingSpanName = "SomeSpan";
+        Span parentSpan = ElasticTracer.create("SomeScope").spanBuilder(existingSpanName).startSpan();
         try (Scope ignored = parentSpan.makeCurrent()) {
             executeHttpCall();
         } finally {
@@ -80,6 +81,7 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
         SpanData httpSpan = spans.get(1);
 
         Spans.verify(parentSpanData)
+                .isNamed(existingSpanName)
                 .hasNoParent();
 
         Spans.verify(httpSpan)

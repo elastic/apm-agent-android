@@ -23,9 +23,3 @@ jobs:
           vaultUrl: ${{ secrets.VAULT_ADDR }}
           vaultRoleId: ${{ secrets.VAULT_ROLE_ID }}
           vaultSecretId: ${{ secrets.VAULT_SECRET_ID }}
-          waitFor: false
-          printBuildLogs: false
-          buildEnvVars: |
-            commit=${{ github.sha }}
-            command=./scripts/ci/bench.sh
-            channel='#apm-agent-mobile'

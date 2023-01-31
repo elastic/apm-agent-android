@@ -53,7 +53,7 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
 
     @Test
     public void verifyHttpSpanStructure_whenSucceeded() {
-        executeSuccessfulHttpCall();
+        executeSuccessfulHttpCall(request);
 
         List<SpanData> spans = getRecordedSpans(2);
         SpanData httpSpan = spans.get(1);
@@ -67,7 +67,7 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
 
     @Test
     public void verifyHttpSpanStructure_whenFailed() {
-        executeFailedHttpCall();
+        executeFailedHttpCall(request);
 
         List<SpanData> spans = getRecordedSpans(2);
         SpanData httpSpan = spans.get(1);
@@ -81,11 +81,44 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
     }
 
     @Test
+    public void excludeHttpCallsFromOTelTracesExporter() {
+        Request otelExporterRequest = new Request.Builder()
+                .url(webServer.url("/opentelemetry.proto.collector.trace.v1.TraceService/Export"))
+                .build();
+
+        executeSuccessfulHttpCall(otelExporterRequest);
+
+        getRecordedSpans(0);
+    }
+
+    @Test
+    public void excludeHttpCallsFromOTelMetricsExporter() {
+        Request otelExporterRequest = new Request.Builder()
+                .url(webServer.url("/opentelemetry.proto.collector.metrics.v1.MetricsService/Export"))
+                .build();
+
+        executeSuccessfulHttpCall(otelExporterRequest);
+
+        getRecordedSpans(0);
+    }
+
+    @Test
+    public void excludeHttpCallsFromOTelLogsExporter() {
+        Request otelExporterRequest = new Request.Builder()
+                .url(webServer.url("/opentelemetry.proto.collector.logs.v1.LogsService/Export"))
+                .build();
+
+        executeSuccessfulHttpCall(otelExporterRequest);
+
+        getRecordedSpans(0);
+    }
+
+    @Test
     public void whenThereIsAnExistingSpanContext_createHttpSpanOnly() {
         String existingSpanName = "SomeSpan";
         Span parentSpan = ElasticTracer.create("SomeScope").spanBuilder(existingSpanName).startSpan();
         try (Scope ignored = parentSpan.makeCurrent()) {
-            executeSuccessfulHttpCall();
+            executeSuccessfulHttpCall(request);
         } finally {
             parentSpan.end();
         }
@@ -105,7 +138,7 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
 
     @Test
     public void whenThereIsNoParentSpanContext_wrapHttpSpanWithTransactionSpan_forSuccessfulCall() {
-        executeSuccessfulHttpCall();
+        executeSuccessfulHttpCall(request);
 
         List<SpanData> spans = getRecordedSpans(2);
 
@@ -124,7 +157,7 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
 
     @Test
     public void whenThereIsNoParentSpanContext_wrapHttpSpanWithTransactionSpan_forFailedCall() {
-        executeFailedHttpCall();
+        executeFailedHttpCall(request);
 
         List<SpanData> spans = getRecordedSpans(2);
 
@@ -141,21 +174,21 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
                 .isDirectChildOf(transactionSpan);
     }
 
-    private void executeSuccessfulHttpCall() {
+    private void executeSuccessfulHttpCall(Request request) {
         webServer.enqueue(new MockResponse().setResponseCode(200).setBody("{}"));
         try {
-            Response response = executeHttpCall();
+            Response response = executeHttpCall(request);
             assertEquals("{}", response.body().string());
         } catch (IOException e) {
             fail(e.getMessage());
         }
     }
 
-    private void executeFailedHttpCall() {
+    private void executeFailedHttpCall(Request request) {
         webServer.enqueue(new MockResponse()
                 .setBody("{}")
                 .setSocketPolicy(SocketPolicy.DISCONNECT_DURING_RESPONSE_BODY));
-        Response response = executeHttpCall();
+        Response response = executeHttpCall(request);
         try {
             response.body().string();
             fail();
@@ -164,7 +197,7 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
         }
     }
 
-    private Response executeHttpCall() {
+    private Response executeHttpCall(Request request) {
         try {
             return client.newCall(request).execute();
         } catch (IOException e) {

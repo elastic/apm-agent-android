@@ -8,7 +8,7 @@ import android.net.Uri;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-public final class LaunchTimeContentProvier extends ContentProvider {
+public final class LaunchTimeContentProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {

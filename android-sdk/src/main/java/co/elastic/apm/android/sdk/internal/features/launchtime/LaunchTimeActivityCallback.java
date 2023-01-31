@@ -25,6 +25,8 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.util.concurrent.TimeUnit;
+
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.ElasticApmAgent;
 import io.opentelemetry.api.GlobalOpenTelemetry;
@@ -39,15 +41,15 @@ public final class LaunchTimeActivityCallback implements Application.ActivityLif
 
         if (LaunchTimeTracker.stopTimer()) {
             long launchTimeInNanos = LaunchTimeTracker.getElapsedTimeInNanos();
-            sendAppLaunchTimeMetric(launchTimeInNanos);
+            sendAppLaunchTimeMetric(TimeUnit.NANOSECONDS.toMillis(launchTimeInNanos));
         }
     }
 
-    private void sendAppLaunchTimeMetric(long launchTimeInNanos) {
-        Elog.getLogger().info("Sending launch time metric");
+    private void sendAppLaunchTimeMetric(long launchTimeMillis) {
+        Elog.getLogger().debug("Sending launch time metric of {} milliseconds", launchTimeMillis);
         Meter meter = GlobalOpenTelemetry.getMeter("LaunchTimeTracker");
         DoubleHistogram histogram = meter.histogramBuilder("application.launch.time").build();
-        histogram.record(launchTimeInNanos);
+        histogram.record(launchTimeMillis);
         ElasticApmAgent.get().getFlusher().flushMetrics();
     }
 

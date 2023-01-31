@@ -50,6 +50,6 @@ jobs:
             commit=${{ github.sha }}
             command=./scripts/ci/bench.sh
             channel='#apm-agent-mobile'
-            branch_specifier=${{ inputs.branch_specifier }}
-            target_specifier=${{ inputs.target_specifier }}
+            branch_specifier=${{ inputs.branch_specifier || 'main' }}
+            target_specifier=${{ inputs.target_specifier || 'All' }}
             version_override_specifier=${{ inputs.version_override_specifier || '' }}

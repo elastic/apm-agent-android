@@ -18,6 +18,7 @@
  */
 package co.elastic.apm.android.sdk;
 
+import android.app.Application;
 import android.content.Context;
 
 import androidx.annotation.RestrictTo;
@@ -38,6 +39,7 @@ import co.elastic.apm.android.sdk.attributes.resources.ServiceIdVisitor;
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.internal.api.Initializable;
 import co.elastic.apm.android.sdk.internal.exceptions.ElasticExceptionHandler;
+import co.elastic.apm.android.sdk.internal.features.launchtime.LaunchTimeActivityCallback;
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.logging.AndroidLoggerFactory;
 import co.elastic.apm.android.sdk.internal.providers.LazyProvider;
@@ -107,7 +109,7 @@ public final class ElasticApmAgent {
             apmConfiguration = ElasticApmConfiguration.getDefault();
         }
         instance = new ElasticApmAgent(context, connectivityProvider, apmConfiguration);
-        instance.onInitializationFinished();
+        instance.onInitializationFinished(context);
         return instance;
     }
 
@@ -146,18 +148,23 @@ public final class ElasticApmAgent {
         serviceManager.addService(new PreferencesService(appContext));
     }
 
-    private void onInitializationFinished() {
+    private void onInitializationFinished(Context context) {
         ntpManager.initialize();
         serviceManager.start();
         initializeOpentelemetry();
         initializeCrashReports();
         initializeSessionIdProvider();
+        initializeLaunchTimeTracker(context);
     }
 
     private void initializeSessionIdProvider() {
         if (configuration.sessionIdProvider instanceof Initializable) {
             ((Initializable) configuration.sessionIdProvider).initialize();
         }
+    }
+
+    private void initializeLaunchTimeTracker(Context context) {
+        ((Application) context).registerActivityLifecycleCallbacks(new LaunchTimeActivityCallback());
     }
 
     private void initializeCrashReports() {

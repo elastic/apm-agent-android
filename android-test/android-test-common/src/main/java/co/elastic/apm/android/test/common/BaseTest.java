@@ -64,9 +64,12 @@ public abstract class BaseTest {
         return metrics;
     }
 
+    protected void flushMetrics() {
+        getMetricExporter().flush();
+    }
+
     private List<MetricData> findCapturedMetrics(MetricExporterCaptor metricExporter) {
         List<MetricData> metrics = new ArrayList<>();
-        metricExporter.flush();
         List<List<MetricData>> capturedMetrics = metricExporter.getCapturedMetrics();
 
         for (List<MetricData> list : capturedMetrics) {

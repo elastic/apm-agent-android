@@ -42,6 +42,7 @@ import co.elastic.apm.android.sdk.internal.exceptions.ElasticExceptionHandler;
 import co.elastic.apm.android.sdk.internal.features.launchtime.LaunchTimeActivityCallback;
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.logging.AndroidLoggerFactory;
+import co.elastic.apm.android.sdk.internal.otel.Flusher;
 import co.elastic.apm.android.sdk.internal.providers.LazyProvider;
 import co.elastic.apm.android.sdk.internal.providers.Provider;
 import co.elastic.apm.android.sdk.internal.providers.SimpleProvider;
@@ -73,6 +74,7 @@ public final class ElasticApmAgent {
     private final Provider<Connectivity> connectivityProvider;
     private final ServiceManager serviceManager;
     private final NtpManager ntpManager;
+    private final Flusher flusher;
 
     public static ElasticApmAgent get() {
         verifyInitialization();
@@ -135,11 +137,17 @@ public final class ElasticApmAgent {
         return LazyProvider.of(() -> get().getService(name));
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    public Flusher getFlusher() {
+        return flusher;
+    }
+
     private ElasticApmAgent(Context context, Provider<Connectivity> connectivityProvider, ElasticApmConfiguration configuration) {
         Context appContext = context.getApplicationContext();
         AgentDependenciesInjector injector = AgentDependenciesInjector.get(context);
         this.connectivityProvider = connectivityProvider;
         this.configuration = configuration;
+        flusher = new Flusher();
         ntpManager = injector.getNtpManager();
         serviceManager = new ServiceManager();
         serviceManager.addService(new NetworkService(appContext));
@@ -177,10 +185,14 @@ public final class ElasticApmAgent {
         Resource resource = Resource.getDefault()
                 .merge(Resource.create(resourceAttrs));
 
+        SdkMeterProvider meterProvider = getMeterProvider(resource);
+
+        flusher.setMeterDelegator(meterProvider::forceFlush);
+
         OpenTelemetrySdk.builder()
                 .setTracerProvider(getTracerProvider(resource, globalAttributesVisitor))
                 .setLoggerProvider(getLoggerProvider(resource, globalAttributesVisitor))
-                .setMeterProvider(getMeterProvider(resource))
+                .setMeterProvider(meterProvider)
                 .setPropagators(getContextPropagator())
                 .buildAndRegisterGlobal();
     }

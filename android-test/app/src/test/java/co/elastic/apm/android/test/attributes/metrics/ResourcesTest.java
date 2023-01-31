@@ -124,6 +124,7 @@ public class ResourcesTest extends BaseRobolectricTest {
         MetricAttrHost host = new MetricAttrHost();
 
         host.methodWithCounter();
+        flushMetrics();
 
         return getRecorderMetric();
     }

@@ -26,6 +26,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
+import co.elastic.apm.android.sdk.ElasticApmAgent;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
@@ -47,6 +48,7 @@ public final class LaunchTimeActivityCallback implements Application.ActivityLif
         Meter meter = GlobalOpenTelemetry.getMeter("LaunchTimeTracker");
         DoubleHistogram histogram = meter.histogramBuilder("application.launch.time").build();
         histogram.record(launchTimeInNanos);
+        ElasticApmAgent.get().getFlusher().flushMetrics();
     }
 
     private void unregisterCallback(@NonNull Activity activity) {

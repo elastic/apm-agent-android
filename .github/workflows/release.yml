@@ -54,7 +54,7 @@ jobs:
             repo=${{ github.repository }}
             repositoryUrl=${{ github.repositoryUrl }}
             commit=${{ github.event.after }}
-            command=./scripts/ci/bench.sh
+            command=.ci/release.sh
             channel='#apm-agent-mobile'
             branch_specifier=${{ inputs.branch_specifier || 'main' }}
             target_specifier=${{ inputs.target_specifier || 'All' }}

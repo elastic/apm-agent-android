@@ -9,6 +9,11 @@
 
 set -e
 
+## Stage 0. Prepare vault context to access the secrets
+export VAULT_ROLE_ID=$(vault read -field=role-id secret/ci/elastic-observability-robots-playground/internal-ci-approle)
+export VAULT_SECRET_ID=$(vault read -field=secret-id secret/ci/elastic-observability-robots-playground/internal-ci-approle)
+export VAULT_ADDR=$(vault read -field=vault-url secret/ci/elastic-observability-robots-playground/internal-ci-approle)
+
 ## Stage 1. Prepare context
 
 # Avoid detached HEAD since the release plugin requires to be on a branch

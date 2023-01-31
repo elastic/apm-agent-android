@@ -31,7 +31,6 @@ import co.elastic.apm.android.sdk.traces.http.attributes.HttpAttributesVisitorWr
 import co.elastic.apm.android.sdk.traces.http.attributes.visitors.BasicHttpAttributesVisitor;
 import co.elastic.apm.android.sdk.traces.http.data.HttpRequest;
 import co.elastic.apm.android.sdk.traces.http.filtering.HttpExclusionRule;
-import co.elastic.apm.android.sdk.traces.http.filtering.OtelRequestsExclusionRule;
 
 public class HttpTraceConfiguration {
     public final Collection<HttpExclusionRule> exclusionRules;
@@ -61,7 +60,6 @@ public class HttpTraceConfiguration {
         private final Set<HttpAttributesVisitor> httpAttributesVisitors = new HashSet<>();
 
         private Builder() {
-            exclusionRules.add(new OtelRequestsExclusionRule());
             httpAttributesVisitors.add(new BasicHttpAttributesVisitor());
         }
 

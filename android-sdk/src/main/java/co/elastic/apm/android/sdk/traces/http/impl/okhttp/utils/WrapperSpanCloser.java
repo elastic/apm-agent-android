@@ -16,16 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.traces.http.filtering;
+package co.elastic.apm.android.sdk.traces.http.impl.okhttp.utils;
 
-import androidx.annotation.NonNull;
-
-import co.elastic.apm.android.sdk.traces.http.data.HttpRequest;
-
-public class OtelRequestsExclusionRule extends HttpExclusionRule {
-
-    @Override
-    public boolean exclude(@NonNull HttpRequest request) {
-        return request.url.getPath().startsWith("/opentelemetry.proto.collector");
-    }
+public interface WrapperSpanCloser {
+    void closeWrapper();
 }

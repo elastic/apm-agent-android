@@ -40,8 +40,13 @@ jobs:
           vaultUrl: ${{ secrets.VAULT_ADDR }}
           vaultRoleId: ${{ secrets.VAULT_ROLE_ID }}
           vaultSecretId: ${{ secrets.VAULT_SECRET_ID }}
-          pipeline: observability-release-agent
-          waitFor: true
+          pipeline: observability-release
+          waitFor: false
           printBuildLogs: false
-          ## TODO: extra arguments to be passed to the build system
-          ## such as branch_specifier and target_specifier
+          buildEnvVars: |
+            commit=${{ github.sha }}
+            command=./scripts/ci/bench.sh
+            channel='#apm-agent-mobile'
+            branch_specifier=${{ inputs.branch_specifier }}
+            target_specifier=${{ inputs.target_specifier }}
+            version_override_specifier=${{ inputs.version_override_specifier || '' }}

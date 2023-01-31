@@ -67,6 +67,8 @@ export PATH=${PATH}:$PWD/.android-sdk/tools/bin/
 export ANDROID_HOME=$PWD/.android-sdk
 
 ## Stage 4. Run release
+## TODO: let's stop here so we can test things work nicely until here
+exit 0
 
 set +x
 # Setting up common deploy params in env var

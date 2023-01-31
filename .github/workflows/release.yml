@@ -52,11 +52,12 @@ jobs:
           printBuildLogs: false
           buildEnvVars: |
             repo=${{ github.repository }}
-            commit=${{ github.sha }}
+            repositoryUrl=${{ repositoryUrl }}
+            commit=${{ github.event.after }}
             command=./scripts/ci/bench.sh
             channel='#apm-agent-mobile'
             branch_specifier=${{ inputs.branch_specifier || 'main' }}
             target_specifier=${{ inputs.target_specifier || 'All' }}
             version_override_specifier=${{ inputs.version_override_specifier || '' }}
-            base_ref=${{ github.event.pull_request.base.ref }}
-            base_sha=${{ github.event.pull_request.base.sha }}
+
+## ${{ github.event.after }} while use PRs for testing otherwsie ${{ github.sha }}

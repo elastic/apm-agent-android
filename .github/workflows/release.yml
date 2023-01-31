@@ -36,10 +36,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
       - name: Run Release
         # TODO: for testing purposes let's use the feature branch rather than current
         uses: elastic/apm-pipeline-library/.github/actions/buildkite@feature/avoid-guessing-git-commit

@@ -5,6 +5,8 @@ permissions:
   contents: read
 
 on:
+  # TODO: for testing purposes on PRs
+  pull_request:
   workflow_dispatch:
     inputs:
       branch_specifier:

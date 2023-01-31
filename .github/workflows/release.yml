@@ -52,7 +52,7 @@ jobs:
           printBuildLogs: false
           buildEnvVars: |
             repo=${{ github.repository }}
-            repositoryUrl=${{ repositoryUrl }}
+            repositoryUrl=${{ github.repositoryUrl }}
             commit=${{ github.event.after }}
             command=./scripts/ci/bench.sh
             channel='#apm-agent-mobile'

@@ -36,7 +36,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Run Release
+      - id: buildkite
+        name: Run Release
         # TODO: for testing purposes let's use the feature branch rather than current
         uses: elastic/apm-pipeline-library/.github/actions/buildkite@feature/avoid-guessing-git-commit
         with:
@@ -56,4 +57,16 @@ jobs:
             target_specifier=${{ inputs.target_specifier || 'All' }}
             version_override_specifier=${{ inputs.version_override_specifier || '' }}
 
-## ${{ github.event.after }} while use PRs for testing otherwsie ${{ github.sha }}
+      ## ${{ github.event.after }} while use PRs for testing otherwsie ${{ github.sha }}
+
+      - if: ${{ success() }}
+        uses: elastic/apm-pipeline-library/.github/actions/slack-message@current
+        with:
+          url: ${{ secrets.VAULT_ADDR }}
+          roleId: ${{ secrets.VAULT_ROLE_ID }}
+          secretId: ${{ secrets.VAULT_SECRET_ID }}
+          channel: "#on-week-oblt-productivity"
+          message: |
+            :large_green_circle: [${{ github.repository }}] Release *${{ github.ref_name }}* published."
+            Build: (<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|here>)
+            Buildkite: (<${{ steps.buildkite.outputs.build }}|BK>)

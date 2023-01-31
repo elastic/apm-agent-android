@@ -9,7 +9,7 @@ public final class LaunchTimeTracker {
     private static boolean timeAlreadyQueried = false;
 
     static void startTimer() {
-        Elog.getLogger().info("Initializing app launch time tracker");
+        Elog.getLogger().info("Starting app launch time tracker");
         initialTimeInNanos = System.nanoTime();
     }
 
@@ -18,6 +18,7 @@ public final class LaunchTimeTracker {
             return false;
         }
 
+        Elog.getLogger().info("Stopping app launch time tracker");
         launchTimeInNanos = System.nanoTime() - initialTimeInNanos;
         initialTimeInNanos = 0;
         finalizedTracking = true;
@@ -32,6 +33,8 @@ public final class LaunchTimeTracker {
         if (timeAlreadyQueried) {
             throw new IllegalStateException("Launch time already queried");
         }
+
+        Elog.getLogger().info("Retrieving app launch time tracker");
 
         long time = launchTimeInNanos;
         launchTimeInNanos = 0;

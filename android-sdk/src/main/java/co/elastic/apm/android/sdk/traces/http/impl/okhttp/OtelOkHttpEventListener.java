@@ -60,6 +60,12 @@ public class OtelOkHttpEventListener extends EventListener {
         Request request = call.request();
         Elog.getLogger().info("Intercepting OkHttp request");
         Elog.getLogger().debug("Intercepting OkHttp request: {}", request.url());
+
+        if (isOtelExporterCall(request.url())) {
+            Elog.getLogger().info("Ignoring OTel exporting related http request");
+            return;
+        }
+
         String method = request.method();
         HttpUrl url = request.url();
         String host = url.host();
@@ -86,6 +92,10 @@ public class OtelOkHttpEventListener extends EventListener {
         }
 
         contextStore.put(request, spanContext);
+    }
+
+    private boolean isOtelExporterCall(HttpUrl url) {
+        return url.url().getPath().startsWith("/opentelemetry.proto.collector");
     }
 
     private Span createWrapperSpan(Tracer okhttpTracer, String method, String host) {

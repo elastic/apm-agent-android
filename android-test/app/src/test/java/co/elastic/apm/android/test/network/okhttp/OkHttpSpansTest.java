@@ -2,6 +2,10 @@ package co.elastic.apm.android.test.network.okhttp;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 import org.junit.After;
 import org.junit.Before;
@@ -31,11 +35,12 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
     private MockWebServer webServer;
     private OkHttpClient client;
     private Request request;
+    private OkHttpContextStore contextStore;
 
     @Before
     public void setUp() {
         webServer = new MockWebServer();
-        OkHttpContextStore contextStore = new OkHttpContextStore();
+        contextStore = spy(new OkHttpContextStore());
         client = new OkHttpClient.Builder()
                 .eventListenerFactory(new OtelOkHttpEventListener.Factory(contextStore))
                 .addInterceptor(new OtelOkHttpInterceptor(contextStore))
@@ -89,6 +94,7 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
         executeSuccessfulHttpCall(otelExporterRequest);
 
         getRecordedSpans(0);
+        verify(contextStore, never()).put(any(), any());
     }
 
     @Test
@@ -100,6 +106,7 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
         executeSuccessfulHttpCall(otelExporterRequest);
 
         getRecordedSpans(0);
+        verify(contextStore, never()).put(any(), any());
     }
 
     @Test
@@ -111,6 +118,7 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
         executeSuccessfulHttpCall(otelExporterRequest);
 
         getRecordedSpans(0);
+        verify(contextStore, never()).put(any(), any());
     }
 
     @Test

@@ -27,7 +27,6 @@ public final class LaunchTimeTracker {
     private static boolean timeAlreadyQueried = false;
 
     static void startTimer() {
-        Elog.getLogger().info("Starting app launch time tracker");
         initialTimeInNanos = System.nanoTime();
     }
 

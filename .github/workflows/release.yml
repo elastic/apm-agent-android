@@ -47,6 +47,7 @@ jobs:
           waitFor: false
           printBuildLogs: false
           buildEnvVars: |
+            repo=${{ github.repository }}
             commit=${{ github.sha }}
             command=./scripts/ci/bench.sh
             channel='#apm-agent-mobile'

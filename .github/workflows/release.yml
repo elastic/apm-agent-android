@@ -67,6 +67,5 @@ jobs:
           secretId: ${{ secrets.VAULT_SECRET_ID }}
           channel: "#on-week-oblt-productivity"
           message: |
-            :large_green_circle: [${{ github.repository }}] Release *${{ github.ref_name }}* published."
-            Build: (<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|here>)
+            :large_green_circle: [${{ github.repository }}] Release *${{ github.ref_name }}* published.
             Buildkite: (<${{ steps.buildkite.outputs.build }}|BK>)

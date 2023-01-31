@@ -40,7 +40,7 @@ public class InitializationTest extends BaseRobolectricTest {
             MetricData startupMetric = getRecorderMetric();
 
             Metrics.verify(startupMetric)
-                    .hasResource("application.launch.time");
+                    .isNamed("application.launch.time");
         }
     }
 

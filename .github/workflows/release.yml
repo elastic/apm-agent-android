@@ -54,7 +54,7 @@ jobs:
             command=.ci/release.sh
             channel='#apm-agent-mobile'
             branch_specifier=${{ inputs.branch_specifier || 'main' }}
-            target_specifier=${{ inputs.target_specifier || 'All' }}
+            target_specifier=${{ inputs.target_specifier || 'all' }}
             version_override_specifier=${{ inputs.version_override_specifier || '' }}
 
       ## ${{ github.event.after }} while use PRs for testing otherwsie ${{ github.sha }}

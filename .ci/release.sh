@@ -6,7 +6,7 @@
 
 set -e
 
-## Stage 0. Prepare vault context to access the secrets
+echo "--- Prepare vault context"
 set +x
 VAULT_ROLE_ID=$(vault read -field=role-id secret/ci/elastic-observability-robots-playground/internal-ci-approle)
 export VAULT_ROLE_ID
@@ -18,8 +18,7 @@ export VAULT_ADDR
 # Delete the vault specific accessing the ci vault
 unset VAULT_TOKEN
 
-## Stage 1. Prepare context
-
+echo "--- Prepare release context"
 # Avoid detached HEAD since the release plugin requires to be on a branch
 git checkout -f "${branch_specifier}"
 # Prepare a secure temp folder not shared between other jobs to store the key ring
@@ -32,14 +31,13 @@ chmod -R 700 $TMP_WORKSPACE
 # Make sure we delete this folder before leaving even in case of failure
 clean_up () {
   ARG=$?
-  echo "Deleting tmp workspace"
+  echo "--- Deleting tmp workspace"
   rm -rf $TMP_WORKSPACE
-  echo "done"
   exit $ARG
 }
 trap clean_up EXIT
 
-## Stage 2. Prepare secrets context
+echo "--- Prepare keys context"
 # Retrieve the secrets we are going to use in this job
 set +x
 VAULT_TOKEN=$(vault write -address="${VAULT_ADDR}" -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
@@ -75,14 +73,12 @@ set -x
 git config --global user.email "infra-root+apmmachine@elastic.co"
 git config --global user.name "apmmachine"
 
-## Stage 3. Prepare Android SDK dependency
-
+echo "--- Install Android SDK"
 # Configure Android SDK using the script
 ./install-android-sdk.sh
 export PATH=${PATH}:$PWD/.android-sdk/tools/bin/
 export ANDROID_HOME=$PWD/.android-sdk
 
-## Stage 4. Run release
 set +x
 # Setting up common deploy params in env var
 export COMMON_GRADLE_SIGNING_PARAMS="-Psigning.secretKeyRingFile=$SECRING_FILE -Psigning.password=$KEYPASS -Psigning.keyId=$KEY_ID"
@@ -91,16 +87,16 @@ export COMMON_GRADLE_DEPLOY_PARAMS="$COMMON_GRADLE_SIGNING_PARAMS $COMMON_GRADLE
 
 if [ ${target_specifier} == 'all' ] || [ ${target_specifier} == 'mavenCentral' ]
 then
-  # Release the binaries to Maven Central
+  echo "--- Release the binaries to Maven Central"
   echo "./gradlew publishElasticPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository $COMMON_GRADLE_DEPLOY_PARAMS"
 fi
 
 if [ ${target_specifier} == 'all' ] || [ ${target_specifier} == 'pluginPortal' ]
 then
-  # Release the binaries to the Gradle Plugin portal
+  echo "--- Release the binaries to the Gradle Plugin portal"
   echo "./gradlew publishPlugins -Pgradle.publish.key=$PLUGIN_PORTAL_KEY -Pgradle.publish.secret=$PLUGIN_PORTAL_SECRET $COMMON_GRADLE_DEPLOY_PARAMS"
 fi
 set -x
 
-# Running post deploy process
+echo "--- Running post deploy process"
 echo "./gradlew postDeploy $COMMON_GRADLE_CONFIG_PARAMS"

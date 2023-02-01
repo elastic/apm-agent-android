@@ -30,8 +30,9 @@ import java.util.concurrent.TimeUnit;
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.ElasticApmAgent;
 import io.opentelemetry.api.GlobalOpenTelemetry;
-import io.opentelemetry.api.metrics.DoubleHistogram;
+import io.opentelemetry.api.metrics.BatchCallback;
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.api.metrics.ObservableDoubleMeasurement;
 
 public final class LaunchTimeActivityCallback implements Application.ActivityLifecycleCallbacks {
 
@@ -46,11 +47,15 @@ public final class LaunchTimeActivityCallback implements Application.ActivityLif
     }
 
     private void sendAppLaunchTimeMetric(long launchTimeMillis) {
-        Elog.getLogger().debug("Sending launch time metric of {} milliseconds", launchTimeMillis);
+        Elog.getLogger().debug("Setting up launch time metric of {} milliseconds", launchTimeMillis);
         Meter meter = GlobalOpenTelemetry.getMeter("LaunchTimeTracker");
-        DoubleHistogram histogram = meter.histogramBuilder("application.launch.time").build();
-        histogram.record(launchTimeMillis);
+        ObservableDoubleMeasurement launchTime = meter.gaugeBuilder("application.launch.time").buildObserver();
+        BatchCallback batchCallback = meter.batchCallback(() -> {
+            Elog.getLogger().debug("Sending launch metric of {} milliseconds", launchTimeMillis);
+            launchTime.record(launchTimeMillis);
+        }, launchTime);
         ElasticApmAgent.get().getFlusher().flushMetrics();
+        batchCallback.close();
     }
 
     private void unregisterCallback(@NonNull Activity activity) {

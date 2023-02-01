@@ -3,9 +3,6 @@
 ##  branch_specifier
 ##  target_specifier
 ##  version_override_specifier
-##  WORKSPACE
-##  VAULT_ROLE_ID
-##  VAULT_SECRET_ID
 
 set -e
 

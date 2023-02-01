@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-## This script run the release given the different environment variables
+## This script runs the release given the different environment variables
 ##  branch_specifier
 ##  target_specifier
 ##  version_override_specifier

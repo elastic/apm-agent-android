@@ -3,17 +3,21 @@
 ##  branch_specifier
 ##  target_specifier
 ##  version_override_specifier
+##
+##  NOTE: *_SECRET env variables are masked, hence if you'd like to avoid any
+##        surprises please use the suffix _SECRET for those values that contain
+##        any sensitive data. Buildkite can mask those values automatically
 
 set -ex
 
 echo "--- Prepare vault context"
 set +x
-VAULT_ROLE_ID=$(vault read -field=role-id secret/ci/elastic-observability-robots-playground/internal-ci-approle)
-export VAULT_ROLE_ID
-VAULT_SECRET_ID=$(vault read -field=secret-id secret/ci/elastic-observability-robots-playground/internal-ci-approle)
-export VAULT_SECRET_ID
-VAULT_ADDR=$(vault read -field=vault-url secret/ci/elastic-observability-robots-playground/internal-ci-approle)
-export VAULT_ADDR
+VAULT_ROLE_ID_SECRET=$(vault read -field=role-id secret/ci/elastic-observability-robots-playground/internal-ci-approle)
+export VAULT_ROLE_ID_SECRET
+VAULT_SECRET_ID_SECRET=$(vault read -field=secret-id secret/ci/elastic-observability-robots-playground/internal-ci-approle)
+export VAULT_SECRET_ID_SECRET
+VAULT_ADDR_SECRET=$(vault read -field=vault-url secret/ci/elastic-observability-robots-playground/internal-ci-approle)
+export VAULT_ADDR_SECRET
 
 # Delete the vault specific accessing the ci vault
 unset VAULT_TOKEN
@@ -38,11 +42,11 @@ clean_up () {
 trap clean_up EXIT
 
 echo "--- Prepare keys context"
-# Retrieve the secrets we are going to use in this job
 set +x
-VAULT_TOKEN=$(vault write -address="${VAULT_ADDR}" -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
+VAULT_TOKEN=$(vault write -address="${VAULT_ADDR_SECRET}" -field=token auth/approle/login role_id="$VAULT_ROLE_ID_SECRET" secret_id="$VAULT_SECRET_ID_SECRET")
 export VAULT_TOKEN
-# Nexus credentials
+# Nexus credentials (they cannot use the _SECRET pattern since they are in-memory based)
+# See https://docs.gradle.org/current/userguide/signing_plugin.html#sec:in-memory-keys
 ORG_GRADLE_PROJECT_sonatypeUsername=$(vault read -field=username secret/release/nexus)
 export ORG_GRADLE_PROJECT_sonatypeUsername
 ORG_GRADLE_PROJECT_sonatypePassword=$(vault read -field=password secret/release/nexus)
@@ -56,17 +60,17 @@ export PLUGIN_PORTAL_SECRET
 
 # Signing keys
 vault read -field=key secret/release/signing >$KEY_FILE
-KEYPASS=$(vault read -field=passphrase secret/release/signing)
-export KEYPASS
-export KEY_ID=D88E42B4
+KEYPASS_SECRET=$(vault read -field=passphrase secret/release/signing)
+export KEYPASS_SECRET
+export KEY_ID_SECRET=D88E42B4
 unset VAULT_TOKEN
 
 # Import the key into the keyring
-echo "$KEYPASS" | gpg --batch --import "$KEY_FILE"
+echo "$KEYPASS_SECRET" | gpg --batch --import "$KEY_FILE"
 
 # Export secring
 export SECRING_FILE=$GNUPGHOME"/secring.gpg"
-gpg --pinentry-mode=loopback --passphrase "$KEYPASS" --export-secret-key $KEY_ID > "$SECRING_FILE"
+gpg --pinentry-mode=loopback --passphrase "$KEYPASS_SECRET" --export-secret-key $KEY_ID_SECRET > "$SECRING_FILE"
 set -x
 # Configure the committer since the maven release requires to push changes to GitHub
 # This will help with the SLSA requirements.
@@ -81,7 +85,7 @@ export ANDROID_HOME=$PWD/.android-sdk
 
 set +x
 # Setting up common deploy params in env var
-export COMMON_GRADLE_SIGNING_PARAMS="-Psigning.secretKeyRingFile=$SECRING_FILE -Psigning.password=$KEYPASS -Psigning.keyId=$KEY_ID"
+export COMMON_GRADLE_SIGNING_PARAMS="-Psigning.secretKeyRingFile=$SECRING_FILE -Psigning.password=$KEYPASS_SECRET -Psigning.keyId=$KEY_ID_SECRET"
 export COMMON_GRADLE_CONFIG_PARAMS="-Prelease=true -Pversion_override=${version_override_specifier}"
 export COMMON_GRADLE_DEPLOY_PARAMS="$COMMON_GRADLE_SIGNING_PARAMS $COMMON_GRADLE_CONFIG_PARAMS"
 

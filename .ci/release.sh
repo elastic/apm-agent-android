@@ -6,6 +6,9 @@
 
 set -e
 
+echo "--- Debug env variables"
+env | sort
+
 echo "--- Prepare vault context"
 set +x
 VAULT_ROLE_ID=$(vault read -field=role-id secret/ci/elastic-observability-robots-playground/internal-ci-approle)

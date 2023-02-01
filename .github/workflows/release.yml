@@ -53,7 +53,7 @@ jobs:
             target_specifier=${{ inputs.target_specifier || 'all' }}
             version_override_specifier=${{ inputs.version_override_specifier || '' }}
 
-      - if: ${{ always() }}
+      - if: ${{ success() }}
         uses: elastic/apm-pipeline-library/.github/actions/slack-message@current
         with:
           url: ${{ secrets.VAULT_ADDR }}
@@ -62,3 +62,14 @@ jobs:
           channel: "#apm-agent-mobile"
           message: |
             :runner: [${{ github.repository }}] Release *${{ github.ref_name }}* has been triggered in Buildkite: (<${{ steps.buildkite.outputs.build }}|build>)
+
+      - if: ${{ failure() }}
+        uses: elastic/apm-pipeline-library/.github/actions/slack-message@current
+        with:
+          url: ${{ secrets.VAULT_ADDR }}
+          roleId: ${{ secrets.VAULT_ROLE_ID }}
+          secretId: ${{ secrets.VAULT_SECRET_ID }}
+          channel: "#apm-agent-mobile"
+          message: |
+            :ghost: [${{ github.repository }}] Release *${{ github.ref_name }}* didn't get triggered in Buildkite.
+            Build: (<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|here>)

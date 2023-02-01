@@ -4,10 +4,18 @@
 ##  target_specifier
 ##  version_override_specifier
 
-set -e
+set -ex
 
-echo "--- Debug env variables"
-env | sort
+
+if [[ "$target_specifier" == "all" ||  "$target_specifier" == "mavenCentral" ]]; then
+  echo "--- Release the binaries to Maven Central"
+fi
+
+if [[ "$target_specifier" == "all" ||  "$target_specifier" == "pluginPortal" ]]; then
+  echo "--- Release the binaries to the Gradle Plugin portal"
+fi
+
+exit 0
 
 echo "--- Prepare vault context"
 set +x
@@ -88,15 +96,6 @@ export COMMON_GRADLE_SIGNING_PARAMS="-Psigning.secretKeyRingFile=$SECRING_FILE -
 export COMMON_GRADLE_CONFIG_PARAMS="-Prelease=true -Pversion_override=${version_override_specifier}"
 export COMMON_GRADLE_DEPLOY_PARAMS="$COMMON_GRADLE_SIGNING_PARAMS $COMMON_GRADLE_CONFIG_PARAMS"
 
-if [[ "$target_specifier" == "all" ||  "$target_specifier" == "mavenCentral" ]]; then
-  echo "--- Release the binaries to Maven Central"
-  echo "./gradlew publishElasticPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository $COMMON_GRADLE_DEPLOY_PARAMS"
-fi
-
-if [[ "$target_specifier" == "all" ||  "$target_specifier" == "pluginPortal" ]]; then
-  echo "--- Release the binaries to the Gradle Plugin portal"
-  echo "./gradlew publishPlugins -Pgradle.publish.key=$PLUGIN_PORTAL_KEY -Pgradle.publish.secret=$PLUGIN_PORTAL_SECRET $COMMON_GRADLE_DEPLOY_PARAMS"
-fi
 set -x
 
 echo "--- Running post deploy process"

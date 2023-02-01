@@ -20,7 +20,6 @@ export VAULT_ADDR
 
 # Delete the vault specific accessing the ci vault
 unset VAULT_TOKEN
-rm ~/.vault-token || true
 
 ## Stage 1. Prepare context
 
@@ -46,7 +45,6 @@ trap clean_up EXIT
 ## Stage 2. Prepare secrets context
 # Retrieve the secrets we are going to use in this job
 set +x
-vault write -address="${VAULT_ADDR}" -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID"
 VAULT_TOKEN=$(vault write -address="${VAULT_ADDR}" -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
 export VAULT_TOKEN
 # Nexus credentials

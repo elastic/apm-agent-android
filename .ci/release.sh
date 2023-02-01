@@ -16,8 +16,8 @@ VAULT_ROLE_ID_SECRET=$(vault read -field=role-id secret/ci/elastic-observability
 export VAULT_ROLE_ID_SECRET
 VAULT_SECRET_ID_SECRET=$(vault read -field=secret-id secret/ci/elastic-observability-robots-playground/internal-ci-approle)
 export VAULT_SECRET_ID_SECRET
-VAULT_ADDR_SECRET=$(vault read -field=vault-url secret/ci/elastic-observability-robots-playground/internal-ci-approle)
-export VAULT_ADDR_SECRET
+VAULT_ADDR=$(vault read -field=vault-url secret/ci/elastic-observability-robots-playground/internal-ci-approle)
+export VAULT_ADDR
 
 # Delete the vault specific accessing the ci vault
 unset VAULT_TOKEN
@@ -43,7 +43,7 @@ trap clean_up EXIT
 
 echo "--- Prepare keys context"
 set +x
-VAULT_TOKEN=$(vault write -address="${VAULT_ADDR_SECRET}" -field=token auth/approle/login role_id="$VAULT_ROLE_ID_SECRET" secret_id="$VAULT_SECRET_ID_SECRET")
+VAULT_TOKEN=$(vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID_SECRET" secret_id="$VAULT_SECRET_ID_SECRET")
 export VAULT_TOKEN
 # Nexus credentials (they cannot use the _SECRET pattern since they are in-memory based)
 # See https://docs.gradle.org/current/userguide/signing_plugin.html#sec:in-memory-keys

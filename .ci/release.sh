@@ -10,6 +10,12 @@
 
 set -ex
 
+echo "--- Test mask password in Buildkite"
+MY_SECRET=$(vault read -field=vault-url secret/ci/elastic-observability-robots-playground/internal-ci-approle)
+export MY_SECRET
+echo "MY_SECRET=$MY_SECRET"
+exit 0
+
 echo "--- Prepare vault context"
 set +x
 VAULT_ROLE_ID_SECRET=$(vault read -field=role-id secret/ci/elastic-observability-robots-playground/internal-ci-approle)

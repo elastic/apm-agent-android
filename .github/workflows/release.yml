@@ -5,8 +5,6 @@ permissions:
   contents: read
 
 on:
-  # TODO: for testing purposes on PRs
-  pull_request:
   workflow_dispatch:
     inputs:
       branch_specifier:
@@ -38,8 +36,7 @@ jobs:
     steps:
       - id: buildkite
         name: Run Release
-        # TODO: for testing purposes let's use the feature branch rather than current
-        uses: elastic/apm-pipeline-library/.github/actions/buildkite@feature/avoid-guessing-git-commit
+        uses: elastic/apm-pipeline-library/.github/actions/buildkite@current
         with:
           vaultUrl: ${{ secrets.VAULT_ADDR }}
           vaultRoleId: ${{ secrets.VAULT_ROLE_ID }}
@@ -49,17 +46,14 @@ jobs:
           printBuildLogs: false
           buildEnvVars: |
             repo=${{ github.repository }}
-            repositoryUrl=${{ github.repositoryUrl }}
-            commit=${{ github.event.after }}
+            commit=${{ github.sha }}
             command=.ci/release.sh
             channel='#apm-agent-mobile'
             branch_specifier=${{ inputs.branch_specifier || 'main' }}
             target_specifier=${{ inputs.target_specifier || 'all' }}
             version_override_specifier=${{ inputs.version_override_specifier || '' }}
 
-      ## ${{ github.event.after }} while use PRs for testing otherwsie ${{ github.sha }}
-
-      - if: ${{ success() }}
+      - if: ${{ always() }}
         uses: elastic/apm-pipeline-library/.github/actions/slack-message@current
         with:
           url: ${{ secrets.VAULT_ADDR }}

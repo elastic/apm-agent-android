@@ -83,9 +83,6 @@ export PATH=${PATH}:$PWD/.android-sdk/tools/bin/
 export ANDROID_HOME=$PWD/.android-sdk
 
 ## Stage 4. Run release
-## TODO: let's stop here so we can test things work nicely until here
-exit 0
-
 set +x
 # Setting up common deploy params in env var
 export COMMON_GRADLE_SIGNING_PARAMS="-Psigning.secretKeyRingFile=$SECRING_FILE -Psigning.password=$KEYPASS -Psigning.keyId=$KEY_ID"
@@ -95,15 +92,15 @@ export COMMON_GRADLE_DEPLOY_PARAMS="$COMMON_GRADLE_SIGNING_PARAMS $COMMON_GRADLE
 if [ ${target_specifier} == 'all' ] || [ ${target_specifier} == 'mavenCentral' ]
 then
   # Release the binaries to Maven Central
-  ./gradlew publishElasticPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository $COMMON_GRADLE_DEPLOY_PARAMS
+  echo "./gradlew publishElasticPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository $COMMON_GRADLE_DEPLOY_PARAMS"
 fi
 
 if [ ${target_specifier} == 'all' ] || [ ${target_specifier} == 'pluginPortal' ]
 then
   # Release the binaries to the Gradle Plugin portal
-  ./gradlew publishPlugins -Pgradle.publish.key=$PLUGIN_PORTAL_KEY -Pgradle.publish.secret=$PLUGIN_PORTAL_SECRET $COMMON_GRADLE_DEPLOY_PARAMS
+  echo "./gradlew publishPlugins -Pgradle.publish.key=$PLUGIN_PORTAL_KEY -Pgradle.publish.secret=$PLUGIN_PORTAL_SECRET $COMMON_GRADLE_DEPLOY_PARAMS"
 fi
 set -x
 
 # Running post deploy process
-./gradlew postDeploy $COMMON_GRADLE_CONFIG_PARAMS
+echo "./gradlew postDeploy $COMMON_GRADLE_CONFIG_PARAMS"

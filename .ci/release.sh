@@ -17,6 +17,11 @@ VAULT_SECRET_ID=$(vault read -field=secret-id secret/ci/elastic-observability-ro
 export VAULT_SECRET_ID
 VAULT_ADDR=$(vault read -field=vault-url secret/ci/elastic-observability-robots-playground/internal-ci-approle)
 export VAULT_ADDR
+
+# Delete the vault specific accessing the ci vault
+unset VAULT_TOKEN
+rm ~/.vault-token || true
+
 ## Stage 1. Prepare context
 
 # Avoid detached HEAD since the release plugin requires to be on a branch

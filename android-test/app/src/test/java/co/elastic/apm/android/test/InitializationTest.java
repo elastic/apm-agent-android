@@ -44,6 +44,24 @@ public class InitializationTest extends BaseRobolectricTest {
         }
     }
 
+    @Test
+    public void whenMetricsAreFlushedMoreThanOnce_trackStartupTime_onlyOnce() {
+        try (ActivityController<FullCreationActivity> controller = Robolectric.buildActivity(FullCreationActivity.class)) {
+            controller.create().start().postCreate(null);
+
+            getRecordedMetrics(0);
+
+            controller.resume();
+            flushMetrics();
+            flushMetrics();
+
+            MetricData startupMetric = getRecorderMetric();
+
+            Metrics.verify(startupMetric)
+                    .isNamed("application.launch.time");
+        }
+    }
+
     private static class AppWithMockSessionId extends BaseRobolectricTestApplication {
         private DefaultSessionIdProvider sessionIdProvider;
 

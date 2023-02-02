@@ -3,7 +3,12 @@ agents:
 
 steps:
   - label: "Run the release"
-    commands: .ci/release.sh
+    key: "release"
+    commands: .ci/release.sh | tee release.out
+
+  - label: "Upload the logs"
+    depends_on: "release"
+    commands: .ci/upload-logs.sh release.out
 
 notify:
   - slack:

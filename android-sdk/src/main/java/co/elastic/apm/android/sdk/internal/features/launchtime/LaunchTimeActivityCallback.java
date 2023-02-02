@@ -47,11 +47,11 @@ public final class LaunchTimeActivityCallback implements Application.ActivityLif
     }
 
     private void sendAppLaunchTimeMetric(long launchTimeMillis) {
-        Elog.getLogger().debug("Setting up launch time metric of {} milliseconds", launchTimeMillis);
+        Elog.getLogger().info("Setting up launch time metric");
         Meter meter = GlobalOpenTelemetry.getMeter("LaunchTimeTracker");
         ObservableDoubleMeasurement launchTime = meter.gaugeBuilder("application.launch.time").buildObserver();
         BatchCallback batchCallback = meter.batchCallback(() -> {
-            Elog.getLogger().debug("Sending launch metric of {} milliseconds", launchTimeMillis);
+            Elog.getLogger().debug("Sending launch time metric of {} milliseconds", launchTimeMillis);
             launchTime.record(launchTimeMillis);
         }, launchTime);
         ElasticApmAgent.get().getFlusher().flushMetrics();

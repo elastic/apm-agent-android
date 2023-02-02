@@ -69,6 +69,7 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
                 .hasAttribute("http.url", "http://localhost:" + webServer.getPort() + "/")
                 .hasAttribute("http.method", "GET")
                 .hasAttribute("http.status_code", 200);
+        verify(contextStore).remove(any());
     }
 
     @Test
@@ -99,6 +100,8 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
                 .hasAmountOfRecordedExceptions(1)
                 .hasAttribute("http.url", "http://localhost:" + webServer.getPort() + "/")
                 .hasAttribute("http.method", "GET");
+
+        verify(contextStore).remove(any());
     }
 
     @Test

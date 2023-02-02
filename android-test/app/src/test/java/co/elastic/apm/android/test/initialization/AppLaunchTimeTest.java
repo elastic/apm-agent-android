@@ -1,32 +1,22 @@
-package co.elastic.apm.android.test;
+package co.elastic.apm.android.test.initialization;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-
+import org.junit.After;
 import org.junit.Test;
 import org.robolectric.Robolectric;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.android.controller.ActivityController;
-import org.robolectric.annotation.Config;
 
-import co.elastic.apm.android.sdk.ElasticApmAgent;
-import co.elastic.apm.android.sdk.ElasticApmConfiguration;
-import co.elastic.apm.android.sdk.session.impl.DefaultSessionIdProvider;
+import co.elastic.apm.android.sdk.internal.features.launchtime.LaunchTimeTracker;
 import co.elastic.apm.android.test.activities.FullCreationActivity;
 import co.elastic.apm.android.test.activities.OnStartOnlyActivity;
 import co.elastic.apm.android.test.common.metrics.Metrics;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
-import co.elastic.apm.android.test.testutils.base.BaseRobolectricTestApplication;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 
-public class InitializationTest extends BaseRobolectricTest {
+public class AppLaunchTimeTest extends BaseRobolectricTest {
 
-    @Config(application = AppWithMockSessionId.class)
-    @Test
-    public void whenSessionIdProviderIsInitializable_initializeIt() {
-        AppWithMockSessionId app = (AppWithMockSessionId) RuntimeEnvironment.getApplication();
-
-        verify(app.sessionIdProvider).initialize();
+    @After
+    public void tearDown() {
+        LaunchTimeTracker.resetForTest();
     }
 
     @Test
@@ -76,16 +66,4 @@ public class InitializationTest extends BaseRobolectricTest {
         }
     }
 
-    private static class AppWithMockSessionId extends BaseRobolectricTestApplication {
-        private DefaultSessionIdProvider sessionIdProvider;
-
-        @Override
-        public void onCreate() {
-            super.onCreate();
-            sessionIdProvider = mock(DefaultSessionIdProvider.class);
-            ElasticApmAgent.initialize(this,
-                    ElasticApmConfiguration.builder().setSessionIdProvider(sessionIdProvider).build(),
-                    getConnectivity());
-        }
-    }
 }

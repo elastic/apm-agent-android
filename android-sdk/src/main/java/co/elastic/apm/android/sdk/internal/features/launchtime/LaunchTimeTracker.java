@@ -30,6 +30,11 @@ public final class LaunchTimeTracker {
         initialTimeInNanos = System.nanoTime();
     }
 
+    public static void resetForTest() {
+        finalizedTracking = false;
+        timeAlreadyQueried = false;
+    }
+
     public static boolean stopTimer() {
         if (finalizedTracking) {
             return false;

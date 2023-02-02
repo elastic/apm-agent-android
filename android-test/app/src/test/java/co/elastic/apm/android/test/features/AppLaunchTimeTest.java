@@ -1,4 +1,4 @@
-package co.elastic.apm.android.test.initialization;
+package co.elastic.apm.android.test.features;
 
 import org.junit.After;
 import org.junit.Test;

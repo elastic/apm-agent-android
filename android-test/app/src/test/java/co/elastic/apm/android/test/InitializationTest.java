@@ -13,6 +13,7 @@ import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.ElasticApmConfiguration;
 import co.elastic.apm.android.sdk.session.impl.DefaultSessionIdProvider;
 import co.elastic.apm.android.test.activities.FullCreationActivity;
+import co.elastic.apm.android.test.activities.OnStartOnlyActivity;
 import co.elastic.apm.android.test.common.metrics.Metrics;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTestApplication;
@@ -47,11 +48,8 @@ public class InitializationTest extends BaseRobolectricTest {
     @Test
     public void whenMetricsAreFlushedMoreThanOnce_trackStartupTime_onlyOnce() {
         try (ActivityController<FullCreationActivity> controller = Robolectric.buildActivity(FullCreationActivity.class)) {
-            controller.create().start().postCreate(null);
+            controller.setup();
 
-            getRecordedMetrics(0);
-
-            controller.resume();
             flushMetrics();
             flushMetrics();
 
@@ -59,6 +57,21 @@ public class InitializationTest extends BaseRobolectricTest {
 
             Metrics.verify(startupMetric)
                     .isNamed("application.launch.time");
+        }
+    }
+
+    @Test
+    public void whenMoreThanOneActivityGetsOpened_trackStartupTime_fromTheFirstOneOnly() {
+        try (ActivityController<FullCreationActivity> controller = Robolectric.buildActivity(FullCreationActivity.class)) {
+            controller.setup();
+
+            Metrics.verify(getRecordedMetric())
+                    .isNamed("application.launch.time");
+        }
+        try (ActivityController<OnStartOnlyActivity> controller = Robolectric.buildActivity(OnStartOnlyActivity.class)) {
+            controller.setup();
+
+            getRecordedMetrics(0);
         }
     }
 

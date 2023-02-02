@@ -5,10 +5,7 @@ steps:
   - label: "Run the release"
     key: "release"
     commands: .ci/release.sh | tee release.out
-
-  - label: "Upload the logs"
-    depends_on: "release"
-    commands: .ci/upload-logs.sh release.out
+    artifact_paths: "release.out"
 
 notify:
   - slack:

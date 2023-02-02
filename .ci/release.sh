@@ -29,7 +29,7 @@ echo "--- Prepare release context"
 # Avoid detached HEAD since the release plugin requires to be on a branch
 git checkout -f "${branch_specifier}"
 # Prepare a secure temp folder not shared between other jobs to store the key ring
-export TMP_WORKSPACE=$WORKSPACE"@tmp"
+export TMP_WORKSPACE=$(mktemp)
 export KEY_FILE=$TMP_WORKSPACE"/private.key"
 # Secure home for our keyring
 export GNUPGHOME=$TMP_WORKSPACE"/keyring"
@@ -85,6 +85,16 @@ echo "--- Install Android SDK"
 ./install-android-sdk.sh
 export PATH=${PATH}:$PWD/.android-sdk/tools/bin/
 export ANDROID_HOME=$PWD/.android-sdk
+
+echo "--- Install JDK11"
+JAVA_URL=https://jvm-catalog.elastic.co/jdk
+JAVA_HOME=$(pwd)/.openjdk11
+JAVA_PKG="$JAVA_URL/latest_openjdk_11_linux.tar.gz"
+curl -L --output /tmp/jdk.tar.gz "$JAVA_PKG"; \
+  mkdir -p "$JAVA_HOME"; \
+  tar --extract --file /tmp/jdk.tar.gz --directory "$JAVA_HOME" --strip-components 1
+export JAVA_HOME
+export PATH=$JAVA_HOME/bin:$PATH
 
 set +x
 # Setting up common deploy params in env var

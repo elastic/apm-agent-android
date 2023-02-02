@@ -18,18 +18,29 @@
  */
 package co.elastic.apm.android.sdk.internal.otel;
 
+import io.opentelemetry.sdk.common.CompletableResultCode;
+
 public final class Flusher {
     private Delegator meterDelegator;
+    private Delegator loggerDelegator;
 
-    public void flushMetrics() {
-        meterDelegator.flush();
+    public CompletableResultCode flushMetrics() {
+        return meterDelegator.flush();
+    }
+
+    public CompletableResultCode flushLogs() {
+        return loggerDelegator.flush();
     }
 
     public void setMeterDelegator(Delegator meterDelegator) {
         this.meterDelegator = meterDelegator;
     }
 
+    public void setLoggerDelegator(Delegator loggerDelegator) {
+        this.loggerDelegator = loggerDelegator;
+    }
+
     public interface Delegator {
-        void flush();
+        CompletableResultCode flush();
     }
 }

@@ -186,12 +186,14 @@ public final class ElasticApmAgent {
                 .merge(Resource.create(resourceAttrs));
 
         SdkMeterProvider meterProvider = getMeterProvider(resource);
+        SdkLoggerProvider loggerProvider = getLoggerProvider(resource, globalAttributesVisitor);
 
         flusher.setMeterDelegator(meterProvider::forceFlush);
+        flusher.setLoggerDelegator(loggerProvider::forceFlush);
 
         OpenTelemetrySdk.builder()
                 .setTracerProvider(getTracerProvider(resource, globalAttributesVisitor))
-                .setLoggerProvider(getLoggerProvider(resource, globalAttributesVisitor))
+                .setLoggerProvider(loggerProvider)
                 .setMeterProvider(meterProvider)
                 .setPropagators(getContextPropagator())
                 .buildAndRegisterGlobal();

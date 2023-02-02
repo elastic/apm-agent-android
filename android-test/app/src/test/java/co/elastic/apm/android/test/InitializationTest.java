@@ -34,6 +34,7 @@ public class InitializationTest extends BaseRobolectricTest {
         try (ActivityController<FullCreationActivity> controller = Robolectric.buildActivity(FullCreationActivity.class)) {
             controller.create().start().postCreate(null);
 
+            // Checking that there's no metrics up to this point
             getRecordedMetrics(0);
 
             controller.resume();

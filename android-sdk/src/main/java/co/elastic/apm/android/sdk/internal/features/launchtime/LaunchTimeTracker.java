@@ -51,7 +51,7 @@ public final class LaunchTimeTracker {
             throw new IllegalStateException("Launch time already queried");
         }
 
-        Elog.getLogger().info("Retrieving app launch time tracker");
+        Elog.getLogger().info("Retrieving app launch time");
 
         long time = launchTimeInNanos;
         launchTimeInNanos = 0;

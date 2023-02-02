@@ -37,7 +37,7 @@ public class InitializationTest extends BaseRobolectricTest {
 
             controller.resume();
 
-            MetricData startupMetric = getRecorderMetric();
+            MetricData startupMetric = getRecordedMetric();
 
             Metrics.verify(startupMetric)
                     .isNamed("application.launch.time");
@@ -55,7 +55,7 @@ public class InitializationTest extends BaseRobolectricTest {
             flushMetrics();
             flushMetrics();
 
-            MetricData startupMetric = getRecorderMetric();
+            MetricData startupMetric = getRecordedMetric();
 
             Metrics.verify(startupMetric)
                     .isNamed("application.launch.time");

@@ -95,7 +95,7 @@ public abstract class BaseTest {
         return getRecordedLogs(1).get(0);
     }
 
-    protected MetricData getRecorderMetric() {
+    protected MetricData getRecordedMetric() {
         return getRecordedMetrics(1).get(0);
     }
 }

@@ -29,6 +29,6 @@ public class ClockTest extends BaseRobolectricTest {
 
         flushMetrics();
 
-        return getRecorderMetric();
+        return getRecordedMetric();
     }
 }

@@ -1,0 +1,11 @@
+agents:
+  provider: "gcp"
+
+steps:
+  - label: "Run the release"
+    commands: .ci/release.sh
+
+notify:
+  - slack:
+      channels:
+        - "#apm-agent-mobile"

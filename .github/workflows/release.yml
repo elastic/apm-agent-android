@@ -41,14 +41,10 @@ jobs:
           vaultUrl: ${{ secrets.VAULT_ADDR }}
           vaultRoleId: ${{ secrets.VAULT_ROLE_ID }}
           vaultSecretId: ${{ secrets.VAULT_SECRET_ID }}
-          pipeline: observability-release
+          pipeline: apm-agent-android-release
           waitFor: false
           printBuildLogs: false
           buildEnvVars: |
-            repo=${{ github.repository }}
-            commit=${{ github.sha }}
-            command=.ci/release.sh
-            channel='#apm-agent-mobile'
             branch_specifier=${{ inputs.branch_specifier || 'main' }}
             target_specifier=${{ inputs.target_specifier || 'all' }}
             version_override_specifier=${{ inputs.version_override_specifier || '' }}

@@ -2,12 +2,6 @@ plugins {
     id "java-gradle-plugin"
 }
 
-repositories {
-    mavenCentral()
-    gradlePluginPortal()
-    google()
-}
-
 Properties properties = new Properties()
 File propertiesFile = new File(rootDir, '../gradle.properties')
 propertiesFile.withInputStream {

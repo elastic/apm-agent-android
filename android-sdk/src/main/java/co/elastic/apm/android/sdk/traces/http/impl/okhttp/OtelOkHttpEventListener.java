@@ -113,9 +113,8 @@ public class OtelOkHttpEventListener extends EventListener {
 
     @Override
     public void responseHeadersEnd(@NonNull Call call, @NonNull Response response) {
-        Context context = getContext(call.request());
-        if (context != null) {
-            Span span = Span.fromContext(context);
+        Span span = retrieveSpan(call.request());
+        if (span != null) {
             span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, response.code());
         }
     }

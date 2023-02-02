@@ -3,6 +3,7 @@
 ##  branch_specifier
 ##  target_specifier
 ##  version_override_specifier
+##  dry_run
 ##
 ##  NOTE: *_SECRET env variables are masked, hence if you'd like to avoid any
 ##        surprises please use the suffix _SECRET for those values that contain
@@ -23,6 +24,7 @@ VAULT_ADDR=$(vault read -field=vault-url secret/ci/elastic-observability-robots-
 export VAULT_ADDR
 
 # Delete the vault specific accessing the ci vault
+export VAULT_TOKEN_PREVIOUS=$VAULT_TOKEN
 unset VAULT_TOKEN
 
 echo "--- Prepare release context"
@@ -38,6 +40,7 @@ chmod -R 700 $TMP_WORKSPACE
 # Make sure we delete this folder before leaving even in case of failure
 clean_up () {
   ARG=$?
+  export VAULT_TOKEN=$VAULT_TOKEN_PREVIOUS
   echo "--- Deleting tmp workspace"
   rm -rf $TMP_WORKSPACE
   exit $ARG
@@ -104,14 +107,26 @@ export COMMON_GRADLE_DEPLOY_PARAMS="$COMMON_GRADLE_SIGNING_PARAMS $COMMON_GRADLE
 
 if [[ "$target_specifier" == "all" ||  "$target_specifier" == "mavenCentral" ]]; then
   echo "--- Release the binaries to Maven Central"
-  ./gradlew publishElasticPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository $COMMON_GRADLE_DEPLOY_PARAMS
+  if [[ "$dry_run" == "true" ]] ; then
+    echo './gradlew publishElasticPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository'
+  else
+    ./gradlew publishElasticPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository $COMMON_GRADLE_DEPLOY_PARAMS
+  fi
 fi
 
 if [[ "$target_specifier" == "all" ||  "$target_specifier" == "pluginPortal" ]]; then
   echo "--- Release the binaries to the Gradle Plugin portal"
-  ./gradlew publishPlugins -Pgradle.publish.key=$PLUGIN_PORTAL_KEY -Pgradle.publish.secret=$PLUGIN_PORTAL_SECRET $COMMON_GRADLE_DEPLOY_PARAMS
+  if [[ "$dry_run" == "true" ]] ; then
+    echo './gradlew publishPlugins'
+  else
+    ./gradlew publishPlugins -Pgradle.publish.key=$PLUGIN_PORTAL_KEY -Pgradle.publish.secret=$PLUGIN_PORTAL_SECRET $COMMON_GRADLE_DEPLOY_PARAMS
+  fi
 fi
 set -x
 
 echo "--- Running post deploy process"
-./gradlew postDeploy $COMMON_GRADLE_CONFIG_PARAMS
+if [[ "$dry_run" == "true" ]] ; then
+  echo './gradlew postDeploy'
+else
+  ./gradlew postDeploy $COMMON_GRADLE_CONFIG_PARAMS
+fi

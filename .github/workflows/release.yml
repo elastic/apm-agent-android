@@ -28,6 +28,11 @@ on:
         required: false
         type: string
 
+      dry_run:
+        description: If set, this will not run a release but run a dry-run
+        default: false
+        type: boolean
+
 jobs:
   release:
     name: Release
@@ -48,6 +53,7 @@ jobs:
             branch_specifier=${{ inputs.branch_specifier || 'main' }}
             target_specifier=${{ inputs.target_specifier || 'all' }}
             version_override_specifier=${{ inputs.version_override_specifier || '' }}
+            dry_run=${{ inputs.dry_run || 'false' }}
 
       - if: ${{ success() }}
         uses: elastic/apm-pipeline-library/.github/actions/slack-message@current

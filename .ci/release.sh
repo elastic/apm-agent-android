@@ -31,7 +31,7 @@ echo "--- Prepare release context"
 # Avoid detached HEAD since the release plugin requires to be on a branch
 git checkout -f "${branch_specifier}"
 # Prepare a secure temp folder not shared between other jobs to store the key ring
-export TMP_WORKSPACE=$(mktemp)
+export TMP_WORKSPACE=/tmp/secured
 export KEY_FILE=$TMP_WORKSPACE"/private.key"
 # Secure home for our keyring
 export GNUPGHOME=$TMP_WORKSPACE"/keyring"

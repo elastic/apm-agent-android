@@ -28,6 +28,7 @@ import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporterBuilder;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporterBuilder;
 import io.opentelemetry.sdk.logs.export.LogRecordExporter;
+import io.opentelemetry.sdk.metrics.export.AggregationTemporalitySelector;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
@@ -66,7 +67,9 @@ public class CommonConnectivity extends DefaultProcessingConnectivity {
 
     @Override
     protected MetricExporter provideMetricExporter() {
-        OtlpGrpcMetricExporterBuilder exporterBuilder = OtlpGrpcMetricExporter.builder().setEndpoint(endpoint);
+        OtlpGrpcMetricExporterBuilder exporterBuilder = OtlpGrpcMetricExporter.builder()
+                .setAggregationTemporalitySelector(AggregationTemporalitySelector.deltaPreferred())
+                .setEndpoint(endpoint);
         if (token != null) {
             exporterBuilder.addHeader(AUTHORIZATION_HEADER_NAME, getBearerToken());
         }

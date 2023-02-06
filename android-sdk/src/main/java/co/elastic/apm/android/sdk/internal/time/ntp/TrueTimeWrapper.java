@@ -44,6 +44,10 @@ public class TrueTimeWrapper {
         TrueTime.build().withRootDispersionMax(rootDispersionMax);
     }
 
+    public void withRootDelayMax(float rootDelayMax) {
+        TrueTime.build().withRootDelayMax(rootDelayMax);
+    }
+
     public boolean isInitialized() {
         return TrueTime.isInitialized();
     }

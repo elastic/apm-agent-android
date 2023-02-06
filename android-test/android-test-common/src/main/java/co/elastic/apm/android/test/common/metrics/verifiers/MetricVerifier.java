@@ -32,4 +32,9 @@ public class MetricVerifier {
         assertEquals(timeInNanoseconds, points.get(0).getEpochNanos());
         return this;
     }
+
+    public MetricVerifier isNamed(String name) {
+        assertEquals(name, metric.getName());
+        return this;
+    }
 }

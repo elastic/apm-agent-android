@@ -19,6 +19,7 @@
 package co.elastic.apm.android.sdk.traces.http.impl.okhttp;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.io.IOException;
 
@@ -36,10 +37,12 @@ import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.ContextKey;
+import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 import okhttp3.Call;
 import okhttp3.EventListener;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
+import okhttp3.Response;
 
 public class OtelOkHttpEventListener extends EventListener {
 
@@ -109,19 +112,25 @@ public class OtelOkHttpEventListener extends EventListener {
     }
 
     @Override
+    public void responseHeadersEnd(@NonNull Call call, @NonNull Response response) {
+        Span span = retrieveSpan(call.request());
+        if (span != null) {
+            span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, response.code());
+        }
+    }
+
+    @Override
     public void callEnd(Call call) {
         super.callEnd(call);
         Request request = call.request();
         Elog.getLogger().info("OkHttp request ended");
         Elog.getLogger().debug("OkHttp request ended: {}", request.url());
         Context context = getContext(request);
-        if (context != null) {
-            Span span = Span.fromContext(context);
-            if (isValid(span)) {
-                endSpan(span, context);
-            }
-            contextStore.remove(request);
+        Span span = retrieveSpan(context);
+        if (span != null) {
+            endSpan(span, context);
         }
+        clearStore(context, request);
     }
 
     @Override
@@ -131,13 +140,35 @@ public class OtelOkHttpEventListener extends EventListener {
         Elog.getLogger().info("OkHttp request failed");
         Elog.getLogger().debug("OkHttp request failed: {}", request.url());
         Context context = getContext(request);
+        Span span = retrieveSpan(context);
+        if (span != null) {
+            span.setStatus(StatusCode.ERROR);
+            span.recordException(ioe);
+            endSpan(span, context);
+        }
+        clearStore(context, request);
+    }
+
+    @Nullable
+    private Span retrieveSpan(Request request) {
+        return retrieveSpan(getContext(request));
+    }
+
+    @Nullable
+    private Span retrieveSpan(Context context) {
+        if (context == null) {
+            return null;
+        }
+        Span span = Span.fromContext(context);
+        if (!isValid(span)) {
+            return null;
+        }
+
+        return span;
+    }
+
+    private void clearStore(Context context, Request request) {
         if (context != null) {
-            Span span = Span.fromContext(context);
-            if (isValid(span)) {
-                span.setStatus(StatusCode.ERROR);
-                span.recordException(ioe);
-                endSpan(span, context);
-            }
             contextStore.remove(request);
         }
     }

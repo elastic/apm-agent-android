@@ -14,6 +14,10 @@ public interface SpanVerifier<T extends SpanVerifier<?>> {
 
     T hasAttribute(String attributeName, String attributeValue);
 
+    T hasAttribute(String attributeName, Long attributeValue);
+
+    T hasAttribute(String attributeName, Integer attributeValue);
+
     T hasResource(String resourceName);
 
     T hasResource(String resourceName, String resourceValue);

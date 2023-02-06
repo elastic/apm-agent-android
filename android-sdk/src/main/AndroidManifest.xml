@@ -16,5 +16,9 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+        <provider
+            android:name=".internal.features.launchtime.LaunchTimeContentProvider"
+            android:authorities="${applicationId}.elasticlaunchtimeprovider"
+            android:exported="false" />
     </application>
 </manifest>

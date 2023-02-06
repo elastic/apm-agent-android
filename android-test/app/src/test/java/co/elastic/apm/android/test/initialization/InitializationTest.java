@@ -1,4 +1,4 @@
-package co.elastic.apm.android.test;
+package co.elastic.apm.android.test.initialization;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;

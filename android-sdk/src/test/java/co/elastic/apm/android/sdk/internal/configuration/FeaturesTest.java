@@ -70,10 +70,10 @@ public class FeaturesTest {
         assertEquals(features, Features.get());
     }
 
-    private static class SimpleFeature implements FeatureConfiguration {
+    private static class SimpleFeature extends FeatureConfiguration {
 
         @Override
-        public boolean isEnabled() {
+        protected boolean enabled() {
             return true;
         }
     }

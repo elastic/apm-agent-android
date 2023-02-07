@@ -18,6 +18,15 @@
  */
 package co.elastic.apm.android.sdk.internal.configuration;
 
-public interface FeatureConfiguration {
-    boolean isEnabled();
+public abstract class FeatureConfiguration {
+
+    public final boolean isEnabled() {
+        return enabled();
+    }
+
+    protected Class<? extends FeatureConfiguration> getParentConfiguration() {
+        return null;
+    }
+
+    protected abstract boolean enabled();
 }

@@ -27,7 +27,7 @@ import java.util.function.Consumer;
 import co.elastic.apm.android.sdk.internal.api.FeatureConfiguration;
 
 public class Features {
-    private static final Features INSTANCE = null;
+    private static Features INSTANCE;
     private final Map<Class<? extends FeatureConfiguration>, FeatureConfiguration> configurationsMap;
 
     public static Features get() {
@@ -41,6 +41,7 @@ public class Features {
     private Features(List<? extends FeatureConfiguration> configurations) {
         this.configurationsMap = new HashMap<>();
         configurations.forEach((Consumer<FeatureConfiguration>) featureConfiguration -> configurationsMap.put(featureConfiguration.getClass(), featureConfiguration));
+        INSTANCE = this;
     }
 
     @SuppressWarnings("unchecked")

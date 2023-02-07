@@ -47,6 +47,13 @@ public class FeaturesTest {
         assertTrue(configuration.isEnabled());
     }
 
+    @Test
+    public void whenStaticGetterIsCalled_returnAvailableInstance() {
+        Features features = Features.builder().build();
+
+        assertEquals(features, Features.get());
+    }
+
     private static class SimpleFeature implements FeatureConfiguration {
 
         @Override

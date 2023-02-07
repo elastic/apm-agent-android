@@ -16,8 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.concurrency;
+package co.elastic.apm.android.sdk.internal.utilities.concurrency.impl;
 
-public interface BackgroundWork<T> {
-    T execute();
+import co.elastic.apm.android.sdk.internal.utilities.concurrency.BackgroundExecutor;
+import co.elastic.apm.android.sdk.internal.utilities.concurrency.BackgroundWork;
+import co.elastic.apm.android.sdk.internal.utilities.concurrency.Result;
+
+public class SimpleBackgroundExecutor implements BackgroundExecutor {
+
+    @Override
+    public <T> void execute(BackgroundWork<T> work, Callback<T> callback) {
+        new Thread(() -> {
+            try {
+                T result = work.execute();
+                callback.onFinish(Result.success(result));
+            } catch (Throwable t) {
+                callback.onFinish(Result.error(t));
+            }
+        }).start();
+    }
 }

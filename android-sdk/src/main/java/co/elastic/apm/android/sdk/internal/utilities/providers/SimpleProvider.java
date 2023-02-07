@@ -16,28 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.time;
+package co.elastic.apm.android.sdk.internal.utilities.providers;
 
-public class SystemTimeProvider {
+public class SimpleProvider<T> implements Provider<T> {
+    private final T object;
 
-    private static SystemTimeProvider INSTANCE;
-
-    public static SystemTimeProvider get() {
-        if (INSTANCE == null) {
-            INSTANCE = new SystemTimeProvider();
-        }
-
-        return INSTANCE;
+    public SimpleProvider(T object) {
+        this.object = object;
     }
 
-    private SystemTimeProvider() {
-    }
-
-    public long getCurrentTimeMillis() {
-        return System.currentTimeMillis();
-    }
-
-    public long getNanoTime() {
-        return System.nanoTime();
+    @Override
+    public T get() {
+        return object;
     }
 }

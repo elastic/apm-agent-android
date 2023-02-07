@@ -16,23 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.time.ntp;
+package co.elastic.apm.android.sdk.internal.utilities.logging;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
+import org.slf4j.Logger;
 
-import co.elastic.apm.android.common.internal.logging.Elog;
+import co.elastic.apm.android.common.internal.logging.ELoggerFactory;
 
-public class TrueTimeBootBroadcastReceiver extends BroadcastReceiver {
+public class AndroidLoggerFactory extends ELoggerFactory {
 
     @Override
-    public void onReceive(Context context, Intent intent) {
-        Elog.getLogger().debug("Clearing TrueTime disk cache as we've detected a boot");
-        if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
-            TrueTimeWrapper trueTimeWrapper = new TrueTimeWrapper(context);
-            trueTimeWrapper.withSharedPreferencesCache();
-            trueTimeWrapper.clearCachedInfo();
-        }
+    public Logger getLogger(String name) {
+        return new AndroidLogger(name);
     }
 }

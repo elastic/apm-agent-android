@@ -16,17 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.providers;
+package co.elastic.apm.android.sdk.internal.utilities.otel;
 
-public class SimpleProvider<T> implements Provider<T> {
-    private final T object;
+import io.opentelemetry.context.Context;
 
-    public SimpleProvider(T object) {
-        this.object = object;
+public final class SpanUtilities {
+
+    public static boolean runningSpanFound() {
+        return !runningSpanNotFound();
     }
 
-    @Override
-    public T get() {
-        return object;
+    public static boolean runningSpanNotFound() {
+        return Context.current().equals(Context.root());
     }
 }

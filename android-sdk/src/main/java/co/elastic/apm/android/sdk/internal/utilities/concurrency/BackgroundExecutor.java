@@ -16,17 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.otel;
+package co.elastic.apm.android.sdk.internal.utilities.concurrency;
 
-import io.opentelemetry.context.Context;
+public interface BackgroundExecutor {
 
-public final class SpanUtilities {
+    <T> void execute(BackgroundWork<T> work, Callback<T> callback);
 
-    public static boolean runningSpanFound() {
-        return !runningSpanNotFound();
-    }
-
-    public static boolean runningSpanNotFound() {
-        return Context.current().equals(Context.root());
+    interface Callback<T> {
+        void onFinish(Result<T> result);
     }
 }

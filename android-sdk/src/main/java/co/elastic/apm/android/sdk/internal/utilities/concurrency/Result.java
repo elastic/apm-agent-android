@@ -16,13 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.concurrency;
+package co.elastic.apm.android.sdk.internal.utilities.concurrency;
 
-public interface BackgroundExecutor {
+public final class Result<T> {
+    public final T value;
+    public final Throwable error;
+    public final boolean isSuccess;
 
-    <T> void execute(BackgroundWork<T> work, Callback<T> callback);
+    private Result(T result, Throwable error, boolean isSuccess) {
+        this.value = result;
+        this.error = error;
+        this.isSuccess = isSuccess;
+    }
 
-    interface Callback<T> {
-        void onFinish(Result<T> result);
+    public static <T> Result<T> success(T value) {
+        return new Result<>(value, null, true);
+    }
+
+    public static <T> Result<T> error(Throwable error) {
+        return new Result<>(null, error, false);
     }
 }

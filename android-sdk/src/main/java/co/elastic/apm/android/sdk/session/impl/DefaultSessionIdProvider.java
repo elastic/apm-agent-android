@@ -25,10 +25,10 @@ import java.util.concurrent.TimeUnit;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.internal.api.Initializable;
-import co.elastic.apm.android.sdk.internal.providers.Provider;
+import co.elastic.apm.android.sdk.internal.utilities.providers.Provider;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
-import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
+import co.elastic.apm.android.sdk.internal.utilities.time.SystemTimeProvider;
 import co.elastic.apm.android.sdk.session.SessionIdProvider;
 
 /**

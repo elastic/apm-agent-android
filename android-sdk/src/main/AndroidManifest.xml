@@ -10,7 +10,7 @@
     <application>
         <!-- Launch TrueTime's cache clearing process when the device has been rebooted -->
         <receiver
-            android:name=".internal.time.ntp.TrueTimeBootBroadcastReceiver"
+            android:name=".internal.utilities.time.ntp.TrueTimeBootBroadcastReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

@@ -16,16 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.logging;
+package co.elastic.apm.android.sdk.internal.utilities.otel;
 
-import org.slf4j.Logger;
+import io.opentelemetry.sdk.common.CompletableResultCode;
 
-import co.elastic.apm.android.common.internal.logging.ELoggerFactory;
+public final class Flusher {
+    private Delegator meterDelegator;
+    private Delegator loggerDelegator;
 
-public class AndroidLoggerFactory extends ELoggerFactory {
+    public CompletableResultCode flushMetrics() {
+        return meterDelegator.flush();
+    }
 
-    @Override
-    public Logger getLogger(String name) {
-        return new AndroidLogger(name);
+    public CompletableResultCode flushLogs() {
+        return loggerDelegator.flush();
+    }
+
+    public void setMeterDelegator(Delegator meterDelegator) {
+        this.meterDelegator = meterDelegator;
+    }
+
+    public void setLoggerDelegator(Delegator loggerDelegator) {
+        this.loggerDelegator = loggerDelegator;
+    }
+
+    public interface Delegator {
+        CompletableResultCode flush();
     }
 }

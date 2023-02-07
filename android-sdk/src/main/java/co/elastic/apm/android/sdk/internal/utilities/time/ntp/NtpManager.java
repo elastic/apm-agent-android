@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.time.ntp;
+package co.elastic.apm.android.sdk.internal.utilities.time.ntp;
 
 import android.content.Context;
 
@@ -25,10 +25,10 @@ import androidx.annotation.VisibleForTesting;
 import java.io.IOException;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
-import co.elastic.apm.android.sdk.internal.concurrency.BackgroundExecutor;
-import co.elastic.apm.android.sdk.internal.concurrency.Result;
-import co.elastic.apm.android.sdk.internal.concurrency.impl.SimpleBackgroundExecutor;
-import co.elastic.apm.android.sdk.internal.otel.ElasticClock;
+import co.elastic.apm.android.sdk.internal.utilities.concurrency.BackgroundExecutor;
+import co.elastic.apm.android.sdk.internal.utilities.concurrency.Result;
+import co.elastic.apm.android.sdk.internal.utilities.concurrency.impl.SimpleBackgroundExecutor;
+import co.elastic.apm.android.sdk.internal.utilities.otel.ElasticClock;
 import io.opentelemetry.sdk.common.Clock;
 
 public final class NtpManager implements BackgroundExecutor.Callback<Void> {

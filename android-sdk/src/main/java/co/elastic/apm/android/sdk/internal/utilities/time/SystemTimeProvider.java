@@ -16,23 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.concurrency.impl;
+package co.elastic.apm.android.sdk.internal.utilities.time;
 
-import co.elastic.apm.android.sdk.internal.concurrency.BackgroundExecutor;
-import co.elastic.apm.android.sdk.internal.concurrency.BackgroundWork;
-import co.elastic.apm.android.sdk.internal.concurrency.Result;
+public class SystemTimeProvider {
 
-public class SimpleBackgroundExecutor implements BackgroundExecutor {
+    private static SystemTimeProvider INSTANCE;
 
-    @Override
-    public <T> void execute(BackgroundWork<T> work, Callback<T> callback) {
-        new Thread(() -> {
-            try {
-                T result = work.execute();
-                callback.onFinish(Result.success(result));
-            } catch (Throwable t) {
-                callback.onFinish(Result.error(t));
-            }
-        }).start();
+    public static SystemTimeProvider get() {
+        if (INSTANCE == null) {
+            INSTANCE = new SystemTimeProvider();
+        }
+
+        return INSTANCE;
+    }
+
+    private SystemTimeProvider() {
+    }
+
+    public long getCurrentTimeMillis() {
+        return System.currentTimeMillis();
+    }
+
+    public long getNanoTime() {
+        return System.nanoTime();
     }
 }

@@ -21,8 +21,6 @@ package co.elastic.apm.android.sdk.internal.configuration;
 import java.util.HashMap;
 import java.util.Map;
 
-import co.elastic.apm.android.sdk.internal.api.FeatureConfiguration;
-
 public class Features {
     private static Features INSTANCE;
     private final Map<Class<? extends FeatureConfiguration>, FeatureConfiguration> configurations;

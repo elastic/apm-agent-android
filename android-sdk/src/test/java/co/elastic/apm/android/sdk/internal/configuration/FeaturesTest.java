@@ -24,8 +24,6 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-import co.elastic.apm.android.sdk.internal.api.FeatureConfiguration;
-
 public class FeaturesTest {
 
     @Test

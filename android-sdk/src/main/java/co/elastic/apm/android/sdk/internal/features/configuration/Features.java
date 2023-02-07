@@ -55,6 +55,9 @@ public class Features {
     public static class Builder {
         private final List<FeatureConfiguration> features = new ArrayList<>();
 
+        private Builder() {
+        }
+
         public Builder register(FeatureConfiguration featureConfiguration) {
             features.add(featureConfiguration);
             return this;

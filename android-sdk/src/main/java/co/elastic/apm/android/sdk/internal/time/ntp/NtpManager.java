@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.utilities.time.ntp;
+package co.elastic.apm.android.sdk.internal.time.ntp;
 
 import android.content.Context;
 

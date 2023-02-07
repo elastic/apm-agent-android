@@ -31,8 +31,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
 
-import co.elastic.apm.android.sdk.internal.utilities.time.ntp.NtpManager;
-import co.elastic.apm.android.sdk.internal.utilities.time.ntp.TrueTimeWrapper;
 import co.elastic.apm.android.sdk.testutils.BaseTest;
 import co.elastic.apm.android.sdk.testutils.ImmediateBackgroundExecutor;
 

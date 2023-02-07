@@ -23,8 +23,8 @@ import androidx.annotation.VisibleForTesting;
 import java.util.concurrent.TimeUnit;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
-import co.elastic.apm.android.sdk.internal.utilities.time.SystemTimeProvider;
-import co.elastic.apm.android.sdk.internal.utilities.time.ntp.TrueTimeWrapper;
+import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
+import co.elastic.apm.android.sdk.internal.time.ntp.TrueTimeWrapper;
 import io.opentelemetry.sdk.common.Clock;
 
 public class ElasticClock implements Clock {

@@ -52,7 +52,7 @@ import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService;
 import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
 import co.elastic.apm.android.sdk.internal.services.network.NetworkService;
 import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
-import co.elastic.apm.android.sdk.internal.utilities.time.ntp.NtpManager;
+import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.sdk.logs.ElasticLogRecordProcessor;
 import co.elastic.apm.android.sdk.traces.otel.processor.ElasticSpanProcessor;
 import io.opentelemetry.api.common.Attributes;

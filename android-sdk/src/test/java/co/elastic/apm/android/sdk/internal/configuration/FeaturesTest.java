@@ -25,7 +25,6 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 
 import co.elastic.apm.android.sdk.internal.api.FeatureConfiguration;
-import co.elastic.apm.android.sdk.internal.configuration.Features;
 
 public class FeaturesTest {
 
@@ -36,7 +35,7 @@ public class FeaturesTest {
             features.getConfiguration(SimpleFeature.class);
             fail();
         } catch (IllegalArgumentException e) {
-            assertEquals("No configuration found for 'co.elastic.apm.android.sdk.internal.features.configuration.FeaturesTest$SimpleFeature'", e.getMessage());
+            assertEquals("No configuration found for 'co.elastic.apm.android.sdk.internal.configuration.FeaturesTest$SimpleFeature'", e.getMessage());
         }
     }
 

@@ -20,7 +20,7 @@ package co.elastic.apm.android.sdk.internal.injection;
 
 import android.content.Context;
 
-import co.elastic.apm.android.sdk.internal.utilities.time.ntp.NtpManager;
+import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 
 public class AgentDependenciesInjector {
     private final Context appContext;

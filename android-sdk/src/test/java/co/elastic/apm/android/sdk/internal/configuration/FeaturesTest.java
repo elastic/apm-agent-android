@@ -48,6 +48,13 @@ public class FeaturesTest {
     }
 
     @Test
+    public void checkIfFeatureIsEnabled_statically() {
+        Features.builder().register(new SimpleFeature()).build();
+
+        assertTrue(Features.isEnabled(SimpleFeature.class));
+    }
+
+    @Test
     public void whenStaticGetterIsCalled_returnAvailableInstance() {
         Features features = Features.builder().build();
 

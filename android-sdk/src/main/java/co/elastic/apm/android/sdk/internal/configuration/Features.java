@@ -44,6 +44,10 @@ public class Features {
         INSTANCE = this;
     }
 
+    public static boolean isEnabled(Class<? extends FeatureConfiguration> configurationClass) {
+        return get().getConfiguration(configurationClass).isEnabled();
+    }
+
     @SuppressWarnings("unchecked")
     public <T extends FeatureConfiguration> T getConfiguration(Class<? extends FeatureConfiguration> configurationClass) {
         if (!configurationsMap.containsKey(configurationClass)) {

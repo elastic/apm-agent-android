@@ -55,6 +55,17 @@ public class FeaturesTest {
     }
 
     @Test
+    public void whenTryingToRegisterSameFeatureTypeMoreThanOnce_fail() {
+        try {
+            Features.builder().register(new SimpleFeature())
+                    .register(new SimpleFeature());
+            fail();
+        } catch (IllegalStateException e) {
+            assertEquals("The feature 'co.elastic.apm.android.sdk.internal.configuration.FeaturesTest$SimpleFeature' is already registered", e.getMessage());
+        }
+    }
+
+    @Test
     public void whenStaticGetterIsCalled_returnAvailableInstance() {
         Features features = Features.builder().build();
 

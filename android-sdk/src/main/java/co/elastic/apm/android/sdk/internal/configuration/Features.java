@@ -18,17 +18,14 @@
  */
 package co.elastic.apm.android.sdk.internal.configuration;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import co.elastic.apm.android.sdk.internal.api.FeatureConfiguration;
 
 public class Features {
     private static Features INSTANCE;
-    private final Map<Class<? extends FeatureConfiguration>, FeatureConfiguration> configurationsMap;
+    private final Map<Class<? extends FeatureConfiguration>, FeatureConfiguration> configurations;
 
     public static Features get() {
         return INSTANCE;
@@ -38,9 +35,8 @@ public class Features {
         return new Features.Builder();
     }
 
-    private Features(List<? extends FeatureConfiguration> configurations) {
-        this.configurationsMap = new HashMap<>();
-        configurations.forEach((Consumer<FeatureConfiguration>) featureConfiguration -> configurationsMap.put(featureConfiguration.getClass(), featureConfiguration));
+    private Features(Map<Class<? extends FeatureConfiguration>, FeatureConfiguration> configurations) {
+        this.configurations = configurations;
         INSTANCE = this;
     }
 
@@ -50,20 +46,24 @@ public class Features {
 
     @SuppressWarnings("unchecked")
     public <T extends FeatureConfiguration> T getConfiguration(Class<? extends FeatureConfiguration> configurationClass) {
-        if (!configurationsMap.containsKey(configurationClass)) {
+        if (!configurations.containsKey(configurationClass)) {
             throw new IllegalArgumentException("No configuration found for '" + configurationClass.getName() + "'");
         }
-        return (T) configurationsMap.get(configurationClass);
+        return (T) configurations.get(configurationClass);
     }
 
     public static class Builder {
-        private final List<FeatureConfiguration> features = new ArrayList<>();
+        private final Map<Class<? extends FeatureConfiguration>, FeatureConfiguration> features = new HashMap<>();
 
         private Builder() {
         }
 
         public Builder register(FeatureConfiguration featureConfiguration) {
-            features.add(featureConfiguration);
+            Class<? extends FeatureConfiguration> configurationClass = featureConfiguration.getClass();
+            if (features.containsKey(configurationClass)) {
+                throw new IllegalStateException("The feature '" + configurationClass.getName() + "' is already registered");
+            }
+            features.put(configurationClass, featureConfiguration);
             return this;
         }
 

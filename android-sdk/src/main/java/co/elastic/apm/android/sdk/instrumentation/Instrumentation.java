@@ -23,9 +23,22 @@ import androidx.annotation.NonNull;
 import co.elastic.apm.android.sdk.instrumentation.supported.HttpRequestsInstrumentation;
 import co.elastic.apm.android.sdk.instrumentation.supported.ScreenRenderingInstrumentation;
 import co.elastic.apm.android.sdk.internal.configuration.Configuration;
+import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.instrumentation.GroupInstrumentation;
 
 public abstract class Instrumentation extends Configuration {
+
+    public static boolean isEnabled(Class<? extends Instrumentation> instrumentationClass) {
+        return Configurations.isEnabled(instrumentationClass);
+    }
+
+    public static <T extends Instrumentation> T getConfiguration(Class<T> instrumentationClass) {
+        return Configurations.get().getConfiguration(instrumentationClass);
+    }
+
+    public static HttpRequestsInstrumentation getHttpRequestsConfiguration() {
+        return getConfiguration(HttpRequestsInstrumentation.class);
+    }
 
     @NonNull
     protected GroupType getGroupType() {

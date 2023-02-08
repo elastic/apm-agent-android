@@ -1,4 +1,4 @@
-package co.elastic.apm.android.sdk.instrumentation;
+package co.elastic.apm.android.sdk.configuration.instrumentation;
 
 import co.elastic.apm.android.sdk.internal.configuration.FeatureConfiguration;
 

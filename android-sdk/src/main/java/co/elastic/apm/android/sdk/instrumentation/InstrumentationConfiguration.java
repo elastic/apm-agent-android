@@ -18,6 +18,9 @@
  */
 package co.elastic.apm.android.sdk.instrumentation;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import co.elastic.apm.android.sdk.instrumentation.supported.AppLaunchTimeInstrumentation;
 import co.elastic.apm.android.sdk.instrumentation.supported.CrashReportingInstrumentation;
 import co.elastic.apm.android.sdk.instrumentation.supported.HttpRequestsInstrumentation;
@@ -26,55 +29,25 @@ import co.elastic.apm.android.sdk.internal.configuration.Configuration;
 import co.elastic.apm.android.sdk.internal.instrumentation.GroupInstrumentation;
 
 public final class InstrumentationConfiguration extends GroupInstrumentation {
-    private final HttpRequestsInstrumentation httpRequestsConfiguration;
-    private final ScreenRenderingInstrumentation screenRenderingConfiguration;
-    private final CrashReportingInstrumentation crashReportingConfiguration;
-    private final AppLaunchTimeInstrumentation appLaunchTimeConfiguration;
+    private final List<Instrumentation> instrumentations;
 
     public static InstrumentationConfiguration.Builder builder() {
-        return new Builder();
+        return new Builder(true);
     }
 
     public static InstrumentationConfiguration allEnabled() {
-        return builder()
-                .enableCrashReporting(true)
-                .enableHttpRequests(true)
-                .enableAppLaunchTime(true)
-                .enableScreenRendering(true)
-                .build();
+        return builder().build();
     }
 
     public static InstrumentationConfiguration allDisabled() {
-        return builder().build();
+        return new Builder(false).build();
     }
 
     public InstrumentationConfiguration(
             boolean enabled,
-            HttpRequestsInstrumentation httpRequestsConfiguration,
-            ScreenRenderingInstrumentation screenRenderingConfiguration,
-            CrashReportingInstrumentation crashReportingConfiguration,
-            AppLaunchTimeInstrumentation appLaunchTimeConfiguration) {
+            List<Instrumentation> instrumentations) {
         super(enabled);
-        this.httpRequestsConfiguration = httpRequestsConfiguration;
-        this.screenRenderingConfiguration = screenRenderingConfiguration;
-        this.crashReportingConfiguration = crashReportingConfiguration;
-        this.appLaunchTimeConfiguration = appLaunchTimeConfiguration;
-    }
-
-    public HttpRequestsInstrumentation getHttpRequestsConfiguration() {
-        return httpRequestsConfiguration;
-    }
-
-    public ScreenRenderingInstrumentation getScreenRenderingConfiguration() {
-        return screenRenderingConfiguration;
-    }
-
-    public CrashReportingInstrumentation getCrashReportingConfiguration() {
-        return crashReportingConfiguration;
-    }
-
-    public AppLaunchTimeInstrumentation getAppLaunchTimeConfiguration() {
-        return appLaunchTimeConfiguration;
+        this.instrumentations = instrumentations;
     }
 
     @Override
@@ -83,12 +56,14 @@ public final class InstrumentationConfiguration extends GroupInstrumentation {
     }
 
     public static class Builder {
+        private final boolean enabled;
         private boolean enableHttpRequests;
         private boolean enableScreenRendering;
         private boolean enableCrashReporting;
         private boolean enableAppLaunchTime;
 
-        private Builder() {
+        private Builder(boolean enabled) {
+            this.enabled = enabled;
         }
 
         public Builder enableHttpRequests(boolean enableHttpRequests) {
@@ -112,13 +87,12 @@ public final class InstrumentationConfiguration extends GroupInstrumentation {
         }
 
         public InstrumentationConfiguration build() {
-            return new InstrumentationConfiguration(
-                    true,
-                    new HttpRequestsInstrumentation(enableHttpRequests),
-                    new ScreenRenderingInstrumentation(enableScreenRendering),
-                    new CrashReportingInstrumentation(enableCrashReporting),
-                    new AppLaunchTimeInstrumentation(enableAppLaunchTime)
-            );
+            List<Instrumentation> instrumentations = new ArrayList<>();
+            instrumentations.add(new HttpRequestsInstrumentation(enableHttpRequests));
+            instrumentations.add(new ScreenRenderingInstrumentation(enableScreenRendering));
+            instrumentations.add(new CrashReportingInstrumentation(enableCrashReporting));
+            instrumentations.add(new AppLaunchTimeInstrumentation(enableAppLaunchTime));
+            return new InstrumentationConfiguration(enabled, instrumentations);
         }
     }
 }

@@ -57,7 +57,7 @@ public final class InstrumentationConfiguration extends Instrumentation {
     }
 
     @Override
-    protected Class<? extends FeatureConfiguration> getParentConfiguration() {
+    protected Class<? extends FeatureConfiguration> getParentConfigurationType() {
         return null;
     }
 

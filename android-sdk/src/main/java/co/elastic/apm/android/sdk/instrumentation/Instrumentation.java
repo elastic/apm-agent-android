@@ -11,7 +11,7 @@ public abstract class Instrumentation extends FeatureConfiguration {
     protected abstract Type getInstrumentationType();
 
     @Override
-    protected Class<? extends FeatureConfiguration> getParentConfiguration() {
+    protected Class<? extends FeatureConfiguration> getParentConfigurationType() {
         switch (getInstrumentationType()) {
             case HTTP_REQUESTS:
                 return HttpRequestsInstrumentation.class;

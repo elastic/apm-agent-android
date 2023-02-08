@@ -16,15 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.configuration;
+package co.elastic.apm.android.sdk.internal.configuration;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-
-import co.elastic.apm.android.sdk.configuration.FeatureConfiguration;
-import co.elastic.apm.android.sdk.configuration.Features;
 
 public class FeatureConfigurationTest {
 

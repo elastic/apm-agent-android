@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.configuration;
+package co.elastic.apm.android.sdk.internal.configuration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -33,7 +33,7 @@ public class FeaturesTest {
             features.getConfiguration(SimpleFeature.class);
             fail();
         } catch (IllegalArgumentException e) {
-            assertEquals("No configuration found for 'co.elastic.apm.android.sdk.configuration.FeaturesTest$SimpleFeature'", e.getMessage());
+            assertEquals("No configuration found for 'co.elastic.apm.android.sdk.internal.configuration.FeaturesTest$SimpleFeature'", e.getMessage());
         }
     }
 
@@ -59,7 +59,7 @@ public class FeaturesTest {
                     .register(new SimpleFeature());
             fail();
         } catch (IllegalStateException e) {
-            assertEquals("The feature 'co.elastic.apm.android.sdk.configuration.FeaturesTest$SimpleFeature' is already registered", e.getMessage());
+            assertEquals("The feature 'co.elastic.apm.android.sdk.internal.configuration.FeaturesTest$SimpleFeature' is already registered", e.getMessage());
         }
     }
 

@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.configuration.instrumentation;
+package co.elastic.apm.android.sdk.instrumentation;
 
-import co.elastic.apm.android.sdk.configuration.instrumentation.supported.AppLaunchTimeConfiguration;
-import co.elastic.apm.android.sdk.configuration.instrumentation.supported.CrashReportingConfiguration;
-import co.elastic.apm.android.sdk.configuration.instrumentation.supported.HttpRequestsConfiguration;
-import co.elastic.apm.android.sdk.configuration.instrumentation.supported.ScreenRenderingConfiguration;
+import co.elastic.apm.android.sdk.instrumentation.supported.AppLaunchTimeConfiguration;
+import co.elastic.apm.android.sdk.instrumentation.supported.CrashReportingConfiguration;
+import co.elastic.apm.android.sdk.instrumentation.supported.HttpRequestsConfiguration;
+import co.elastic.apm.android.sdk.instrumentation.supported.ScreenRenderingConfiguration;
 
 public class InstrumentationConfiguration {
     private final HttpRequestsConfiguration httpRequestsConfiguration;

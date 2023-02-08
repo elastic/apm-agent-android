@@ -16,14 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.configuration.instrumentation.supported;
+package co.elastic.apm.android.sdk.instrumentation.supported;
 
 import co.elastic.apm.android.sdk.internal.configuration.FeatureConfiguration;
 
-public class AppLaunchTimeConfiguration extends FeatureConfiguration {
+public class CrashReportingConfiguration extends FeatureConfiguration {
     private final boolean enabled;
 
-    public AppLaunchTimeConfiguration(boolean enabled) {
+    public CrashReportingConfiguration(boolean enabled) {
         this.enabled = enabled;
     }
 

@@ -20,10 +20,10 @@ package co.elastic.apm.android.sdk.instrumentation.supported;
 
 import co.elastic.apm.android.sdk.internal.instrumentation.SupportedInstrumentation;
 
-public class HttpRequestsConfiguration extends SupportedInstrumentation {
+public final class HttpRequestsInstrumentation extends SupportedInstrumentation {
     private final boolean enabled;
 
-    public HttpRequestsConfiguration(boolean enabled) {
+    public HttpRequestsInstrumentation(boolean enabled) {
         this.enabled = enabled;
     }
 

@@ -18,41 +18,41 @@
  */
 package co.elastic.apm.android.sdk.instrumentation;
 
-import co.elastic.apm.android.sdk.instrumentation.supported.AppLaunchTimeConfiguration;
-import co.elastic.apm.android.sdk.instrumentation.supported.CrashReportingConfiguration;
-import co.elastic.apm.android.sdk.instrumentation.supported.HttpRequestsConfiguration;
-import co.elastic.apm.android.sdk.instrumentation.supported.ScreenRenderingConfiguration;
+import co.elastic.apm.android.sdk.instrumentation.supported.AppLaunchTimeInstrumentation;
+import co.elastic.apm.android.sdk.instrumentation.supported.CrashReportingInstrumentation;
+import co.elastic.apm.android.sdk.instrumentation.supported.HttpRequestsInstrumentation;
+import co.elastic.apm.android.sdk.instrumentation.supported.ScreenRenderingInstrumentation;
 import co.elastic.apm.android.sdk.internal.configuration.FeatureConfiguration;
 
-public class InstrumentationConfiguration extends Instrumentation {
-    private final HttpRequestsConfiguration httpRequestsConfiguration;
-    private final ScreenRenderingConfiguration screenRenderingConfiguration;
-    private final CrashReportingConfiguration crashReportingConfiguration;
-    private final AppLaunchTimeConfiguration appLaunchTimeConfiguration;
+public final class InstrumentationConfiguration extends Instrumentation {
+    private final HttpRequestsInstrumentation httpRequestsConfiguration;
+    private final ScreenRenderingInstrumentation screenRenderingConfiguration;
+    private final CrashReportingInstrumentation crashReportingConfiguration;
+    private final AppLaunchTimeInstrumentation appLaunchTimeConfiguration;
 
-    public InstrumentationConfiguration(HttpRequestsConfiguration httpRequestsConfiguration,
-                                        ScreenRenderingConfiguration screenRenderingConfiguration,
-                                        CrashReportingConfiguration crashReportingConfiguration,
-                                        AppLaunchTimeConfiguration appLaunchTimeConfiguration) {
+    public InstrumentationConfiguration(HttpRequestsInstrumentation httpRequestsConfiguration,
+                                        ScreenRenderingInstrumentation screenRenderingConfiguration,
+                                        CrashReportingInstrumentation crashReportingConfiguration,
+                                        AppLaunchTimeInstrumentation appLaunchTimeConfiguration) {
         this.httpRequestsConfiguration = httpRequestsConfiguration;
         this.screenRenderingConfiguration = screenRenderingConfiguration;
         this.crashReportingConfiguration = crashReportingConfiguration;
         this.appLaunchTimeConfiguration = appLaunchTimeConfiguration;
     }
 
-    public HttpRequestsConfiguration getHttpRequestsConfiguration() {
+    public HttpRequestsInstrumentation getHttpRequestsConfiguration() {
         return httpRequestsConfiguration;
     }
 
-    public ScreenRenderingConfiguration getScreenRenderingConfiguration() {
+    public ScreenRenderingInstrumentation getScreenRenderingConfiguration() {
         return screenRenderingConfiguration;
     }
 
-    public CrashReportingConfiguration getCrashReportingConfiguration() {
+    public CrashReportingInstrumentation getCrashReportingConfiguration() {
         return crashReportingConfiguration;
     }
 
-    public AppLaunchTimeConfiguration getAppLaunchTimeConfiguration() {
+    public AppLaunchTimeInstrumentation getAppLaunchTimeConfiguration() {
         return appLaunchTimeConfiguration;
     }
 
@@ -82,10 +82,10 @@ public class InstrumentationConfiguration extends Instrumentation {
 
         public InstrumentationConfiguration build() {
             return new InstrumentationConfiguration(
-                    new HttpRequestsConfiguration(enableHttpRequests),
-                    new ScreenRenderingConfiguration(enableScreenRendering),
-                    new CrashReportingConfiguration(enableCrashReporting),
-                    new AppLaunchTimeConfiguration(enableAppLaunchTime)
+                    new HttpRequestsInstrumentation(enableHttpRequests),
+                    new ScreenRenderingInstrumentation(enableScreenRendering),
+                    new CrashReportingInstrumentation(enableCrashReporting),
+                    new AppLaunchTimeInstrumentation(enableAppLaunchTime)
             );
         }
     }

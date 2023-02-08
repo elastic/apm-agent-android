@@ -1,9 +1,9 @@
 package co.elastic.apm.android.sdk.instrumentation;
 
-import co.elastic.apm.android.sdk.instrumentation.supported.AppLaunchTimeConfiguration;
-import co.elastic.apm.android.sdk.instrumentation.supported.CrashReportingConfiguration;
-import co.elastic.apm.android.sdk.instrumentation.supported.HttpRequestsConfiguration;
-import co.elastic.apm.android.sdk.instrumentation.supported.ScreenRenderingConfiguration;
+import co.elastic.apm.android.sdk.instrumentation.supported.AppLaunchTimeInstrumentation;
+import co.elastic.apm.android.sdk.instrumentation.supported.CrashReportingInstrumentation;
+import co.elastic.apm.android.sdk.instrumentation.supported.HttpRequestsInstrumentation;
+import co.elastic.apm.android.sdk.instrumentation.supported.ScreenRenderingInstrumentation;
 import co.elastic.apm.android.sdk.internal.configuration.FeatureConfiguration;
 
 public abstract class Instrumentation extends FeatureConfiguration {
@@ -14,13 +14,13 @@ public abstract class Instrumentation extends FeatureConfiguration {
     protected Class<? extends FeatureConfiguration> getParentConfiguration() {
         switch (getInstrumentationType()) {
             case HTTP_REQUESTS:
-                return HttpRequestsConfiguration.class;
+                return HttpRequestsInstrumentation.class;
             case SCREEN_RENDERING:
-                return ScreenRenderingConfiguration.class;
+                return ScreenRenderingInstrumentation.class;
             case CRASH_REPORTING:
-                return CrashReportingConfiguration.class;
+                return CrashReportingInstrumentation.class;
             case APP_LAUNCH_TIME:
-                return AppLaunchTimeConfiguration.class;
+                return AppLaunchTimeInstrumentation.class;
         }
 
         return InstrumentationConfiguration.class;

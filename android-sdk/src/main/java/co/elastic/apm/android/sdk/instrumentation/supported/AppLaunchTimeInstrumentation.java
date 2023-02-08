@@ -20,10 +20,10 @@ package co.elastic.apm.android.sdk.instrumentation.supported;
 
 import co.elastic.apm.android.sdk.internal.instrumentation.SupportedInstrumentation;
 
-public class CrashReportingConfiguration extends SupportedInstrumentation {
+public final class AppLaunchTimeInstrumentation extends SupportedInstrumentation {
     private final boolean enabled;
 
-    public CrashReportingConfiguration(boolean enabled) {
+    public AppLaunchTimeInstrumentation(boolean enabled) {
         this.enabled = enabled;
     }
 

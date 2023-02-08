@@ -20,10 +20,10 @@ package co.elastic.apm.android.sdk.instrumentation.supported;
 
 import co.elastic.apm.android.sdk.internal.instrumentation.SupportedInstrumentation;
 
-public class ScreenRenderingConfiguration extends SupportedInstrumentation {
+public final class CrashReportingInstrumentation extends SupportedInstrumentation {
     private final boolean enabled;
 
-    public ScreenRenderingConfiguration(boolean enabled) {
+    public CrashReportingInstrumentation(boolean enabled) {
         this.enabled = enabled;
     }
 

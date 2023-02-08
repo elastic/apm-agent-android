@@ -66,23 +66,23 @@ public final class InstrumentationConfiguration extends GroupInstrumentation {
             this.enabled = enabled;
         }
 
-        public Builder enableHttpRequests(boolean enableHttpRequests) {
-            this.enableHttpRequests = enableHttpRequests;
+        public Builder enableHttpRequests(boolean enable) {
+            this.enableHttpRequests = enable;
             return this;
         }
 
-        public Builder enableScreenRendering(boolean enableScreenRendering) {
-            this.enableScreenRendering = enableScreenRendering;
+        public Builder enableScreenRendering(boolean enable) {
+            this.enableScreenRendering = enable;
             return this;
         }
 
-        public Builder enableCrashReporting(boolean enableCrashReporting) {
-            this.enableCrashReporting = enableCrashReporting;
+        public Builder enableCrashReporting(boolean enable) {
+            this.enableCrashReporting = enable;
             return this;
         }
 
-        public Builder enableAppLaunchTimeMetric(boolean enableAppLaunchTimeMetric) {
-            this.enableAppLaunchTimeMetric = enableAppLaunchTimeMetric;
+        public Builder enableAppLaunchTimeMetric(boolean enable) {
+            this.enableAppLaunchTimeMetric = enable;
             return this;
         }
 

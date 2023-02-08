@@ -80,6 +80,26 @@ public final class InstrumentationConfiguration extends Instrumentation {
         private Builder() {
         }
 
+        public Builder enableHttpRequests(boolean enableHttpRequests) {
+            this.enableHttpRequests = enableHttpRequests;
+            return this;
+        }
+
+        public Builder enableScreenRendering(boolean enableScreenRendering) {
+            this.enableScreenRendering = enableScreenRendering;
+            return this;
+        }
+
+        public Builder enableCrashReporting(boolean enableCrashReporting) {
+            this.enableCrashReporting = enableCrashReporting;
+            return this;
+        }
+
+        public Builder enableAppLaunchTime(boolean enableAppLaunchTime) {
+            this.enableAppLaunchTime = enableAppLaunchTime;
+            return this;
+        }
+
         public InstrumentationConfiguration build() {
             return new InstrumentationConfiguration(
                     new HttpRequestsInstrumentation(enableHttpRequests),

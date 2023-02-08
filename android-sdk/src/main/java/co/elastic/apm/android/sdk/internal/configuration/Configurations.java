@@ -37,8 +37,24 @@ public final class Configurations {
         this.configurations = configurations;
     }
 
+    public static boolean isEnabled(Class<? extends Configuration> configurationClass) {
+        Configurations configurations = get();
+        if (configurations == null) {
+            return false;
+        }
+        if (!configurations.hasConfiguration(configurationClass)) {
+            return false;
+        }
+
+        return configurations.getConfiguration(configurationClass).isEnabled();
+    }
+
     public static <T extends Configuration> T get(Class<? extends Configuration> configurationClass) {
         return get().getConfiguration(configurationClass);
+    }
+
+    public boolean hasConfiguration(Class<? extends Configuration> configurationClass) {
+        return configurations.containsKey(configurationClass);
     }
 
     @SuppressWarnings("unchecked")
@@ -47,6 +63,10 @@ public final class Configurations {
             throw new IllegalArgumentException("No configuration found for '" + configurationClass.getName() + "'");
         }
         return (T) configurations.get(configurationClass);
+    }
+
+    static void resetForTest() {
+        INSTANCE = null;
     }
 
     public static class Builder {

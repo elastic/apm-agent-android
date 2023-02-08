@@ -19,12 +19,19 @@
 package co.elastic.apm.android.sdk.internal.configuration;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.junit.After;
 import org.junit.Test;
 
 public class ConfigurationsTest {
+
+    @After
+    public void tearDown() {
+        Configurations.resetForTest();
+    }
 
     @Test
     public void whenConfigurationIsntAvailable_fail() {
@@ -49,7 +56,17 @@ public class ConfigurationsTest {
     public void checkIfConfigurationIsEnabled_statically() {
         Configurations.builder().register(new SimpleConfiguration()).buildAndRegisterGlobal();
 
-        assertTrue(Configurations.get(SimpleConfiguration.class).isEnabled());
+        assertTrue(Configurations.isEnabled(SimpleConfiguration.class));
+    }
+
+    @Test
+    public void whenNotInitialized_returnNotEnabled_statically() {
+        assertFalse(Configurations.isEnabled(SimpleConfiguration.class));
+    }
+
+    @Test
+    public void whenConfigNotFound_returnNotEnabled_statically() {
+        assertFalse(Configurations.isEnabled(SimpleConfiguration.class));
     }
 
     @Test

@@ -81,8 +81,8 @@ public final class InstrumentationConfiguration extends GroupInstrumentation {
             return this;
         }
 
-        public Builder enableAppLaunchTimeMetric(boolean enableAppLaunchTime) {
-            this.enableAppLaunchTimeMetric = enableAppLaunchTime;
+        public Builder enableAppLaunchTimeMetric(boolean enableAppLaunchTimeMetric) {
+            this.enableAppLaunchTimeMetric = enableAppLaunchTimeMetric;
             return this;
         }
 

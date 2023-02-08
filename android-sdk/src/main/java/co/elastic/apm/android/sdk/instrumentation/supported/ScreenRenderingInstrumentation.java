@@ -18,9 +18,9 @@
  */
 package co.elastic.apm.android.sdk.instrumentation.supported;
 
-import co.elastic.apm.android.sdk.internal.instrumentation.GroupInstrumentation;
+import co.elastic.apm.android.sdk.internal.instrumentation.SupportedInstrumentation;
 
-public final class ScreenRenderingInstrumentation extends GroupInstrumentation {
+public final class ScreenRenderingInstrumentation extends SupportedInstrumentation {
 
     public ScreenRenderingInstrumentation(boolean enabled) {
         super(enabled);

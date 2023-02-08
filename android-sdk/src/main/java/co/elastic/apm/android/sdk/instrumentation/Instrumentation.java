@@ -21,7 +21,6 @@ package co.elastic.apm.android.sdk.instrumentation;
 import androidx.annotation.NonNull;
 
 import co.elastic.apm.android.sdk.instrumentation.supported.HttpRequestsInstrumentation;
-import co.elastic.apm.android.sdk.instrumentation.supported.ScreenRenderingInstrumentation;
 import co.elastic.apm.android.sdk.internal.configuration.Configuration;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.instrumentation.GroupInstrumentation;
@@ -51,8 +50,6 @@ public abstract class Instrumentation extends Configuration {
     }
 
     public enum GroupType {
-        HTTP_REQUESTS(HttpRequestsInstrumentation.class),
-        SCREEN_RENDERING(ScreenRenderingInstrumentation.class),
         NONE(InstrumentationConfiguration.class);
 
         private final Class<? extends GroupInstrumentation> type;

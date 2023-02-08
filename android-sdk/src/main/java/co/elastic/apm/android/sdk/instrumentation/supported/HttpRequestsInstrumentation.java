@@ -18,9 +18,9 @@
  */
 package co.elastic.apm.android.sdk.instrumentation.supported;
 
-import co.elastic.apm.android.sdk.internal.instrumentation.GroupInstrumentation;
+import co.elastic.apm.android.sdk.internal.instrumentation.SupportedInstrumentation;
 
-public final class HttpRequestsInstrumentation extends GroupInstrumentation {
+public final class HttpRequestsInstrumentation extends SupportedInstrumentation {
 
     public HttpRequestsInstrumentation(boolean enabled) {
         super(enabled);

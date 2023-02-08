@@ -27,12 +27,12 @@ import co.elastic.apm.android.sdk.internal.instrumentation.GroupInstrumentation;
 
 public abstract class Instrumentation extends Configuration {
 
-    public static <T extends Instrumentation> T getConfiguration(Class<T> instrumentationClass) {
+    public static <T extends Instrumentation> T get(Class<T> instrumentationClass) {
         return Configurations.get(instrumentationClass);
     }
 
     public static HttpRequestsInstrumentation getHttpRequestsConfiguration() {
-        return getConfiguration(HttpRequestsInstrumentation.class);
+        return get(HttpRequestsInstrumentation.class);
     }
 
     @NonNull

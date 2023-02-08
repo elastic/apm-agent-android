@@ -21,29 +21,29 @@ package co.elastic.apm.android.sdk.internal.configuration;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Features {
-    private static Features INSTANCE;
-    private final Map<Class<? extends FeatureConfiguration>, FeatureConfiguration> configurations;
+public final class Configurations {
+    private static Configurations INSTANCE;
+    private final Map<Class<? extends Configuration>, Configuration> configurations;
 
-    public static Features get() {
+    public static Configurations get() {
         return INSTANCE;
     }
 
-    public static Features.Builder builder() {
-        return new Features.Builder();
+    public static Configurations.Builder builder() {
+        return new Configurations.Builder();
     }
 
-    private Features(Map<Class<? extends FeatureConfiguration>, FeatureConfiguration> configurations) {
+    private Configurations(Map<Class<? extends Configuration>, Configuration> configurations) {
         this.configurations = configurations;
         INSTANCE = this;
     }
 
-    public static boolean isEnabled(Class<? extends FeatureConfiguration> configurationClass) {
+    public static boolean isEnabled(Class<? extends Configuration> configurationClass) {
         return get().getConfiguration(configurationClass).isEnabled();
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends FeatureConfiguration> T getConfiguration(Class<? extends FeatureConfiguration> configurationClass) {
+    public <T extends Configuration> T getConfiguration(Class<? extends Configuration> configurationClass) {
         if (!configurations.containsKey(configurationClass)) {
             throw new IllegalArgumentException("No configuration found for '" + configurationClass.getName() + "'");
         }
@@ -51,22 +51,22 @@ public class Features {
     }
 
     public static class Builder {
-        private final Map<Class<? extends FeatureConfiguration>, FeatureConfiguration> features = new HashMap<>();
+        private final Map<Class<? extends Configuration>, Configuration> features = new HashMap<>();
 
         private Builder() {
         }
 
-        public Builder register(FeatureConfiguration featureConfiguration) {
-            Class<? extends FeatureConfiguration> configurationClass = featureConfiguration.getClass();
+        public Builder register(Configuration featureConfiguration) {
+            Class<? extends Configuration> configurationClass = featureConfiguration.getClass();
             if (features.containsKey(configurationClass)) {
-                throw new IllegalStateException("The feature '" + configurationClass.getName() + "' is already registered");
+                throw new IllegalStateException("The configuration '" + configurationClass.getName() + "' is already registered");
             }
             features.put(configurationClass, featureConfiguration);
             return this;
         }
 
-        public Features build() {
-            return new Features(features);
+        public Configurations build() {
+            return new Configurations(features);
         }
     }
 }

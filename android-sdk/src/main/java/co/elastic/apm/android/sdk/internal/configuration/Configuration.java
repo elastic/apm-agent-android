@@ -18,17 +18,17 @@
  */
 package co.elastic.apm.android.sdk.internal.configuration;
 
-public abstract class FeatureConfiguration {
+public abstract class Configuration {
 
     public final boolean isEnabled() {
-        Class<? extends FeatureConfiguration> parentConfiguration = getParentConfigurationType();
-        if (parentConfiguration != null && !Features.isEnabled(parentConfiguration)) {
+        Class<? extends Configuration> parentConfiguration = getParentConfigurationType();
+        if (parentConfiguration != null && !Configurations.isEnabled(parentConfiguration)) {
             return false;
         }
         return enabled();
     }
 
-    protected Class<? extends FeatureConfiguration> getParentConfigurationType() {
+    protected Class<? extends Configuration> getParentConfigurationType() {
         return null;
     }
 

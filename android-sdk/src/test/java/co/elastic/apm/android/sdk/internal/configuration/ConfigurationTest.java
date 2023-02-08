@@ -23,7 +23,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-public class FeatureConfigurationTest {
+public class ConfigurationTest {
 
     @Test
     public void whenParentConfigurationIsNotAvailable_provideLocalEnableInfo() {
@@ -32,29 +32,29 @@ public class FeatureConfigurationTest {
 
     @Test
     public void whenParentConfigurationIsAvailable_andEnabled_provideLocalEnableInfo() {
-        Features.builder().register(new ParentConfiguration(true)).build();
+        Configurations.builder().register(new ParentConfiguration(true)).build();
 
         assertFalse(new SimpleConfiguration(ParentConfiguration.class, false).isEnabled());
     }
 
     @Test
     public void whenParentConfigurationIsAvailable_andNotEnabled_provideParentEnableInfo() {
-        Features.builder().register(new ParentConfiguration(false)).build();
+        Configurations.builder().register(new ParentConfiguration(false)).build();
 
         assertFalse(new SimpleConfiguration(ParentConfiguration.class, true).isEnabled());
     }
 
-    private static class SimpleConfiguration extends FeatureConfiguration {
-        private final Class<? extends FeatureConfiguration> parentConfigClass;
+    private static class SimpleConfiguration extends Configuration {
+        private final Class<? extends Configuration> parentConfigClass;
         private final boolean enabled;
 
-        private SimpleConfiguration(Class<? extends FeatureConfiguration> parentConfigClass, boolean enabled) {
+        private SimpleConfiguration(Class<? extends Configuration> parentConfigClass, boolean enabled) {
             this.parentConfigClass = parentConfigClass;
             this.enabled = enabled;
         }
 
         @Override
-        protected Class<? extends FeatureConfiguration> getParentConfigurationType() {
+        protected Class<? extends Configuration> getParentConfigurationType() {
             return parentConfigClass;
         }
 
@@ -64,7 +64,7 @@ public class FeatureConfigurationTest {
         }
     }
 
-    private static class ParentConfiguration extends FeatureConfiguration {
+    private static class ParentConfiguration extends Configuration {
         private final boolean enabled;
 
         private ParentConfiguration(boolean enabled) {

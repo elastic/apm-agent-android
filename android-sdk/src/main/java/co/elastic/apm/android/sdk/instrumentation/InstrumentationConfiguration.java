@@ -22,7 +22,7 @@ import co.elastic.apm.android.sdk.instrumentation.supported.AppLaunchTimeInstrum
 import co.elastic.apm.android.sdk.instrumentation.supported.CrashReportingInstrumentation;
 import co.elastic.apm.android.sdk.instrumentation.supported.HttpRequestsInstrumentation;
 import co.elastic.apm.android.sdk.instrumentation.supported.ScreenRenderingInstrumentation;
-import co.elastic.apm.android.sdk.internal.configuration.FeatureConfiguration;
+import co.elastic.apm.android.sdk.internal.configuration.Configuration;
 
 public final class InstrumentationConfiguration extends Instrumentation {
     private final HttpRequestsInstrumentation httpRequestsConfiguration;
@@ -57,7 +57,7 @@ public final class InstrumentationConfiguration extends Instrumentation {
     }
 
     @Override
-    protected Class<? extends FeatureConfiguration> getParentConfigurationType() {
+    protected Class<? extends Configuration> getParentConfigurationType() {
         return null;
     }
 

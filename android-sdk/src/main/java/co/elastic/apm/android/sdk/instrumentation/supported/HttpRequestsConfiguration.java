@@ -18,9 +18,9 @@
  */
 package co.elastic.apm.android.sdk.instrumentation.supported;
 
-import co.elastic.apm.android.sdk.internal.configuration.FeatureConfiguration;
+import co.elastic.apm.android.sdk.internal.instrumentation.SupportedInstrumentation;
 
-public class HttpRequestsConfiguration extends FeatureConfiguration {
+public class HttpRequestsConfiguration extends SupportedInstrumentation {
     private final boolean enabled;
 
     public HttpRequestsConfiguration(boolean enabled) {

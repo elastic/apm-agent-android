@@ -18,9 +18,9 @@
  */
 package co.elastic.apm.android.sdk.instrumentation.supported;
 
-import co.elastic.apm.android.sdk.internal.configuration.FeatureConfiguration;
+import co.elastic.apm.android.sdk.internal.instrumentation.SupportedInstrumentation;
 
-public class ScreenRenderingConfiguration extends FeatureConfiguration {
+public class ScreenRenderingConfiguration extends SupportedInstrumentation {
     private final boolean enabled;
 
     public ScreenRenderingConfiguration(boolean enabled) {

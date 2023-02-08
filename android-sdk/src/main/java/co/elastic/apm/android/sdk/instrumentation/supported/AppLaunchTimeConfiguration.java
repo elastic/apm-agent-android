@@ -18,9 +18,9 @@
  */
 package co.elastic.apm.android.sdk.instrumentation.supported;
 
-import co.elastic.apm.android.sdk.internal.configuration.FeatureConfiguration;
+import co.elastic.apm.android.sdk.internal.instrumentation.SupportedInstrumentation;
 
-public class AppLaunchTimeConfiguration extends FeatureConfiguration {
+public class AppLaunchTimeConfiguration extends SupportedInstrumentation {
     private final boolean enabled;
 
     public AppLaunchTimeConfiguration(boolean enabled) {

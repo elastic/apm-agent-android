@@ -160,14 +160,14 @@ public final class ElasticApmAgent {
     private void onInitializationFinished(Context context) {
         ntpManager.initialize();
         serviceManager.start();
-        initializeGlobalConfiguration();
+        initializeDynamicConfiguration();
         initializeOpentelemetry();
         initializeCrashReports();
         initializeSessionIdProvider();
         initializeLaunchTimeTracker(context);
     }
 
-    private void initializeGlobalConfiguration() {
+    private void initializeDynamicConfiguration() {
         Configurations.Builder builder = Configurations.builder();
         configuration.instrumentationConfiguration.instrumentations.forEach(builder::register);
         builder.buildAndRegisterGlobal();

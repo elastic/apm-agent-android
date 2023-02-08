@@ -23,6 +23,9 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import co.elastic.apm.android.sdk.configuration.FeatureConfiguration;
+import co.elastic.apm.android.sdk.configuration.Features;
+
 public class FeatureConfigurationTest {
 
     @Test

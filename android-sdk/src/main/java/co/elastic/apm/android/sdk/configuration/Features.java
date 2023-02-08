@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.configuration;
+package co.elastic.apm.android.sdk.configuration;
 
 import java.util.HashMap;
 import java.util.Map;

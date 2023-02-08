@@ -18,6 +18,8 @@
  */
 package co.elastic.apm.android.sdk.instrumentation;
 
+import androidx.annotation.NonNull;
+
 import co.elastic.apm.android.sdk.instrumentation.supported.AppLaunchTimeInstrumentation;
 import co.elastic.apm.android.sdk.instrumentation.supported.CrashReportingInstrumentation;
 import co.elastic.apm.android.sdk.instrumentation.supported.HttpRequestsInstrumentation;
@@ -26,11 +28,14 @@ import co.elastic.apm.android.sdk.internal.configuration.Configuration;
 
 public abstract class Instrumentation extends Configuration {
 
-    protected abstract Type getInstrumentationType();
+    @NonNull
+    protected GroupType getGroupType() {
+        return GroupType.NONE;
+    }
 
     @Override
     protected Class<? extends Configuration> getParentConfigurationType() {
-        switch (getInstrumentationType()) {
+        switch (getGroupType()) {
             case HTTP_REQUESTS:
                 return HttpRequestsInstrumentation.class;
             case SCREEN_RENDERING:
@@ -44,7 +49,8 @@ public abstract class Instrumentation extends Configuration {
         return InstrumentationConfiguration.class;
     }
 
-    public enum Type {
+    public enum GroupType {
+        NONE,
         HTTP_REQUESTS,
         SCREEN_RENDERING,
         CRASH_REPORTING,

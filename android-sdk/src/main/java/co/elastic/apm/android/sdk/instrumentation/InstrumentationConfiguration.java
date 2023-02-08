@@ -79,11 +79,6 @@ public final class InstrumentationConfiguration extends Instrumentation {
     }
 
     @Override
-    protected Type getInstrumentationType() {
-        return null;
-    }
-
-    @Override
     protected boolean enabled() {
         return true;
     }

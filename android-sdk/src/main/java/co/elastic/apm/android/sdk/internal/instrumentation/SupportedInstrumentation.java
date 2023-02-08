@@ -28,11 +28,6 @@ public abstract class SupportedInstrumentation extends Instrumentation {
     }
 
     @Override
-    protected Type getInstrumentationType() {
-        return null;
-    }
-
-    @Override
     protected boolean enabled() {
         return enabled;
     }

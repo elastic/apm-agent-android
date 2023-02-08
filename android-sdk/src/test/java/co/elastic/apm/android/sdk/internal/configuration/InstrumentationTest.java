@@ -24,53 +24,53 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-public class FeaturesTest {
+public class InstrumentationTest {
 
     @Test
     public void whenConfigurationIsntAvailable_fail() {
         try {
-            Features features = Features.builder().build();
-            features.getConfiguration(SimpleFeature.class);
+            Instrumentation features = Instrumentation.builder().build();
+            features.getConfiguration(SimpleInstrumentationConfig.class);
             fail();
         } catch (IllegalArgumentException e) {
-            assertEquals("No configuration found for 'co.elastic.apm.android.sdk.internal.configuration.FeaturesTest$SimpleFeature'", e.getMessage());
+            assertEquals("No configuration found for 'co.elastic.apm.android.sdk.internal.configuration.InstrumentationTest$SimpleInstrumentationConfig'", e.getMessage());
         }
     }
 
     @Test
     public void whenConfigurationIsAvailable_provideIt() {
-        Features features = Features.builder().register(new SimpleFeature()).build();
-        FeatureConfiguration configuration = features.getConfiguration(SimpleFeature.class);
+        Instrumentation features = Instrumentation.builder().register(new SimpleInstrumentationConfig()).build();
+        InstrumentationConfig configuration = features.getConfiguration(SimpleInstrumentationConfig.class);
 
         assertTrue(configuration.isEnabled());
     }
 
     @Test
     public void checkIfFeatureIsEnabled_statically() {
-        Features.builder().register(new SimpleFeature()).build();
+        Instrumentation.builder().register(new SimpleInstrumentationConfig()).build();
 
-        assertTrue(Features.isEnabled(SimpleFeature.class));
+        assertTrue(Instrumentation.isEnabled(SimpleInstrumentationConfig.class));
     }
 
     @Test
     public void whenTryingToRegisterSameFeatureTypeMoreThanOnce_fail() {
         try {
-            Features.builder().register(new SimpleFeature())
-                    .register(new SimpleFeature());
+            Instrumentation.builder().register(new SimpleInstrumentationConfig())
+                    .register(new SimpleInstrumentationConfig());
             fail();
         } catch (IllegalStateException e) {
-            assertEquals("The feature 'co.elastic.apm.android.sdk.internal.configuration.FeaturesTest$SimpleFeature' is already registered", e.getMessage());
+            assertEquals("The feature 'co.elastic.apm.android.sdk.internal.configuration.InstrumentationTest$SimpleInstrumentationConfig' is already registered", e.getMessage());
         }
     }
 
     @Test
     public void whenStaticGetterIsCalled_returnAvailableInstance() {
-        Features features = Features.builder().build();
+        Instrumentation features = Instrumentation.builder().build();
 
-        assertEquals(features, Features.get());
+        assertEquals(features, Instrumentation.get());
     }
 
-    private static class SimpleFeature extends FeatureConfiguration {
+    private static class SimpleInstrumentationConfig extends InstrumentationConfig {
 
         @Override
         protected boolean enabled() {

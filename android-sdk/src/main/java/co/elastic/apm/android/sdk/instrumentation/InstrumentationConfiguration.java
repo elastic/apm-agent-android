@@ -23,8 +23,9 @@ import co.elastic.apm.android.sdk.instrumentation.supported.CrashReportingInstru
 import co.elastic.apm.android.sdk.instrumentation.supported.HttpRequestsInstrumentation;
 import co.elastic.apm.android.sdk.instrumentation.supported.ScreenRenderingInstrumentation;
 import co.elastic.apm.android.sdk.internal.configuration.Configuration;
+import co.elastic.apm.android.sdk.internal.instrumentation.GroupInstrumentation;
 
-public final class InstrumentationConfiguration extends Instrumentation {
+public final class InstrumentationConfiguration extends GroupInstrumentation {
     private final HttpRequestsInstrumentation httpRequestsConfiguration;
     private final ScreenRenderingInstrumentation screenRenderingConfiguration;
     private final CrashReportingInstrumentation crashReportingConfiguration;
@@ -47,10 +48,13 @@ public final class InstrumentationConfiguration extends Instrumentation {
         return builder().build();
     }
 
-    public InstrumentationConfiguration(HttpRequestsInstrumentation httpRequestsConfiguration,
-                                        ScreenRenderingInstrumentation screenRenderingConfiguration,
-                                        CrashReportingInstrumentation crashReportingConfiguration,
-                                        AppLaunchTimeInstrumentation appLaunchTimeConfiguration) {
+    public InstrumentationConfiguration(
+            boolean enabled,
+            HttpRequestsInstrumentation httpRequestsConfiguration,
+            ScreenRenderingInstrumentation screenRenderingConfiguration,
+            CrashReportingInstrumentation crashReportingConfiguration,
+            AppLaunchTimeInstrumentation appLaunchTimeConfiguration) {
+        super(enabled);
         this.httpRequestsConfiguration = httpRequestsConfiguration;
         this.screenRenderingConfiguration = screenRenderingConfiguration;
         this.crashReportingConfiguration = crashReportingConfiguration;
@@ -114,6 +118,7 @@ public final class InstrumentationConfiguration extends Instrumentation {
 
         public InstrumentationConfiguration build() {
             return new InstrumentationConfiguration(
+                    true,
                     new HttpRequestsInstrumentation(enableHttpRequests),
                     new ScreenRenderingInstrumentation(enableScreenRendering),
                     new CrashReportingInstrumentation(enableCrashReporting),

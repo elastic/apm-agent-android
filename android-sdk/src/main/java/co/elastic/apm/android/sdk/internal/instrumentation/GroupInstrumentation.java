@@ -16,13 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.instrumentation.supported;
+package co.elastic.apm.android.sdk.internal.instrumentation;
 
-import co.elastic.apm.android.sdk.internal.instrumentation.GroupInstrumentation;
+public abstract class GroupInstrumentation extends SupportedInstrumentation {
 
-public final class ScreenRenderingInstrumentation extends GroupInstrumentation {
-
-    public ScreenRenderingInstrumentation(boolean enabled) {
+    protected GroupInstrumentation(boolean enabled) {
         super(enabled);
     }
 }

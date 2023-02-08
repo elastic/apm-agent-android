@@ -32,7 +32,7 @@ public abstract class Instrumentation extends Configuration {
     }
 
     public static <T extends Instrumentation> T getConfiguration(Class<T> instrumentationClass) {
-        return Configurations.get().getConfiguration(instrumentationClass);
+        return Configurations.get(instrumentationClass);
     }
 
     public static HttpRequestsInstrumentation getHttpRequestsConfiguration() {

@@ -25,7 +25,7 @@ public final class Configurations {
     private static Configurations INSTANCE;
     private final Map<Class<? extends Configuration>, Configuration> configurations;
 
-    public static Configurations get() {
+    private static Configurations get() {
         return INSTANCE;
     }
 
@@ -39,6 +39,10 @@ public final class Configurations {
 
     public static boolean isEnabled(Class<? extends Configuration> configurationClass) {
         return get().getConfiguration(configurationClass).isEnabled();
+    }
+
+    public static <T extends Configuration> T get(Class<? extends Configuration> configurationClass) {
+        return get().getConfiguration(configurationClass);
     }
 
     @SuppressWarnings("unchecked")

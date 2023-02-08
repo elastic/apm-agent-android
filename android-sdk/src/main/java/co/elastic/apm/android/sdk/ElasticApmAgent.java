@@ -38,6 +38,7 @@ import co.elastic.apm.android.sdk.attributes.resources.SdkIdVisitor;
 import co.elastic.apm.android.sdk.attributes.resources.ServiceIdVisitor;
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.internal.api.Initializable;
+import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.exceptions.ElasticExceptionHandler;
 import co.elastic.apm.android.sdk.internal.features.launchtime.LaunchTimeActivityCallback;
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
@@ -159,10 +160,17 @@ public final class ElasticApmAgent {
     private void onInitializationFinished(Context context) {
         ntpManager.initialize();
         serviceManager.start();
+        initializeGlobalConfiguration();
         initializeOpentelemetry();
         initializeCrashReports();
         initializeSessionIdProvider();
         initializeLaunchTimeTracker(context);
+    }
+
+    private void initializeGlobalConfiguration() {
+        Configurations.Builder builder = Configurations.builder();
+        configuration.instrumentationConfiguration.instrumentations.forEach(builder::register);
+        builder.buildAndRegisterGlobal();
     }
 
     private void initializeSessionIdProvider() {

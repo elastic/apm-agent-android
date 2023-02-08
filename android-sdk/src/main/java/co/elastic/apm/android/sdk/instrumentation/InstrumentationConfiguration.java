@@ -29,7 +29,7 @@ import co.elastic.apm.android.sdk.internal.configuration.Configuration;
 import co.elastic.apm.android.sdk.internal.instrumentation.GroupInstrumentation;
 
 public final class InstrumentationConfiguration extends GroupInstrumentation {
-    private final List<Instrumentation> instrumentations;
+    public final List<Instrumentation> instrumentations;
 
     public static InstrumentationConfiguration.Builder builder() {
         return new Builder(true);

@@ -29,7 +29,7 @@ public class ConfigurationsTest {
     @Test
     public void whenConfigurationIsntAvailable_fail() {
         try {
-            Configurations configurations = Configurations.builder().build();
+            Configurations configurations = Configurations.builder().buildAndRegisterGlobal();
             configurations.getConfiguration(SimpleConfiguration.class);
             fail();
         } catch (IllegalArgumentException e) {
@@ -39,7 +39,7 @@ public class ConfigurationsTest {
 
     @Test
     public void whenConfigurationIsAvailable_provideIt() {
-        Configurations configurations = Configurations.builder().register(new SimpleConfiguration()).build();
+        Configurations configurations = Configurations.builder().register(new SimpleConfiguration()).buildAndRegisterGlobal();
         Configuration configuration = configurations.getConfiguration(SimpleConfiguration.class);
 
         assertTrue(configuration.isEnabled());
@@ -47,7 +47,7 @@ public class ConfigurationsTest {
 
     @Test
     public void checkIfConfigurationIsEnabled_statically() {
-        Configurations.builder().register(new SimpleConfiguration()).build();
+        Configurations.builder().register(new SimpleConfiguration()).buildAndRegisterGlobal();
 
         assertTrue(Configurations.isEnabled(SimpleConfiguration.class));
     }
@@ -65,7 +65,7 @@ public class ConfigurationsTest {
 
     @Test
     public void whenStaticGetterIsCalled_returnAvailableInstance() {
-        Configurations configurations = Configurations.builder().build();
+        Configurations configurations = Configurations.builder().buildAndRegisterGlobal();
 
         assertEquals(configurations, Configurations.get());
     }

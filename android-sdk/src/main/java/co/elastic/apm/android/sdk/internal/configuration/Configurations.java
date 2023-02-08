@@ -35,7 +35,6 @@ public final class Configurations {
 
     private Configurations(Map<Class<? extends Configuration>, Configuration> configurations) {
         this.configurations = configurations;
-        INSTANCE = this;
     }
 
     public static boolean isEnabled(Class<? extends Configuration> configurationClass) {
@@ -51,22 +50,23 @@ public final class Configurations {
     }
 
     public static class Builder {
-        private final Map<Class<? extends Configuration>, Configuration> features = new HashMap<>();
+        private final Map<Class<? extends Configuration>, Configuration> configurations = new HashMap<>();
 
         private Builder() {
         }
 
-        public Builder register(Configuration featureConfiguration) {
-            Class<? extends Configuration> configurationClass = featureConfiguration.getClass();
-            if (features.containsKey(configurationClass)) {
+        public Builder register(Configuration configuration) {
+            Class<? extends Configuration> configurationClass = configuration.getClass();
+            if (configurations.containsKey(configurationClass)) {
                 throw new IllegalStateException("The configuration '" + configurationClass.getName() + "' is already registered");
             }
-            features.put(configurationClass, featureConfiguration);
+            configurations.put(configurationClass, configuration);
             return this;
         }
 
-        public Configurations build() {
-            return new Configurations(features);
+        public Configurations buildAndRegisterGlobal() {
+            INSTANCE = new Configurations(configurations);
+            return INSTANCE;
         }
     }
 }

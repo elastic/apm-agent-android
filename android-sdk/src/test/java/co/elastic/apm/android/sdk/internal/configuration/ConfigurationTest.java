@@ -32,14 +32,14 @@ public class ConfigurationTest {
 
     @Test
     public void whenParentConfigurationIsAvailable_andEnabled_provideLocalEnableInfo() {
-        Configurations.builder().register(new ParentConfiguration(true)).build();
+        Configurations.builder().register(new ParentConfiguration(true)).buildAndRegisterGlobal();
 
         assertFalse(new SimpleConfiguration(ParentConfiguration.class, false).isEnabled());
     }
 
     @Test
     public void whenParentConfigurationIsAvailable_andNotEnabled_provideParentEnableInfo() {
-        Configurations.builder().register(new ParentConfiguration(false)).build();
+        Configurations.builder().register(new ParentConfiguration(false)).buildAndRegisterGlobal();
 
         assertFalse(new SimpleConfiguration(ParentConfiguration.class, true).isEnabled());
     }

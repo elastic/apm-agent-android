@@ -25,7 +25,7 @@ public final class Configurations {
     private static Configurations INSTANCE;
     private final Map<Class<? extends Configuration>, Configuration> configurations;
 
-    private static Configurations get() {
+    static Configurations get() {
         return INSTANCE;
     }
 

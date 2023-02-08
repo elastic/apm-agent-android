@@ -23,7 +23,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-public class InstrumentationConfigTest {
+public class FeatureConfigurationTest {
 
     @Test
     public void whenParentConfigurationIsNotAvailable_provideLocalEnableInfo() {
@@ -32,29 +32,29 @@ public class InstrumentationConfigTest {
 
     @Test
     public void whenParentConfigurationIsAvailable_andEnabled_provideLocalEnableInfo() {
-        Instrumentation.builder().register(new ParentConfiguration(true)).build();
+        Features.builder().register(new ParentConfiguration(true)).build();
 
         assertFalse(new SimpleConfiguration(ParentConfiguration.class, false).isEnabled());
     }
 
     @Test
     public void whenParentConfigurationIsAvailable_andNotEnabled_provideParentEnableInfo() {
-        Instrumentation.builder().register(new ParentConfiguration(false)).build();
+        Features.builder().register(new ParentConfiguration(false)).build();
 
         assertFalse(new SimpleConfiguration(ParentConfiguration.class, true).isEnabled());
     }
 
-    private static class SimpleConfiguration extends InstrumentationConfig {
-        private final Class<? extends InstrumentationConfig> parentConfigClass;
+    private static class SimpleConfiguration extends FeatureConfiguration {
+        private final Class<? extends FeatureConfiguration> parentConfigClass;
         private final boolean enabled;
 
-        private SimpleConfiguration(Class<? extends InstrumentationConfig> parentConfigClass, boolean enabled) {
+        private SimpleConfiguration(Class<? extends FeatureConfiguration> parentConfigClass, boolean enabled) {
             this.parentConfigClass = parentConfigClass;
             this.enabled = enabled;
         }
 
         @Override
-        protected Class<? extends InstrumentationConfig> getParentConfiguration() {
+        protected Class<? extends FeatureConfiguration> getParentConfiguration() {
             return parentConfigClass;
         }
 
@@ -64,7 +64,7 @@ public class InstrumentationConfigTest {
         }
     }
 
-    private static class ParentConfiguration extends InstrumentationConfig {
+    private static class ParentConfiguration extends FeatureConfiguration {
         private final boolean enabled;
 
         private ParentConfiguration(boolean enabled) {

@@ -21,29 +21,29 @@ package co.elastic.apm.android.sdk.internal.configuration;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Instrumentation {
-    private static Instrumentation INSTANCE;
-    private final Map<Class<? extends InstrumentationConfig>, InstrumentationConfig> configurations;
+public class Features {
+    private static Features INSTANCE;
+    private final Map<Class<? extends FeatureConfiguration>, FeatureConfiguration> configurations;
 
-    public static Instrumentation get() {
+    public static Features get() {
         return INSTANCE;
     }
 
-    public static Instrumentation.Builder builder() {
-        return new Instrumentation.Builder();
+    public static Features.Builder builder() {
+        return new Features.Builder();
     }
 
-    private Instrumentation(Map<Class<? extends InstrumentationConfig>, InstrumentationConfig> configurations) {
+    private Features(Map<Class<? extends FeatureConfiguration>, FeatureConfiguration> configurations) {
         this.configurations = configurations;
         INSTANCE = this;
     }
 
-    public static boolean isEnabled(Class<? extends InstrumentationConfig> configurationClass) {
+    public static boolean isEnabled(Class<? extends FeatureConfiguration> configurationClass) {
         return get().getConfiguration(configurationClass).isEnabled();
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends InstrumentationConfig> T getConfiguration(Class<? extends InstrumentationConfig> configurationClass) {
+    public <T extends FeatureConfiguration> T getConfiguration(Class<? extends FeatureConfiguration> configurationClass) {
         if (!configurations.containsKey(configurationClass)) {
             throw new IllegalArgumentException("No configuration found for '" + configurationClass.getName() + "'");
         }
@@ -51,13 +51,13 @@ public class Instrumentation {
     }
 
     public static class Builder {
-        private final Map<Class<? extends InstrumentationConfig>, InstrumentationConfig> features = new HashMap<>();
+        private final Map<Class<? extends FeatureConfiguration>, FeatureConfiguration> features = new HashMap<>();
 
         private Builder() {
         }
 
-        public Builder register(InstrumentationConfig featureConfiguration) {
-            Class<? extends InstrumentationConfig> configurationClass = featureConfiguration.getClass();
+        public Builder register(FeatureConfiguration featureConfiguration) {
+            Class<? extends FeatureConfiguration> configurationClass = featureConfiguration.getClass();
             if (features.containsKey(configurationClass)) {
                 throw new IllegalStateException("The feature '" + configurationClass.getName() + "' is already registered");
             }
@@ -65,8 +65,8 @@ public class Instrumentation {
             return this;
         }
 
-        public Instrumentation build() {
-            return new Instrumentation(features);
+        public Features build() {
+            return new Features(features);
         }
     }
 }

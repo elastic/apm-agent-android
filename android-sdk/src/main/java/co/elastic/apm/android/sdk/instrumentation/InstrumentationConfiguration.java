@@ -30,6 +30,23 @@ public final class InstrumentationConfiguration extends Instrumentation {
     private final CrashReportingInstrumentation crashReportingConfiguration;
     private final AppLaunchTimeInstrumentation appLaunchTimeConfiguration;
 
+    public static InstrumentationConfiguration.Builder builder() {
+        return new Builder();
+    }
+
+    public static InstrumentationConfiguration allEnabled() {
+        return builder()
+                .enableCrashReporting(true)
+                .enableHttpRequests(true)
+                .enableAppLaunchTime(true)
+                .enableScreenRendering(true)
+                .build();
+    }
+
+    public static InstrumentationConfiguration allDisabled() {
+        return builder().build();
+    }
+
     public InstrumentationConfiguration(HttpRequestsInstrumentation httpRequestsConfiguration,
                                         ScreenRenderingInstrumentation screenRenderingConfiguration,
                                         CrashReportingInstrumentation crashReportingConfiguration,

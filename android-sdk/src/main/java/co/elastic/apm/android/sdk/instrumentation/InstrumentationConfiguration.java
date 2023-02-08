@@ -60,7 +60,7 @@ public final class InstrumentationConfiguration extends GroupInstrumentation {
         private boolean enableHttpRequests;
         private boolean enableScreenRendering;
         private boolean enableCrashReporting;
-        private boolean enableAppLaunchTime;
+        private boolean enableAppLaunchTimeMetric;
 
         private Builder(boolean enabled) {
             this.enabled = enabled;
@@ -81,8 +81,8 @@ public final class InstrumentationConfiguration extends GroupInstrumentation {
             return this;
         }
 
-        public Builder enableAppLaunchTime(boolean enableAppLaunchTime) {
-            this.enableAppLaunchTime = enableAppLaunchTime;
+        public Builder enableAppLaunchTimeMetric(boolean enableAppLaunchTime) {
+            this.enableAppLaunchTimeMetric = enableAppLaunchTime;
             return this;
         }
 
@@ -91,7 +91,7 @@ public final class InstrumentationConfiguration extends GroupInstrumentation {
             instrumentations.add(new HttpRequestsInstrumentation(enableHttpRequests));
             instrumentations.add(new ScreenRenderingInstrumentation(enableScreenRendering));
             instrumentations.add(new CrashReportingInstrumentation(enableCrashReporting));
-            instrumentations.add(new AppLaunchTimeInstrumentation(enableAppLaunchTime));
+            instrumentations.add(new AppLaunchTimeInstrumentation(enableAppLaunchTimeMetric));
             return new InstrumentationConfiguration(enabled, instrumentations);
         }
     }

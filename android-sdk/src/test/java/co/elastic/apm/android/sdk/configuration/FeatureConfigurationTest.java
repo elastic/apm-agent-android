@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.configuration;
+package co.elastic.apm.android.sdk.configuration;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

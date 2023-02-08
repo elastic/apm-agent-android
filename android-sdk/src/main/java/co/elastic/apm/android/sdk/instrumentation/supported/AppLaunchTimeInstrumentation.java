@@ -21,14 +21,8 @@ package co.elastic.apm.android.sdk.instrumentation.supported;
 import co.elastic.apm.android.sdk.internal.instrumentation.SupportedInstrumentation;
 
 public final class AppLaunchTimeInstrumentation extends SupportedInstrumentation {
-    private final boolean enabled;
 
     public AppLaunchTimeInstrumentation(boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    @Override
-    protected boolean enabled() {
-        return enabled;
+        super(enabled);
     }
 }

@@ -21,9 +21,19 @@ package co.elastic.apm.android.sdk.internal.instrumentation;
 import co.elastic.apm.android.sdk.instrumentation.Instrumentation;
 
 public abstract class SupportedInstrumentation extends Instrumentation {
+    private final boolean enabled;
+
+    protected SupportedInstrumentation(boolean enabled) {
+        this.enabled = enabled;
+    }
 
     @Override
     protected Type getInstrumentationType() {
         return null;
+    }
+
+    @Override
+    protected boolean enabled() {
+        return enabled;
     }
 }

@@ -21,14 +21,8 @@ package co.elastic.apm.android.sdk.instrumentation.supported;
 import co.elastic.apm.android.sdk.internal.instrumentation.SupportedInstrumentation;
 
 public final class ScreenRenderingInstrumentation extends SupportedInstrumentation {
-    private final boolean enabled;
 
     public ScreenRenderingInstrumentation(boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    @Override
-    protected boolean enabled() {
-        return enabled;
+        super(enabled);
     }
 }

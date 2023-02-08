@@ -21,14 +21,8 @@ package co.elastic.apm.android.sdk.instrumentation.supported;
 import co.elastic.apm.android.sdk.internal.instrumentation.SupportedInstrumentation;
 
 public final class CrashReportingInstrumentation extends SupportedInstrumentation {
-    private final boolean enabled;
 
     public CrashReportingInstrumentation(boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    @Override
-    protected boolean enabled() {
-        return enabled;
+        super(enabled);
     }
 }

@@ -82,11 +82,6 @@ public final class InstrumentationConfiguration extends GroupInstrumentation {
         return null;
     }
 
-    @Override
-    protected boolean enabled() {
-        return true;
-    }
-
     public static class Builder {
         private boolean enableHttpRequests;
         private boolean enableScreenRendering;

@@ -21,9 +21,14 @@ package co.elastic.apm.android.sdk.configuration.instrumentation.supported;
 import co.elastic.apm.android.sdk.configuration.FeatureConfiguration;
 
 public class CrashReportingConfiguration extends FeatureConfiguration {
+    private final boolean enabled;
+
+    public CrashReportingConfiguration(boolean enabled) {
+        this.enabled = enabled;
+    }
 
     @Override
     protected boolean enabled() {
-        return false;
+        return enabled;
     }
 }

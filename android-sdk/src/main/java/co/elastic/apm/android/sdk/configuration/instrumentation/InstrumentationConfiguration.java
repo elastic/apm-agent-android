@@ -23,13 +23,54 @@ import co.elastic.apm.android.sdk.configuration.instrumentation.supported.CrashR
 import co.elastic.apm.android.sdk.configuration.instrumentation.supported.HttpRequestsConfiguration;
 import co.elastic.apm.android.sdk.configuration.instrumentation.supported.ScreenRenderingConfiguration;
 
-public interface InstrumentationConfiguration {
+public class InstrumentationConfiguration {
+    private final HttpRequestsConfiguration httpRequestsConfiguration;
+    private final ScreenRenderingConfiguration screenRenderingConfiguration;
+    private final CrashReportingConfiguration crashReportingConfiguration;
+    private final AppLaunchTimeConfiguration appLaunchTimeConfiguration;
 
-    HttpRequestsConfiguration getHttpRequestsConfiguration();
+    public InstrumentationConfiguration(HttpRequestsConfiguration httpRequestsConfiguration,
+                                        ScreenRenderingConfiguration screenRenderingConfiguration,
+                                        CrashReportingConfiguration crashReportingConfiguration,
+                                        AppLaunchTimeConfiguration appLaunchTimeConfiguration) {
+        this.httpRequestsConfiguration = httpRequestsConfiguration;
+        this.screenRenderingConfiguration = screenRenderingConfiguration;
+        this.crashReportingConfiguration = crashReportingConfiguration;
+        this.appLaunchTimeConfiguration = appLaunchTimeConfiguration;
+    }
 
-    ScreenRenderingConfiguration getScreenRenderingConfiguration();
+    public HttpRequestsConfiguration getHttpRequestsConfiguration() {
+        return httpRequestsConfiguration;
+    }
 
-    CrashReportingConfiguration getCrashReportingConfiguration();
+    public ScreenRenderingConfiguration getScreenRenderingConfiguration() {
+        return screenRenderingConfiguration;
+    }
 
-    AppLaunchTimeConfiguration getAppLaunchTimeConfiguration();
+    public CrashReportingConfiguration getCrashReportingConfiguration() {
+        return crashReportingConfiguration;
+    }
+
+    public AppLaunchTimeConfiguration getAppLaunchTimeConfiguration() {
+        return appLaunchTimeConfiguration;
+    }
+
+    public static class Builder {
+        private boolean enableHttpRequests;
+        private boolean enableScreenRendering;
+        private boolean enableCrashReporting;
+        private boolean enableAppLaunchTime;
+
+        private Builder() {
+        }
+
+        public InstrumentationConfiguration build() {
+            return new InstrumentationConfiguration(
+                    new HttpRequestsConfiguration(enableHttpRequests),
+                    new ScreenRenderingConfiguration(enableScreenRendering),
+                    new CrashReportingConfiguration(enableCrashReporting),
+                    new AppLaunchTimeConfiguration(enableAppLaunchTime)
+            );
+        }
+    }
 }

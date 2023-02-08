@@ -23,7 +23,7 @@ public abstract class Instrumentation extends FeatureConfiguration {
                 return AppLaunchTimeConfiguration.class;
         }
 
-        throw new UnsupportedOperationException();
+        return InstrumentationConfiguration.class;
     }
 
     public enum Type {

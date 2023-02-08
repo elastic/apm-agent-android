@@ -22,8 +22,9 @@ import co.elastic.apm.android.sdk.instrumentation.supported.AppLaunchTimeConfigu
 import co.elastic.apm.android.sdk.instrumentation.supported.CrashReportingConfiguration;
 import co.elastic.apm.android.sdk.instrumentation.supported.HttpRequestsConfiguration;
 import co.elastic.apm.android.sdk.instrumentation.supported.ScreenRenderingConfiguration;
+import co.elastic.apm.android.sdk.internal.configuration.FeatureConfiguration;
 
-public class InstrumentationConfiguration {
+public class InstrumentationConfiguration extends Instrumentation {
     private final HttpRequestsConfiguration httpRequestsConfiguration;
     private final ScreenRenderingConfiguration screenRenderingConfiguration;
     private final CrashReportingConfiguration crashReportingConfiguration;
@@ -53,6 +54,21 @@ public class InstrumentationConfiguration {
 
     public AppLaunchTimeConfiguration getAppLaunchTimeConfiguration() {
         return appLaunchTimeConfiguration;
+    }
+
+    @Override
+    protected Class<? extends FeatureConfiguration> getParentConfiguration() {
+        return null;
+    }
+
+    @Override
+    protected Type getInstrumentationType() {
+        return null;
+    }
+
+    @Override
+    protected boolean enabled() {
+        return true;
     }
 
     public static class Builder {

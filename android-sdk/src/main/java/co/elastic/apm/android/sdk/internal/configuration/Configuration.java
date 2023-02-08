@@ -22,7 +22,7 @@ public abstract class Configuration {
 
     public final boolean isEnabled() {
         Class<? extends Configuration> parentConfiguration = getParentConfigurationType();
-        if (parentConfiguration != null && !Configurations.isEnabled(parentConfiguration)) {
+        if (parentConfiguration != null && !Configurations.get(parentConfiguration).isEnabled()) {
             return false;
         }
         return enabled();

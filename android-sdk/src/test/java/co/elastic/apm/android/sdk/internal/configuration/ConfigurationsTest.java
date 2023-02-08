@@ -49,7 +49,7 @@ public class ConfigurationsTest {
     public void checkIfConfigurationIsEnabled_statically() {
         Configurations.builder().register(new SimpleConfiguration()).buildAndRegisterGlobal();
 
-        assertTrue(Configurations.isEnabled(SimpleConfiguration.class));
+        assertTrue(Configurations.get(SimpleConfiguration.class).isEnabled());
     }
 
     @Test

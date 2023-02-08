@@ -27,10 +27,6 @@ import co.elastic.apm.android.sdk.internal.instrumentation.GroupInstrumentation;
 
 public abstract class Instrumentation extends Configuration {
 
-    public static boolean isEnabled(Class<? extends Instrumentation> instrumentationClass) {
-        return Configurations.isEnabled(instrumentationClass);
-    }
-
     public static <T extends Instrumentation> T getConfiguration(Class<T> instrumentationClass) {
         return Configurations.get(instrumentationClass);
     }

@@ -37,10 +37,6 @@ public final class Configurations {
         this.configurations = configurations;
     }
 
-    public static boolean isEnabled(Class<? extends Configuration> configurationClass) {
-        return get().getConfiguration(configurationClass).isEnabled();
-    }
-
     public static <T extends Configuration> T get(Class<? extends Configuration> configurationClass) {
         return get().getConfiguration(configurationClass);
     }

@@ -18,15 +18,18 @@
  */
 package co.elastic.apm.android.sdk.configuration.instrumentation;
 
-import co.elastic.apm.android.sdk.configuration.FeatureConfiguration;
+import co.elastic.apm.android.sdk.configuration.instrumentation.supported.AppLaunchTimeConfiguration;
+import co.elastic.apm.android.sdk.configuration.instrumentation.supported.CrashReportingConfiguration;
+import co.elastic.apm.android.sdk.configuration.instrumentation.supported.HttpRequestsConfiguration;
+import co.elastic.apm.android.sdk.configuration.instrumentation.supported.ScreenRenderingConfiguration;
 
 public interface InstrumentationConfiguration {
 
-    FeatureConfiguration getHttpRequestsConfiguration();
+    HttpRequestsConfiguration getHttpRequestsConfiguration();
 
-    FeatureConfiguration getScreenRenderingConfiguration();
+    ScreenRenderingConfiguration getScreenRenderingConfiguration();
 
-    FeatureConfiguration getCrashReportingConfiguration();
+    CrashReportingConfiguration getCrashReportingConfiguration();
 
-    FeatureConfiguration getAppLaunchTimeConfiguration();
+    AppLaunchTimeConfiguration getAppLaunchTimeConfiguration();
 }

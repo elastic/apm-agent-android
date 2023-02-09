@@ -51,7 +51,7 @@ public class AutoInstrumentationProcessor extends AbstractProcessor {
         MethodSpec genericMethod = generateGenericMethod(instrumentationClassName, functionClassName);
         methods.add(genericMethod);
         types.forEach(typeElement -> methods.add(generateMethodFor(typeElement, instrumentationClassName, functionClassName)));
-        generateTypeWithMethods(methods, types);
+        generateTypeWithMethods(instrumentationClassName.packageName(), methods, types);
     }
 
     private MethodSpec generateGenericMethod(ClassName instrumentationClassName, ClassName functionClassName) {
@@ -79,8 +79,7 @@ public class AutoInstrumentationProcessor extends AbstractProcessor {
                 .build();
     }
 
-    private void generateTypeWithMethods(List<MethodSpec> methods, List<TypeElement> from) {
-        String packageName = "co.elastic.apm.android.sdk.instrumentation";
+    private void generateTypeWithMethods(String packageName, List<MethodSpec> methods, List<TypeElement> from) {
         String simpleName = "Instrumentations";
         TypeSpec typeSpec = TypeSpec.classBuilder(simpleName)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)

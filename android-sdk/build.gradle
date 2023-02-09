@@ -37,7 +37,6 @@ dependencies {
     api "io.opentelemetry:opentelemetry-sdk:$openTelemetry_version"
     api "io.opentelemetry:opentelemetry-sdk-logs:$openTelemetry_version-alpha"
     api "com.squareup.okhttp3:okhttp:$okhttp_version"
-    compileOnly 'co.elastic.apm.compile:processor'
     implementation 'com.blogspot.mydailyjava:weak-lock-free:0.18'
     implementation project(':android-common')
     implementation "io.opentelemetry:opentelemetry-exporter-otlp:$openTelemetry_version"
@@ -45,6 +44,8 @@ dependencies {
     implementation "io.opentelemetry:opentelemetry-semconv:$openTelemetry_version-alpha"
     implementation "androidx.annotation:annotation:$androidAnnotations_version"
     embedded 'com.github.instacart.truetime-android:library:3.5'
+    annotationProcessor 'co.elastic.apm.compile:processor'
+    compileOnly 'co.elastic.apm.compile:processor'
     testImplementation "org.mockito:mockito-core:4.9.0"
     testImplementation "junit:junit:$junit_version"
     androidTestImplementation 'androidx.test:runner:1.4.0'

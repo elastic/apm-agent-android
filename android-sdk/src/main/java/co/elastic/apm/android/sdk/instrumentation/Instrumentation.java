@@ -27,13 +27,12 @@ import co.elastic.apm.android.sdk.internal.instrumentation.ConfigurableInstrumen
 
 public abstract class Instrumentation extends Configuration {
 
-    public static <T extends Instrumentation> void runWhenEnabled(Class<T> type, Function<T> onEnabled) {
+    static <T extends Instrumentation> void runWhenEnabled(Class<T> type, Function<T> onEnabled) {
         if (Configurations.isEnabled(type)) {
             onEnabled.onInstrumentationReady(Configurations.get(type));
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static void runHttpRequestsWhenEnabled(Function<HttpRequestsInstrumentation> function) {
         runWhenEnabled(HttpRequestsInstrumentation.class, function);
     }

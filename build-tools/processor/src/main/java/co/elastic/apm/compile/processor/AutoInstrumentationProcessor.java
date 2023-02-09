@@ -7,6 +7,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.TypeVariableName;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -44,16 +45,30 @@ public class AutoInstrumentationProcessor extends AbstractProcessor {
     }
 
     private void generateTypeFor(List<TypeElement> types) {
+        ClassName instrumentationClassName = ClassName.get("co.elastic.apm.android.sdk.instrumentation", "Instrumentation");
+        ClassName functionClassName = ClassName.get(instrumentationClassName.packageName(), instrumentationClassName.simpleName(), "Function");
         List<MethodSpec> methods = new ArrayList<>();
-        types.forEach(typeElement -> methods.add(generateMethodFor(typeElement)));
+        MethodSpec genericMethod = generateGenericMethod(instrumentationClassName, functionClassName);
+        methods.add(genericMethod);
+        types.forEach(typeElement -> methods.add(generateMethodFor(typeElement, instrumentationClassName, functionClassName)));
         generateTypeWithMethods(methods, types);
     }
 
-    private MethodSpec generateMethodFor(TypeElement typeElement) {
+    private MethodSpec generateGenericMethod(ClassName instrumentationClassName, ClassName functionClassName) {
+        TypeVariableName typeVariable = TypeVariableName.get("T", instrumentationClassName);
+        return MethodSpec.methodBuilder("runWhenInstrumentationIsEnabled")
+                .returns(void.class)
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addTypeVariable(typeVariable)
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Class.class), typeVariable), "type")
+                .addParameter(ParameterizedTypeName.get(functionClassName, typeVariable), "function")
+                .addStatement("$T.runWhenEnabled(type, function)", instrumentationClassName)
+                .build();
+    }
+
+    private MethodSpec generateMethodFor(TypeElement typeElement, ClassName instrumentationClassName, ClassName functionClassName) {
         String simpleName = typeElement.getSimpleName().toString();
         String instrumentationName = getInstrumentationName(simpleName);
-        ClassName instrumentationClassName = ClassName.get("co.elastic.apm.android.sdk.instrumentation", "Instrumentation");
-        ClassName functionClassName = ClassName.get(instrumentationClassName.packageName(), instrumentationClassName.simpleName(), "Function");
         ClassName typeClassName = ClassName.get(typeElement);
         ParameterSpec function = ParameterSpec.builder(ParameterizedTypeName.get(functionClassName, typeClassName), "function").build();
         return MethodSpec.methodBuilder("runWhen" + instrumentationName + "IsEnabled")

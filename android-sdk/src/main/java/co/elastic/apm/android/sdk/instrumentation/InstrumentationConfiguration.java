@@ -36,7 +36,12 @@ public final class InstrumentationConfiguration extends GroupInstrumentation {
     }
 
     public static InstrumentationConfiguration allEnabled() {
-        return builder().build();
+        return builder()
+                .enableScreenRendering(true)
+                .enableHttpRequests(true)
+                .enableCrashReporting(true)
+                .enableAppLaunchTimeMetric(true)
+                .build();
     }
 
     public static InstrumentationConfiguration allDisabled() {

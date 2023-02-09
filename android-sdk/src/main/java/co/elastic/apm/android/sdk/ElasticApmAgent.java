@@ -169,6 +169,7 @@ public final class ElasticApmAgent {
 
     private void initializeDynamicConfiguration() {
         Configurations.Builder builder = Configurations.builder();
+        builder.register(configuration.instrumentationConfiguration);
         configuration.instrumentationConfiguration.instrumentations.forEach(builder::register);
         builder.buildAndRegisterGlobal();
     }

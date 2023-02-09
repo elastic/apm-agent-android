@@ -95,7 +95,7 @@ public class BaseRobolectricTestApplication extends Application implements Expor
 
     @Override
     public void afterTest(Method method) {
-        ElasticApmAgent.get().resetForTest();
+        ElasticApmAgent.resetForTest();
         GlobalOpenTelemetry.resetForTest();
         GlobalLoggerProvider.resetForTest();
     }

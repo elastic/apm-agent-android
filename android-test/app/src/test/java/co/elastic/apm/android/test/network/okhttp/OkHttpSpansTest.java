@@ -23,6 +23,7 @@ import co.elastic.apm.android.sdk.traces.http.impl.okhttp.OkHttpContextStore;
 import co.elastic.apm.android.sdk.traces.http.impl.okhttp.OtelOkHttpEventListener;
 import co.elastic.apm.android.sdk.traces.http.impl.okhttp.OtelOkHttpInterceptor;
 import co.elastic.apm.android.test.common.spans.Spans;
+import co.elastic.apm.android.test.testutils.AppWithoutInitializedAgent;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTestApplication;
 import io.opentelemetry.api.trace.Span;
@@ -208,7 +209,7 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
 
     @Config(application = DisabledHttpRequestsApp.class)
     @Test
-    public void whenHttpInstrumentationIsDisabled_doNotSendAnyOkhttpSpans() {
+    public void whenHttpInstrumentationIsDisabled_doNotSendAnyOkHttpSpans() {
         executeSuccessfulHttpCall(request);
 
         getRecordedSpans(0);
@@ -216,6 +217,14 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
 
     private void executeSuccessfulHttpCall(Request request) {
         executeSuccessfulHttpCall(request, 200);
+    }
+
+    @Config(application = AppWithoutInitializedAgent.class)
+    @Test
+    public void whenAgentIsNotInitialized_doNotSendAnyOkHttpSpans() {
+        executeSuccessfulHttpCall(request);
+
+        getRecordedSpans(0);
     }
 
     private void executeSuccessfulHttpCall(Request request, int responseCode) {

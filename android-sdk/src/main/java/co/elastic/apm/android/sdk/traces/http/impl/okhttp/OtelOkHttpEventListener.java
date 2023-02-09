@@ -61,44 +61,43 @@ public class OtelOkHttpEventListener extends EventListener {
     @Override
     public void callStart(Call call) {
         super.callStart(call);
-        if (!Instrumentation.getHttpRequestsConfiguration().isEnabled()) {
-            return;
-        }
-        Request request = call.request();
-        Elog.getLogger().info("Intercepting OkHttp request");
-        Elog.getLogger().debug("Intercepting OkHttp request: {}", request.url());
+        Instrumentation.runHttpRequestsWhenEnabled(instrumentation -> {
+            Request request = call.request();
+            Elog.getLogger().info("Intercepting OkHttp request");
+            Elog.getLogger().debug("Intercepting OkHttp request: {}", request.url());
 
-        if (isOtelExporterCall(request.url())) {
-            Elog.getLogger().info("Ignoring OTel exporting related http request");
-            return;
-        }
+            if (isOtelExporterCall(request.url())) {
+                Elog.getLogger().info("Ignoring OTel exporting related http request");
+                return;
+            }
 
-        String method = request.method();
-        HttpUrl url = request.url();
-        String host = url.host();
-        Tracer okhttpTracer = getTracer();
+            String method = request.method();
+            HttpUrl url = request.url();
+            String host = url.host();
+            Tracer okhttpTracer = getTracer();
 
-        Context parentContext = Context.current();
-        Span wrapperSpan = null;
-        if (thereIsNoParentSpan(parentContext)) {
-            wrapperSpan = createWrapperSpan(okhttpTracer, method, host);
-            parentContext = parentContext.with(wrapperSpan);
-        }
+            Context parentContext = Context.current();
+            Span wrapperSpan = null;
+            if (thereIsNoParentSpan(parentContext)) {
+                wrapperSpan = createWrapperSpan(okhttpTracer, method, host);
+                parentContext = parentContext.with(wrapperSpan);
+            }
 
-        AttributesVisitor httpAttributes = getConfiguration().createHttpAttributesVisitor(convertRequest(request));
-        Span span = okhttpTracer.spanBuilder(String.format(SPAN_NAME_FORMAT, method, host))
-                .setSpanKind(SpanKind.CLIENT)
-                .setAllAttributes(AttributesCreator.from(httpAttributes).create())
-                .setParent(parentContext)
-                .startSpan();
-        Context spanContext = parentContext.with(span);
+            AttributesVisitor httpAttributes = getConfiguration().createHttpAttributesVisitor(convertRequest(request));
+            Span span = okhttpTracer.spanBuilder(String.format(SPAN_NAME_FORMAT, method, host))
+                    .setSpanKind(SpanKind.CLIENT)
+                    .setAllAttributes(AttributesCreator.from(httpAttributes).create())
+                    .setParent(parentContext)
+                    .startSpan();
+            Context spanContext = parentContext.with(span);
 
-        if (wrapperSpan != null) {
-            // Attaching the wrapper span to end it right after the http span is ended.
-            spanContext = spanContext.with(WRAPPER_CLOSER_KEY, wrapperSpan::end);
-        }
+            if (wrapperSpan != null) {
+                // Attaching the wrapper span to end it right after the http span is ended.
+                spanContext = spanContext.with(WRAPPER_CLOSER_KEY, wrapperSpan::end);
+            }
 
-        contextStore.put(request, spanContext);
+            contextStore.put(request, spanContext);
+        });
     }
 
     private boolean isOtelExporterCall(HttpUrl url) {

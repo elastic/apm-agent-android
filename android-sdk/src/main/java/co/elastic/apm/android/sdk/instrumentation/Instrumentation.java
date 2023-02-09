@@ -27,12 +27,14 @@ import co.elastic.apm.android.sdk.internal.instrumentation.GroupInstrumentation;
 
 public abstract class Instrumentation extends Configuration {
 
-    public static <T extends Instrumentation> T get(Class<T> instrumentationClass) {
-        return Configurations.get(instrumentationClass);
+    public static <T extends Instrumentation> void runWhenEnabled(Class<T> type, Function<T> onEnabled) {
+        if (Configurations.isEnabled(type)) {
+            onEnabled.onInstrumentationReady(Configurations.get(type));
+        }
     }
 
-    public static HttpRequestsInstrumentation getHttpRequestsConfiguration() {
-        return get(HttpRequestsInstrumentation.class);
+    public static void runHttpRequestsWhenEnabled(Function<HttpRequestsInstrumentation> function) {
+        runWhenEnabled(HttpRequestsInstrumentation.class, function);
     }
 
     @NonNull
@@ -53,5 +55,10 @@ public abstract class Instrumentation extends Configuration {
         GroupType(Class<? extends GroupInstrumentation> type) {
             this.type = type;
         }
+    }
+
+    @FunctionalInterface
+    public interface Function<T extends Instrumentation> {
+        void onInstrumentationReady(T instrumentation);
     }
 }

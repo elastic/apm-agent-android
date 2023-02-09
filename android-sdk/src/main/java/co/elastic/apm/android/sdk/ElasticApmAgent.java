@@ -122,10 +122,12 @@ public final class ElasticApmAgent {
         }
     }
 
-    public void resetForTest() {
+    public static void resetForTest() {
         ElasticExceptionHandler.resetForTest();
-        serviceManager.stop();
-        instance = null;
+        if (instance != null) {
+            instance.serviceManager.stop();
+            instance = null;
+        }
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)

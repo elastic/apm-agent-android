@@ -20,13 +20,10 @@ package co.elastic.apm.android.sdk.instrumentation;
 
 import androidx.annotation.NonNull;
 
-import co.elastic.apm.android.sdk.instrumentation.supported.AppLaunchTimeInstrumentation;
-import co.elastic.apm.android.sdk.instrumentation.supported.CrashReportingInstrumentation;
 import co.elastic.apm.android.sdk.instrumentation.supported.HttpRequestsInstrumentation;
-import co.elastic.apm.android.sdk.instrumentation.supported.ScreenRenderingInstrumentation;
 import co.elastic.apm.android.sdk.internal.configuration.Configuration;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
-import co.elastic.apm.android.sdk.internal.instrumentation.SupportedInstrumentation;
+import co.elastic.apm.android.sdk.internal.instrumentation.ConfigurableInstrumentation;
 
 public abstract class Instrumentation extends Configuration {
 
@@ -37,12 +34,8 @@ public abstract class Instrumentation extends Configuration {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends SupportedInstrumentation> void runWhenEnabled(Supported instrumentation, Function<T> onEnabled) {
-        runWhenEnabled((Class<T>) instrumentation.type, onEnabled);
-    }
-
     public static void runHttpRequestsWhenEnabled(Function<HttpRequestsInstrumentation> function) {
-        runWhenEnabled(Supported.HTTP_REQUESTS, function);
+        runWhenEnabled(HttpRequestsInstrumentation.class, function);
     }
 
     @NonNull
@@ -52,29 +45,15 @@ public abstract class Instrumentation extends Configuration {
 
     @Override
     protected Class<? extends Configuration> getParentConfigurationType() {
-        return getGroup().instrumentation.type;
+        return getGroup().type;
     }
 
     public enum Group {
-        NONE(Supported.GENERAL);
+        NONE(InstrumentationConfiguration.class);
 
-        private final Supported instrumentation;
+        private final Class<? extends ConfigurableInstrumentation> type;
 
-        Group(Supported instrumentation) {
-            this.instrumentation = instrumentation;
-        }
-    }
-
-    public enum Supported {
-        GENERAL(InstrumentationConfiguration.class),
-        HTTP_REQUESTS(HttpRequestsInstrumentation.class),
-        APP_LAUNCH_TIME(AppLaunchTimeInstrumentation.class),
-        SCREEN_RENDERING(ScreenRenderingInstrumentation.class),
-        CRASH_REPORTING(CrashReportingInstrumentation.class);
-
-        private final Class<? extends SupportedInstrumentation> type;
-
-        Supported(Class<? extends SupportedInstrumentation> type) {
+        Group(Class<? extends ConfigurableInstrumentation> type) {
             this.type = type;
         }
     }

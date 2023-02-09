@@ -18,7 +18,7 @@
  */
 package co.elastic.apm.android.sdk.internal.instrumentation;
 
-public abstract class GroupInstrumentation extends SupportedInstrumentation {
+public abstract class GroupInstrumentation extends ConfigurableInstrumentation {
 
     protected GroupInstrumentation(boolean enabled) {
         super(enabled);

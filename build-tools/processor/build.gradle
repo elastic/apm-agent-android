@@ -2,6 +2,14 @@ plugins {
     id 'java-library'
 }
 
+def autoService_version = '1.0.1'
+
+dependencies {
+    implementation 'com.squareup:javapoet:1.13.0'
+    compileOnly "com.google.auto.service:auto-service-annotations:$autoService_version"
+    annotationProcessor "com.google.auto.service:auto-service:$autoService_version"
+}
+
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8

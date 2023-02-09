@@ -18,19 +18,13 @@
  */
 package co.elastic.apm.android.sdk.instrumentation.supported;
 
-import androidx.annotation.NonNull;
+import co.elastic.apm.android.sdk.internal.instrumentation.ConfigurableInstrumentation;
+import co.elastic.apm.compile.processor.annotations.SupportedInstrumentation;
 
-import co.elastic.apm.android.sdk.internal.instrumentation.SupportedInstrumentation;
-
-public final class ScreenRenderingInstrumentation extends SupportedInstrumentation {
+@SupportedInstrumentation
+public final class ScreenRenderingInstrumentation extends ConfigurableInstrumentation {
 
     public ScreenRenderingInstrumentation(boolean enabled) {
         super(enabled);
-    }
-
-    @NonNull
-    @Override
-    protected Supported getSupportedType() {
-        return Supported.SCREEN_RENDERING;
     }
 }

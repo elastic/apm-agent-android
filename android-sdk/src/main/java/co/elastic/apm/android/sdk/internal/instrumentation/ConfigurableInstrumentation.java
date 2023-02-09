@@ -18,19 +18,14 @@
  */
 package co.elastic.apm.android.sdk.internal.instrumentation;
 
-import androidx.annotation.NonNull;
-
 import co.elastic.apm.android.sdk.instrumentation.Instrumentation;
 
-public abstract class SupportedInstrumentation extends Instrumentation {
+public abstract class ConfigurableInstrumentation extends Instrumentation {
     private final boolean enabled;
 
-    protected SupportedInstrumentation(boolean enabled) {
+    protected ConfigurableInstrumentation(boolean enabled) {
         this.enabled = enabled;
     }
-
-    @NonNull
-    protected abstract Instrumentation.Supported getSupportedType();
 
     @Override
     protected boolean enabled() {

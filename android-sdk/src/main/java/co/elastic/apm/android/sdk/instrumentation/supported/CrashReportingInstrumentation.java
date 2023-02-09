@@ -19,9 +19,9 @@
 package co.elastic.apm.android.sdk.instrumentation.supported;
 
 import co.elastic.apm.android.sdk.internal.instrumentation.ConfigurableInstrumentation;
-import co.elastic.apm.compile.processor.annotations.SupportedInstrumentation;
+import co.elastic.apm.compile.processor.annotations.AutoInstrumentation;
 
-@SupportedInstrumentation
+@AutoInstrumentation
 public final class CrashReportingInstrumentation extends ConfigurableInstrumentation {
 
     public CrashReportingInstrumentation(boolean enabled) {

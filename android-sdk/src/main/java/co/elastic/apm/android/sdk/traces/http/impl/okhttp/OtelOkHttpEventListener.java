@@ -27,6 +27,7 @@ import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.attributes.AttributesCreator;
 import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
+import co.elastic.apm.android.sdk.instrumentation.Instrumentation;
 import co.elastic.apm.android.sdk.traces.common.tools.ElasticTracer;
 import co.elastic.apm.android.sdk.traces.http.HttpTraceConfiguration;
 import co.elastic.apm.android.sdk.traces.http.data.HttpRequest;
@@ -60,6 +61,9 @@ public class OtelOkHttpEventListener extends EventListener {
     @Override
     public void callStart(Call call) {
         super.callStart(call);
+        if (!Instrumentation.getHttpRequestsConfiguration().isEnabled()) {
+            return;
+        }
         Request request = call.request();
         Elog.getLogger().info("Intercepting OkHttp request");
         Elog.getLogger().debug("Intercepting OkHttp request: {}", request.url());

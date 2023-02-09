@@ -10,16 +10,21 @@ import static org.mockito.Mockito.verify;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.robolectric.annotation.Config;
 
 import java.io.IOException;
 import java.util.List;
 
+import co.elastic.apm.android.sdk.ElasticApmAgent;
+import co.elastic.apm.android.sdk.ElasticApmConfiguration;
+import co.elastic.apm.android.sdk.instrumentation.InstrumentationConfiguration;
 import co.elastic.apm.android.sdk.traces.common.tools.ElasticTracer;
 import co.elastic.apm.android.sdk.traces.http.impl.okhttp.OkHttpContextStore;
 import co.elastic.apm.android.sdk.traces.http.impl.okhttp.OtelOkHttpEventListener;
 import co.elastic.apm.android.sdk.traces.http.impl.okhttp.OtelOkHttpInterceptor;
 import co.elastic.apm.android.test.common.spans.Spans;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
+import co.elastic.apm.android.test.testutils.base.BaseRobolectricTestApplication;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Scope;
@@ -201,6 +206,14 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
                 .isDirectChildOf(transactionSpan);
     }
 
+    @Config(application = DisabledHttpRequestsApp.class)
+    @Test
+    public void whenHttpInstrumentationIsDisabled_doNotSendAnyOkhttpSpans() {
+        executeSuccessfulHttpCall(request);
+
+        getRecordedSpans(0);
+    }
+
     private void executeSuccessfulHttpCall(Request request) {
         executeSuccessfulHttpCall(request, 200);
     }
@@ -234,6 +247,18 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
         } catch (IOException e) {
             fail(e.getMessage());
             throw new RuntimeException(e);
+        }
+    }
+
+    private static class DisabledHttpRequestsApp extends BaseRobolectricTestApplication {
+        @Override
+        public void onCreate() {
+            super.onCreate();
+            ElasticApmConfiguration configuration = ElasticApmConfiguration.builder().setInstrumentationConfiguration(InstrumentationConfiguration.builder()
+                    .enableHttpRequests(false)
+                    .build()).build();
+
+            ElasticApmAgent.initialize(this, configuration, getConnectivity());
         }
     }
 }

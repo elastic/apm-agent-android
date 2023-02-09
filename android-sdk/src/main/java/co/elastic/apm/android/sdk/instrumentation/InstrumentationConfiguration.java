@@ -23,7 +23,7 @@ import java.util.List;
 
 import co.elastic.apm.android.sdk.instrumentation.supported.AppLaunchTimeInstrumentation;
 import co.elastic.apm.android.sdk.instrumentation.supported.CrashReportingInstrumentation;
-import co.elastic.apm.android.sdk.instrumentation.supported.HttpRequestsInstrumentation;
+import co.elastic.apm.android.sdk.instrumentation.supported.HttpTracingInstrumentation;
 import co.elastic.apm.android.sdk.instrumentation.supported.ScreenRenderingInstrumentation;
 import co.elastic.apm.android.sdk.internal.configuration.Configuration;
 import co.elastic.apm.android.sdk.internal.instrumentation.GroupInstrumentation;
@@ -38,7 +38,7 @@ public final class InstrumentationConfiguration extends GroupInstrumentation {
     public static InstrumentationConfiguration allEnabled() {
         return builder()
                 .enableScreenRendering(true)
-                .enableHttpRequests(true)
+                .enableHttpTracing(true)
                 .enableCrashReporting(true)
                 .enableAppLaunchTimeMetric(true)
                 .build();
@@ -62,7 +62,7 @@ public final class InstrumentationConfiguration extends GroupInstrumentation {
 
     public static class Builder {
         private final boolean enabled;
-        private boolean enableHttpRequests;
+        private boolean enableHttpTracing;
         private boolean enableScreenRendering;
         private boolean enableCrashReporting;
         private boolean enableAppLaunchTimeMetric;
@@ -71,8 +71,8 @@ public final class InstrumentationConfiguration extends GroupInstrumentation {
             this.enabled = enabled;
         }
 
-        public Builder enableHttpRequests(boolean enable) {
-            this.enableHttpRequests = enable;
+        public Builder enableHttpTracing(boolean enable) {
+            this.enableHttpTracing = enable;
             return this;
         }
 
@@ -93,7 +93,7 @@ public final class InstrumentationConfiguration extends GroupInstrumentation {
 
         public InstrumentationConfiguration build() {
             List<Instrumentation> instrumentations = new ArrayList<>();
-            instrumentations.add(new HttpRequestsInstrumentation(enableHttpRequests));
+            instrumentations.add(new HttpTracingInstrumentation(enableHttpTracing));
             instrumentations.add(new ScreenRenderingInstrumentation(enableScreenRendering));
             instrumentations.add(new CrashReportingInstrumentation(enableCrashReporting));
             instrumentations.add(new AppLaunchTimeInstrumentation(enableAppLaunchTimeMetric));

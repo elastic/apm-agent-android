@@ -22,9 +22,9 @@ import co.elastic.apm.android.sdk.internal.instrumentation.ConfigurableInstrumen
 import co.elastic.apm.compile.processor.annotations.AutoInstrumentation;
 
 @AutoInstrumentation
-public final class HttpRequestsInstrumentation extends ConfigurableInstrumentation {
+public final class HttpTracingInstrumentation extends ConfigurableInstrumentation {
 
-    public HttpRequestsInstrumentation(boolean enabled) {
+    public HttpTracingInstrumentation(boolean enabled) {
         super(enabled);
     }
 }

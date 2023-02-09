@@ -20,7 +20,7 @@ package co.elastic.apm.android.sdk.instrumentation;
 
 import androidx.annotation.NonNull;
 
-import co.elastic.apm.android.sdk.instrumentation.supported.HttpRequestsInstrumentation;
+import co.elastic.apm.android.sdk.instrumentation.supported.HttpTracingInstrumentation;
 import co.elastic.apm.android.sdk.internal.configuration.Configuration;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.instrumentation.ConfigurableInstrumentation;
@@ -33,8 +33,8 @@ public abstract class Instrumentation extends Configuration {
         }
     }
 
-    public static void runHttpRequestsWhenEnabled(Function<HttpRequestsInstrumentation> function) {
-        runWhenEnabled(HttpRequestsInstrumentation.class, function);
+    public static void runHttpRequestsWhenEnabled(Function<HttpTracingInstrumentation> function) {
+        runWhenEnabled(HttpTracingInstrumentation.class, function);
     }
 
     @NonNull

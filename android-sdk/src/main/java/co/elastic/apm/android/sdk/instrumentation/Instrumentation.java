@@ -36,8 +36,13 @@ public abstract class Instrumentation extends Configuration {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T extends SupportedInstrumentation> void runWhenEnabled(Supported instrumentation, Function<T> onEnabled) {
+        runWhenEnabled((Class<T>) instrumentation.type, onEnabled);
+    }
+
     public static void runHttpRequestsWhenEnabled(Function<HttpRequestsInstrumentation> function) {
-        runWhenEnabled(HttpRequestsInstrumentation.class, function);
+        runWhenEnabled(Supported.HTTP_REQUESTS, function);
     }
 
     @NonNull

@@ -16,13 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.concurrency;
+package co.elastic.apm.android.sdk.internal.utilities.concurrency;
 
-public interface BackgroundExecutor {
-
-    <T> void execute(BackgroundWork<T> work, Callback<T> callback);
-
-    interface Callback<T> {
-        void onFinish(Result<T> result);
-    }
+public interface BackgroundWork<T> {
+    T execute();
 }

@@ -16,8 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.concurrency;
+package co.elastic.apm.android.sdk.instrumentation.supported;
 
-public interface BackgroundWork<T> {
-    T execute();
+import co.elastic.apm.android.sdk.internal.instrumentation.SupportedInstrumentation;
+
+public final class ScreenRenderingInstrumentation extends SupportedInstrumentation {
+
+    public ScreenRenderingInstrumentation(boolean enabled) {
+        super(enabled);
+    }
 }

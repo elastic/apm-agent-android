@@ -16,17 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.otel;
+package co.elastic.apm.android.sdk.internal.instrumentation;
 
-import io.opentelemetry.context.Context;
+public abstract class GroupInstrumentation extends SupportedInstrumentation {
 
-public final class SpanUtilities {
-
-    public static boolean runningSpanFound() {
-        return !runningSpanNotFound();
-    }
-
-    public static boolean runningSpanNotFound() {
-        return Context.current().equals(Context.root());
+    protected GroupInstrumentation(boolean enabled) {
+        super(enabled);
     }
 }

@@ -38,14 +38,10 @@ import co.elastic.apm.android.sdk.attributes.resources.SdkIdVisitor;
 import co.elastic.apm.android.sdk.attributes.resources.ServiceIdVisitor;
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.internal.api.Initializable;
+import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.exceptions.ElasticExceptionHandler;
 import co.elastic.apm.android.sdk.internal.features.launchtime.LaunchTimeActivityCallback;
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
-import co.elastic.apm.android.sdk.internal.logging.AndroidLoggerFactory;
-import co.elastic.apm.android.sdk.internal.otel.Flusher;
-import co.elastic.apm.android.sdk.internal.providers.LazyProvider;
-import co.elastic.apm.android.sdk.internal.providers.Provider;
-import co.elastic.apm.android.sdk.internal.providers.SimpleProvider;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService;
@@ -53,6 +49,11 @@ import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
 import co.elastic.apm.android.sdk.internal.services.network.NetworkService;
 import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
+import co.elastic.apm.android.sdk.internal.utilities.logging.AndroidLoggerFactory;
+import co.elastic.apm.android.sdk.internal.utilities.otel.Flusher;
+import co.elastic.apm.android.sdk.internal.utilities.providers.LazyProvider;
+import co.elastic.apm.android.sdk.internal.utilities.providers.Provider;
+import co.elastic.apm.android.sdk.internal.utilities.providers.SimpleProvider;
 import co.elastic.apm.android.sdk.logs.ElasticLogRecordProcessor;
 import co.elastic.apm.android.sdk.traces.otel.processor.ElasticSpanProcessor;
 import io.opentelemetry.api.common.Attributes;
@@ -159,10 +160,17 @@ public final class ElasticApmAgent {
     private void onInitializationFinished(Context context) {
         ntpManager.initialize();
         serviceManager.start();
+        initializeDynamicConfiguration();
         initializeOpentelemetry();
         initializeCrashReports();
         initializeSessionIdProvider();
         initializeLaunchTimeTracker(context);
+    }
+
+    private void initializeDynamicConfiguration() {
+        Configurations.Builder builder = Configurations.builder();
+        configuration.instrumentationConfiguration.instrumentations.forEach(builder::register);
+        builder.buildAndRegisterGlobal();
     }
 
     private void initializeSessionIdProvider() {

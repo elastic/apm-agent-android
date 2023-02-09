@@ -16,26 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.testutils;
+package co.elastic.apm.android.sdk.internal.utilities.otel;
 
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.BackgroundExecutor;
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.BackgroundWork;
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.Result;
+import io.opentelemetry.sdk.common.CompletableResultCode;
 
-public class ImmediateBackgroundExecutor implements BackgroundExecutor {
-    private int executions = 0;
+public final class Flusher {
+    private Delegator meterDelegator;
+    private Delegator loggerDelegator;
 
-    @Override
-    public <T> void execute(BackgroundWork<T> work, Callback<T> callback) {
-        executions++;
-        try {
-            callback.onFinish(Result.success(work.execute()));
-        } catch (Throwable t) {
-            callback.onFinish(Result.error(t));
-        }
+    public CompletableResultCode flushMetrics() {
+        return meterDelegator.flush();
     }
 
-    public int getExecutions() {
-        return executions;
+    public CompletableResultCode flushLogs() {
+        return loggerDelegator.flush();
+    }
+
+    public void setMeterDelegator(Delegator meterDelegator) {
+        this.meterDelegator = meterDelegator;
+    }
+
+    public void setLoggerDelegator(Delegator loggerDelegator) {
+        this.loggerDelegator = loggerDelegator;
+    }
+
+    public interface Delegator {
+        CompletableResultCode flush();
     }
 }

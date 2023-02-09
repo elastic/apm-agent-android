@@ -18,7 +18,7 @@
  */
 package co.elastic.apm.android.sdk.instrumentation
 
-import co.elastic.apm.android.sdk.internal.otel.SpanUtilities
+import co.elastic.apm.android.sdk.internal.utilities.otel.SpanUtilities
 import io.opentelemetry.context.Context
 import io.opentelemetry.extension.kotlin.asContextElement
 import kotlinx.coroutines.CoroutineScope

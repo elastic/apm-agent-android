@@ -16,26 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.testutils;
+package co.elastic.apm.android.sdk.internal.utilities.concurrency;
 
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.BackgroundExecutor;
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.BackgroundWork;
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.Result;
+public interface BackgroundExecutor {
 
-public class ImmediateBackgroundExecutor implements BackgroundExecutor {
-    private int executions = 0;
+    <T> void execute(BackgroundWork<T> work, Callback<T> callback);
 
-    @Override
-    public <T> void execute(BackgroundWork<T> work, Callback<T> callback) {
-        executions++;
-        try {
-            callback.onFinish(Result.success(work.execute()));
-        } catch (Throwable t) {
-            callback.onFinish(Result.error(t));
-        }
-    }
-
-    public int getExecutions() {
-        return executions;
+    interface Callback<T> {
+        void onFinish(Result<T> result);
     }
 }

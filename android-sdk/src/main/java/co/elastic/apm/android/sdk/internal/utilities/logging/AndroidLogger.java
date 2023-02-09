@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.logging;
+package co.elastic.apm.android.sdk.internal.utilities.logging;
 
 import android.util.Log;
 
@@ -26,7 +26,7 @@ import co.elastic.apm.android.common.internal.logging.BaseELogger;
 import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService;
-import co.elastic.apm.android.sdk.internal.providers.LazyProvider;
+import co.elastic.apm.android.sdk.internal.utilities.providers.LazyProvider;
 
 class AndroidLogger extends BaseELogger {
     private final LazyProvider<Boolean> appIsDebuggable;

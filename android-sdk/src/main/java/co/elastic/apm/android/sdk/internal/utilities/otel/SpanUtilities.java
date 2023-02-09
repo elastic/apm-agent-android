@@ -16,23 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.concurrency.impl;
+package co.elastic.apm.android.sdk.internal.utilities.otel;
 
-import co.elastic.apm.android.sdk.internal.concurrency.BackgroundExecutor;
-import co.elastic.apm.android.sdk.internal.concurrency.BackgroundWork;
-import co.elastic.apm.android.sdk.internal.concurrency.Result;
+import io.opentelemetry.context.Context;
 
-public class SimpleBackgroundExecutor implements BackgroundExecutor {
+public final class SpanUtilities {
 
-    @Override
-    public <T> void execute(BackgroundWork<T> work, Callback<T> callback) {
-        new Thread(() -> {
-            try {
-                T result = work.execute();
-                callback.onFinish(Result.success(result));
-            } catch (Throwable t) {
-                callback.onFinish(Result.error(t));
-            }
-        }).start();
+    public static boolean runningSpanFound() {
+        return !runningSpanNotFound();
+    }
+
+    public static boolean runningSpanNotFound() {
+        return Context.current().equals(Context.root());
     }
 }

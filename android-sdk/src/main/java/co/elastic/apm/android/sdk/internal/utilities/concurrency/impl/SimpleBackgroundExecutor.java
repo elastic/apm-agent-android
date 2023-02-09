@@ -16,17 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.providers;
+package co.elastic.apm.android.sdk.internal.utilities.concurrency.impl;
 
-public class SimpleProvider<T> implements Provider<T> {
-    private final T object;
+import co.elastic.apm.android.sdk.internal.utilities.concurrency.BackgroundExecutor;
+import co.elastic.apm.android.sdk.internal.utilities.concurrency.BackgroundWork;
+import co.elastic.apm.android.sdk.internal.utilities.concurrency.Result;
 
-    public SimpleProvider(T object) {
-        this.object = object;
-    }
+public class SimpleBackgroundExecutor implements BackgroundExecutor {
 
     @Override
-    public T get() {
-        return object;
+    public <T> void execute(BackgroundWork<T> work, Callback<T> callback) {
+        new Thread(() -> {
+            try {
+                T result = work.execute();
+                callback.onFinish(Result.success(result));
+            } catch (Throwable t) {
+                callback.onFinish(Result.error(t));
+            }
+        }).start();
     }
 }

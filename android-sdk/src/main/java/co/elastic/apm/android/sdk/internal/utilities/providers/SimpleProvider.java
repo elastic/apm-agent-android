@@ -16,31 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.otel;
+package co.elastic.apm.android.sdk.internal.utilities.providers;
 
-import io.opentelemetry.sdk.common.CompletableResultCode;
+public class SimpleProvider<T> implements Provider<T> {
+    private final T object;
 
-public final class Flusher {
-    private Delegator meterDelegator;
-    private Delegator loggerDelegator;
-
-    public CompletableResultCode flushMetrics() {
-        return meterDelegator.flush();
+    public SimpleProvider(T object) {
+        this.object = object;
     }
 
-    public CompletableResultCode flushLogs() {
-        return loggerDelegator.flush();
-    }
-
-    public void setMeterDelegator(Delegator meterDelegator) {
-        this.meterDelegator = meterDelegator;
-    }
-
-    public void setLoggerDelegator(Delegator loggerDelegator) {
-        this.loggerDelegator = loggerDelegator;
-    }
-
-    public interface Delegator {
-        CompletableResultCode flush();
+    @Override
+    public T get() {
+        return object;
     }
 }

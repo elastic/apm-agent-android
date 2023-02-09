@@ -33,8 +33,8 @@ import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
 
-import co.elastic.apm.android.sdk.internal.providers.LazyProvider;
-import co.elastic.apm.android.sdk.internal.providers.Provider;
+import co.elastic.apm.android.sdk.internal.utilities.providers.LazyProvider;
+import co.elastic.apm.android.sdk.internal.utilities.providers.Provider;
 import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
 import co.elastic.apm.android.sdk.session.SessionIdProvider;

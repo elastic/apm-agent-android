@@ -16,26 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.testutils;
+package co.elastic.apm.android.sdk.internal.instrumentation;
 
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.BackgroundExecutor;
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.BackgroundWork;
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.Result;
+import co.elastic.apm.android.sdk.instrumentation.Instrumentation;
 
-public class ImmediateBackgroundExecutor implements BackgroundExecutor {
-    private int executions = 0;
+public abstract class SupportedInstrumentation extends Instrumentation {
+    private final boolean enabled;
 
-    @Override
-    public <T> void execute(BackgroundWork<T> work, Callback<T> callback) {
-        executions++;
-        try {
-            callback.onFinish(Result.success(work.execute()));
-        } catch (Throwable t) {
-            callback.onFinish(Result.error(t));
-        }
+    protected SupportedInstrumentation(boolean enabled) {
+        this.enabled = enabled;
     }
 
-    public int getExecutions() {
-        return executions;
+    @Override
+    protected boolean enabled() {
+        return enabled;
     }
 }

@@ -16,16 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.logging;
+package co.elastic.apm.android.sdk.internal.utilities.concurrency;
 
-import org.slf4j.Logger;
+public final class Result<T> {
+    public final T value;
+    public final Throwable error;
+    public final boolean isSuccess;
 
-import co.elastic.apm.android.common.internal.logging.ELoggerFactory;
+    private Result(T result, Throwable error, boolean isSuccess) {
+        this.value = result;
+        this.error = error;
+        this.isSuccess = isSuccess;
+    }
 
-public class AndroidLoggerFactory extends ELoggerFactory {
+    public static <T> Result<T> success(T value) {
+        return new Result<>(value, null, true);
+    }
 
-    @Override
-    public Logger getLogger(String name) {
-        return new AndroidLogger(name);
+    public static <T> Result<T> error(Throwable error) {
+        return new Result<>(null, error, false);
     }
 }

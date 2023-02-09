@@ -16,26 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.testutils;
+package co.elastic.apm.android.sdk.internal.configuration;
 
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.BackgroundExecutor;
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.BackgroundWork;
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.Result;
+public abstract class Configuration {
 
-public class ImmediateBackgroundExecutor implements BackgroundExecutor {
-    private int executions = 0;
-
-    @Override
-    public <T> void execute(BackgroundWork<T> work, Callback<T> callback) {
-        executions++;
-        try {
-            callback.onFinish(Result.success(work.execute()));
-        } catch (Throwable t) {
-            callback.onFinish(Result.error(t));
+    public final boolean isEnabled() {
+        Class<? extends Configuration> parentConfiguration = getParentConfigurationType();
+        if (parentConfiguration != null && !Configurations.get(parentConfiguration).isEnabled()) {
+            return false;
         }
+        return enabled();
     }
 
-    public int getExecutions() {
-        return executions;
+    protected Class<? extends Configuration> getParentConfigurationType() {
+        return null;
     }
+
+    protected abstract boolean enabled();
 }

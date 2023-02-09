@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
 import co.elastic.apm.android.sdk.internal.time.ntp.TrueTimeWrapper;
+import co.elastic.apm.android.sdk.internal.utilities.otel.ElasticClock;
 import co.elastic.apm.android.sdk.testutils.BaseTest;
 
 @RunWith(MockitoJUnitRunner.class)

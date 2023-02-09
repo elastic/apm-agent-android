@@ -24,13 +24,15 @@ import org.slf4j.Logger;
 
 public class Elog {
 
-    private static ELoggerFactory loggerFactory;
+    private static ELoggerFactory loggerFactory = new ELoggerFactory.Noop();
+    private static boolean initialized = false;
 
-    public static void init(ELoggerFactory factory) {
-        if (loggerFactory != null) {
+    public static synchronized void init(ELoggerFactory factory) {
+        if (initialized) {
             return;
         }
         loggerFactory = factory;
+        initialized = true;
     }
 
     public static Logger getLogger(@NonNull String name) {

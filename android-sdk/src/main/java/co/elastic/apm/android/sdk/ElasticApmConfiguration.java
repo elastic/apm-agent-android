@@ -18,12 +18,14 @@
  */
 package co.elastic.apm.android.sdk;
 
+import co.elastic.apm.android.sdk.instrumentation.InstrumentationConfiguration;
 import co.elastic.apm.android.sdk.session.SessionIdProvider;
 import co.elastic.apm.android.sdk.session.impl.DefaultSessionIdProvider;
 import co.elastic.apm.android.sdk.traces.http.HttpTraceConfiguration;
 
 public final class ElasticApmConfiguration {
     public final HttpTraceConfiguration httpTraceConfiguration;
+    public final InstrumentationConfiguration instrumentationConfiguration;
     public final String serviceName;
     public final String serviceVersion;
     public final SessionIdProvider sessionIdProvider;
@@ -41,10 +43,12 @@ public final class ElasticApmConfiguration {
         serviceName = builder.serviceName;
         serviceVersion = builder.serviceVersion;
         sessionIdProvider = builder.sessionIdProvider;
+        instrumentationConfiguration = builder.instrumentationConfiguration;
     }
 
     public static class Builder {
         private HttpTraceConfiguration httpTraceConfiguration;
+        private InstrumentationConfiguration instrumentationConfiguration;
         private String serviceName;
         private String serviceVersion;
         private SessionIdProvider sessionIdProvider;
@@ -67,9 +71,17 @@ public final class ElasticApmConfiguration {
             return this;
         }
 
+        public Builder setInstrumentationConfiguration(InstrumentationConfiguration instrumentationConfiguration) {
+            this.instrumentationConfiguration = instrumentationConfiguration;
+            return this;
+        }
+
         public ElasticApmConfiguration build() {
             if (httpTraceConfiguration == null) {
                 httpTraceConfiguration = HttpTraceConfiguration.builder().build();
+            }
+            if (instrumentationConfiguration == null) {
+                instrumentationConfiguration = InstrumentationConfiguration.allEnabled();
             }
             if (sessionIdProvider == null) {
                 sessionIdProvider = new DefaultSessionIdProvider();

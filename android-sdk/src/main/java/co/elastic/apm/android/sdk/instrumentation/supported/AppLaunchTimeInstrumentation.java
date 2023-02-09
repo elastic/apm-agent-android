@@ -16,9 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.providers;
+package co.elastic.apm.android.sdk.instrumentation.supported;
 
-public interface Provider<T> {
+import co.elastic.apm.android.sdk.internal.instrumentation.SupportedInstrumentation;
 
-    T get();
+public final class AppLaunchTimeInstrumentation extends SupportedInstrumentation {
+
+    public AppLaunchTimeInstrumentation(boolean enabled) {
+        super(enabled);
+    }
 }

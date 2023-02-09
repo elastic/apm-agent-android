@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.providers;
+package co.elastic.apm.android.sdk.internal.utilities.providers;
 
 public class LazyProvider<T> implements Provider<T> {
     private final Provider<T> provider;

@@ -18,11 +18,19 @@
  */
 package co.elastic.apm.android.sdk.instrumentation.supported;
 
+import androidx.annotation.NonNull;
+
 import co.elastic.apm.android.sdk.internal.instrumentation.SupportedInstrumentation;
 
 public final class AppLaunchTimeInstrumentation extends SupportedInstrumentation {
 
     public AppLaunchTimeInstrumentation(boolean enabled) {
         super(enabled);
+    }
+
+    @NonNull
+    @Override
+    protected Supported getSupportedType() {
+        return Supported.APP_LAUNCH_TIME;
     }
 }

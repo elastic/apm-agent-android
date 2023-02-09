@@ -18,11 +18,19 @@
  */
 package co.elastic.apm.android.sdk.instrumentation.supported;
 
+import androidx.annotation.NonNull;
+
 import co.elastic.apm.android.sdk.internal.instrumentation.SupportedInstrumentation;
 
 public final class CrashReportingInstrumentation extends SupportedInstrumentation {
 
     public CrashReportingInstrumentation(boolean enabled) {
         super(enabled);
+    }
+
+    @NonNull
+    @Override
+    protected Supported getSupportedType() {
+        return Supported.CRASH_REPORTING;
     }
 }

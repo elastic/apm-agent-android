@@ -18,6 +18,8 @@
  */
 package co.elastic.apm.android.sdk.instrumentation;
 
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,6 +60,12 @@ public final class InstrumentationConfiguration extends GroupInstrumentation {
     @Override
     protected Class<? extends Configuration> getParentConfigurationType() {
         return null;
+    }
+
+    @NonNull
+    @Override
+    protected Supported getSupportedType() {
+        return Supported.GENERAL;
     }
 
     public static class Builder {

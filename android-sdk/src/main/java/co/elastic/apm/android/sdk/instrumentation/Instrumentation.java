@@ -20,10 +20,13 @@ package co.elastic.apm.android.sdk.instrumentation;
 
 import androidx.annotation.NonNull;
 
+import co.elastic.apm.android.sdk.instrumentation.supported.AppLaunchTimeInstrumentation;
+import co.elastic.apm.android.sdk.instrumentation.supported.CrashReportingInstrumentation;
 import co.elastic.apm.android.sdk.instrumentation.supported.HttpRequestsInstrumentation;
+import co.elastic.apm.android.sdk.instrumentation.supported.ScreenRenderingInstrumentation;
 import co.elastic.apm.android.sdk.internal.configuration.Configuration;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
-import co.elastic.apm.android.sdk.internal.instrumentation.GroupInstrumentation;
+import co.elastic.apm.android.sdk.internal.instrumentation.SupportedInstrumentation;
 
 public abstract class Instrumentation extends Configuration {
 
@@ -38,21 +41,35 @@ public abstract class Instrumentation extends Configuration {
     }
 
     @NonNull
-    protected GroupType getGroupType() {
-        return GroupType.NONE;
+    protected Group getGroup() {
+        return Group.NONE;
     }
 
     @Override
     protected Class<? extends Configuration> getParentConfigurationType() {
-        return getGroupType().type;
+        return getGroup().instrumentation.type;
     }
 
-    public enum GroupType {
-        NONE(InstrumentationConfiguration.class);
+    public enum Group {
+        NONE(Supported.GENERAL);
 
-        private final Class<? extends GroupInstrumentation> type;
+        private final Supported instrumentation;
 
-        GroupType(Class<? extends GroupInstrumentation> type) {
+        Group(Supported instrumentation) {
+            this.instrumentation = instrumentation;
+        }
+    }
+
+    public enum Supported {
+        GENERAL(InstrumentationConfiguration.class),
+        HTTP_REQUESTS(HttpRequestsInstrumentation.class),
+        APP_LAUNCH_TIME(AppLaunchTimeInstrumentation.class),
+        SCREEN_RENDERING(ScreenRenderingInstrumentation.class),
+        CRASH_REPORTING(CrashReportingInstrumentation.class);
+
+        private final Class<? extends SupportedInstrumentation> type;
+
+        Supported(Class<? extends SupportedInstrumentation> type) {
             this.type = type;
         }
     }

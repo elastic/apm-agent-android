@@ -264,7 +264,7 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
         public void onCreate() {
             super.onCreate();
             ElasticApmConfiguration configuration = ElasticApmConfiguration.builder().setInstrumentationConfiguration(InstrumentationConfiguration.builder()
-                    .enableHttpRequests(false)
+                    .enableHttpTracing(false)
                     .build()).build();
 
             ElasticApmAgent.initialize(this, configuration, getConnectivity());

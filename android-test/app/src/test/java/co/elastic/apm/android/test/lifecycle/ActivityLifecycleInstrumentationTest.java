@@ -19,6 +19,7 @@ import co.elastic.apm.android.test.activities.NoLifecycleMethodsActivity;
 import co.elastic.apm.android.test.activities.SimpleCoroutineActivity;
 import co.elastic.apm.android.test.activities.TitleActivity;
 import co.elastic.apm.android.test.common.spans.Spans;
+import co.elastic.apm.android.test.testutils.AppWithoutInitializedAgent;
 import io.opentelemetry.sdk.trace.data.SpanData;
 
 public class ActivityLifecycleInstrumentationTest extends BaseLifecycleInstrumentationTest {
@@ -274,6 +275,15 @@ public class ActivityLifecycleInstrumentationTest extends BaseLifecycleInstrumen
     @Config(application = AppWithScreenRenderingInstrumentationDisabled.class)
     @Test
     public void whenInstrumentationIsDisabled_doNotSendScreenRenderingSpans() {
+        try (ActivityController<FullCreationActivity> controller = Robolectric.buildActivity(FullCreationActivity.class)) {
+            controller.setup();
+            getRecordedSpans(0);
+        }
+    }
+
+    @Config(application = AppWithoutInitializedAgent.class)
+    @Test
+    public void whenAgentIsNotInitialized_doNotSendScreenRenderingSpans() {
         try (ActivityController<FullCreationActivity> controller = Robolectric.buildActivity(FullCreationActivity.class)) {
             controller.setup();
             getRecordedSpans(0);

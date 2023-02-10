@@ -14,7 +14,9 @@ import java.util.List;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 
-public class InstrumentationsGenerator implements Generator {
+import co.elastic.apm.compile.processor.generators.instrumentations.BaseInstrumentationsGenerator;
+
+public class InstrumentationsGenerator extends BaseInstrumentationsGenerator {
 
     @Override
     public Result generate(List<TypeElement> from) {
@@ -44,8 +46,7 @@ public class InstrumentationsGenerator implements Generator {
     }
 
     private MethodSpec generateMethodFor(TypeElement typeElement, ClassName instrumentationClassName, ClassName functionClassName) {
-        String simpleName = typeElement.getSimpleName().toString();
-        String instrumentationName = getInstrumentationName(simpleName);
+        String instrumentationName = getInstrumentationName(typeElement);
         ClassName typeClassName = ClassName.get(typeElement);
         ParameterSpec function = ParameterSpec.builder(ParameterizedTypeName.get(functionClassName, typeClassName), "function").build();
         return MethodSpec.methodBuilder("runWhen" + instrumentationName + "IsEnabled")
@@ -66,13 +67,5 @@ public class InstrumentationsGenerator implements Generator {
         JavaFile javaFile = JavaFile.builder(packageName, typeSpec).build();
 
         return new Result(packageName + "." + simpleName, javaFile, from.toArray(new TypeElement[0]));
-    }
-
-    private String getInstrumentationName(String simpleName) {
-        int suffixIndex = simpleName.lastIndexOf("Instrumentation");
-        if (suffixIndex > 0) {
-            return simpleName.substring(0, suffixIndex);
-        }
-        return simpleName;
     }
 }

@@ -20,6 +20,7 @@ import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
 
 import co.elastic.apm.compile.processor.generators.Generator;
+import co.elastic.apm.compile.processor.generators.InstrumentationBuilderGenerator;
 import co.elastic.apm.compile.processor.generators.InstrumentationsGenerator;
 
 @AutoService(Processor.class)
@@ -35,6 +36,7 @@ public class AutoInstrumentationProcessor extends AbstractProcessor {
             annotated.forEach((Consumer<Element>) element -> types.add((TypeElement) element));
 
             Generator.Result instrumentations = new InstrumentationsGenerator().generate(types);
+            Generator.Result instrumentationBuilder = new InstrumentationBuilderGenerator().generate(types);
 
             createJavaSource(instrumentations);
         });

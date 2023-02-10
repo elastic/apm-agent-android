@@ -37,6 +37,7 @@ import co.elastic.apm.android.sdk.attributes.resources.RuntimeDescriptorVisitor;
 import co.elastic.apm.android.sdk.attributes.resources.SdkIdVisitor;
 import co.elastic.apm.android.sdk.attributes.resources.ServiceIdVisitor;
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
+import co.elastic.apm.android.sdk.instrumentation.Instrumentations;
 import co.elastic.apm.android.sdk.internal.api.Initializable;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.exceptions.ElasticExceptionHandler;
@@ -192,7 +193,9 @@ public final class ElasticApmAgent {
     }
 
     private void initializeCrashReports() {
-        Thread.setDefaultUncaughtExceptionHandler(ElasticExceptionHandler.getInstance());
+        Instrumentations.runWhenCrashReportingIsEnabled(instrumentation -> {
+            Thread.setDefaultUncaughtExceptionHandler(ElasticExceptionHandler.getInstance());
+        });
     }
 
     private void initializeOpentelemetry() {

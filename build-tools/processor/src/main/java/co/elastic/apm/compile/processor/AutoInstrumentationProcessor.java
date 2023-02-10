@@ -20,8 +20,8 @@ import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
 
 import co.elastic.apm.compile.processor.generators.Generator;
-import co.elastic.apm.compile.processor.generators.InstrumentationBuilderGenerator;
-import co.elastic.apm.compile.processor.generators.InstrumentationsGenerator;
+import co.elastic.apm.compile.processor.generators.instrumentations.InstrumentationBuilderGenerator;
+import co.elastic.apm.compile.processor.generators.instrumentations.InstrumentationsGenerator;
 
 @AutoService(Processor.class)
 @SupportedAnnotationTypes("co.elastic.apm.compile.processor.annotations.AutoInstrumentation")

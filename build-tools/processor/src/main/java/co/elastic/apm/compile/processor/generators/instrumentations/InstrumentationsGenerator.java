@@ -1,4 +1,4 @@
-package co.elastic.apm.compile.processor.generators;
+package co.elastic.apm.compile.processor.generators.instrumentations;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
@@ -13,8 +13,6 @@ import java.util.List;
 
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-
-import co.elastic.apm.compile.processor.generators.instrumentations.BaseInstrumentationsGenerator;
 
 public class InstrumentationsGenerator extends BaseInstrumentationsGenerator {
 

@@ -43,8 +43,8 @@ public class InstrumentationBuilderGenerator extends BaseInstrumentationsGenerat
     }
 
     private JavaFile createType(ClassName instrumentationConfigName, ClassName builderName, List<FieldInfo> fields) {
-        TypeSpec.Builder classBuilder = TypeSpec.classBuilder(builderName);
-        TypeSpec.classBuilder(builderName);
+        TypeSpec.Builder classBuilder = TypeSpec.classBuilder(builderName)
+                .addModifiers(Modifier.PUBLIC);
 
         fields.forEach(fieldInfo -> {
             classBuilder.addField(fieldInfo.field);

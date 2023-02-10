@@ -88,6 +88,7 @@ public class InstrumentationBuilderGenerator extends BaseInstrumentationsGenerat
         ClassName instrumentationTypeName = ClassName.get(instrumentationConfigName.packageName(), "Instrumentation");
         String instrumentationsListName = "instrumentations";
         MethodSpec.Builder buildMethodBuilder = MethodSpec.methodBuilder("build").returns(instrumentationConfigName)
+                .addModifiers(Modifier.PUBLIC)
                 .addStatement("$T<$T> $L = new $T<>()", List.class, instrumentationTypeName, instrumentationsListName, ArrayList.class);
 
         fields.forEach(fieldInfo -> buildMethodBuilder.addStatement("$N.add(new $T($N))", instrumentationsListName, fieldInfo.element, fieldInfo.field));

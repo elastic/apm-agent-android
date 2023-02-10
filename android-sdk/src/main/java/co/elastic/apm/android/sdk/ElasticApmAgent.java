@@ -193,9 +193,9 @@ public final class ElasticApmAgent {
     }
 
     private void initializeCrashReports() {
-        Instrumentations.runWhenCrashReportingIsEnabled(instrumentation -> {
+        if (Instrumentations.isCrashReportingEnabled()) {
             Thread.setDefaultUncaughtExceptionHandler(ElasticExceptionHandler.getInstance());
-        });
+        }
     }
 
     private void initializeOpentelemetry() {

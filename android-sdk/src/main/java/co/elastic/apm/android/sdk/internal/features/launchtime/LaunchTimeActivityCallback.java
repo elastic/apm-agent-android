@@ -42,10 +42,10 @@ public final class LaunchTimeActivityCallback implements Application.ActivityLif
         unregisterCallback(activity);
 
         if (LaunchTimeTracker.stopTimer()) {
-            Instrumentations.runWhenAppLaunchTimeIsEnabled(instrumentation -> {
+            if (Instrumentations.isAppLaunchTimeEnabled()) {
                 long launchTimeInNanos = LaunchTimeTracker.getElapsedTimeInNanos();
                 sendAppLaunchTimeMetric(TimeUnit.NANOSECONDS.toMillis(launchTimeInNanos));
-            });
+            }
         }
     }
 

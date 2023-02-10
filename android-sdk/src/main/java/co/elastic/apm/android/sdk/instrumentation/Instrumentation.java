@@ -27,9 +27,13 @@ import co.elastic.apm.android.sdk.internal.instrumentation.InternalInstrumentati
 public abstract class Instrumentation extends Configuration {
 
     static <T extends Instrumentation> void runWhenEnabled(Class<T> type, Function<T> onEnabled) {
-        if (Configurations.isEnabled(type)) {
+        if (isEnabled(type)) {
             onEnabled.onInstrumentationReady(Configurations.get(type));
         }
+    }
+
+    static <T extends Instrumentation> boolean isEnabled(Class<T> type) {
+        return Configurations.isEnabled(type);
     }
 
     @NonNull

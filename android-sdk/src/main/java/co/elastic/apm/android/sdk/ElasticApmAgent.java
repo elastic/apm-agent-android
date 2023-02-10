@@ -116,6 +116,10 @@ public final class ElasticApmAgent {
         return instance;
     }
 
+    public synchronized static boolean isInitialized() {
+        return instance != null;
+    }
+
     private static void verifyInitialization() {
         if (instance == null) {
             throw new IllegalStateException("ElasticApmAgent hasn't been initialized");
@@ -124,6 +128,7 @@ public final class ElasticApmAgent {
 
     public static void resetForTest() {
         ElasticExceptionHandler.resetForTest();
+        Configurations.resetForTest();
         if (instance != null) {
             instance.serviceManager.stop();
             instance = null;

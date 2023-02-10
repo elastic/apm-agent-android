@@ -65,7 +65,7 @@ public final class Configurations {
         return (T) configurations.get(configurationClass);
     }
 
-    static void resetForTest() {
+    public static void resetForTest() {
         INSTANCE = null;
     }
 

@@ -16,6 +16,7 @@ import java.io.StringWriter;
 import co.elastic.apm.android.sdk.ElasticApmConfiguration;
 import co.elastic.apm.android.sdk.instrumentation.InstrumentationConfiguration;
 import co.elastic.apm.android.test.common.logs.Logs;
+import co.elastic.apm.android.test.testutils.AppWithoutInitializedAgent;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTestApplication;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
@@ -51,6 +52,14 @@ public class CrashReportTest extends BaseRobolectricTest {
     @Config(application = AppWithInstrumentationDisabled.class)
     @Test
     public void whenInstrumentationIsDisabled_doNotSendCrashReport() {
+        throwException();
+
+        getRecordedLogs(0);
+    }
+
+    @Config(application = AppWithoutInitializedAgent.class)
+    @Test
+    public void whenTheAgentIsNotInitialized_doNotSendCrashReport() {
         throwException();
 
         getRecordedLogs(0);

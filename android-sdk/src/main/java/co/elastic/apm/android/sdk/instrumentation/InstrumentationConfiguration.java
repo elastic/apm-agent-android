@@ -27,20 +27,15 @@ public final class InstrumentationConfiguration extends GroupInstrumentation {
     public final List<Instrumentation> instrumentations;
 
     public static InstrumentationConfigurationBuilder builder() {
-        return new InstrumentationConfigurationBuilder();
+        return InstrumentationConfigurationBuilder.allDisabled();
     }
 
     public static InstrumentationConfiguration allEnabled() {
-        return builder()
-                .enableScreenRendering(true)
-                .enableHttpTracing(true)
-                .enableCrashReporting(true)
-                .enableAppLaunchTime(true)
-                .build();
+        return InstrumentationConfigurationBuilder.allEnabled().build();
     }
 
     public static InstrumentationConfiguration allDisabled() {
-        return new InstrumentationConfigurationBuilder().build();
+        return InstrumentationConfigurationBuilder.allDisabled().build();
     }
 
     public InstrumentationConfiguration(List<Instrumentation> instrumentations) {

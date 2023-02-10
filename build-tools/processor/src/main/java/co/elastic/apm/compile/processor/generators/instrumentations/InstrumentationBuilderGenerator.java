@@ -51,6 +51,7 @@ public class InstrumentationBuilderGenerator extends BaseInstrumentationsGenerat
             classBuilder.addMethod(fieldInfo.method);
         });
 
+        classBuilder.addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build());
         classBuilder.addMethod(createBuildMethod(instrumentationConfigName, fields));
 
         MethodSpec creatorMethod = createCreatorMethod(builderName);

@@ -15,7 +15,6 @@ import org.robolectric.annotation.Config;
 import java.io.IOException;
 import java.util.List;
 
-import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.ElasticApmConfiguration;
 import co.elastic.apm.android.sdk.instrumentation.InstrumentationConfiguration;
 import co.elastic.apm.android.sdk.traces.common.tools.ElasticTracer;
@@ -267,7 +266,7 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
                     .enableHttpTracing(false)
                     .build()).build();
 
-            ElasticApmAgent.initialize(this, configuration, getConnectivity());
+            initializeAgentWithCustomConfig(configuration);
         }
     }
 }

@@ -11,6 +11,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
+import co.elastic.apm.android.sdk.ElasticApmConfiguration;
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
@@ -35,6 +36,14 @@ public class BaseRobolectricTestApplication extends Application implements Expor
     private final MetricExporterCaptor metricExporter;
     private AgentDependenciesInjector injector;
     private NtpManager ntpManager;
+
+    protected void initializeAgentWithCustomConfig(ElasticApmConfiguration configuration) {
+        ElasticApmAgent.initialize(this, configuration, getConnectivity());
+    }
+
+    protected void initializeAgent() {
+        ElasticApmAgent.initialize(this, getConnectivity());
+    }
 
     public BaseRobolectricTestApplication() {
         spanExporter = new SpanExporterCaptor();
@@ -74,7 +83,7 @@ public class BaseRobolectricTestApplication extends Application implements Expor
         return logRecordExporter;
     }
 
-    protected Connectivity getConnectivity() {
+    private Connectivity getConnectivity() {
         PeriodicMetricReader metricReader = PeriodicMetricReader.create(metricExporter);
         MetricsFlusher flusher = new MetricsFlusher(metricReader);
         metricExporter.setFlusher(flusher);

@@ -11,7 +11,6 @@ import org.robolectric.annotation.Config;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.test.common.logs.Logs;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTestApplication;
@@ -54,7 +53,7 @@ public class CrashReportTest extends BaseRobolectricTest {
             super.onCreate();
             originalExceptionHandler = Mockito.mock(Thread.UncaughtExceptionHandler.class);
             Thread.setDefaultUncaughtExceptionHandler(originalExceptionHandler);
-            ElasticApmAgent.initialize(this, getConnectivity());
+            initializeAgent();
         }
     }
 

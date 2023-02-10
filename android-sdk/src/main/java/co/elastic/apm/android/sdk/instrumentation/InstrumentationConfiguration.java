@@ -18,21 +18,16 @@
  */
 package co.elastic.apm.android.sdk.instrumentation;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import co.elastic.apm.android.sdk.instrumentation.supported.AppLaunchTimeInstrumentation;
-import co.elastic.apm.android.sdk.instrumentation.supported.CrashReportingInstrumentation;
-import co.elastic.apm.android.sdk.instrumentation.supported.HttpTracingInstrumentation;
-import co.elastic.apm.android.sdk.instrumentation.supported.ScreenRenderingInstrumentation;
 import co.elastic.apm.android.sdk.internal.configuration.Configuration;
 import co.elastic.apm.android.sdk.internal.instrumentation.GroupInstrumentation;
 
 public final class InstrumentationConfiguration extends GroupInstrumentation {
     public final List<Instrumentation> instrumentations;
 
-    public static InstrumentationConfiguration.Builder builder() {
-        return new Builder(true);
+    public static InstrumentationConfigurationBuilder builder() {
+        return new InstrumentationConfigurationBuilder();
     }
 
     public static InstrumentationConfiguration allEnabled() {
@@ -40,64 +35,21 @@ public final class InstrumentationConfiguration extends GroupInstrumentation {
                 .enableScreenRendering(true)
                 .enableHttpTracing(true)
                 .enableCrashReporting(true)
-                .enableAppLaunchTimeMetric(true)
+                .enableAppLaunchTime(true)
                 .build();
     }
 
     public static InstrumentationConfiguration allDisabled() {
-        return new Builder(false).build();
+        return new InstrumentationConfigurationBuilder().build();
     }
 
-    public InstrumentationConfiguration(
-            boolean enabled,
-            List<Instrumentation> instrumentations) {
-        super(enabled);
+    public InstrumentationConfiguration(List<Instrumentation> instrumentations) {
+        super(true);
         this.instrumentations = instrumentations;
     }
 
     @Override
     protected Class<? extends Configuration> getParentConfigurationType() {
         return null;
-    }
-
-    public static class Builder {
-        private final boolean enabled;
-        private boolean enableHttpTracing;
-        private boolean enableScreenRendering;
-        private boolean enableCrashReporting;
-        private boolean enableAppLaunchTimeMetric;
-
-        private Builder(boolean enabled) {
-            this.enabled = enabled;
-        }
-
-        public Builder enableHttpTracing(boolean enable) {
-            this.enableHttpTracing = enable;
-            return this;
-        }
-
-        public Builder enableScreenRendering(boolean enable) {
-            this.enableScreenRendering = enable;
-            return this;
-        }
-
-        public Builder enableCrashReporting(boolean enable) {
-            this.enableCrashReporting = enable;
-            return this;
-        }
-
-        public Builder enableAppLaunchTimeMetric(boolean enable) {
-            this.enableAppLaunchTimeMetric = enable;
-            return this;
-        }
-
-        public InstrumentationConfiguration build() {
-            List<Instrumentation> instrumentations = new ArrayList<>();
-            instrumentations.add(new HttpTracingInstrumentation(enableHttpTracing));
-            instrumentations.add(new ScreenRenderingInstrumentation(enableScreenRendering));
-            instrumentations.add(new CrashReportingInstrumentation(enableCrashReporting));
-            instrumentations.add(new AppLaunchTimeInstrumentation(enableAppLaunchTimeMetric));
-            return new InstrumentationConfiguration(enabled, instrumentations);
-        }
     }
 }

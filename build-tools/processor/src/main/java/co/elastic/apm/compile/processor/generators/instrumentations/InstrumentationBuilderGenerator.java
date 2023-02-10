@@ -66,7 +66,7 @@ public class InstrumentationBuilderGenerator extends BaseInstrumentationsGenerat
 
         fields.forEach(fieldInfo -> buildMethodBuilder.addStatement("$N.add(new $T($N))", instrumentationsListName, fieldInfo.element, fieldInfo.field));
 
-        return buildMethodBuilder.addStatement("return new $T(true, $N)", instrumentationConfigName, instrumentationsListName).build();
+        return buildMethodBuilder.addStatement("return new $T($N)", instrumentationConfigName, instrumentationsListName).build();
     }
 
     private static class FieldInfo {

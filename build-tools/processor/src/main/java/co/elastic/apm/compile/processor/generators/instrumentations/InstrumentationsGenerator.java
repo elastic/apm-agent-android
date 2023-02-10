@@ -26,8 +26,8 @@ public class InstrumentationsGenerator extends BaseInstrumentationsGenerator {
         ClassName instrumentationClassName = ClassName.get("co.elastic.apm.android.sdk.instrumentation", "Instrumentation");
         ClassName functionClassName = ClassName.get(instrumentationClassName.packageName(), instrumentationClassName.simpleName(), "Function");
         List<MethodSpec> methods = new ArrayList<>();
-        MethodSpec genericRunWhenEnabledMethod = generateGenericRunWhenEnabledMethod(instrumentationClassName, functionClassName);
-        methods.add(genericRunWhenEnabledMethod);
+        methods.add(generateGenericRunWhenEnabledMethod(instrumentationClassName, functionClassName));
+        methods.add(generateGenericIsEnabledMethod(instrumentationClassName));
         types.forEach(typeElement -> {
             String instrumentationName = getInstrumentationName(typeElement);
             ClassName typeClassName = ClassName.get(typeElement);
@@ -46,6 +46,17 @@ public class InstrumentationsGenerator extends BaseInstrumentationsGenerator {
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Class.class), typeVariable), "type")
                 .addParameter(ParameterizedTypeName.get(functionClassName, typeVariable), "function")
                 .addStatement("$T.runWhenEnabled(type, function)", instrumentationClassName)
+                .build();
+    }
+
+    private MethodSpec generateGenericIsEnabledMethod(ClassName instrumentationClassName) {
+        TypeVariableName typeVariable = TypeVariableName.get("T", instrumentationClassName);
+        return MethodSpec.methodBuilder("isInstrumentationEnabled")
+                .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
+                .addTypeVariable(typeVariable)
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Class.class), typeVariable), "type")
+                .returns(TypeName.BOOLEAN)
+                .addStatement("return $T.isEnabled(type)", instrumentationClassName)
                 .build();
     }
 

@@ -18,7 +18,7 @@ public class InstrumentationBuilderGenerator extends BaseInstrumentationsGenerat
     @Override
     public Result generate(List<TypeElement> from) {
         ClassName instrumentationConfigName = ClassName.get("co.elastic.apm.android.sdk.instrumentation", "InstrumentationConfiguration");
-        ClassName builderName = ClassName.get(instrumentationConfigName.packageName(), instrumentationConfigName.simpleName(), "Builder");
+        ClassName builderName = ClassName.get(instrumentationConfigName.packageName(), instrumentationConfigName.simpleName() + "Builder");
         List<FieldInfo> fieldInfos = new ArrayList<>();
         from.forEach(element -> {
             String fieldName = "enable" + getInstrumentationName(element);
@@ -62,7 +62,7 @@ public class InstrumentationBuilderGenerator extends BaseInstrumentationsGenerat
         ClassName instrumentationTypeName = ClassName.get(instrumentationConfigName.packageName(), "Instrumentation");
         String instrumentationsListName = "instrumentations";
         MethodSpec.Builder buildMethodBuilder = MethodSpec.methodBuilder("build").returns(instrumentationConfigName)
-                .addStatement("List<$T> $L = new ArrayList<>()", instrumentationTypeName, instrumentationsListName);
+                .addStatement("$T<$T> $L = new $T<>()", List.class, instrumentationTypeName, instrumentationsListName, ArrayList.class);
 
         fields.forEach(fieldInfo -> buildMethodBuilder.addStatement("$N.add(new $T($N))", instrumentationsListName, fieldInfo.element, fieldInfo.field));
 

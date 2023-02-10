@@ -52,10 +52,25 @@ public class InstrumentationBuilderGenerator extends BaseInstrumentationsGenerat
         });
 
         classBuilder.addMethod(createBuildMethod(instrumentationConfigName, fields));
+        classBuilder.addMethod(createAllEnabledProvider(builderName, fields));
 
         TypeSpec typeSpec = classBuilder.build();
 
         return JavaFile.builder(builderName.packageName(), typeSpec).build();
+    }
+
+    private MethodSpec createAllEnabledProvider(ClassName builderName, List<FieldInfo> fields) {
+        String builderInstanceName = "builder";
+        MethodSpec.Builder builder = MethodSpec.methodBuilder("allEnabled")
+                .returns(builderName)
+                .addStatement("$T $L = new $T()", builderName, builderInstanceName, builderName)
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
+
+        fields.forEach(fieldInfo -> builder.addStatement("$N.$N(true)", builderInstanceName, fieldInfo.method));
+
+        builder.addStatement("return $N", builderInstanceName);
+
+        return builder.build();
     }
 
     private MethodSpec createBuildMethod(ClassName instrumentationConfigName, List<FieldInfo> fields) {

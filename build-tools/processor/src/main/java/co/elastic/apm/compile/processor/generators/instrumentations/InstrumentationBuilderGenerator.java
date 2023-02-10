@@ -56,6 +56,7 @@ public class InstrumentationBuilderGenerator extends BaseInstrumentationsGenerat
         MethodSpec creatorMethod = createCreatorMethod(builderName);
         classBuilder.addMethod(creatorMethod);
         classBuilder.addMethod(createAllEnabledProvider(builderName, creatorMethod, fields));
+        classBuilder.addMethod(createAllDisabledProvider(builderName, creatorMethod));
 
         TypeSpec typeSpec = classBuilder.build();
 
@@ -82,6 +83,14 @@ public class InstrumentationBuilderGenerator extends BaseInstrumentationsGenerat
         builder.addStatement("return $N", builderInstanceName);
 
         return builder.build();
+    }
+
+    private MethodSpec createAllDisabledProvider(ClassName builderName, MethodSpec creator) {
+        return MethodSpec.methodBuilder("allDisabled")
+                .returns(builderName)
+                .addStatement("return $N()", creator)
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC).
+                build();
     }
 
     private MethodSpec createBuildMethod(ClassName instrumentationConfigName, List<FieldInfo> fields) {

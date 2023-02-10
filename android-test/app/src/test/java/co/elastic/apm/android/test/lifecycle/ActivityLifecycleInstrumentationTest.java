@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNull;
 import org.junit.Test;
 import org.robolectric.Robolectric;
 import org.robolectric.android.controller.ActivityController;
+import org.robolectric.annotation.Config;
 
 import java.util.List;
 
@@ -265,6 +266,15 @@ public class ActivityLifecycleInstrumentationTest extends BaseLifecycleInstrumen
     @Test
     public void onCreation_whenNoLifecycleMethodsAvailable_doNothing() {
         try (ActivityController<NoLifecycleMethodsActivity> controller = Robolectric.buildActivity(NoLifecycleMethodsActivity.class)) {
+            controller.setup();
+            getRecordedSpans(0);
+        }
+    }
+
+    @Config(application = AppWithScreenRenderingInstrumentationDisabled.class)
+    @Test
+    public void whenInstrumentationIsDisabled_doNotSendScreenRenderingSpans() {
+        try (ActivityController<FullCreationActivity> controller = Robolectric.buildActivity(FullCreationActivity.class)) {
             controller.setup();
             getRecordedSpans(0);
         }

@@ -39,6 +39,7 @@ public class AutoInstrumentationProcessor extends AbstractProcessor {
             Generator.Result instrumentationBuilder = new InstrumentationBuilderGenerator().generate(types);
 
             createJavaSource(instrumentations);
+            createJavaSource(instrumentationBuilder);
         });
 
         return true;

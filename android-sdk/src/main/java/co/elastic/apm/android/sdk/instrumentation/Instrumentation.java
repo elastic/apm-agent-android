@@ -22,7 +22,7 @@ import androidx.annotation.NonNull;
 
 import co.elastic.apm.android.sdk.internal.configuration.Configuration;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
-import co.elastic.apm.android.sdk.internal.instrumentation.ConfigurableInstrumentation;
+import co.elastic.apm.android.sdk.internal.instrumentation.InternalInstrumentation;
 
 public abstract class Instrumentation extends Configuration {
 
@@ -45,9 +45,9 @@ public abstract class Instrumentation extends Configuration {
     public enum Group {
         NONE(InstrumentationConfiguration.class);
 
-        private final Class<? extends ConfigurableInstrumentation> type;
+        private final Class<? extends InternalInstrumentation> type;
 
-        Group(Class<? extends ConfigurableInstrumentation> type) {
+        Group(Class<? extends InternalInstrumentation> type) {
             this.type = type;
         }
     }

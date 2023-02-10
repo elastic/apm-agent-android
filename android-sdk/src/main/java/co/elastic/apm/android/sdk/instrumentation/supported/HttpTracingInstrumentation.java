@@ -18,11 +18,11 @@
  */
 package co.elastic.apm.android.sdk.instrumentation.supported;
 
-import co.elastic.apm.android.sdk.internal.instrumentation.ConfigurableInstrumentation;
+import co.elastic.apm.android.sdk.internal.instrumentation.InternalInstrumentation;
 import co.elastic.apm.compile.processor.annotations.AutoInstrumentation;
 
 @AutoInstrumentation
-public final class HttpTracingInstrumentation extends ConfigurableInstrumentation {
+public final class HttpTracingInstrumentation extends InternalInstrumentation {
 
     public HttpTracingInstrumentation(boolean enabled) {
         super(enabled);

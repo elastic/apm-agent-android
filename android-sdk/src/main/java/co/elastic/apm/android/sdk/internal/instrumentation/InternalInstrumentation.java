@@ -20,10 +20,10 @@ package co.elastic.apm.android.sdk.internal.instrumentation;
 
 import co.elastic.apm.android.sdk.instrumentation.Instrumentation;
 
-public abstract class ConfigurableInstrumentation extends Instrumentation {
+public abstract class InternalInstrumentation extends Instrumentation {
     private final boolean enabled;
 
-    protected ConfigurableInstrumentation(boolean enabled) {
+    protected InternalInstrumentation(boolean enabled) {
         this.enabled = enabled;
     }
 

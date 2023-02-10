@@ -21,6 +21,8 @@ package co.elastic.apm.android.sdk.internal.configuration;
 import java.util.HashMap;
 import java.util.Map;
 
+import co.elastic.apm.android.common.internal.logging.Elog;
+
 public final class Configurations {
     private static Configurations INSTANCE;
     private final Map<Class<? extends Configuration>, Configuration> configurations;
@@ -40,9 +42,11 @@ public final class Configurations {
     public static boolean isEnabled(Class<? extends Configuration> configurationClass) {
         Configurations configurations = get();
         if (configurations == null) {
+            Elog.getLogger(Configurations.class).info("Configurations has not been initialized");
             return false;
         }
         if (!configurations.hasConfiguration(configurationClass)) {
+            Elog.getLogger(Configurations.class).info("The requested Configuration was not found");
             return false;
         }
 

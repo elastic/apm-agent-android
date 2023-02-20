@@ -43,6 +43,7 @@ dependencies {
     implementation "io.opentelemetry:opentelemetry-exporter-otlp-logs:$openTelemetry_version-alpha"
     implementation "io.opentelemetry:opentelemetry-semconv:$openTelemetry_version-alpha"
     implementation "androidx.annotation:annotation:$androidAnnotations_version"
+    implementation 'com.dslplatform:dsl-json-java8:1.10.0'
     embedded 'com.github.instacart.truetime-android:library:3.5'
     annotationProcessor 'co.elastic.apm.compile:processor'
     compileOnly 'co.elastic.apm.compile:processor'

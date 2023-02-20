@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNull;
 import androidx.fragment.app.testing.FragmentScenario;
 
 import org.junit.Test;
+import org.robolectric.annotation.Config;
 
 import java.util.List;
 
@@ -16,6 +17,7 @@ import co.elastic.apm.android.test.fragments.Hilt_InstrumentedFragment;
 import co.elastic.apm.android.test.fragments.OnCreateMissingFragment;
 import co.elastic.apm.android.test.fragments.OnCreateViewOnlyFragment;
 import co.elastic.apm.android.test.fragments.ViewlessCreationFragment;
+import co.elastic.apm.android.test.testutils.AppWithoutInitializedAgent;
 import io.opentelemetry.sdk.trace.data.SpanData;
 
 public class FragmentLifecycleInstrumentationTest extends BaseLifecycleInstrumentationTest {
@@ -158,5 +160,20 @@ public class FragmentLifecycleInstrumentationTest extends BaseLifecycleInstrumen
                     .isNamed(getSpanMethodName(FragmentMethod.ON_CREATE_VIEW));
         }
     }
-}
 
+    @Config(application = AppWithScreenRenderingInstrumentationDisabled.class)
+    @Test
+    public void whenInstrumentationIsDisabled_doNotSendScreenRenderingSpans() {
+        try (FragmentScenario<FullCreationFragment> scenario = FragmentScenario.launchInContainer(FullCreationFragment.class)) {
+            scenario.onFragment(fullCreationFragment -> getRecordedSpans(0));
+        }
+    }
+
+    @Config(application = AppWithoutInitializedAgent.class)
+    @Test
+    public void whenAgentIsNotInitialized_doNotSendScreenRenderingSpans() {
+        try (FragmentScenario<FullCreationFragment> scenario = FragmentScenario.launchInContainer(FullCreationFragment.class)) {
+            scenario.onFragment(fullCreationFragment -> getRecordedSpans(0));
+        }
+    }
+}

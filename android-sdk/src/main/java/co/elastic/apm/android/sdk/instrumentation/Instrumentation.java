@@ -20,38 +20,44 @@ package co.elastic.apm.android.sdk.instrumentation;
 
 import androidx.annotation.NonNull;
 
-import co.elastic.apm.android.sdk.instrumentation.supported.HttpRequestsInstrumentation;
 import co.elastic.apm.android.sdk.internal.configuration.Configuration;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
-import co.elastic.apm.android.sdk.internal.instrumentation.GroupInstrumentation;
+import co.elastic.apm.android.sdk.internal.instrumentation.InternalInstrumentation;
 
 public abstract class Instrumentation extends Configuration {
 
-    public static <T extends Instrumentation> T get(Class<T> instrumentationClass) {
-        return Configurations.get(instrumentationClass);
+    static <T extends Instrumentation> void runWhenEnabled(Class<T> type, Function<T> onEnabled) {
+        if (isEnabled(type)) {
+            onEnabled.onInstrumentationReady(Configurations.get(type));
+        }
     }
 
-    public static HttpRequestsInstrumentation getHttpRequestsConfiguration() {
-        return get(HttpRequestsInstrumentation.class);
+    static <T extends Instrumentation> boolean isEnabled(Class<T> type) {
+        return Configurations.isEnabled(type);
     }
 
     @NonNull
-    protected GroupType getGroupType() {
-        return GroupType.NONE;
+    protected Group getGroup() {
+        return Group.NONE;
     }
 
     @Override
     protected Class<? extends Configuration> getParentConfigurationType() {
-        return getGroupType().type;
+        return getGroup().type;
     }
 
-    public enum GroupType {
+    public enum Group {
         NONE(InstrumentationConfiguration.class);
 
-        private final Class<? extends GroupInstrumentation> type;
+        private final Class<? extends InternalInstrumentation> type;
 
-        GroupType(Class<? extends GroupInstrumentation> type) {
+        Group(Class<? extends InternalInstrumentation> type) {
             this.type = type;
         }
+    }
+
+    @FunctionalInterface
+    public interface Function<T extends Instrumentation> {
+        void onInstrumentationReady(T instrumentation);
     }
 }

@@ -34,6 +34,9 @@ class AndroidLogger extends BaseELogger {
     AndroidLogger(String tag) {
         super(tag);
         appIsDebuggable = LazyProvider.of(() -> {
+            if (!ElasticApmAgent.isInitialized()) {
+                return false;
+            }
             AppInfoService service = ElasticApmAgent.get().getService(Service.Names.APP_INFO);
             return service.isInDebugMode();
         });

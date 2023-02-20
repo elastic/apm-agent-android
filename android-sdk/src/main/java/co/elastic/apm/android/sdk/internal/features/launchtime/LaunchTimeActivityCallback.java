@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.ElasticApmAgent;
+import co.elastic.apm.android.sdk.instrumentation.Instrumentations;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.metrics.BatchCallback;
 import io.opentelemetry.api.metrics.Meter;
@@ -41,8 +42,10 @@ public final class LaunchTimeActivityCallback implements Application.ActivityLif
         unregisterCallback(activity);
 
         if (LaunchTimeTracker.stopTimer()) {
-            long launchTimeInNanos = LaunchTimeTracker.getElapsedTimeInNanos();
-            sendAppLaunchTimeMetric(TimeUnit.NANOSECONDS.toMillis(launchTimeInNanos));
+            if (Instrumentations.isAppLaunchTimeEnabled()) {
+                long launchTimeInNanos = LaunchTimeTracker.getElapsedTimeInNanos();
+                sendAppLaunchTimeMetric(TimeUnit.NANOSECONDS.toMillis(launchTimeInNanos));
+            }
         }
     }
 

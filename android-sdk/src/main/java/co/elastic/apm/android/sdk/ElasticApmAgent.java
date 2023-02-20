@@ -37,6 +37,7 @@ import co.elastic.apm.android.sdk.attributes.resources.RuntimeDescriptorVisitor;
 import co.elastic.apm.android.sdk.attributes.resources.SdkIdVisitor;
 import co.elastic.apm.android.sdk.attributes.resources.ServiceIdVisitor;
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
+import co.elastic.apm.android.sdk.instrumentation.Instrumentations;
 import co.elastic.apm.android.sdk.internal.api.Initializable;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.exceptions.ElasticExceptionHandler;
@@ -116,16 +117,23 @@ public final class ElasticApmAgent {
         return instance;
     }
 
+    public synchronized static boolean isInitialized() {
+        return instance != null;
+    }
+
     private static void verifyInitialization() {
         if (instance == null) {
             throw new IllegalStateException("ElasticApmAgent hasn't been initialized");
         }
     }
 
-    public void resetForTest() {
+    public static void resetForTest() {
         ElasticExceptionHandler.resetForTest();
-        serviceManager.stop();
-        instance = null;
+        Configurations.resetForTest();
+        if (instance != null) {
+            instance.serviceManager.stop();
+            instance = null;
+        }
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -169,6 +177,7 @@ public final class ElasticApmAgent {
 
     private void initializeDynamicConfiguration() {
         Configurations.Builder builder = Configurations.builder();
+        builder.register(configuration.instrumentationConfiguration);
         configuration.instrumentationConfiguration.instrumentations.forEach(builder::register);
         builder.buildAndRegisterGlobal();
     }
@@ -184,7 +193,9 @@ public final class ElasticApmAgent {
     }
 
     private void initializeCrashReports() {
-        Thread.setDefaultUncaughtExceptionHandler(ElasticExceptionHandler.getInstance());
+        if (Instrumentations.isCrashReportingEnabled()) {
+            Thread.setDefaultUncaughtExceptionHandler(ElasticExceptionHandler.getInstance());
+        }
     }
 
     private void initializeOpentelemetry() {

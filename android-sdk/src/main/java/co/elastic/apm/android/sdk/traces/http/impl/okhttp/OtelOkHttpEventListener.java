@@ -27,6 +27,7 @@ import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.attributes.AttributesCreator;
 import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
+import co.elastic.apm.android.sdk.instrumentation.Instrumentations;
 import co.elastic.apm.android.sdk.traces.common.tools.ElasticTracer;
 import co.elastic.apm.android.sdk.traces.http.HttpTraceConfiguration;
 import co.elastic.apm.android.sdk.traces.http.data.HttpRequest;
@@ -60,6 +61,9 @@ public class OtelOkHttpEventListener extends EventListener {
     @Override
     public void callStart(Call call) {
         super.callStart(call);
+        if (!Instrumentations.isHttpTracingEnabled()) {
+            return;
+        }
         Request request = call.request();
         Elog.getLogger().info("Intercepting OkHttp request");
         Elog.getLogger().debug("Intercepting OkHttp request: {}", request.url());
@@ -123,9 +127,12 @@ public class OtelOkHttpEventListener extends EventListener {
     public void callEnd(Call call) {
         super.callEnd(call);
         Request request = call.request();
+        Context context = getContext(request);
+        if (context == null) {
+            return;
+        }
         Elog.getLogger().info("OkHttp request ended");
         Elog.getLogger().debug("OkHttp request ended: {}", request.url());
-        Context context = getContext(request);
         Span span = retrieveSpan(context);
         if (span != null) {
             endSpan(span, context);
@@ -137,9 +144,12 @@ public class OtelOkHttpEventListener extends EventListener {
     public void callFailed(Call call, IOException ioe) {
         super.callFailed(call, ioe);
         Request request = call.request();
+        Context context = getContext(request);
+        if (context == null) {
+            return;
+        }
         Elog.getLogger().info("OkHttp request failed");
         Elog.getLogger().debug("OkHttp request failed: {}", request.url());
-        Context context = getContext(request);
         Span span = retrieveSpan(context);
         if (span != null) {
             span.setStatus(StatusCode.ERROR);

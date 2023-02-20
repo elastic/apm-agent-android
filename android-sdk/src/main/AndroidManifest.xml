@@ -17,8 +17,8 @@
             </intent-filter>
         </receiver>
         <provider
-            android:name=".internal.features.launchtime.LaunchTimeContentProvider"
-            android:authorities="${applicationId}.elasticlaunchtimeprovider"
+            android:name=".internal.features.contentprovider.ElasticInitializer"
+            android:authorities="${applicationId}.elasticagentinitializer"
             android:exported="false" />
     </application>
 </manifest>

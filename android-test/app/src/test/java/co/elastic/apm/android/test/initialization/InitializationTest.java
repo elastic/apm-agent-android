@@ -9,7 +9,6 @@ import org.robolectric.annotation.Config;
 
 import java.lang.reflect.Field;
 
-import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.ElasticApmConfiguration;
 import co.elastic.apm.android.sdk.session.impl.DefaultSessionIdProvider;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
@@ -34,9 +33,8 @@ public class InitializationTest extends BaseRobolectricTest {
             sessionIdProvider = mock(DefaultSessionIdProvider.class);
             ElasticApmConfiguration configuration = ElasticApmConfiguration.builder().build();
             setSessionIdProvider(configuration, sessionIdProvider);
-            ElasticApmAgent.initialize(this,
-                    configuration,
-                    getConnectivity());
+
+            initializeAgentWithCustomConfig(configuration);
         }
 
         private void setSessionIdProvider(ElasticApmConfiguration configuration, DefaultSessionIdProvider sessionIdProvider) {

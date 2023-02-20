@@ -4,12 +4,18 @@ import org.junit.After;
 import org.junit.Test;
 import org.robolectric.Robolectric;
 import org.robolectric.android.controller.ActivityController;
+import org.robolectric.annotation.Config;
 
+import co.elastic.apm.android.sdk.ElasticApmAgent;
+import co.elastic.apm.android.sdk.ElasticApmConfiguration;
+import co.elastic.apm.android.sdk.instrumentation.InstrumentationConfiguration;
 import co.elastic.apm.android.sdk.internal.features.launchtime.LaunchTimeTracker;
 import co.elastic.apm.android.test.activities.FullCreationActivity;
 import co.elastic.apm.android.test.activities.OnStartOnlyActivity;
 import co.elastic.apm.android.test.common.metrics.Metrics;
+import co.elastic.apm.android.test.testutils.AppWithoutInitializedAgent;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
+import co.elastic.apm.android.test.testutils.base.BaseRobolectricTestApplication;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 
 public class AppLaunchTimeTest extends BaseRobolectricTest {
@@ -66,4 +72,34 @@ public class AppLaunchTimeTest extends BaseRobolectricTest {
         }
     }
 
+    @Config(application = AppWithDisabledAppLaunchInstrumentation.class)
+    @Test
+    public void whenInstrumentationConfigIsDisabled_doNotTrackStartupTime() {
+        try (ActivityController<FullCreationActivity> controller = Robolectric.buildActivity(FullCreationActivity.class)) {
+            controller.setup();
+
+            getRecordedMetrics(0);
+        }
+    }
+
+    @Config(application = AppWithoutInitializedAgent.class)
+    @Test
+    public void whenAgentIsNotInitialized_doNotTrackStartupTime() {
+        try (ActivityController<FullCreationActivity> controller = Robolectric.buildActivity(FullCreationActivity.class)) {
+            controller.setup();
+
+            getRecordedMetrics(0);
+        }
+    }
+
+    private static class AppWithDisabledAppLaunchInstrumentation extends BaseRobolectricTestApplication {
+        @Override
+        public void onCreate() {
+            super.onCreate();
+            ElasticApmConfiguration configuration = ElasticApmConfiguration.builder().setInstrumentationConfiguration(InstrumentationConfiguration.builder()
+                    .enableAppLaunchTime(false).build()).build();
+
+            initializeAgentWithCustomConfig(configuration);
+        }
+    }
 }

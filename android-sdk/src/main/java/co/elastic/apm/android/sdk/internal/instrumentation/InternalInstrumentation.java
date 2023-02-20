@@ -16,13 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.instrumentation.supported;
+package co.elastic.apm.android.sdk.internal.instrumentation;
 
-import co.elastic.apm.android.sdk.internal.instrumentation.SupportedInstrumentation;
+import co.elastic.apm.android.sdk.instrumentation.Instrumentation;
 
-public final class HttpRequestsInstrumentation extends SupportedInstrumentation {
+public abstract class InternalInstrumentation extends Instrumentation {
+    private final boolean enabled;
 
-    public HttpRequestsInstrumentation(boolean enabled) {
-        super(enabled);
+    protected InternalInstrumentation(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    @Override
+    protected boolean enabled() {
+        return enabled;
     }
 }

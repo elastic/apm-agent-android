@@ -73,7 +73,7 @@ public final class ElasticApmAgent {
 
     public final ElasticApmConfiguration configuration;
     private static ElasticApmAgent instance;
-    private final Provider<Connectivity> connectivityProvider;
+    private final Connectivity connectivity;
     private final ServiceManager serviceManager;
     private final NtpManager ntpManager;
     private final Flusher flusher;
@@ -154,7 +154,7 @@ public final class ElasticApmAgent {
     private ElasticApmAgent(Context context, Provider<Connectivity> connectivityProvider, ElasticApmConfiguration configuration) {
         Context appContext = context.getApplicationContext();
         AgentDependenciesInjector injector = AgentDependenciesInjector.get(context);
-        this.connectivityProvider = connectivityProvider;
+        this.connectivity = connectivityProvider.get();
         this.configuration = configuration;
         flusher = new Flusher();
         ntpManager = injector.getNtpManager();
@@ -230,7 +230,7 @@ public final class ElasticApmAgent {
     }
 
     private SdkTracerProvider getTracerProvider(Resource resource, AttributesVisitor commonAttrVisitor) {
-        SpanProcessor spanProcessor = connectivityProvider.get().getSpanProcessor();
+        SpanProcessor spanProcessor = connectivity.getSpanProcessor();
         ComposeAttributesVisitor spanAttributesVisitor = AttributesVisitor.compose(
                 commonAttrVisitor,
                 new CarrierHttpAttributesVisitor(),
@@ -247,7 +247,7 @@ public final class ElasticApmAgent {
     }
 
     private SdkLoggerProvider getLoggerProvider(Resource resource, AttributesVisitor commonAttrVisitor) {
-        LogRecordProcessor logProcessor = connectivityProvider.get().getLogProcessor();
+        LogRecordProcessor logProcessor = connectivity.getLogProcessor();
         ElasticLogRecordProcessor elasticProcessor = new ElasticLogRecordProcessor(logProcessor, commonAttrVisitor);
         SdkLoggerProvider loggerProvider = SdkLoggerProvider.builder()
                 .setResource(resource)
@@ -261,7 +261,7 @@ public final class ElasticApmAgent {
     private SdkMeterProvider getMeterProvider(Resource resource) {
         return SdkMeterProvider.builder()
                 .setClock(ntpManager.getClock())
-                .registerMetricReader(connectivityProvider.get().getMetricReader())
+                .registerMetricReader(connectivity.getMetricReader())
                 .setResource(resource)
                 .build();
     }

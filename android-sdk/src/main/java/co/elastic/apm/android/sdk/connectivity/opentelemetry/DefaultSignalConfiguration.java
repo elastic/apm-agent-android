@@ -20,7 +20,7 @@ package co.elastic.apm.android.sdk.connectivity.opentelemetry;
 
 import androidx.annotation.NonNull;
 
-import co.elastic.apm.android.sdk.connectivity.opentelemetry.base.DefaultSignalConfiguration;
+import co.elastic.apm.android.sdk.connectivity.opentelemetry.base.DefaultSignalProcessorConfiguration;
 import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporter;
 import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporterBuilder;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
@@ -32,17 +32,17 @@ import io.opentelemetry.sdk.metrics.export.AggregationTemporalitySelector;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
-public class CommonSignalConfiguration extends DefaultSignalConfiguration {
+public class DefaultSignalConfiguration extends DefaultSignalProcessorConfiguration {
     private final static String AUTHORIZATION_HEADER_NAME = "Authorization";
     private final static String BEARER_TOKEN_FORMAT = "Bearer %s";
     private final String endpoint;
     private String token;
 
-    CommonSignalConfiguration(String endpoint) {
+    DefaultSignalConfiguration(String endpoint) {
         this.endpoint = endpoint;
     }
 
-    public CommonSignalConfiguration withSecretToken(String token) {
+    public DefaultSignalConfiguration withSecretToken(String token) {
         this.token = token;
         return this;
     }

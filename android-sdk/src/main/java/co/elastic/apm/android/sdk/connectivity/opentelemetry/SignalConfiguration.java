@@ -33,8 +33,8 @@ public interface SignalConfiguration {
      *
      * @param endpoint - The APM server URL.
      */
-    static CommonSignalConfiguration create(String endpoint) {
-        return new CommonSignalConfiguration(endpoint);
+    static DefaultSignalConfiguration create(String endpoint) {
+        return new DefaultSignalConfiguration(endpoint);
     }
 
     /**
@@ -59,7 +59,7 @@ public interface SignalConfiguration {
     static Provider<SignalConfiguration> getDefault() {
         return LazyProvider.of(() -> {
             ApmMetadataService service = ElasticApmAgent.get().getService(Service.Names.METADATA);
-            CommonSignalConfiguration configuration = SignalConfiguration.create(service.getServerUrl());
+            DefaultSignalConfiguration configuration = SignalConfiguration.create(service.getServerUrl());
             String secretToken = service.getSecretToken();
             if (secretToken != null) {
                 configuration.withSecretToken(secretToken);

@@ -85,7 +85,7 @@ class MyApp extends android.app.Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        Connectivity myCustomConnectivity = Connectivity.custom(/*params*/);
+        Connectivity myCustomConnectivity = Connectivity.simple(/*params*/);
         ElasticApmAgent.initialize(this, myCustomConnectivity);
 
         // Optionally if you also define a custom configuration:

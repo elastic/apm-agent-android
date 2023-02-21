@@ -23,7 +23,7 @@ import io.opentelemetry.sdk.logs.LogRecordProcessor;
 import io.opentelemetry.sdk.metrics.export.MetricReader;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 
-public class CustomSignalConfiguration implements SignalConfiguration {
+public final class CustomSignalConfiguration implements SignalConfiguration {
     private final SpanProcessor spanProcessor;
     private final LogRecordProcessor logProcessor;
     private final MetricReader metricReader;

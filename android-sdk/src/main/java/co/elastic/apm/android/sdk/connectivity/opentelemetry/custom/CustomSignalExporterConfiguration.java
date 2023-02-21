@@ -23,7 +23,7 @@ import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
-public class CustomSignalExporterConfiguration extends DefaultSignalProcessorConfiguration {
+public final class CustomSignalExporterConfiguration extends DefaultSignalProcessorConfiguration {
     private final SpanExporter spanExporter;
     private final LogRecordExporter logExporter;
     private final MetricExporter metricExporter;

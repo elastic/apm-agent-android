@@ -32,7 +32,7 @@ import io.opentelemetry.sdk.metrics.export.AggregationTemporalitySelector;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
-public class DefaultSignalConfiguration extends DefaultSignalProcessorConfiguration {
+public final class DefaultSignalConfiguration extends DefaultSignalProcessorConfiguration {
     private final static String AUTHORIZATION_HEADER_NAME = "Authorization";
     private final static String BEARER_TOKEN_FORMAT = "Bearer %s";
     private final String endpoint;

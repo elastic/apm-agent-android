@@ -21,18 +21,21 @@ public class AgentInitializer {
 
     public static void initialize(Context context, ElasticApmConfiguration
             configuration, Connectivity connectivity, SignalConfiguration signalConfiguration) {
-        ElasticApmAgent agent = ElasticApmAgent.initialize(context, configuration, connectivity);
-        if (signalConfiguration != null) {
-            injectSignalConfiguration(agent, signalConfiguration);
+        if (configuration == null) {
+            configuration = ElasticApmConfiguration.getDefault();
         }
+        if (signalConfiguration != null) {
+            injectSignalConfiguration(configuration, signalConfiguration);
+        }
+        ElasticApmAgent.initialize(context, configuration, connectivity);
     }
 
-    private static void injectSignalConfiguration(ElasticApmAgent agent, SignalConfiguration
-            signalConfiguration) {
+    private static void injectSignalConfiguration(ElasticApmConfiguration configuration,
+                                                  SignalConfiguration signalConfiguration) {
         try {
-            Field field = ElasticApmAgent.class.getDeclaredField("signalConfiguration");
+            Field field = ElasticApmConfiguration.class.getDeclaredField("signalConfiguration");
             field.setAccessible(true);
-            field.set(agent, signalConfiguration);
+            field.set(configuration, signalConfiguration);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }

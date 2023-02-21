@@ -30,7 +30,7 @@ public final class ElasticApmConfiguration {
     public final String serviceName;
     public final String serviceVersion;
     public final SessionIdProvider sessionIdProvider;
-    public SignalConfiguration signalConfiguration;
+    public final SignalConfiguration signalConfiguration;
 
     public static Builder builder() {
         return new Builder();
@@ -46,6 +46,7 @@ public final class ElasticApmConfiguration {
         serviceVersion = builder.serviceVersion;
         sessionIdProvider = builder.sessionIdProvider;
         instrumentationConfiguration = builder.instrumentationConfiguration;
+        signalConfiguration = builder.signalConfiguration;
     }
 
     public static class Builder {
@@ -54,6 +55,7 @@ public final class ElasticApmConfiguration {
         private String serviceName;
         private String serviceVersion;
         private SessionIdProvider sessionIdProvider;
+        private SignalConfiguration signalConfiguration;
 
         private Builder() {
         }
@@ -75,6 +77,11 @@ public final class ElasticApmConfiguration {
 
         public Builder setInstrumentationConfiguration(InstrumentationConfiguration instrumentationConfiguration) {
             this.instrumentationConfiguration = instrumentationConfiguration;
+            return this;
+        }
+
+        public Builder setSignalConfiguration(SignalConfiguration signalConfiguration) {
+            this.signalConfiguration = signalConfiguration;
             return this;
         }
 

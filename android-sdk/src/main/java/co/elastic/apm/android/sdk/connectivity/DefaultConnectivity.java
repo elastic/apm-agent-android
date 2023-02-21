@@ -6,7 +6,7 @@ final class DefaultConnectivity implements Connectivity {
     private final String endpoint;
     private final AuthConfiguration authConfiguration;
 
-    private DefaultConnectivity(String endpoint, AuthConfiguration authConfiguration) {
+    DefaultConnectivity(String endpoint, AuthConfiguration authConfiguration) {
         this.endpoint = endpoint;
         this.authConfiguration = authConfiguration;
     }
@@ -19,23 +19,5 @@ final class DefaultConnectivity implements Connectivity {
     @Override
     public AuthConfiguration authConfiguration() {
         return authConfiguration;
-    }
-
-    public static class Builder {
-        private final String endpoint;
-        private AuthConfiguration authConfiguration;
-
-        Builder(String endpoint) {
-            this.endpoint = endpoint;
-        }
-
-        public Connectivity buildWithSecretToken(String secretToken) {
-            authConfiguration = AuthConfiguration.secretToken(secretToken);
-            return build();
-        }
-
-        public Connectivity build() {
-            return new DefaultConnectivity(endpoint, authConfiguration);
-        }
     }
 }

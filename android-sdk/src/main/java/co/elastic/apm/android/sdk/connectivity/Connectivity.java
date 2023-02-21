@@ -22,8 +22,12 @@ import co.elastic.apm.android.sdk.connectivity.auth.AuthConfiguration;
 
 public interface Connectivity {
 
-    static DefaultConnectivity.Builder defaultBuilder(String endpoint) {
-        return new DefaultConnectivity.Builder(endpoint);
+    static Connectivity simple(String endpoint) {
+        return new DefaultConnectivity(endpoint, null);
+    }
+
+    static Connectivity withSecretToken(String endpoint, String secretToken) {
+        return new DefaultConnectivity(endpoint, AuthConfiguration.secretToken(secretToken));
     }
 
     String endpoint();

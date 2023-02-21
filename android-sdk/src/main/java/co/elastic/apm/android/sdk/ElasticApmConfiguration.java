@@ -80,11 +80,6 @@ public final class ElasticApmConfiguration {
             return this;
         }
 
-        public Builder setSignalConfiguration(SignalConfiguration signalConfiguration) {
-            this.signalConfiguration = signalConfiguration;
-            return this;
-        }
-
         public ElasticApmConfiguration build() {
             if (httpTraceConfiguration == null) {
                 httpTraceConfiguration = HttpTraceConfiguration.builder().build();

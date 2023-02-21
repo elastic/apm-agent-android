@@ -68,6 +68,7 @@ public final class ElasticApmAgent {
     private final Connectivity connectivity;
     private final NtpManager ntpManager;
     private final Flusher flusher;
+    private SignalConfiguration signalConfiguration;
 
     public static ElasticApmAgent get() {
         verifyInitialization();
@@ -138,11 +139,16 @@ public final class ElasticApmAgent {
 
     private void onInitializationFinished(Context context) {
         ntpManager.initialize();
+        initializeSignalConfiguration();
         initializeDynamicConfiguration();
         initializeOpentelemetry();
         initializeCrashReports();
         initializeSessionIdProvider();
         initializeLaunchTimeTracker(context);
+    }
+
+    private void initializeSignalConfiguration() {
+        signalConfiguration = SignalConfiguration.getDefault(connectivity);
     }
 
     private void initializeDynamicConfiguration() {
@@ -169,20 +175,19 @@ public final class ElasticApmAgent {
     }
 
     private void initializeOpentelemetry() {
-        SignalConfiguration signalConfiguration = SignalConfiguration.getDefault(connectivity);
         Attributes resourceAttrs = AttributesCreator.from(getResourceAttributesVisitor()).create();
         AttributesVisitor globalAttributesVisitor = new SessionAttributesVisitor();
         Resource resource = Resource.getDefault()
                 .merge(Resource.create(resourceAttrs));
 
-        SdkMeterProvider meterProvider = getMeterProvider(signalConfiguration, resource);
-        SdkLoggerProvider loggerProvider = getLoggerProvider(signalConfiguration, resource, globalAttributesVisitor);
+        SdkMeterProvider meterProvider = getMeterProvider(resource);
+        SdkLoggerProvider loggerProvider = getLoggerProvider(resource, globalAttributesVisitor);
 
         flusher.setMeterDelegator(meterProvider::forceFlush);
         flusher.setLoggerDelegator(loggerProvider::forceFlush);
 
         OpenTelemetrySdk.builder()
-                .setTracerProvider(getTracerProvider(signalConfiguration, resource, globalAttributesVisitor))
+                .setTracerProvider(getTracerProvider(resource, globalAttributesVisitor))
                 .setLoggerProvider(loggerProvider)
                 .setMeterProvider(meterProvider)
                 .setPropagators(getContextPropagator())
@@ -200,8 +205,7 @@ public final class ElasticApmAgent {
         );
     }
 
-    private SdkTracerProvider getTracerProvider(SignalConfiguration signalConfiguration,
-                                                Resource resource,
+    private SdkTracerProvider getTracerProvider(Resource resource,
                                                 AttributesVisitor commonAttrVisitor) {
         SpanProcessor spanProcessor = signalConfiguration.getSpanProcessor();
         ComposeAttributesVisitor spanAttributesVisitor = AttributesVisitor.compose(
@@ -219,8 +223,7 @@ public final class ElasticApmAgent {
                 .build();
     }
 
-    private SdkLoggerProvider getLoggerProvider(SignalConfiguration signalConfiguration,
-                                                Resource resource,
+    private SdkLoggerProvider getLoggerProvider(Resource resource,
                                                 AttributesVisitor commonAttrVisitor) {
         LogRecordProcessor logProcessor = signalConfiguration.getLogProcessor();
         ElasticLogRecordProcessor elasticProcessor = new ElasticLogRecordProcessor(logProcessor, commonAttrVisitor);
@@ -233,8 +236,7 @@ public final class ElasticApmAgent {
         return loggerProvider;
     }
 
-    private SdkMeterProvider getMeterProvider(SignalConfiguration signalConfiguration,
-                                              Resource resource) {
+    private SdkMeterProvider getMeterProvider(Resource resource) {
         return SdkMeterProvider.builder()
                 .setClock(ntpManager.getClock())
                 .registerMetricReader(signalConfiguration.getMetricReader())

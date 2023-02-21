@@ -12,9 +12,10 @@ import java.lang.reflect.Method;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.ElasticApmConfiguration;
-import co.elastic.apm.android.sdk.connectivity.Connectivity;
+import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration;
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
+import co.elastic.apm.android.test.common.agent.AgentInitializer;
 import co.elastic.apm.android.test.common.logs.LogRecordExporterCaptor;
 import co.elastic.apm.android.test.common.metrics.MetricExporterCaptor;
 import co.elastic.apm.android.test.common.metrics.MetricsFlusher;
@@ -38,11 +39,11 @@ public class BaseRobolectricTestApplication extends Application implements Expor
     private NtpManager ntpManager;
 
     protected void initializeAgentWithCustomConfig(ElasticApmConfiguration configuration) {
-        ElasticApmAgent.initialize(this, configuration, getConnectivity());
+        AgentInitializer.initialize(this, configuration, getSignalConfiguration());
     }
 
     protected void initializeAgent() {
-        ElasticApmAgent.initialize(this, getConnectivity());
+        AgentInitializer.initialize(this, getSignalConfiguration());
     }
 
     public BaseRobolectricTestApplication() {
@@ -83,11 +84,11 @@ public class BaseRobolectricTestApplication extends Application implements Expor
         return logRecordExporter;
     }
 
-    private Connectivity getConnectivity() {
+    private SignalConfiguration getSignalConfiguration() {
         PeriodicMetricReader metricReader = PeriodicMetricReader.create(metricExporter);
         MetricsFlusher flusher = new MetricsFlusher(metricReader);
         metricExporter.setFlusher(flusher);
-        return Connectivity.custom(SimpleSpanProcessor.create(spanExporter),
+        return SignalConfiguration.custom(SimpleSpanProcessor.create(spanExporter),
                 SimpleLogRecordProcessor.create(logRecordExporter),
                 metricReader);
     }

@@ -16,32 +16,36 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.connectivity.base;
+package co.elastic.apm.android.sdk.connectivity.opentelemetry.custom;
 
-import io.opentelemetry.sdk.logs.LogRecordProcessor;
-import io.opentelemetry.sdk.logs.export.BatchLogRecordProcessor;
+import co.elastic.apm.android.sdk.connectivity.opentelemetry.base.DefaultSignalConfiguration;
 import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
-import io.opentelemetry.sdk.metrics.export.MetricReader;
-import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
-import io.opentelemetry.sdk.trace.SpanProcessor;
-import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
-public abstract class DefaultProcessingConnectivity extends BaseConnectivity {
+public class CustomSignalExporterConfiguration extends DefaultSignalConfiguration {
+    private final SpanExporter spanExporter;
+    private final LogRecordExporter logExporter;
+    private final MetricExporter metricExporter;
 
-    @Override
-    protected SpanProcessor provideSpanProcessor(SpanExporter exporter) {
-        return BatchSpanProcessor.builder(exporter).build();
+    public CustomSignalExporterConfiguration(SpanExporter exporter, LogRecordExporter logExporter, MetricExporter metricExporter) {
+        this.spanExporter = exporter;
+        this.logExporter = logExporter;
+        this.metricExporter = metricExporter;
     }
 
     @Override
-    protected LogRecordProcessor provideLogProcessor(LogRecordExporter exporter) {
-        return BatchLogRecordProcessor.builder(exporter).build();
+    protected SpanExporter provideSpanExporter() {
+        return spanExporter;
     }
 
     @Override
-    protected MetricReader provideMetricReader(MetricExporter exporter) {
-        return PeriodicMetricReader.create(exporter);
+    protected LogRecordExporter provideLogExporter() {
+        return logExporter;
+    }
+
+    @Override
+    protected MetricExporter provideMetricExporter() {
+        return metricExporter;
     }
 }

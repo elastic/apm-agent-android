@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.connectivity;
+package co.elastic.apm.android.sdk.connectivity.opentelemetry;
 
 import androidx.annotation.NonNull;
 
-import co.elastic.apm.android.sdk.connectivity.base.DefaultProcessingConnectivity;
+import co.elastic.apm.android.sdk.connectivity.opentelemetry.base.DefaultSignalConfiguration;
 import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporter;
 import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporterBuilder;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
@@ -32,17 +32,17 @@ import io.opentelemetry.sdk.metrics.export.AggregationTemporalitySelector;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
-public class CommonConnectivity extends DefaultProcessingConnectivity {
+public class CommonSignalConfiguration extends DefaultSignalConfiguration {
     private final static String AUTHORIZATION_HEADER_NAME = "Authorization";
     private final static String BEARER_TOKEN_FORMAT = "Bearer %s";
     private final String endpoint;
     private String token;
 
-    CommonConnectivity(String endpoint) {
+    CommonSignalConfiguration(String endpoint) {
         this.endpoint = endpoint;
     }
 
-    public CommonConnectivity withSecretToken(String token) {
+    public CommonSignalConfiguration withSecretToken(String token) {
         this.token = token;
         return this;
     }

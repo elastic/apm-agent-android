@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.connectivity.base;
+package co.elastic.apm.android.sdk.connectivity.opentelemetry.base;
 
-import co.elastic.apm.android.sdk.connectivity.Connectivity;
+import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration;
 import io.opentelemetry.sdk.logs.LogRecordProcessor;
 import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
@@ -26,7 +26,7 @@ import io.opentelemetry.sdk.metrics.export.MetricReader;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
-public abstract class BaseConnectivity implements Connectivity {
+public abstract class BaseSignalConfiguration implements SignalConfiguration {
 
     @Override
     public SpanProcessor getSpanProcessor() {

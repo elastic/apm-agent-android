@@ -63,7 +63,6 @@ import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 
 public final class ElasticApmAgent {
-
     public final ElasticApmConfiguration configuration;
     private static ElasticApmAgent instance;
     private final Connectivity connectivity;
@@ -95,13 +94,7 @@ public final class ElasticApmAgent {
         Elog.init(new AndroidLoggerFactory());
         ServiceManager.initialize(appContext);
         ServiceManager.get().start();
-        ElasticApmConfiguration apmConfiguration;
-        if (configuration != null) {
-            apmConfiguration = configuration;
-        } else {
-            apmConfiguration = ElasticApmConfiguration.getDefault();
-        }
-        instance = new ElasticApmAgent(appContext, connectivity, apmConfiguration);
+        instance = new ElasticApmAgent(appContext, connectivity, configuration);
         instance.onInitializationFinished(appContext);
         return instance;
     }
@@ -129,7 +122,11 @@ public final class ElasticApmAgent {
 
     private ElasticApmAgent(Context appContext, Connectivity connectivity, ElasticApmConfiguration configuration) {
         AgentDependenciesInjector injector = AgentDependenciesInjector.get(appContext);
-        this.configuration = configuration;
+        if (configuration != null) {
+            this.configuration = configuration;
+        } else {
+            this.configuration = ElasticApmConfiguration.getDefault();
+        }
         if (connectivity == null) {
             this.connectivity = Connectivity.getDefault();
         } else {

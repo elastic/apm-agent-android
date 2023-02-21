@@ -21,6 +21,11 @@ package co.elastic.apm.android.sdk.connectivity;
 import co.elastic.apm.android.sdk.connectivity.auth.AuthConfiguration;
 
 public interface Connectivity {
+
+    static DefaultConnectivity.Builder defaultBuilder(String endpoint) {
+        return new DefaultConnectivity.Builder(endpoint);
+    }
+
     String endpoint();
 
     AuthConfiguration authConfiguration();

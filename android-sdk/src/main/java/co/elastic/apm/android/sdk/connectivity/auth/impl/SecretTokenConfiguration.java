@@ -2,7 +2,7 @@ package co.elastic.apm.android.sdk.connectivity.auth.impl;
 
 import co.elastic.apm.android.sdk.connectivity.auth.AuthConfiguration;
 
-public class SecretTokenConfiguration implements AuthConfiguration {
+public final class SecretTokenConfiguration implements AuthConfiguration {
     private final String token;
 
     public SecretTokenConfiguration(String token) {

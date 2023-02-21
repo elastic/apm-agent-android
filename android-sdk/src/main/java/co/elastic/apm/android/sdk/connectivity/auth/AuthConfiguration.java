@@ -1,8 +1,14 @@
 package co.elastic.apm.android.sdk.connectivity.auth;
 
-public interface AuthParameters {
+import co.elastic.apm.android.sdk.connectivity.auth.impl.SecretTokenConfiguration;
 
-    String asHeader();
+public interface AuthConfiguration {
+
+    static AuthConfiguration secretToken(String token) {
+        return new SecretTokenConfiguration(token);
+    }
+
+    String asAuthorizationHeaderValue();
 
     Type getType();
 

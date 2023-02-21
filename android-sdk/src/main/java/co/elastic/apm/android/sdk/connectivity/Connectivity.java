@@ -18,10 +18,10 @@
  */
 package co.elastic.apm.android.sdk.connectivity;
 
-import co.elastic.apm.android.sdk.connectivity.auth.AuthParameters;
+import co.elastic.apm.android.sdk.connectivity.auth.AuthConfiguration;
 
 public interface Connectivity {
     String endpoint();
 
-    AuthParameters authConfiguration();
+    AuthConfiguration authConfiguration();
 }

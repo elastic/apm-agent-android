@@ -28,7 +28,7 @@ import io.opentelemetry.sdk.trace.SpanProcessor;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
-public abstract class DefaultSignalConfiguration extends BaseSignalConfiguration {
+public abstract class DefaultSignalProcessorConfiguration extends BaseSignalConfiguration {
 
     @Override
     protected SpanProcessor provideSpanProcessor(SpanExporter exporter) {

@@ -18,12 +18,12 @@
  */
 package co.elastic.apm.android.sdk.connectivity.opentelemetry.custom;
 
-import co.elastic.apm.android.sdk.connectivity.opentelemetry.base.DefaultSignalConfiguration;
+import co.elastic.apm.android.sdk.connectivity.opentelemetry.base.DefaultSignalProcessorConfiguration;
 import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
-public class CustomSignalExporterConfiguration extends DefaultSignalConfiguration {
+public class CustomSignalExporterConfiguration extends DefaultSignalProcessorConfiguration {
     private final SpanExporter spanExporter;
     private final LogRecordExporter logExporter;
     private final MetricExporter metricExporter;

@@ -18,10 +18,42 @@
  */
 package co.elastic.apm.android.sdk.internal.services;
 
+import android.content.Context;
+
+import androidx.annotation.RestrictTo;
+
 import java.util.HashMap;
+
+import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService;
+import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
+import co.elastic.apm.android.sdk.internal.services.network.NetworkService;
+import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
+import co.elastic.apm.android.sdk.internal.utilities.providers.LazyProvider;
+import co.elastic.apm.android.sdk.internal.utilities.providers.Provider;
 
 public final class ServiceManager implements Lifecycle {
     private final HashMap<String, Service> services = new HashMap<>();
+    private static ServiceManager INSTANCE;
+
+    private ServiceManager() {
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    public static void initialize(Context appContext) {
+        INSTANCE = new ServiceManager();
+        INSTANCE.addService(new NetworkService(appContext));
+        INSTANCE.addService(new AppInfoService(appContext));
+        INSTANCE.addService(new ApmMetadataService(appContext));
+        INSTANCE.addService(new PreferencesService(appContext));
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    public static ServiceManager get() {
+        if (INSTANCE == null) {
+            throw new IllegalStateException("Services haven't been initialized");
+        }
+        return INSTANCE;
+    }
 
     public void addService(Service service) {
         String name = service.name();
@@ -43,6 +75,7 @@ public final class ServiceManager implements Lifecycle {
         }
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @SuppressWarnings("unchecked")
     public <T extends Service> T getService(String name) {
         Service service = services.get(name);
@@ -51,6 +84,18 @@ public final class ServiceManager implements Lifecycle {
         }
 
         return (T) service;
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    public static <T extends Service> Provider<T> getServiceProvider(String name) {
+        return LazyProvider.of(() -> get().getService(name));
+    }
+
+    public static void resetForTest() {
+        if (INSTANCE != null) {
+            INSTANCE.stop();
+        }
+        INSTANCE = null;
     }
 
     private void verifyNotExisting(String name) {

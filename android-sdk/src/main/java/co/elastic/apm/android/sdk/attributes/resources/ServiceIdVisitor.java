@@ -22,6 +22,7 @@ import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.ElasticApmConfiguration;
 import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
 import co.elastic.apm.android.sdk.internal.services.Service;
+import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
@@ -47,6 +48,6 @@ public class ServiceIdVisitor implements AttributesVisitor {
     }
 
     private ApmMetadataService getApmMetadataService() {
-        return ElasticApmAgent.get().getService(Service.Names.METADATA);
+        return ServiceManager.get().getService(Service.Names.METADATA);
     }
 }

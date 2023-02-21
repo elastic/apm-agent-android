@@ -18,12 +18,12 @@
  */
 package co.elastic.apm.android.sdk.attributes.common;
 
-import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
-import co.elastic.apm.android.sdk.internal.utilities.providers.Provider;
 import co.elastic.apm.android.sdk.internal.services.Service;
+import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.network.NetworkService;
 import co.elastic.apm.android.sdk.internal.services.network.data.type.NetworkType;
+import co.elastic.apm.android.sdk.internal.utilities.providers.Provider;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 
@@ -31,7 +31,7 @@ public class ConnectionHttpAttributesVisitor implements AttributesVisitor {
     private final Provider<NetworkService> networkServiceProvider;
 
     public ConnectionHttpAttributesVisitor() {
-        networkServiceProvider = ElasticApmAgent.getServiceProvider(Service.Names.NETWORK);
+        networkServiceProvider = ServiceManager.getServiceProvider(Service.Names.NETWORK);
     }
 
     @Override

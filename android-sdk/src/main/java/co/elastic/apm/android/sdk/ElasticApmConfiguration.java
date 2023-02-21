@@ -18,6 +18,7 @@
  */
 package co.elastic.apm.android.sdk;
 
+import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration;
 import co.elastic.apm.android.sdk.instrumentation.InstrumentationConfiguration;
 import co.elastic.apm.android.sdk.session.SessionIdProvider;
 import co.elastic.apm.android.sdk.session.impl.DefaultSessionIdProvider;
@@ -29,6 +30,7 @@ public final class ElasticApmConfiguration {
     public final String serviceName;
     public final String serviceVersion;
     public final SessionIdProvider sessionIdProvider;
+    public SignalConfiguration signalConfiguration;
 
     public static Builder builder() {
         return new Builder();

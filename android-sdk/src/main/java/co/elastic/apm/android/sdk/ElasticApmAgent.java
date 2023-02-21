@@ -113,6 +113,7 @@ public final class ElasticApmAgent {
         ElasticExceptionHandler.resetForTest();
         Configurations.resetForTest();
         ServiceManager.resetForTest();
+        instance = null;
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -169,7 +170,10 @@ public final class ElasticApmAgent {
     }
 
     private void initializeOpentelemetry() {
-        SignalConfiguration signalConfiguration = SignalConfiguration.getDefault(connectivity);
+        SignalConfiguration signalConfiguration = configuration.signalConfiguration;
+        if (signalConfiguration == null) {
+            signalConfiguration = SignalConfiguration.getDefault(connectivity);
+        }
         Attributes resourceAttrs = AttributesCreator.from(getResourceAttributesVisitor()).create();
         AttributesVisitor globalAttributesVisitor = new SessionAttributesVisitor();
         Resource resource = Resource.getDefault()

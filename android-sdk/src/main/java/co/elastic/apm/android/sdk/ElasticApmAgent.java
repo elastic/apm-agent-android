@@ -37,24 +37,17 @@ import co.elastic.apm.android.sdk.attributes.resources.RuntimeDescriptorVisitor;
 import co.elastic.apm.android.sdk.attributes.resources.SdkIdVisitor;
 import co.elastic.apm.android.sdk.attributes.resources.ServiceIdVisitor;
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
+import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration;
 import co.elastic.apm.android.sdk.instrumentation.Instrumentations;
 import co.elastic.apm.android.sdk.internal.api.Initializable;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.exceptions.ElasticExceptionHandler;
 import co.elastic.apm.android.sdk.internal.features.launchtime.LaunchTimeActivityCallback;
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
-import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
-import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService;
-import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
-import co.elastic.apm.android.sdk.internal.services.network.NetworkService;
-import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.sdk.internal.utilities.logging.AndroidLoggerFactory;
 import co.elastic.apm.android.sdk.internal.utilities.otel.Flusher;
-import co.elastic.apm.android.sdk.internal.utilities.providers.LazyProvider;
-import co.elastic.apm.android.sdk.internal.utilities.providers.Provider;
-import co.elastic.apm.android.sdk.internal.utilities.providers.SimpleProvider;
 import co.elastic.apm.android.sdk.logs.ElasticLogRecordProcessor;
 import co.elastic.apm.android.sdk.traces.otel.processor.ElasticSpanProcessor;
 import io.opentelemetry.api.common.Attributes;
@@ -74,7 +67,6 @@ public final class ElasticApmAgent {
     public final ElasticApmConfiguration configuration;
     private static ElasticApmAgent instance;
     private final Connectivity connectivity;
-    private final ServiceManager serviceManager;
     private final NtpManager ntpManager;
     private final Flusher flusher;
 
@@ -99,21 +91,18 @@ public final class ElasticApmAgent {
         if (instance != null) {
             throw new IllegalStateException("Already initialized");
         }
+        Context appContext = context.getApplicationContext();
         Elog.init(new AndroidLoggerFactory());
-        Provider<Connectivity> connectivityProvider;
-        if (connectivity != null) {
-            connectivityProvider = new SimpleProvider<>(connectivity);
-        } else {
-            connectivityProvider = Connectivity.getDefault();
-        }
+        ServiceManager.initialize(appContext);
+        ServiceManager.get().start();
         ElasticApmConfiguration apmConfiguration;
         if (configuration != null) {
             apmConfiguration = configuration;
         } else {
             apmConfiguration = ElasticApmConfiguration.getDefault();
         }
-        instance = new ElasticApmAgent(context, connectivityProvider, apmConfiguration);
-        instance.onInitializationFinished(context);
+        instance = new ElasticApmAgent(appContext, connectivity, apmConfiguration);
+        instance.onInitializationFinished(appContext);
         return instance;
     }
 
@@ -130,20 +119,7 @@ public final class ElasticApmAgent {
     public static void resetForTest() {
         ElasticExceptionHandler.resetForTest();
         Configurations.resetForTest();
-        if (instance != null) {
-            instance.serviceManager.stop();
-            instance = null;
-        }
-    }
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-    public <T extends Service> T getService(String name) {
-        return serviceManager.getService(name);
-    }
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-    public static <T extends Service> Provider<T> getServiceProvider(String name) {
-        return LazyProvider.of(() -> get().getService(name));
+        ServiceManager.resetForTest();
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -151,23 +127,20 @@ public final class ElasticApmAgent {
         return flusher;
     }
 
-    private ElasticApmAgent(Context context, Provider<Connectivity> connectivityProvider, ElasticApmConfiguration configuration) {
-        Context appContext = context.getApplicationContext();
-        AgentDependenciesInjector injector = AgentDependenciesInjector.get(context);
-        this.connectivity = connectivityProvider.get();
+    private ElasticApmAgent(Context appContext, Connectivity connectivity, ElasticApmConfiguration configuration) {
+        AgentDependenciesInjector injector = AgentDependenciesInjector.get(appContext);
         this.configuration = configuration;
+        if (connectivity == null) {
+            this.connectivity = Connectivity.getDefault();
+        } else {
+            this.connectivity = connectivity;
+        }
         flusher = new Flusher();
         ntpManager = injector.getNtpManager();
-        serviceManager = new ServiceManager();
-        serviceManager.addService(new NetworkService(appContext));
-        serviceManager.addService(new AppInfoService(appContext));
-        serviceManager.addService(new ApmMetadataService(appContext));
-        serviceManager.addService(new PreferencesService(appContext));
     }
 
     private void onInitializationFinished(Context context) {
         ntpManager.initialize();
-        serviceManager.start();
         initializeDynamicConfiguration();
         initializeOpentelemetry();
         initializeCrashReports();
@@ -199,19 +172,20 @@ public final class ElasticApmAgent {
     }
 
     private void initializeOpentelemetry() {
+        SignalConfiguration signalConfiguration = SignalConfiguration.getDefault(connectivity);
         Attributes resourceAttrs = AttributesCreator.from(getResourceAttributesVisitor()).create();
         AttributesVisitor globalAttributesVisitor = new SessionAttributesVisitor();
         Resource resource = Resource.getDefault()
                 .merge(Resource.create(resourceAttrs));
 
-        SdkMeterProvider meterProvider = getMeterProvider(resource);
-        SdkLoggerProvider loggerProvider = getLoggerProvider(resource, globalAttributesVisitor);
+        SdkMeterProvider meterProvider = getMeterProvider(signalConfiguration, resource);
+        SdkLoggerProvider loggerProvider = getLoggerProvider(signalConfiguration, resource, globalAttributesVisitor);
 
         flusher.setMeterDelegator(meterProvider::forceFlush);
         flusher.setLoggerDelegator(loggerProvider::forceFlush);
 
         OpenTelemetrySdk.builder()
-                .setTracerProvider(getTracerProvider(resource, globalAttributesVisitor))
+                .setTracerProvider(getTracerProvider(signalConfiguration, resource, globalAttributesVisitor))
                 .setLoggerProvider(loggerProvider)
                 .setMeterProvider(meterProvider)
                 .setPropagators(getContextPropagator())
@@ -229,8 +203,10 @@ public final class ElasticApmAgent {
         );
     }
 
-    private SdkTracerProvider getTracerProvider(Resource resource, AttributesVisitor commonAttrVisitor) {
-        SpanProcessor spanProcessor = connectivity.getSpanProcessor();
+    private SdkTracerProvider getTracerProvider(SignalConfiguration signalConfiguration,
+                                                Resource resource,
+                                                AttributesVisitor commonAttrVisitor) {
+        SpanProcessor spanProcessor = signalConfiguration.getSpanProcessor();
         ComposeAttributesVisitor spanAttributesVisitor = AttributesVisitor.compose(
                 commonAttrVisitor,
                 new CarrierHttpAttributesVisitor(),
@@ -246,8 +222,10 @@ public final class ElasticApmAgent {
                 .build();
     }
 
-    private SdkLoggerProvider getLoggerProvider(Resource resource, AttributesVisitor commonAttrVisitor) {
-        LogRecordProcessor logProcessor = connectivity.getLogProcessor();
+    private SdkLoggerProvider getLoggerProvider(SignalConfiguration signalConfiguration,
+                                                Resource resource,
+                                                AttributesVisitor commonAttrVisitor) {
+        LogRecordProcessor logProcessor = signalConfiguration.getLogProcessor();
         ElasticLogRecordProcessor elasticProcessor = new ElasticLogRecordProcessor(logProcessor, commonAttrVisitor);
         SdkLoggerProvider loggerProvider = SdkLoggerProvider.builder()
                 .setResource(resource)
@@ -258,10 +236,11 @@ public final class ElasticApmAgent {
         return loggerProvider;
     }
 
-    private SdkMeterProvider getMeterProvider(Resource resource) {
+    private SdkMeterProvider getMeterProvider(SignalConfiguration signalConfiguration,
+                                              Resource resource) {
         return SdkMeterProvider.builder()
                 .setClock(ntpManager.getClock())
-                .registerMetricReader(connectivity.getMetricReader())
+                .registerMetricReader(signalConfiguration.getMetricReader())
                 .setResource(resource)
                 .build();
     }

@@ -23,12 +23,12 @@ import androidx.annotation.NonNull;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.internal.api.Initializable;
-import co.elastic.apm.android.sdk.internal.utilities.providers.Provider;
 import co.elastic.apm.android.sdk.internal.services.Service;
+import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
+import co.elastic.apm.android.sdk.internal.utilities.providers.Provider;
 import co.elastic.apm.android.sdk.session.SessionIdProvider;
 
 /**
@@ -52,7 +52,7 @@ public class DefaultSessionIdProvider implements SessionIdProvider, Initializabl
     }
 
     public DefaultSessionIdProvider() {
-        this(SystemTimeProvider.get(), ElasticApmAgent.getServiceProvider(Service.Names.PREFERENCES));
+        this(SystemTimeProvider.get(), ServiceManager.getServiceProvider(Service.Names.PREFERENCES));
     }
 
     @NonNull

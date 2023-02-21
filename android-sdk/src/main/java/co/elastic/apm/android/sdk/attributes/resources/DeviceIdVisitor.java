@@ -20,9 +20,9 @@ package co.elastic.apm.android.sdk.attributes.resources;
 
 import java.util.UUID;
 
-import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
 import co.elastic.apm.android.sdk.internal.services.Service;
+import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
@@ -37,7 +37,7 @@ public class DeviceIdVisitor implements AttributesVisitor {
     }
 
     private String getId() {
-        PreferencesService preferences = ElasticApmAgent.get().getService(Service.Names.PREFERENCES);
+        PreferencesService preferences = ServiceManager.get().getService(Service.Names.PREFERENCES);
         String deviceId = preferences.retrieveString(DEVICE_ID_KEY);
 
         if (deviceId == null) {

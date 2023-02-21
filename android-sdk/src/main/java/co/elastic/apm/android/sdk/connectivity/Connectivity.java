@@ -19,6 +19,9 @@
 package co.elastic.apm.android.sdk.connectivity;
 
 import co.elastic.apm.android.sdk.connectivity.auth.AuthConfiguration;
+import co.elastic.apm.android.sdk.internal.services.Service;
+import co.elastic.apm.android.sdk.internal.services.ServiceManager;
+import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
 
 public interface Connectivity {
 
@@ -28,6 +31,17 @@ public interface Connectivity {
 
     static Connectivity withSecretToken(String endpoint, String secretToken) {
         return new DefaultConnectivity(endpoint, AuthConfiguration.secretToken(secretToken));
+    }
+
+    static Connectivity getDefault() {
+        ApmMetadataService service = ServiceManager.get().getService(Service.Names.METADATA);
+        String serverUrl = service.getServerUrl();
+        String secretToken = service.getSecretToken();
+        if (secretToken != null) {
+            return Connectivity.withSecretToken(serverUrl, secretToken);
+        } else {
+            return Connectivity.simple(serverUrl);
+        }
     }
 
     String endpoint();

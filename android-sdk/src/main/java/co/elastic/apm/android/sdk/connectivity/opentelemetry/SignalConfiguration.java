@@ -1,12 +1,26 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *	http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package co.elastic.apm.android.sdk.connectivity.opentelemetry;
 
-import co.elastic.apm.android.sdk.ElasticApmAgent;
+import co.elastic.apm.android.sdk.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.custom.CustomSignalConfiguration;
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.custom.CustomSignalExporterConfiguration;
-import co.elastic.apm.android.sdk.internal.services.Service;
-import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
-import co.elastic.apm.android.sdk.internal.utilities.providers.LazyProvider;
-import co.elastic.apm.android.sdk.internal.utilities.providers.Provider;
 import io.opentelemetry.sdk.logs.LogRecordProcessor;
 import io.opentelemetry.sdk.logs.export.BatchLogRecordProcessor;
 import io.opentelemetry.sdk.logs.export.LogRecordExporter;
@@ -31,10 +45,10 @@ public interface SignalConfiguration {
      *  {@code SignalConfiguration myConfiguration = SignalConfiguration.create("https://my.server.url").withSecretToken("my_bearer_token");}
      * </pre>
      *
-     * @param endpoint - The APM server URL.
+     * @param connectivity - The APM server configured {@link Connectivity}.
      */
-    static DefaultSignalConfiguration create(String endpoint) {
-        return new DefaultSignalConfiguration(endpoint);
+    static DefaultSignalConfiguration create(Connectivity connectivity) {
+        return new DefaultSignalConfiguration(connectivity);
     }
 
     /**
@@ -56,16 +70,8 @@ public interface SignalConfiguration {
     /**
      * This function provides a {@link SignalConfiguration} instance that uses the server parameters defined at compile time.
      */
-    static Provider<SignalConfiguration> getDefault() {
-        return LazyProvider.of(() -> {
-            ApmMetadataService service = ElasticApmAgent.get().getService(Service.Names.METADATA);
-            DefaultSignalConfiguration configuration = SignalConfiguration.create(service.getServerUrl());
-            String secretToken = service.getSecretToken();
-            if (secretToken != null) {
-                configuration.withSecretToken(secretToken);
-            }
-            return configuration;
-        });
+    static SignalConfiguration getDefault(Connectivity connectivity) {
+        return SignalConfiguration.create(connectivity);
     }
 
     SpanProcessor getSpanProcessor();

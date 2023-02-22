@@ -23,11 +23,17 @@ import static org.junit.Assert.assertTrue;
 
 import androidx.annotation.NonNull;
 
+import org.junit.After;
 import org.junit.Test;
 
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 
 public class InstrumentationTest {
+
+    @After
+    public void tearDown() {
+        Configurations.resetForTest();
+    }
 
     @Test
     public void whenInstrumentationIsAvailable_provideIt() {
@@ -83,7 +89,7 @@ public class InstrumentationTest {
         }
 
         private SimpleInstrumentation() {
-            this(Groups.NONE.getType(), true);
+            this(null, true);
         }
 
         @NonNull
@@ -108,6 +114,12 @@ public class InstrumentationTest {
         @Override
         protected boolean enabled() {
             return enabled;
+        }
+
+        @NonNull
+        @Override
+        protected Group getGroup() {
+            return () -> null;
         }
     }
 }

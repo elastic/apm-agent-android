@@ -79,6 +79,13 @@ public class InstrumentationTest {
         assertFalse(new SimpleInstrumentation(ParentInstrumentation.class, true).isEnabled());
     }
 
+    @Test
+    public void whenParentInstrumentationIsSelf_provideSelfEnableInfo() {
+        Configurations.builder().register(new SimpleInstrumentation(SimpleInstrumentation.class, true)).buildAndRegisterGlobal();
+
+        assertTrue(Instrumentation.isEnabled(SimpleInstrumentation.class));
+    }
+
     private static class SimpleInstrumentation extends Instrumentation {
         private final Class<? extends Instrumentation> parentConfigClass;
         private final boolean enabled;

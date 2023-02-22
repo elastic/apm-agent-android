@@ -20,10 +20,6 @@ package co.elastic.apm.android.sdk.internal.features.centralconfig;
 
 import android.net.Uri;
 
-import com.dslplatform.json.DslJson;
-import com.dslplatform.json.JsonReader;
-import com.dslplatform.json.MapConverter;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -31,17 +27,19 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.Map;
 
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
 
 public class CentralConfigurationFetcher {
+    private static final int REQUEST_OK = 200;
+    private static final int CONFIGURATION_NOT_MODIFIED = 304;
+    private static final int REQUEST_FORBIDDEN = 403;
+    private static final int CONFIGURATION_NOT_FOUND = 404;
+    private static final int SERVICE_UNAVAILABLE = 503;
     private final Connectivity connectivity;
     private final String serviceName;
     private final String serviceEnvironment;
     private final ConfigurationFileProvider fileProvider;
-    private final DslJson<Object> dslJson = new DslJson<>(new DslJson.Settings<>());
-    private final byte[] buffer = new byte[4096];
 
     public CentralConfigurationFetcher(Connectivity connectivity,
                                        String serviceName,
@@ -53,20 +51,28 @@ public class CentralConfigurationFetcher {
         this.fileProvider = fileProvider;
     }
 
-    public Map<String, String> fetch() throws IOException {
+    public boolean fetch() throws IOException {
         HttpURLConnection connection = (HttpURLConnection) getUrl().openConnection();
         connection.setRequestProperty("Content-Type", "application/json");
         if (connectivity.authConfiguration() != null) {
             connection.setRequestProperty("Authorization", connectivity.authConfiguration().asAuthorizationHeaderValue());
         }
         try {
-            saveConfiguration(connection.getInputStream());
-            final JsonReader<Object> reader = dslJson.newReader(connection.getInputStream(), buffer);
-            reader.startObject();
-            return MapConverter.deserialize(reader);
+            int responseCode = connection.getResponseCode();
+            if (responseCode == REQUEST_OK) {
+                saveConfiguration(connection.getInputStream());
+                return true;
+            } else {
+                handleUnsuccessfulResponse(responseCode);
+            }
+            return false;
         } finally {
             connection.disconnect();
         }
+    }
+
+    private void handleUnsuccessfulResponse(int responseCode) {
+
     }
 
     private void saveConfiguration(InputStream inputStream) throws IOException {

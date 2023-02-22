@@ -12,6 +12,7 @@ import java.lang.reflect.Method;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.ElasticApmConfiguration;
+import co.elastic.apm.android.sdk.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration;
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
@@ -40,6 +41,10 @@ public class BaseRobolectricTestApplication extends Application implements Expor
 
     protected void initializeAgentWithCustomConfig(ElasticApmConfiguration configuration) {
         AgentInitializer.initialize(this, configuration, getSignalConfiguration());
+    }
+
+    protected void initializeAgentWithCustomConnectivity(Connectivity connectivity) {
+        AgentInitializer.initialize(this, connectivity);
     }
 
     protected void initializeAgent() {

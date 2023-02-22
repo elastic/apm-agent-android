@@ -15,6 +15,10 @@ public class AgentInitializer {
         initialize(context, null, signalConfiguration);
     }
 
+    public static void initialize(Context context, Connectivity connectivity) {
+        initialize(context, null, connectivity, null);
+    }
+
     public static void initialize(Context context, ElasticApmConfiguration configuration, SignalConfiguration signalConfiguration) {
         initialize(context, configuration, null, signalConfiguration);
     }

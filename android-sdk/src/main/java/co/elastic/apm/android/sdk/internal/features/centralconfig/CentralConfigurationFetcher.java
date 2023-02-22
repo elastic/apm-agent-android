@@ -32,6 +32,8 @@ import java.nio.file.StandardCopyOption;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
+import co.elastic.apm.android.sdk.internal.configuration.Configurations;
+import co.elastic.apm.android.sdk.internal.configuration.impl.GeneralConfiguration;
 
 public class CentralConfigurationFetcher {
     private static final int REQUEST_OK = 200;
@@ -41,17 +43,11 @@ public class CentralConfigurationFetcher {
     private static final int SERVICE_UNAVAILABLE = 503;
     private final Logger logger = Elog.getLogger(CentralConfigurationFetcher.class);
     private final Connectivity connectivity;
-    private final String serviceName;
-    private final String serviceEnvironment;
     private final ConfigurationFileProvider fileProvider;
 
     public CentralConfigurationFetcher(Connectivity connectivity,
-                                       String serviceName,
-                                       String serviceEnvironment,
                                        ConfigurationFileProvider fileProvider) {
         this.connectivity = connectivity;
-        this.serviceName = serviceName;
-        this.serviceEnvironment = serviceEnvironment;
         this.fileProvider = fileProvider;
     }
 
@@ -98,9 +94,10 @@ public class CentralConfigurationFetcher {
     }
 
     private URL getUrl() throws MalformedURLException {
+        GeneralConfiguration configuration = Configurations.get(GeneralConfiguration.class);
         Uri uri = Uri.parse(connectivity.endpoint()).buildUpon()
-                .appendQueryParameter("service.name", serviceName)
-                .appendQueryParameter("service.environment", serviceEnvironment)
+                .appendQueryParameter("service.name", configuration.getServiceName())
+                .appendQueryParameter("service.environment", configuration.getServiceEnvironment())
                 .build();
         return new URL(uri.toString());
     }

@@ -31,8 +31,8 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
-import co.elastic.apm.android.sdk.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
+import co.elastic.apm.android.sdk.internal.configuration.impl.ConnectivityConfiguration;
 import co.elastic.apm.android.sdk.internal.configuration.impl.GeneralConfiguration;
 
 public class CentralConfigurationFetcher {
@@ -42,20 +42,19 @@ public class CentralConfigurationFetcher {
     private static final int CONFIGURATION_NOT_FOUND = 404;
     private static final int SERVICE_UNAVAILABLE = 503;
     private final Logger logger = Elog.getLogger(CentralConfigurationFetcher.class);
-    private final Connectivity connectivity;
+    private final ConnectivityConfiguration connectivity;
     private final ConfigurationFileProvider fileProvider;
 
-    public CentralConfigurationFetcher(Connectivity connectivity,
-                                       ConfigurationFileProvider fileProvider) {
-        this.connectivity = connectivity;
+    public CentralConfigurationFetcher(ConfigurationFileProvider fileProvider) {
+        this.connectivity = Configurations.get(ConnectivityConfiguration.class);
         this.fileProvider = fileProvider;
     }
 
     public boolean fetch() throws IOException {
         HttpURLConnection connection = (HttpURLConnection) getUrl().openConnection();
         connection.setRequestProperty("Content-Type", "application/json");
-        if (connectivity.authConfiguration() != null) {
-            connection.setRequestProperty("Authorization", connectivity.authConfiguration().asAuthorizationHeaderValue());
+        if (connectivity.getAuthConfiguration() != null) {
+            connection.setRequestProperty("Authorization", connectivity.getAuthConfiguration().asAuthorizationHeaderValue());
         }
         try {
             int responseCode = connection.getResponseCode();
@@ -95,7 +94,7 @@ public class CentralConfigurationFetcher {
 
     private URL getUrl() throws MalformedURLException {
         GeneralConfiguration configuration = Configurations.get(GeneralConfiguration.class);
-        Uri uri = Uri.parse(connectivity.endpoint()).buildUpon()
+        Uri uri = Uri.parse(connectivity.getEndpoint()).buildUpon()
                 .appendQueryParameter("service.name", configuration.getServiceName())
                 .appendQueryParameter("service.environment", configuration.getServiceEnvironment())
                 .build();

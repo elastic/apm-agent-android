@@ -18,11 +18,13 @@
  */
 package co.elastic.apm.android.sdk.instrumentation;
 
+import androidx.annotation.NonNull;
+
 import java.util.List;
 
 import co.elastic.apm.android.sdk.internal.instrumentation.GroupInstrumentation;
 
-public final class InstrumentationConfiguration extends GroupInstrumentation {
+public final class InstrumentationConfiguration extends GroupInstrumentation implements Instrumentation.Group {
     public final List<Instrumentation> instrumentations;
 
     public static InstrumentationConfigurationBuilder builder() {
@@ -40,5 +42,16 @@ public final class InstrumentationConfiguration extends GroupInstrumentation {
     public InstrumentationConfiguration(List<Instrumentation> instrumentations) {
         super(true);
         this.instrumentations = instrumentations;
+    }
+
+    @NonNull
+    @Override
+    protected Group getGroup() {
+        return this;
+    }
+
+    @Override
+    public Class<? extends Instrumentation> getType() {
+        return null;
     }
 }

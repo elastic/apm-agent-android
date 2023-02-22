@@ -60,19 +60,19 @@ public final class Configurations {
         return get().getConfiguration(configurationClass);
     }
 
-    public boolean hasConfiguration(Class<? extends Configuration> configurationClass) {
-        return configurations.containsKey(configurationClass);
-    }
-
-    public <T extends Configuration> List<T> findConfigurationsByType(Class<T> type) {
+    public static <T> List<T> findByType(Class<T> type) {
         List<T> found = new ArrayList<>();
-        for (Configuration configuration : configurations.values()) {
+        for (Configuration configuration : Configurations.get().configurations.values()) {
             if (type.isAssignableFrom(configuration.getClass())) {
                 found.add((T) configuration);
             }
         }
 
         return found;
+    }
+
+    public boolean hasConfiguration(Class<? extends Configuration> configurationClass) {
+        return configurations.containsKey(configurationClass);
     }
 
     public <T extends Configuration> T getConfiguration(Class<? extends Configuration> configurationClass) {

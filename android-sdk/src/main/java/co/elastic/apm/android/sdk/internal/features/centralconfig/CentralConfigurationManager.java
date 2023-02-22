@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
+import co.elastic.apm.android.sdk.internal.configuration.Configurations;
+
 public class CentralConfigurationManager {
     private final DslJson<Object> dslJson = new DslJson<>(new DslJson.Settings<>());
     private final byte[] buffer = new byte[4096];
@@ -16,6 +18,12 @@ public class CentralConfigurationManager {
         final JsonReader<Object> reader = dslJson.newReader(getConfigurationInputStream(), buffer);
         reader.startObject();
         Map<String, String> map = MapConverter.deserialize(reader);
+    }
+
+    private void notifyConfigurationChanged(Map<String, String> configs) {
+        for (CentralConfigurationListener listener : Configurations.findByType(CentralConfigurationListener.class)) {
+            listener.onUpdate(configs);
+        }
     }
 
     private InputStream getConfigurationInputStream() {

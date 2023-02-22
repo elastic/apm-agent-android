@@ -41,6 +41,7 @@ import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration
 import co.elastic.apm.android.sdk.instrumentation.Instrumentations;
 import co.elastic.apm.android.sdk.internal.api.Initializable;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
+import co.elastic.apm.android.sdk.internal.configuration.impl.ConnectivityConfiguration;
 import co.elastic.apm.android.sdk.internal.configuration.impl.GeneralConfiguration;
 import co.elastic.apm.android.sdk.internal.exceptions.ElasticExceptionHandler;
 import co.elastic.apm.android.sdk.internal.features.launchtime.LaunchTimeActivityCallback;
@@ -66,7 +67,6 @@ import io.opentelemetry.sdk.trace.SpanProcessor;
 public final class ElasticApmAgent {
     public final ElasticApmConfiguration configuration;
     private static ElasticApmAgent instance;
-    private final Connectivity connectivity;
     private final NtpManager ntpManager;
     private final Flusher flusher;
 
@@ -95,8 +95,8 @@ public final class ElasticApmAgent {
         Elog.init(new AndroidLoggerFactory());
         ServiceManager.initialize(appContext);
         ServiceManager.get().start();
-        instance = new ElasticApmAgent(appContext, connectivity, configuration);
-        instance.onInitializationFinished(appContext);
+        instance = new ElasticApmAgent(appContext, configuration);
+        instance.onInitializationFinished(appContext, (connectivity == null) ? Connectivity.getDefault() : connectivity);
         return instance;
     }
 
@@ -122,34 +122,30 @@ public final class ElasticApmAgent {
         return flusher;
     }
 
-    private ElasticApmAgent(Context appContext, Connectivity connectivity, ElasticApmConfiguration configuration) {
+    private ElasticApmAgent(Context appContext, ElasticApmConfiguration configuration) {
         AgentDependenciesInjector injector = AgentDependenciesInjector.get(appContext);
         if (configuration != null) {
             this.configuration = configuration;
         } else {
             this.configuration = ElasticApmConfiguration.getDefault();
         }
-        if (connectivity == null) {
-            this.connectivity = Connectivity.getDefault();
-        } else {
-            this.connectivity = connectivity;
-        }
         flusher = new Flusher();
         ntpManager = injector.getNtpManager();
     }
 
-    private void onInitializationFinished(Context context) {
+    private void onInitializationFinished(Context context, Connectivity connectivity) {
         ntpManager.initialize();
-        initializeConfigurations();
+        initializeConfigurations(connectivity);
         initializeOpentelemetry();
         initializeCrashReports();
         initializeSessionIdProvider();
         initializeLaunchTimeTracker(context);
     }
 
-    private void initializeConfigurations() {
+    private void initializeConfigurations(Connectivity connectivity) {
         Configurations.Builder builder = Configurations.builder();
         builder.register(new GeneralConfiguration(configuration));
+        builder.register(new ConnectivityConfiguration(connectivity));
         builder.register(configuration.instrumentationConfiguration);
         configuration.instrumentationConfiguration.instrumentations.forEach(builder::register);
         builder.buildAndRegisterGlobal();
@@ -174,7 +170,7 @@ public final class ElasticApmAgent {
     private void initializeOpentelemetry() {
         SignalConfiguration signalConfiguration = configuration.signalConfiguration;
         if (signalConfiguration == null) {
-            signalConfiguration = SignalConfiguration.getDefault(connectivity);
+            signalConfiguration = SignalConfiguration.getDefault();
         }
         Attributes resourceAttrs = AttributesCreator.from(getResourceAttributesVisitor()).create();
         AttributesVisitor globalAttributesVisitor = new SessionAttributesVisitor();

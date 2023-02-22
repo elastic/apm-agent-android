@@ -20,11 +20,12 @@ package co.elastic.apm.android.sdk.instrumentation;
 
 import androidx.annotation.NonNull;
 
+import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.configuration.Configuration;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.instrumentation.InternalInstrumentation;
 
-public abstract class Instrumentation extends Configuration {
+public abstract class Instrumentation implements Configuration {
 
     static <T extends Instrumentation> void runWhenEnabled(Class<T> type, Function<T> onEnabled) {
         if (isEnabled(type)) {
@@ -32,27 +33,54 @@ public abstract class Instrumentation extends Configuration {
         }
     }
 
-    static <T extends Instrumentation> boolean isEnabled(Class<T> type) {
-        return Configurations.isEnabled(type);
+    static boolean isEnabled(Class<? extends Instrumentation> instrumentationClass) {
+        if (!Configurations.isInitialized()) {
+            Elog.getLogger(Configurations.class).info("Configurations has not been initialized");
+            return false;
+        }
+        if (!Configurations.hasConfiguration(instrumentationClass)) {
+            Elog.getLogger(Configurations.class).info("The requested Configuration was not found");
+            return false;
+        }
+
+        return Configurations.<Instrumentation>get(instrumentationClass).isEnabled();
     }
+
+    public final boolean isEnabled() {
+        if (groupIsNotEnabled()) {
+            return false;
+        }
+        return enabled();
+    }
+
+    private boolean groupIsNotEnabled() {
+        Class<? extends Instrumentation> groupType = getGroup().getType();
+        return groupType != null && getClass() != groupType && !Configurations.<Instrumentation>get(groupType).isEnabled();
+    }
+
+    protected abstract boolean enabled();
 
     @NonNull
     protected Group getGroup() {
-        return Group.NONE;
+        return Groups.NONE;
     }
 
-    @Override
-    protected Class<? extends Configuration> getParentConfigurationType() {
-        return getGroup().type;
+    public interface Group {
+        Class<? extends Instrumentation> getType();
     }
 
-    public enum Group {
+    public enum Groups implements Group {
         NONE(InstrumentationConfiguration.class);
 
         private final Class<? extends InternalInstrumentation> type;
 
-        Group(Class<? extends InternalInstrumentation> type) {
+        Groups(Class<? extends InternalInstrumentation> type) {
             this.type = type;
+        }
+
+        @Override
+        public Class<? extends Instrumentation> getType() {
+            return type;
         }
     }
 

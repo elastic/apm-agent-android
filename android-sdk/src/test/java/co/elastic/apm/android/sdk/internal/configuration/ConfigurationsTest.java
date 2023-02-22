@@ -19,8 +19,6 @@
 package co.elastic.apm.android.sdk.internal.configuration;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.junit.After;
@@ -45,31 +43,6 @@ public class ConfigurationsTest {
     }
 
     @Test
-    public void whenConfigurationIsAvailable_provideIt() {
-        Configurations configurations = Configurations.builder().register(new SimpleConfiguration()).buildAndRegisterGlobal();
-        Configuration configuration = configurations.getConfiguration(SimpleConfiguration.class);
-
-        assertTrue(configuration.isEnabled());
-    }
-
-    @Test
-    public void checkIfConfigurationIsEnabled_statically() {
-        Configurations.builder().register(new SimpleConfiguration()).buildAndRegisterGlobal();
-
-        assertTrue(Configurations.isEnabled(SimpleConfiguration.class));
-    }
-
-    @Test
-    public void whenNotInitialized_returnNotEnabled_statically() {
-        assertFalse(Configurations.isEnabled(SimpleConfiguration.class));
-    }
-
-    @Test
-    public void whenConfigNotFound_returnNotEnabled_statically() {
-        assertFalse(Configurations.isEnabled(SimpleConfiguration.class));
-    }
-
-    @Test
     public void whenTryingToRegisterSameConfigurationTypeMoreThanOnce_fail() {
         try {
             Configurations.builder().register(new SimpleConfiguration())
@@ -87,11 +60,7 @@ public class ConfigurationsTest {
         assertEquals(configurations, Configurations.get());
     }
 
-    private static class SimpleConfiguration extends Configuration {
+    private static class SimpleConfiguration implements Configuration {
 
-        @Override
-        protected boolean enabled() {
-            return true;
-        }
     }
 }

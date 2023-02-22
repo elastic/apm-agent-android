@@ -20,7 +20,6 @@ package co.elastic.apm.android.sdk.instrumentation;
 
 import java.util.List;
 
-import co.elastic.apm.android.sdk.internal.configuration.Configuration;
 import co.elastic.apm.android.sdk.internal.instrumentation.GroupInstrumentation;
 
 public final class InstrumentationConfiguration extends GroupInstrumentation {
@@ -41,10 +40,5 @@ public final class InstrumentationConfiguration extends GroupInstrumentation {
     public InstrumentationConfiguration(List<Instrumentation> instrumentations) {
         super(true);
         this.instrumentations = instrumentations;
-    }
-
-    @Override
-    protected Class<? extends Configuration> getParentConfigurationType() {
-        return null;
     }
 }

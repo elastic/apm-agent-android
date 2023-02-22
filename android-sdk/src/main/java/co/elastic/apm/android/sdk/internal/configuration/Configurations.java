@@ -47,20 +47,6 @@ public final class Configurations {
         this.configurations = configurations;
     }
 
-    public static boolean isEnabled(Class<? extends Configuration> configurationClass) {
-        Configurations configurations = get();
-        if (configurations == null) {
-            Elog.getLogger(Configurations.class).info("Configurations has not been initialized");
-            return false;
-        }
-        if (!configurations.hasConfiguration(configurationClass)) {
-            Elog.getLogger(Configurations.class).info("The requested Configuration was not found");
-            return false;
-        }
-
-        return configurations.getConfiguration(configurationClass).isEnabled();
-    }
-
     public static <T extends Configuration> T get(Class<? extends Configuration> configurationClass) {
         return get().getConfiguration(configurationClass);
     }
@@ -81,8 +67,8 @@ public final class Configurations {
         return found;
     }
 
-    public boolean hasConfiguration(Class<? extends Configuration> configurationClass) {
-        return configurations.containsKey(configurationClass);
+    public static boolean hasConfiguration(Class<? extends Configuration> configurationClass) {
+        return get().configurations.containsKey(configurationClass);
     }
 
     public <T extends Configuration> T getConfiguration(Class<? extends Configuration> configurationClass) {

@@ -19,6 +19,7 @@
 package co.elastic.apm.android.sdk.internal.configuration;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,10 @@ public final class Configurations {
 
     static Configurations get() {
         return INSTANCE;
+    }
+
+    public static boolean isInitialized() {
+        return INSTANCE != null;
     }
 
     public static Configurations.Builder builder() {
@@ -61,7 +66,12 @@ public final class Configurations {
     }
 
     public static <T> List<T> findByType(Class<T> type) {
+        if (!isInitialized()) {
+            Elog.getLogger(Configurations.class).info("Configurations has not been initialized");
+            return Collections.emptyList();
+        }
         List<T> found = new ArrayList<>();
+
         for (Configuration configuration : Configurations.get().configurations.values()) {
             if (type.isAssignableFrom(configuration.getClass())) {
                 found.add((T) configuration);

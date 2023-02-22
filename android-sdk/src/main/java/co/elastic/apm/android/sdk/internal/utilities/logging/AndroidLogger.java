@@ -25,6 +25,7 @@ import org.slf4j.event.Level;
 import co.elastic.apm.android.common.internal.logging.BaseELogger;
 import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.internal.services.Service;
+import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService;
 import co.elastic.apm.android.sdk.internal.utilities.providers.LazyProvider;
 
@@ -37,7 +38,7 @@ class AndroidLogger extends BaseELogger {
             if (!ElasticApmAgent.isInitialized()) {
                 return false;
             }
-            AppInfoService service = ElasticApmAgent.get().getService(Service.Names.APP_INFO);
+            AppInfoService service = ServiceManager.get().getService(Service.Names.APP_INFO);
             return service.isInDebugMode();
         });
     }

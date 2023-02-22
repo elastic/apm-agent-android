@@ -16,36 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.connectivity.custom;
+package co.elastic.apm.android.sdk.connectivity.opentelemetry.base;
 
-import co.elastic.apm.android.sdk.connectivity.base.DefaultProcessingConnectivity;
+import io.opentelemetry.sdk.logs.LogRecordProcessor;
+import io.opentelemetry.sdk.logs.export.BatchLogRecordProcessor;
 import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
+import io.opentelemetry.sdk.metrics.export.MetricReader;
+import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
+import io.opentelemetry.sdk.trace.SpanProcessor;
+import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
-public class CustomExporterConnectivity extends DefaultProcessingConnectivity {
-    private final SpanExporter spanExporter;
-    private final LogRecordExporter logExporter;
-    private final MetricExporter metricExporter;
+public abstract class DefaultSignalProcessorConfiguration extends BaseSignalConfiguration {
 
-    public CustomExporterConnectivity(SpanExporter exporter, LogRecordExporter logExporter, MetricExporter metricExporter) {
-        this.spanExporter = exporter;
-        this.logExporter = logExporter;
-        this.metricExporter = metricExporter;
+    @Override
+    protected SpanProcessor provideSpanProcessor(SpanExporter exporter) {
+        return BatchSpanProcessor.builder(exporter).build();
     }
 
     @Override
-    protected SpanExporter provideSpanExporter() {
-        return spanExporter;
+    protected LogRecordProcessor provideLogProcessor(LogRecordExporter exporter) {
+        return BatchLogRecordProcessor.builder(exporter).build();
     }
 
     @Override
-    protected LogRecordExporter provideLogExporter() {
-        return logExporter;
-    }
-
-    @Override
-    protected MetricExporter provideMetricExporter() {
-        return metricExporter;
+    protected MetricReader provideMetricReader(MetricExporter exporter) {
+        return PeriodicMetricReader.create(exporter);
     }
 }

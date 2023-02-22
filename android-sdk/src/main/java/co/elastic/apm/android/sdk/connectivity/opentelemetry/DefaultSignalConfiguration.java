@@ -16,11 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.connectivity;
+package co.elastic.apm.android.sdk.connectivity.opentelemetry;
 
 import androidx.annotation.NonNull;
 
-import co.elastic.apm.android.sdk.connectivity.base.DefaultProcessingConnectivity;
+import co.elastic.apm.android.sdk.connectivity.Connectivity;
+import co.elastic.apm.android.sdk.connectivity.opentelemetry.base.DefaultSignalProcessorConfiguration;
 import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporter;
 import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporterBuilder;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
@@ -32,35 +33,28 @@ import io.opentelemetry.sdk.metrics.export.AggregationTemporalitySelector;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
-public class CommonConnectivity extends DefaultProcessingConnectivity {
+public final class DefaultSignalConfiguration extends DefaultSignalProcessorConfiguration {
     private final static String AUTHORIZATION_HEADER_NAME = "Authorization";
-    private final static String BEARER_TOKEN_FORMAT = "Bearer %s";
-    private final String endpoint;
-    private String token;
+    private final Connectivity connectivity;
 
-    CommonConnectivity(String endpoint) {
-        this.endpoint = endpoint;
-    }
-
-    public CommonConnectivity withSecretToken(String token) {
-        this.token = token;
-        return this;
+    DefaultSignalConfiguration(Connectivity connectivity) {
+        this.connectivity = connectivity;
     }
 
     @Override
     protected SpanExporter provideSpanExporter() {
-        OtlpGrpcSpanExporterBuilder exporterBuilder = OtlpGrpcSpanExporter.builder().setEndpoint(endpoint);
-        if (token != null) {
-            exporterBuilder.addHeader(AUTHORIZATION_HEADER_NAME, getBearerToken());
+        OtlpGrpcSpanExporterBuilder exporterBuilder = OtlpGrpcSpanExporter.builder().setEndpoint(connectivity.endpoint());
+        if (connectivity.authConfiguration() != null) {
+            exporterBuilder.addHeader(AUTHORIZATION_HEADER_NAME, getAuthorizationHeaderValue());
         }
         return exporterBuilder.build();
     }
 
     @Override
     protected LogRecordExporter provideLogExporter() {
-        OtlpGrpcLogRecordExporterBuilder exporterBuilder = OtlpGrpcLogRecordExporter.builder().setEndpoint(endpoint);
-        if (token != null) {
-            exporterBuilder.addHeader(AUTHORIZATION_HEADER_NAME, getBearerToken());
+        OtlpGrpcLogRecordExporterBuilder exporterBuilder = OtlpGrpcLogRecordExporter.builder().setEndpoint(connectivity.endpoint());
+        if (connectivity.authConfiguration() != null) {
+            exporterBuilder.addHeader(AUTHORIZATION_HEADER_NAME, getAuthorizationHeaderValue());
         }
         return exporterBuilder.build();
     }
@@ -69,15 +63,15 @@ public class CommonConnectivity extends DefaultProcessingConnectivity {
     protected MetricExporter provideMetricExporter() {
         OtlpGrpcMetricExporterBuilder exporterBuilder = OtlpGrpcMetricExporter.builder()
                 .setAggregationTemporalitySelector(AggregationTemporalitySelector.deltaPreferred())
-                .setEndpoint(endpoint);
-        if (token != null) {
-            exporterBuilder.addHeader(AUTHORIZATION_HEADER_NAME, getBearerToken());
+                .setEndpoint(connectivity.endpoint());
+        if (connectivity.authConfiguration() != null) {
+            exporterBuilder.addHeader(AUTHORIZATION_HEADER_NAME, getAuthorizationHeaderValue());
         }
         return exporterBuilder.build();
     }
 
     @NonNull
-    private String getBearerToken() {
-        return String.format(BEARER_TOKEN_FORMAT, token);
+    private String getAuthorizationHeaderValue() {
+        return connectivity.authConfiguration().asAuthorizationHeaderValue();
     }
 }

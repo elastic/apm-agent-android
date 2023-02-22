@@ -29,8 +29,8 @@ import androidx.annotation.Nullable;
 
 import org.jetbrains.annotations.NotNull;
 
-import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.internal.services.Service;
+import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService;
 import co.elastic.apm.android.sdk.internal.services.network.data.CarrierInfo;
 import co.elastic.apm.android.sdk.internal.services.network.data.type.NetworkType;
@@ -112,7 +112,7 @@ public class NetworkService extends ConnectivityManager.NetworkCallback implemen
 
     private AppInfoService getAppInfoService() {
         if (appInfoService == null) {
-            appInfoService = ElasticApmAgent.get().getService(Names.APP_INFO);
+            appInfoService = ServiceManager.get().getService(Names.APP_INFO);
         }
 
         return appInfoService;

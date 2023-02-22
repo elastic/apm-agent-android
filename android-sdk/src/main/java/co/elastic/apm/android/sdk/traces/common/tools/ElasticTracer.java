@@ -21,8 +21,8 @@ package co.elastic.apm.android.sdk.traces.common.tools;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.internal.services.Service;
+import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.SpanBuilder;
@@ -48,7 +48,7 @@ public class ElasticTracer implements Tracer {
     }
 
     public static ElasticTracer okhttp() {
-        ApmMetadataService service = ElasticApmAgent.get().getService(Service.Names.METADATA);
+        ApmMetadataService service = ServiceManager.get().getService(Service.Names.METADATA);
         return create("OkHttp", service.getOkHttpVersion());
     }
 

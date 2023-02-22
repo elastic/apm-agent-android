@@ -2,8 +2,8 @@ package co.elastic.apm.android.test;
 
 import android.app.Application;
 
-import co.elastic.apm.android.sdk.ElasticApmAgent;
-import co.elastic.apm.android.sdk.connectivity.Connectivity;
+import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration;
+import co.elastic.apm.android.test.common.agent.AgentInitializer;
 import co.elastic.apm.android.test.common.logs.LogRecordExporterCaptor;
 import co.elastic.apm.android.test.common.metrics.MetricExporterCaptor;
 import co.elastic.apm.android.test.common.metrics.MetricsFlusher;
@@ -21,14 +21,14 @@ public class DefaultApp extends Application implements ExportersProvider {
     @Override
     public void onCreate() {
         super.onCreate();
-        ElasticApmAgent.initialize(this, getConnectivity());
+        AgentInitializer.initialize(this, getSignalConfiguration());
     }
 
-    protected Connectivity getConnectivity() {
+    protected SignalConfiguration getSignalConfiguration() {
         PeriodicMetricReader metricReader = PeriodicMetricReader.create(metricExporter);
         MetricsFlusher flusher = new MetricsFlusher(metricReader);
         metricExporter.setFlusher(flusher);
-        return Connectivity.custom(SimpleSpanProcessor.create(spanExporter),
+        return SignalConfiguration.custom(SimpleSpanProcessor.create(spanExporter),
                 SimpleLogRecordProcessor.create(logRecordExporter),
                 metricReader);
     }

@@ -20,6 +20,8 @@ package co.elastic.apm.android.sdk.internal.features.centralconfig;
 
 import android.net.Uri;
 
+import org.slf4j.Logger;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -28,6 +30,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
+import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
 
 public class CentralConfigurationFetcher {
@@ -36,6 +39,7 @@ public class CentralConfigurationFetcher {
     private static final int REQUEST_FORBIDDEN = 403;
     private static final int CONFIGURATION_NOT_FOUND = 404;
     private static final int SERVICE_UNAVAILABLE = 503;
+    private final Logger logger = Elog.getLogger(CentralConfigurationFetcher.class);
     private final Connectivity connectivity;
     private final String serviceName;
     private final String serviceEnvironment;
@@ -72,7 +76,21 @@ public class CentralConfigurationFetcher {
     }
 
     private void handleUnsuccessfulResponse(int responseCode) {
-
+        switch (responseCode) {
+            case CONFIGURATION_NOT_MODIFIED:
+                logger.debug("Configuration did not change");
+                break;
+            case CONFIGURATION_NOT_FOUND:
+                logger.debug("This APM Server does not support central configuration. Update to APM Server 7.3+");
+                break;
+            case REQUEST_FORBIDDEN:
+                logger.debug("Central configuration is disabled. Set kibana.enabled: true in your APM Server configuration.");
+                break;
+            case SERVICE_UNAVAILABLE:
+                throw new IllegalStateException("Remote configuration is not available. Check the connection between APM Server and Kibana.");
+            default:
+                throw new IllegalStateException("Unexpected status " + responseCode + " while fetching configuration");
+        }
     }
 
     private void saveConfiguration(InputStream inputStream) throws IOException {

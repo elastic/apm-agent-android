@@ -25,9 +25,12 @@ import com.dslplatform.json.JsonReader;
 import com.dslplatform.json.MapConverter;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Map;
 
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
@@ -36,15 +39,18 @@ public class CentralConfigurationFetcher {
     private final Connectivity connectivity;
     private final String serviceName;
     private final String serviceEnvironment;
+    private final ConfigurationFileProvider fileProvider;
     private final DslJson<Object> dslJson = new DslJson<>(new DslJson.Settings<>());
     private final byte[] buffer = new byte[4096];
 
     public CentralConfigurationFetcher(Connectivity connectivity,
                                        String serviceName,
-                                       String serviceEnvironment) {
+                                       String serviceEnvironment,
+                                       ConfigurationFileProvider fileProvider) {
         this.connectivity = connectivity;
         this.serviceName = serviceName;
         this.serviceEnvironment = serviceEnvironment;
+        this.fileProvider = fileProvider;
     }
 
     public Map<String, String> fetch() throws IOException {
@@ -54,12 +60,17 @@ public class CentralConfigurationFetcher {
             connection.setRequestProperty("Authorization", connectivity.authConfiguration().asAuthorizationHeaderValue());
         }
         try {
+            saveConfiguration(connection.getInputStream());
             final JsonReader<Object> reader = dslJson.newReader(connection.getInputStream(), buffer);
             reader.startObject();
             return MapConverter.deserialize(reader);
         } finally {
             connection.disconnect();
         }
+    }
+
+    private void saveConfiguration(InputStream inputStream) throws IOException {
+        Files.copy(inputStream, fileProvider.getConfigurationFile().toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 
     private URL getUrl() throws MalformedURLException {

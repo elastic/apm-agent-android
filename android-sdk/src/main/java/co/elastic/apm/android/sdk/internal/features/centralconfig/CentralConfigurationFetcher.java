@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.configuration.central;
+package co.elastic.apm.android.sdk.internal.features.centralconfig;
 
 import android.net.Uri;
 

@@ -18,11 +18,14 @@
  */
 package co.elastic.apm.android.sdk.internal.configuration;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
 
+@SuppressWarnings("unchecked")
 public final class Configurations {
     private static Configurations INSTANCE;
     private final Map<Class<? extends Configuration>, Configuration> configurations;
@@ -61,7 +64,17 @@ public final class Configurations {
         return configurations.containsKey(configurationClass);
     }
 
-    @SuppressWarnings("unchecked")
+    public <T extends Configuration> List<T> findConfigurationsByType(Class<T> type) {
+        List<T> found = new ArrayList<>();
+        for (Configuration configuration : configurations.values()) {
+            if (type.isAssignableFrom(configuration.getClass())) {
+                found.add((T) configuration);
+            }
+        }
+
+        return found;
+    }
+
     public <T extends Configuration> T getConfiguration(Class<? extends Configuration> configurationClass) {
         if (!configurations.containsKey(configurationClass)) {
             throw new IllegalArgumentException("No configuration found for '" + configurationClass.getName() + "'");

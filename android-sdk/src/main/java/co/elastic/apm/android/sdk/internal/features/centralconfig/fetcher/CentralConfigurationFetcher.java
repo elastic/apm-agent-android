@@ -29,6 +29,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
@@ -45,6 +47,7 @@ public class CentralConfigurationFetcher {
     private static final int CONFIGURATION_NOT_FOUND = 404;
     private static final int SERVICE_UNAVAILABLE = 503;
     private static final String ETAG_PREFERENCE_NAME = "central_configuration_etag";
+    private static final Pattern MAX_AGE = Pattern.compile("max-age\\s*=\\s*(\\d+)");
     private final Logger logger = Elog.getLogger(CentralConfigurationFetcher.class);
     private final ConnectivityConfiguration connectivity;
     private final ConfigurationFileProvider fileProvider;
@@ -56,7 +59,7 @@ public class CentralConfigurationFetcher {
         preferences = ServiceManager.get().getService(Service.Names.PREFERENCES);
     }
 
-    public boolean fetch() throws IOException {
+    public FetchResult fetch() throws IOException {
         HttpURLConnection connection = (HttpURLConnection) getUrl().openConnection();
         String eTag = getETag();
         connection.setRequestProperty("Content-Type", "application/json");
@@ -68,17 +71,31 @@ public class CentralConfigurationFetcher {
         }
         try {
             storeETag(connection.getHeaderField("ETag"));
+            Integer maxAgeInSeconds = parseMaxAge(connection.getHeaderField("Cache-Control"));
             int responseCode = connection.getResponseCode();
             if (responseCode == REQUEST_OK) {
                 saveConfiguration(connection.getInputStream());
-                return true;
+                return new FetchResult(maxAgeInSeconds, true);
             } else {
                 handleUnsuccessfulResponse(responseCode);
             }
-            return false;
+            return new FetchResult(maxAgeInSeconds, false);
         } finally {
             connection.disconnect();
         }
+    }
+
+    private Integer parseMaxAge(String cacheControlHeader) {
+        if (cacheControlHeader == null) {
+            logger.debug("Cache control header not found");
+            return null;
+        }
+        Matcher matcher = MAX_AGE.matcher(cacheControlHeader);
+        if (!matcher.find()) {
+            logger.debug("Cache control header has invalid format");
+            return null;
+        }
+        return Integer.parseInt(matcher.group(1));
     }
 
     private void handleUnsuccessfulResponse(int responseCode) {

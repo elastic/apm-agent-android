@@ -44,6 +44,7 @@ import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.configuration.impl.ConnectivityConfiguration;
 import co.elastic.apm.android.sdk.internal.configuration.impl.GeneralConfiguration;
 import co.elastic.apm.android.sdk.internal.exceptions.ElasticExceptionHandler;
+import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigInitializer;
 import co.elastic.apm.android.sdk.internal.features.launchtime.LaunchTimeActivityCallback;
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
@@ -136,10 +137,16 @@ public final class ElasticApmAgent {
     private void onInitializationFinished(Context context, Connectivity connectivity) {
         ntpManager.initialize();
         initializeConfigurations(connectivity);
+        initializeCentralConfiguration(context);
         initializeOpentelemetry();
         initializeCrashReports();
         initializeSessionIdProvider();
         initializeLaunchTimeTracker(context);
+    }
+
+    private void initializeCentralConfiguration(Context context) {
+        CentralConfigInitializer centralConfigInitializer = new CentralConfigInitializer(context);
+        centralConfigInitializer.initialize();
     }
 
     private void initializeConfigurations(Connectivity connectivity) {

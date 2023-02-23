@@ -19,5 +19,5 @@
 package co.elastic.apm.android.sdk.internal.utilities.concurrency;
 
 public interface BackgroundWork<T> {
-    T execute();
+    T execute() throws Throwable;
 }

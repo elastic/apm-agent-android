@@ -1,23 +1,68 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *	http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package co.elastic.apm.android.sdk.internal.features.centralconfig;
+
+import android.content.Context;
 
 import com.dslplatform.json.DslJson;
 import com.dslplatform.json.JsonReader;
 import com.dslplatform.json.MapConverter;
 
+import org.slf4j.Logger;
+
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
+import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 
-public class CentralConfigurationManager {
+public class CentralConfigurationManager implements ConfigurationFileProvider {
+    private final Context context;
     private final DslJson<Object> dslJson = new DslJson<>(new DslJson.Settings<>());
     private final byte[] buffer = new byte[4096];
+    private File configFile;
 
-    public void sync() throws IOException {
-        final JsonReader<Object> reader = dslJson.newReader(getConfigurationInputStream(), buffer);
-        reader.startObject();
-        Map<String, String> map = MapConverter.deserialize(reader);
+    public CentralConfigurationManager(Context context) {
+        this.context = context;
+    }
+
+    public void sync() {
+        CentralConfigurationFetcher fetcher = new CentralConfigurationFetcher(this);
+        try {
+            if (fetcher.fetch()) {
+                notifyConfigurationChanged(readConfigs(getConfigurationFile()));
+            }
+        } catch (Throwable e) {
+            Logger logger = Elog.getLogger(CentralConfigurationManager.class);
+            logger.error("An error occurred while fetching the central configuration", e);
+        }
+    }
+
+    private Map<String, String> readConfigs(File configFile) throws IOException {
+        try (InputStream is = new FileInputStream(configFile)) {
+            JsonReader<Object> reader = dslJson.newReader(is, buffer);
+            reader.startObject();
+            return MapConverter.deserialize(reader);
+        }
     }
 
     private void notifyConfigurationChanged(Map<String, String> configs) {
@@ -26,7 +71,11 @@ public class CentralConfigurationManager {
         }
     }
 
-    private InputStream getConfigurationInputStream() {
-        return null;
+    @Override
+    public File getConfigurationFile() {
+        if (configFile == null) {
+            configFile = new File(context.getFilesDir(), "elastic_agent_configuration.json");
+        }
+        return configFile;
     }
 }

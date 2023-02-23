@@ -54,16 +54,17 @@ public final class CentralConfigurationManager implements ConfigurationFileProvi
         preferences = ServiceManager.get().getService(Service.Names.PREFERENCES);
     }
 
-    public void sync() {
-        CentralConfigurationFetcher fetcher = new CentralConfigurationFetcher(this, preferences);
+    public void sync() throws IOException {
         try {
+            CentralConfigurationFetcher fetcher = new CentralConfigurationFetcher(this, preferences);
             FetchResult fetchResult = fetcher.fetch();
             if (fetchResult.hasChanged) {
                 notifyConfigurationChanged(readConfigs(getConfigurationFile()));
             }
-        } catch (Throwable e) {
+        } catch (Throwable t) {
             Logger logger = Elog.getLogger(CentralConfigurationManager.class);
-            logger.error("An error occurred while fetching the central configuration", e);
+            logger.error("An error occurred while fetching the central configuration", t);
+            throw t;
         }
     }
 

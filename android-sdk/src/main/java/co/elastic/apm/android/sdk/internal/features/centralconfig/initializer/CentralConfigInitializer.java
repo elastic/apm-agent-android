@@ -38,6 +38,8 @@ public class CentralConfigInitializer implements BackgroundExecutor.Callback<Int
             } else {
                 CentralConfigurationManager.scheduleInitialSync(context);
             }
+        } else {
+            CentralConfigurationManager.scheduleInitialSync(context);
         }
     }
 }

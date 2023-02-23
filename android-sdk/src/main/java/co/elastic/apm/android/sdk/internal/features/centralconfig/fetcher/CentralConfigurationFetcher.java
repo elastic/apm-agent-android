@@ -44,7 +44,7 @@ public class CentralConfigurationFetcher {
     private static final int REQUEST_FORBIDDEN = 403;
     private static final int CONFIGURATION_NOT_FOUND = 404;
     private static final int SERVICE_UNAVAILABLE = 503;
-    private static final String ETAG_NAME = "central_configuration_etag";
+    private static final String ETAG_PREFERENCE_NAME = "central_configuration_etag";
     private final Logger logger = Elog.getLogger(CentralConfigurationFetcher.class);
     private final ConnectivityConfiguration connectivity;
     private final ConfigurationFileProvider fileProvider;
@@ -105,11 +105,11 @@ public class CentralConfigurationFetcher {
 
     private void storeETag(String eTag) {
         logger.debug("Storing ETag {}", eTag);
-        preferences.store(ETAG_NAME, eTag);
+        preferences.store(ETAG_PREFERENCE_NAME, eTag);
     }
 
     private String getETag() {
-        String eTag = preferences.retrieveString(ETAG_NAME);
+        String eTag = preferences.retrieveString(ETAG_PREFERENCE_NAME);
         logger.debug("Retrieving ETag {}", eTag);
         return eTag;
     }

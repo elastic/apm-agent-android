@@ -58,7 +58,7 @@ public final class CentralConfigurationManager implements ConfigurationFileProvi
         try {
             CentralConfigurationFetcher fetcher = new CentralConfigurationFetcher(this, preferences);
             FetchResult fetchResult = fetcher.fetch();
-            if (fetchResult.hasChanged) {
+            if (fetchResult.configurationHasChanged) {
                 notifyConfigurationChanged(readConfigs(getConfigurationFile()));
             }
         } catch (Throwable t) {

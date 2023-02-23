@@ -48,16 +48,17 @@ public class CentralConfigurationFetcher {
     private final Logger logger = Elog.getLogger(CentralConfigurationFetcher.class);
     private final ConnectivityConfiguration connectivity;
     private final ConfigurationFileProvider fileProvider;
+    private final PreferencesService preferences;
 
     public CentralConfigurationFetcher(ConfigurationFileProvider fileProvider) {
         this.connectivity = Configurations.get(ConnectivityConfiguration.class);
         this.fileProvider = fileProvider;
+        preferences = ServiceManager.get().getService(Service.Names.PREFERENCES);
     }
 
     public boolean fetch() throws IOException {
-        PreferencesService preferences = ServiceManager.get().getService(Service.Names.PREFERENCES);
         HttpURLConnection connection = (HttpURLConnection) getUrl().openConnection();
-        String eTag = getETag(preferences);
+        String eTag = getETag();
         connection.setRequestProperty("Content-Type", "application/json");
         if (eTag != null) {
             connection.setRequestProperty("If-None-Match", eTag);
@@ -66,7 +67,7 @@ public class CentralConfigurationFetcher {
             connection.setRequestProperty("Authorization", connectivity.getAuthConfiguration().asAuthorizationHeaderValue());
         }
         try {
-            storeETag(preferences, connection.getHeaderField("ETag"));
+            storeETag(connection.getHeaderField("ETag"));
             int responseCode = connection.getResponseCode();
             if (responseCode == REQUEST_OK) {
                 saveConfiguration(connection.getInputStream());
@@ -102,12 +103,12 @@ public class CentralConfigurationFetcher {
         Files.copy(inputStream, fileProvider.getConfigurationFile().toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 
-    private void storeETag(PreferencesService preferences, String eTag) {
+    private void storeETag(String eTag) {
         logger.debug("Storing ETag {}", eTag);
         preferences.store(ETAG_NAME, eTag);
     }
 
-    private String getETag(PreferencesService preferences) {
+    private String getETag() {
         String eTag = preferences.retrieveString(ETAG_NAME);
         logger.debug("Retrieving ETag {}", eTag);
         return eTag;

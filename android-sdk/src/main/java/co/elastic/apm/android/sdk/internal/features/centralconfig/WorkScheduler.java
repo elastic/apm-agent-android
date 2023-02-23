@@ -59,6 +59,7 @@ final class WorkScheduler {
                 ExistingPeriodicWorkPolicy.UPDATE,
                 workRequest);
 
+        storeCurrentPollTimeInterval(preferences, timeIntervalInSeconds);
         Elog.getLogger().debug("Enqueued central config worker with time interval in seconds: {}", timeIntervalInSeconds);
     }
 

@@ -40,7 +40,7 @@ import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
 
-public class CentralConfigurationFetcher {
+public final class CentralConfigurationFetcher {
     private static final int REQUEST_OK = 200;
     private static final int CONFIGURATION_NOT_MODIFIED = 304;
     private static final int REQUEST_FORBIDDEN = 403;
@@ -92,7 +92,7 @@ public class CentralConfigurationFetcher {
         }
         Matcher matcher = MAX_AGE.matcher(cacheControlHeader);
         if (!matcher.find()) {
-            logger.debug("Cache control header has invalid format");
+            logger.debug("Cache control header has invalid format: {}", cacheControlHeader);
             return null;
         }
         return Integer.parseInt(matcher.group(1));

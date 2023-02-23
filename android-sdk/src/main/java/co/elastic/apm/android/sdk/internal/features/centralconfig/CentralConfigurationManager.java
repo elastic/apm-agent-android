@@ -36,8 +36,9 @@ import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.fetcher.CentralConfigurationFetcher;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.fetcher.ConfigurationFileProvider;
+import co.elastic.apm.android.sdk.internal.features.centralconfig.fetcher.FetchResult;
 
-public class CentralConfigurationManager implements ConfigurationFileProvider {
+public final class CentralConfigurationManager implements ConfigurationFileProvider {
     private final Context context;
     private final DslJson<Object> dslJson = new DslJson<>(new DslJson.Settings<>());
     private final byte[] buffer = new byte[4096];
@@ -50,7 +51,8 @@ public class CentralConfigurationManager implements ConfigurationFileProvider {
     public void sync() {
         CentralConfigurationFetcher fetcher = new CentralConfigurationFetcher(this);
         try {
-            if (fetcher.fetch()) {
+            FetchResult fetchResult = fetcher.fetch();
+            if (fetchResult.hasChanged) {
                 notifyConfigurationChanged(readConfigs(getConfigurationFile()));
             }
         } catch (Throwable e) {

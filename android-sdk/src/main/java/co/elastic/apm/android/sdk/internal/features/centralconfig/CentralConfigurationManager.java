@@ -20,10 +20,7 @@ package co.elastic.apm.android.sdk.internal.features.centralconfig;
 
 import android.content.Context;
 
-import androidx.work.Constraints;
-import androidx.work.ExistingPeriodicWorkPolicy;
-import androidx.work.NetworkType;
-import androidx.work.PeriodicWorkRequest;
+import androidx.annotation.WorkerThread;
 import androidx.work.WorkManager;
 
 import com.dslplatform.json.DslJson;
@@ -38,22 +35,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.fetcher.CentralConfigurationFetcher;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.fetcher.ConfigurationFileProvider;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.fetcher.FetchResult;
-import co.elastic.apm.android.sdk.internal.features.centralconfig.worker.CentralConfigFetchWorker;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
 
 public final class CentralConfigurationManager implements ConfigurationFileProvider {
-    private static final String MAX_AGE_PREFERENCE_NAME = "central_configuration_max_age";
-    private static final int DEFAULT_POLL_DELAY_SEC = (int) TimeUnit.MINUTES.toSeconds(5);
-    private static final String UNIQUE_PERIODIC_WORK_NAME = "central_config_periodic_work";
     private final Context context;
     private final DslJson<Object> dslJson = new DslJson<>(new DslJson.Settings<>());
     private final Logger logger = Elog.getLogger(CentralConfigurationManager.class);
@@ -66,23 +58,15 @@ public final class CentralConfigurationManager implements ConfigurationFileProvi
         preferences = ServiceManager.get().getService(Service.Names.PREFERENCES);
     }
 
-    public static void scheduleSync(Context context, Integer timeIntervalInSeconds) {
-        Constraints constraints = new Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.METERED)
-                .setRequiresCharging(true)
-                .build();
 
-        PeriodicWorkRequest workRequest = new PeriodicWorkRequest.Builder(CentralConfigFetchWorker.class,
-                timeIntervalInSeconds, TimeUnit.SECONDS)
-                .setInitialDelay(timeIntervalInSeconds, TimeUnit.SECONDS)
-                .setConstraints(constraints)
-                .build();
+    @WorkerThread
+    public static void scheduleInitialSync(Context context) {
+        WorkScheduler.scheduleInitialSync(WorkManager.getInstance(context));
+    }
 
-        WorkManager.getInstance(context).enqueueUniquePeriodicWork(UNIQUE_PERIODIC_WORK_NAME,
-                ExistingPeriodicWorkPolicy.UPDATE,
-                workRequest);
-
-        Elog.getLogger().debug("Enqueued central config worker");
+    @WorkerThread
+    public synchronized static void scheduleSync(Context context, int timeIntervalInSeconds) {
+        WorkScheduler.scheduleSync(WorkManager.getInstance(context), timeIntervalInSeconds, false);
     }
 
     public void sync() throws IOException {
@@ -92,19 +76,10 @@ public final class CentralConfigurationManager implements ConfigurationFileProvi
             if (fetchResult.configurationHasChanged) {
                 notifyConfigurationChanged(readConfigs(getConfigurationFile()));
             }
-            storeMaxAgeTime(fetchResult.maxAgeInSeconds);
         } catch (Throwable t) {
             logger.error("An error occurred while fetching the central configuration", t);
             throw t;
         }
-    }
-
-    private void storeMaxAgeTime(Integer maxAgeInSeconds) {
-        if (maxAgeInSeconds == null) {
-            return;
-        }
-        logger.debug("Storing central config max age in seconds: {}", maxAgeInSeconds);
-        preferences.store(MAX_AGE_PREFERENCE_NAME, maxAgeInSeconds);
     }
 
     private Map<String, String> readConfigs(File configFile) throws IOException {

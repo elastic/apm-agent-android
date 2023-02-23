@@ -21,6 +21,7 @@ package co.elastic.apm.android.sdk.internal.features.centralconfig;
 import android.content.Context;
 
 import androidx.work.Constraints;
+import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.NetworkType;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
@@ -52,6 +53,7 @@ import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesServi
 public final class CentralConfigurationManager implements ConfigurationFileProvider {
     private static final String MAX_AGE_PREFERENCE_NAME = "central_configuration_max_age";
     private static final int DEFAULT_POLL_DELAY_SEC = (int) TimeUnit.MINUTES.toSeconds(5);
+    private static final String UNIQUE_PERIODIC_WORK_NAME = "central_config_periodic_work";
     private final Context context;
     private final DslJson<Object> dslJson = new DslJson<>(new DslJson.Settings<>());
     private final Logger logger = Elog.getLogger(CentralConfigurationManager.class);
@@ -76,7 +78,10 @@ public final class CentralConfigurationManager implements ConfigurationFileProvi
                 .setConstraints(constraints)
                 .build();
 
-        WorkManager.getInstance(context).enqueue(workRequest);
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(UNIQUE_PERIODIC_WORK_NAME,
+                ExistingPeriodicWorkPolicy.UPDATE,
+                workRequest);
+
         Elog.getLogger().debug("Enqueued central config worker");
     }
 

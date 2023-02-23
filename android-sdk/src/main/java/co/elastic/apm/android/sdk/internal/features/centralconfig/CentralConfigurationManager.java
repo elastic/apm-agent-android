@@ -66,7 +66,7 @@ public final class CentralConfigurationManager implements ConfigurationFileProvi
 
     @WorkerThread
     public synchronized static void scheduleSync(Context context, int timeIntervalInSeconds) {
-        WorkScheduler.scheduleSync(WorkManager.getInstance(context), timeIntervalInSeconds, false);
+        WorkScheduler.scheduleSync(WorkManager.getInstance(context), timeIntervalInSeconds);
     }
 
     public Integer sync() throws IOException {

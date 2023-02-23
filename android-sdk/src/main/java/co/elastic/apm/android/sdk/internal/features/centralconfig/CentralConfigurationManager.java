@@ -34,6 +34,8 @@ import java.util.Map;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
+import co.elastic.apm.android.sdk.internal.features.centralconfig.fetcher.CentralConfigurationFetcher;
+import co.elastic.apm.android.sdk.internal.features.centralconfig.fetcher.ConfigurationFileProvider;
 
 public class CentralConfigurationManager implements ConfigurationFileProvider {
     private final Context context;

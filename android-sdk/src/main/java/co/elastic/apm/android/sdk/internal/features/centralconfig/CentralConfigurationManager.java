@@ -38,19 +38,24 @@ import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.fetcher.CentralConfigurationFetcher;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.fetcher.ConfigurationFileProvider;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.fetcher.FetchResult;
+import co.elastic.apm.android.sdk.internal.services.Service;
+import co.elastic.apm.android.sdk.internal.services.ServiceManager;
+import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
 
 public final class CentralConfigurationManager implements ConfigurationFileProvider {
     private final Context context;
     private final DslJson<Object> dslJson = new DslJson<>(new DslJson.Settings<>());
     private final byte[] buffer = new byte[4096];
+    private final PreferencesService preferences;
     private File configFile;
 
     public CentralConfigurationManager(Context context) {
         this.context = context;
+        preferences = ServiceManager.get().getService(Service.Names.PREFERENCES);
     }
 
     public void sync() {
-        CentralConfigurationFetcher fetcher = new CentralConfigurationFetcher(this);
+        CentralConfigurationFetcher fetcher = new CentralConfigurationFetcher(this, preferences);
         try {
             FetchResult fetchResult = fetcher.fetch();
             if (fetchResult.hasChanged) {

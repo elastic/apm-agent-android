@@ -36,8 +36,6 @@ import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.configuration.impl.ConnectivityConfiguration;
 import co.elastic.apm.android.sdk.internal.configuration.impl.GeneralConfiguration;
-import co.elastic.apm.android.sdk.internal.services.Service;
-import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
 
 public final class CentralConfigurationFetcher {
@@ -53,10 +51,10 @@ public final class CentralConfigurationFetcher {
     private final ConfigurationFileProvider fileProvider;
     private final PreferencesService preferences;
 
-    public CentralConfigurationFetcher(ConfigurationFileProvider fileProvider) {
+    public CentralConfigurationFetcher(ConfigurationFileProvider fileProvider, PreferencesService preferences) {
         this.connectivity = Configurations.get(ConnectivityConfiguration.class);
         this.fileProvider = fileProvider;
-        preferences = ServiceManager.get().getService(Service.Names.PREFERENCES);
+        this.preferences = preferences;
     }
 
     public FetchResult fetch() throws IOException {

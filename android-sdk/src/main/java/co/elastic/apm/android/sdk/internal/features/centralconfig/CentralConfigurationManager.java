@@ -58,7 +58,6 @@ public final class CentralConfigurationManager implements ConfigurationFileProvi
         preferences = ServiceManager.get().getService(Service.Names.PREFERENCES);
     }
 
-
     @WorkerThread
     public static void scheduleInitialSync(Context context) {
         WorkScheduler.scheduleInitialSync(WorkManager.getInstance(context));

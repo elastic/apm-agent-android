@@ -69,13 +69,14 @@ public final class CentralConfigurationManager implements ConfigurationFileProvi
         WorkScheduler.scheduleSync(WorkManager.getInstance(context), timeIntervalInSeconds, false);
     }
 
-    public void sync() throws IOException {
+    public Integer sync() throws IOException {
         try {
             CentralConfigurationFetcher fetcher = new CentralConfigurationFetcher(this, preferences);
             FetchResult fetchResult = fetcher.fetch();
             if (fetchResult.configurationHasChanged) {
                 notifyConfigurationChanged(readConfigs(getConfigurationFile()));
             }
+            return fetchResult.maxAgeInSeconds;
         } catch (Throwable t) {
             logger.error("An error occurred while fetching the central configuration", t);
             throw t;

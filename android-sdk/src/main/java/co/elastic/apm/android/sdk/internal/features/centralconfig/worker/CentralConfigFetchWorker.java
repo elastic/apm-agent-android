@@ -24,7 +24,10 @@ public class CentralConfigFetchWorker extends Worker {
         logger.info("Starting central config worker");
         try {
             CentralConfigurationManager configurationManager = new CentralConfigurationManager(getApplicationContext());
-            configurationManager.sync();
+            Integer maxAgeInSeconds = configurationManager.sync();
+            if (maxAgeInSeconds != null) {
+                CentralConfigurationManager.scheduleSync(getApplicationContext(), maxAgeInSeconds);
+            }
             logger.info("Central config worker succeeded");
             return Result.success();
         } catch (Throwable t) {

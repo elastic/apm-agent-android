@@ -73,13 +73,17 @@ public final class CentralConfigurationManager implements ConfigurationFileProvi
             CentralConfigurationFetcher fetcher = new CentralConfigurationFetcher(this, preferences);
             FetchResult fetchResult = fetcher.fetch();
             if (fetchResult.configurationHasChanged) {
-                notifyConfigurationChanged(readConfigs(getConfigurationFile()));
+                notifyListeners();
             }
             return fetchResult.maxAgeInSeconds;
         } catch (Throwable t) {
             logger.error("An error occurred while fetching the central configuration", t);
             throw t;
         }
+    }
+
+    private void notifyListeners() throws IOException {
+        notifyConfigurationChanged(readConfigs(getConfigurationFile()));
     }
 
     private Map<String, String> readConfigs(File configFile) throws IOException {
@@ -91,6 +95,7 @@ public final class CentralConfigurationManager implements ConfigurationFileProvi
     }
 
     private void notifyConfigurationChanged(Map<String, String> configs) {
+        logger.debug("Notifying central config change");
         for (CentralConfigurationListener listener : Configurations.findByType(CentralConfigurationListener.class)) {
             listener.onUpdate(configs);
         }
@@ -102,5 +107,18 @@ public final class CentralConfigurationManager implements ConfigurationFileProvi
             configFile = new File(context.getFilesDir(), "elastic_agent_configuration.json");
         }
         return configFile;
+    }
+
+    public void publishCachedConfig() {
+        File configurationFile = getConfigurationFile();
+        if (!configurationFile.exists()) {
+            logger.debug("No cached config found");
+            return;
+        }
+        try {
+            notifyListeners();
+        } catch (Throwable t) {
+            logger.error("Exception when publishing cached config", t);
+        }
     }
 }

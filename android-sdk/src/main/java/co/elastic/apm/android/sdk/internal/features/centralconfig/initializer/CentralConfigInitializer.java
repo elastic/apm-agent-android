@@ -23,7 +23,10 @@ public class CentralConfigInitializer implements BackgroundExecutor.Callback<Int
     }
 
     public void initialize() {
-        executor.execute(manager::sync, this);
+        executor.execute(() -> {
+            manager.publishCachedConfig();
+            return manager.sync();
+        }, this);
     }
 
     @Override

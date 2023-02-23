@@ -34,6 +34,9 @@ import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.configuration.impl.ConnectivityConfiguration;
 import co.elastic.apm.android.sdk.internal.configuration.impl.GeneralConfiguration;
+import co.elastic.apm.android.sdk.internal.services.Service;
+import co.elastic.apm.android.sdk.internal.services.ServiceManager;
+import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
 
 public class CentralConfigurationFetcher {
     private static final int REQUEST_OK = 200;
@@ -41,6 +44,7 @@ public class CentralConfigurationFetcher {
     private static final int REQUEST_FORBIDDEN = 403;
     private static final int CONFIGURATION_NOT_FOUND = 404;
     private static final int SERVICE_UNAVAILABLE = 503;
+    private static final String ETAG_NAME = "central_configuration_etag";
     private final Logger logger = Elog.getLogger(CentralConfigurationFetcher.class);
     private final ConnectivityConfiguration connectivity;
     private final ConfigurationFileProvider fileProvider;
@@ -52,7 +56,11 @@ public class CentralConfigurationFetcher {
 
     public boolean fetch() throws IOException {
         HttpURLConnection connection = (HttpURLConnection) getUrl().openConnection();
+        String eTag = getETag();
         connection.setRequestProperty("Content-Type", "application/json");
+        if (eTag != null) {
+            connection.setRequestProperty("If-None-Match", eTag);
+        }
         if (connectivity.getAuthConfiguration() != null) {
             connection.setRequestProperty("Authorization", connectivity.getAuthConfiguration().asAuthorizationHeaderValue());
         }
@@ -90,6 +98,11 @@ public class CentralConfigurationFetcher {
 
     private void saveConfiguration(InputStream inputStream) throws IOException {
         Files.copy(inputStream, fileProvider.getConfigurationFile().toPath(), StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    private String getETag() {
+        PreferencesService service = ServiceManager.get().getService(Service.Names.PREFERENCES);
+        return service.retrieveString(ETAG_NAME);
     }
 
     private URL getUrl() throws MalformedURLException {

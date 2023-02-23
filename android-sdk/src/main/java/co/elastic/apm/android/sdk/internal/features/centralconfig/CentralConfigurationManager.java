@@ -20,6 +20,11 @@ package co.elastic.apm.android.sdk.internal.features.centralconfig;
 
 import android.content.Context;
 
+import androidx.work.Constraints;
+import androidx.work.NetworkType;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+
 import com.dslplatform.json.DslJson;
 import com.dslplatform.json.JsonReader;
 import com.dslplatform.json.MapConverter;
@@ -32,18 +37,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.fetcher.CentralConfigurationFetcher;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.fetcher.ConfigurationFileProvider;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.fetcher.FetchResult;
+import co.elastic.apm.android.sdk.internal.features.centralconfig.worker.CentralConfigFetchWorker;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
 
 public final class CentralConfigurationManager implements ConfigurationFileProvider {
     private static final String MAX_AGE_PREFERENCE_NAME = "central_configuration_max_age";
+    private static final int DEFAULT_POLL_DELAY_SEC = (int) TimeUnit.MINUTES.toSeconds(5);
     private final Context context;
     private final DslJson<Object> dslJson = new DslJson<>(new DslJson.Settings<>());
     private final Logger logger = Elog.getLogger(CentralConfigurationManager.class);
@@ -54,6 +62,22 @@ public final class CentralConfigurationManager implements ConfigurationFileProvi
     public CentralConfigurationManager(Context context) {
         this.context = context;
         preferences = ServiceManager.get().getService(Service.Names.PREFERENCES);
+    }
+
+    public static void scheduleSync(Context context, Integer timeIntervalInSeconds) {
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.METERED)
+                .setRequiresCharging(true)
+                .build();
+
+        PeriodicWorkRequest workRequest = new PeriodicWorkRequest.Builder(CentralConfigFetchWorker.class,
+                timeIntervalInSeconds, TimeUnit.SECONDS)
+                .setInitialDelay(timeIntervalInSeconds, TimeUnit.SECONDS)
+                .setConstraints(constraints)
+                .build();
+
+        WorkManager.getInstance(context).enqueue(workRequest);
+        Elog.getLogger().debug("Enqueued central config worker");
     }
 
     public void sync() throws IOException {

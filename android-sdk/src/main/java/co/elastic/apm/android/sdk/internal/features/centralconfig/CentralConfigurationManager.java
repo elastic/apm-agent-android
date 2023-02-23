@@ -43,8 +43,10 @@ import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
 
 public final class CentralConfigurationManager implements ConfigurationFileProvider {
+    private static final String MAX_AGE_PREFERENCE_NAME = "central_configuration_max_age";
     private final Context context;
     private final DslJson<Object> dslJson = new DslJson<>(new DslJson.Settings<>());
+    private final Logger logger = Elog.getLogger(CentralConfigurationManager.class);
     private final byte[] buffer = new byte[4096];
     private final PreferencesService preferences;
     private File configFile;
@@ -61,11 +63,19 @@ public final class CentralConfigurationManager implements ConfigurationFileProvi
             if (fetchResult.configurationHasChanged) {
                 notifyConfigurationChanged(readConfigs(getConfigurationFile()));
             }
+            storeMaxAgeTime(fetchResult.maxAgeInSeconds);
         } catch (Throwable t) {
-            Logger logger = Elog.getLogger(CentralConfigurationManager.class);
             logger.error("An error occurred while fetching the central configuration", t);
             throw t;
         }
+    }
+
+    private void storeMaxAgeTime(Integer maxAgeInSeconds) {
+        if (maxAgeInSeconds == null) {
+            return;
+        }
+        logger.debug("Storing central config max age in seconds: {}", maxAgeInSeconds);
+        preferences.store(MAX_AGE_PREFERENCE_NAME, maxAgeInSeconds);
     }
 
     private Map<String, String> readConfigs(File configFile) throws IOException {

@@ -55,8 +55,9 @@ public class CentralConfigurationFetcher {
     }
 
     public boolean fetch() throws IOException {
+        PreferencesService preferences = ServiceManager.get().getService(Service.Names.PREFERENCES);
         HttpURLConnection connection = (HttpURLConnection) getUrl().openConnection();
-        String eTag = getETag();
+        String eTag = getETag(preferences);
         connection.setRequestProperty("Content-Type", "application/json");
         if (eTag != null) {
             connection.setRequestProperty("If-None-Match", eTag);
@@ -65,6 +66,7 @@ public class CentralConfigurationFetcher {
             connection.setRequestProperty("Authorization", connectivity.getAuthConfiguration().asAuthorizationHeaderValue());
         }
         try {
+            storeETag(preferences, connection.getHeaderField("ETag"));
             int responseCode = connection.getResponseCode();
             if (responseCode == REQUEST_OK) {
                 saveConfiguration(connection.getInputStream());
@@ -100,9 +102,15 @@ public class CentralConfigurationFetcher {
         Files.copy(inputStream, fileProvider.getConfigurationFile().toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 
-    private String getETag() {
-        PreferencesService service = ServiceManager.get().getService(Service.Names.PREFERENCES);
-        return service.retrieveString(ETAG_NAME);
+    private void storeETag(PreferencesService preferences, String eTag) {
+        logger.debug("Storing ETag {}", eTag);
+        preferences.store(ETAG_NAME, eTag);
+    }
+
+    private String getETag(PreferencesService preferences) {
+        String eTag = preferences.retrieveString(ETAG_NAME);
+        logger.debug("Retrieving ETag {}", eTag);
+        return eTag;
     }
 
     private URL getUrl() throws MalformedURLException {

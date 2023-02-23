@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.Map;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
@@ -65,7 +66,7 @@ public final class CentralConfigurationManager implements ConfigurationFileProvi
         try (InputStream is = new FileInputStream(configFile)) {
             JsonReader<Object> reader = dslJson.newReader(is, buffer);
             reader.startObject();
-            return MapConverter.deserialize(reader);
+            return Collections.unmodifiableMap(MapConverter.deserialize(reader));
         }
     }
 

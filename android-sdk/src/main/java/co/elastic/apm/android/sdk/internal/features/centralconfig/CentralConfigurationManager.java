@@ -51,7 +51,7 @@ public final class CentralConfigurationManager implements ConfigurationFileProvi
     private static final String REFRESH_TIMEOUT_PREFERENCE_NAME = "central_configuration_refresh_timeout";
     private final Context context;
     private final DslJson<Object> dslJson = new DslJson<>(new DslJson.Settings<>());
-    private final Logger logger = Elog.getLogger(CentralConfigurationManager.class);
+    private final Logger logger = Elog.getLogger();
     private final byte[] buffer = new byte[4096];
     private final PreferencesService preferences;
     private final SystemTimeProvider systemTimeProvider;

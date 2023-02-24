@@ -53,7 +53,7 @@ public final class Configurations {
 
     public static <T> List<T> findByType(Class<T> type) {
         if (!isInitialized()) {
-            Elog.getLogger(Configurations.class).info("Configurations has not been initialized");
+            Elog.getLogger().info("Configurations has not been initialized");
             return Collections.emptyList();
         }
         List<T> found = new ArrayList<>();

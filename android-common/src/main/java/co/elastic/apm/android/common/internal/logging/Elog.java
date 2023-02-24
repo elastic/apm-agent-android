@@ -39,10 +39,6 @@ public class Elog {
         return loggerFactory.getLogger(name);
     }
 
-    public static Logger getLogger(@NonNull Class<?> type) {
-        return loggerFactory.getLogger(type);
-    }
-
     public static Logger getLogger() {
         return loggerFactory.getDefaultLogger();
     }

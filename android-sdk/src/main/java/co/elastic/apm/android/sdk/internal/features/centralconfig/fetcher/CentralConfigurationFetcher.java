@@ -46,7 +46,7 @@ public final class CentralConfigurationFetcher {
     private static final int SERVICE_UNAVAILABLE = 503;
     private static final String ETAG_PREFERENCE_NAME = "central_configuration_etag";
     private static final Pattern MAX_AGE = Pattern.compile("max-age\\s*=\\s*(\\d+)");
-    private final Logger logger = Elog.getLogger(CentralConfigurationFetcher.class);
+    private final Logger logger = Elog.getLogger();
     private final ConnectivityConfiguration connectivity;
     private final ConfigurationFileProvider fileProvider;
     private final PreferencesService preferences;
@@ -137,6 +137,7 @@ public final class CentralConfigurationFetcher {
                 .appendQueryParameter("service.name", configuration.getServiceName())
                 .appendQueryParameter("service.environment", configuration.getServiceEnvironment())
                 .build();
+        logger.debug("Central config url: {}", uri);
         return new URL(uri.toString());
     }
 }

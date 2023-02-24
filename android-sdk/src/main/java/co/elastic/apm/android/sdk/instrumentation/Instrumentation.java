@@ -35,11 +35,11 @@ public abstract class Instrumentation implements Configuration {
 
     static boolean isEnabled(Class<? extends Instrumentation> instrumentationClass) {
         if (!Configurations.isInitialized()) {
-            Elog.getLogger(Configurations.class).info("Configurations has not been initialized");
+            Elog.getLogger().info("Configurations has not been initialized");
             return false;
         }
         if (!Configurations.hasConfiguration(instrumentationClass)) {
-            Elog.getLogger(Configurations.class).info("The requested Configuration was not found");
+            Elog.getLogger().info("The requested Configuration was not found");
             return false;
         }
 

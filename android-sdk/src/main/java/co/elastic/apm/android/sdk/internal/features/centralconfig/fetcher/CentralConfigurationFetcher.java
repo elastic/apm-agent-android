@@ -134,6 +134,7 @@ public final class CentralConfigurationFetcher {
     private URL getUrl() throws MalformedURLException {
         GeneralConfiguration configuration = Configurations.get(GeneralConfiguration.class);
         Uri uri = Uri.parse(connectivity.getEndpoint()).buildUpon()
+                .path("config/v1/agents")
                 .appendQueryParameter("service.name", configuration.getServiceName())
                 .appendQueryParameter("service.environment", configuration.getServiceEnvironment())
                 .build();

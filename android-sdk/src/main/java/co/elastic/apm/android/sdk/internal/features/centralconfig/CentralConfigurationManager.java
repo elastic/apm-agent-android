@@ -70,7 +70,7 @@ public final class CentralConfigurationManager implements ConfigurationFileProvi
 
     public Integer sync() throws IOException {
         if (getRefreshTimeoutMillis() > systemTimeProvider.getCurrentTimeMillis()) {
-            logger.debug("Ignoring sync request");
+            logger.debug("Ignoring central config sync request");
             return null;
         }
         try {
@@ -111,6 +111,7 @@ public final class CentralConfigurationManager implements ConfigurationFileProvi
     }
 
     private void storeRefreshTimeoutTime(int maxAgeInSeconds) {
+        logger.debug("Storing central config max age seconds {}", maxAgeInSeconds);
         setRefreshTimeoutMillis(systemTimeProvider.getCurrentTimeMillis() + TimeUnit.SECONDS.toMillis(maxAgeInSeconds));
     }
 
@@ -133,13 +134,13 @@ public final class CentralConfigurationManager implements ConfigurationFileProvi
     public void publishCachedConfig() {
         File configurationFile = getConfigurationFile();
         if (!configurationFile.exists()) {
-            logger.debug("No cached config found");
+            logger.debug("No cached central config found");
             return;
         }
         try {
             notifyListeners();
         } catch (Throwable t) {
-            logger.error("Exception when publishing cached config", t);
+            logger.error("Exception when publishing cached central config", t);
         }
     }
 }

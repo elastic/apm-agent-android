@@ -87,12 +87,12 @@ public final class CentralConfigurationFetcher {
 
     private Integer parseMaxAge(String cacheControlHeader) {
         if (cacheControlHeader == null) {
-            logger.debug("Cache control header not found");
+            logger.debug("Central config cache control header not found");
             return null;
         }
         Matcher matcher = MAX_AGE.matcher(cacheControlHeader);
         if (!matcher.find()) {
-            logger.debug("Cache control header has invalid format: {}", cacheControlHeader);
+            logger.debug("Central config cache control header has invalid format: {}", cacheControlHeader);
             return null;
         }
         return Integer.parseInt(matcher.group(1));
@@ -101,7 +101,7 @@ public final class CentralConfigurationFetcher {
     private void handleUnsuccessfulResponse(int responseCode) {
         switch (responseCode) {
             case CONFIGURATION_NOT_MODIFIED:
-                logger.debug("Configuration did not change");
+                logger.debug("Central configuration did not change");
                 break;
             case CONFIGURATION_NOT_FOUND:
                 logger.debug("This APM Server does not support central configuration. Update to APM Server 7.3+");
@@ -121,13 +121,13 @@ public final class CentralConfigurationFetcher {
     }
 
     private void storeETag(String eTag) {
-        logger.debug("Storing ETag {}", eTag);
+        logger.debug("Storing central config ETag {}", eTag);
         preferences.store(ETAG_PREFERENCE_NAME, eTag);
     }
 
     private String getETag() {
         String eTag = preferences.retrieveString(ETAG_PREFERENCE_NAME);
-        logger.debug("Retrieving ETag {}", eTag);
+        logger.debug("Retrieving central config ETag {}", eTag);
         return eTag;
     }
 

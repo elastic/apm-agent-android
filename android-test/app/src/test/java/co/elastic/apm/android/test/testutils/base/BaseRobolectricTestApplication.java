@@ -132,4 +132,9 @@ public class BaseRobolectricTestApplication extends Application implements Expor
     public NtpManager getNtpManager() {
         return ntpManager;
     }
+
+    @Override
+    public CentralConfigurationInitializer getCentralConfigurationInitializer() {
+        return centralConfigurationInitializer;
+    }
 }

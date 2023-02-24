@@ -24,6 +24,11 @@ public class InitializationTest extends BaseRobolectricTest {
         verify(app.sessionIdProvider).initialize();
     }
 
+    @Test
+    public void verifyCentralConfiguration_isInitialized() {
+        verify(getAgentDependenciesProvider().getCentralConfigurationInitializer()).initialize();
+    }
+
     private static class AppWithMockSessionId extends BaseRobolectricTestApplication {
         private DefaultSessionIdProvider sessionIdProvider;
 

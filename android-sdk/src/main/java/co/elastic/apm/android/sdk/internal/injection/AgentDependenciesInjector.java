@@ -20,6 +20,7 @@ package co.elastic.apm.android.sdk.internal.injection;
 
 import android.content.Context;
 
+import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer;
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 
 public class AgentDependenciesInjector {
@@ -40,5 +41,9 @@ public class AgentDependenciesInjector {
 
     public NtpManager getNtpManager() {
         return new NtpManager(appContext);
+    }
+
+    public CentralConfigurationInitializer getCentralConfigurationInitializer() {
+        return new CentralConfigurationInitializer(appContext);
     }
 }

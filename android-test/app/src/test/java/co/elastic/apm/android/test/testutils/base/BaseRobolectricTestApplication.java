@@ -14,6 +14,7 @@ import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.ElasticApmConfiguration;
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration;
+import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer;
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.test.common.agent.AgentInitializer;
@@ -38,6 +39,7 @@ public class BaseRobolectricTestApplication extends Application implements Expor
     private final MetricExporterCaptor metricExporter;
     private AgentDependenciesInjector injector;
     private NtpManager ntpManager;
+    private CentralConfigurationInitializer centralConfigurationInitializer;
 
     protected void initializeAgentWithCustomConfig(ElasticApmConfiguration configuration) {
         AgentInitializer.initialize(this, configuration, getSignalConfiguration());
@@ -60,10 +62,8 @@ public class BaseRobolectricTestApplication extends Application implements Expor
 
     private void setUpAgentDependencies() {
         injector = mock(AgentDependenciesInjector.class);
-        Clock clock = new TestElasticClock();
-        ntpManager = mock(NtpManager.class);
-        doReturn(clock).when(ntpManager).getClock();
-        doReturn(ntpManager).when(injector).getNtpManager();
+        setUpNtpManager();
+        setUpCentralConfigurationInitializer();
 
         try {
             Field instanceField = AgentDependenciesInjector.class.getDeclaredField("INSTANCE");
@@ -72,6 +72,18 @@ public class BaseRobolectricTestApplication extends Application implements Expor
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void setUpCentralConfigurationInitializer() {
+        centralConfigurationInitializer = mock(CentralConfigurationInitializer.class);
+        doReturn(centralConfigurationInitializer).when(injector).getCentralConfigurationInitializer();
+    }
+
+    private void setUpNtpManager() {
+        Clock clock = new TestElasticClock();
+        ntpManager = mock(NtpManager.class);
+        doReturn(clock).when(ntpManager).getClock();
+        doReturn(ntpManager).when(injector).getNtpManager();
     }
 
     @Override

@@ -44,7 +44,7 @@ import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.configuration.impl.ConnectivityConfiguration;
 import co.elastic.apm.android.sdk.internal.configuration.impl.GeneralConfiguration;
 import co.elastic.apm.android.sdk.internal.exceptions.ElasticExceptionHandler;
-import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigInitializer;
+import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer;
 import co.elastic.apm.android.sdk.internal.features.launchtime.LaunchTimeActivityCallback;
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
@@ -68,6 +68,7 @@ import io.opentelemetry.sdk.trace.SpanProcessor;
 public final class ElasticApmAgent {
     public final ElasticApmConfiguration configuration;
     private static ElasticApmAgent instance;
+    private final AgentDependenciesInjector injector;
     private final NtpManager ntpManager;
     private final Flusher flusher;
 
@@ -124,7 +125,7 @@ public final class ElasticApmAgent {
     }
 
     private ElasticApmAgent(Context appContext, ElasticApmConfiguration configuration) {
-        AgentDependenciesInjector injector = AgentDependenciesInjector.get(appContext);
+        injector = AgentDependenciesInjector.get(appContext);
         if (configuration != null) {
             this.configuration = configuration;
         } else {
@@ -137,15 +138,15 @@ public final class ElasticApmAgent {
     private void onInitializationFinished(Context context, Connectivity connectivity) {
         ntpManager.initialize();
         initializeConfigurations(connectivity);
-        initializeCentralConfiguration(context);
+        initializeCentralConfiguration();
         initializeOpentelemetry();
         initializeCrashReports();
         initializeSessionIdProvider();
         initializeLaunchTimeTracker(context);
     }
 
-    private void initializeCentralConfiguration(Context context) {
-        CentralConfigInitializer centralConfigInitializer = new CentralConfigInitializer(context);
+    private void initializeCentralConfiguration() {
+        CentralConfigurationInitializer centralConfigInitializer = injector.getCentralConfigurationInitializer();
         centralConfigInitializer.initialize();
     }
 

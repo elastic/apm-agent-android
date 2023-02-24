@@ -25,18 +25,18 @@ import co.elastic.apm.android.sdk.internal.utilities.concurrency.BackgroundExecu
 import co.elastic.apm.android.sdk.internal.utilities.concurrency.Result;
 import co.elastic.apm.android.sdk.internal.utilities.concurrency.impl.SimpleBackgroundExecutor;
 
-public final class CentralConfigInitializer implements BackgroundExecutor.Callback<Integer> {
+public final class CentralConfigurationInitializer implements BackgroundExecutor.Callback<Integer> {
     private final Context context;
     private final BackgroundExecutor executor;
     private final CentralConfigurationManager manager;
 
-    public CentralConfigInitializer(Context context, BackgroundExecutor executor, CentralConfigurationManager manager) {
+    public CentralConfigurationInitializer(Context context, BackgroundExecutor executor, CentralConfigurationManager manager) {
         this.context = context;
         this.executor = executor;
         this.manager = manager;
     }
 
-    public CentralConfigInitializer(Context context) {
+    public CentralConfigurationInitializer(Context context) {
         this(context, new SimpleBackgroundExecutor(), new CentralConfigurationManager(context));
     }
 

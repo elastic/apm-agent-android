@@ -35,6 +35,7 @@ import java.util.Map;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
+import co.elastic.apm.android.sdk.internal.configuration.impl.ConnectivityConfiguration;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.fetcher.CentralConfigurationFetcher;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.fetcher.ConfigurationFileProvider;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.fetcher.FetchResult;
@@ -57,7 +58,8 @@ public final class CentralConfigurationManager implements ConfigurationFileProvi
 
     public Integer sync() throws IOException {
         try {
-            CentralConfigurationFetcher fetcher = new CentralConfigurationFetcher(this, preferences);
+            CentralConfigurationFetcher fetcher = new CentralConfigurationFetcher(Configurations.get(ConnectivityConfiguration.class),
+                    this, preferences);
             FetchResult fetchResult = fetcher.fetch();
             if (fetchResult.configurationHasChanged) {
                 notifyListeners();

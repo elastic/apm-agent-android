@@ -51,8 +51,10 @@ public final class CentralConfigurationFetcher {
     private final ConfigurationFileProvider fileProvider;
     private final PreferencesService preferences;
 
-    public CentralConfigurationFetcher(ConfigurationFileProvider fileProvider, PreferencesService preferences) {
-        this.connectivity = Configurations.get(ConnectivityConfiguration.class);
+    public CentralConfigurationFetcher(ConnectivityConfiguration connectivity,
+                                       ConfigurationFileProvider fileProvider,
+                                       PreferencesService preferences) {
+        this.connectivity = connectivity;
         this.fileProvider = fileProvider;
         this.preferences = preferences;
     }

@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 
 import android.content.Context;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -21,15 +22,20 @@ import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.Map;
 
+import co.elastic.apm.android.sdk.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.internal.configuration.Configuration;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
+import co.elastic.apm.android.sdk.internal.configuration.impl.ConnectivityConfiguration;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigurationListener;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigurationManager;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
 
 public class CentralConfigurationManagerTest extends BaseRobolectricTest {
     private Context context;
     private File configFile;
+    private MockWebServer webServer;
     private CentralConfigurationManager manager;
 
     @Rule
@@ -37,6 +43,7 @@ public class CentralConfigurationManagerTest extends BaseRobolectricTest {
 
     @Before
     public void setUp() throws IOException {
+        webServer = new MockWebServer();
         context = mock(Context.class);
         manager = new CentralConfigurationManager(context);
         File filesDir = temporaryFolder.newFolder("filesDir");
@@ -44,8 +51,13 @@ public class CentralConfigurationManagerTest extends BaseRobolectricTest {
         doReturn(filesDir).when(context).getFilesDir();
     }
 
+    @After
+    public void tearDown() throws IOException {
+        webServer.shutdown();
+    }
+
     @Test
-    public void whenNotifyingConfigChanges_targetCentralConfigListeners() {
+    public void whenPublishingCachedConfig_targetCentralConfigListeners() {
         NormalConfiguration normalConfiguration = mock(NormalConfiguration.class);
         CentralAwareConfiguration centralAwareConfiguration = mock(CentralAwareConfiguration.class);
         injectConfigurations(normalConfiguration, centralAwareConfiguration);
@@ -57,6 +69,67 @@ public class CentralConfigurationManagerTest extends BaseRobolectricTest {
 
         verify(centralAwareConfiguration).onUpdate(map);
         verifyNoInteractions(normalConfiguration);
+    }
+
+    @Test
+    public void whenPublishingCachedConfig_andTheresNoAvailableConfig_doNothing() {
+        CentralAwareConfiguration centralAwareConfiguration = mock(CentralAwareConfiguration.class);
+        injectConfigurations(centralAwareConfiguration);
+
+        manager.publishCachedConfig();
+
+        verifyNoInteractions(centralAwareConfiguration);
+    }
+
+    @Test
+    public void whenPublishingCachedConfig_andConfigIsUnreadable_doNothing() {
+        CentralAwareConfiguration centralAwareConfiguration = mock(CentralAwareConfiguration.class);
+        injectConfigurations(centralAwareConfiguration);
+        setConfigFileContents("not a json");
+
+        manager.publishCachedConfig();
+
+        verifyNoInteractions(centralAwareConfiguration);
+    }
+
+    @Test
+    public void whenFetchingRemoteConfigSucceeds_notifyListeners() throws IOException {
+        NormalConfiguration normalConfiguration = mock(NormalConfiguration.class);
+        CentralAwareConfiguration centralAwareConfiguration = mock(CentralAwareConfiguration.class);
+        injectConfigurations(normalConfiguration, centralAwareConfiguration);
+        stubNetworkResponse(200, "{\"aKey\":\"aValue\"}");
+        Map<String, String> map = new HashMap<>();
+        map.put("aKey", "aValue");
+
+        manager.sync();
+
+        verify(centralAwareConfiguration).onUpdate(map);
+        verifyNoInteractions(normalConfiguration);
+    }
+
+    @Test
+    public void whenFetchingRemoteConfigDoesNotSucceed_doNotNotifyListeners() throws IOException {
+        NormalConfiguration normalConfiguration = mock(NormalConfiguration.class);
+        CentralAwareConfiguration centralAwareConfiguration = mock(CentralAwareConfiguration.class);
+        injectConfigurations(normalConfiguration, centralAwareConfiguration);
+        stubNetworkResponse(304, "{\"aKey\":\"aValue\"}");
+
+        manager.sync();
+
+        verifyNoInteractions(normalConfiguration, centralAwareConfiguration);
+    }
+
+    private void stubNetworkResponse(int code, String body) {
+        try {
+            Connectivity connectivity = mock(Connectivity.class);
+            Field field = ConnectivityConfiguration.class.getDeclaredField("connectivity");
+            field.setAccessible(true);
+            field.set(Configurations.get(ConnectivityConfiguration.class), connectivity);
+            doReturn("http://" + webServer.getHostName() + ":" + webServer.getPort()).when(connectivity).endpoint();
+            webServer.enqueue(new MockResponse().setResponseCode(code).setBody(body));
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void setConfigFileContents(String contents) {

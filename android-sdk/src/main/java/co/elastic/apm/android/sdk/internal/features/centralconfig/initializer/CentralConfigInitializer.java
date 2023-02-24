@@ -49,15 +49,6 @@ public final class CentralConfigInitializer implements BackgroundExecutor.Callba
 
     @Override
     public void onFinish(Result<Integer> result) {
-        if (result.isSuccess) {
-            Integer maxAgeInSeconds = result.value;
-            if (maxAgeInSeconds != null) {
-                CentralConfigurationManager.scheduleSync(context, maxAgeInSeconds);
-            } else {
-                CentralConfigurationManager.scheduleInitialSync(context);
-            }
-        } else {
-            CentralConfigurationManager.scheduleInitialSync(context);
-        }
+        // todo schedule next poll
     }
 }

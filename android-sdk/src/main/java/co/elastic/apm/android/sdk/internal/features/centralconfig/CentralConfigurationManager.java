@@ -20,9 +20,6 @@ package co.elastic.apm.android.sdk.internal.features.centralconfig;
 
 import android.content.Context;
 
-import androidx.annotation.WorkerThread;
-import androidx.work.WorkManager;
-
 import com.dslplatform.json.DslJson;
 import com.dslplatform.json.JsonReader;
 import com.dslplatform.json.MapConverter;
@@ -56,16 +53,6 @@ public final class CentralConfigurationManager implements ConfigurationFileProvi
     public CentralConfigurationManager(Context context) {
         this.context = context;
         preferences = ServiceManager.get().getService(Service.Names.PREFERENCES);
-    }
-
-    @WorkerThread
-    public static void scheduleInitialSync(Context context) {
-        WorkScheduler.scheduleInitialSync(WorkManager.getInstance(context));
-    }
-
-    @WorkerThread
-    public synchronized static void scheduleSync(Context context, int timeIntervalInSeconds) {
-        WorkScheduler.scheduleSync(WorkManager.getInstance(context), timeIntervalInSeconds);
     }
 
     public Integer sync() throws IOException {

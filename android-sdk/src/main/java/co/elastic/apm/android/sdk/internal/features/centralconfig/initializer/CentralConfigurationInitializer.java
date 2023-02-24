@@ -20,6 +20,8 @@ package co.elastic.apm.android.sdk.internal.features.centralconfig.initializer;
 
 import android.content.Context;
 
+import androidx.annotation.VisibleForTesting;
+
 import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigurationManager;
 import co.elastic.apm.android.sdk.internal.utilities.concurrency.BackgroundExecutor;
 import co.elastic.apm.android.sdk.internal.utilities.concurrency.Result;
@@ -30,6 +32,7 @@ public final class CentralConfigurationInitializer implements BackgroundExecutor
     private final BackgroundExecutor executor;
     private final CentralConfigurationManager manager;
 
+    @VisibleForTesting
     public CentralConfigurationInitializer(Context context, BackgroundExecutor executor, CentralConfigurationManager manager) {
         this.context = context;
         this.executor = executor;

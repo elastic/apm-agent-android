@@ -1,5 +1,7 @@
 package co.elastic.apm.android.test.features.centralconfig;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -108,6 +110,24 @@ public class CentralConfigurationManagerTest extends BaseRobolectricTest {
     }
 
     @Test
+    public void whenMaxAgeIsProvided_returnIt() throws IOException {
+        stubNetworkResponse(200, "{\"aKey\":\"aValue\"}", "max-age=12345");
+
+        Integer maxAge = manager.sync();
+
+        assertEquals(12345, maxAge.intValue());
+    }
+
+    @Test
+    public void whenMaxAgeIsNotProvided_returnNull() throws IOException {
+        stubNetworkResponse(200, "{\"aKey\":\"aValue\"}");
+
+        Integer maxAge = manager.sync();
+
+        assertNull(maxAge);
+    }
+
+    @Test
     public void whenFetchingRemoteConfigDoesNotSucceed_doNotNotifyListeners() throws IOException {
         NormalConfiguration normalConfiguration = mock(NormalConfiguration.class);
         CentralAwareConfiguration centralAwareConfiguration = mock(CentralAwareConfiguration.class);
@@ -120,13 +140,21 @@ public class CentralConfigurationManagerTest extends BaseRobolectricTest {
     }
 
     private void stubNetworkResponse(int code, String body) {
+        stubNetworkResponse(code, body, null);
+    }
+
+    private void stubNetworkResponse(int code, String body, String cacheControlHeader) {
         try {
             Connectivity connectivity = mock(Connectivity.class);
             Field field = ConnectivityConfiguration.class.getDeclaredField("connectivity");
             field.setAccessible(true);
             field.set(Configurations.get(ConnectivityConfiguration.class), connectivity);
             doReturn("http://" + webServer.getHostName() + ":" + webServer.getPort()).when(connectivity).endpoint();
-            webServer.enqueue(new MockResponse().setResponseCode(code).setBody(body));
+            MockResponse response = new MockResponse().setResponseCode(code).setBody(body);
+            if (cacheControlHeader != null) {
+                response = response.setHeader("Cache-Control", cacheControlHeader);
+            }
+            webServer.enqueue(response);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }

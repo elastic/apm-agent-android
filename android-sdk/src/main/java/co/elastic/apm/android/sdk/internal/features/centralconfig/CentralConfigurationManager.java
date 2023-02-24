@@ -20,6 +20,8 @@ package co.elastic.apm.android.sdk.internal.features.centralconfig;
 
 import android.content.Context;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.dslplatform.json.DslJson;
 import com.dslplatform.json.JsonReader;
 import com.dslplatform.json.MapConverter;
@@ -42,21 +44,34 @@ import co.elastic.apm.android.sdk.internal.features.centralconfig.fetcher.FetchR
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
+import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
 
 public final class CentralConfigurationManager implements ConfigurationFileProvider {
+    private static final String REFRESH_TIMEOUT_PREFERENCE_NAME = "central_configuration_refresh_timeout";
     private final Context context;
     private final DslJson<Object> dslJson = new DslJson<>(new DslJson.Settings<>());
     private final Logger logger = Elog.getLogger(CentralConfigurationManager.class);
     private final byte[] buffer = new byte[4096];
     private final PreferencesService preferences;
+    private final SystemTimeProvider systemTimeProvider;
     private File configFile;
 
     public CentralConfigurationManager(Context context) {
+        this(context, SystemTimeProvider.get());
+    }
+
+    @VisibleForTesting
+    public CentralConfigurationManager(Context context, SystemTimeProvider systemTimeProvider) {
         this.context = context;
+        this.systemTimeProvider = systemTimeProvider;
         preferences = ServiceManager.get().getService(Service.Names.PREFERENCES);
     }
 
     public Integer sync() throws IOException {
+        if (getRefreshTimeoutMillis() > systemTimeProvider.getCurrentTimeMillis()) {
+            logger.debug("Ignoring sync request");
+            return null;
+        }
         try {
             CentralConfigurationFetcher fetcher = new CentralConfigurationFetcher(Configurations.get(ConnectivityConfiguration.class),
                     this, preferences);
@@ -88,6 +103,10 @@ public final class CentralConfigurationManager implements ConfigurationFileProvi
         for (CentralConfigurationListener listener : Configurations.findByType(CentralConfigurationListener.class)) {
             listener.onUpdate(configs);
         }
+    }
+
+    private long getRefreshTimeoutMillis() {
+        return preferences.retrieveLong(REFRESH_TIMEOUT_PREFERENCE_NAME, 0);
     }
 
     @Override

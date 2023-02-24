@@ -2,6 +2,7 @@ package co.elastic.apm.android.test.features.centralconfig;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -30,6 +31,10 @@ import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.configuration.impl.ConnectivityConfiguration;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigurationListener;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigurationManager;
+import co.elastic.apm.android.sdk.internal.services.Service;
+import co.elastic.apm.android.sdk.internal.services.ServiceManager;
+import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
+import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -38,6 +43,7 @@ public class CentralConfigurationManagerTest extends BaseRobolectricTest {
     private Context context;
     private File configFile;
     private MockWebServer webServer;
+    private SystemTimeProvider systemTimeProvider;
     private CentralConfigurationManager manager;
 
     @Rule
@@ -47,7 +53,8 @@ public class CentralConfigurationManagerTest extends BaseRobolectricTest {
     public void setUp() throws IOException {
         webServer = new MockWebServer();
         context = mock(Context.class);
-        manager = new CentralConfigurationManager(context);
+        systemTimeProvider = mock(SystemTimeProvider.class);
+        manager = new CentralConfigurationManager(context, systemTimeProvider);
         File filesDir = temporaryFolder.newFolder("filesDir");
         configFile = new File(filesDir, "elastic_agent_configuration.json");
         doReturn(filesDir).when(context).getFilesDir();
@@ -110,7 +117,7 @@ public class CentralConfigurationManagerTest extends BaseRobolectricTest {
     }
 
     @Test
-    public void whenMaxAgeIsProvided_returnIt() throws IOException {
+    public void whenMaxAgeIsProvided_returnItAndStoreRefreshTime() throws IOException {
         stubNetworkResponse(200, "{\"aKey\":\"aValue\"}", "max-age=12345");
 
         Integer maxAge = manager.sync();
@@ -137,6 +144,39 @@ public class CentralConfigurationManagerTest extends BaseRobolectricTest {
         manager.sync();
 
         verifyNoInteractions(normalConfiguration, centralAwareConfiguration);
+    }
+
+    @Test
+    public void whenSyncIsRequested_maxAgeIsAvailableAndExpired_executeFetching() throws IOException {
+        CentralAwareConfiguration centralAwareConfiguration = mock(CentralAwareConfiguration.class);
+        injectConfigurations(centralAwareConfiguration);
+        stubNetworkResponse(200, "{}");
+        long currentTimeMillis = 1_000_000;
+        doReturn(currentTimeMillis).when(systemTimeProvider).getCurrentTimeMillis();
+        setMaxAgeTimeout(currentTimeMillis - 1);
+
+        manager.sync();
+
+        verify(centralAwareConfiguration).onUpdate(anyMap());
+    }
+
+    @Test
+    public void whenSyncIsRequested_maxAgeIsAvailableAndNotExpired_doNotExecuteFetching() throws IOException {
+        CentralAwareConfiguration centralAwareConfiguration = mock(CentralAwareConfiguration.class);
+        injectConfigurations(centralAwareConfiguration);
+        stubNetworkResponse(200, "{}");
+        long currentTimeMillis = 1_000_000;
+        doReturn(currentTimeMillis).when(systemTimeProvider).getCurrentTimeMillis();
+        setMaxAgeTimeout(currentTimeMillis + 1);
+
+        manager.sync();
+
+        verifyNoInteractions(centralAwareConfiguration);
+    }
+
+    private void setMaxAgeTimeout(long timeInMillis) {
+        PreferencesService preferences = ServiceManager.get().getService(Service.Names.PREFERENCES);
+        preferences.store("central_configuration_refresh_timeout", timeInMillis);
     }
 
     private void stubNetworkResponse(int code, String body) {

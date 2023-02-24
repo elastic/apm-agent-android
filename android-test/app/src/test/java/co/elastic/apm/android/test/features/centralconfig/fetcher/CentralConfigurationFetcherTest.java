@@ -97,7 +97,7 @@ public class CentralConfigurationFetcherTest extends BaseRobolectricTest impleme
 
         fetcher.fetch();
 
-        String sentEtag = webServer.takeRequest().getHeader("ETag");
+        String sentEtag = webServer.takeRequest().getHeader("If-None-Match");
         assertEquals(theEtag, sentEtag);
     }
 

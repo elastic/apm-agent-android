@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
@@ -79,7 +80,11 @@ public final class CentralConfigurationManager implements ConfigurationFileProvi
             if (fetchResult.configurationHasChanged) {
                 notifyListeners();
             }
-            return fetchResult.maxAgeInSeconds;
+            Integer maxAgeInSeconds = fetchResult.maxAgeInSeconds;
+            if (maxAgeInSeconds != null) {
+                storeRefreshTimeoutTime(maxAgeInSeconds);
+            }
+            return maxAgeInSeconds;
         } catch (Throwable t) {
             logger.error("An error occurred while fetching the central configuration", t);
             throw t;
@@ -105,8 +110,16 @@ public final class CentralConfigurationManager implements ConfigurationFileProvi
         }
     }
 
+    private void storeRefreshTimeoutTime(int maxAgeInSeconds) {
+        setRefreshTimeoutMillis(systemTimeProvider.getCurrentTimeMillis() + TimeUnit.SECONDS.toMillis(maxAgeInSeconds));
+    }
+
     private long getRefreshTimeoutMillis() {
         return preferences.retrieveLong(REFRESH_TIMEOUT_PREFERENCE_NAME, 0);
+    }
+
+    private void setRefreshTimeoutMillis(long timeoutMillis) {
+        preferences.store(REFRESH_TIMEOUT_PREFERENCE_NAME, timeoutMillis);
     }
 
     @Override

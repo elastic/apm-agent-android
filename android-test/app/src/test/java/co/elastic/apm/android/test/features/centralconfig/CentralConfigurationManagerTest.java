@@ -45,6 +45,7 @@ public class CentralConfigurationManagerTest extends BaseRobolectricTest {
     private MockWebServer webServer;
     private SystemTimeProvider systemTimeProvider;
     private CentralConfigurationManager manager;
+    PreferencesService preferences;
 
     @Rule
     public final TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -53,6 +54,7 @@ public class CentralConfigurationManagerTest extends BaseRobolectricTest {
     public void setUp() throws IOException {
         webServer = new MockWebServer();
         context = mock(Context.class);
+        preferences = ServiceManager.get().getService(Service.Names.PREFERENCES);
         systemTimeProvider = mock(SystemTimeProvider.class);
         manager = new CentralConfigurationManager(context, systemTimeProvider);
         File filesDir = temporaryFolder.newFolder("filesDir");
@@ -118,11 +120,14 @@ public class CentralConfigurationManagerTest extends BaseRobolectricTest {
 
     @Test
     public void whenMaxAgeIsProvided_returnItAndStoreRefreshTime() throws IOException {
-        stubNetworkResponse(200, "{\"aKey\":\"aValue\"}", "max-age=12345");
+        long currentTimeMillis = 1_000_000;
+        doReturn(currentTimeMillis).when(systemTimeProvider).getCurrentTimeMillis();
+        stubNetworkResponse(200, "{\"aKey\":\"aValue\"}", "max-age=500");
 
         Integer maxAge = manager.sync();
 
-        assertEquals(12345, maxAge.intValue());
+        assertEquals(500, maxAge.intValue());
+        assertEquals(1_500_000L, getRefreshTimeoutTime());
     }
 
     @Test
@@ -153,7 +158,7 @@ public class CentralConfigurationManagerTest extends BaseRobolectricTest {
         stubNetworkResponse(200, "{}");
         long currentTimeMillis = 1_000_000;
         doReturn(currentTimeMillis).when(systemTimeProvider).getCurrentTimeMillis();
-        setMaxAgeTimeout(currentTimeMillis - 1);
+        setRefreshTimeoutTime(currentTimeMillis - 1);
 
         manager.sync();
 
@@ -167,15 +172,19 @@ public class CentralConfigurationManagerTest extends BaseRobolectricTest {
         stubNetworkResponse(200, "{}");
         long currentTimeMillis = 1_000_000;
         doReturn(currentTimeMillis).when(systemTimeProvider).getCurrentTimeMillis();
-        setMaxAgeTimeout(currentTimeMillis + 1);
+        setRefreshTimeoutTime(currentTimeMillis + 1);
 
         manager.sync();
 
         verifyNoInteractions(centralAwareConfiguration);
     }
 
-    private void setMaxAgeTimeout(long timeInMillis) {
-        PreferencesService preferences = ServiceManager.get().getService(Service.Names.PREFERENCES);
+
+    private long getRefreshTimeoutTime() {
+        return preferences.retrieveLong("central_configuration_refresh_timeout", 0);
+    }
+
+    private void setRefreshTimeoutTime(long timeInMillis) {
         preferences.store("central_configuration_refresh_timeout", timeInMillis);
     }
 

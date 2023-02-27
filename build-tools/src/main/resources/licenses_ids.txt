@@ -1,2 +1,3 @@
 apache_v2|Apache License Version 2.0
 mit|MIT License
+bsd3|The 3-Clause BSD License

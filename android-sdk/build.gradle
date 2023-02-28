@@ -43,10 +43,12 @@ dependencies {
     implementation "io.opentelemetry:opentelemetry-exporter-otlp-logs:$openTelemetry_version-alpha"
     implementation "io.opentelemetry:opentelemetry-semconv:$openTelemetry_version-alpha"
     implementation "androidx.annotation:annotation:$androidAnnotations_version"
+    implementation 'com.dslplatform:dsl-json-java8:1.10.0'
     embedded 'com.github.instacart.truetime-android:library:3.5'
     annotationProcessor 'co.elastic.apm.compile:processor'
     compileOnly 'co.elastic.apm.compile:processor'
-    testImplementation "org.mockito:mockito-core:4.9.0"
+    testImplementation "org.mockito:mockito-core:$mockito_version"
+    testImplementation "org.mockito:mockito-inline:$mockito_version"
     testImplementation "junit:junit:$junit_version"
     androidTestImplementation 'androidx.test:runner:1.4.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'

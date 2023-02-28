@@ -18,36 +18,19 @@
  */
 package co.elastic.apm.android.sdk.attributes.resources;
 
-import co.elastic.apm.android.sdk.ElasticApmAgent;
-import co.elastic.apm.android.sdk.ElasticApmConfiguration;
 import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
-import co.elastic.apm.android.sdk.internal.services.Service;
-import co.elastic.apm.android.sdk.internal.services.ServiceManager;
-import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
+import co.elastic.apm.android.sdk.internal.configuration.Configurations;
+import co.elastic.apm.android.sdk.internal.configuration.impl.GeneralConfiguration;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 
 public class ServiceIdVisitor implements AttributesVisitor {
-    private final String serviceName;
-    private final String serviceVersion;
-
-    public ServiceIdVisitor() {
-        ElasticApmConfiguration configuration = ElasticApmAgent.get().configuration;
-        this.serviceName = configuration.serviceName;
-        this.serviceVersion = configuration.serviceVersion;
-    }
 
     @Override
     public void visit(AttributesBuilder builder) {
-        ApmMetadataService metadata = getApmMetadataService();
-        String serviceName = (this.serviceName != null) ? this.serviceName : metadata.getServiceName();
-        String serviceVersion = (this.serviceVersion != null) ? this.serviceVersion : metadata.getServiceVersion();
-        builder.put(ResourceAttributes.SERVICE_NAME, serviceName)
-                .put(ResourceAttributes.SERVICE_VERSION, serviceVersion)
-                .put(ResourceAttributes.DEPLOYMENT_ENVIRONMENT, metadata.getDeploymentEnvironment());
-    }
-
-    private ApmMetadataService getApmMetadataService() {
-        return ServiceManager.get().getService(Service.Names.METADATA);
+        GeneralConfiguration configuration = Configurations.get(GeneralConfiguration.class);
+        builder.put(ResourceAttributes.SERVICE_NAME, configuration.getServiceName())
+                .put(ResourceAttributes.SERVICE_VERSION, configuration.getServiceVersion())
+                .put(ResourceAttributes.DEPLOYMENT_ENVIRONMENT, configuration.getServiceEnvironment());
     }
 }

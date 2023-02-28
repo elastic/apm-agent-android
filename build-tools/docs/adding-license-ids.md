@@ -19,9 +19,9 @@ well as providing their license body needed to be present in our NOTICE files.
 
 ### 1. Creating the license ID
 
-Within this project, `buildSrc`, there's a file located at: `src/resources/licenses_ids.txt` which
-contains all the licenses IDs needed for our NOTICE files generation. If the license you need isn't
-listed there, you should add it in a new line with the following
+Within this project, `build-tools`, there's a file located at: `src/resources/licenses_ids.txt`
+which contains all the licenses IDs needed for our NOTICE files generation. If the license you need
+isn't listed there, you should add it in a new line with the following
 format: `[THE_ID]|[THE LICENSE NAME]`, the id can be anything, without spaces, preferably all
 lowercase, that makes sense based on the license name. Then, followed by a pipeline `|`, the license
 name found on [this site preferably](https://opensource.org/licenses/alphabetical), only the full

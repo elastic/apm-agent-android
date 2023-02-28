@@ -16,30 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.common.internal.logging;
+package co.elastic.apm.android.sdk.internal.configuration.impl;
 
-import androidx.annotation.NonNull;
+import co.elastic.apm.android.sdk.connectivity.Connectivity;
+import co.elastic.apm.android.sdk.connectivity.auth.AuthConfiguration;
+import co.elastic.apm.android.sdk.internal.configuration.Configuration;
 
-import org.slf4j.Logger;
+public final class ConnectivityConfiguration implements Configuration {
+    private final Connectivity connectivity;
 
-public class Elog {
-
-    private static ELoggerFactory loggerFactory = new ELoggerFactory.Noop();
-    private static boolean initialized = false;
-
-    public static synchronized void init(ELoggerFactory factory) {
-        if (initialized) {
-            return;
-        }
-        loggerFactory = factory;
-        initialized = true;
+    public ConnectivityConfiguration(Connectivity connectivity) {
+        this.connectivity = connectivity;
     }
 
-    public static Logger getLogger(@NonNull String name) {
-        return loggerFactory.getLogger(name);
+    public String getEndpoint() {
+        return connectivity.endpoint();
     }
 
-    public static Logger getLogger() {
-        return loggerFactory.getDefaultLogger();
+    public AuthConfiguration getAuthConfiguration() {
+        return connectivity.authConfiguration();
     }
 }

@@ -16,30 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.common.internal.logging;
+package co.elastic.apm.android.sdk.internal.features.centralconfig.fetcher;
 
-import androidx.annotation.NonNull;
+public final class FetchResult {
+    public final Integer maxAgeInSeconds;
+    public final boolean configurationHasChanged;
 
-import org.slf4j.Logger;
-
-public class Elog {
-
-    private static ELoggerFactory loggerFactory = new ELoggerFactory.Noop();
-    private static boolean initialized = false;
-
-    public static synchronized void init(ELoggerFactory factory) {
-        if (initialized) {
-            return;
-        }
-        loggerFactory = factory;
-        initialized = true;
-    }
-
-    public static Logger getLogger(@NonNull String name) {
-        return loggerFactory.getLogger(name);
-    }
-
-    public static Logger getLogger() {
-        return loggerFactory.getDefaultLogger();
+    public FetchResult(Integer maxAgeInSeconds, boolean configurationHasChanged) {
+        this.maxAgeInSeconds = maxAgeInSeconds;
+        this.configurationHasChanged = configurationHasChanged;
     }
 }

@@ -25,7 +25,7 @@ import org.slf4j.helpers.NOPLogger;
 public abstract class ELoggerFactory implements ILoggerFactory {
 
     public Logger getLogger(Class<?> type) {
-        return getLogger(getId() + " - " + type.getName());
+        return getLogger(getId() + " - " + type.getSimpleName());
     }
 
     public Logger getDefaultLogger() {

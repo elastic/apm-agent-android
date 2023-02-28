@@ -18,17 +18,25 @@
  */
 package co.elastic.apm.android.sdk.internal.configuration;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
 
+@SuppressWarnings("unchecked")
 public final class Configurations {
     private static Configurations INSTANCE;
     private final Map<Class<? extends Configuration>, Configuration> configurations;
 
     static Configurations get() {
         return INSTANCE;
+    }
+
+    public static boolean isInitialized() {
+        return INSTANCE != null;
     }
 
     public static Configurations.Builder builder() {
@@ -39,29 +47,30 @@ public final class Configurations {
         this.configurations = configurations;
     }
 
-    public static boolean isEnabled(Class<? extends Configuration> configurationClass) {
-        Configurations configurations = get();
-        if (configurations == null) {
-            Elog.getLogger(Configurations.class).info("Configurations has not been initialized");
-            return false;
-        }
-        if (!configurations.hasConfiguration(configurationClass)) {
-            Elog.getLogger(Configurations.class).info("The requested Configuration was not found");
-            return false;
-        }
-
-        return configurations.getConfiguration(configurationClass).isEnabled();
-    }
-
     public static <T extends Configuration> T get(Class<? extends Configuration> configurationClass) {
         return get().getConfiguration(configurationClass);
     }
 
-    public boolean hasConfiguration(Class<? extends Configuration> configurationClass) {
-        return configurations.containsKey(configurationClass);
+    public static <T> List<T> findByType(Class<T> type) {
+        if (!isInitialized()) {
+            Elog.getLogger().info("Configurations has not been initialized");
+            return Collections.emptyList();
+        }
+        List<T> found = new ArrayList<>();
+
+        for (Configuration configuration : Configurations.get().configurations.values()) {
+            if (type.isAssignableFrom(configuration.getClass())) {
+                found.add((T) configuration);
+            }
+        }
+
+        return found;
     }
 
-    @SuppressWarnings("unchecked")
+    public static boolean hasConfiguration(Class<? extends Configuration> configurationClass) {
+        return get().configurations.containsKey(configurationClass);
+    }
+
     public <T extends Configuration> T getConfiguration(Class<? extends Configuration> configurationClass) {
         if (!configurations.containsKey(configurationClass)) {
             throw new IllegalArgumentException("No configuration found for '" + configurationClass.getName() + "'");

@@ -18,7 +18,6 @@
  */
 package co.elastic.apm.android.sdk.connectivity.opentelemetry;
 
-import co.elastic.apm.android.sdk.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.custom.CustomSignalConfiguration;
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.custom.CustomSignalExporterConfiguration;
 import io.opentelemetry.sdk.logs.LogRecordProcessor;
@@ -44,11 +43,9 @@ public interface SignalConfiguration {
      * <pre>
      *  {@code SignalConfiguration myConfiguration = SignalConfiguration.create("https://my.server.url").withSecretToken("my_bearer_token");}
      * </pre>
-     *
-     * @param connectivity - The APM server configured {@link Connectivity}.
      */
-    static DefaultSignalConfiguration create(Connectivity connectivity) {
-        return new DefaultSignalConfiguration(connectivity);
+    static DefaultSignalConfiguration create() {
+        return new DefaultSignalConfiguration();
     }
 
     /**
@@ -70,8 +67,8 @@ public interface SignalConfiguration {
     /**
      * This function provides a {@link SignalConfiguration} instance that uses the server parameters defined at compile time.
      */
-    static SignalConfiguration getDefault(Connectivity connectivity) {
-        return SignalConfiguration.create(connectivity);
+    static SignalConfiguration getDefault() {
+        return SignalConfiguration.create();
     }
 
     SpanProcessor getSpanProcessor();

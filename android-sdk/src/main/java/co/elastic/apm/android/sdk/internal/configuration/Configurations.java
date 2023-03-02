@@ -19,6 +19,7 @@
 package co.elastic.apm.android.sdk.internal.configuration;
 
 import org.stagemonitor.configuration.ConfigurationRegistry;
+import org.stagemonitor.configuration.source.ConfigurationSource;
 
 @SuppressWarnings("unchecked")
 public final class Configurations {
@@ -61,6 +62,11 @@ public final class Configurations {
         private final ConfigurationRegistry.Builder registryBuilder = ConfigurationRegistry.builder();
 
         private Builder() {
+        }
+
+        public Builder addSource(ConfigurationSource source) {
+            registryBuilder.addConfigSource(source);
+            return this;
         }
 
         public Builder register(Configuration configuration) {

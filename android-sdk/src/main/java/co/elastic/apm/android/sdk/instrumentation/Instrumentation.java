@@ -22,11 +22,10 @@ import androidx.annotation.NonNull;
 
 import org.stagemonitor.configuration.ConfigurationOption;
 
-import java.util.List;
-
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.configuration.Configuration;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
+import co.elastic.apm.android.sdk.internal.configuration.OptionsRegistry;
 
 public abstract class Instrumentation extends Configuration {
     private final ConfigurationOption<Boolean> isEnabled;
@@ -36,9 +35,9 @@ public abstract class Instrumentation extends Configuration {
     }
 
     @Override
-    protected void visitOptions(List<ConfigurationOption<?>> options) {
+    protected void visitOptions(OptionsRegistry options) {
         super.visitOptions(options);
-        options.add(isEnabled);
+        options.register(isEnabled);
     }
 
     protected String getEnabledKeyName() {

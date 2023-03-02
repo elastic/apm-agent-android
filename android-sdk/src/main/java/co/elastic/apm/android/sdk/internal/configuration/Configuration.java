@@ -21,7 +21,6 @@ package co.elastic.apm.android.sdk.internal.configuration;
 import org.stagemonitor.configuration.ConfigurationOption;
 import org.stagemonitor.configuration.ConfigurationOptionProvider;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Configuration extends ConfigurationOptionProvider {
@@ -42,12 +41,12 @@ public abstract class Configuration extends ConfigurationOptionProvider {
 
     @Override
     public final List<ConfigurationOption<?>> getConfigurationOptions() {
-        List<ConfigurationOption<?>> options = new ArrayList<>();
-        visitOptions(options);
-        return options;
+        OptionsRegistry optionsRegistry = new OptionsRegistry();
+        visitOptions(optionsRegistry);
+        return optionsRegistry.getOptions();
     }
 
-    protected void visitOptions(List<ConfigurationOption<?>> options) {
+    protected void visitOptions(OptionsRegistry options) {
 
     }
 }

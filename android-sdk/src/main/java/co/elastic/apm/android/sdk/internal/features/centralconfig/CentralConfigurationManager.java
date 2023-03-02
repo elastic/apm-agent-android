@@ -53,20 +53,21 @@ public final class CentralConfigurationManager extends AbstractConfigurationSour
     private final Context context;
     private final DslJson<Object> dslJson = new DslJson<>(new DslJson.Settings<>());
     private final Logger logger = Elog.getLogger();
+    private final byte[] buffer = new byte[4096];
     private final PreferencesService preferences;
     private final SystemTimeProvider systemTimeProvider;
     private File configFile;
     private Map<String, String> configs;
 
     public CentralConfigurationManager(Context context) {
-        this(context, SystemTimeProvider.get(), ServiceManager.get().getService(Service.Names.PREFERENCES));
+        this(context, SystemTimeProvider.get());
     }
 
     @VisibleForTesting
-    public CentralConfigurationManager(Context context, SystemTimeProvider systemTimeProvider, PreferencesService preferences) {
-        this.context = context.getApplicationContext();
+    public CentralConfigurationManager(Context context, SystemTimeProvider systemTimeProvider) {
+        this.context = context;
         this.systemTimeProvider = systemTimeProvider;
-        this.preferences = preferences;
+        preferences = ServiceManager.get().getService(Service.Names.PREFERENCES);
     }
 
     public Integer sync() throws IOException {
@@ -93,18 +94,14 @@ public final class CentralConfigurationManager extends AbstractConfigurationSour
     }
 
     private void notifyListeners() throws IOException {
-        try {
-            configs = readConfigs(getConfigurationFile());
-            logger.info("Notifying central config change");
-            logger.debug("Central config params: {}", configs);
-            Configurations.reload();
-        } finally {
-            configs = null;
-        }
+        configs = readConfigs(getConfigurationFile());
+        logger.info("Notifying central config change");
+        logger.debug("Central config params: {}", configs);
+        Configurations.reload();
+        configs = null;
     }
 
     private Map<String, String> readConfigs(File configFile) throws IOException {
-        byte[] buffer = new byte[4096];
         try (InputStream is = new FileInputStream(configFile)) {
             JsonReader<Object> reader = dslJson.newReader(is, buffer);
             reader.startObject();
@@ -148,10 +145,6 @@ public final class CentralConfigurationManager extends AbstractConfigurationSour
 
     @Override
     public String getValue(String key) {
-        if (configs == null) {
-            logger.debug("Central config map is null");
-            return null;
-        }
         return configs.get(key);
     }
 

@@ -18,14 +18,7 @@
  */
 package co.elastic.apm.android.sdk.internal.configuration;
 
-import org.stagemonitor.configuration.ConfigurationOptionProvider;
 import org.stagemonitor.configuration.ConfigurationRegistry;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import co.elastic.apm.android.common.internal.logging.Elog;
 
 @SuppressWarnings("unchecked")
 public final class Configurations {
@@ -52,20 +45,8 @@ public final class Configurations {
         return get().getConfiguration(configurationClass);
     }
 
-    public static <T> List<T> findByType(Class<T> type) {
-        if (!isInitialized()) {
-            Elog.getLogger().info("Configurations has not been initialized");
-            return Collections.emptyList();
-        }
-        List<T> found = new ArrayList<>();
-
-        for (ConfigurationOptionProvider configuration : Configurations.get().configurationRegistry.getConfigurationOptionProviders()) {
-            if (type.isAssignableFrom(configuration.getClass())) {
-                found.add((T) configuration);
-            }
-        }
-
-        return found;
+    public static void reload() {
+        get().configurationRegistry.reloadDynamicConfigurationOptions();
     }
 
     public <T extends Configuration> T getConfiguration(Class<? extends Configuration> configurationClass) {

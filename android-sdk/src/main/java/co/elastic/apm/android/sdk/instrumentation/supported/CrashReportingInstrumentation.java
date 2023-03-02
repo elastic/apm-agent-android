@@ -27,4 +27,9 @@ public final class CrashReportingInstrumentation extends Instrumentation {
     public CrashReportingInstrumentation(boolean enabled) {
         super(enabled);
     }
+
+    @Override
+    protected String getEnabledKeyName() {
+        return "enable_crash_reporting";
+    }
 }

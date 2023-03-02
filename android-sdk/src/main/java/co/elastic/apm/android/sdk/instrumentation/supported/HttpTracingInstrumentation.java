@@ -27,4 +27,9 @@ public final class HttpTracingInstrumentation extends Instrumentation {
     public HttpTracingInstrumentation(boolean enabled) {
         super(enabled);
     }
+
+    @Override
+    protected String getEnabledKeyName() {
+        return "enable_http_instrumentation";
+    }
 }

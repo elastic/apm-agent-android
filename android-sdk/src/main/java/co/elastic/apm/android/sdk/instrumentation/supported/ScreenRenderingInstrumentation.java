@@ -27,4 +27,9 @@ public final class ScreenRenderingInstrumentation extends Instrumentation {
     public ScreenRenderingInstrumentation(boolean enabled) {
         super(enabled);
     }
+
+    @Override
+    protected String getEnabledKeyName() {
+        return "enable_screen_rendering";
+    }
 }

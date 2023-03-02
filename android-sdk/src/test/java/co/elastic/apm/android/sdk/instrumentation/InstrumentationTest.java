@@ -107,6 +107,11 @@ public class InstrumentationTest {
         }
 
         @Override
+        protected String getEnabledKeyName() {
+            return "test_name";
+        }
+
+        @Override
         protected boolean enabled() {
             return enabled;
         }
@@ -118,6 +123,11 @@ public class InstrumentationTest {
         private ParentInstrumentation(boolean enabled) {
             super(enabled);
             this.enabled = enabled;
+        }
+
+        @Override
+        protected String getEnabledKeyName() {
+            return "parent_test_name";
         }
 
         @Override

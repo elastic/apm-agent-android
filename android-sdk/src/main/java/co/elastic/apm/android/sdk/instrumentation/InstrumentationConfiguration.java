@@ -44,6 +44,11 @@ public final class InstrumentationConfiguration extends GroupInstrumentation imp
         this.instrumentations = instrumentations;
     }
 
+    @Override
+    protected String getEnabledKeyName() {
+        return "enable_automatic_instrumentation";
+    }
+
     @NonNull
     @Override
     protected Group getGroup() {

@@ -18,8 +18,6 @@
  */
 package co.elastic.apm.android.sdk.internal.configuration;
 
-import org.stagemonitor.configuration.ConfigurationOption;
-
 import java.util.ArrayList;
 import java.util.List;
 

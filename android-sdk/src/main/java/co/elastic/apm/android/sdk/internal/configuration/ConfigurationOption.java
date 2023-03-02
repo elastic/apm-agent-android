@@ -18,7 +18,7 @@
  */
 package co.elastic.apm.android.sdk.internal.configuration;
 
-public final class ConfigurationOption<T> {
+public class ConfigurationOption<T> {
     final org.stagemonitor.configuration.ConfigurationOption<T> wrapped;
 
     public ConfigurationOption(org.stagemonitor.configuration.ConfigurationOption<T> wrapped) {

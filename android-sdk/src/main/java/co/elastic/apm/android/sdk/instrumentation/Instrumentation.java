@@ -20,10 +20,9 @@ package co.elastic.apm.android.sdk.instrumentation;
 
 import androidx.annotation.NonNull;
 
-import org.stagemonitor.configuration.ConfigurationOption;
-
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.configuration.Configuration;
+import co.elastic.apm.android.sdk.internal.configuration.ConfigurationOption;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.configuration.OptionsRegistry;
 

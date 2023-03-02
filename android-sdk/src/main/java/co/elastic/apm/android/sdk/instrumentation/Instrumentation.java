@@ -56,12 +56,13 @@ public abstract class Instrumentation extends Configuration {
             Elog.getLogger().info("Configurations has not been initialized");
             return false;
         }
-        if (!Configurations.hasConfiguration(instrumentationClass)) {
+        Instrumentation instrumentation = Configurations.get(instrumentationClass);
+        if (instrumentation == null) {
             Elog.getLogger().info("The requested Configuration was not found");
             return false;
         }
 
-        return Configurations.<Instrumentation>get(instrumentationClass).isEnabled();
+        return instrumentation.isEnabled();
     }
 
     public final boolean isEnabled() {
@@ -76,7 +77,7 @@ public abstract class Instrumentation extends Configuration {
         return groupType != null && getClass() != groupType && !Configurations.<Instrumentation>get(groupType).isEnabled();
     }
 
-    protected final boolean enabled() {
+    protected boolean enabled() {
         return isEnabled.get();
     }
 

@@ -34,6 +34,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -52,12 +53,12 @@ public final class CentralConfigurationManager extends AbstractConfigurationSour
     private static final String REFRESH_TIMEOUT_PREFERENCE_NAME = "central_configuration_refresh_timeout";
     private final Context context;
     private final DslJson<Object> dslJson = new DslJson<>(new DslJson.Settings<>());
+    private final Map<String, String> configs = new HashMap<>();
     private final Logger logger = Elog.getLogger();
     private final byte[] buffer = new byte[4096];
     private final PreferencesService preferences;
     private final SystemTimeProvider systemTimeProvider;
     private File configFile;
-    private Map<String, String> configs;
 
     public CentralConfigurationManager(Context context) {
         this(context, SystemTimeProvider.get());
@@ -94,11 +95,11 @@ public final class CentralConfigurationManager extends AbstractConfigurationSour
     }
 
     private void notifyListeners() throws IOException {
-        configs = readConfigs(getConfigurationFile());
+        configs.putAll(readConfigs(getConfigurationFile()));
         logger.info("Notifying central config change");
         logger.debug("Central config params: {}", configs);
         Configurations.reload();
-        configs = null;
+        configs.clear();
     }
 
     private Map<String, String> readConfigs(File configFile) throws IOException {

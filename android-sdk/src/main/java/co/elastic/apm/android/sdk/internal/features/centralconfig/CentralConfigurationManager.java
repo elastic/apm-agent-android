@@ -93,11 +93,14 @@ public final class CentralConfigurationManager extends AbstractConfigurationSour
     }
 
     private void notifyListeners() throws IOException {
-        configs = readConfigs(getConfigurationFile());
-        logger.info("Notifying central config change");
-        logger.debug("Central config params: {}", configs);
-        Configurations.reload();
-        configs = null;
+        try {
+            configs = readConfigs(getConfigurationFile());
+            logger.info("Notifying central config change");
+            logger.debug("Central config params: {}", configs);
+            Configurations.reload();
+        } finally {
+            configs = null;
+        }
     }
 
     private Map<String, String> readConfigs(File configFile) throws IOException {

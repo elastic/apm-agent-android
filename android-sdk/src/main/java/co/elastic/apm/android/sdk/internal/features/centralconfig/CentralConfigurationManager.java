@@ -104,7 +104,8 @@ public final class CentralConfigurationManager implements ConfigurationFileProvi
     }
 
     private void notifyConfigurationChanged(Map<String, String> configs) {
-        logger.debug("Notifying central config change");
+        logger.info("Notifying central config change");
+        logger.debug("Central config params: {}", configs);
         for (CentralConfigurationListener listener : Configurations.findByType(CentralConfigurationListener.class)) {
             listener.onUpdate(configs);
         }

@@ -68,10 +68,6 @@ public final class Configurations {
         return found;
     }
 
-    public static boolean hasConfiguration(Class<? extends Configuration> configurationClass) {
-        return get().configurationRegistry.getConfigurationOptionProviders().contains(configurationClass);
-    }
-
     public <T extends Configuration> T getConfiguration(Class<? extends Configuration> configurationClass) {
         return (T) configurationRegistry.getConfig(configurationClass);
     }

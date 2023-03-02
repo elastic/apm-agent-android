@@ -91,6 +91,7 @@ public class InstrumentationTest {
         private final boolean enabled;
 
         private SimpleInstrumentation(Class<? extends Instrumentation> parentConfigClass, boolean enabled) {
+            super(enabled);
             this.parentConfigClass = parentConfigClass;
             this.enabled = enabled;
         }
@@ -115,6 +116,7 @@ public class InstrumentationTest {
         private final boolean enabled;
 
         private ParentInstrumentation(boolean enabled) {
+            super(enabled);
             this.enabled = enabled;
         }
 

@@ -27,4 +27,9 @@ public final class AppLaunchTimeInstrumentation extends Instrumentation {
     public AppLaunchTimeInstrumentation(boolean enabled) {
         super(enabled);
     }
+
+    @Override
+    protected String getEnabledKeyName() {
+        return "enable_app_launch_tracing";
+    }
 }

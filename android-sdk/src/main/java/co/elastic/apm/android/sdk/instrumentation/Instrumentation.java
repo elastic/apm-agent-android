@@ -39,9 +39,7 @@ public abstract class Instrumentation extends Configuration {
         options.register(isEnabled);
     }
 
-    protected String getEnabledKeyName() {
-        return "enabled";
-    }
+    protected abstract String getEnabledKeyName();
 
     static <T extends Instrumentation> void runWhenEnabled(Class<T> type, Function<T> onEnabled) {
         if (isEnabled(type)) {

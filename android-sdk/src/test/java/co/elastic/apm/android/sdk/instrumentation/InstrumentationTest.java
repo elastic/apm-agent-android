@@ -25,6 +25,9 @@ import androidx.annotation.NonNull;
 
 import org.junit.After;
 import org.junit.Test;
+import org.stagemonitor.configuration.ConfigurationOption;
+
+import java.util.List;
 
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 
@@ -115,6 +118,11 @@ public class InstrumentationTest {
         protected boolean enabled() {
             return enabled;
         }
+
+        @Override
+        protected List<ConfigurationOption<?>> getOptions() {
+            return null;
+        }
     }
 
     private static class ParentInstrumentation extends Instrumentation {
@@ -139,6 +147,11 @@ public class InstrumentationTest {
         @Override
         protected Group getGroup() {
             return () -> null;
+        }
+
+        @Override
+        protected List<ConfigurationOption<?>> getOptions() {
+            return null;
         }
     }
 }

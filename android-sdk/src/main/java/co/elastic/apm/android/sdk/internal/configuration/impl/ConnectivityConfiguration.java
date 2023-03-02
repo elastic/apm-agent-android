@@ -18,10 +18,6 @@
  */
 package co.elastic.apm.android.sdk.internal.configuration.impl;
 
-import org.stagemonitor.configuration.ConfigurationOption;
-
-import java.util.List;
-
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.connectivity.auth.AuthConfiguration;
 import co.elastic.apm.android.sdk.internal.configuration.Configuration;
@@ -39,10 +35,5 @@ public final class ConnectivityConfiguration extends Configuration {
 
     public AuthConfiguration getAuthConfiguration() {
         return connectivity.authConfiguration();
-    }
-
-    @Override
-    protected List<ConfigurationOption<?>> getOptions() {
-        return null;
     }
 }

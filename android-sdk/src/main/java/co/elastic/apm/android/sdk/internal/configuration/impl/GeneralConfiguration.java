@@ -18,10 +18,6 @@
  */
 package co.elastic.apm.android.sdk.internal.configuration.impl;
 
-import org.stagemonitor.configuration.ConfigurationOption;
-
-import java.util.List;
-
 import co.elastic.apm.android.sdk.ElasticApmConfiguration;
 import co.elastic.apm.android.sdk.internal.configuration.Configuration;
 import co.elastic.apm.android.sdk.internal.services.Service;
@@ -49,10 +45,5 @@ public final class GeneralConfiguration extends Configuration {
 
     public String getServiceEnvironment() {
         return metadata.getDeploymentEnvironment();
-    }
-
-    @Override
-    protected List<ConfigurationOption<?>> getOptions() {
-        return null;
     }
 }

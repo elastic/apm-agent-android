@@ -18,18 +18,28 @@
  */
 package co.elastic.apm.android.sdk.instrumentation.supported;
 
-import co.elastic.apm.android.sdk.instrumentation.Instrumentation;
+import org.stagemonitor.configuration.ConfigurationOption;
+import org.stagemonitor.configuration.source.ConfigurationSource;
+
+import java.util.List;
+
+import co.elastic.apm.android.sdk.internal.instrumentation.InternalInstrumentation;
 import co.elastic.apm.compile.processor.annotations.AutoInstrumentation;
 
 @AutoInstrumentation
-public final class ScreenRenderingInstrumentation extends Instrumentation {
+public final class ScreenRenderingInstrumentation extends InternalInstrumentation {
 
     public ScreenRenderingInstrumentation(boolean enabled) {
         super(enabled);
     }
 
     @Override
-    protected String getEnabledKeyName() {
-        return "enable_screen_rendering";
+    protected List<ConfigurationOption<?>> getOptions() {
+        return null;
+    }
+
+    @Override
+    protected List<ConfigurationSource> getSources() {
+        return null;
     }
 }

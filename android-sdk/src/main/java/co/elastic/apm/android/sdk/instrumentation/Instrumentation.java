@@ -22,24 +22,10 @@ import androidx.annotation.NonNull;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.configuration.Configuration;
-import co.elastic.apm.android.sdk.internal.configuration.ConfigurationOption;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
-import co.elastic.apm.android.sdk.internal.configuration.OptionsRegistry;
+import co.elastic.apm.android.sdk.internal.instrumentation.InternalInstrumentation;
 
 public abstract class Instrumentation extends Configuration {
-    private final ConfigurationOption<Boolean> isEnabled;
-
-    public Instrumentation(boolean enabled) {
-        isEnabled = createBooleanOption(getEnabledKeyName(), enabled);
-    }
-
-    @Override
-    protected void visitOptions(OptionsRegistry options) {
-        super.visitOptions(options);
-        options.register(isEnabled);
-    }
-
-    protected abstract String getEnabledKeyName();
 
     static <T extends Instrumentation> void runWhenEnabled(Class<T> type, Function<T> onEnabled) {
         if (isEnabled(type)) {
@@ -52,13 +38,12 @@ public abstract class Instrumentation extends Configuration {
             Elog.getLogger().info("Configurations has not been initialized");
             return false;
         }
-        Instrumentation instrumentation = Configurations.get(instrumentationClass);
-        if (instrumentation == null) {
+        if (!Configurations.hasConfiguration(instrumentationClass)) {
             Elog.getLogger().info("The requested Configuration was not found");
             return false;
         }
 
-        return instrumentation.isEnabled();
+        return Configurations.<Instrumentation>get(instrumentationClass).isEnabled();
     }
 
     public final boolean isEnabled() {
@@ -70,12 +55,10 @@ public abstract class Instrumentation extends Configuration {
 
     private boolean groupIsNotEnabled() {
         Class<? extends Instrumentation> groupType = getGroup().getType();
-        return groupType != null && getClass() != groupType && !Configurations.get(groupType).isEnabled();
+        return groupType != null && getClass() != groupType && !Configurations.<Instrumentation>get(groupType).isEnabled();
     }
 
-    protected boolean enabled() {
-        return isEnabled.get();
-    }
+    protected abstract boolean enabled();
 
     @NonNull
     protected Group getGroup() {
@@ -89,9 +72,9 @@ public abstract class Instrumentation extends Configuration {
     public enum Groups implements Group {
         NONE(InstrumentationConfiguration.class);
 
-        private final Class<? extends Instrumentation> type;
+        private final Class<? extends InternalInstrumentation> type;
 
-        Groups(Class<? extends Instrumentation> type) {
+        Groups(Class<? extends InternalInstrumentation> type) {
             this.type = type;
         }
 

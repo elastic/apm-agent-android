@@ -18,11 +18,16 @@
  */
 package co.elastic.apm.android.sdk.internal.configuration;
 
+import org.stagemonitor.configuration.ConfigurationOptionProvider;
 import org.stagemonitor.configuration.ConfigurationRegistry;
-import org.stagemonitor.configuration.source.ConfigurationSource;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
+import co.elastic.apm.android.common.internal.logging.Elog;
+
+@SuppressWarnings("unchecked")
 public final class Configurations {
     private static Configurations INSTANCE;
     private final ConfigurationRegistry configurationRegistry;
@@ -43,20 +48,32 @@ public final class Configurations {
         this.configurationRegistry = configurationRegistry;
     }
 
-    public static <T extends Configuration> T get(Class<T> configurationClass) {
+    public static <T extends Configuration> T get(Class<? extends Configuration> configurationClass) {
         return get().getConfiguration(configurationClass);
     }
 
-    public static void reload() {
-        get().doReload();
+    public static <T> List<T> findByType(Class<T> type) {
+        if (!isInitialized()) {
+            Elog.getLogger().info("Configurations has not been initialized");
+            return Collections.emptyList();
+        }
+        List<T> found = new ArrayList<>();
+
+        for (ConfigurationOptionProvider configuration : Configurations.get().configurationRegistry.getConfigurationOptionProviders()) {
+            if (type.isAssignableFrom(configuration.getClass())) {
+                found.add((T) configuration);
+            }
+        }
+
+        return found;
     }
 
-    public <T extends Configuration> T getConfiguration(Class<T> configurationClass) {
+    public static boolean hasConfiguration(Class<? extends Configuration> configurationClass) {
+        return get().configurationRegistry.getConfigurationOptionProviders().contains(configurationClass);
+    }
+
+    public <T extends Configuration> T getConfiguration(Class<? extends Configuration> configurationClass) {
         return (T) configurationRegistry.getConfig(configurationClass);
-    }
-
-    public void doReload() {
-        configurationRegistry.reloadDynamicConfigurationOptions();
     }
 
     public static void resetForTest() {
@@ -69,20 +86,8 @@ public final class Configurations {
         private Builder() {
         }
 
-        public Builder addSource(ConfigurationSource source) {
-            registryBuilder.addConfigSource(source);
-            return this;
-        }
-
         public Builder register(Configuration configuration) {
             registryBuilder.addOptionProvider(configuration);
-            return this;
-        }
-
-        public Builder registerAll(Collection<? extends Configuration> configurations) {
-            for (Configuration configuration : configurations) {
-                registryBuilder.addOptionProvider(configuration);
-            }
             return this;
         }
 

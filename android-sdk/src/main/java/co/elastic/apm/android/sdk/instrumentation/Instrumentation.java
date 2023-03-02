@@ -20,12 +20,26 @@ package co.elastic.apm.android.sdk.instrumentation;
 
 import androidx.annotation.NonNull;
 
+import org.stagemonitor.configuration.ConfigurationOption;
+
+import java.util.List;
+
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.configuration.Configuration;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.instrumentation.InternalInstrumentation;
 
 public abstract class Instrumentation extends Configuration {
+
+    @Override
+    protected void visitOptions(List<ConfigurationOption<?>> options) {
+        super.visitOptions(options);
+        options.add(createBooleanOption(getEnabledKeyName(), true));
+    }
+
+    protected String getEnabledKeyName() {
+        return "enabled";
+    }
 
     static <T extends Instrumentation> void runWhenEnabled(Class<T> type, Function<T> onEnabled) {
         if (isEnabled(type)) {

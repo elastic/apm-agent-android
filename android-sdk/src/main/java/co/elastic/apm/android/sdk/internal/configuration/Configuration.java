@@ -18,6 +18,20 @@
  */
 package co.elastic.apm.android.sdk.internal.configuration;
 
-public interface Configuration {
+import org.stagemonitor.configuration.ConfigurationOption;
+import org.stagemonitor.configuration.ConfigurationOptionProvider;
+import org.stagemonitor.configuration.source.ConfigurationSource;
 
+import java.util.List;
+
+public abstract class Configuration extends ConfigurationOptionProvider {
+
+    @Override
+    public final List<ConfigurationOption<?>> getConfigurationOptions() {
+        return getOptions();
+    }
+
+    protected abstract List<ConfigurationOption<?>> getOptions();
+
+    protected abstract List<ConfigurationSource> getSources();
 }

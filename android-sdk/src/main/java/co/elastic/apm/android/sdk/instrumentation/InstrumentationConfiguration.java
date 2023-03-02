@@ -20,6 +20,9 @@ package co.elastic.apm.android.sdk.instrumentation;
 
 import androidx.annotation.NonNull;
 
+import org.stagemonitor.configuration.ConfigurationOption;
+import org.stagemonitor.configuration.source.ConfigurationSource;
+
 import java.util.List;
 
 import co.elastic.apm.android.sdk.internal.instrumentation.GroupInstrumentation;
@@ -52,6 +55,16 @@ public final class InstrumentationConfiguration extends GroupInstrumentation imp
 
     @Override
     public Class<? extends Instrumentation> getType() {
+        return null;
+    }
+
+    @Override
+    protected List<ConfigurationOption<?>> getOptions() {
+        return null;
+    }
+
+    @Override
+    protected List<ConfigurationSource> getSources() {
         return null;
     }
 }

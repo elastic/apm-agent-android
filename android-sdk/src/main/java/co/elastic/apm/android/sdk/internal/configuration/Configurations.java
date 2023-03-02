@@ -18,18 +18,19 @@
  */
 package co.elastic.apm.android.sdk.internal.configuration;
 
+import org.stagemonitor.configuration.ConfigurationOptionProvider;
+import org.stagemonitor.configuration.ConfigurationRegistry;
+
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
 
 @SuppressWarnings("unchecked")
 public final class Configurations {
     private static Configurations INSTANCE;
-    private final Map<Class<? extends Configuration>, Configuration> configurations;
+    private final ConfigurationRegistry configurationRegistry;
 
     static Configurations get() {
         return INSTANCE;
@@ -43,8 +44,8 @@ public final class Configurations {
         return new Configurations.Builder();
     }
 
-    private Configurations(Map<Class<? extends Configuration>, Configuration> configurations) {
-        this.configurations = configurations;
+    private Configurations(ConfigurationRegistry configurationRegistry) {
+        this.configurationRegistry = configurationRegistry;
     }
 
     public static <T extends Configuration> T get(Class<? extends Configuration> configurationClass) {
@@ -58,7 +59,7 @@ public final class Configurations {
         }
         List<T> found = new ArrayList<>();
 
-        for (Configuration configuration : Configurations.get().configurations.values()) {
+        for (ConfigurationOptionProvider configuration : Configurations.get().configurationRegistry.getConfigurationOptionProviders()) {
             if (type.isAssignableFrom(configuration.getClass())) {
                 found.add((T) configuration);
             }
@@ -68,14 +69,11 @@ public final class Configurations {
     }
 
     public static boolean hasConfiguration(Class<? extends Configuration> configurationClass) {
-        return get().configurations.containsKey(configurationClass);
+        return get().configurationRegistry.getConfigurationOptionProviders().contains(configurationClass);
     }
 
     public <T extends Configuration> T getConfiguration(Class<? extends Configuration> configurationClass) {
-        if (!configurations.containsKey(configurationClass)) {
-            throw new IllegalArgumentException("No configuration found for '" + configurationClass.getName() + "'");
-        }
-        return (T) configurations.get(configurationClass);
+        return (T) configurationRegistry.getConfig(configurationClass);
     }
 
     public static void resetForTest() {
@@ -83,22 +81,18 @@ public final class Configurations {
     }
 
     public static class Builder {
-        private final Map<Class<? extends Configuration>, Configuration> configurations = new HashMap<>();
+        private final ConfigurationRegistry.Builder registryBuilder = ConfigurationRegistry.builder();
 
         private Builder() {
         }
 
         public Builder register(Configuration configuration) {
-            Class<? extends Configuration> configurationClass = configuration.getClass();
-            if (configurations.containsKey(configurationClass)) {
-                throw new IllegalStateException("The configuration '" + configurationClass.getName() + "' is already registered");
-            }
-            configurations.put(configurationClass, configuration);
+            registryBuilder.addOptionProvider(configuration);
             return this;
         }
 
         public Configurations buildAndRegisterGlobal() {
-            INSTANCE = new Configurations(configurations);
+            INSTANCE = new Configurations(registryBuilder.build());
             return INSTANCE;
         }
     }

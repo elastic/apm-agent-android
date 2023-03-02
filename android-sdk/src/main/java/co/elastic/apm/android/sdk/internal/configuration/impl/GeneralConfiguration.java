@@ -18,13 +18,18 @@
  */
 package co.elastic.apm.android.sdk.internal.configuration.impl;
 
+import org.stagemonitor.configuration.ConfigurationOption;
+import org.stagemonitor.configuration.source.ConfigurationSource;
+
+import java.util.List;
+
 import co.elastic.apm.android.sdk.ElasticApmConfiguration;
 import co.elastic.apm.android.sdk.internal.configuration.Configuration;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
 
-public final class GeneralConfiguration implements Configuration {
+public final class GeneralConfiguration extends Configuration {
     private final ApmMetadataService metadata;
     private final String providedServiceName;
     private final String providedServiceVersion;
@@ -45,5 +50,15 @@ public final class GeneralConfiguration implements Configuration {
 
     public String getServiceEnvironment() {
         return metadata.getDeploymentEnvironment();
+    }
+
+    @Override
+    protected List<ConfigurationOption<?>> getOptions() {
+        return null;
+    }
+
+    @Override
+    protected List<ConfigurationSource> getSources() {
+        return null;
     }
 }

@@ -18,11 +18,11 @@
  */
 package co.elastic.apm.android.sdk.instrumentation.supported;
 
-import co.elastic.apm.android.sdk.internal.instrumentation.InternalInstrumentation;
+import co.elastic.apm.android.sdk.instrumentation.Instrumentation;
 import co.elastic.apm.compile.processor.annotations.AutoInstrumentation;
 
 @AutoInstrumentation
-public final class AppLaunchTimeInstrumentation extends InternalInstrumentation {
+public final class AppLaunchTimeInstrumentation extends Instrumentation {
 
     public AppLaunchTimeInstrumentation(boolean enabled) {
         super(enabled);

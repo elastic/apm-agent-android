@@ -23,9 +23,6 @@ import static org.junit.Assert.fail;
 
 import org.junit.After;
 import org.junit.Test;
-import org.stagemonitor.configuration.ConfigurationOption;
-
-import java.util.List;
 
 public class ConfigurationsTest {
 
@@ -65,9 +62,5 @@ public class ConfigurationsTest {
 
     private static class SimpleConfiguration extends Configuration {
 
-        @Override
-        protected List<ConfigurationOption<?>> getOptions() {
-            return null;
-        }
     }
 }

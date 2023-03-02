@@ -21,14 +21,33 @@ package co.elastic.apm.android.sdk.internal.configuration;
 import org.stagemonitor.configuration.ConfigurationOption;
 import org.stagemonitor.configuration.ConfigurationOptionProvider;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Configuration extends ConfigurationOptionProvider {
 
-    @Override
-    public final List<ConfigurationOption<?>> getConfigurationOptions() {
-        return getOptions();
+    protected ConfigurationOption<Boolean> createBooleanOption(String key, boolean defaultValue) {
+        return ConfigurationOption.booleanOption()
+                .key(key)
+                .dynamic(true)
+                .buildWithDefault(defaultValue);
     }
 
-    protected abstract List<ConfigurationOption<?>> getOptions();
+    protected ConfigurationOption<String> createStringOption(String key, String defaultValue) {
+        return ConfigurationOption.stringOption()
+                .key(key)
+                .dynamic(true)
+                .buildWithDefault(defaultValue);
+    }
+
+    @Override
+    public final List<ConfigurationOption<?>> getConfigurationOptions() {
+        List<ConfigurationOption<?>> options = new ArrayList<>();
+        visitOptions(options);
+        return options;
+    }
+
+    protected void visitOptions(List<ConfigurationOption<?>> options) {
+
+    }
 }

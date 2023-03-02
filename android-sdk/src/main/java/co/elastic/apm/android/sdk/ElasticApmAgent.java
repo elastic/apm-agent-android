@@ -138,25 +138,24 @@ public final class ElasticApmAgent {
     private void onInitializationFinished(Context context, Connectivity connectivity) {
         ntpManager.initialize();
         initializeConfigurations(connectivity);
-        initializeCentralConfiguration();
         initializeOpentelemetry();
         initializeCrashReports();
         initializeSessionIdProvider();
         initializeLaunchTimeTracker(context);
     }
 
-    private void initializeCentralConfiguration() {
-        CentralConfigurationInitializer centralConfigInitializer = injector.getCentralConfigurationInitializer();
-        centralConfigInitializer.initialize();
-    }
-
     private void initializeConfigurations(Connectivity connectivity) {
+        CentralConfigurationInitializer centralConfigInitializer = injector.getCentralConfigurationInitializer();
         Configurations.Builder builder = Configurations.builder();
+        builder.addSource(centralConfigInitializer.getManager());
+
         builder.register(new GeneralConfiguration(configuration));
         builder.register(new ConnectivityConfiguration(connectivity));
         builder.register(configuration.instrumentationConfiguration);
         configuration.instrumentationConfiguration.instrumentations.forEach(builder::register);
         builder.buildAndRegisterGlobal();
+
+        centralConfigInitializer.initialize();
     }
 
     private void initializeSessionIdProvider() {

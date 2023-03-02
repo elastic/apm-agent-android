@@ -43,6 +43,10 @@ public final class CentralConfigurationInitializer implements BackgroundExecutor
         this(context, new SimpleBackgroundExecutor(), new CentralConfigurationManager(context));
     }
 
+    public CentralConfigurationManager getManager() {
+        return manager;
+    }
+
     public void initialize() {
         executor.execute(() -> {
             manager.publishCachedConfig();

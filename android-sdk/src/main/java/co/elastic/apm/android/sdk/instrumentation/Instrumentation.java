@@ -27,14 +27,18 @@ import java.util.List;
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.configuration.Configuration;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
-import co.elastic.apm.android.sdk.internal.instrumentation.InternalInstrumentation;
 
 public abstract class Instrumentation extends Configuration {
+    private final ConfigurationOption<Boolean> isEnabled;
+
+    public Instrumentation(boolean enabled) {
+        isEnabled = createBooleanOption(getEnabledKeyName(), enabled);
+    }
 
     @Override
     protected void visitOptions(List<ConfigurationOption<?>> options) {
         super.visitOptions(options);
-        options.add(createBooleanOption(getEnabledKeyName(), true));
+        options.add(isEnabled);
     }
 
     protected String getEnabledKeyName() {
@@ -72,7 +76,9 @@ public abstract class Instrumentation extends Configuration {
         return groupType != null && getClass() != groupType && !Configurations.<Instrumentation>get(groupType).isEnabled();
     }
 
-    protected abstract boolean enabled();
+    protected final boolean enabled() {
+        return isEnabled.get();
+    }
 
     @NonNull
     protected Group getGroup() {
@@ -86,9 +92,9 @@ public abstract class Instrumentation extends Configuration {
     public enum Groups implements Group {
         NONE(InstrumentationConfiguration.class);
 
-        private final Class<? extends InternalInstrumentation> type;
+        private final Class<? extends Instrumentation> type;
 
-        Groups(Class<? extends InternalInstrumentation> type) {
+        Groups(Class<? extends Instrumentation> type) {
             this.type = type;
         }
 

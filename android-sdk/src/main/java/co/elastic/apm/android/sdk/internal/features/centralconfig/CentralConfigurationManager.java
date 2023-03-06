@@ -149,7 +149,7 @@ public final class CentralConfigurationManager extends AbstractConfigurationSour
     @Override
     public String getValue(String key) {
         if (configs == null) {
-            logger.info("Central config map is null");
+            logger.debug("Central config map is null");
             return null;
         }
         return configs.get(key);

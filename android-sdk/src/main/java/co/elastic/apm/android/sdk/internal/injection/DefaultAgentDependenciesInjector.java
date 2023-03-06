@@ -31,7 +31,7 @@ import co.elastic.apm.android.sdk.internal.configuration.impl.GeneralConfigurati
 import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer;
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 
-public class DefaultAgentDependenciesInjector extends AgentDependenciesInjector {
+public class DefaultAgentDependenciesInjector implements AgentDependenciesInjector {
     private final Context appContext;
 
     public DefaultAgentDependenciesInjector(Context appContext) {

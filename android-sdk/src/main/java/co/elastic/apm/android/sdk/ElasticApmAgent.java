@@ -41,8 +41,6 @@ import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration
 import co.elastic.apm.android.sdk.instrumentation.Instrumentations;
 import co.elastic.apm.android.sdk.internal.api.Initializable;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
-import co.elastic.apm.android.sdk.internal.configuration.impl.ConnectivityConfiguration;
-import co.elastic.apm.android.sdk.internal.configuration.impl.GeneralConfiguration;
 import co.elastic.apm.android.sdk.internal.exceptions.ElasticExceptionHandler;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer;
 import co.elastic.apm.android.sdk.internal.features.launchtime.LaunchTimeActivityCallback;
@@ -149,8 +147,7 @@ public final class ElasticApmAgent {
         Configurations.Builder builder = Configurations.builder();
         builder.addSource(centralConfigInitializer.getManager());
 
-        builder.register(new GeneralConfiguration(configuration));
-        builder.register(new ConnectivityConfiguration(connectivity));
+        builder.registerAll(injector.getDefaultConfigurations(configuration, connectivity));
         builder.register(configuration.instrumentationConfiguration);
         configuration.instrumentationConfiguration.instrumentations.forEach(builder::register);
         builder.buildAndRegisterGlobal();

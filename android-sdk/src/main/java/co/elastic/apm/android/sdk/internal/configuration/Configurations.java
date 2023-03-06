@@ -23,7 +23,6 @@ import org.stagemonitor.configuration.source.ConfigurationSource;
 
 import java.util.Collection;
 
-@SuppressWarnings("unchecked")
 public final class Configurations {
     private static Configurations INSTANCE;
     private final ConfigurationRegistry configurationRegistry;

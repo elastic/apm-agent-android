@@ -28,20 +28,28 @@ import co.elastic.apm.android.sdk.internal.configuration.Configuration;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer;
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 
-public abstract class AgentDependenciesInjector {
-    private static AgentDependenciesInjector INSTANCE;
+public interface AgentDependenciesInjector {
+    Holder holder = new Holder();
 
-    public static AgentDependenciesInjector get(Context context) {
-        if (INSTANCE == null) {
-            INSTANCE = new DefaultAgentDependenciesInjector(context.getApplicationContext());
-        }
-
-        return INSTANCE;
+    static AgentDependenciesInjector get(Context context) {
+        return holder.get(context);
     }
 
-    public abstract NtpManager getNtpManager();
+    NtpManager getNtpManager();
 
-    public abstract CentralConfigurationInitializer getCentralConfigurationInitializer();
+    CentralConfigurationInitializer getCentralConfigurationInitializer();
 
-    public abstract List<Configuration> getDefaultConfigurations(ElasticApmConfiguration configuration, Connectivity connectivity);
+    List<Configuration> getDefaultConfigurations(ElasticApmConfiguration configuration, Connectivity connectivity);
+
+    class Holder {
+        private AgentDependenciesInjector INSTANCE;
+
+        private AgentDependenciesInjector get(Context context) {
+            if (INSTANCE == null) {
+                INSTANCE = new DefaultAgentDependenciesInjector(context.getApplicationContext());
+            }
+
+            return INSTANCE;
+        }
+    }
 }

@@ -20,22 +20,22 @@ package co.elastic.apm.android.sdk.internal.injection;
 
 import android.content.Context;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import co.elastic.apm.android.sdk.ElasticApmConfiguration;
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
-import co.elastic.apm.android.sdk.internal.configuration.Configuration;
-import co.elastic.apm.android.sdk.internal.configuration.impl.ConnectivityConfiguration;
-import co.elastic.apm.android.sdk.internal.configuration.impl.GeneralConfiguration;
+import co.elastic.apm.android.sdk.internal.configuration.provider.ConfigurationsProvider;
+import co.elastic.apm.android.sdk.internal.configuration.provider.DefaultConfigurationsProvider;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer;
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 
 public class DefaultAgentDependenciesInjector implements AgentDependenciesInjector {
     private final Context appContext;
+    private final ElasticApmConfiguration configuration;
+    private final Connectivity connectivity;
 
-    public DefaultAgentDependenciesInjector(Context appContext) {
+    public DefaultAgentDependenciesInjector(Context appContext, ElasticApmConfiguration configuration, Connectivity connectivity) {
         this.appContext = appContext;
+        this.configuration = configuration;
+        this.connectivity = connectivity;
     }
 
     @Override
@@ -49,10 +49,7 @@ public class DefaultAgentDependenciesInjector implements AgentDependenciesInject
     }
 
     @Override
-    public List<Configuration> getDefaultConfigurations(ElasticApmConfiguration configuration, Connectivity connectivity) {
-        List<Configuration> configurations = new ArrayList<>();
-        configurations.add(new GeneralConfiguration(configuration));
-        configurations.add(new ConnectivityConfiguration(connectivity));
-        return configurations;
+    public ConfigurationsProvider getConfigurationsProvider() {
+        return new DefaultConfigurationsProvider(configuration, connectivity);
     }
 }

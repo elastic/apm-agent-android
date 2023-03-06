@@ -44,7 +44,7 @@ public final class Configurations {
         this.configurationRegistry = configurationRegistry;
     }
 
-    public static <T extends Configuration> T get(Class<? extends Configuration> configurationClass) {
+    public static <T extends Configuration> T get(Class<T> configurationClass) {
         return get().getConfiguration(configurationClass);
     }
 
@@ -52,7 +52,7 @@ public final class Configurations {
         get().configurationRegistry.reloadDynamicConfigurationOptions();
     }
 
-    public <T extends Configuration> T getConfiguration(Class<? extends Configuration> configurationClass) {
+    public <T extends Configuration> T getConfiguration(Class<T> configurationClass) {
         return (T) configurationRegistry.getConfig(configurationClass);
     }
 

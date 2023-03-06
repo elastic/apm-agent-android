@@ -70,7 +70,7 @@ public abstract class Instrumentation extends Configuration {
 
     private boolean groupIsNotEnabled() {
         Class<? extends Instrumentation> groupType = getGroup().getType();
-        return groupType != null && getClass() != groupType && !Configurations.<Instrumentation>get(groupType).isEnabled();
+        return groupType != null && getClass() != groupType && !Configurations.get(groupType).isEnabled();
     }
 
     protected boolean enabled() {

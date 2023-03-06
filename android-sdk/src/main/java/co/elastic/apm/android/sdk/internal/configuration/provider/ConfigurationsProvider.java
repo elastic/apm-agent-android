@@ -16,21 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.injection;
+package co.elastic.apm.android.sdk.internal.configuration.provider;
 
-import co.elastic.apm.android.sdk.internal.configuration.provider.ConfigurationsProvider;
-import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer;
-import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
+import java.util.List;
 
-public interface AgentDependenciesInjector {
+import co.elastic.apm.android.sdk.internal.configuration.Configuration;
 
-    NtpManager getNtpManager();
+public interface ConfigurationsProvider {
 
-    CentralConfigurationInitializer getCentralConfigurationInitializer();
-
-    ConfigurationsProvider getConfigurationsProvider();
-
-    interface Interceptor {
-        AgentDependenciesInjector intercept(AgentDependenciesInjector injector);
-    }
+    List<Configuration> provideConfigurations();
 }

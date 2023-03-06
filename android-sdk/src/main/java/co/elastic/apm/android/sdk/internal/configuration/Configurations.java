@@ -21,6 +21,8 @@ package co.elastic.apm.android.sdk.internal.configuration;
 import org.stagemonitor.configuration.ConfigurationRegistry;
 import org.stagemonitor.configuration.source.ConfigurationSource;
 
+import java.util.Collection;
+
 @SuppressWarnings("unchecked")
 public final class Configurations {
     private static Configurations INSTANCE;
@@ -71,6 +73,13 @@ public final class Configurations {
 
         public Builder register(Configuration configuration) {
             registryBuilder.addOptionProvider(configuration);
+            return this;
+        }
+
+        public Builder registerAll(Collection<? extends Configuration> configurations) {
+            for (Configuration configuration : configurations) {
+                registryBuilder.addOptionProvider(configuration);
+            }
             return this;
         }
 

@@ -176,7 +176,7 @@ public class CentralConfigurationManagerTest extends BaseRobolectricTest {
 
         manager.sync();
 
-        verify(configurationsSpy, never()).doReload();
+        verify(configurationsSpy).doReload();
     }
 
     private DummyConfiguration getDummyConfiguration() {
@@ -188,7 +188,7 @@ public class CentralConfigurationManagerTest extends BaseRobolectricTest {
     }
 
     private void setRefreshTimeoutTime(long timeInMillis) {
-        doReturn(timeInMillis).when(preferences).retrieveLong(PREFERENCE_REFRESH_TIMEOUT_NAME, 0);
+        preferences.store(PREFERENCE_REFRESH_TIMEOUT_NAME, timeInMillis);
     }
 
     private void stubNetworkResponse(int code, String body) {

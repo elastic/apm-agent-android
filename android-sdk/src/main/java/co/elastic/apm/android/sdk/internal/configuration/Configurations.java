@@ -49,11 +49,15 @@ public final class Configurations {
     }
 
     public static void reload() {
-        get().configurationRegistry.reloadDynamicConfigurationOptions();
+        get().doReload();
     }
 
     public <T extends Configuration> T getConfiguration(Class<T> configurationClass) {
         return (T) configurationRegistry.getConfig(configurationClass);
+    }
+
+    public void doReload() {
+        configurationRegistry.reloadDynamicConfigurationOptions();
     }
 
     public static void resetForTest() {

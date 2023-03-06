@@ -7,13 +7,18 @@ import android.app.Application;
 
 import org.robolectric.TestLifecycleApplication;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.ElasticApmConfiguration;
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration;
+import co.elastic.apm.android.sdk.internal.configuration.Configuration;
+import co.elastic.apm.android.sdk.internal.configuration.provider.ConfigurationsProvider;
+import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigurationManager;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer;
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
@@ -23,7 +28,6 @@ import co.elastic.apm.android.test.common.metrics.MetricExporterCaptor;
 import co.elastic.apm.android.test.common.metrics.MetricsFlusher;
 import co.elastic.apm.android.test.common.spans.SpanExporterCaptor;
 import co.elastic.apm.android.test.providers.ExportersProvider;
-import co.elastic.apm.android.test.testutils.AgentDependenciesProvider;
 import co.elastic.apm.android.test.testutils.TestElasticClock;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.logs.GlobalLoggerProvider;
@@ -33,24 +37,40 @@ import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 
 public class BaseRobolectricTestApplication extends Application implements ExportersProvider,
-        TestLifecycleApplication, AgentDependenciesProvider {
+        TestLifecycleApplication, AgentDependenciesInjector, AgentDependenciesInjector.Interceptor,
+        ConfigurationsProvider {
     private final SpanExporterCaptor spanExporter;
     private final LogRecordExporterCaptor logRecordExporter;
     private final MetricExporterCaptor metricExporter;
-    private AgentDependenciesInjector injector;
+    private final List<Configuration> configurations = new ArrayList<>();
     private NtpManager ntpManager;
     private CentralConfigurationInitializer centralConfigurationInitializer;
 
+    protected void initializeAgent() {
+        initializeAgent(null, null);
+    }
+
     protected void initializeAgentWithCustomConfig(ElasticApmConfiguration configuration) {
-        AgentInitializer.initialize(this, configuration, getSignalConfiguration());
+        initializeAgent(configuration, null);
     }
 
     protected void initializeAgentWithCustomConnectivity(Connectivity connectivity) {
-        AgentInitializer.initialize(this, connectivity);
+        initializeAgent(null, connectivity);
     }
 
-    protected void initializeAgent() {
-        AgentInitializer.initialize(this, getSignalConfiguration());
+    protected void initializeAgentWithExtraConfigurations(Configuration... configurations) {
+        initializeAgent(null, null, configurations);
+    }
+
+    protected void initializeAgent(ElasticApmConfiguration configuration, Connectivity connectivity, Configuration... extraConfigs) {
+        if (configuration == null) {
+            configuration = ElasticApmConfiguration.getDefault();
+        }
+        if (extraConfigs != null) {
+            configurations.addAll(Arrays.asList(extraConfigs));
+        }
+        AgentInitializer.injectSignalConfiguration(configuration, getSignalConfiguration());
+        AgentInitializer.initialize(this, configuration, connectivity, this);
     }
 
     public BaseRobolectricTestApplication() {
@@ -61,29 +81,20 @@ public class BaseRobolectricTestApplication extends Application implements Expor
     }
 
     private void setUpAgentDependencies() {
-        injector = mock(AgentDependenciesInjector.class);
         setUpNtpManager();
         setUpCentralConfigurationInitializer();
-
-        try {
-            Field instanceField = AgentDependenciesInjector.class.getDeclaredField("INSTANCE");
-            instanceField.setAccessible(true);
-            instanceField.set(null, injector);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private void setUpCentralConfigurationInitializer() {
         centralConfigurationInitializer = mock(CentralConfigurationInitializer.class);
-        doReturn(centralConfigurationInitializer).when(injector).getCentralConfigurationInitializer();
+        CentralConfigurationManager centralConfigurationManager = mock(CentralConfigurationManager.class);
+        doReturn(centralConfigurationManager).when(centralConfigurationInitializer).getManager();
     }
 
     private void setUpNtpManager() {
         Clock clock = new TestElasticClock();
         ntpManager = mock(NtpManager.class);
         doReturn(clock).when(ntpManager).getClock();
-        doReturn(ntpManager).when(injector).getNtpManager();
     }
 
     @Override
@@ -101,7 +112,7 @@ public class BaseRobolectricTestApplication extends Application implements Expor
         return logRecordExporter;
     }
 
-    private SignalConfiguration getSignalConfiguration() {
+    protected SignalConfiguration getSignalConfiguration() {
         PeriodicMetricReader metricReader = PeriodicMetricReader.create(metricExporter);
         MetricsFlusher flusher = new MetricsFlusher(metricReader);
         metricExporter.setFlusher(flusher);
@@ -122,6 +133,7 @@ public class BaseRobolectricTestApplication extends Application implements Expor
 
     @Override
     public void afterTest(Method method) {
+        configurations.clear();
         ElasticApmAgent.resetForTest();
         Thread.setDefaultUncaughtExceptionHandler(null);
         GlobalOpenTelemetry.resetForTest();
@@ -136,5 +148,21 @@ public class BaseRobolectricTestApplication extends Application implements Expor
     @Override
     public CentralConfigurationInitializer getCentralConfigurationInitializer() {
         return centralConfigurationInitializer;
+    }
+
+    @Override
+    public ConfigurationsProvider getConfigurationsProvider() {
+        return this;
+    }
+
+    @Override
+    public AgentDependenciesInjector intercept(AgentDependenciesInjector agentDependenciesInjector) {
+        configurations.addAll(agentDependenciesInjector.getConfigurationsProvider().provideConfigurations());
+        return this;
+    }
+
+    @Override
+    public List<Configuration> provideConfigurations() {
+        return configurations;
     }
 }

@@ -59,14 +59,14 @@ public final class CentralConfigurationManager extends AbstractConfigurationSour
     private Map<String, String> configs;
 
     public CentralConfigurationManager(Context context) {
-        this(context, SystemTimeProvider.get());
+        this(context, SystemTimeProvider.get(), ServiceManager.get().getService(Service.Names.PREFERENCES));
     }
 
     @VisibleForTesting
-    public CentralConfigurationManager(Context context, SystemTimeProvider systemTimeProvider) {
+    public CentralConfigurationManager(Context context, SystemTimeProvider systemTimeProvider, PreferencesService preferences) {
         this.context = context.getApplicationContext();
         this.systemTimeProvider = systemTimeProvider;
-        preferences = ServiceManager.get().getService(Service.Names.PREFERENCES);
+        this.preferences = preferences;
     }
 
     public Integer sync() throws IOException {

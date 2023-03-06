@@ -1,12 +1,16 @@
 package co.elastic.apm.android.test.features.centralconfig;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
-import static org.mockito.ArgumentMatchers.anyMap;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 
 import android.content.Context;
 
@@ -15,6 +19,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.Config;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,44 +28,58 @@ import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-import java.util.HashMap;
-import java.util.Map;
 
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.internal.configuration.Configuration;
+import co.elastic.apm.android.sdk.internal.configuration.ConfigurationOption;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
+import co.elastic.apm.android.sdk.internal.configuration.OptionsRegistry;
 import co.elastic.apm.android.sdk.internal.configuration.impl.ConnectivityConfiguration;
-import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigurationListener;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigurationManager;
-import co.elastic.apm.android.sdk.internal.services.Service;
-import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
+import co.elastic.apm.android.test.testutils.base.BaseRobolectricTestApplication;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 
+@Config(application = CentralConfigurationManagerTest.CentralConfigurationTestApp.class)
 public class CentralConfigurationManagerTest extends BaseRobolectricTest {
-    private Context context;
     private File configFile;
     private MockWebServer webServer;
-    private SystemTimeProvider systemTimeProvider;
     private CentralConfigurationManager manager;
-    PreferencesService preferences;
+    private SystemTimeProvider systemTimeProvider;
+    private PreferencesService preferences;
+    private Configurations configurationsSpy;
+    private static final String PREFERENCE_REFRESH_TIMEOUT_NAME = "central_configuration_refresh_timeout";
 
     @Rule
     public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Before
     public void setUp() throws IOException {
+        CentralConfigurationTestApp app = (CentralConfigurationTestApp) RuntimeEnvironment.getApplication();
+        manager = app.manager;
+        systemTimeProvider = app.systemTimeProvider;
+        preferences = app.preferences;
         webServer = new MockWebServer();
-        context = mock(Context.class);
-        preferences = ServiceManager.get().getService(Service.Names.PREFERENCES);
-        systemTimeProvider = mock(SystemTimeProvider.class);
-        manager = new CentralConfigurationManager(context, systemTimeProvider);
         File filesDir = temporaryFolder.newFolder("filesDir");
         configFile = new File(filesDir, "elastic_agent_configuration.json");
-        doReturn(filesDir).when(context).getFilesDir();
+        doReturn(filesDir).when(app.context).getFilesDir();
+        setUpConfigurationRegistrySpy();
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    private void setUpConfigurationRegistrySpy() {
+        try {
+            Field instanceField = Configurations.class.getDeclaredField("INSTANCE");
+            instanceField.setAccessible(true);
+            Object instance = instanceField.get(null);
+            configurationsSpy = (Configurations) spy(instance);
+            instanceField.set(null, configurationsSpy);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @After
@@ -68,54 +88,40 @@ public class CentralConfigurationManagerTest extends BaseRobolectricTest {
     }
 
     @Test
-    public void whenPublishingCachedConfig_targetCentralConfigListeners() {
-        NormalConfiguration normalConfiguration = mock(NormalConfiguration.class);
-        CentralAwareConfiguration centralAwareConfiguration = mock(CentralAwareConfiguration.class);
-        injectConfigurations(normalConfiguration, centralAwareConfiguration);
-        setConfigFileContents("{\"someKey\":\"someValue\"}");
-        Map<String, String> map = new HashMap<>();
-        map.put("someKey", "someValue");
+    public void whenPublishingCachedConfig_notifyConfigs() {
+        setConfigFileContents("{\"someKey\":\"true\"}");
 
         manager.publishCachedConfig();
 
-        verify(centralAwareConfiguration).onUpdate(map);
-        verifyNoInteractions(normalConfiguration);
+        assertTrue(getDummyConfiguration().getOptionValue());
+        verify(configurationsSpy).doReload();
     }
 
     @Test
     public void whenPublishingCachedConfig_andTheresNoAvailableConfig_doNothing() {
-        CentralAwareConfiguration centralAwareConfiguration = mock(CentralAwareConfiguration.class);
-        injectConfigurations(centralAwareConfiguration);
-
         manager.publishCachedConfig();
 
-        verifyNoInteractions(centralAwareConfiguration);
+        assertFalse(getDummyConfiguration().getOptionValue());
+
+        verify(configurationsSpy, never()).doReload();
     }
 
     @Test
     public void whenPublishingCachedConfig_andConfigIsUnreadable_doNothing() {
-        CentralAwareConfiguration centralAwareConfiguration = mock(CentralAwareConfiguration.class);
-        injectConfigurations(centralAwareConfiguration);
         setConfigFileContents("not a json");
 
         manager.publishCachedConfig();
 
-        verifyNoInteractions(centralAwareConfiguration);
+        verify(configurationsSpy, never()).doReload();
     }
 
     @Test
-    public void whenFetchingRemoteConfigSucceeds_notifyListeners() throws IOException {
-        NormalConfiguration normalConfiguration = mock(NormalConfiguration.class);
-        CentralAwareConfiguration centralAwareConfiguration = mock(CentralAwareConfiguration.class);
-        injectConfigurations(normalConfiguration, centralAwareConfiguration);
-        stubNetworkResponse(200, "{\"aKey\":\"aValue\"}");
-        Map<String, String> map = new HashMap<>();
-        map.put("aKey", "aValue");
+    public void whenFetchingRemoteConfigSucceeds_notifyConfigs() throws IOException {
+        stubNetworkResponse(200, "{\"someKey\":\"true\"}");
 
         manager.sync();
 
-        verify(centralAwareConfiguration).onUpdate(map);
-        verifyNoInteractions(normalConfiguration);
+        assertTrue(getDummyConfiguration().getOptionValue());
     }
 
     @Test
@@ -127,34 +133,30 @@ public class CentralConfigurationManagerTest extends BaseRobolectricTest {
         Integer maxAge = manager.sync();
 
         assertEquals(500, maxAge.intValue());
-        assertEquals(1_500_000L, getRefreshTimeoutTime());
+        verifyRefreshTimeoutTimeSet(1_500_000L);
     }
 
     @Test
-    public void whenMaxAgeIsNotProvided_returnNull() throws IOException {
+    public void whenMaxAgeIsNotProvided_returnNull_and_doNotChange_preferences() throws IOException {
         stubNetworkResponse(200, "{\"aKey\":\"aValue\"}");
 
         Integer maxAge = manager.sync();
 
         assertNull(maxAge);
+        verify(preferences, never()).store(eq(PREFERENCE_REFRESH_TIMEOUT_NAME), anyLong());
     }
 
     @Test
     public void whenFetchingRemoteConfigDoesNotSucceed_doNotNotifyListeners() throws IOException {
-        NormalConfiguration normalConfiguration = mock(NormalConfiguration.class);
-        CentralAwareConfiguration centralAwareConfiguration = mock(CentralAwareConfiguration.class);
-        injectConfigurations(normalConfiguration, centralAwareConfiguration);
         stubNetworkResponse(304, "{\"aKey\":\"aValue\"}");
 
         manager.sync();
 
-        verifyNoInteractions(normalConfiguration, centralAwareConfiguration);
+        verify(configurationsSpy, never()).doReload();
     }
 
     @Test
     public void whenSyncIsRequested_maxAgeIsAvailableAndExpired_executeFetching() throws IOException {
-        CentralAwareConfiguration centralAwareConfiguration = mock(CentralAwareConfiguration.class);
-        injectConfigurations(centralAwareConfiguration);
         stubNetworkResponse(200, "{}");
         long currentTimeMillis = 1_000_000;
         doReturn(currentTimeMillis).when(systemTimeProvider).getCurrentTimeMillis();
@@ -162,13 +164,11 @@ public class CentralConfigurationManagerTest extends BaseRobolectricTest {
 
         manager.sync();
 
-        verify(centralAwareConfiguration).onUpdate(anyMap());
+        verify(configurationsSpy).doReload();
     }
 
     @Test
     public void whenSyncIsRequested_maxAgeIsAvailableAndNotExpired_doNotExecuteFetching() throws IOException {
-        CentralAwareConfiguration centralAwareConfiguration = mock(CentralAwareConfiguration.class);
-        injectConfigurations(centralAwareConfiguration);
         stubNetworkResponse(200, "{}");
         long currentTimeMillis = 1_000_000;
         doReturn(currentTimeMillis).when(systemTimeProvider).getCurrentTimeMillis();
@@ -176,16 +176,19 @@ public class CentralConfigurationManagerTest extends BaseRobolectricTest {
 
         manager.sync();
 
-        verifyNoInteractions(centralAwareConfiguration);
+        verify(configurationsSpy).doReload();
     }
 
+    private DummyConfiguration getDummyConfiguration() {
+        return Configurations.get(DummyConfiguration.class);
+    }
 
-    private long getRefreshTimeoutTime() {
-        return preferences.retrieveLong("central_configuration_refresh_timeout", 0);
+    private void verifyRefreshTimeoutTimeSet(long time) {
+        verify(preferences).store(PREFERENCE_REFRESH_TIMEOUT_NAME, time);
     }
 
     private void setRefreshTimeoutTime(long timeInMillis) {
-        preferences.store("central_configuration_refresh_timeout", timeInMillis);
+        preferences.store(PREFERENCE_REFRESH_TIMEOUT_NAME, timeInMillis);
     }
 
     private void stubNetworkResponse(int code, String body) {
@@ -220,32 +223,42 @@ public class CentralConfigurationManagerTest extends BaseRobolectricTest {
         }
     }
 
-    @SuppressWarnings({"unchecked", "ConstantConditions"})
-    private void injectConfigurations(Configuration... configurations) {
-        try {
-            Field mapField = Configurations.class.getDeclaredField("configurations");
-            mapField.setAccessible(true);
-            Field instanceField = Configurations.class.getDeclaredField("INSTANCE");
-            instanceField.setAccessible(true);
-            Configurations instance = (Configurations) instanceField.get(null);
-            Map<Class<? extends Configuration>, Configuration> map = (Map<Class<? extends Configuration>, Configuration>) mapField.get(instance);
-            for (Configuration configuration : configurations) {
-                map.put(configuration.getClass(), configuration);
-            }
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException(e);
+    private static class DummyConfiguration extends Configuration {
+        final ConfigurationOption<Boolean> option;
+
+        private DummyConfiguration(String optionKey, boolean optionValue) {
+            option = createBooleanOption(optionKey, optionValue);
+        }
+
+        public boolean getOptionValue() {
+            return option.get();
+        }
+
+        @Override
+        protected void visitOptions(OptionsRegistry options) {
+            super.visitOptions(options);
+            options.register(option);
         }
     }
 
-    private static class NormalConfiguration implements Configuration {
-
-    }
-
-    private static class CentralAwareConfiguration implements Configuration, CentralConfigurationListener {
+    protected static class CentralConfigurationTestApp extends BaseRobolectricTestApplication {
+        private Context context;
+        private SystemTimeProvider systemTimeProvider;
+        private CentralConfigurationManager manager;
+        private PreferencesService preferences;
 
         @Override
-        public void onUpdate(Map<String, String> map) {
+        public void onCreate() {
+            super.onCreate();
+            context = mock(Context.class);
+            doReturn(context).when(context).getApplicationContext();
+            preferences = mock(PreferencesService.class);
+            systemTimeProvider = mock(SystemTimeProvider.class);
+            manager = new CentralConfigurationManager(context, systemTimeProvider, preferences);
+            doReturn(manager).when(getCentralConfigurationInitializer()).getManager();
 
+            initializeAgentWithExtraConfigurations(new DummyConfiguration("someKey", false),
+                    mock(Configuration.class));
         }
     }
 }

@@ -137,11 +137,7 @@ public final class ElasticApmAgent {
     }
 
     private ElasticApmAgent(ElasticApmConfiguration configuration) {
-        if (configuration != null) {
-            this.configuration = configuration;
-        } else {
-            this.configuration = ElasticApmConfiguration.getDefault();
-        }
+        this.configuration = configuration;
         flusher = new Flusher();
     }
 

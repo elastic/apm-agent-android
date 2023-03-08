@@ -59,6 +59,10 @@ public final class CentralConfigurationInitializer implements BackgroundExecutor
 
     @Override
     public void onFinish(Result<Integer> result) {
-
+        if (result.isSuccess && result.value != null) {
+            pollManager.scheduleInSeconds(result.value);
+        } else {
+            pollManager.scheduleDefault();
+        }
     }
 }

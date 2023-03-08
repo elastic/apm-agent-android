@@ -24,7 +24,9 @@ import co.elastic.apm.android.sdk.ElasticApmConfiguration;
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.internal.configuration.provider.ConfigurationsProvider;
 import co.elastic.apm.android.sdk.internal.configuration.provider.DefaultConfigurationsProvider;
+import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigurationManager;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer;
+import co.elastic.apm.android.sdk.internal.features.centralconfig.poll.ConfigurationPollManager;
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 
 public class DefaultAgentDependenciesInjector implements AgentDependenciesInjector {
@@ -45,7 +47,8 @@ public class DefaultAgentDependenciesInjector implements AgentDependenciesInject
 
     @Override
     public CentralConfigurationInitializer getCentralConfigurationInitializer() {
-        return new CentralConfigurationInitializer(appContext);
+        CentralConfigurationManager manager = new CentralConfigurationManager(appContext);
+        return new CentralConfigurationInitializer(manager, new ConfigurationPollManager(manager));
     }
 
     @Override

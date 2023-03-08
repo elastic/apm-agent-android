@@ -21,8 +21,6 @@ package co.elastic.apm.android.sdk.internal.features.centralconfig.initializer;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 
-import android.content.Context;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -30,18 +28,19 @@ import org.mockito.InOrder;
 import java.io.IOException;
 
 import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigurationManager;
+import co.elastic.apm.android.sdk.internal.features.centralconfig.poll.ConfigurationPollManager;
 import co.elastic.apm.android.sdk.testutils.ImmediateBackgroundExecutor;
 
 public class CentralConfigurationInitializerTest {
     private CentralConfigurationManager manager;
-    private Context context;
     private CentralConfigurationInitializer initializer;
+    private ConfigurationPollManager pollManager;
 
     @Before
     public void setUp() {
         manager = mock(CentralConfigurationManager.class);
-        context = mock(Context.class);
-        initializer = new CentralConfigurationInitializer(context, new ImmediateBackgroundExecutor(), manager);
+        pollManager = mock(ConfigurationPollManager.class);
+        initializer = new CentralConfigurationInitializer(new ImmediateBackgroundExecutor(), manager, pollManager);
     }
 
     @Test

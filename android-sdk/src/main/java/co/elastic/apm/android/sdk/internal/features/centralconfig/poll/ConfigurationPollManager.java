@@ -28,22 +28,24 @@ import java.util.concurrent.TimeUnit;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigurationManager;
+import co.elastic.apm.android.sdk.internal.utilities.providers.LazyProvider;
+import co.elastic.apm.android.sdk.internal.utilities.providers.Provider;
 
 public final class ConfigurationPollManager implements Runnable {
     private static ConfigurationPollManager INSTANCE;
-    private final ScheduledExecutorService executor;
+    private final Provider<ScheduledExecutorService> executorProvider;
     private final CentralConfigurationManager manager;
     private final Logger logger = Elog.getLogger();
     private static final long DEFAULT_DELAY_IN_SECONDS = 60;
 
     @VisibleForTesting
-    public ConfigurationPollManager(CentralConfigurationManager manager, ScheduledExecutorService executor) {
+    public ConfigurationPollManager(CentralConfigurationManager manager, Provider<ScheduledExecutorService> executorProvider) {
         this.manager = manager;
-        this.executor = executor;
+        this.executorProvider = executorProvider;
     }
 
     public ConfigurationPollManager(CentralConfigurationManager manager) {
-        this(manager, Executors.newSingleThreadScheduledExecutor(new PollThreadFactory()));
+        this(manager, LazyProvider.of(() -> Executors.newSingleThreadScheduledExecutor(new PollThreadFactory())));
     }
 
     public static void initialize(CentralConfigurationManager manager) {
@@ -60,7 +62,7 @@ public final class ConfigurationPollManager implements Runnable {
     public void scheduleInSeconds(long delayInSeconds) {
         logger.info("Scheduling next central config poll");
         logger.debug("Next central config poll in {} seconds", delayInSeconds);
-        executor.schedule(this, delayInSeconds, TimeUnit.SECONDS);
+        executorProvider.get().schedule(this, delayInSeconds, TimeUnit.SECONDS);
     }
 
     public void scheduleDefault() {

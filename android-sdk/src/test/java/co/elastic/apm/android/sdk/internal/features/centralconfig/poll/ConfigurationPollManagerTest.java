@@ -31,17 +31,18 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigurationManager;
+import co.elastic.apm.android.sdk.internal.utilities.providers.SimpleProvider;
 
 public class ConfigurationPollManagerTest {
     private CentralConfigurationManager manager;
-    private ScheduledExecutorService executor;
     private ConfigurationPollManager pollManager;
+    private ScheduledExecutorService executor;
 
     @Before
     public void setUp() {
         manager = mock(CentralConfigurationManager.class);
         executor = mock(ScheduledExecutorService.class);
-        pollManager = new ConfigurationPollManager(manager, executor);
+        pollManager = new ConfigurationPollManager(manager, new SimpleProvider<>(executor));
     }
 
     @Test

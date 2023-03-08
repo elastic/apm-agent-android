@@ -48,11 +48,15 @@ public final class ConfigurationPollManager implements Runnable {
         this(manager, LazyProvider.of(() -> Executors.newSingleThreadScheduledExecutor(new PollThreadFactory())));
     }
 
-    public static void initialize(CentralConfigurationManager manager) {
+    public static ConfigurationPollManager get() {
+        return INSTANCE;
+    }
+
+    public static void set(ConfigurationPollManager pollManager) {
         if (INSTANCE != null) {
             throw new IllegalStateException("Already initialized");
         }
-        INSTANCE = new ConfigurationPollManager(manager);
+        INSTANCE = pollManager;
     }
 
     public static void resetForTest() {

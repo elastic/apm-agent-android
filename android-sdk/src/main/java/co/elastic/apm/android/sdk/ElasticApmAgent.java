@@ -43,6 +43,7 @@ import co.elastic.apm.android.sdk.internal.api.Initializable;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.exceptions.ElasticExceptionHandler;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer;
+import co.elastic.apm.android.sdk.internal.features.centralconfig.poll.ConfigurationPollManager;
 import co.elastic.apm.android.sdk.internal.features.launchtime.LaunchTimeActivityCallback;
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.injection.DefaultAgentDependenciesInjector;
@@ -126,6 +127,7 @@ public final class ElasticApmAgent {
 
     public static void resetForTest() {
         ElasticExceptionHandler.resetForTest();
+        ConfigurationPollManager.resetForTest();
         Configurations.resetForTest();
         ServiceManager.resetForTest();
         instance = null;

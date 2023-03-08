@@ -159,6 +159,7 @@ public final class ElasticApmAgent {
 
     private void initializeConfigurations(AgentDependenciesInjector injector) {
         CentralConfigurationInitializer centralConfigInitializer = injector.getCentralConfigurationInitializer();
+        ConfigurationPollManager.set(centralConfigInitializer.getPollManager());
         Configurations.Builder builder = Configurations.builder();
         builder.addSource(centralConfigInitializer.getManager());
 

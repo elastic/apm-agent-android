@@ -46,22 +46,25 @@ public final class ConfigurationPollManager implements Runnable {
         this(manager, Executors.newSingleThreadScheduledExecutor(new PollThreadFactory()));
     }
 
-    public static void initialize(CentralConfigurationManager manager, long initialDelayInSeconds) {
+    public static void initialize(CentralConfigurationManager manager) {
         if (INSTANCE != null) {
             throw new IllegalStateException("Already initialized");
         }
         INSTANCE = new ConfigurationPollManager(manager);
-        INSTANCE.scheduleInSeconds(initialDelayInSeconds);
     }
 
     public static void resetForTest() {
         INSTANCE = null;
     }
 
-    private void scheduleInSeconds(long delayInSeconds) {
+    public void scheduleInSeconds(long delayInSeconds) {
         logger.info("Scheduling next central config poll");
         logger.debug("Next central config poll in {} seconds", delayInSeconds);
         executor.schedule(this, delayInSeconds, TimeUnit.SECONDS);
+    }
+
+    public void scheduleDefault() {
+        scheduleInSeconds(DEFAULT_DELAY_IN_SECONDS);
     }
 
     @Override
@@ -70,13 +73,13 @@ public final class ConfigurationPollManager implements Runnable {
             Integer maxAgeInSeconds = manager.sync();
             if (maxAgeInSeconds == null) {
                 logger.info("Central config returned max age is null");
-                scheduleInSeconds(DEFAULT_DELAY_IN_SECONDS);
+                scheduleDefault();
             } else {
                 scheduleInSeconds(maxAgeInSeconds);
             }
         } catch (Throwable t) {
             logger.error("Central config poll error", t);
-            scheduleInSeconds(DEFAULT_DELAY_IN_SECONDS);
+            scheduleDefault();
         }
     }
 }

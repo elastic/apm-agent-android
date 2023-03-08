@@ -71,4 +71,11 @@ public class ConfigurationPollManagerTest {
 
         verify(executor).schedule(pollManager, 60, TimeUnit.SECONDS);
     }
+
+    @Test
+    public void verifyScheduleDefault() {
+        pollManager.scheduleDefault();
+
+        verify(executor).schedule(pollManager, 60, TimeUnit.SECONDS);
+    }
 }

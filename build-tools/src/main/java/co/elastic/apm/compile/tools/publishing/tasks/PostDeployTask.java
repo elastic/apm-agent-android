@@ -1,6 +1,8 @@
 package co.elastic.apm.compile.tools.publishing.tasks;
 
 import org.gradle.api.DefaultTask;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
 import org.gradle.api.tasks.TaskAction;
 
 import java.io.BufferedReader;
@@ -12,12 +14,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class PostDeployTask extends DefaultTask {
 
-    private static final Pattern MINOR_VERSION_PATTERN = Pattern.compile("(?<=^\\d{1,2}\\.)\\d+");
+    private static final Logger logger = Logging.getLogger(VersionUtility.class);
 
     @TaskAction
     public void execute() {
@@ -26,7 +26,7 @@ public class PostDeployTask extends DefaultTask {
 
         String currentVersion = properties.getProperty("version");
         setGitTag(currentVersion);
-        String newVersion = bumpMinorVersion(currentVersion);
+        String newVersion = VersionUtility.bumpMinorVersion(currentVersion);
         updateVersion(gradlePropertiesFile, properties, newVersion);
     }
 
@@ -42,20 +42,6 @@ public class PostDeployTask extends DefaultTask {
         saveProperties(properties, gradlePropertiesFile);
         runCommand("git commit -a -m \"Preparing for the next release\"");
         runCommand("git push");
-    }
-
-    private String bumpMinorVersion(String version) {
-        log("Bumping minor version for: " + version);
-        Matcher minorVersionMatcher = MINOR_VERSION_PATTERN.matcher(version);
-        if (minorVersionMatcher.find()) {
-            int currentMinorVersion = Integer.parseInt(version.substring(minorVersionMatcher.start(), minorVersionMatcher.end()));
-            log("Current minor version is: " + currentMinorVersion);
-            String newVersion = version.replaceFirst(MINOR_VERSION_PATTERN.pattern(), String.valueOf(currentMinorVersion + 1));
-            log("The new version is: " + newVersion);
-            return newVersion;
-        } else {
-            throw new IllegalArgumentException("Could not find minor version in: " + version);
-        }
     }
 
     private Properties getProperties(File from) {
@@ -81,7 +67,7 @@ public class PostDeployTask extends DefaultTask {
     }
 
     private void log(String message) {
-        getProject().getLogger().lifecycle(message);
+        logger.lifecycle(message);
     }
 
     private void runCommand(String command) {

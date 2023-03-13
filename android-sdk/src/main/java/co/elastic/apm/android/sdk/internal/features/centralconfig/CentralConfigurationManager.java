@@ -27,6 +27,7 @@ import com.dslplatform.json.JsonReader;
 import com.dslplatform.json.MapConverter;
 
 import org.slf4j.Logger;
+import org.stagemonitor.configuration.source.AbstractConfigurationSource;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -47,25 +48,25 @@ import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
 
-public final class CentralConfigurationManager implements ConfigurationFileProvider {
+public final class CentralConfigurationManager extends AbstractConfigurationSource implements ConfigurationFileProvider {
     private static final String REFRESH_TIMEOUT_PREFERENCE_NAME = "central_configuration_refresh_timeout";
     private final Context context;
     private final DslJson<Object> dslJson = new DslJson<>(new DslJson.Settings<>());
     private final Logger logger = Elog.getLogger();
-    private final byte[] buffer = new byte[4096];
     private final PreferencesService preferences;
     private final SystemTimeProvider systemTimeProvider;
     private File configFile;
+    private Map<String, String> configs;
 
     public CentralConfigurationManager(Context context) {
-        this(context, SystemTimeProvider.get());
+        this(context, SystemTimeProvider.get(), ServiceManager.get().getService(Service.Names.PREFERENCES));
     }
 
     @VisibleForTesting
-    public CentralConfigurationManager(Context context, SystemTimeProvider systemTimeProvider) {
-        this.context = context;
+    public CentralConfigurationManager(Context context, SystemTimeProvider systemTimeProvider, PreferencesService preferences) {
+        this.context = context.getApplicationContext();
         this.systemTimeProvider = systemTimeProvider;
-        preferences = ServiceManager.get().getService(Service.Names.PREFERENCES);
+        this.preferences = preferences;
     }
 
     public Integer sync() throws IOException {
@@ -92,21 +93,22 @@ public final class CentralConfigurationManager implements ConfigurationFileProvi
     }
 
     private void notifyListeners() throws IOException {
-        notifyConfigurationChanged(readConfigs(getConfigurationFile()));
+        try {
+            configs = readConfigs(getConfigurationFile());
+            logger.info("Notifying central config change");
+            logger.debug("Central config params: {}", configs);
+            Configurations.reload();
+        } finally {
+            configs = null;
+        }
     }
 
     private Map<String, String> readConfigs(File configFile) throws IOException {
+        byte[] buffer = new byte[4096];
         try (InputStream is = new FileInputStream(configFile)) {
             JsonReader<Object> reader = dslJson.newReader(is, buffer);
             reader.startObject();
             return Collections.unmodifiableMap(MapConverter.deserialize(reader));
-        }
-    }
-
-    private void notifyConfigurationChanged(Map<String, String> configs) {
-        logger.debug("Notifying central config change");
-        for (CentralConfigurationListener listener : Configurations.findByType(CentralConfigurationListener.class)) {
-            listener.onUpdate(configs);
         }
     }
 
@@ -142,5 +144,19 @@ public final class CentralConfigurationManager implements ConfigurationFileProvi
         } catch (Throwable t) {
             logger.error("Exception when publishing cached central config", t);
         }
+    }
+
+    @Override
+    public String getValue(String key) {
+        if (configs == null) {
+            logger.debug("Central config map is null");
+            return null;
+        }
+        return configs.get(key);
+    }
+
+    @Override
+    public String getName() {
+        return "APM Server";
     }
 }

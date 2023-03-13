@@ -16,24 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.configuration.impl;
+package co.elastic.apm.android.sdk.internal.configuration.provider;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import co.elastic.apm.android.sdk.ElasticApmConfiguration;
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
-import co.elastic.apm.android.sdk.connectivity.auth.AuthConfiguration;
 import co.elastic.apm.android.sdk.internal.configuration.Configuration;
+import co.elastic.apm.android.sdk.internal.configuration.impl.ConnectivityConfiguration;
+import co.elastic.apm.android.sdk.internal.configuration.impl.GeneralConfiguration;
 
-public final class ConnectivityConfiguration extends Configuration {
-    private final Connectivity connectivity;
+public class DefaultConfigurationsProvider implements ConfigurationsProvider {
+    public final List<Configuration> configurations = new ArrayList<>();
 
-    public ConnectivityConfiguration(Connectivity connectivity) {
-        this.connectivity = connectivity;
+    public DefaultConfigurationsProvider(ElasticApmConfiguration configuration, Connectivity connectivity) {
+        configurations.add(new GeneralConfiguration(configuration));
+        configurations.add(new ConnectivityConfiguration(connectivity));
     }
 
-    public String getEndpoint() {
-        return connectivity.endpoint();
-    }
-
-    public AuthConfiguration getAuthConfiguration() {
-        return connectivity.authConfiguration();
+    @Override
+    public List<Configuration> provideConfigurations() {
+        return Collections.unmodifiableList(configurations);
     }
 }

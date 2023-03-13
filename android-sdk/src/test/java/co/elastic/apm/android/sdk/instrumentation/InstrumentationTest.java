@@ -91,6 +91,7 @@ public class InstrumentationTest {
         private final boolean enabled;
 
         private SimpleInstrumentation(Class<? extends Instrumentation> parentConfigClass, boolean enabled) {
+            super(enabled);
             this.parentConfigClass = parentConfigClass;
             this.enabled = enabled;
         }
@@ -106,6 +107,11 @@ public class InstrumentationTest {
         }
 
         @Override
+        protected String getEnabledKeyName() {
+            return "test_name";
+        }
+
+        @Override
         protected boolean enabled() {
             return enabled;
         }
@@ -115,7 +121,13 @@ public class InstrumentationTest {
         private final boolean enabled;
 
         private ParentInstrumentation(boolean enabled) {
+            super(enabled);
             this.enabled = enabled;
+        }
+
+        @Override
+        protected String getEnabledKeyName() {
+            return "parent_test_name";
         }
 
         @Override

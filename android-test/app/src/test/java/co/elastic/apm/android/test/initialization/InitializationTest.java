@@ -26,7 +26,7 @@ public class InitializationTest extends BaseRobolectricTest {
 
     @Test
     public void verifyCentralConfiguration_isInitialized() {
-        verify(getAgentDependenciesProvider().getCentralConfigurationInitializer()).initialize();
+        verify(getAgentDependenciesInjector().getCentralConfigurationInitializer()).initialize();
     }
 
     private static class AppWithMockSessionId extends BaseRobolectricTestApplication {

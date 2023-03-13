@@ -18,6 +18,29 @@
  */
 package co.elastic.apm.android.sdk.internal.configuration;
 
-public interface Configuration {
+import org.stagemonitor.configuration.ConfigurationOptionProvider;
 
+import java.util.ArrayList;
+import java.util.List;
+
+public abstract class Configuration extends ConfigurationOptionProvider {
+
+    protected ConfigurationOption<Boolean> createBooleanOption(String key, boolean defaultValue) {
+        return ConfigurationOption.booleanOption(key, defaultValue);
+    }
+
+    @Override
+    public final List<org.stagemonitor.configuration.ConfigurationOption<?>> getConfigurationOptions() {
+        OptionsRegistry optionsRegistry = new OptionsRegistry();
+        visitOptions(optionsRegistry);
+        List<org.stagemonitor.configuration.ConfigurationOption<?>> stageMonitorOptions = new ArrayList<>();
+        for (ConfigurationOption<?> option : optionsRegistry.getOptions()) {
+            stageMonitorOptions.add(option.wrapped);
+        }
+        return stageMonitorOptions;
+    }
+
+    protected void visitOptions(OptionsRegistry options) {
+
+    }
 }

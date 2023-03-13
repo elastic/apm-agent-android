@@ -18,32 +18,19 @@
  */
 package co.elastic.apm.android.sdk.internal.injection;
 
-import android.content.Context;
-
+import co.elastic.apm.android.sdk.internal.configuration.provider.ConfigurationsProvider;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer;
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 
-public class AgentDependenciesInjector {
-    private final Context appContext;
-    private static AgentDependenciesInjector INSTANCE;
+public interface AgentDependenciesInjector {
 
-    public AgentDependenciesInjector(Context appContext) {
-        this.appContext = appContext;
-    }
+    NtpManager getNtpManager();
 
-    public static AgentDependenciesInjector get(Context context) {
-        if (INSTANCE == null) {
-            INSTANCE = new AgentDependenciesInjector(context.getApplicationContext());
-        }
+    CentralConfigurationInitializer getCentralConfigurationInitializer();
 
-        return INSTANCE;
-    }
+    ConfigurationsProvider getConfigurationsProvider();
 
-    public NtpManager getNtpManager() {
-        return new NtpManager(appContext);
-    }
-
-    public CentralConfigurationInitializer getCentralConfigurationInitializer() {
-        return new CentralConfigurationInitializer(appContext);
+    interface Interceptor {
+        AgentDependenciesInjector intercept(AgentDependenciesInjector injector);
     }
 }

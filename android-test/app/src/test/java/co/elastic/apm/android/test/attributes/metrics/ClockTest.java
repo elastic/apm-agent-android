@@ -13,7 +13,7 @@ public class ClockTest extends BaseRobolectricTest {
     @Test
     public void whenAMetricIsCreated_itHasTimestampSetFromElasticClock() {
         long startTimeFromElasticClock = 123456789;
-        NtpManager ntpManager = getAgentDependenciesProvider().getNtpManager();
+        NtpManager ntpManager = getAgentDependenciesInjector().getNtpManager();
         TestElasticClock clock = (TestElasticClock) ntpManager.getClock();
         clock.setForcedNow(startTimeFromElasticClock);
         MetricData metric = captureMetric();

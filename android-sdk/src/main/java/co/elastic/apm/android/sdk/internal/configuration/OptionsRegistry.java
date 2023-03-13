@@ -16,19 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.instrumentation;
+package co.elastic.apm.android.sdk.internal.configuration;
 
-import co.elastic.apm.android.sdk.instrumentation.Instrumentation;
+import java.util.ArrayList;
+import java.util.List;
 
-public abstract class InternalInstrumentation extends Instrumentation {
-    private final boolean enabled;
+public final class OptionsRegistry {
+    private final List<ConfigurationOption<?>> options = new ArrayList<>();
 
-    protected InternalInstrumentation(boolean enabled) {
-        this.enabled = enabled;
+    List<ConfigurationOption<?>> getOptions() {
+        return options;
     }
 
-    @Override
-    protected boolean enabled() {
-        return enabled;
+    public void register(ConfigurationOption<?> option) {
+        options.add(option);
     }
 }

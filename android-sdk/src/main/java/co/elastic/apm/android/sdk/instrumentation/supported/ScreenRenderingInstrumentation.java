@@ -18,13 +18,18 @@
  */
 package co.elastic.apm.android.sdk.instrumentation.supported;
 
-import co.elastic.apm.android.sdk.internal.instrumentation.InternalInstrumentation;
+import co.elastic.apm.android.sdk.instrumentation.Instrumentation;
 import co.elastic.apm.compile.processor.annotations.AutoInstrumentation;
 
 @AutoInstrumentation
-public final class ScreenRenderingInstrumentation extends InternalInstrumentation {
+public final class ScreenRenderingInstrumentation extends Instrumentation {
 
     public ScreenRenderingInstrumentation(boolean enabled) {
         super(enabled);
+    }
+
+    @Override
+    protected String getEnabledKeyName() {
+        return "enable_screen_rendering";
     }
 }

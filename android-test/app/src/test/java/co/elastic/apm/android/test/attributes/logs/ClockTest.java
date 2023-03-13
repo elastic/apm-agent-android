@@ -13,7 +13,7 @@ public class ClockTest extends BaseRobolectricTest {
     @Test
     public void whenALogIsCreated_itHasTimestampSetFromElasticClock() {
         long startTimeFromElasticClock = 123456789;
-        NtpManager ntpManager = getAgentDependenciesProvider().getNtpManager();
+        NtpManager ntpManager = getAgentDependenciesInjector().getNtpManager();
         TestElasticClock clock = (TestElasticClock) ntpManager.getClock();
         clock.setForcedNow(startTimeFromElasticClock);
         LogRecordData log = captureLog();
@@ -25,7 +25,7 @@ public class ClockTest extends BaseRobolectricTest {
     @Test
     public void whenAnEventIsCreated_itHasTimestampSetFromElasticClock() {
         long startTimeFromElasticClock = 123456789;
-        NtpManager ntpManager = getAgentDependenciesProvider().getNtpManager();
+        NtpManager ntpManager = getAgentDependenciesInjector().getNtpManager();
         TestElasticClock clock = (TestElasticClock) ntpManager.getClock();
         clock.setForcedNow(startTimeFromElasticClock);
         LogRecordData event = captureEvent();

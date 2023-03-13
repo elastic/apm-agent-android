@@ -24,7 +24,7 @@ import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
 
-public final class GeneralConfiguration implements Configuration {
+public final class GeneralConfiguration extends Configuration {
     private final ApmMetadataService metadata;
     private final String providedServiceName;
     private final String providedServiceVersion;

@@ -41,12 +41,11 @@ import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration
 import co.elastic.apm.android.sdk.instrumentation.Instrumentations;
 import co.elastic.apm.android.sdk.internal.api.Initializable;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
-import co.elastic.apm.android.sdk.internal.configuration.impl.ConnectivityConfiguration;
-import co.elastic.apm.android.sdk.internal.configuration.impl.GeneralConfiguration;
 import co.elastic.apm.android.sdk.internal.exceptions.ElasticExceptionHandler;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer;
 import co.elastic.apm.android.sdk.internal.features.launchtime.LaunchTimeActivityCallback;
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
+import co.elastic.apm.android.sdk.internal.injection.DefaultAgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.sdk.internal.utilities.logging.AndroidLoggerFactory;
@@ -68,9 +67,8 @@ import io.opentelemetry.sdk.trace.SpanProcessor;
 public final class ElasticApmAgent {
     public final ElasticApmConfiguration configuration;
     private static ElasticApmAgent instance;
-    private final AgentDependenciesInjector injector;
-    private final NtpManager ntpManager;
     private final Flusher flusher;
+    private NtpManager ntpManager;
 
     public static ElasticApmAgent get() {
         verifyInitialization();
@@ -89,7 +87,11 @@ public final class ElasticApmAgent {
         return initialize(context, null, connectivity);
     }
 
-    public synchronized static ElasticApmAgent initialize(Context context, ElasticApmConfiguration configuration, Connectivity connectivity) {
+    public static ElasticApmAgent initialize(Context context, ElasticApmConfiguration configuration, Connectivity connectivity) {
+        return initialize(context, configuration, connectivity, null);
+    }
+
+    private synchronized static ElasticApmAgent initialize(Context context, ElasticApmConfiguration configuration, Connectivity connectivity, AgentDependenciesInjector.Interceptor interceptor) {
         if (instance != null) {
             throw new IllegalStateException("Already initialized");
         }
@@ -97,9 +99,19 @@ public final class ElasticApmAgent {
         Elog.init(new AndroidLoggerFactory());
         ServiceManager.initialize(appContext);
         ServiceManager.get().start();
-        instance = new ElasticApmAgent(appContext, configuration);
-        instance.onInitializationFinished(appContext, (connectivity == null) ? Connectivity.getDefault() : connectivity);
+        ElasticApmConfiguration finalConfiguration = (configuration == null) ? ElasticApmConfiguration.getDefault() : configuration;
+        Connectivity finalConnectivity = (connectivity == null) ? Connectivity.getDefault() : connectivity;
+        AgentDependenciesInjector injector = process(new DefaultAgentDependenciesInjector(appContext, finalConfiguration, finalConnectivity), interceptor);
+        instance = new ElasticApmAgent(finalConfiguration);
+        instance.onInitializationFinished(appContext, injector);
         return instance;
+    }
+
+    private static AgentDependenciesInjector process(AgentDependenciesInjector injector, AgentDependenciesInjector.Interceptor interceptor) {
+        if (interceptor != null) {
+            return interceptor.intercept(injector);
+        }
+        return injector;
     }
 
     public synchronized static boolean isInitialized() {
@@ -124,39 +136,36 @@ public final class ElasticApmAgent {
         return flusher;
     }
 
-    private ElasticApmAgent(Context appContext, ElasticApmConfiguration configuration) {
-        injector = AgentDependenciesInjector.get(appContext);
-        if (configuration != null) {
-            this.configuration = configuration;
-        } else {
-            this.configuration = ElasticApmConfiguration.getDefault();
-        }
+    private ElasticApmAgent(ElasticApmConfiguration configuration) {
+        this.configuration = configuration;
         flusher = new Flusher();
-        ntpManager = injector.getNtpManager();
     }
 
-    private void onInitializationFinished(Context context, Connectivity connectivity) {
-        ntpManager.initialize();
-        initializeConfigurations(connectivity);
-        initializeCentralConfiguration();
+    private void onInitializationFinished(Context context, AgentDependenciesInjector injector) {
+        initializeNtpManager(injector);
+        initializeConfigurations(injector);
         initializeOpentelemetry();
         initializeCrashReports();
         initializeSessionIdProvider();
         initializeLaunchTimeTracker(context);
     }
 
-    private void initializeCentralConfiguration() {
-        CentralConfigurationInitializer centralConfigInitializer = injector.getCentralConfigurationInitializer();
-        centralConfigInitializer.initialize();
+    private void initializeNtpManager(AgentDependenciesInjector injector) {
+        ntpManager = injector.getNtpManager();
+        ntpManager.initialize();
     }
 
-    private void initializeConfigurations(Connectivity connectivity) {
+    private void initializeConfigurations(AgentDependenciesInjector injector) {
+        CentralConfigurationInitializer centralConfigInitializer = injector.getCentralConfigurationInitializer();
         Configurations.Builder builder = Configurations.builder();
-        builder.register(new GeneralConfiguration(configuration));
-        builder.register(new ConnectivityConfiguration(connectivity));
+        builder.addSource(centralConfigInitializer.getManager());
+
+        builder.registerAll(injector.getConfigurationsProvider().provideConfigurations());
         builder.register(configuration.instrumentationConfiguration);
         configuration.instrumentationConfiguration.instrumentations.forEach(builder::register);
         builder.buildAndRegisterGlobal();
+
+        centralConfigInitializer.initialize();
     }
 
     private void initializeSessionIdProvider() {

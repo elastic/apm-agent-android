@@ -20,7 +20,7 @@ public class ClockTest extends BaseRobolectricTest {
     @Test
     public void whenASpanIsCreated_itHasTimestampSetFromElasticClock() {
         long startTimeFromElasticClock = 123456789;
-        NtpManager ntpManager = getAgentDependenciesProvider().getNtpManager();
+        NtpManager ntpManager = getAgentDependenciesInjector().getNtpManager();
         TestElasticClock clock = (TestElasticClock) ntpManager.getClock();
         clock.setForcedNow(startTimeFromElasticClock);
         SpanData span = getSpanData();
@@ -32,7 +32,7 @@ public class ClockTest extends BaseRobolectricTest {
     @Test
     public void whenClockNowChangesInMidSpan_verifyFinalSpanDurationIsNotAffected() {
         long startTimeFromElasticClock = 2_000_000_000;
-        NtpManager ntpManager = getAgentDependenciesProvider().getNtpManager();
+        NtpManager ntpManager = getAgentDependenciesInjector().getNtpManager();
         TestElasticClock clock = (TestElasticClock) ntpManager.getClock();
         clock.setForcedNow(startTimeFromElasticClock);
 
@@ -51,7 +51,7 @@ public class ClockTest extends BaseRobolectricTest {
 
     @Test
     public void whenASpanIsCreated_itHasInitializedTheNtpManager() {
-        verify(getAgentDependenciesProvider().getNtpManager()).initialize();
+        verify(getAgentDependenciesInjector().getNtpManager()).initialize();
     }
 
     private SpanData getSpanData() {

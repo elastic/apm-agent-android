@@ -16,11 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.features.centralconfig;
+package co.elastic.apm.android.sdk.internal.configuration.provider;
 
-import java.util.Map;
+import java.util.List;
 
-public interface CentralConfigurationListener {
+import co.elastic.apm.android.sdk.internal.configuration.Configuration;
 
-    void onUpdate(Map<String, String> configs);
+public interface ConfigurationsProvider {
+
+    List<Configuration> provideConfigurations();
 }

@@ -19,7 +19,7 @@
 package co.elastic.apm.android.sdk.internal.configuration;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertNull;
 
 import org.junit.After;
 import org.junit.Test;
@@ -32,25 +32,10 @@ public class ConfigurationsTest {
     }
 
     @Test
-    public void whenConfigurationIsntAvailable_fail() {
-        try {
-            Configurations configurations = Configurations.builder().buildAndRegisterGlobal();
-            configurations.getConfiguration(SimpleConfiguration.class);
-            fail();
-        } catch (IllegalArgumentException e) {
-            assertEquals("No configuration found for 'co.elastic.apm.android.sdk.internal.configuration.ConfigurationsTest$SimpleConfiguration'", e.getMessage());
-        }
-    }
-
-    @Test
-    public void whenTryingToRegisterSameConfigurationTypeMoreThanOnce_fail() {
-        try {
-            Configurations.builder().register(new SimpleConfiguration())
-                    .register(new SimpleConfiguration());
-            fail();
-        } catch (IllegalStateException e) {
-            assertEquals("The configuration 'co.elastic.apm.android.sdk.internal.configuration.ConfigurationsTest$SimpleConfiguration' is already registered", e.getMessage());
-        }
+    public void whenConfigurationIsntAvailable_returnNull() {
+        Configurations configurations = Configurations.builder().buildAndRegisterGlobal();
+        Configuration configuration = configurations.getConfiguration(SimpleConfiguration.class);
+        assertNull(configuration);
     }
 
     @Test
@@ -60,7 +45,7 @@ public class ConfigurationsTest {
         assertEquals(configurations, Configurations.get());
     }
 
-    private static class SimpleConfiguration implements Configuration {
+    private static class SimpleConfiguration extends Configuration {
 
     }
 }

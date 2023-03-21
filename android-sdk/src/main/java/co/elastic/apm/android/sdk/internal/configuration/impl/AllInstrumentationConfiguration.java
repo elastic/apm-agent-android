@@ -16,13 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.instrumentation;
+package co.elastic.apm.android.sdk.internal.configuration.impl;
 
-import co.elastic.apm.android.sdk.instrumentation.Instrumentation;
+import co.elastic.apm.android.sdk.internal.instrumentation.groups.InstrumentationGroup;
 
-public abstract class GroupInstrumentation extends Instrumentation {
+public class AllInstrumentationConfiguration extends InstrumentationGroup {
 
-    protected GroupInstrumentation(boolean enabled) {
-        super(enabled);
+    public AllInstrumentationConfiguration() {
+        super(true);
+    }
+
+    @Override
+    protected String getEnabledKeyName() {
+        return "recording";
     }
 }

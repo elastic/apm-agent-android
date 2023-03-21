@@ -16,26 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.instrumentation;
+package co.elastic.apm.android.sdk.internal.instrumentation.groups;
 
-import java.util.List;
+import co.elastic.apm.android.sdk.instrumentation.Instrumentation;
 
-public final class InstrumentationConfiguration {
-    public final List<Instrumentation> instrumentations;
+public abstract class InstrumentationGroup extends Instrumentation {
 
-    public static InstrumentationConfigurationBuilder builder() {
-        return InstrumentationConfigurationBuilder.allDisabled();
-    }
-
-    public static InstrumentationConfiguration allEnabled() {
-        return InstrumentationConfigurationBuilder.allEnabled().build();
-    }
-
-    public static InstrumentationConfiguration allDisabled() {
-        return InstrumentationConfigurationBuilder.allDisabled().build();
-    }
-
-    InstrumentationConfiguration(List<Instrumentation> instrumentations) {
-        this.instrumentations = instrumentations;
+    protected InstrumentationGroup(boolean enabled) {
+        super(enabled);
     }
 }

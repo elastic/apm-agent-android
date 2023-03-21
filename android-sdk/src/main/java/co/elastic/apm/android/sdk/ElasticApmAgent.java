@@ -161,7 +161,6 @@ public final class ElasticApmAgent {
         builder.addSource(centralConfigInitializer.getManager());
 
         builder.registerAll(injector.getConfigurationsProvider().provideConfigurations());
-        builder.register(configuration.instrumentationConfiguration);
         configuration.instrumentationConfiguration.instrumentations.forEach(builder::register);
         builder.buildAndRegisterGlobal();
 

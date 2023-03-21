@@ -25,6 +25,8 @@ import co.elastic.apm.android.sdk.internal.configuration.Configuration;
 import co.elastic.apm.android.sdk.internal.configuration.ConfigurationOption;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.configuration.OptionsRegistry;
+import co.elastic.apm.android.sdk.internal.configuration.impl.AllInstrumentationConfiguration;
+import co.elastic.apm.android.sdk.internal.instrumentation.groups.InstrumentationGroup;
 
 public abstract class Instrumentation extends Configuration {
     private final ConfigurationOption<Boolean> isEnabled;
@@ -69,8 +71,8 @@ public abstract class Instrumentation extends Configuration {
     }
 
     private boolean groupIsNotEnabled() {
-        Class<? extends Instrumentation> groupType = getGroup().getType();
-        return groupType != null && getClass() != groupType && !Configurations.get(groupType).isEnabled();
+        Class<? extends Instrumentation> groupType = getGroupType();
+        return getClass() != groupType && !Configurations.get(groupType).isEnabled();
     }
 
     protected boolean enabled() {
@@ -78,27 +80,8 @@ public abstract class Instrumentation extends Configuration {
     }
 
     @NonNull
-    protected Group getGroup() {
-        return Groups.NONE;
-    }
-
-    public interface Group {
-        Class<? extends Instrumentation> getType();
-    }
-
-    public enum Groups implements Group {
-        NONE(InstrumentationConfiguration.class);
-
-        private final Class<? extends Instrumentation> type;
-
-        Groups(Class<? extends Instrumentation> type) {
-            this.type = type;
-        }
-
-        @Override
-        public Class<? extends Instrumentation> getType() {
-            return type;
-        }
+    protected Class<? extends InstrumentationGroup> getGroupType() {
+        return AllInstrumentationConfiguration.class;
     }
 
     @FunctionalInterface

@@ -25,6 +25,7 @@ import java.util.List;
 import co.elastic.apm.android.sdk.ElasticApmConfiguration;
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.internal.configuration.Configuration;
+import co.elastic.apm.android.sdk.internal.configuration.impl.AllInstrumentationConfiguration;
 import co.elastic.apm.android.sdk.internal.configuration.impl.ConnectivityConfiguration;
 import co.elastic.apm.android.sdk.internal.configuration.impl.GeneralConfiguration;
 
@@ -34,6 +35,7 @@ public class DefaultConfigurationsProvider implements ConfigurationsProvider {
     public DefaultConfigurationsProvider(ElasticApmConfiguration configuration, Connectivity connectivity) {
         configurations.add(new GeneralConfiguration(configuration));
         configurations.add(new ConnectivityConfiguration(connectivity));
+        configurations.add(new AllInstrumentationConfiguration());
     }
 
     @Override

@@ -18,8 +18,11 @@
  */
 package co.elastic.apm.android.sdk.logs;
 
+import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.attributes.AttributesCreator;
 import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
+import co.elastic.apm.android.sdk.internal.configuration.Configurations;
+import co.elastic.apm.android.sdk.internal.configuration.impl.AllInstrumentationConfiguration;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.context.Context;
@@ -38,6 +41,10 @@ public final class ElasticLogRecordProcessor implements LogRecordProcessor {
 
     @Override
     public void onEmit(Context context, ReadWriteLogRecord logRecord) {
+        if (!Configurations.get(AllInstrumentationConfiguration.class).isEnabled()) {
+            Elog.getLogger().debug("Ignoring all log records");
+            return;
+        }
         setAllAttributes(logRecord, AttributesCreator.from(commonAttributesVisitor).create());
         original.onEmit(context, logRecord);
     }

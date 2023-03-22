@@ -19,9 +19,15 @@
 package co.elastic.apm.android.sdk.logs;
 
 import io.opentelemetry.api.logs.GlobalLoggerProvider;
+import io.opentelemetry.api.logs.Logger;
 import io.opentelemetry.api.logs.LoggerBuilder;
 
-public final class ElasticLogRecord {
+public final class ElasticLoggers {
+
+    public static Logger crashReporter() {
+        return builder("CrashReport")
+                .setEventDomain("device").build();
+    }
 
     public static LoggerBuilder builder(String instrumentationScopeName) {
         return GlobalLoggerProvider.get().loggerBuilder(instrumentationScopeName);

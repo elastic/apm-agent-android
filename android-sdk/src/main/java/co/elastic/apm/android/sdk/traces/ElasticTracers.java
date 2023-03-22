@@ -25,47 +25,36 @@ import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
 import io.opentelemetry.api.GlobalOpenTelemetry;
-import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.Tracer;
 
-public final class ElasticTracer implements Tracer {
-    private final Tracer tracer;
+public final class ElasticTracers {
 
-    public ElasticTracer(Tracer tracer) {
-        this.tracer = tracer;
-    }
-
-    public static ElasticTracer create(@NonNull String name, @Nullable String version) {
+    public static Tracer create(@NonNull String name, @Nullable String version) {
         if (version == null) {
-            return new ElasticTracer(GlobalOpenTelemetry.getTracer(name));
+            return GlobalOpenTelemetry.getTracer(name);
         } else {
-            return new ElasticTracer(GlobalOpenTelemetry.getTracer(name, version));
+            return GlobalOpenTelemetry.getTracer(name, version);
         }
     }
 
-    public static ElasticTracer create(String name) {
+    public static Tracer create(String name) {
         return create(name, null);
     }
 
-    public static ElasticTracer okhttp() {
+    public static Tracer okhttp() {
         ApmMetadataService service = ServiceManager.get().getService(Service.Names.METADATA);
         return create("OkHttp", service.getOkHttpVersion());
     }
 
-    public static ElasticTracer androidActivity() {
+    public static Tracer androidActivity() {
         return create("Android Activity");
     }
 
-    public static ElasticTracer androidFragment() {
+    public static Tracer androidFragment() {
         return create("Android Fragment");
     }
 
-    public static ElasticTracer coroutine() {
+    public static Tracer coroutine() {
         return create("Kotlin Coroutine");
-    }
-
-    @Override
-    public SpanBuilder spanBuilder(@NonNull String spanName) {
-        return tracer.spanBuilder(spanName);
     }
 }

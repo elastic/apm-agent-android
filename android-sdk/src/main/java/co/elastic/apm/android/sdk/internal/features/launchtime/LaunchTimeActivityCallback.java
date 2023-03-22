@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.instrumentation.Instrumentations;
-import io.opentelemetry.api.GlobalOpenTelemetry;
+import co.elastic.apm.android.sdk.metrics.ElasticMeters;
 import io.opentelemetry.api.metrics.BatchCallback;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.metrics.ObservableDoubleMeasurement;
@@ -51,7 +51,7 @@ public final class LaunchTimeActivityCallback implements Application.ActivityLif
 
     private void sendAppLaunchTimeMetric(long launchTimeMillis) {
         Elog.getLogger().info("Setting up launch time metric");
-        Meter meter = GlobalOpenTelemetry.getMeter("LaunchTimeTracker");
+        Meter meter = ElasticMeters.create("LaunchTimeTracker");
         ObservableDoubleMeasurement launchTime = meter.gaugeBuilder("application.launch.time").buildObserver();
         BatchCallback batchCallback = meter.batchCallback(() -> {
             Elog.getLogger().debug("Sending launch time metric of {} milliseconds", launchTimeMillis);

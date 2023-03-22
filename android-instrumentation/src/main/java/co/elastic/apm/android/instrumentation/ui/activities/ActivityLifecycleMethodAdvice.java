@@ -22,7 +22,7 @@ import net.bytebuddy.asm.Advice;
 
 import co.elastic.apm.android.instrumentation.ui.common.IsLastLifecycleMethod;
 import co.elastic.apm.android.sdk.internal.instrumentation.LifecycleMultiMethodSpan;
-import co.elastic.apm.android.sdk.traces.ElasticTracer;
+import co.elastic.apm.android.sdk.traces.ElasticTracers;
 
 public class ActivityLifecycleMethodAdvice {
 
@@ -31,7 +31,7 @@ public class ActivityLifecycleMethodAdvice {
             @Advice.Origin("#t") String ownerName,
             @Advice.Origin("#m") String methodName,
             @Advice.Local("elasticSpanWithScope") LifecycleMultiMethodSpan.SpanWithScope spanWithScope) {
-        spanWithScope = LifecycleMultiMethodSpan.onMethodEnter(ownerName, methodName, ElasticTracer.androidActivity());
+        spanWithScope = LifecycleMultiMethodSpan.onMethodEnter(ownerName, methodName, ElasticTracers.androidActivity());
     }
 
     @Advice.OnMethodExit(onThrowable = Throwable.class)

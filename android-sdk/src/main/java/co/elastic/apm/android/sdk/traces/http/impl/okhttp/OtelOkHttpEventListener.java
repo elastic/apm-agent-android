@@ -28,7 +28,7 @@ import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.attributes.AttributesCreator;
 import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
 import co.elastic.apm.android.sdk.instrumentation.Instrumentations;
-import co.elastic.apm.android.sdk.traces.ElasticTracer;
+import co.elastic.apm.android.sdk.traces.ElasticTracers;
 import co.elastic.apm.android.sdk.traces.http.HttpTraceConfiguration;
 import co.elastic.apm.android.sdk.traces.http.data.HttpRequest;
 import co.elastic.apm.android.sdk.traces.http.impl.okhttp.utils.WrapperSpanCloser;
@@ -210,7 +210,7 @@ public class OtelOkHttpEventListener extends EventListener {
 
     private Tracer getTracer() {
         if (okHttpTracer == null) {
-            okHttpTracer = ElasticTracer.okhttp();
+            okHttpTracer = ElasticTracers.okhttp();
         }
 
         return okHttpTracer;

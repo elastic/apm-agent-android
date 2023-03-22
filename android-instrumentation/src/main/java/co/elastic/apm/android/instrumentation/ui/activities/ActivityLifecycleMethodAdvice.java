@@ -22,7 +22,7 @@ import net.bytebuddy.asm.Advice;
 
 import co.elastic.apm.android.instrumentation.ui.common.IsLastLifecycleMethod;
 import co.elastic.apm.android.sdk.internal.instrumentation.LifecycleMultiMethodSpan;
-import co.elastic.apm.android.sdk.traces.tools.ElasticTracer;
+import co.elastic.apm.android.sdk.traces.ElasticTracer;
 
 public class ActivityLifecycleMethodAdvice {
 

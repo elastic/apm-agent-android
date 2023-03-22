@@ -5,7 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.test.espresso.IdlingResource
 import androidx.test.espresso.idling.CountingIdlingResource
-import co.elastic.apm.android.sdk.traces.tools.ElasticTracer
+import co.elastic.apm.android.sdk.traces.ElasticTracer
 import co.elastic.apm.android.test.activities.espresso.IdlingResourceProvider
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

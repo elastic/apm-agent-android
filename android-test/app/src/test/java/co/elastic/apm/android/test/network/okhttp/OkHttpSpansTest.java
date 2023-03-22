@@ -17,10 +17,10 @@ import java.util.List;
 
 import co.elastic.apm.android.sdk.ElasticApmConfiguration;
 import co.elastic.apm.android.sdk.instrumentation.InstrumentationConfiguration;
+import co.elastic.apm.android.sdk.traces.ElasticTracer;
 import co.elastic.apm.android.sdk.traces.http.impl.okhttp.OkHttpContextStore;
 import co.elastic.apm.android.sdk.traces.http.impl.okhttp.OtelOkHttpEventListener;
 import co.elastic.apm.android.sdk.traces.http.impl.okhttp.OtelOkHttpInterceptor;
-import co.elastic.apm.android.sdk.traces.tools.ElasticTracer;
 import co.elastic.apm.android.test.common.spans.Spans;
 import co.elastic.apm.android.test.testutils.AppWithoutInitializedAgent;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;

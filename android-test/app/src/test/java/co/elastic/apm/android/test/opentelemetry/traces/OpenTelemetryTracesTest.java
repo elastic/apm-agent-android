@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.configuration.impl.AllInstrumentationConfiguration;
-import co.elastic.apm.android.sdk.traces.tools.ElasticTracer;
+import co.elastic.apm.android.sdk.traces.ElasticTracer;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
 import io.opentelemetry.api.trace.Span;
 

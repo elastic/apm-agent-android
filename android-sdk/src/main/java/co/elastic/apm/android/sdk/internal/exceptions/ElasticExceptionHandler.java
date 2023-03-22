@@ -25,7 +25,7 @@ import java.io.StringWriter;
 import java.util.concurrent.TimeUnit;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
-import co.elastic.apm.android.sdk.logs.tools.ElasticLogRecorder;
+import co.elastic.apm.android.sdk.logs.ElasticLogRecord;
 import io.opentelemetry.api.logs.EventBuilder;
 import io.opentelemetry.api.logs.Logger;
 import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
@@ -74,7 +74,7 @@ public final class ElasticExceptionHandler implements Thread.UncaughtExceptionHa
     }
 
     private Logger getCrashReporter() {
-        return ElasticLogRecorder.builder("CrashReport")
+        return ElasticLogRecord.builder("CrashReport")
                 .setEventDomain("device").build();
     }
 

@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import co.elastic.apm.android.sdk.traces.tools.ElasticTracer
+import co.elastic.apm.android.sdk.traces.ElasticTracer
 import kotlinx.coroutines.launch
 
 class SimpleCoroutineActivity : AppCompatActivity() {

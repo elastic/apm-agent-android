@@ -3,7 +3,7 @@ package co.elastic.apm.android.test.okhttp
 import androidx.appcompat.app.AppCompatActivity
 import androidx.test.espresso.IdlingResource
 import androidx.test.espresso.idling.CountingIdlingResource
-import co.elastic.apm.android.sdk.traces.tools.ElasticTracer
+import co.elastic.apm.android.sdk.traces.ElasticTracer
 import co.elastic.apm.android.test.activities.espresso.IdlingResourceProvider
 import okhttp3.*
 import java.io.IOException

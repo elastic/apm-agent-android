@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.logs.tools;
+package co.elastic.apm.android.sdk.logs;
 
 import io.opentelemetry.api.logs.GlobalLoggerProvider;
 import io.opentelemetry.api.logs.LoggerBuilder;
 
-public final class ElasticLogRecorder {
+public final class ElasticLogRecord {
 
     public static LoggerBuilder builder(String instrumentationScopeName) {
         return GlobalLoggerProvider.get().loggerBuilder(instrumentationScopeName);

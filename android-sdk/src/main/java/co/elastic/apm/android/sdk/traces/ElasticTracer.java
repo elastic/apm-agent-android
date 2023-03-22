@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.traces.tools;
+package co.elastic.apm.android.sdk.traces;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;

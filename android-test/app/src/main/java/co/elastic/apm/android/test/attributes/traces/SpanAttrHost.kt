@@ -1,6 +1,6 @@
 package co.elastic.apm.android.test.attributes.traces
 
-import co.elastic.apm.android.sdk.traces.tools.ElasticTracer
+import co.elastic.apm.android.sdk.traces.ElasticTracer
 
 class SpanAttrHost {
 

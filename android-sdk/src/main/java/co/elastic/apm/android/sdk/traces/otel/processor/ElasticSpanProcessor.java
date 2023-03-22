@@ -18,6 +18,8 @@
  */
 package co.elastic.apm.android.sdk.traces.otel.processor;
 
+import org.slf4j.Logger;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -25,6 +27,8 @@ import java.util.Set;
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.attributes.AttributesCreator;
 import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
+import co.elastic.apm.android.sdk.internal.configuration.Configurations;
+import co.elastic.apm.android.sdk.internal.configuration.impl.AllInstrumentationConfiguration;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.context.Context;
@@ -36,6 +40,7 @@ public final class ElasticSpanProcessor implements SpanProcessor {
     private final SpanProcessor original;
     private final AttributesVisitor commonAttributesVisitor;
     private final Set<ExclusionRule> rules = new HashSet<>();
+    private final Logger logger = Elog.getLogger();
     private static final AttributeKey<String> TRANSACTION_TYPE_ATTRIBUTE_KEY = AttributeKey.stringKey("type");
     private static final String TRANSACTION_TYPE_VALUE = "mobile";
 
@@ -50,10 +55,13 @@ public final class ElasticSpanProcessor implements SpanProcessor {
 
     @Override
     public void onStart(Context parentContext, ReadWriteSpan span) {
+        if (instrumentationIsNotEnabled()) {
+            return;
+        }
         span.setAllAttributes(AttributesCreator.from(commonAttributesVisitor).create());
         span.setAttribute(TRANSACTION_TYPE_ATTRIBUTE_KEY, TRANSACTION_TYPE_VALUE);
         span.setStatus(StatusCode.OK);
-        Elog.getLogger().debug("Starting span: '{}', within context: '{}'", span, parentContext);
+        logger.debug("Starting span: '{}', within context: '{}'", span, parentContext);
         original.onStart(parentContext, span);
     }
 
@@ -64,12 +72,20 @@ public final class ElasticSpanProcessor implements SpanProcessor {
 
     @Override
     public void onEnd(ReadableSpan span) {
-        if (shouldExclude(span)) {
-            Elog.getLogger().debug("Excluding span: {}", span);
+        if (instrumentationIsNotEnabled()) {
+            logger.debug("Ignoring all traces");
             return;
         }
-        Elog.getLogger().debug("Ending span: {}", span);
+        if (shouldExclude(span)) {
+            logger.debug("Excluding span: {}", span);
+            return;
+        }
+        logger.debug("Ending span: {}", span);
         original.onEnd(span);
+    }
+
+    private boolean instrumentationIsNotEnabled() {
+        return !Configurations.get(AllInstrumentationConfiguration.class).isEnabled();
     }
 
     @Override

@@ -2,6 +2,7 @@ package co.elastic.apm.android.test.testutils.base;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
 import android.app.Application;
 
@@ -163,6 +164,10 @@ public class BaseRobolectricTestApplication extends Application implements Expor
 
     @Override
     public List<Configuration> provideConfigurations() {
-        return configurations;
+        List<Configuration> spies = new ArrayList<>();
+        for (Configuration configuration : configurations) {
+            spies.add(spy(configuration));
+        }
+        return spies;
     }
 }

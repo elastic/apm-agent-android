@@ -20,7 +20,7 @@ package co.elastic.apm.android.sdk.internal.configuration.impl;
 
 import co.elastic.apm.android.sdk.internal.instrumentation.groups.InstrumentationGroup;
 
-public class AllInstrumentationConfiguration extends InstrumentationGroup {
+public final class AllInstrumentationConfiguration extends InstrumentationGroup {
 
     public AllInstrumentationConfiguration() {
         super(true);

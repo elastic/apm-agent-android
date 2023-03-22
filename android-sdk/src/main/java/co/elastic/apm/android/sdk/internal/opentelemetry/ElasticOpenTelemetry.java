@@ -25,7 +25,7 @@ import io.opentelemetry.api.metrics.MeterProvider;
 import io.opentelemetry.api.trace.TracerProvider;
 import io.opentelemetry.context.propagation.ContextPropagators;
 
-public class ElasticOpenTelemetry implements OpenTelemetry {
+public final class ElasticOpenTelemetry implements OpenTelemetry {
     private final OpenTelemetry wrapped;
 
     public ElasticOpenTelemetry(OpenTelemetry wrapped) {

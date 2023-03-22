@@ -20,8 +20,8 @@ package co.elastic.apm.android.sdk.internal.features.centralconfig.initializer;
 
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
-
-import android.content.Context;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -30,18 +30,20 @@ import org.mockito.InOrder;
 import java.io.IOException;
 
 import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigurationManager;
+import co.elastic.apm.android.sdk.internal.features.centralconfig.poll.ConfigurationPollManager;
+import co.elastic.apm.android.sdk.internal.utilities.concurrency.Result;
 import co.elastic.apm.android.sdk.testutils.ImmediateBackgroundExecutor;
 
 public class CentralConfigurationInitializerTest {
     private CentralConfigurationManager manager;
-    private Context context;
     private CentralConfigurationInitializer initializer;
+    private ConfigurationPollManager pollManager;
 
     @Before
     public void setUp() {
         manager = mock(CentralConfigurationManager.class);
-        context = mock(Context.class);
-        initializer = new CentralConfigurationInitializer(context, new ImmediateBackgroundExecutor(), manager);
+        pollManager = mock(ConfigurationPollManager.class);
+        initializer = new CentralConfigurationInitializer(new ImmediateBackgroundExecutor(), manager, pollManager);
     }
 
     @Test
@@ -51,5 +53,30 @@ public class CentralConfigurationInitializerTest {
         InOrder inOrder = inOrder(manager);
         inOrder.verify(manager).publishCachedConfig();
         inOrder.verify(manager).sync();
+    }
+
+    @Test
+    public void whenFirstFetchSucceeds_schedulePollsBasedOnReceivedMaxAge() {
+        Integer maxAgeReceived = 14;
+        initializer.onFinish(Result.success(maxAgeReceived));
+
+        verify(pollManager).scheduleInSeconds(14);
+        verifyNoMoreInteractions(pollManager);
+    }
+
+    @Test
+    public void whenFirstFetchSucceeds_withNoMaxAgeProvided_scheduleNextPollOnDefaultDelay() {
+        initializer.onFinish(Result.success(null));
+
+        verify(pollManager).scheduleDefault();
+        verifyNoMoreInteractions(pollManager);
+    }
+
+    @Test
+    public void whenFirstFetchFailed_scheduleNextPollOnDefaultDelay() {
+        initializer.onFinish(Result.error(new Exception()));
+
+        verify(pollManager).scheduleDefault();
+        verifyNoMoreInteractions(pollManager);
     }
 }

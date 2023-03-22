@@ -18,33 +18,36 @@
  */
 package co.elastic.apm.android.sdk.internal.features.centralconfig.initializer;
 
-import android.content.Context;
-
 import androidx.annotation.VisibleForTesting;
 
 import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigurationManager;
+import co.elastic.apm.android.sdk.internal.features.centralconfig.poll.ConfigurationPollManager;
 import co.elastic.apm.android.sdk.internal.utilities.concurrency.BackgroundExecutor;
 import co.elastic.apm.android.sdk.internal.utilities.concurrency.Result;
 import co.elastic.apm.android.sdk.internal.utilities.concurrency.impl.SimpleBackgroundExecutor;
 
 public final class CentralConfigurationInitializer implements BackgroundExecutor.Callback<Integer> {
-    private final Context context;
     private final BackgroundExecutor executor;
     private final CentralConfigurationManager manager;
+    private final ConfigurationPollManager pollManager;
 
     @VisibleForTesting
-    public CentralConfigurationInitializer(Context context, BackgroundExecutor executor, CentralConfigurationManager manager) {
-        this.context = context;
+    public CentralConfigurationInitializer(BackgroundExecutor executor, CentralConfigurationManager manager, ConfigurationPollManager pollManager) {
         this.executor = executor;
         this.manager = manager;
+        this.pollManager = pollManager;
     }
 
-    public CentralConfigurationInitializer(Context context) {
-        this(context, new SimpleBackgroundExecutor(), new CentralConfigurationManager(context));
+    public CentralConfigurationInitializer(CentralConfigurationManager manager, ConfigurationPollManager pollManager) {
+        this(new SimpleBackgroundExecutor(), manager, pollManager);
     }
 
     public CentralConfigurationManager getManager() {
         return manager;
+    }
+
+    public ConfigurationPollManager getPollManager() {
+        return pollManager;
     }
 
     public void initialize() {
@@ -56,6 +59,10 @@ public final class CentralConfigurationInitializer implements BackgroundExecutor
 
     @Override
     public void onFinish(Result<Integer> result) {
-        // todo schedule next poll
+        if (result.isSuccess && result.value != null) {
+            pollManager.scheduleInSeconds(result.value);
+        } else {
+            pollManager.scheduleDefault();
+        }
     }
 }

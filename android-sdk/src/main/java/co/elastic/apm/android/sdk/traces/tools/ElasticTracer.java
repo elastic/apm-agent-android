@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.traces.common.tools;
+package co.elastic.apm.android.sdk.traces.tools;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,7 +28,7 @@ import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.Tracer;
 
-public class ElasticTracer implements Tracer {
+public final class ElasticTracer implements Tracer {
     private final Tracer tracer;
 
     public ElasticTracer(Tracer tracer) {

@@ -20,7 +20,7 @@ package co.elastic.apm.android.sdk.internal.instrumentation;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.instrumentation.Instrumentations;
-import co.elastic.apm.android.sdk.internal.utilities.otel.SpanUtilities;
+import co.elastic.apm.android.sdk.internal.opentelemetry.tools.SpanUtilities;
 import co.elastic.apm.android.sdk.traces.tools.ElasticTracer;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanBuilder;

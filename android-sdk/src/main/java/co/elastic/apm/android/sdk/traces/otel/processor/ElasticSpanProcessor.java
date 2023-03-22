@@ -27,8 +27,6 @@ import java.util.Set;
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.attributes.AttributesCreator;
 import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
-import co.elastic.apm.android.sdk.internal.configuration.Configurations;
-import co.elastic.apm.android.sdk.internal.configuration.impl.AllInstrumentationConfiguration;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.context.Context;
@@ -55,9 +53,6 @@ public final class ElasticSpanProcessor implements SpanProcessor {
 
     @Override
     public void onStart(Context parentContext, ReadWriteSpan span) {
-        if (instrumentationIsNotEnabled()) {
-            return;
-        }
         span.setAllAttributes(AttributesCreator.from(commonAttributesVisitor).create());
         span.setAttribute(TRANSACTION_TYPE_ATTRIBUTE_KEY, TRANSACTION_TYPE_VALUE);
         span.setStatus(StatusCode.OK);
@@ -72,20 +67,12 @@ public final class ElasticSpanProcessor implements SpanProcessor {
 
     @Override
     public void onEnd(ReadableSpan span) {
-        if (instrumentationIsNotEnabled()) {
-            logger.debug("Ignoring all traces");
-            return;
-        }
         if (shouldExclude(span)) {
             logger.debug("Excluding span: {}", span);
             return;
         }
         logger.debug("Ending span: {}", span);
         original.onEnd(span);
-    }
-
-    private boolean instrumentationIsNotEnabled() {
-        return !Configurations.get(AllInstrumentationConfiguration.class).isEnabled();
     }
 
     @Override

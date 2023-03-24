@@ -16,26 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.instrumentation;
+package co.elastic.apm.android.sdk.internal.opentelemetry.tools;
 
-import java.util.List;
+import io.opentelemetry.sdk.common.CompletableResultCode;
 
-public final class InstrumentationConfiguration {
-    public final List<Instrumentation> instrumentations;
+public final class Flusher {
+    private Delegator meterDelegator;
+    private Delegator loggerDelegator;
 
-    public static InstrumentationConfigurationBuilder builder() {
-        return InstrumentationConfigurationBuilder.allDisabled();
+    public CompletableResultCode flushMetrics() {
+        return meterDelegator.flush();
     }
 
-    public static InstrumentationConfiguration allEnabled() {
-        return InstrumentationConfigurationBuilder.allEnabled().build();
+    public CompletableResultCode flushLogs() {
+        return loggerDelegator.flush();
     }
 
-    public static InstrumentationConfiguration allDisabled() {
-        return InstrumentationConfigurationBuilder.allDisabled().build();
+    public void setMeterDelegator(Delegator meterDelegator) {
+        this.meterDelegator = meterDelegator;
     }
 
-    InstrumentationConfiguration(List<Instrumentation> instrumentations) {
-        this.instrumentations = instrumentations;
+    public void setLoggerDelegator(Delegator loggerDelegator) {
+        this.loggerDelegator = loggerDelegator;
+    }
+
+    public interface Delegator {
+        CompletableResultCode flush();
     }
 }

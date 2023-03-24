@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import co.elastic.apm.android.sdk.traces.common.tools.ElasticTracer
+import co.elastic.apm.android.sdk.traces.ElasticTracers
 import kotlinx.coroutines.launch
 
 class SimpleCoroutineActivity : AppCompatActivity() {
@@ -13,7 +13,7 @@ class SimpleCoroutineActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         lifecycleScope.launch {
             val span =
-                ElasticTracer.androidActivity().spanBuilder("My Span Inside Coroutine").startSpan()
+                ElasticTracers.androidActivity().spanBuilder("My Span Inside Coroutine").startSpan()
 
             Log.d("Elastic", "Search")
 

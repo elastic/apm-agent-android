@@ -1,6 +1,6 @@
 package co.elastic.apm.android.test.attributes.metrics
 
-import io.opentelemetry.api.GlobalOpenTelemetry
+import co.elastic.apm.android.sdk.metrics.ElasticMeters
 import io.opentelemetry.api.metrics.Meter
 
 class MetricAttrHost {
@@ -10,6 +10,6 @@ class MetricAttrHost {
     }
 
     private fun getMeter(): Meter {
-        return GlobalOpenTelemetry.getMeterProvider().meterBuilder("Test meter").build()
+        return ElasticMeters.builder("Test meter").build()
     }
 }

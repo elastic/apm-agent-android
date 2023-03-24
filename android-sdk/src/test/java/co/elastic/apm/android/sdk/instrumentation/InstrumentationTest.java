@@ -27,6 +27,7 @@ import org.junit.After;
 import org.junit.Test;
 
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
+import co.elastic.apm.android.sdk.internal.instrumentation.groups.InstrumentationGroup;
 
 public class InstrumentationTest {
 
@@ -37,7 +38,9 @@ public class InstrumentationTest {
 
     @Test
     public void whenInstrumentationIsAvailable_provideIt() {
-        Configurations configurations = Configurations.builder().register(new SimpleInstrumentation()).buildAndRegisterGlobal();
+        Configurations.Builder builder = Configurations.builder();
+        builder.register(new ParentInstrumentation(true));
+        Configurations configurations = builder.register(new SimpleInstrumentation()).buildAndRegisterGlobal();
         Instrumentation instrumentation = configurations.getConfiguration(SimpleInstrumentation.class);
 
         assertTrue(instrumentation.isEnabled());
@@ -45,7 +48,9 @@ public class InstrumentationTest {
 
     @Test
     public void checkIfInstrumentationIsEnabled_statically() {
-        Configurations.builder().register(new SimpleInstrumentation()).buildAndRegisterGlobal();
+        Configurations.Builder builder = Configurations.builder();
+        builder.register(new ParentInstrumentation(true));
+        builder.register(new SimpleInstrumentation()).buildAndRegisterGlobal();
 
         assertTrue(Instrumentation.isEnabled(SimpleInstrumentation.class));
     }
@@ -61,49 +66,42 @@ public class InstrumentationTest {
     }
 
     @Test
-    public void whenParentInstrumentationIsNotAvailable_provideLocalEnableInfo() {
-        assertTrue(new SimpleInstrumentation(null, true).isEnabled());
-    }
-
-    @Test
     public void whenParentInstrumentationIsAvailable_andEnabled_provideLocalEnableInfo() {
         Configurations.builder().register(new ParentInstrumentation(true)).buildAndRegisterGlobal();
 
-        assertFalse(new SimpleInstrumentation(ParentInstrumentation.class, false).isEnabled());
+        assertFalse(new SimpleInstrumentation(false).isEnabled());
     }
 
     @Test
     public void whenParentInstrumentationIsAvailable_andNotEnabled_provideParentEnableInfo() {
         Configurations.builder().register(new ParentInstrumentation(false)).buildAndRegisterGlobal();
 
-        assertFalse(new SimpleInstrumentation(ParentInstrumentation.class, true).isEnabled());
+        assertFalse(new SimpleInstrumentation(true).isEnabled());
     }
 
     @Test
     public void whenParentInstrumentationIsSelf_provideSelfEnableInfo() {
-        Configurations.builder().register(new SimpleInstrumentation(SimpleInstrumentation.class, true)).buildAndRegisterGlobal();
+        Configurations.builder().register(new ParentInstrumentation(true)).buildAndRegisterGlobal();
 
-        assertTrue(Instrumentation.isEnabled(SimpleInstrumentation.class));
+        assertTrue(Instrumentation.isEnabled(ParentInstrumentation.class));
     }
 
     private static class SimpleInstrumentation extends Instrumentation {
-        private final Class<? extends Instrumentation> parentConfigClass;
         private final boolean enabled;
 
-        private SimpleInstrumentation(Class<? extends Instrumentation> parentConfigClass, boolean enabled) {
+        private SimpleInstrumentation(boolean enabled) {
             super(enabled);
-            this.parentConfigClass = parentConfigClass;
             this.enabled = enabled;
         }
 
         private SimpleInstrumentation() {
-            this(null, true);
+            this(true);
         }
 
         @NonNull
         @Override
-        protected Group getGroup() {
-            return () -> parentConfigClass;
+        protected Class<? extends InstrumentationGroup> getGroupType() {
+            return ParentInstrumentation.class;
         }
 
         @Override
@@ -117,7 +115,7 @@ public class InstrumentationTest {
         }
     }
 
-    private static class ParentInstrumentation extends Instrumentation {
+    private static class ParentInstrumentation extends InstrumentationGroup {
         private final boolean enabled;
 
         private ParentInstrumentation(boolean enabled) {
@@ -137,8 +135,8 @@ public class InstrumentationTest {
 
         @NonNull
         @Override
-        protected Group getGroup() {
-            return () -> null;
+        protected Class<? extends InstrumentationGroup> getGroupType() {
+            return ParentInstrumentation.class;
         }
     }
 }

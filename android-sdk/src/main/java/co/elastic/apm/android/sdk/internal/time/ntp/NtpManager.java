@@ -28,7 +28,7 @@ import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.utilities.concurrency.BackgroundExecutor;
 import co.elastic.apm.android.sdk.internal.utilities.concurrency.Result;
 import co.elastic.apm.android.sdk.internal.utilities.concurrency.impl.SimpleBackgroundExecutor;
-import co.elastic.apm.android.sdk.internal.utilities.otel.ElasticClock;
+import co.elastic.apm.android.sdk.internal.opentelemetry.tools.ElasticClock;
 import io.opentelemetry.sdk.common.Clock;
 
 public final class NtpManager implements BackgroundExecutor.Callback<Void> {

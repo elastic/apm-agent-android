@@ -16,7 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.traces.otel.processor;
+package co.elastic.apm.android.sdk.internal.opentelemetry.processors;
+
+import org.slf4j.Logger;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -36,6 +38,7 @@ public final class ElasticSpanProcessor implements SpanProcessor {
     private final SpanProcessor original;
     private final AttributesVisitor commonAttributesVisitor;
     private final Set<ExclusionRule> rules = new HashSet<>();
+    private final Logger logger = Elog.getLogger();
     private static final AttributeKey<String> TRANSACTION_TYPE_ATTRIBUTE_KEY = AttributeKey.stringKey("type");
     private static final String TRANSACTION_TYPE_VALUE = "mobile";
 
@@ -53,7 +56,7 @@ public final class ElasticSpanProcessor implements SpanProcessor {
         span.setAllAttributes(AttributesCreator.from(commonAttributesVisitor).create());
         span.setAttribute(TRANSACTION_TYPE_ATTRIBUTE_KEY, TRANSACTION_TYPE_VALUE);
         span.setStatus(StatusCode.OK);
-        Elog.getLogger().debug("Starting span: '{}', within context: '{}'", span, parentContext);
+        logger.debug("Starting span: '{}', within context: '{}'", span, parentContext);
         original.onStart(parentContext, span);
     }
 
@@ -65,10 +68,10 @@ public final class ElasticSpanProcessor implements SpanProcessor {
     @Override
     public void onEnd(ReadableSpan span) {
         if (shouldExclude(span)) {
-            Elog.getLogger().debug("Excluding span: {}", span);
+            logger.debug("Excluding span: {}", span);
             return;
         }
-        Elog.getLogger().debug("Ending span: {}", span);
+        logger.debug("Ending span: {}", span);
         original.onEnd(span);
     }
 

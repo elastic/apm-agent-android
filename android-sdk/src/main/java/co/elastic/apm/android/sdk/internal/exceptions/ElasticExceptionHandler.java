@@ -25,10 +25,9 @@ import java.io.StringWriter;
 import java.util.concurrent.TimeUnit;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
+import co.elastic.apm.android.sdk.logs.ElasticLoggers;
 import io.opentelemetry.api.logs.EventBuilder;
-import io.opentelemetry.api.logs.GlobalLoggerProvider;
 import io.opentelemetry.api.logs.Logger;
-import io.opentelemetry.api.logs.LoggerProvider;
 import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 
 public final class ElasticExceptionHandler implements Thread.UncaughtExceptionHandler {
@@ -58,9 +57,7 @@ public final class ElasticExceptionHandler implements Thread.UncaughtExceptionHa
 
     @Override
     public void uncaughtException(@NonNull Thread t, @NonNull Throwable e) {
-        LoggerProvider loggerProvider = GlobalLoggerProvider.get();
-
-        emitCrashEvent(getCrashReporter(loggerProvider), e);
+        emitCrashEvent(ElasticLoggers.crashReporter(), e);
         ElasticApmAgent.get().getFlusher().flushLogs().join(5, TimeUnit.SECONDS);
 
         if (wrapped != null) {
@@ -74,11 +71,6 @@ public final class ElasticExceptionHandler implements Thread.UncaughtExceptionHa
         crashEvent.setAttribute(SemanticAttributes.EXCEPTION_STACKTRACE, stackTraceToString(e));
         crashEvent.setAttribute(SemanticAttributes.EXCEPTION_TYPE, e.getClass().getName());
         crashEvent.emit();
-    }
-
-    private Logger getCrashReporter(LoggerProvider loggerProvider) {
-        return loggerProvider.loggerBuilder("CrashReport")
-                .setEventDomain("device").build();
     }
 
     private String stackTraceToString(Throwable throwable) {

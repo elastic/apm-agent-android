@@ -24,7 +24,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import co.elastic.apm.android.sdk.traces.http.data.HttpRequest;
-import co.elastic.apm.android.sdk.traces.otel.processor.ElasticSpanProcessor;
+import co.elastic.apm.android.sdk.internal.opentelemetry.processors.ElasticSpanProcessor;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 

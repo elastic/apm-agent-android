@@ -47,12 +47,14 @@ import co.elastic.apm.android.sdk.internal.features.centralconfig.poll.Configura
 import co.elastic.apm.android.sdk.internal.features.launchtime.LaunchTimeActivityCallback;
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.injection.DefaultAgentDependenciesInjector;
+import co.elastic.apm.android.sdk.internal.opentelemetry.ElasticOpenTelemetry;
+import co.elastic.apm.android.sdk.internal.opentelemetry.processors.ElasticLogRecordProcessor;
+import co.elastic.apm.android.sdk.internal.opentelemetry.processors.ElasticSpanProcessor;
+import co.elastic.apm.android.sdk.internal.opentelemetry.tools.Flusher;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.sdk.internal.utilities.logging.AndroidLoggerFactory;
-import co.elastic.apm.android.sdk.internal.utilities.otel.Flusher;
-import co.elastic.apm.android.sdk.logs.ElasticLogRecordProcessor;
-import co.elastic.apm.android.sdk.traces.otel.processor.ElasticSpanProcessor;
+import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.logs.GlobalLoggerProvider;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
@@ -164,7 +166,6 @@ public final class ElasticApmAgent {
         builder.addSource(centralConfigInitializer.getManager());
 
         builder.registerAll(injector.getConfigurationsProvider().provideConfigurations());
-        builder.register(configuration.instrumentationConfiguration);
         configuration.instrumentationConfiguration.instrumentations.forEach(builder::register);
         builder.buildAndRegisterGlobal();
 
@@ -203,12 +204,13 @@ public final class ElasticApmAgent {
         flusher.setMeterDelegator(meterProvider::forceFlush);
         flusher.setLoggerDelegator(loggerProvider::forceFlush);
 
-        OpenTelemetrySdk.builder()
+        OpenTelemetrySdk openTelemetrySdk = OpenTelemetrySdk.builder()
                 .setTracerProvider(getTracerProvider(signalConfiguration, resource, globalAttributesVisitor))
                 .setLoggerProvider(loggerProvider)
                 .setMeterProvider(meterProvider)
                 .setPropagators(getContextPropagator())
-                .buildAndRegisterGlobal();
+                .build();
+        GlobalOpenTelemetry.set(new ElasticOpenTelemetry(openTelemetrySdk));
     }
 
     private AttributesVisitor getResourceAttributesVisitor() {

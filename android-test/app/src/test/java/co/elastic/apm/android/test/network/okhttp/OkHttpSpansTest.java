@@ -17,7 +17,7 @@ import java.util.List;
 
 import co.elastic.apm.android.sdk.ElasticApmConfiguration;
 import co.elastic.apm.android.sdk.instrumentation.InstrumentationConfiguration;
-import co.elastic.apm.android.sdk.traces.common.tools.ElasticTracer;
+import co.elastic.apm.android.sdk.traces.ElasticTracers;
 import co.elastic.apm.android.sdk.traces.http.impl.okhttp.OkHttpContextStore;
 import co.elastic.apm.android.sdk.traces.http.impl.okhttp.OtelOkHttpEventListener;
 import co.elastic.apm.android.sdk.traces.http.impl.okhttp.OtelOkHttpInterceptor;
@@ -148,7 +148,7 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
     @Test
     public void whenThereIsAnExistingSpanContext_createHttpSpanOnly() {
         String existingSpanName = "SomeSpan";
-        Span parentSpan = ElasticTracer.create("SomeScope").spanBuilder(existingSpanName).startSpan();
+        Span parentSpan = ElasticTracers.create("SomeScope").spanBuilder(existingSpanName).startSpan();
         try (Scope ignored = parentSpan.makeCurrent()) {
             executeSuccessfulHttpCall(request);
         } finally {

@@ -16,26 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.instrumentation;
+package co.elastic.apm.android.sdk.metrics;
 
-import java.util.List;
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.api.metrics.MeterBuilder;
 
-public final class InstrumentationConfiguration {
-    public final List<Instrumentation> instrumentations;
+public final class ElasticMeters {
 
-    public static InstrumentationConfigurationBuilder builder() {
-        return InstrumentationConfigurationBuilder.allDisabled();
+    public static MeterBuilder builder(String instrumentationScopeName) {
+        return GlobalOpenTelemetry.meterBuilder(instrumentationScopeName);
     }
 
-    public static InstrumentationConfiguration allEnabled() {
-        return InstrumentationConfigurationBuilder.allEnabled().build();
-    }
-
-    public static InstrumentationConfiguration allDisabled() {
-        return InstrumentationConfigurationBuilder.allDisabled().build();
-    }
-
-    InstrumentationConfiguration(List<Instrumentation> instrumentations) {
-        this.instrumentations = instrumentations;
+    public static Meter create(String instrumentationScopeName) {
+        return GlobalOpenTelemetry.getMeter(instrumentationScopeName);
     }
 }

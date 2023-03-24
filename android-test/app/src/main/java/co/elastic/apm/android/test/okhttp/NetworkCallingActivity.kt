@@ -3,7 +3,7 @@ package co.elastic.apm.android.test.okhttp
 import androidx.appcompat.app.AppCompatActivity
 import androidx.test.espresso.IdlingResource
 import androidx.test.espresso.idling.CountingIdlingResource
-import co.elastic.apm.android.sdk.traces.common.tools.ElasticTracer
+import co.elastic.apm.android.sdk.traces.ElasticTracers
 import co.elastic.apm.android.test.activities.espresso.IdlingResourceProvider
 import okhttp3.*
 import java.io.IOException
@@ -24,7 +24,7 @@ class NetworkCallingActivity : AppCompatActivity(),
             .url(mockServerUrl)
             .build()
 
-        val span = ElasticTracer.androidActivity().spanBuilder("Http parent span").startSpan()
+        val span = ElasticTracers.androidActivity().spanBuilder("Http parent span").startSpan()
         span.makeCurrent().use {
             idling.increment()
             client.newCall(request).enqueue(object : Callback {

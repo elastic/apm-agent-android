@@ -20,18 +20,18 @@ package co.elastic.apm.android.sdk.internal.instrumentation;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.instrumentation.Instrumentations;
-import co.elastic.apm.android.sdk.internal.utilities.otel.SpanUtilities;
-import co.elastic.apm.android.sdk.traces.common.tools.ElasticTracer;
+import co.elastic.apm.android.sdk.internal.opentelemetry.tools.SpanUtilities;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 
 public class LifecycleMultiMethodSpan {
     private static final String ROOT_SPAN_SUFFIX = " - View appearing";
 
-    public static SpanWithScope onMethodEnter(String ownerName, String methodName, ElasticTracer tracer) {
+    public static SpanWithScope onMethodEnter(String ownerName, String methodName, Tracer tracer) {
         if (!Instrumentations.isScreenRenderingEnabled()) {
             return null;
         }
@@ -73,7 +73,7 @@ public class LifecycleMultiMethodSpan {
         Context.root().makeCurrent();
     }
 
-    private static void ensureRootSpanIsCreated(String ownerName, ElasticTracer tracer) {
+    private static void ensureRootSpanIsCreated(String ownerName, Tracer tracer) {
         if (SpanUtilities.runningSpanNotFound()) {
             String spanName = ownerName.substring(ownerName.lastIndexOf('.') + 1);
             Elog.getLogger().debug("Creating root span named {} for {}", spanName, ownerName);

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.utilities.otel;
+package co.elastic.apm.android.sdk.internal.opentelemetry.tools;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -27,7 +27,7 @@ import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
 import co.elastic.apm.android.sdk.internal.time.ntp.TrueTimeWrapper;
 import io.opentelemetry.sdk.common.Clock;
 
-public class ElasticClock implements Clock {
+public final class ElasticClock implements Clock {
     private final TrueTimeWrapper trueTimeWrapper;
     private final SystemTimeProvider systemTimeProvider;
 

@@ -253,6 +253,6 @@ Said configuration will be used by the Elastic agent for the https://opentelemet
 [float]
 === Central configuration
 
-Some of the runtime configurable options are available through Kibana's https://www.elastic.co/guide/en/kibana/master/agent-configuration.html[central configuration].
+Some of the runtime configurable options are available through Kibana's {kibana-ref}/agent-configuration.html[central configuration].
 
 You can take a look at the available options https://github.com/elastic/apm/blob/main/specs/agents/mobile/configuration.md[here].

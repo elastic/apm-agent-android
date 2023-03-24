@@ -116,6 +116,36 @@ class MyApp extends android.app.Application {
 ----
 
 [float]
+==== Automatic instrumentation enabling/disabling
+
+The agent provides automatic instrumentation for its <<supported-technologies>> which are all enabled by default.
+You can choose which ones to keep enabled, as well as and disabling those you don't need, at runtime, like so:
+
+[source,java]
+----
+class MyApp extends android.app.Application {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        // When building an InstrumentationConfiguration object using `InstrumentationConfiguration.builder()`
+        // all of the instrumentations are disabled by default, so you only need to enable the ones you need.
+        InstrumentationConfiguration instrumentations = InstrumentationConfiguration.builder()
+            .enableHttpTracing(true)
+            .build();
+        ElasticApmConfiguration configuration = ElasticApmConfiguration.builder()
+                .setInstrumentationConfiguration(instrumentations)
+                .build();
+        ElasticApmAgent.initialize(this, configuration);
+    }
+}
+----
+
+Please note that when building an InstrumentationConfiguration object using `InstrumentationConfiguration.builder()`
+all the instrumentations are disabled by default, so you only need to enable the ones you need using the builder setter methods.
+
+[float]
 ==== HTTP Configuration
 
 The agent provides a configuration object for HTTP-related spans named `HttpTraceConfiguration`.

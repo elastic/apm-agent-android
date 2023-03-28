@@ -38,8 +38,15 @@ public class PostDeployTask extends DefaultTask {
 
         String newVersion = VersionUtility.bumpMinorVersion(currentVersion);
 
-        updateVersion(gradlePropertiesFile, properties, newVersion);
+        updateNextVersion(gradlePropertiesFile, properties, newVersion);
         updateChangelog(newVersion);
+
+        publishChanges();
+    }
+
+    private void publishChanges() {
+        runCommand("git commit -a -m \"Preparing for the next release\"");
+        runCommand("git push");
     }
 
     private void setGitTag(String version) {
@@ -48,12 +55,10 @@ public class PostDeployTask extends DefaultTask {
         runCommand("git push --tags");
     }
 
-    private void updateVersion(File gradlePropertiesFile, Properties properties, String newVersion) {
+    private void updateNextVersion(File gradlePropertiesFile, Properties properties, String newVersion) {
         log("Updating version to: " + newVersion);
         properties.setProperty("version", newVersion);
         saveProperties(properties, gradlePropertiesFile);
-        runCommand("git commit -a -m \"Preparing for the next release\"");
-        runCommand("git push");
     }
 
     private void updateChangelog(String newVersion) {

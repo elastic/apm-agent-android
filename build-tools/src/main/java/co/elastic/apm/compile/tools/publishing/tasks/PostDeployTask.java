@@ -1,5 +1,6 @@
 package co.elastic.apm.compile.tools.publishing.tasks;
 
+import org.apache.commons.text.StringSubstitutor;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
@@ -13,6 +14,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 
 public class PostDeployTask extends DefaultTask {
@@ -26,8 +35,11 @@ public class PostDeployTask extends DefaultTask {
 
         String currentVersion = properties.getProperty("version");
         setGitTag(currentVersion);
+
         String newVersion = VersionUtility.bumpMinorVersion(currentVersion);
+
         updateVersion(gradlePropertiesFile, properties, newVersion);
+        updateChangelog();
     }
 
     private void setGitTag(String version) {
@@ -42,6 +54,24 @@ public class PostDeployTask extends DefaultTask {
         saveProperties(properties, gradlePropertiesFile);
         runCommand("git commit -a -m \"Preparing for the next release\"");
         runCommand("git push");
+    }
+
+    private void updateChangelog() {
+        File changelog = new File("CHANGELOG.asciidoc");
+        Map<String, String> substitutions = new HashMap<>();
+        substitutions.put("release_date", new SimpleDateFormat("yyyy/MM/dd", Locale.US).format(new Date()));
+        StringSubstitutor substitutor = new StringSubstitutor(substitutions, "//${", "}");
+        substituteFileContents(changelog, substitutor);
+    }
+
+    private void substituteFileContents(File file, StringSubstitutor substitutor) {
+        try {
+            Path path = file.toPath();
+            String contents = Files.readString(path, StandardCharsets.UTF_8);
+            Files.write(path, substitutor.replace(contents).getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private Properties getProperties(File from) {

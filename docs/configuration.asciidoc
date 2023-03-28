@@ -254,7 +254,7 @@ Said configuration will be used by the Elastic agent for the https://opentelemet
 [[configuration-dynamic]]
 === Dynamic configuration image:./images/dynamic-config.svg[]
 
-Configuration options marked with Dynamic true can be changed at runtime when set from Kibana's https://www.elastic.co/guide/en/kibana/master/agent-configuration.html[central configuration].
+Configuration options marked with Dynamic true can be changed at runtime when set from Kibana's {kibana-ref}/agent-configuration.html[central configuration].
 
 [float]
 === Option reference

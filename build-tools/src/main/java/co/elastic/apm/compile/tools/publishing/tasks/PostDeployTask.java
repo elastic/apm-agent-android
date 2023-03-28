@@ -1,5 +1,6 @@
 package co.elastic.apm.compile.tools.publishing.tasks;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.logging.Logger;
@@ -76,7 +77,7 @@ public class PostDeployTask extends DefaultTask {
         StringSubstitutor substitutor = new StringSubstitutor(substitutions, "{{", "}}");
 
         try (InputStream is = getClass().getResourceAsStream("/changelog/release_notes_template.txt")) {
-            return substitutor.replace(new String(is.readAllBytes()));
+            return substitutor.replace(IOUtils.toString(is, StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

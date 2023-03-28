@@ -23,7 +23,7 @@ endif::[]
 //${next_release_notes}
 
 [[release-notes-0.4.0]]
-==== 0.4.0 - ${release_date}
+==== 0.4.0 - //${release_date}
 
 [float]
 ===== Features

@@ -39,7 +39,7 @@ public class PostDeployTask extends DefaultTask {
         String newVersion = VersionUtility.bumpMinorVersion(currentVersion);
 
         updateVersion(gradlePropertiesFile, properties, newVersion);
-        updateChangelog();
+        updateChangelog(newVersion);
     }
 
     private void setGitTag(String version) {
@@ -56,12 +56,25 @@ public class PostDeployTask extends DefaultTask {
         runCommand("git push");
     }
 
-    private void updateChangelog() {
+    private void updateChangelog(String newVersion) {
         File changelog = new File("CHANGELOG.asciidoc");
         Map<String, String> substitutions = new HashMap<>();
         substitutions.put("release_date", new SimpleDateFormat("yyyy/MM/dd", Locale.US).format(new Date()));
-        StringSubstitutor substitutor = new StringSubstitutor(substitutions, "//${", "}");
+        substitutions.put("next_release_notes", getNewReleaseNotes(newVersion));
+        StringSubstitutor substitutor = new StringSubstitutor(substitutions, "//${", "}", '\\');
         substituteFileContents(changelog, substitutor);
+    }
+
+    private String getNewReleaseNotes(String newVersion) {
+        Map<String, String> substitutions = new HashMap<>();
+        substitutions.put("version", newVersion);
+        StringSubstitutor substitutor = new StringSubstitutor(substitutions, "{{", "}}");
+
+        try (InputStream is = getClass().getResourceAsStream("/changelog/release_notes_template.txt")) {
+            return substitutor.replace(new String(is.readAllBytes()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void substituteFileContents(File file, StringSubstitutor substitutor) {

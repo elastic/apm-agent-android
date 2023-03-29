@@ -58,6 +58,11 @@ public class ApmMetadataService implements Service {
         return apmInfoPropertiesProvider.get().getProperty(ApmInfo.KEY_SERVER_SECRET_TOKEN);
     }
 
+    @Nullable
+    public String getApiKey() {
+        return apmInfoPropertiesProvider.get().getProperty(ApmInfo.KEY_SERVER_API_KEY);
+    }
+
     @NonNull
     public String getDeploymentEnvironment() {
         return apmInfoPropertiesProvider.get().getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT);

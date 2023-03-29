@@ -8,10 +8,13 @@ import android.app.Application;
 
 import org.robolectric.TestLifecycleApplication;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.ElasticApmConfiguration;
@@ -22,6 +25,8 @@ import co.elastic.apm.android.sdk.internal.configuration.provider.Configurations
 import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigurationManager;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer;
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
+import co.elastic.apm.android.sdk.internal.services.Service;
+import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.test.common.agent.AgentInitializer;
 import co.elastic.apm.android.test.common.logs.LogRecordExporterCaptor;
@@ -72,6 +77,21 @@ public class BaseRobolectricTestApplication extends Application implements Expor
         }
         AgentInitializer.injectSignalConfiguration(configuration, getSignalConfiguration());
         AgentInitializer.initialize(this, configuration, connectivity, this);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void spyOnServices() {
+        try {
+            ServiceManager instance = ServiceManager.get();
+            Field field = ServiceManager.class.getDeclaredField("services");
+            field.setAccessible(true);
+            Map<String, Service> services = (Map<String, Service>) field.get(instance);
+            Map<String, Service> spies = new HashMap<>();
+            services.forEach((key, service) -> spies.put(key, spy(service)));
+            field.set(instance, spies);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public BaseRobolectricTestApplication() {

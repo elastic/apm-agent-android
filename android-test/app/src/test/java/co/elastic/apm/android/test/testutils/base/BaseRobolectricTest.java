@@ -36,6 +36,10 @@ public abstract class BaseRobolectricTest extends BaseTest {
         return (AgentDependenciesInjector) RuntimeEnvironment.getApplication();
     }
 
+    protected void spyOnServices() {
+        ((BaseRobolectricTestApplication) RuntimeEnvironment.getApplication()).spyOnServices();
+    }
+
     private ExportersProvider getExporterProvider() {
         return (ExportersProvider) RuntimeEnvironment.getApplication();
     }

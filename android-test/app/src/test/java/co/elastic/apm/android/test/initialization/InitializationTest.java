@@ -1,6 +1,8 @@
 package co.elastic.apm.android.test.initialization;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -12,7 +14,13 @@ import org.robolectric.annotation.Config;
 import java.lang.reflect.Field;
 
 import co.elastic.apm.android.sdk.ElasticApmConfiguration;
+import co.elastic.apm.android.sdk.connectivity.Connectivity;
+import co.elastic.apm.android.sdk.connectivity.auth.impl.ApiKeyConfiguration;
+import co.elastic.apm.android.sdk.connectivity.auth.impl.SecretTokenConfiguration;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.poll.ConfigurationPollManager;
+import co.elastic.apm.android.sdk.internal.services.Service;
+import co.elastic.apm.android.sdk.internal.services.ServiceManager;
+import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
 import co.elastic.apm.android.sdk.session.impl.DefaultSessionIdProvider;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTestApplication;
@@ -35,6 +43,44 @@ public class InitializationTest extends BaseRobolectricTest {
         verify(getAgentDependenciesInjector().getCentralConfigurationInitializer()).initialize();
 
         assertEquals(app.pollManager, ConfigurationPollManager.get());
+    }
+
+    @Test
+    public void whenSecretTokenIsProvided_createConnectivityWithIt() {
+        spyOnServices();
+        ApmMetadataService service = ServiceManager.get().getService(Service.Names.METADATA);
+        doReturn("someSecretToken").when(service).getSecretToken();
+
+        assertTrue(Connectivity.getDefault().authConfiguration() instanceof SecretTokenConfiguration);
+    }
+
+    @Test
+    public void whenApiKeyIsProvided_createConnectivityWithIt() {
+        spyOnServices();
+        ApmMetadataService service = ServiceManager.get().getService(Service.Names.METADATA);
+        doReturn("someApiKey").when(service).getApiKey();
+
+        assertTrue(Connectivity.getDefault().authConfiguration() instanceof ApiKeyConfiguration);
+    }
+
+    @Test
+    public void whenSecretTokenAndApiKeyAreProvided_createConnectivityWithApiKey() {
+        spyOnServices();
+        ApmMetadataService service = ServiceManager.get().getService(Service.Names.METADATA);
+        doReturn("someSecretToken").when(service).getSecretToken();
+        doReturn("someApiKey").when(service).getApiKey();
+
+        assertTrue(Connectivity.getDefault().authConfiguration() instanceof ApiKeyConfiguration);
+    }
+
+    @Test
+    public void whenNoAuthKeysAreProvided_createSimpleConnectivity() {
+        spyOnServices();
+        ApmMetadataService service = ServiceManager.get().getService(Service.Names.METADATA);
+        doReturn(null).when(service).getSecretToken();
+        doReturn(null).when(service).getApiKey();
+
+        assertNull(Connectivity.getDefault().authConfiguration());
     }
 
     private static class AppWithMockPollManager extends BaseRobolectricTestApplication {

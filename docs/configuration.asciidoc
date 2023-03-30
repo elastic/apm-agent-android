@@ -143,8 +143,8 @@ class MyApp extends android.app.Application {
 }
 ----
 
-Please note that when building an InstrumentationConfiguration object using `InstrumentationConfiguration.builder()`
-all the instrumentations are disabled by default, so you only need to enable the ones you need using the builder setter methods.
+NOTE: When building an InstrumentationConfiguration object using `InstrumentationConfiguration.builder()`,
+all instrumentations are disabled by default. Only enable the instrumentations you need using the builder setter methods.
 
 [float]
 ==== HTTP Configuration
@@ -260,7 +260,6 @@ Configuration options marked with Dynamic true can be changed at runtime when se
 === Option reference
 
 This is a list of all configuration options.
-Click on a key to get more information.
 
 [float]
 [[config-recording]]

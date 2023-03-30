@@ -1,5 +1,7 @@
 package co.elastic.apm.compile.tools.publishing.tasks;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.text.StringSubstitutor;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
@@ -13,6 +15,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 
 public class PostDeployTask extends DefaultTask {
@@ -26,8 +36,18 @@ public class PostDeployTask extends DefaultTask {
 
         String currentVersion = properties.getProperty("version");
         setGitTag(currentVersion);
+
         String newVersion = VersionUtility.bumpMinorVersion(currentVersion);
-        updateVersion(gradlePropertiesFile, properties, newVersion);
+
+        updateNextVersion(gradlePropertiesFile, properties, newVersion);
+        updateChangelog(newVersion);
+
+        publishChanges();
+    }
+
+    private void publishChanges() {
+        runCommand("git commit -a -m \"Preparing for the next release\"");
+        runCommand("git push");
     }
 
     private void setGitTag(String version) {
@@ -36,12 +56,41 @@ public class PostDeployTask extends DefaultTask {
         runCommand("git push --tags");
     }
 
-    private void updateVersion(File gradlePropertiesFile, Properties properties, String newVersion) {
+    private void updateNextVersion(File gradlePropertiesFile, Properties properties, String newVersion) {
         log("Updating version to: " + newVersion);
         properties.setProperty("version", newVersion);
         saveProperties(properties, gradlePropertiesFile);
-        runCommand("git commit -a -m \"Preparing for the next release\"");
-        runCommand("git push");
+    }
+
+    private void updateChangelog(String newVersion) {
+        File changelog = new File("CHANGELOG.asciidoc");
+        Map<String, String> substitutions = new HashMap<>();
+        substitutions.put("release_date", new SimpleDateFormat("yyyy/MM/dd", Locale.US).format(new Date()));
+        substitutions.put("next_release_notes", getNewReleaseNotes(newVersion));
+        StringSubstitutor substitutor = new StringSubstitutor(substitutions, "//${", "}", '\\');
+        substituteFileContents(changelog, substitutor);
+    }
+
+    private String getNewReleaseNotes(String newVersion) {
+        Map<String, String> substitutions = new HashMap<>();
+        substitutions.put("version", newVersion);
+        StringSubstitutor substitutor = new StringSubstitutor(substitutions, "{{", "}}");
+
+        try (InputStream is = getClass().getResourceAsStream("/changelog/release_notes_template.txt")) {
+            return substitutor.replace(IOUtils.toString(is, StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void substituteFileContents(File file, StringSubstitutor substitutor) {
+        try {
+            Path path = file.toPath();
+            String contents = Files.readString(path, StandardCharsets.UTF_8);
+            Files.write(path, substitutor.replace(contents).getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private Properties getProperties(File from) {

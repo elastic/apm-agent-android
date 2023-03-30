@@ -20,14 +20,21 @@ endif::[]
 
 === Unreleased
 
-[[release-notes-x.x.x]]
-==== x.x.x - YYYY/MM/DD
+//${next_release_notes}
+
+[[release-notes-0.4.0]]
+==== 0.4.0 - //${release_date}
 
 [float]
-===== Breaking changes
+===== Features
+
+* Wrapping HTTP spans: {pull}106[#106]
+* Tracking app launch time metrics: {pull}110[#110]
+* Added runtime configuration options: {pull}122[#122]
+* Added central configuration https://github.com/elastic/apm/blob/main/specs/agents/mobile/configuration.md#recording-configuration[recording] option: {pull}136[#136]
 
 [[release-notes-0.1.0]]
-==== 0.1.0 - YYYY/MM/DD
+==== 0.1.0 - 2022/12/12
 
 [float]
 ===== Features

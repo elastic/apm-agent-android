@@ -4,7 +4,7 @@ agents:
 steps:
   - label: "Run the release"
     key: "release"
-    commands: .ci/release.sh | tee release.out
+    commands: .ci/release-wrapper.sh
     artifact_paths: "release.out"
 
 notify:

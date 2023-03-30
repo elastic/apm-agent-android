@@ -83,12 +83,6 @@ set -x
 git config --global user.email "infra-root+apmmachine@elastic.co"
 git config --global user.name "apmmachine"
 
-echo "--- Install Android SDK"
-# Configure Android SDK using the script
-./install-android-sdk.sh
-export PATH=${PATH}:$PWD/.android-sdk/tools/bin/
-export ANDROID_HOME=$PWD/.android-sdk
-
 echo "--- Install JDK11"
 JAVA_URL=https://jvm-catalog.elastic.co/jdk
 JAVA_HOME=$(pwd)/.openjdk11
@@ -98,6 +92,12 @@ curl -L --output /tmp/jdk.tar.gz "$JAVA_PKG"; \
   tar --extract --file /tmp/jdk.tar.gz --directory "$JAVA_HOME" --strip-components 1
 export JAVA_HOME
 export PATH=$JAVA_HOME/bin:$PATH
+
+echo "--- Install Android SDK"
+# Configure Android SDK using the script
+./install-android-sdk.sh
+export PATH=${PATH}:$PWD/.android-sdk/tools/bin/
+export ANDROID_HOME=$PWD/.android-sdk
 
 set +x
 # Setting up common deploy params in env var

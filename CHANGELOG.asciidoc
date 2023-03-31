@@ -28,7 +28,7 @@ endif::[]
 [float]
 ===== Features
 
-* Added server ApiKey auth support: {pull}000[#000]
+* Added server ApiKey auth support: {pull}141[#141]
 
 [[release-notes-0.4.0]]
 ==== 0.4.0 - 2023/03/30

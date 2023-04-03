@@ -22,8 +22,16 @@ endif::[]
 
 //${next_release_notes}
 
+[[release-notes-0.6.0]]
+==== 0.6.0 - //${release_date}
+
+[float]
+===== Features
+
+* New feature: {pull}000[#000]
+
 [[release-notes-0.5.0]]
-==== 0.5.0 - //${release_date}
+==== 0.5.0 - 2023/04/03
 
 [float]
 ===== Features

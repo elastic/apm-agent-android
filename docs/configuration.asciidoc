@@ -49,6 +49,9 @@ All of the values provided in the Gradle configuration can be overridden with th
 |serverUrl
 |`ELASTIC_APM_SERVER_URL`
 
+|apiKey
+|`ELASTIC_APM_API_KEY`
+
 |secretToken
 |`ELASTIC_APM_SECRET_TOKEN`
 

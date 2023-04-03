@@ -33,11 +33,18 @@ public interface Connectivity {
         return new DefaultConnectivity(endpoint, AuthConfiguration.secretToken(secretToken));
     }
 
+    static Connectivity withApiKey(String endpoint, String apiKey) {
+        return new DefaultConnectivity(endpoint, AuthConfiguration.apiKey(apiKey));
+    }
+
     static Connectivity getDefault() {
         ApmMetadataService service = ServiceManager.get().getService(Service.Names.METADATA);
         String serverUrl = service.getServerUrl();
+        String apiKey = service.getApiKey();
         String secretToken = service.getSecretToken();
-        if (secretToken != null) {
+        if (apiKey != null) {
+            return Connectivity.withApiKey(serverUrl, apiKey);
+        } else if (secretToken != null) {
             return Connectivity.withSecretToken(serverUrl, secretToken);
         } else {
             return Connectivity.simple(serverUrl);

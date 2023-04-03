@@ -124,6 +124,7 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
             parameters.getServiceVersion().set(defaultExtension.getServiceVersion());
             parameters.getServerUrl().set(defaultExtension.getServerUrl());
             parameters.getSecretToken().set(defaultExtension.getSecretToken());
+            parameters.getApiKey().set(defaultExtension.getApiKey());
             parameters.getClasspathProvider().set(compatibleManager.getClasspathProvider());
         });
         apmInfoUseCase.execute();

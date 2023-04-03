@@ -18,12 +18,17 @@
  */
 package co.elastic.apm.android.sdk.connectivity.auth;
 
+import co.elastic.apm.android.sdk.connectivity.auth.impl.ApiKeyConfiguration;
 import co.elastic.apm.android.sdk.connectivity.auth.impl.SecretTokenConfiguration;
 
 public interface AuthConfiguration {
 
     static AuthConfiguration secretToken(String token) {
         return new SecretTokenConfiguration(token);
+    }
+
+    static AuthConfiguration apiKey(String key) {
+        return new ApiKeyConfiguration(key);
     }
 
     String asAuthorizationHeaderValue();

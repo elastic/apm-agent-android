@@ -16,15 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.common;
+package co.elastic.apm.android.sdk.connectivity.auth.impl;
 
-public class ApmInfo {
-    public static String KEY_SERVICE_VERSION = "service.version";
-    public static String KEY_SERVICE_NAME = "service.name";
-    public static String KEY_SERVER_URL = "server.url";
-    public static String KEY_SERVER_SECRET_TOKEN = "server.secret_token";
-    public static String KEY_SERVER_API_KEY = "server.api_key";
-    public static String KEY_SERVICE_ENVIRONMENT = "service.deployment_environment";
-    public static String KEY_SCOPE_OKHTTP_VERSION = "scope.okhttp.version";
-    public static String ASSET_FILE_NAME = "co_elastic_apm_android.properties";
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
+
+public class SecretTokenConfigurationTest {
+
+    @Test
+    public void provideHeaderValue() {
+        SecretTokenConfiguration secretTokenConfiguration = new SecretTokenConfiguration("someSecretToken");
+
+        assertEquals("Bearer someSecretToken", secretTokenConfiguration.asAuthorizationHeaderValue());
+    }
 }

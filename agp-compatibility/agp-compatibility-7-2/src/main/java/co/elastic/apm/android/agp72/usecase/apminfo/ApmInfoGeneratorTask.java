@@ -69,6 +69,10 @@ public abstract class ApmInfoGeneratorTask extends DefaultTask {
 
     @Optional
     @Input
+    public abstract Property<String> getApiKey();
+
+    @Optional
+    @Input
     public abstract Property<String> getOkHttpVersion();
 
     @OutputDirectory
@@ -79,6 +83,7 @@ public abstract class ApmInfoGeneratorTask extends DefaultTask {
     private static final String SERVICE_VERSION_ENVIRONMENT_VARIABLE = "ELASTIC_APM_SERVICE_VERSION";
     private static final String SERVER_URL_ENVIRONMENT_VARIABLE = "ELASTIC_APM_SERVER_URL";
     private static final String SECRET_TOKEN_ENVIRONMENT_VARIABLE = "ELASTIC_APM_SECRET_TOKEN";
+    private static final String API_KEY_ENVIRONMENT_VARIABLE = "ELASTIC_APM_API_KEY";
 
     @TaskAction
     public void execute() {
@@ -92,6 +97,10 @@ public abstract class ApmInfoGeneratorTask extends DefaultTask {
         String secretToken = provideSecretToken();
         if (secretToken != null) {
             properties.put(ApmInfo.KEY_SERVER_SECRET_TOKEN, secretToken);
+        }
+        String apiKey = provideApiKey();
+        if (apiKey != null) {
+            properties.put(ApmInfo.KEY_SERVER_API_KEY, apiKey);
         }
         String okhttpVersion = getOkHttpVersion().getOrNull();
         if (okhttpVersion != null) {
@@ -107,6 +116,10 @@ public abstract class ApmInfoGeneratorTask extends DefaultTask {
 
     private String provideSecretToken() {
         return provideOptionalValue("secretToken", SECRET_TOKEN_ENVIRONMENT_VARIABLE, getSecretToken());
+    }
+
+    private String provideApiKey() {
+        return provideOptionalValue("apiKey", API_KEY_ENVIRONMENT_VARIABLE, getApiKey());
     }
 
     private String provideServiceName() {
@@ -154,6 +167,7 @@ public abstract class ApmInfoGeneratorTask extends DefaultTask {
             apmInfoGenerator.getServiceVersion().set(parameters.getServiceVersion());
             apmInfoGenerator.getServerUrl().set(parameters.getServerUrl());
             apmInfoGenerator.getSecretToken().set(parameters.getSecretToken());
+            apmInfoGenerator.getApiKey().set(parameters.getApiKey());
             apmInfoGenerator.getVariantName().set(variantName);
             apmInfoGenerator.getOutputDir().set(project.getLayout().getBuildDirectory().dir(apmInfoGenerator.getName()));
             apmInfoGenerator.getOkHttpVersion().set(getOkhttpVersion(project, classpathProvider.getRuntimeConfiguration(variant)));

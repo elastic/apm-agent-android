@@ -42,7 +42,8 @@ elasticApm {
     // Optional
     serviceName = "your app name" <2>
     serviceVersion = "0.0.0" <3>
-    secretToken = "your server auth token" <4>
+    apiKey = "your server api key" <4>
+    secretToken = "your server auth token" <5>
 }
 ----
 
@@ -50,6 +51,10 @@ elasticApm {
 <2> Defaults to your `android.defaultConfig.applicationId` value.
 <3> Defaults to your `android.defaultConfig.versionName` value.
 <4> Defaults to null.
+More info on API Keys {ref}/security-api-create-api-key.html[here].
+<5> Defaults to null.
+
+NOTE: When both `secretToken` and `apiKey` are provided, apiKey has priority and secretToken is ignored.
 
 [float]
 [[application-setup]]

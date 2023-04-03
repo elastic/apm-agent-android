@@ -128,7 +128,48 @@ public class CompilationConfigTest extends BaseAssetsVerificationTest {
     }
 
     @Test
-    public void compileConfig_verifySettingServerToken() {
+    public void compileConfig_verifySettingApiKey() {
+        String serverUrl = "http://server.url";
+        String apiKey = "some.apiKey";
+        getDefaultElasticBlockBuilder().setApiKey(apiKey);
+        getDefaultElasticBlockBuilder().setServerUrl(serverUrl);
+        setUpProject();
+
+        runGradle("assembleDebug");
+
+        verifyTaskIsSuccessful(":debugGenerateApmInfo");
+        Properties properties = getGeneratedProperties("debug");
+        assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
+        assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
+        assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
+        assertEquals(apiKey, properties.getProperty(ApmInfo.KEY_SERVER_API_KEY));
+        assertEquals(serverUrl, properties.getProperty(ApmInfo.KEY_SERVER_URL));
+    }
+
+    @Test
+    public void compileConfig_verifyOverridingApiKey_withEnvironmentVariable() {
+        String serverUrl = "http://server.url";
+        String apiKey = "some.apiKey";
+        String apiKeyEnv = "some.environment-provided.token";
+        environmentVariables.set("ELASTIC_APM_API_KEY", apiKeyEnv);
+        getDefaultElasticBlockBuilder().setApiKey(apiKey);
+        getDefaultElasticBlockBuilder().setServerUrl(serverUrl);
+        setUpProject();
+
+        runGradle("assembleDebug");
+
+        verifyTaskIsSuccessful(":debugGenerateApmInfo");
+        Properties properties = getGeneratedProperties("debug");
+        assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
+        assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
+        assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
+        assertEquals(apiKeyEnv, properties.getProperty(ApmInfo.KEY_SERVER_API_KEY));
+        assertEquals(serverUrl, properties.getProperty(ApmInfo.KEY_SERVER_URL));
+    }
+
+
+    @Test
+    public void compileConfig_verifySettingSecretToken() {
         String serverUrl = "http://server.url";
         String serverToken = "some.token";
         getDefaultElasticBlockBuilder().setSecretToken(serverToken);
@@ -147,7 +188,7 @@ public class CompilationConfigTest extends BaseAssetsVerificationTest {
     }
 
     @Test
-    public void compileConfig_verifyOverridingServerToken_withEnvironmentVariable() {
+    public void compileConfig_verifyOverridingSecretToken_withEnvironmentVariable() {
         String serverUrl = "http://server.url";
         String serverToken = "some.token";
         String serverTokenEnv = "some.environment-provided.token";

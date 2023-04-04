@@ -80,6 +80,7 @@ class MyApp extends android.app.Application {
 ----
 
 [float]
+[[app-server-connectivity]]
 ==== APM Server connectivity
 
 The APM Server connectivity parameters can be provided at compile time, either by using the Gradle DSL configuration or by providing the APM Server connectivity-related environment variables as mentioned above.
@@ -104,9 +105,10 @@ class MyApp extends android.app.Application {
 ----
 
 [float]
+[[app-id-configuration]]
 ==== Application ID configuration
 
-You can provide your application name and version dynamically by setting those when building your `ElasticApmConfiguration` instance as show below:
+You can provide your application name, version and its environment name dynamically by setting those when building your `ElasticApmConfiguration` instance as show below:
 
 [source,java]
 ----
@@ -118,6 +120,7 @@ class MyApp extends android.app.Application {
         ElasticApmConfiguration configuration = ElasticApmConfiguration.builder()
                 .setServiceName("my-custom-name")
                 .setServiceVersion("1.0.0")
+                .setDeploymentEnvironment("debug")
                 .build();
         ElasticApmAgent.initialize(this, configuration);
     }

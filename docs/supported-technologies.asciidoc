@@ -27,8 +27,10 @@ This section lists all supported technologies.
 |===
 |Supported versions
 
-| API >= 26
+| API >= 24
 |===
+
+NOTE: If your minSdk version is lower than 26, then you must add https://developer.android.com/studio/write/java8-support#library-desugaring[Java 8+ desugaring support] to your application.
 
 [float]
 [[supported-languages]]

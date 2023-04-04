@@ -1,0 +1,10 @@
+:pull: https://github.com/elastic/apm-agent-android/pull/
+:issues: https://github.com/elastic/apm-agent-android/issues/
+
+[[release-notes]]
+== Release notes
+
+// new major versions go here
+* <<release-notes-0.x>>
+
+include::../CHANGELOG.asciidoc[]

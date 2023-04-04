@@ -27,7 +27,7 @@ public class GeneralConfigurationTest extends BaseRobolectricTest {
 
     @Test
     public void whenNoServiceVersionIsProvided_useServiceVersionFromMetadata() {
-        assertEquals("1.0", getConfiguration().getServiceVersion());
+        assertEquals("1.0(5)", getConfiguration().getServiceVersion());
     }
 
     @Config(application = AppWithCustomServiceVersion.class)

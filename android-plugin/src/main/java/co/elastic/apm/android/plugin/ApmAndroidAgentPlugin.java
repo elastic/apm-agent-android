@@ -23,6 +23,7 @@ import com.android.build.api.instrumentation.InstrumentationScope;
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension;
 import com.android.build.api.variant.ApplicationVariant;
 import com.android.build.gradle.BaseExtension;
+import com.android.build.gradle.internal.dsl.DefaultConfig;
 
 import net.bytebuddy.build.gradle.android.ByteBuddyAndroidPlugin;
 
@@ -67,7 +68,10 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
     private void initializeElasticExtension(Project project) {
         defaultExtension = project.getExtensions().create("elasticApm", ElasticApmExtension.class);
         defaultExtension.getServiceName().convention(project.provider(() -> androidExtension.getDefaultConfig().getApplicationId()));
-        defaultExtension.getServiceVersion().convention(project.provider(() -> androidExtension.getDefaultConfig().getVersionName()));
+        defaultExtension.getServiceVersion().convention(project.provider(() -> {
+            DefaultConfig defaultConfig = androidExtension.getDefaultConfig();
+            return defaultConfig.getVersionName() + "(" + defaultConfig.getVersionCode() + ")";
+        }));
     }
 
     private void addBytebuddyPlugin() {

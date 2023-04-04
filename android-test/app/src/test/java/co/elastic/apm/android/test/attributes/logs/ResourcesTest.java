@@ -29,7 +29,7 @@ public class ResourcesTest extends BaseRobolectricTest {
         LogRecordData log = captureLog();
 
         Logs.verifyRecord(log)
-                .hasResource("service.version", "1.0");
+                .hasResource("service.version", "1.0(5)");
     }
 
     @Test

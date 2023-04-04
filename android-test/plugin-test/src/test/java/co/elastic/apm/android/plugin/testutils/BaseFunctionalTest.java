@@ -49,7 +49,7 @@ public abstract class BaseFunctionalTest {
     private BuildResult latestResult;
 
     protected BaseFunctionalTest() {
-        buildFileBuilder = new BuildFileBuilder(getAndroidCompileSdk(), getAndroidAppId(), "1.0");
+        buildFileBuilder = new BuildFileBuilder(getAndroidCompileSdk(), getAndroidAppId(), "1.0", 1);
         buildFileBuilder.addRepository("mavenLocal()");
         buildFileBuilder.addRepository("mavenCentral()");
         buildFileBuilder.addRepository("google()");

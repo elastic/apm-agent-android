@@ -124,7 +124,7 @@ public class ResourcesTest extends BaseRobolectricTest {
 
     @Config(application = CustomDeploymentEnvApp.class)
     @Test
-    public void withProvided_deploymentEnv_whenASpanIsCreated_providedDeploymentEnvironmentIsSet() {
+    public void withProvidedDeploymentEnv_whenASpanIsCreated_providedDeploymentEnvironmentIsSet() {
         SpanData customSpan = captureSpan();
 
         Spans.verify(customSpan)

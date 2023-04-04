@@ -25,6 +25,11 @@ endif::[]
 
 //${next_release_notes}
 
+[float]
+===== Features
+
+* Appending versionCode to the `service.version` attribute.
+
 [[release-notes-0.5.0]]
 ==== 0.5.0 - 2023/04/03
 

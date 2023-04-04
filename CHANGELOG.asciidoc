@@ -25,6 +25,11 @@ endif::[]
 
 //${next_release_notes}
 
+[float]
+===== Features
+
+* Making OpenTelemetry processors and exporters configurable: {pull}151[#151]
+
 [[release-notes-0.5.0]]
 ==== 0.5.0 - 2023/04/03
 

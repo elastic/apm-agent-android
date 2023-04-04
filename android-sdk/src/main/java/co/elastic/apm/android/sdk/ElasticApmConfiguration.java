@@ -78,8 +78,9 @@ public final class ElasticApmConfiguration {
             return this;
         }
 
-        public void setDeploymentEnvironment(String deploymentEnvironment) {
+        public Builder setDeploymentEnvironment(String deploymentEnvironment) {
             this.deploymentEnvironment = deploymentEnvironment;
+            return this;
         }
 
         public Builder setInstrumentationConfiguration(InstrumentationConfiguration instrumentationConfiguration) {

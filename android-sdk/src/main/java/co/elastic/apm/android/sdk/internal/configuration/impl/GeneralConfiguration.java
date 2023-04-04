@@ -28,11 +28,13 @@ public final class GeneralConfiguration extends Configuration {
     private final ApmMetadataService metadata;
     private final String providedServiceName;
     private final String providedServiceVersion;
+    private final String providedDeploymentEnvironment;
 
     public GeneralConfiguration(ElasticApmConfiguration configuration) {
         this.metadata = ServiceManager.get().getService(Service.Names.METADATA);
         providedServiceName = configuration.serviceName;
         providedServiceVersion = configuration.serviceVersion;
+        providedDeploymentEnvironment = configuration.deploymentEnvironment;
     }
 
     public String getServiceName() {
@@ -44,6 +46,6 @@ public final class GeneralConfiguration extends Configuration {
     }
 
     public String getServiceEnvironment() {
-        return metadata.getDeploymentEnvironment();
+        return (providedDeploymentEnvironment != null) ? providedDeploymentEnvironment : metadata.getDeploymentEnvironment();
     }
 }

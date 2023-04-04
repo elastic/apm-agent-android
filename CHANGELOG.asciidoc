@@ -25,6 +25,11 @@ endif::[]
 
 //${next_release_notes}
 
+[float]
+===== Features
+
+* Making environment name configurable at runtime: {pull}152[#152]
+
 [[release-notes-0.5.0]]
 ==== 0.5.0 - 2023/04/03
 

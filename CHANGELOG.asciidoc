@@ -18,17 +18,12 @@ endif::[]
 ===== Bug fixes
 ////
 
-=== Unreleased
+[[release-notes-0.x]]
+=== Android agent version 0.x
+
+// === Unreleased
 
 //${next_release_notes}
-
-[[release-notes-0.6.0]]
-==== 0.6.0 - //${release_date}
-
-[float]
-===== Features
-
-* New feature: {pull}000[#000]
 
 [[release-notes-0.5.0]]
 ==== 0.5.0 - 2023/04/03

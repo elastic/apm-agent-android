@@ -25,6 +25,11 @@ endif::[]
 
 //${next_release_notes}
 
+[float]
+===== Features
+
+* Using minSdk 24: {pull}149[#149]
+
 [[release-notes-0.5.0]]
 ==== 0.5.0 - 2023/04/03
 

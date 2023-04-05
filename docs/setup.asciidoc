@@ -103,10 +103,10 @@ That's it!
 
 If you need to set up the Elastic SDK manually, without having to add the Gradle plugin as shown above, you'll need to provide the following configuration parameters at runtime:
 
-- Set your app name, version and environment name, as explained <<app-id-configuration, here>>.
+- Set your app name, version, and environment name, as explained <<app-id-configuration, here>>.
 - Set your server connectivity parameters, as explained <<app-server-connectivity, here>>.
 
-NOTE: Bear in mind that, without the Gradle plugin, the Elastic SDK won't be able to provide automatic instrumentations for its <<supported-technologies>>
+NOTE: Without the Gradle plugin, the Elastic SDK won't be able to provide automatic instrumentations for its <<supported-technologies>>.
 
 [float]
 [[whats-next]]

@@ -23,7 +23,11 @@ endif::[]
 
 // === Unreleased
 
-//${next_release_notes}
+////
+${next_release_notes}
+
+[[release-notes-${version}]]
+==== ${version} - ${release_date}
 
 [float]
 ===== Features
@@ -31,6 +35,7 @@ endif::[]
 * Using minSdk 24: {pull}149[#149]
 * Making OpenTelemetry processors and exporters configurable: {pull}151[#151]
 * Making environment name configurable at runtime: {pull}152[#152]
+////
 
 [[release-notes-0.5.0]]
 ==== 0.5.0 - 2023/04/03

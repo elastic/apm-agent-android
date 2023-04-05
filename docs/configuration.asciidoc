@@ -108,7 +108,7 @@ class MyApp extends android.app.Application {
 [[app-id-configuration]]
 ==== Application ID configuration
 
-You can provide your application name, version and its environment name dynamically by setting those when building your `ElasticApmConfiguration` instance as show below:
+You can provide your application name, version, and environment dynamically when building your `ElasticApmConfiguration` instance as shown below:
 
 [source,java]
 ----

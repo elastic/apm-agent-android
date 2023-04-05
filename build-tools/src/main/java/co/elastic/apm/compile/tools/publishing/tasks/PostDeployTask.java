@@ -43,7 +43,7 @@ public class PostDeployTask extends DefaultTask {
         String newVersion = VersionUtility.bumpMinorVersion(currentVersion);
 
         updateNextVersion(gradlePropertiesFile, properties, newVersion);
-        updateChangelog(newVersion);
+        updateChangelog(currentVersion);
 
         publishChanges();
     }

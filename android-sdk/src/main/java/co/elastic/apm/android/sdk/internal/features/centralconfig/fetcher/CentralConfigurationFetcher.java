@@ -19,11 +19,16 @@
 package co.elastic.apm.android.sdk.internal.features.centralconfig.fetcher;
 
 import android.net.Uri;
+import android.os.Build;
 
 import org.slf4j.Logger;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -117,7 +122,22 @@ public final class CentralConfigurationFetcher {
     }
 
     private void saveConfiguration(InputStream inputStream) throws IOException {
-        Files.copy(inputStream, fileProvider.getConfigurationFile().toPath(), StandardCopyOption.REPLACE_EXISTING);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            saveToFileLegacy(inputStream, fileProvider.getConfigurationFile());
+        } else {
+            Files.copy(inputStream, fileProvider.getConfigurationFile().toPath(), StandardCopyOption.REPLACE_EXISTING);
+        }
+    }
+
+    private void saveToFileLegacy(InputStream inputStream, File configurationFile) throws IOException {
+        try (OutputStream out = new BufferedOutputStream(new FileOutputStream(configurationFile))) {
+            byte[] buffer = new byte[1024];
+            int lengthRead;
+            while ((lengthRead = inputStream.read(buffer)) > 0) {
+                out.write(buffer, 0, lengthRead);
+                out.flush();
+            }
+        }
     }
 
     private void storeETag(String eTag) {

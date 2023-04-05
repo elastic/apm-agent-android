@@ -28,6 +28,7 @@ endif::[]
 [float]
 ===== Features
 
+* Using minSdk 24: {pull}149[#149]
 * Making OpenTelemetry processors and exporters configurable: {pull}151[#151]
 
 [[release-notes-0.5.0]]

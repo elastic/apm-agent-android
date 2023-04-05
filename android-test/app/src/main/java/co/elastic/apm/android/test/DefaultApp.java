@@ -2,6 +2,7 @@ package co.elastic.apm.android.test;
 
 import android.app.Application;
 
+import co.elastic.apm.android.sdk.ElasticApmConfiguration;
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration;
 import co.elastic.apm.android.test.common.agent.AgentInitializer;
 import co.elastic.apm.android.test.common.logs.LogRecordExporterCaptor;
@@ -21,7 +22,8 @@ public class DefaultApp extends Application implements ExportersProvider {
     @Override
     public void onCreate() {
         super.onCreate();
-        AgentInitializer.initialize(this, getSignalConfiguration());
+        ElasticApmConfiguration configuration = ElasticApmConfiguration.builder().setSignalConfiguration(getSignalConfiguration()).build();
+        AgentInitializer.initialize(this, configuration);
     }
 
     protected SignalConfiguration getSignalConfiguration() {

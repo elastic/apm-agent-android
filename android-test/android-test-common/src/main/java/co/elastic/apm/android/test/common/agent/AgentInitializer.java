@@ -14,9 +14,7 @@ import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
 
 public class AgentInitializer {
 
-    public static void initialize(Context context, SignalConfiguration signalConfiguration) {
-        ElasticApmConfiguration configuration = ElasticApmConfiguration.getDefault();
-        injectSignalConfiguration(configuration, signalConfiguration);
+    public static void initialize(Context context, ElasticApmConfiguration configuration) {
         initialize(context, configuration, null, null);
     }
 

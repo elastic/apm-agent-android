@@ -29,6 +29,7 @@ public final class ElasticApmConfiguration {
     public final InstrumentationConfiguration instrumentationConfiguration;
     public final String serviceName;
     public final String serviceVersion;
+    public final String deploymentEnvironment;
     public final SessionIdProvider sessionIdProvider;
     public final SignalConfiguration signalConfiguration;
 
@@ -47,6 +48,7 @@ public final class ElasticApmConfiguration {
         sessionIdProvider = builder.sessionIdProvider;
         instrumentationConfiguration = builder.instrumentationConfiguration;
         signalConfiguration = builder.signalConfiguration;
+        deploymentEnvironment = builder.deploymentEnvironment;
     }
 
     public static class Builder {
@@ -54,6 +56,7 @@ public final class ElasticApmConfiguration {
         private InstrumentationConfiguration instrumentationConfiguration;
         private String serviceName;
         private String serviceVersion;
+        private String deploymentEnvironment;
         private SessionIdProvider sessionIdProvider;
         private SignalConfiguration signalConfiguration;
 
@@ -90,6 +93,16 @@ public final class ElasticApmConfiguration {
          */
         public Builder setServiceVersion(String serviceVersion) {
             this.serviceVersion = serviceVersion;
+            return this;
+        }
+
+        /**
+         * This method sets up OpenTelemetry's `deployment.environment` resource attribute for every signal.
+         *
+         * @param deploymentEnvironment - The application environment
+         */
+        public Builder setDeploymentEnvironment(String deploymentEnvironment) {
+            this.deploymentEnvironment = deploymentEnvironment;
             return this;
         }
 

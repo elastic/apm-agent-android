@@ -1,9 +1,11 @@
-\//${next_release_notes}
+////
+$${next_release_notes}
 
-[[release-notes-{{version}}]]
-==== {{version}} - \//${release_date}
+[[release-notes-${version}]]
+==== ${version} - ${release_date}
 
 [float]
 ===== Features
 
 * New feature: {pull}000[#000]
+////

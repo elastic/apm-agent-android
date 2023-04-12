@@ -27,6 +27,12 @@ public abstract class BaseLogVerifier<T extends LogVerifier<?>> implements LogVe
     }
 
     @Override
+    public T hasResource(String resourceName, Integer resourceValue) {
+        assertEquals(Long.valueOf(resourceValue), log.getResource().getAttribute(AttributeKey.longKey(resourceName)));
+        return (T) this;
+    }
+
+    @Override
     public T startedAt(long timeInNanoseconds) {
         assertEquals(timeInNanoseconds, log.getEpochNanos());
         return (T) this;

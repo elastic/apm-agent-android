@@ -70,6 +70,12 @@ public abstract class BaseSpanVerifier<T extends SpanVerifier<?>> implements Spa
     }
 
     @Override
+    public T hasResource(String resourceName, Integer resourceValue) {
+        assertEquals(Long.valueOf(resourceValue), span.getResource().getAttribute(AttributeKey.longKey(resourceName)));
+        return (T) this;
+    }
+
+    @Override
     public T startedAt(long timeInNanoseconds) {
         assertEquals(timeInNanoseconds, span.getStartEpochNanos());
         return (T) this;

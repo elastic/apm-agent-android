@@ -66,6 +66,7 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
 
     private void initializeElasticExtension(Project project) {
         defaultExtension = project.getExtensions().create("elasticApm", ElasticApmExtension.class);
+        defaultExtension.getServiceName().convention(project.provider(() -> androidExtension.getDefaultConfig().getApplicationId()));
         defaultExtension.getServiceVersion().convention(project.provider(() -> androidExtension.getDefaultConfig().getVersionName()));
     }
 

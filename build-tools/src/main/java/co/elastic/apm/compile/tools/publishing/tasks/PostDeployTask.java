@@ -24,10 +24,13 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class PostDeployTask extends DefaultTask {
 
     private static final Logger logger = Logging.getLogger(VersionUtility.class);
+    private static final Pattern COMMENTED_NEXT_RELEASE_PATTERN = Pattern.compile("/{4}\\s+(\\$\\{next_release_notes}[\\s\\S]+)/{4}\\s?");
 
     @TaskAction
     public void execute() {
@@ -40,7 +43,7 @@ public class PostDeployTask extends DefaultTask {
         String newVersion = VersionUtility.bumpMinorVersion(currentVersion);
 
         updateNextVersion(gradlePropertiesFile, properties, newVersion);
-        updateChangelog(newVersion);
+        updateChangelog(currentVersion);
 
         publishChanges();
     }
@@ -63,31 +66,53 @@ public class PostDeployTask extends DefaultTask {
     }
 
     private void updateChangelog(String newVersion) {
-        File changelog = new File("CHANGELOG.asciidoc");
-        Map<String, String> substitutions = new HashMap<>();
-        substitutions.put("release_date", new SimpleDateFormat("yyyy/MM/dd", Locale.US).format(new Date()));
-        substitutions.put("next_release_notes", getNewReleaseNotes(newVersion));
-        StringSubstitutor substitutor = new StringSubstitutor(substitutions, "//${", "}", '\\');
-        substituteFileContents(changelog, substitutor);
+        Path changelogPath = getChangelogPath();
+        String contents = getContents(changelogPath);
+        contents = uncommentNextRelease(contents);
+        replaceFileContents(changelogPath, resolvePlaceholders(contents, newVersion));
     }
 
-    private String getNewReleaseNotes(String newVersion) {
+    private byte[] resolvePlaceholders(String text, String newVersion) {
         Map<String, String> substitutions = new HashMap<>();
+        substitutions.put("release_date", new SimpleDateFormat("yyyy/MM/dd", Locale.US).format(new Date()));
         substitutions.put("version", newVersion);
-        StringSubstitutor substitutor = new StringSubstitutor(substitutions, "{{", "}}");
+        substitutions.put("next_release_notes", getNewReleaseNotes());
+        StringSubstitutor substitutor = new StringSubstitutor(substitutions);
+        return substitutor.replace(text).getBytes(StandardCharsets.UTF_8);
+    }
 
-        try (InputStream is = getClass().getResourceAsStream("/changelog/release_notes_template.txt")) {
-            return substitutor.replace(IOUtils.toString(is, StandardCharsets.UTF_8));
+    private Path getChangelogPath() {
+        File changelog = new File("CHANGELOG.asciidoc");
+        return changelog.toPath();
+    }
+
+    private String uncommentNextRelease(String contents) {
+        Matcher matcher = COMMENTED_NEXT_RELEASE_PATTERN.matcher(contents);
+        if (!matcher.find()) {
+            return contents;
+        }
+        return contents.replace(matcher.group(), matcher.group(1));
+    }
+
+    private String getContents(Path path) {
+        try {
+            return Files.readString(path);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void substituteFileContents(File file, StringSubstitutor substitutor) {
+    private String getNewReleaseNotes() {
+        try (InputStream is = getClass().getResourceAsStream("/changelog/release_notes_template.txt")) {
+            return IOUtils.toString(is, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void replaceFileContents(Path path, byte[] contents) {
         try {
-            Path path = file.toPath();
-            String contents = Files.readString(path, StandardCharsets.UTF_8);
-            Files.write(path, substitutor.replace(contents).getBytes(StandardCharsets.UTF_8));
+            Files.write(path, contents);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

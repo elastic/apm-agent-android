@@ -7,10 +7,12 @@ import static co.elastic.apm.android.test.attributes.common.ResourcesApp.RUNTIME
 import org.junit.Test;
 import org.robolectric.annotation.Config;
 
+import co.elastic.apm.android.sdk.ElasticApmConfiguration;
 import co.elastic.apm.android.test.BuildConfig;
 import co.elastic.apm.android.test.attributes.common.ResourcesApp;
 import co.elastic.apm.android.test.common.spans.Spans;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
+import co.elastic.apm.android.test.testutils.base.BaseRobolectricTestApplication;
 import io.opentelemetry.sdk.trace.data.SpanData;
 
 @Config(application = ResourcesApp.class)
@@ -126,6 +128,24 @@ public class ResourcesTest extends BaseRobolectricTest {
 
         Spans.verify(customSpan)
                 .hasResource("process.runtime.version", RUNTIME_VERSION);
+    }
+
+    @Config(application = CustomDeploymentEnvApp.class)
+    @Test
+    public void withProvidedDeploymentEnv_whenASpanIsCreated_providedDeploymentEnvironmentIsSet() {
+        SpanData customSpan = captureSpan();
+
+        Spans.verify(customSpan)
+                .hasResource("deployment.environment", "some-deployment-env");
+    }
+
+    private static class CustomDeploymentEnvApp extends BaseRobolectricTestApplication {
+        @Override
+        public void onCreate() {
+            initializeAgentWithCustomConfig(ElasticApmConfiguration.builder()
+                    .setDeploymentEnvironment("some-deployment-env")
+                    .build());
+        }
     }
 
     private SpanData captureSpan() {

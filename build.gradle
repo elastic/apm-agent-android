@@ -6,7 +6,7 @@ plugins {
 
 ext {
     jvmCompatibility = JavaVersion.VERSION_1_8
-    androidMinSdk = 26
+    androidMinSdk = 24
     androidCompileSdk = 32
     openTelemetry_version = "1.22.0"
     androidAnnotations_version = "1.4.0"

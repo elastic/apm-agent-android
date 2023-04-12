@@ -6,6 +6,8 @@ Follow these steps to start reporting your Android application's performance to 
 1. <<gradle-setup>>.
 2. <<application-setup>>.
 3. <<compile-and-run>>.
+4. <<manual-setup>>.
+5. <<whats-next>>.
 
 [float]
 [[gradle-setup]]
@@ -57,6 +59,15 @@ More info on API Keys {ref}/security-api-create-api-key.html[here].
 NOTE: When both `secretToken` and `apiKey` are provided, apiKey has priority and secretToken is ignored.
 
 [float]
+[[minsdk-24-support]]
+==== For projects using minSdk version < 26
+
+Due to Android's limited support for Java 8 features on devices with API level < 26, or in other words, older than Android 8.0, you must add https://developer.android.com/studio/write/java8-support#library-desugaring[Java 8+ desugaring support] to apps with a minSdk version lower than 26.
+If you don't, your app can crash when running on devices using Android OS versions older than 8.0. This is because the https://github.com/open-telemetry/opentelemetry-java[OpenTelemetry Java SDK], which this SDK is built upon, uses Java 8 features.
+
+If your minSdk is 26 or higher, you can skip this step.
+
+[float]
 [[application-setup]]
 === Set up your application
 
@@ -87,11 +98,23 @@ All that's left is to compile and run your application.
 That's it!
 
 [float]
+[[manual-setup]]
+=== (Optional) Manual set up
+
+If you need to set up the Elastic SDK manually, without having to add the Gradle plugin as shown above, you'll need to provide the following configuration parameters at runtime:
+
+- Set your app name, version, and environment name, as explained <<app-id-configuration, here>>.
+- Set your server connectivity parameters, as explained <<app-server-connectivity, here>>.
+
+NOTE: Without the Gradle plugin, the Elastic SDK won't be able to provide automatic instrumentations for its <<supported-technologies>>.
+
+[float]
 [[whats-next]]
 === What's next?
 
-After initializing the agent as shown above, your application will automatically create traces for all OkHttp network requests (including those created by tools that make use of OkHttp, like Retrofit) and all https://developer.android.com/reference/android/app/Activity[Activity] and https://developer.android.com/reference/androidx/fragment/app/Fragment[Fragment] starting methods.
-In addition, you'll get automatic crash reports when an unexpected error occurs in your app.
+After initializing the agent (by using the gradle plugin), your application will automatically create traces for all OkHttp network requests (including those created by tools that make use of OkHttp, like Retrofit) and all https://developer.android.com/reference/android/app/Activity[Activity] and https://developer.android.com/reference/androidx/fragment/app/Fragment[Fragment] starting methods.
+
+Apart from the automatic instrumentation helped by the Gradle plugin, you'll get automatic crash reports when an unexpected error occurs in your app, regardless of whether the Gradle plugin is available or not.
 
 All of these events will contain a "Session ID" that links related events together—allowing you to make sense of and diagnose any issues that arise.
 Head to the **APM app in {kib}** to start exploring your data.

@@ -29,7 +29,7 @@ public class ResourcesTest extends BaseRobolectricTest {
         SpanData customSpan = captureSpan();
 
         Spans.verify(customSpan)
-                .hasResource("service.version", "1.0(5)");
+                .hasResource("service.version", "1.0");
     }
 
     @Test

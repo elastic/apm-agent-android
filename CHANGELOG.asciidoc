@@ -45,11 +45,6 @@ ${next_release_notes}
 * Making OpenTelemetry processors and exporters configurable: {pull}151[#151]
 * Making environment name configurable at runtime: {pull}152[#152]
 
-[float]
-===== Features
-
-* Appending versionCode to the `service.version` attribute.
-
 [[release-notes-0.5.0]]
 ==== 0.5.0 - 2023/04/03
 

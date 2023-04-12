@@ -29,8 +29,8 @@ public class BuildFileBuilder {
     private final AndroidBlockBuilder androidBlockBuilder;
     private final ElasticBlockBuilder elasticBlockBuilder = new ElasticBlockBuilder();
 
-    public BuildFileBuilder(int androidCompileSdk, String applicationId, String versionName, int versionCode) {
-        androidBlockBuilder = new AndroidBlockBuilder(androidCompileSdk, applicationId, versionName, versionCode);
+    public BuildFileBuilder(int androidCompileSdk, String applicationId, String versionName) {
+        androidBlockBuilder = new AndroidBlockBuilder(androidCompileSdk, applicationId, versionName);
     }
 
     public BuildFileBuilder addPlugin(String pluginId) {

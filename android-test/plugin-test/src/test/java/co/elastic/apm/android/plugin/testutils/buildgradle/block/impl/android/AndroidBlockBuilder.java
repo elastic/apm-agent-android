@@ -25,10 +25,10 @@ public class AndroidBlockBuilder implements BlockBuilder {
     private final DefaultConfigBlockBuilder defaultConfig;
     private final String applicationId;
 
-    public AndroidBlockBuilder(int compileSdkVersion, String applicationId, String versionName, int versionCode) {
+    public AndroidBlockBuilder(int compileSdkVersion, String applicationId, String versionName) {
         this.compileSdkVersion = compileSdkVersion;
         this.applicationId = applicationId;
-        defaultConfig = new DefaultConfigBlockBuilder(applicationId, versionName, versionCode);
+        defaultConfig = new DefaultConfigBlockBuilder(applicationId, versionName);
     }
 
     public DefaultConfigBlockBuilder getDefaultConfig() {

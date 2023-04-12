@@ -66,7 +66,7 @@ public class CompilationConfigTest extends BaseAssetsVerificationTest {
         verifyTaskIsSuccessful(":debugGenerateApmInfo");
         Properties properties = getGeneratedProperties("debug");
         assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
-        assertEquals("1.0(1)", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
+        assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
         assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
         assertEquals(serverUrl, properties.getProperty(ApmInfo.KEY_SERVER_URL));
         assertNull(properties.getProperty(ApmInfo.KEY_SERVER_SECRET_TOKEN));
@@ -83,7 +83,7 @@ public class CompilationConfigTest extends BaseAssetsVerificationTest {
         verifyTaskIsSuccessful(":debugGenerateApmInfo");
         Properties properties = getGeneratedProperties("debug");
         assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
-        assertEquals("1.0(1)", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
+        assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
         assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
         assertEquals(serverUrlEnv, properties.getProperty(ApmInfo.KEY_SERVER_URL));
         assertNull(properties.getProperty(ApmInfo.KEY_SERVER_SECRET_TOKEN));
@@ -102,7 +102,7 @@ public class CompilationConfigTest extends BaseAssetsVerificationTest {
         verifyTaskIsSuccessful(":debugGenerateApmInfo");
         Properties properties = getGeneratedProperties("debug");
         assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
-        assertEquals("1.0(1)", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
+        assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
         assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
         assertEquals(serverUrl, properties.getProperty(ApmInfo.KEY_SERVER_URL));
         assertEquals(secretTokenEnv, properties.getProperty(ApmInfo.KEY_SERVER_SECRET_TOKEN));
@@ -121,7 +121,7 @@ public class CompilationConfigTest extends BaseAssetsVerificationTest {
         verifyTaskIsSuccessful(":debugGenerateApmInfo");
         Properties properties = getGeneratedProperties("debug");
         assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
-        assertEquals("1.0(1)", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
+        assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
         assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
         assertEquals(serverUrlEnv, properties.getProperty(ApmInfo.KEY_SERVER_URL));
         assertNull(properties.getProperty(ApmInfo.KEY_SERVER_SECRET_TOKEN));
@@ -140,7 +140,7 @@ public class CompilationConfigTest extends BaseAssetsVerificationTest {
         verifyTaskIsSuccessful(":debugGenerateApmInfo");
         Properties properties = getGeneratedProperties("debug");
         assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
-        assertEquals("1.0(1)", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
+        assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
         assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
         assertEquals(apiKey, properties.getProperty(ApmInfo.KEY_SERVER_API_KEY));
         assertEquals(serverUrl, properties.getProperty(ApmInfo.KEY_SERVER_URL));
@@ -161,7 +161,7 @@ public class CompilationConfigTest extends BaseAssetsVerificationTest {
         verifyTaskIsSuccessful(":debugGenerateApmInfo");
         Properties properties = getGeneratedProperties("debug");
         assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
-        assertEquals("1.0(1)", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
+        assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
         assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
         assertEquals(apiKeyEnv, properties.getProperty(ApmInfo.KEY_SERVER_API_KEY));
         assertEquals(serverUrl, properties.getProperty(ApmInfo.KEY_SERVER_URL));
@@ -181,7 +181,7 @@ public class CompilationConfigTest extends BaseAssetsVerificationTest {
         verifyTaskIsSuccessful(":debugGenerateApmInfo");
         Properties properties = getGeneratedProperties("debug");
         assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
-        assertEquals("1.0(1)", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
+        assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
         assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
         assertEquals(serverToken, properties.getProperty(ApmInfo.KEY_SERVER_SECRET_TOKEN));
         assertEquals(serverUrl, properties.getProperty(ApmInfo.KEY_SERVER_URL));
@@ -202,7 +202,7 @@ public class CompilationConfigTest extends BaseAssetsVerificationTest {
         verifyTaskIsSuccessful(":debugGenerateApmInfo");
         Properties properties = getGeneratedProperties("debug");
         assertEquals(getAndroidAppId(), properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
-        assertEquals("1.0(1)", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
+        assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
         assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
         assertEquals(serverTokenEnv, properties.getProperty(ApmInfo.KEY_SERVER_SECRET_TOKEN));
         assertEquals(serverUrl, properties.getProperty(ApmInfo.KEY_SERVER_URL));
@@ -221,7 +221,7 @@ public class CompilationConfigTest extends BaseAssetsVerificationTest {
         verifyTaskIsSuccessful(":debugGenerateApmInfo");
         Properties properties = getGeneratedProperties("debug");
         assertEquals(serviceName, properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
-        assertEquals("1.0(1)", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
+        assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
         assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
         assertEquals(serverUrl, properties.getProperty(ApmInfo.KEY_SERVER_URL));
     }
@@ -241,7 +241,7 @@ public class CompilationConfigTest extends BaseAssetsVerificationTest {
         verifyTaskIsSuccessful(":debugGenerateApmInfo");
         Properties properties = getGeneratedProperties("debug");
         assertEquals(serviceNameEnv, properties.getProperty(ApmInfo.KEY_SERVICE_NAME));
-        assertEquals("1.0(1)", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
+        assertEquals("1.0", properties.getProperty(ApmInfo.KEY_SERVICE_VERSION));
         assertEquals("debug", properties.getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT));
         assertEquals(serverUrl, properties.getProperty(ApmInfo.KEY_SERVER_URL));
     }

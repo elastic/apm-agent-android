@@ -32,7 +32,7 @@ ${next_release_notes}
 [float]
 ===== Features
 
-* New feature: {pull}000[#000]
+* Sending app's versionCode in the `service.build` attribute: {pull}153[#153]
 ////
 
 [[release-notes-0.6.0]]

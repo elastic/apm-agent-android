@@ -27,6 +27,11 @@ public class MetricVerifier {
         return this;
     }
 
+    public MetricVerifier hasResource(String resourceName, Integer resourceValue) {
+        assertEquals(Long.valueOf(resourceValue), metric.getResource().getAttribute(AttributeKey.longKey(resourceName)));
+        return this;
+    }
+
     public MetricVerifier startedAt(long timeInNanoseconds) {
         List<PointData> points = new ArrayList<>(metric.getData().getPoints());
         assertEquals(timeInNanoseconds, points.get(0).getEpochNanos());

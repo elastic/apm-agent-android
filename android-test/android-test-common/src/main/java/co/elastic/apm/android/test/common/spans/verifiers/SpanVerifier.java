@@ -22,6 +22,8 @@ public interface SpanVerifier<T extends SpanVerifier<?>> {
 
     T hasResource(String resourceName, String resourceValue);
 
+    T hasResource(String resourceName, Integer resourceValue);
+
     T startedAt(long timeInNanoseconds);
 
     T isOfKind(SpanKind kind);

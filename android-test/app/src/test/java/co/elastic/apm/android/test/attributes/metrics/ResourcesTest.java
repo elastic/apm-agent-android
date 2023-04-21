@@ -33,6 +33,14 @@ public class ResourcesTest extends BaseRobolectricTest {
     }
 
     @Test
+    public void whenAMetricIsCreated_serviceBuildIsSet() {
+        MetricData metric = captureMetric();
+
+        Metrics.verify(metric)
+                .hasResource("service.build", 5);
+    }
+
+    @Test
     public void whenAMetricIsCreated_agentNameIsSet() {
         MetricData metric = captureMetric();
 

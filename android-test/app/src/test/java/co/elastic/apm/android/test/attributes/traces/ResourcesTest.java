@@ -35,6 +35,14 @@ public class ResourcesTest extends BaseRobolectricTest {
     }
 
     @Test
+    public void whenASpanIsCreated_serviceBuildIsSet() {
+        SpanData customSpan = captureSpan();
+
+        Spans.verify(customSpan)
+                .hasResource("service.build", 5);
+    }
+
+    @Test
     public void whenASpanIsCreated_agentNameIsSet() {
         SpanData customSpan = captureSpan();
 

@@ -20,8 +20,10 @@ package co.elastic.apm.android.sdk.internal.services.appinfo;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 
+import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.services.Service;
 
 public class AppInfoService implements Service {
@@ -37,6 +39,16 @@ public class AppInfoService implements Service {
 
     public boolean isInDebugMode() {
         return (appContext.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+    }
+
+    public int getVersionCode() {
+        try {
+            PackageInfo packageInfo = appContext.getPackageManager().getPackageInfo(appContext.getPackageName(), 0);
+            return packageInfo.versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            Elog.getLogger().error("Error providing versionCode", e);
+            return 0;
+        }
     }
 
     @Override

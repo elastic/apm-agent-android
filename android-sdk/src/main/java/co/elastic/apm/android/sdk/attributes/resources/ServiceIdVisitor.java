@@ -21,6 +21,10 @@ package co.elastic.apm.android.sdk.attributes.resources;
 import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.configuration.impl.GeneralConfiguration;
+import co.elastic.apm.android.sdk.internal.services.Service;
+import co.elastic.apm.android.sdk.internal.services.ServiceManager;
+import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService;
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 
@@ -31,6 +35,11 @@ public class ServiceIdVisitor implements AttributesVisitor {
         GeneralConfiguration configuration = Configurations.get(GeneralConfiguration.class);
         builder.put(ResourceAttributes.SERVICE_NAME, configuration.getServiceName())
                 .put(ResourceAttributes.SERVICE_VERSION, configuration.getServiceVersion())
+                .put(AttributeKey.longKey("service.build"), getServiceBuild())
                 .put(ResourceAttributes.DEPLOYMENT_ENVIRONMENT, configuration.getServiceEnvironment());
+    }
+
+    private int getServiceBuild() {
+        return ServiceManager.get().<AppInfoService>getService(Service.Names.APP_INFO).getVersionCode();
     }
 }

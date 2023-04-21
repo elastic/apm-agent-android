@@ -33,6 +33,14 @@ public class ResourcesTest extends BaseRobolectricTest {
     }
 
     @Test
+    public void whenALogIsCreated_serviceBuildIsSet() {
+        LogRecordData log = captureLog();
+
+        Logs.verifyRecord(log)
+                .hasResource("service.build", 5);
+    }
+
+    @Test
     public void whenALogIsCreated_agentNameIsSet() {
         LogRecordData log = captureLog();
 

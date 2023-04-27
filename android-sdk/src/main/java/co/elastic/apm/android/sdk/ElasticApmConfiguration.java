@@ -20,7 +20,7 @@ package co.elastic.apm.android.sdk;
 
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration;
 import co.elastic.apm.android.sdk.instrumentation.InstrumentationConfiguration;
-import co.elastic.apm.android.sdk.internal.opentelemetry.processors.spans.SpanFilter;
+import co.elastic.apm.android.sdk.traces.tools.SpanFilter;
 import co.elastic.apm.android.sdk.session.SessionIdProvider;
 import co.elastic.apm.android.sdk.session.impl.DefaultSessionIdProvider;
 import co.elastic.apm.android.sdk.traces.http.HttpTraceConfiguration;

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.opentelemetry.processors.spans;
+package co.elastic.apm.android.sdk.traces.tools;
 
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.common.Filter;
 import io.opentelemetry.sdk.trace.ReadableSpan;

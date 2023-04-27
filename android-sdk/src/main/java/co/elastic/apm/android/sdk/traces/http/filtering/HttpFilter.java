@@ -23,7 +23,7 @@ import androidx.annotation.NonNull;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import co.elastic.apm.android.sdk.internal.opentelemetry.processors.spans.SpanFilter;
+import co.elastic.apm.android.sdk.traces.tools.SpanFilter;
 import co.elastic.apm.android.sdk.traces.http.data.HttpRequest;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;

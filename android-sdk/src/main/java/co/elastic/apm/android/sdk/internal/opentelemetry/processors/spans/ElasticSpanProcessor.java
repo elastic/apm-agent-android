@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.opentelemetry.processors;
+package co.elastic.apm.android.sdk.internal.opentelemetry.processors.spans;
 
 import org.slf4j.Logger;
 

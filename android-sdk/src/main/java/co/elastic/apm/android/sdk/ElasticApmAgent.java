@@ -48,8 +48,8 @@ import co.elastic.apm.android.sdk.internal.features.launchtime.LaunchTimeActivit
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.injection.DefaultAgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.opentelemetry.ElasticOpenTelemetry;
-import co.elastic.apm.android.sdk.internal.opentelemetry.processors.ElasticLogRecordProcessor;
-import co.elastic.apm.android.sdk.internal.opentelemetry.processors.ElasticSpanProcessor;
+import co.elastic.apm.android.sdk.internal.opentelemetry.processors.logs.ElasticLogRecordProcessor;
+import co.elastic.apm.android.sdk.internal.opentelemetry.processors.spans.ElasticSpanProcessor;
 import co.elastic.apm.android.sdk.internal.opentelemetry.tools.Flusher;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;

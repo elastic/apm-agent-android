@@ -234,6 +234,7 @@ public final class ElasticApmAgent {
                 new ConnectionHttpAttributesVisitor()
         );
         ElasticSpanProcessor processor = new ElasticSpanProcessor(spanProcessor, spanAttributesVisitor);
+        processor.addFilter(configuration.spanFilter);
         processor.addAllFilters(configuration.httpTraceConfiguration.httpFilters);
 
         return SdkTracerProvider.builder()

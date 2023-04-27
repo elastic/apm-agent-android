@@ -43,6 +43,13 @@ public final class ElasticSpanProcessor implements SpanProcessor {
     private static final AttributeKey<String> TRANSACTION_TYPE_ATTRIBUTE_KEY = AttributeKey.stringKey("type");
     private static final String TRANSACTION_TYPE_VALUE = "mobile";
 
+    public void addFilter(SpanFilter filter) {
+        if (filter == null) {
+            return;
+        }
+        filters.add(filter);
+    }
+
     public void addAllFilters(Collection<? extends SpanFilter> filters) {
         this.filters.addAll(filters);
     }

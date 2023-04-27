@@ -18,7 +18,7 @@
  */
 package co.elastic.apm.android.sdk.traces.tools;
 
-import co.elastic.apm.android.sdk.internal.opentelemetry.processors.common.Filter;
+import co.elastic.apm.android.sdk.internal.api.Filter;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 
 public interface SpanFilter extends Filter<ReadableSpan> {

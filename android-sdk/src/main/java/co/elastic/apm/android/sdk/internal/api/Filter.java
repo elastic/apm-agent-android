@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.opentelemetry.processors.common;
+package co.elastic.apm.android.sdk.internal.api;
 
 public interface Filter<T> {
 

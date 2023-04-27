@@ -37,13 +37,13 @@ import io.opentelemetry.sdk.trace.SpanProcessor;
 public final class ElasticSpanProcessor implements SpanProcessor {
     private final SpanProcessor original;
     private final AttributesVisitor commonAttributesVisitor;
-    private final Set<ExclusionRule> rules = new HashSet<>();
+    private final Set<SpanFilter> filters = new HashSet<>();
     private final Logger logger = Elog.getLogger();
     private static final AttributeKey<String> TRANSACTION_TYPE_ATTRIBUTE_KEY = AttributeKey.stringKey("type");
     private static final String TRANSACTION_TYPE_VALUE = "mobile";
 
-    public void addAllExclusionRules(Collection<? extends ExclusionRule> rules) {
-        this.rules.addAll(rules);
+    public void addAllFilters(Collection<? extends SpanFilter> filters) {
+        this.filters.addAll(filters);
     }
 
     public ElasticSpanProcessor(SpanProcessor original, AttributesVisitor commonAttributesVisitor) {
@@ -67,7 +67,7 @@ public final class ElasticSpanProcessor implements SpanProcessor {
 
     @Override
     public void onEnd(ReadableSpan span) {
-        if (shouldExclude(span)) {
+        if (!shouldInclude(span)) {
             logger.debug("Excluding span: {}", span);
             return;
         }
@@ -80,16 +80,12 @@ public final class ElasticSpanProcessor implements SpanProcessor {
         return true;
     }
 
-    private boolean shouldExclude(ReadableSpan span) {
-        for (ExclusionRule rule : rules) {
-            if (rule.exclude(span)) {
-                return true;
+    private boolean shouldInclude(ReadableSpan span) {
+        for (SpanFilter filter : filters) {
+            if (!filter.shouldInclude(span)) {
+                return false;
             }
         }
-        return false;
-    }
-
-    public interface ExclusionRule {
-        boolean exclude(ReadableSpan span);
+        return true;
     }
 }

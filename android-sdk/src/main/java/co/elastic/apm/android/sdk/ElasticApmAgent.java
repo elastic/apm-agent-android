@@ -234,7 +234,7 @@ public final class ElasticApmAgent {
                 new ConnectionHttpAttributesVisitor()
         );
         ElasticSpanProcessor processor = new ElasticSpanProcessor(spanProcessor, spanAttributesVisitor);
-        processor.addAllExclusionRules(configuration.httpTraceConfiguration.exclusionRules);
+        processor.addAllExclusionRules(configuration.httpTraceConfiguration.httpFilters);
 
         return SdkTracerProvider.builder()
                 .setClock(ntpManager.getClock())

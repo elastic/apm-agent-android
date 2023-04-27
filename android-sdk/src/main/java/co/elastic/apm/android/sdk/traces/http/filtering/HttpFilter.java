@@ -23,12 +23,12 @@ import androidx.annotation.NonNull;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import co.elastic.apm.android.sdk.traces.http.data.HttpRequest;
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.ElasticSpanProcessor;
+import co.elastic.apm.android.sdk.traces.http.data.HttpRequest;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 
-abstract public class HttpExclusionRule implements ElasticSpanProcessor.ExclusionRule {
+abstract public class HttpFilter implements ElasticSpanProcessor.ExclusionRule {
 
     @Override
     public boolean exclude(ReadableSpan span) {
@@ -38,7 +38,7 @@ abstract public class HttpExclusionRule implements ElasticSpanProcessor.Exclusio
             return false;
         }
 
-        return exclude(new HttpRequest(httpMethod, getUrl(span)));
+        return shouldInclude(new HttpRequest(httpMethod, getUrl(span)));
     }
 
     private URL getUrl(ReadableSpan span) {
@@ -50,5 +50,5 @@ abstract public class HttpExclusionRule implements ElasticSpanProcessor.Exclusio
         }
     }
 
-    public abstract boolean exclude(@NonNull HttpRequest request);
+    public abstract boolean shouldInclude(@NonNull HttpRequest request);
 }

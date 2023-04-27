@@ -5,6 +5,7 @@ Copyright 2018-2022 Elasticsearch B.V.
 
 This product includes software licensed under the 'Apache License Version 2.0' license from the following sources:
 
+ - Android Lifecycle Process (https://developer.android.com/jetpack/androidx/releases/lifecycle#2.5.1)
  - Android Support Library Annotations (https://developer.android.com/jetpack/androidx/releases/annotation#1.4.0)
  - Android Support Library fragment (https://developer.android.com/jetpack/androidx/releases/fragment#1.5.3)
  - Byte Buddy (without dependencies)

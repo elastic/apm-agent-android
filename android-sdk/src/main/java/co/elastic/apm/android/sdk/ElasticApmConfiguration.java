@@ -20,6 +20,7 @@ package co.elastic.apm.android.sdk;
 
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration;
 import co.elastic.apm.android.sdk.instrumentation.InstrumentationConfiguration;
+import co.elastic.apm.android.sdk.internal.opentelemetry.processors.spans.SpanFilter;
 import co.elastic.apm.android.sdk.session.SessionIdProvider;
 import co.elastic.apm.android.sdk.session.impl.DefaultSessionIdProvider;
 import co.elastic.apm.android.sdk.traces.http.HttpTraceConfiguration;
@@ -32,6 +33,7 @@ public final class ElasticApmConfiguration {
     public final String deploymentEnvironment;
     public final SessionIdProvider sessionIdProvider;
     public final SignalConfiguration signalConfiguration;
+    public final SpanFilter spanFilter;
 
     public static Builder builder() {
         return new Builder();
@@ -49,6 +51,7 @@ public final class ElasticApmConfiguration {
         instrumentationConfiguration = builder.instrumentationConfiguration;
         signalConfiguration = builder.signalConfiguration;
         deploymentEnvironment = builder.deploymentEnvironment;
+        spanFilter = builder.spanFilter;
     }
 
     public static class Builder {
@@ -59,6 +62,7 @@ public final class ElasticApmConfiguration {
         private String deploymentEnvironment;
         private SessionIdProvider sessionIdProvider;
         private SignalConfiguration signalConfiguration;
+        private SpanFilter spanFilter;
 
         private Builder() {
         }
@@ -119,6 +123,16 @@ public final class ElasticApmConfiguration {
          */
         public Builder setSignalConfiguration(SignalConfiguration signalConfiguration) {
             this.signalConfiguration = signalConfiguration;
+            return this;
+        }
+
+        /**
+         * The span filter can be used to control which spans are exported and which shouldn't
+         * leave the device. An implementation that always excludes all spans is essentially a way
+         * to turn all spans off.
+         */
+        public Builder setSpanFilter(SpanFilter spanFilter) {
+            this.spanFilter = spanFilter;
             return this;
         }
 

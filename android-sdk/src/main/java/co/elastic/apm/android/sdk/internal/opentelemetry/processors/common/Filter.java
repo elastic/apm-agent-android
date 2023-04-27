@@ -20,5 +20,8 @@ package co.elastic.apm.android.sdk.internal.opentelemetry.processors.common;
 
 public interface Filter<T> {
 
+    /**
+     * @return TRUE if we want to let the item continue to the exporter, FALSE if we want to discard it.
+     */
     boolean shouldInclude(T item);
 }

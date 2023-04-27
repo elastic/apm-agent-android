@@ -22,6 +22,7 @@ import android.app.Application;
 import android.content.Context;
 
 import androidx.annotation.RestrictTo;
+import androidx.lifecycle.ProcessLifecycleOwner;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.attributes.AttributesCreator;
@@ -45,6 +46,7 @@ import co.elastic.apm.android.sdk.internal.exceptions.ElasticExceptionHandler;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.poll.ConfigurationPollManager;
 import co.elastic.apm.android.sdk.internal.features.launchtime.LaunchTimeActivityCallback;
+import co.elastic.apm.android.sdk.internal.features.lifecycle.ElasticProcessLifecycleObserver;
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.injection.DefaultAgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.opentelemetry.ElasticOpenTelemetry;
@@ -152,6 +154,11 @@ public final class ElasticApmAgent {
         initializeCrashReports();
         initializeSessionIdProvider();
         initializeLaunchTimeTracker(context);
+        initializeLifecycleObserver();
+    }
+
+    private void initializeLifecycleObserver() {
+        ProcessLifecycleOwner.get().getLifecycle().addObserver(new ElasticProcessLifecycleObserver());
     }
 
     private void initializeNtpManager(AgentDependenciesInjector injector) {

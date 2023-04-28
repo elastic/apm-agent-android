@@ -16,12 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.api;
+package co.elastic.apm.android.sdk.internal.api.filter;
 
-public interface Filter<T> {
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
-    /**
-     * @return TRUE if we want to let the item continue to the exporter, FALSE if we want to discard it.
-     */
-    boolean shouldInclude(T item);
+public class ComposableFilter<T> implements Filter<T> {
+    private final Set<Filter<T>> filters = new HashSet<>();
+
+    public void addFilter(Filter<T> filter) {
+        if (filter == null) {
+            return;
+        }
+        filters.add(filter);
+    }
+
+    public void addAllFilters(Collection<? extends Filter<T>> filters) {
+        for (Filter<T> filter : filters) {
+            addFilter(filter);
+        }
+    }
+
+    @Override
+    public boolean shouldInclude(T item) {
+        for (Filter<T> filter : filters) {
+            if (!filter.shouldInclude(item)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

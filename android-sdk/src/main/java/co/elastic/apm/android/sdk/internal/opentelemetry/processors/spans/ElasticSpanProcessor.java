@@ -20,16 +20,12 @@ package co.elastic.apm.android.sdk.internal.opentelemetry.processors.spans;
 
 import org.slf4j.Logger;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.attributes.AttributesCreator;
 import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
+import co.elastic.apm.android.sdk.internal.api.filter.Filter;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.configuration.impl.AllInstrumentationConfiguration;
-import co.elastic.apm.android.sdk.traces.tools.SpanFilter;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.context.Context;
@@ -40,21 +36,10 @@ import io.opentelemetry.sdk.trace.SpanProcessor;
 public final class ElasticSpanProcessor implements SpanProcessor {
     private final SpanProcessor original;
     private final AttributesVisitor commonAttributesVisitor;
-    private final Set<SpanFilter> filters = new HashSet<>();
     private final Logger logger = Elog.getLogger();
     private static final AttributeKey<String> TRANSACTION_TYPE_ATTRIBUTE_KEY = AttributeKey.stringKey("type");
     private static final String TRANSACTION_TYPE_VALUE = "mobile";
-
-    public void addFilter(SpanFilter filter) {
-        if (filter == null) {
-            return;
-        }
-        filters.add(filter);
-    }
-
-    public void addAllFilters(Collection<? extends SpanFilter> filters) {
-        this.filters.addAll(filters);
-    }
+    private Filter<ReadableSpan> filter = Filter.noop();
 
     public ElasticSpanProcessor(SpanProcessor original, AttributesVisitor commonAttributesVisitor) {
         this.original = original;
@@ -81,7 +66,7 @@ public final class ElasticSpanProcessor implements SpanProcessor {
             Elog.getLogger().debug("Ignoring all spans");
             return;
         }
-        if (!shouldInclude(span)) {
+        if (!filter.shouldInclude(span)) {
             logger.debug("Excluding span: {}", span);
             return;
         }
@@ -94,12 +79,10 @@ public final class ElasticSpanProcessor implements SpanProcessor {
         return true;
     }
 
-    private boolean shouldInclude(ReadableSpan span) {
-        for (SpanFilter filter : filters) {
-            if (!filter.shouldInclude(span)) {
-                return false;
-            }
+    public void setFilter(Filter<ReadableSpan> filter) {
+        if (filter == null) {
+            return;
         }
-        return true;
+        this.filter = filter;
     }
 }

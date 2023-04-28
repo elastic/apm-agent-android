@@ -16,10 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.traces.tools;
+package co.elastic.apm.android.sdk.internal.api.filter;
 
-import co.elastic.apm.android.sdk.internal.api.filter.Filter;
-import io.opentelemetry.sdk.trace.ReadableSpan;
+public interface Filter<T> {
 
-public interface SpanFilter extends Filter<ReadableSpan> {
+    /**
+     * @return TRUE if we want to let the item continue to the exporter, FALSE if we want to discard it.
+     */
+    boolean shouldInclude(T item);
+
+    @SuppressWarnings("unchecked")
+    static <D, T extends Filter<D>> T noop() {
+        return (T) new Noop<D>();
+    }
+
+    class Noop<T> implements Filter<T> {
+        @Override
+        public boolean shouldInclude(T item) {
+            return true;
+        }
+    }
 }

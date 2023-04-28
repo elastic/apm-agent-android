@@ -40,6 +40,7 @@ import co.elastic.apm.android.sdk.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration;
 import co.elastic.apm.android.sdk.instrumentation.Instrumentations;
 import co.elastic.apm.android.sdk.internal.api.Initializable;
+import co.elastic.apm.android.sdk.internal.api.filter.ComposableFilter;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.exceptions.ElasticExceptionHandler;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer;
@@ -63,6 +64,7 @@ import io.opentelemetry.sdk.logs.LogRecordProcessor;
 import io.opentelemetry.sdk.logs.SdkLoggerProvider;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 
@@ -232,8 +234,10 @@ public final class ElasticApmAgent {
                 new ConnectionHttpAttributesVisitor()
         );
         ElasticSpanProcessor processor = new ElasticSpanProcessor(spanProcessor, spanAttributesVisitor);
-        processor.addFilter(configuration.spanFilter);
-        processor.addAllFilters(configuration.httpTraceConfiguration.httpFilters);
+        ComposableFilter<ReadableSpan> filter = new ComposableFilter<>();
+        filter.addFilter(configuration.spanFilter);
+        filter.addAllFilters(configuration.httpTraceConfiguration.httpFilters);
+        processor.setFilter(filter);
 
         return SdkTracerProvider.builder()
                 .setClock(ntpManager.getClock())

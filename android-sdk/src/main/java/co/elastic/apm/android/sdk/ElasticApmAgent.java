@@ -264,9 +264,12 @@ public final class ElasticApmAgent {
 
     private SdkMeterProvider getMeterProvider(SignalConfiguration signalConfiguration,
                                               Resource resource) {
+        ElasticMetricReader elasticMetricReader = new ElasticMetricReader(signalConfiguration.getMetricReader());
+        elasticMetricReader.setFilter(configuration.metricFilter);
+
         return SdkMeterProvider.builder()
                 .setClock(ntpManager.getClock())
-                .registerMetricReader(new ElasticMetricReader(signalConfiguration.getMetricReader()))
+                .registerMetricReader(elasticMetricReader)
                 .setResource(resource)
                 .build();
     }

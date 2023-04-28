@@ -4,19 +4,24 @@ import org.junit.Test;
 import org.robolectric.annotation.Config;
 
 import java.util.List;
+import java.util.Objects;
 
 import co.elastic.apm.android.sdk.ElasticApmConfiguration;
 import co.elastic.apm.android.sdk.logs.ElasticLoggers;
+import co.elastic.apm.android.sdk.metrics.ElasticMeters;
 import co.elastic.apm.android.sdk.traces.ElasticTracers;
 import co.elastic.apm.android.test.common.logs.Logs;
+import co.elastic.apm.android.test.common.metrics.Metrics;
 import co.elastic.apm.android.test.common.spans.Spans;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTestApplication;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.logs.Logger;
+import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
+import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.trace.data.SpanData;
 
 public class FilterConfigurationTest extends BaseRobolectricTest {
@@ -60,12 +65,28 @@ public class FilterConfigurationTest extends BaseRobolectricTest {
                 .hasBody("second log");
     }
 
+    @Config(application = SignalsFilteredApp.class)
+    @Test
+    public void verifyMetricFilter() {
+        Meter meter = ElasticMeters.create("someMeter");
+
+        meter.counterBuilder("includeMe").build().add(1);
+        meter.counterBuilder("secondCounter").build().add(1);
+
+        flushMetrics();
+        List<MetricData> metrics = getRecordedMetrics(1);
+
+        Metrics.verify(metrics.get(0))
+                .isNamed("includeMe");
+    }
+
     private static class SignalsFilteredApp extends BaseRobolectricTestApplication {
         @Override
         public void onCreate() {
             initializeAgentWithCustomConfig(ElasticApmConfiguration.builder()
                     .setSpanFilter(readableSpan -> Boolean.TRUE.equals(readableSpan.getAttribute(AttributeKey.booleanKey("includeMe"))))
                     .setLogFilter(logRecordData -> Boolean.TRUE.equals(logRecordData.getAttributes().get(AttributeKey.booleanKey("includeMe"))))
+                    .setMetricFilter(metricData -> Objects.equals(metricData.getName(), "includeMe"))
                     .build());
         }
     }

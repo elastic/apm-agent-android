@@ -18,10 +18,13 @@
  */
 package co.elastic.apm.android.sdk.internal.opentelemetry.processors.metrics;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
+import co.elastic.apm.android.sdk.internal.api.filter.Filter;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.configuration.impl.AllInstrumentationConfiguration;
 import io.opentelemetry.sdk.common.CompletableResultCode;
@@ -34,6 +37,7 @@ import io.opentelemetry.sdk.metrics.internal.export.MetricProducer;
 
 public final class ElasticMetricReader implements MetricReader {
     private final MetricReader wrapped;
+    private Filter<MetricData> filter = Filter.noop();
 
     public ElasticMetricReader(MetricReader wrapped) {
         this.wrapped = wrapped;
@@ -42,7 +46,7 @@ public final class ElasticMetricReader implements MetricReader {
     @Override
     public void register(CollectionRegistration registration) {
         if (registration instanceof MetricProducer) {
-            wrapped.register(new ElasticMetricProducer((MetricProducer) registration));
+            wrapped.register(new ElasticMetricProducer((MetricProducer) registration, filter));
         } else {
             wrapped.register(registration);
         }
@@ -65,9 +69,11 @@ public final class ElasticMetricReader implements MetricReader {
 
     private static class ElasticMetricProducer implements MetricProducer {
         private final MetricProducer wrapped;
+        private final Filter<MetricData> filter;
 
-        private ElasticMetricProducer(MetricProducer wrapped) {
+        private ElasticMetricProducer(MetricProducer wrapped, Filter<MetricData> filter) {
             this.wrapped = wrapped;
+            this.filter = filter;
         }
 
         @Override
@@ -76,7 +82,20 @@ public final class ElasticMetricReader implements MetricReader {
                 Elog.getLogger().debug("Ignoring all metrics");
                 return Collections.emptyList();
             }
-            return wrapped.collectAllMetrics();
+            Collection<MetricData> originalMetrics = wrapped.collectAllMetrics();
+            List<MetricData> filteredMetrics = new ArrayList<>();
+
+            for (MetricData metric : originalMetrics) {
+                if (filter.shouldInclude(metric)) {
+                    filteredMetrics.add(metric);
+                }
+            }
+
+            return filteredMetrics;
         }
+    }
+
+    public void setFilter(Filter<MetricData> filter) {
+        this.filter = filter;
     }
 }

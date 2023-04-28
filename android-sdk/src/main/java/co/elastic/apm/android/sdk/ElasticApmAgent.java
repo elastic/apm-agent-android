@@ -47,14 +47,13 @@ import co.elastic.apm.android.sdk.internal.features.centralconfig.poll.Configura
 import co.elastic.apm.android.sdk.internal.features.launchtime.LaunchTimeActivityCallback;
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.injection.DefaultAgentDependenciesInjector;
-import co.elastic.apm.android.sdk.internal.opentelemetry.ElasticOpenTelemetry;
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.logs.ElasticLogRecordProcessor;
+import co.elastic.apm.android.sdk.internal.opentelemetry.processors.metrics.ElasticMetricReader;
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.spans.ElasticSpanProcessor;
 import co.elastic.apm.android.sdk.internal.opentelemetry.tools.Flusher;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.sdk.internal.utilities.logging.AndroidLoggerFactory;
-import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.logs.GlobalLoggerProvider;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
@@ -204,13 +203,12 @@ public final class ElasticApmAgent {
         flusher.setMeterDelegator(meterProvider::forceFlush);
         flusher.setLoggerDelegator(loggerProvider::forceFlush);
 
-        OpenTelemetrySdk openTelemetrySdk = OpenTelemetrySdk.builder()
+        OpenTelemetrySdk.builder()
                 .setTracerProvider(getTracerProvider(signalConfiguration, resource, globalAttributesVisitor))
                 .setLoggerProvider(loggerProvider)
                 .setMeterProvider(meterProvider)
                 .setPropagators(getContextPropagator())
-                .build();
-        GlobalOpenTelemetry.set(new ElasticOpenTelemetry(openTelemetrySdk));
+                .buildAndRegisterGlobal();
     }
 
     private AttributesVisitor getResourceAttributesVisitor() {
@@ -262,7 +260,7 @@ public final class ElasticApmAgent {
                                               Resource resource) {
         return SdkMeterProvider.builder()
                 .setClock(ntpManager.getClock())
-                .registerMetricReader(signalConfiguration.getMetricReader())
+                .registerMetricReader(new ElasticMetricReader(signalConfiguration.getMetricReader()))
                 .setResource(resource)
                 .build();
     }

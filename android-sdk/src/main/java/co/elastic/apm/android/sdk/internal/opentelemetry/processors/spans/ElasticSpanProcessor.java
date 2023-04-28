@@ -77,7 +77,7 @@ public final class ElasticSpanProcessor implements SpanProcessor {
 
     @Override
     public void onEnd(ReadableSpan span) {
-       if (!Configurations.get(AllInstrumentationConfiguration.class).isEnabled()) {
+        if (!Configurations.get(AllInstrumentationConfiguration.class).isEnabled()) {
             Elog.getLogger().debug("Ignoring all spans");
             return;
         }

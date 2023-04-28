@@ -21,6 +21,7 @@ package co.elastic.apm.android.sdk;
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration;
 import co.elastic.apm.android.sdk.instrumentation.InstrumentationConfiguration;
 import co.elastic.apm.android.sdk.logs.tools.LogFilter;
+import co.elastic.apm.android.sdk.metrics.tools.MetricFilter;
 import co.elastic.apm.android.sdk.session.SessionIdProvider;
 import co.elastic.apm.android.sdk.session.impl.DefaultSessionIdProvider;
 import co.elastic.apm.android.sdk.traces.http.HttpTraceConfiguration;
@@ -36,6 +37,7 @@ public final class ElasticApmConfiguration {
     public final SignalConfiguration signalConfiguration;
     public final SpanFilter spanFilter;
     public final LogFilter logFilter;
+    public final MetricFilter metricFilter;
 
     public static Builder builder() {
         return new Builder();
@@ -55,6 +57,7 @@ public final class ElasticApmConfiguration {
         deploymentEnvironment = builder.deploymentEnvironment;
         spanFilter = builder.spanFilter;
         logFilter = builder.logFilter;
+        metricFilter = builder.metricFilter;
     }
 
     public static class Builder {
@@ -67,6 +70,7 @@ public final class ElasticApmConfiguration {
         private SignalConfiguration signalConfiguration;
         private SpanFilter spanFilter;
         private LogFilter logFilter;
+        private MetricFilter metricFilter;
 
         private Builder() {
         }
@@ -147,6 +151,16 @@ public final class ElasticApmConfiguration {
          */
         public Builder setLogFilter(LogFilter logFilter) {
             this.logFilter = logFilter;
+            return this;
+        }
+
+        /**
+         * The metric filter can be used to control which metrics are exported and which shouldn't
+         * leave the device. An implementation that always excludes all metrics is essentially a way
+         * to turn all metrics off.
+         */
+        public Builder setMetricFilter(MetricFilter metricFilter) {
+            this.metricFilter = metricFilter;
             return this;
         }
 

@@ -20,6 +20,7 @@ package co.elastic.apm.android.sdk;
 
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration;
 import co.elastic.apm.android.sdk.instrumentation.InstrumentationConfiguration;
+import co.elastic.apm.android.sdk.logs.tools.LogFilter;
 import co.elastic.apm.android.sdk.session.SessionIdProvider;
 import co.elastic.apm.android.sdk.session.impl.DefaultSessionIdProvider;
 import co.elastic.apm.android.sdk.traces.http.HttpTraceConfiguration;
@@ -34,6 +35,7 @@ public final class ElasticApmConfiguration {
     public final SessionIdProvider sessionIdProvider;
     public final SignalConfiguration signalConfiguration;
     public final SpanFilter spanFilter;
+    public final LogFilter logFilter;
 
     public static Builder builder() {
         return new Builder();
@@ -52,6 +54,7 @@ public final class ElasticApmConfiguration {
         signalConfiguration = builder.signalConfiguration;
         deploymentEnvironment = builder.deploymentEnvironment;
         spanFilter = builder.spanFilter;
+        logFilter = builder.logFilter;
     }
 
     public static class Builder {
@@ -63,6 +66,7 @@ public final class ElasticApmConfiguration {
         private SessionIdProvider sessionIdProvider;
         private SignalConfiguration signalConfiguration;
         private SpanFilter spanFilter;
+        private LogFilter logFilter;
 
         private Builder() {
         }
@@ -133,6 +137,16 @@ public final class ElasticApmConfiguration {
          */
         public Builder setSpanFilter(SpanFilter spanFilter) {
             this.spanFilter = spanFilter;
+            return this;
+        }
+
+        /**
+         * The log filter can be used to control which log records are exported and which shouldn't
+         * leave the device. An implementation that always excludes all logs is essentially a way
+         * to turn all log records off.
+         */
+        public Builder setLogFilter(LogFilter logFilter) {
+            this.logFilter = logFilter;
             return this;
         }
 

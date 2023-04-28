@@ -12,4 +12,6 @@ public interface LogVerifier<T extends LogVerifier<?>> {
     T hasAttribute(String attrName);
 
     T hasAttribute(String attrName, String attrValue);
+
+    T hasBody(String body);
 }

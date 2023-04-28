@@ -32,12 +32,13 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.logs.LogRecordProcessor;
 import io.opentelemetry.sdk.logs.ReadWriteLogRecord;
+import io.opentelemetry.sdk.logs.data.LogRecordData;
 
 public final class ElasticLogRecordProcessor implements LogRecordProcessor {
     private final LogRecordProcessor original;
     private final AttributesVisitor commonAttributesVisitor;
     private final Logger logger = Elog.getLogger();
-    private Filter<ReadWriteLogRecord> filter = Filter.noop();
+    private Filter<LogRecordData> filter = Filter.noop();
 
     public ElasticLogRecordProcessor(LogRecordProcessor original, AttributesVisitor commonAttributesVisitor) {
         this.original = original;
@@ -50,7 +51,7 @@ public final class ElasticLogRecordProcessor implements LogRecordProcessor {
             Elog.getLogger().debug("Ignoring all log records");
             return;
         }
-        if (!filter.shouldInclude(logRecord)) {
+        if (!filter.shouldInclude(logRecord.toLogRecordData())) {
             logger.debug("Excluding log record: {}", logRecord);
             return;
         }
@@ -78,7 +79,7 @@ public final class ElasticLogRecordProcessor implements LogRecordProcessor {
         original.close();
     }
 
-    public void setFilter(Filter<ReadWriteLogRecord> filter) {
+    public void setFilter(Filter<LogRecordData> filter) {
         this.filter = filter;
     }
 }

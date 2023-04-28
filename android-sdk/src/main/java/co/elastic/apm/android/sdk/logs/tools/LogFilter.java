@@ -19,7 +19,7 @@
 package co.elastic.apm.android.sdk.logs.tools;
 
 import co.elastic.apm.android.sdk.internal.api.filter.Filter;
-import io.opentelemetry.sdk.logs.ReadWriteLogRecord;
+import io.opentelemetry.sdk.logs.data.LogRecordData;
 
-public interface LogFilter extends Filter<ReadWriteLogRecord> {
+public interface LogFilter extends Filter<LogRecordData> {
 }

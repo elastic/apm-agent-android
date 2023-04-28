@@ -18,9 +18,12 @@
  */
 package co.elastic.apm.android.sdk.internal.opentelemetry.processors.logs;
 
+import org.slf4j.Logger;
+
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.attributes.AttributesCreator;
 import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
+import co.elastic.apm.android.sdk.internal.api.filter.Filter;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.configuration.impl.AllInstrumentationConfiguration;
 import io.opentelemetry.api.common.AttributeKey;
@@ -33,6 +36,8 @@ import io.opentelemetry.sdk.logs.ReadWriteLogRecord;
 public final class ElasticLogRecordProcessor implements LogRecordProcessor {
     private final LogRecordProcessor original;
     private final AttributesVisitor commonAttributesVisitor;
+    private final Logger logger = Elog.getLogger();
+    private Filter<ReadWriteLogRecord> filter = Filter.noop();
 
     public ElasticLogRecordProcessor(LogRecordProcessor original, AttributesVisitor commonAttributesVisitor) {
         this.original = original;
@@ -43,6 +48,10 @@ public final class ElasticLogRecordProcessor implements LogRecordProcessor {
     public void onEmit(Context context, ReadWriteLogRecord logRecord) {
         if (!Configurations.get(AllInstrumentationConfiguration.class).isEnabled()) {
             Elog.getLogger().debug("Ignoring all log records");
+            return;
+        }
+        if (!filter.shouldInclude(logRecord)) {
+            logger.debug("Excluding log record: {}", logRecord);
             return;
         }
         setAllAttributes(logRecord, AttributesCreator.from(commonAttributesVisitor).create());
@@ -67,5 +76,9 @@ public final class ElasticLogRecordProcessor implements LogRecordProcessor {
     @Override
     public void close() {
         original.close();
+    }
+
+    public void setFilter(Filter<ReadWriteLogRecord> filter) {
+        this.filter = filter;
     }
 }

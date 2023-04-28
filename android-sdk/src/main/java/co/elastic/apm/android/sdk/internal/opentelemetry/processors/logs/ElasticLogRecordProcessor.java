@@ -80,6 +80,9 @@ public final class ElasticLogRecordProcessor implements LogRecordProcessor {
     }
 
     public void setFilter(Filter<LogRecordData> filter) {
+        if (filter == null) {
+            return;
+        }
         this.filter = filter;
     }
 }

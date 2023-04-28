@@ -96,6 +96,9 @@ public final class ElasticMetricReader implements MetricReader {
     }
 
     public void setFilter(Filter<MetricData> filter) {
+        if (filter == null) {
+            return;
+        }
         this.filter = filter;
     }
 }

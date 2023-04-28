@@ -251,6 +251,8 @@ public final class ElasticApmAgent {
                                                 AttributesVisitor commonAttrVisitor) {
         LogRecordProcessor logProcessor = signalConfiguration.getLogProcessor();
         ElasticLogRecordProcessor elasticProcessor = new ElasticLogRecordProcessor(logProcessor, commonAttrVisitor);
+        elasticProcessor.setFilter(configuration.logFilter);
+
         SdkLoggerProvider loggerProvider = SdkLoggerProvider.builder()
                 .setResource(resource)
                 .setClock(ntpManager.getClock())

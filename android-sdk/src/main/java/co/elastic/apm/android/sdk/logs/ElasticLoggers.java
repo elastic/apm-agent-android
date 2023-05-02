@@ -25,11 +25,15 @@ import io.opentelemetry.api.logs.LoggerBuilder;
 public final class ElasticLoggers {
 
     public static Logger crashReporter() {
-        return builder("CrashReport")
-                .setEventDomain("device").build();
+        return builder("CrashReport").build();
+    }
+
+    public static Logger lifecycleReporter() {
+        return builder("ApplicationLifecycle").build();
     }
 
     public static LoggerBuilder builder(String instrumentationScopeName) {
-        return GlobalLoggerProvider.get().loggerBuilder(instrumentationScopeName);
+        return GlobalLoggerProvider.get().loggerBuilder(instrumentationScopeName)
+                .setEventDomain("device");
     }
 }

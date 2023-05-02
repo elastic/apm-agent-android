@@ -32,10 +32,10 @@ public class FilterConfigurationTest extends BaseRobolectricTest {
         Tracer tracer = ElasticTracers.create("someTracer");
 
         Span spanOne = tracer.spanBuilder("spanOne").startSpan();
-        spanOne.setAttribute("includeMe", false);
+        spanOne.setAttribute("includeSpan", false);
 
         Span spanTwo = tracer.spanBuilder("spanTwo").startSpan();
-        spanTwo.setAttribute("includeMe", true);
+        spanTwo.setAttribute("includeSpan", true);
 
         spanOne.end();
         spanTwo.end();
@@ -53,11 +53,11 @@ public class FilterConfigurationTest extends BaseRobolectricTest {
 
         logger.logRecordBuilder()
                 .setBody("first log")
-                .setAttribute(AttributeKey.booleanKey("includeMe"), false).emit();
+                .setAttribute(AttributeKey.booleanKey("includeLog"), false).emit();
 
         logger.logRecordBuilder()
                 .setBody("second log")
-                .setAttribute(AttributeKey.booleanKey("includeMe"), true).emit();
+                .setAttribute(AttributeKey.booleanKey("includeLog"), true).emit();
 
         List<LogRecordData> recordedLogs = getRecordedLogs(1);
 
@@ -70,23 +70,23 @@ public class FilterConfigurationTest extends BaseRobolectricTest {
     public void verifyMetricFilter() {
         Meter meter = ElasticMeters.create("someMeter");
 
-        meter.counterBuilder("includeMe").build().add(1);
+        meter.counterBuilder("includeMetric").build().add(1);
         meter.counterBuilder("secondCounter").build().add(1);
 
         flushMetrics();
         List<MetricData> metrics = getRecordedMetrics(1);
 
         Metrics.verify(metrics.get(0))
-                .isNamed("includeMe");
+                .isNamed("includeMetric");
     }
 
     private static class SignalsFilteredApp extends BaseRobolectricTestApplication {
         @Override
         public void onCreate() {
             initializeAgentWithCustomConfig(ElasticApmConfiguration.builder()
-                    .setSpanFilter(readableSpan -> Boolean.TRUE.equals(readableSpan.getAttribute(AttributeKey.booleanKey("includeMe"))))
-                    .setLogFilter(logRecordData -> Boolean.TRUE.equals(logRecordData.getAttributes().get(AttributeKey.booleanKey("includeMe"))))
-                    .setMetricFilter(metricData -> Objects.equals(metricData.getName(), "includeMe"))
+                    .setSpanFilter(readableSpan -> Boolean.TRUE.equals(readableSpan.getAttribute(AttributeKey.booleanKey("includeSpan"))))
+                    .setLogFilter(logRecordData -> Boolean.TRUE.equals(logRecordData.getAttributes().get(AttributeKey.booleanKey("includeLog"))))
+                    .setMetricFilter(metricData -> Objects.equals(metricData.getName(), "includeMetric"))
                     .build());
         }
     }

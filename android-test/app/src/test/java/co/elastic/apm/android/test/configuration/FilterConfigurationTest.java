@@ -84,9 +84,9 @@ public class FilterConfigurationTest extends BaseRobolectricTest {
         @Override
         public void onCreate() {
             initializeAgentWithCustomConfig(ElasticApmConfiguration.builder()
-                    .setSpanFilter(readableSpan -> Boolean.TRUE.equals(readableSpan.getAttribute(AttributeKey.booleanKey("includeSpan"))))
-                    .setLogFilter(logRecordData -> Boolean.TRUE.equals(logRecordData.getAttributes().get(AttributeKey.booleanKey("includeLog"))))
-                    .setMetricFilter(metricData -> Objects.equals(metricData.getName(), "includeMetric"))
+                    .addSpanFilter(readableSpan -> Boolean.TRUE.equals(readableSpan.getAttribute(AttributeKey.booleanKey("includeSpan"))))
+                    .addLogFilter(logRecordData -> Boolean.TRUE.equals(logRecordData.getAttributes().get(AttributeKey.booleanKey("includeLog"))))
+                    .addMetricFilter(metricData -> Objects.equals(metricData.getName(), "includeMetric"))
                     .build());
         }
     }

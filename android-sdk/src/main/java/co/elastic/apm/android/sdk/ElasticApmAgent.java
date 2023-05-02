@@ -62,7 +62,9 @@ import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.logs.LogRecordProcessor;
 import io.opentelemetry.sdk.logs.SdkLoggerProvider;
+import io.opentelemetry.sdk.logs.data.LogRecordData;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
+import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
@@ -235,7 +237,7 @@ public final class ElasticApmAgent {
         );
         ElasticSpanProcessor processor = new ElasticSpanProcessor(spanProcessor, spanAttributesVisitor);
         ComposableFilter<ReadableSpan> filter = new ComposableFilter<>();
-        filter.addFilter(configuration.spanFilter);
+        filter.addAllFilters(configuration.spanFilters);
         filter.addAllFilters(configuration.httpTraceConfiguration.httpFilters);
         processor.setFilter(filter);
 
@@ -251,7 +253,9 @@ public final class ElasticApmAgent {
                                                 AttributesVisitor commonAttrVisitor) {
         LogRecordProcessor logProcessor = signalConfiguration.getLogProcessor();
         ElasticLogRecordProcessor elasticProcessor = new ElasticLogRecordProcessor(logProcessor, commonAttrVisitor);
-        elasticProcessor.setFilter(configuration.logFilter);
+        ComposableFilter<LogRecordData> logFilter = new ComposableFilter<>();
+        logFilter.addAllFilters(configuration.logFilters);
+        elasticProcessor.setFilter(logFilter);
 
         SdkLoggerProvider loggerProvider = SdkLoggerProvider.builder()
                 .setResource(resource)
@@ -265,7 +269,9 @@ public final class ElasticApmAgent {
     private SdkMeterProvider getMeterProvider(SignalConfiguration signalConfiguration,
                                               Resource resource) {
         ElasticMetricReader elasticMetricReader = new ElasticMetricReader(signalConfiguration.getMetricReader());
-        elasticMetricReader.setFilter(configuration.metricFilter);
+        ComposableFilter<MetricData> metricFilter = new ComposableFilter<>();
+        metricFilter.addAllFilters(configuration.metricFilters);
+        elasticMetricReader.setFilter(metricFilter);
 
         return SdkMeterProvider.builder()
                 .setClock(ntpManager.getClock())

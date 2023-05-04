@@ -128,6 +128,42 @@ class MyApp extends android.app.Application {
 ----
 
 [float]
+==== Signal filtering
+
+You can provide your own filters to decide what spans, logs and metrics are allowed to be exported to the backend.
+With this tool, you could essentially turn some of these signals (or all) on and off at runtime depending on your own business logic.
+
+In order to do so, you need to provide your own filters for each signal in the agent configuration as shown below:
+
+[source,java]
+----
+class MyApp extends android.app.Application {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        ElasticApmConfiguration configuration = ElasticApmConfiguration.builder()
+                .addLogFilter(new LogFilter(){/*...*/})
+                .addMetricFilter(new MetricFilter(){/*...*/})
+                .addSpanFilter(new SpanFilter() {
+                    @Override
+                    public boolean shouldInclude(ReadableSpan readableSpan) {
+                        if (thisSpanIsAllowedToContinue(readableSpan)) {
+                            return true;
+                        }
+                        return false;
+                    }
+                })
+                .build();
+        ElasticApmAgent.initialize(this, configuration);
+    }
+}
+----
+
+Each filter will contain a `shouldInclude` function which provides the signal item to be evaluated.
+This function must return a boolean value, `true` for when the provided item is allowed to continue, `false` when it must be discarded.
+
+[float]
 ==== Automatic instrumentation enabling/disabling
 
 The agent provides automatic instrumentation for its <<supported-technologies>> which are all enabled by default.

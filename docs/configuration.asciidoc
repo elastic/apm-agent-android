@@ -145,6 +145,7 @@ class MyApp extends android.app.Application {
         ElasticApmConfiguration configuration = ElasticApmConfiguration.builder()
                 .addLogFilter(new LogFilter(){/*...*/})
                 .addMetricFilter(new MetricFilter(){/*...*/})
+//                .addMetricFilter(new MetricFilter(){/*...*/}) You can add multiple filters per signal.
                 .addSpanFilter(new SpanFilter() {
                     @Override
                     public boolean shouldInclude(ReadableSpan readableSpan) {
@@ -162,6 +163,8 @@ class MyApp extends android.app.Application {
 
 Each filter will contain a `shouldInclude` function which provides the signal item to be evaluated.
 This function must return a boolean value, `true` for when the provided item is allowed to continue, `false` when it must be discarded.
+
+You can add multiple filters per signal which will be iterated over (in the order they were added) until all the filters are checked or until one of them decides to discard the signal item provided.
 
 [float]
 ==== Automatic instrumentation enabling/disabling

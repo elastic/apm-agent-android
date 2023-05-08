@@ -30,14 +30,14 @@ import co.elastic.apm.android.sdk.traces.http.attributes.HttpAttributesVisitor;
 import co.elastic.apm.android.sdk.traces.http.attributes.HttpAttributesVisitorWrapper;
 import co.elastic.apm.android.sdk.traces.http.attributes.visitors.BasicHttpAttributesVisitor;
 import co.elastic.apm.android.sdk.traces.http.data.HttpRequest;
-import co.elastic.apm.android.sdk.traces.http.filtering.HttpExclusionRule;
+import co.elastic.apm.android.sdk.traces.http.filtering.HttpFilter;
 
 public class HttpTraceConfiguration {
-    public final Collection<HttpExclusionRule> exclusionRules;
+    public final Collection<HttpFilter> httpFilters;
     private final Collection<HttpAttributesVisitor> httpAttributesVisitors;
 
     private HttpTraceConfiguration(Builder builder) {
-        exclusionRules = Collections.unmodifiableCollection(builder.exclusionRules);
+        httpFilters = Collections.unmodifiableCollection(builder.filters);
         httpAttributesVisitors = Collections.unmodifiableCollection(builder.httpAttributesVisitors);
     }
 
@@ -56,15 +56,15 @@ public class HttpTraceConfiguration {
     }
 
     public static class Builder {
-        private final Set<HttpExclusionRule> exclusionRules = new HashSet<>();
+        private final Set<HttpFilter> filters = new HashSet<>();
         private final Set<HttpAttributesVisitor> httpAttributesVisitors = new HashSet<>();
 
         private Builder() {
             httpAttributesVisitors.add(new BasicHttpAttributesVisitor());
         }
 
-        public Builder addExclusionRule(HttpExclusionRule rule) {
-            exclusionRules.add(rule);
+        public Builder addFilter(HttpFilter rule) {
+            filters.add(rule);
             return this;
         }
 

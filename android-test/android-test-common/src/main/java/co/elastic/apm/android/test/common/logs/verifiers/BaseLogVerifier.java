@@ -49,4 +49,10 @@ public abstract class BaseLogVerifier<T extends LogVerifier<?>> implements LogVe
         assertEquals(attrValue, log.getAttributes().get(AttributeKey.stringKey(attrName)));
         return (T) this;
     }
+
+    @Override
+    public T hasBody(String body) {
+        assertEquals(body, log.getBody().asString());
+        return (T) this;
+    }
 }

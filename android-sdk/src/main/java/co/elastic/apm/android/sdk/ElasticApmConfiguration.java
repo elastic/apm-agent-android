@@ -18,11 +18,20 @@
  */
 package co.elastic.apm.android.sdk;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration;
 import co.elastic.apm.android.sdk.instrumentation.InstrumentationConfiguration;
+import co.elastic.apm.android.sdk.logs.tools.LogFilter;
+import co.elastic.apm.android.sdk.metrics.tools.MetricFilter;
 import co.elastic.apm.android.sdk.session.SessionIdProvider;
 import co.elastic.apm.android.sdk.session.impl.DefaultSessionIdProvider;
 import co.elastic.apm.android.sdk.traces.http.HttpTraceConfiguration;
+import co.elastic.apm.android.sdk.traces.tools.SpanFilter;
 
 public final class ElasticApmConfiguration {
     public final HttpTraceConfiguration httpTraceConfiguration;
@@ -32,6 +41,9 @@ public final class ElasticApmConfiguration {
     public final String deploymentEnvironment;
     public final SessionIdProvider sessionIdProvider;
     public final SignalConfiguration signalConfiguration;
+    public final List<SpanFilter> spanFilters;
+    public final List<LogFilter> logFilters;
+    public final List<MetricFilter> metricFilters;
 
     public static Builder builder() {
         return new Builder();
@@ -49,6 +61,9 @@ public final class ElasticApmConfiguration {
         instrumentationConfiguration = builder.instrumentationConfiguration;
         signalConfiguration = builder.signalConfiguration;
         deploymentEnvironment = builder.deploymentEnvironment;
+        spanFilters = Collections.unmodifiableList(new ArrayList<>(builder.spanFilters));
+        logFilters = Collections.unmodifiableList(new ArrayList<>(builder.logFilters));
+        metricFilters = Collections.unmodifiableList(new ArrayList<>(builder.metricFilters));
     }
 
     public static class Builder {
@@ -59,6 +74,9 @@ public final class ElasticApmConfiguration {
         private String deploymentEnvironment;
         private SessionIdProvider sessionIdProvider;
         private SignalConfiguration signalConfiguration;
+        private final Set<SpanFilter> spanFilters = new HashSet<>();
+        private final Set<LogFilter> logFilters = new HashSet<>();
+        private final Set<MetricFilter> metricFilters = new HashSet<>();
 
         private Builder() {
         }
@@ -119,6 +137,36 @@ public final class ElasticApmConfiguration {
          */
         public Builder setSignalConfiguration(SignalConfiguration signalConfiguration) {
             this.signalConfiguration = signalConfiguration;
+            return this;
+        }
+
+        /**
+         * The span filter can be used to control which spans are exported and which shouldn't
+         * leave the device. An implementation that always excludes all spans is essentially a way
+         * to turn all spans off.
+         */
+        public Builder addSpanFilter(SpanFilter spanFilter) {
+            spanFilters.add(spanFilter);
+            return this;
+        }
+
+        /**
+         * The log filter can be used to control which log records are exported and which shouldn't
+         * leave the device. An implementation that always excludes all logs is essentially a way
+         * to turn all log records off.
+         */
+        public Builder addLogFilter(LogFilter logFilter) {
+            logFilters.add(logFilter);
+            return this;
+        }
+
+        /**
+         * The metric filter can be used to control which metrics are exported and which shouldn't
+         * leave the device. An implementation that always excludes all metrics is essentially a way
+         * to turn all metrics off.
+         */
+        public Builder addMetricFilter(MetricFilter metricFilter) {
+            metricFilters.add(metricFilter);
             return this;
         }
 

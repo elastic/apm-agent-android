@@ -41,6 +41,7 @@ import co.elastic.apm.android.sdk.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration;
 import co.elastic.apm.android.sdk.instrumentation.Instrumentations;
 import co.elastic.apm.android.sdk.internal.api.Initializable;
+import co.elastic.apm.android.sdk.internal.api.filter.ComposableFilter;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.exceptions.ElasticExceptionHandler;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer;
@@ -49,14 +50,13 @@ import co.elastic.apm.android.sdk.internal.features.launchtime.LaunchTimeActivit
 import co.elastic.apm.android.sdk.internal.features.lifecycle.ElasticProcessLifecycleObserver;
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.injection.DefaultAgentDependenciesInjector;
-import co.elastic.apm.android.sdk.internal.opentelemetry.ElasticOpenTelemetry;
-import co.elastic.apm.android.sdk.internal.opentelemetry.processors.ElasticLogRecordProcessor;
-import co.elastic.apm.android.sdk.internal.opentelemetry.processors.ElasticSpanProcessor;
+import co.elastic.apm.android.sdk.internal.opentelemetry.processors.logs.ElasticLogRecordProcessor;
+import co.elastic.apm.android.sdk.internal.opentelemetry.processors.metrics.ElasticMetricReader;
+import co.elastic.apm.android.sdk.internal.opentelemetry.processors.spans.ElasticSpanProcessor;
 import co.elastic.apm.android.sdk.internal.opentelemetry.tools.Flusher;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.sdk.internal.utilities.logging.AndroidLoggerFactory;
-import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.logs.GlobalLoggerProvider;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
@@ -64,8 +64,11 @@ import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.logs.LogRecordProcessor;
 import io.opentelemetry.sdk.logs.SdkLoggerProvider;
+import io.opentelemetry.sdk.logs.data.LogRecordData;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
+import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 
@@ -211,13 +214,12 @@ public final class ElasticApmAgent {
         flusher.setMeterDelegator(meterProvider::forceFlush);
         flusher.setLoggerDelegator(loggerProvider::forceFlush);
 
-        OpenTelemetrySdk openTelemetrySdk = OpenTelemetrySdk.builder()
+        OpenTelemetrySdk.builder()
                 .setTracerProvider(getTracerProvider(signalConfiguration, resource, globalAttributesVisitor))
                 .setLoggerProvider(loggerProvider)
                 .setMeterProvider(meterProvider)
                 .setPropagators(getContextPropagator())
-                .build();
-        GlobalOpenTelemetry.set(new ElasticOpenTelemetry(openTelemetrySdk));
+                .buildAndRegisterGlobal();
     }
 
     private AttributesVisitor getResourceAttributesVisitor() {
@@ -241,7 +243,10 @@ public final class ElasticApmAgent {
                 new ConnectionHttpAttributesVisitor()
         );
         ElasticSpanProcessor processor = new ElasticSpanProcessor(spanProcessor, spanAttributesVisitor);
-        processor.addAllExclusionRules(configuration.httpTraceConfiguration.exclusionRules);
+        ComposableFilter<ReadableSpan> filter = new ComposableFilter<>();
+        filter.addAllFilters(configuration.spanFilters);
+        filter.addAllFilters(configuration.httpTraceConfiguration.httpFilters);
+        processor.setFilter(filter);
 
         return SdkTracerProvider.builder()
                 .setClock(ntpManager.getClock())
@@ -255,6 +260,10 @@ public final class ElasticApmAgent {
                                                 AttributesVisitor commonAttrVisitor) {
         LogRecordProcessor logProcessor = signalConfiguration.getLogProcessor();
         ElasticLogRecordProcessor elasticProcessor = new ElasticLogRecordProcessor(logProcessor, commonAttrVisitor);
+        ComposableFilter<LogRecordData> logFilter = new ComposableFilter<>();
+        logFilter.addAllFilters(configuration.logFilters);
+        elasticProcessor.setFilter(logFilter);
+
         SdkLoggerProvider loggerProvider = SdkLoggerProvider.builder()
                 .setResource(resource)
                 .setClock(ntpManager.getClock())
@@ -266,9 +275,14 @@ public final class ElasticApmAgent {
 
     private SdkMeterProvider getMeterProvider(SignalConfiguration signalConfiguration,
                                               Resource resource) {
+        ElasticMetricReader elasticMetricReader = new ElasticMetricReader(signalConfiguration.getMetricReader());
+        ComposableFilter<MetricData> metricFilter = new ComposableFilter<>();
+        metricFilter.addAllFilters(configuration.metricFilters);
+        elasticMetricReader.setFilter(metricFilter);
+
         return SdkMeterProvider.builder()
                 .setClock(ntpManager.getClock())
-                .registerMetricReader(signalConfiguration.getMetricReader())
+                .registerMetricReader(elasticMetricReader)
                 .setResource(resource)
                 .build();
     }

@@ -130,7 +130,7 @@ class MyApp extends android.app.Application {
 [float]
 ==== Signal filtering
 
-You can provide your own filters to decide what spans, logs and metrics are allowed to be exported to the backend.
+You can provide your own filters to specify which spans, logs, and metrics are allowed to be exported to the backend.
 With this tool, you could essentially turn some of these signals (or all) on and off at runtime depending on your own business logic.
 
 In order to do so, you need to provide your own filters for each signal in the agent configuration as shown below:

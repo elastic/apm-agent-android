@@ -18,8 +18,6 @@
  */
 package co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.mapping;
 
-import com.google.protobuf.ByteString;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,15 +26,11 @@ import java.util.Map;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.models.LogCollection;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.mapping.Converter;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.mapping.Mapper;
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.common.v1.AnyValue;
 import co.elastic.apm.android.sdk.internal.opentelemetry.proto.common.v1.InstrumentationScope;
 import co.elastic.apm.android.sdk.internal.opentelemetry.proto.logs.v1.LogRecord;
 import co.elastic.apm.android.sdk.internal.opentelemetry.proto.logs.v1.LogsData;
 import co.elastic.apm.android.sdk.internal.opentelemetry.proto.logs.v1.ResourceLogs;
 import co.elastic.apm.android.sdk.internal.opentelemetry.proto.logs.v1.ScopeLogs;
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.logs.v1.SeverityNumber;
-import io.opentelemetry.api.logs.Severity;
-import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import io.opentelemetry.sdk.resources.Resource;
@@ -92,29 +86,8 @@ public class LogCollectionConverter extends Converter<LogCollection, LogsData> {
                 logsByScope.put(logRecordData.getInstrumentationScopeInfo(), logModels);
             }
 
-            logModels.add(createLogRecord(mapper, logRecordData));
+            logModels.add(mapper.map(logRecordData));
         });
         return logsByResourceAndScope;
-    }
-
-    private LogRecord createLogRecord(Mapper mapper, LogRecordData logRecordData) {
-        SpanContext spanContext = logRecordData.getSpanContext();
-        LogRecord.Builder builder = LogRecord.newBuilder()
-                .setTimeUnixNano(logRecordData.getEpochNanos())
-                .setSeverityNumber(convertToSeverityNumber(logRecordData.getSeverity()))
-                .setBody(AnyValue.newBuilder().setStringValue(logRecordData.getBody().asString()))
-                .addAllAttributes(mapper.map(logRecordData.getAttributes()))
-                .setFlags(spanContext.getTraceFlags().asByte())
-                .setTraceId(ByteString.copyFrom(spanContext.getTraceIdBytes()))
-                .setSpanId(ByteString.copyFrom(spanContext.getSpanIdBytes()));
-        String severityText = logRecordData.getSeverityText();
-        if (severityText != null) {
-            builder.setSeverityText(severityText);
-        }
-        return builder.build();
-    }
-
-    private SeverityNumber convertToSeverityNumber(Severity severity) {
-        return SeverityNumber.forNumber(severity.getSeverityNumber());
     }
 }

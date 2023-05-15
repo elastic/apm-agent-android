@@ -19,6 +19,7 @@
 package co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.mapping;
 
 import static org.junit.Assert.assertEquals;
+import static co.elastic.apm.android.sdk.testdata.LogRecordDataUtil.createLogRecordData;
 import static co.elastic.apm.android.sdk.testutils.ListUtils.listOf;
 
 import org.junit.Test;
@@ -33,12 +34,7 @@ import co.elastic.apm.android.sdk.internal.opentelemetry.proto.logs.v1.ScopeLogs
 import co.elastic.apm.android.sdk.testutils.BaseConverterTest;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.logs.Severity;
-import io.opentelemetry.api.trace.SpanContext;
-import io.opentelemetry.api.trace.TraceFlags;
-import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
-import io.opentelemetry.sdk.logs.data.Body;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import io.opentelemetry.sdk.resources.Resource;
 
@@ -161,57 +157,5 @@ public class LogCollectionConverterTest extends BaseConverterTest {
                 .put(AttributeKey.stringKey(someAttr), someValue)
                 .setSchemaUrl(schemaUrl)
                 .build();
-    }
-
-    private LogRecordData createLogRecordData(Resource resource,
-                                              InstrumentationScopeInfo scopeInfo,
-                                              String body,
-                                              Attributes attributes) {
-        return new LogRecordData() {
-            @Override
-            public Resource getResource() {
-                return resource;
-            }
-
-            @Override
-            public InstrumentationScopeInfo getInstrumentationScopeInfo() {
-                return scopeInfo;
-            }
-
-            @Override
-            public long getEpochNanos() {
-                return 12345;
-            }
-
-            @Override
-            public SpanContext getSpanContext() {
-                return SpanContext.create("b535b3b5232b5dabced5b0ab8037eb78", "f3fc364fb6b77cff", TraceFlags.getSampled(), TraceState.getDefault());
-            }
-
-            @Override
-            public Severity getSeverity() {
-                return Severity.INFO;
-            }
-
-            @Override
-            public String getSeverityText() {
-                return null;
-            }
-
-            @Override
-            public Body getBody() {
-                return Body.string(body);
-            }
-
-            @Override
-            public Attributes getAttributes() {
-                return attributes;
-            }
-
-            @Override
-            public int getTotalAttributeCount() {
-                return 0;
-            }
-        };
     }
 }

@@ -25,9 +25,11 @@ import co.elastic.apm.android.sdk.internal.features.storage.serialization.common
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.common.mapping.instrumentationscopeinfo.InstrumentationScopeInfoConverter;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.common.mapping.resource.ResourceConverter;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.mapping.LogCollectionConverter;
+import co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.mapping.LogRecordDataConverter;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.models.LogCollection;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
+import io.opentelemetry.sdk.logs.data.LogRecordData;
 import io.opentelemetry.sdk.resources.Resource;
 
 @SuppressWarnings("unchecked")
@@ -64,6 +66,7 @@ public class Mapper {
         map.put(LogCollection.class, new LogCollectionConverter());
         map.put(InstrumentationScopeInfo.class, new InstrumentationScopeInfoConverter());
         map.put(Resource.class, new ResourceConverter());
+        map.put(LogRecordData.class, new LogRecordDataConverter());
         return new Mapper(map);
     }
 }

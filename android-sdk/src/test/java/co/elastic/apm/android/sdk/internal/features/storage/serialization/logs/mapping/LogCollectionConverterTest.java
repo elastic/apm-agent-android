@@ -46,10 +46,9 @@ public class LogCollectionConverterTest extends BaseConverterTest {
 
     @Test
     public void verifyConversionDataStructure() {
-        Attributes attributes = Attributes.builder()
-                .put(AttributeKey.stringKey("someLogAttr"), "someLogAttrValue").build();
         LogRecordData logRecordData = createLogRecordData(singleAttributeResource("someAttr", "someValue", "resourceSchema"),
-                createScope("someName", "1.2.3", "scopeSchema"), 12345, Severity.DEBUG3, "Some body", attributes);
+                createScope("someName", "1.2.3", "scopeSchema"),
+                "Some body", singleItemAttributes("someLogAttr", "someLogAttrValue"));
 
         LogsData result = map(new LogCollection(listOf(logRecordData)));
 
@@ -67,11 +66,45 @@ public class LogCollectionConverterTest extends BaseConverterTest {
         assertEquals("Some body", logRecord.getBody().getStringValue());
     }
 
+    @Test
+    public void verifyMultipleLogsWithSameResourceAndScope() {
+        Resource resource = singleAttributeResource("oneResourceAttr", "oneResourceValue");
+        InstrumentationScopeInfo scope = createScope("oneScope");
+        LogRecordData firstLog = createLogRecordData(resource, scope,
+                "firstBody", singleItemAttributes("oneAttr", "oneValue"));
+        LogRecordData secondLog = createLogRecordData(resource, scope,
+                "secondBody", singleItemAttributes("otherAttr", "otherValue"));
+
+        LogsData result = map(new LogCollection(listOf(firstLog, secondLog)));
+
+        List<ResourceLogs> resourceLogsList = result.getResourceLogsList();
+        assertEquals(1, resourceLogsList.size());
+        List<ScopeLogs> scopeLogsList = resourceLogsList.get(0).getScopeLogsList();
+        assertEquals(1, scopeLogsList.size());
+        List<LogRecord> logRecordsList = scopeLogsList.get(0).getLogRecordsList();
+        assertEquals(2, logRecordsList.size());
+        assertEquals("firstBody", logRecordsList.get(0).getBody().getStringValue());
+        assertEquals("secondBody", logRecordsList.get(1).getBody().getStringValue());
+    }
+
+    private Attributes singleItemAttributes(String key, String value) {
+        return Attributes.builder()
+                .put(AttributeKey.stringKey(key), value).build();
+    }
+
+    private InstrumentationScopeInfo createScope(String name) {
+        return createScope(name, null, null);
+    }
+
     private InstrumentationScopeInfo createScope(String name, String version, String schemaUrl) {
         return InstrumentationScopeInfo.builder(name)
                 .setVersion(version)
                 .setSchemaUrl(schemaUrl)
                 .build();
+    }
+
+    private Resource singleAttributeResource(String someAttr, String someValue) {
+        return singleAttributeResource(someAttr, someValue, null);
     }
 
     private Resource singleAttributeResource(String someAttr, String someValue, String schemaUrl) {
@@ -83,8 +116,6 @@ public class LogCollectionConverterTest extends BaseConverterTest {
 
     private LogRecordData createLogRecordData(Resource resource,
                                               InstrumentationScopeInfo scopeInfo,
-                                              long epochNanos,
-                                              Severity severity,
                                               String body,
                                               Attributes attributes) {
         return new LogRecordData() {
@@ -100,7 +131,7 @@ public class LogCollectionConverterTest extends BaseConverterTest {
 
             @Override
             public long getEpochNanos() {
-                return epochNanos;
+                return 12345;
             }
 
             @Override
@@ -110,7 +141,7 @@ public class LogCollectionConverterTest extends BaseConverterTest {
 
             @Override
             public Severity getSeverity() {
-                return severity;
+                return Severity.INFO;
             }
 
             @Override

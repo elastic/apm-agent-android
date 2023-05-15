@@ -21,7 +21,7 @@ package co.elastic.apm.android.sdk.internal.features.storage.serialization.mappi
 import java.util.HashMap;
 import java.util.Map;
 
-import co.elastic.apm.android.sdk.internal.features.storage.serialization.common.mapping.AttributesConverter;
+import co.elastic.apm.android.sdk.internal.features.storage.serialization.common.mapping.attributes.AttributesConverter;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.mapping.LogCollectionConverter;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.models.LogCollection;
 import io.opentelemetry.api.common.Attributes;

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.features.storage.serialization.common.mapping;
+package co.elastic.apm.android.sdk.internal.features.storage.serialization.common.mapping.attributes;
 
 import java.util.ArrayList;
 import java.util.List;

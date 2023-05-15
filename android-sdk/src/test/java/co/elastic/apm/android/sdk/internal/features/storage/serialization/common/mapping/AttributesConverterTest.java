@@ -27,13 +27,13 @@ import org.junit.Test;
 
 import java.util.List;
 
-import co.elastic.apm.android.sdk.internal.features.storage.serialization.mapping.Mapper;
 import co.elastic.apm.android.sdk.internal.opentelemetry.proto.common.v1.ArrayValue;
 import co.elastic.apm.android.sdk.internal.opentelemetry.proto.common.v1.KeyValue;
+import co.elastic.apm.android.sdk.testutils.BaseConverterTest;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 
-public class AttributesConverterTest {
+public class AttributesConverterTest extends BaseConverterTest {
 
     @Test
     public void verifyConversionForStringAttr() {
@@ -41,7 +41,7 @@ public class AttributesConverterTest {
                 .put(AttributeKey.stringKey("someStringKey"), "someStringValue")
                 .build();
 
-        List<KeyValue> result = Mapper.createDefault().map(attributes);
+        List<KeyValue> result = map(attributes);
 
         assertEquals(1, result.size());
         KeyValue keyValue = result.get(0);
@@ -55,7 +55,7 @@ public class AttributesConverterTest {
                 .put(AttributeKey.booleanKey("someKey"), true)
                 .build();
 
-        List<KeyValue> result = Mapper.createDefault().map(attributes);
+        List<KeyValue> result = map(attributes);
 
         assertEquals(1, result.size());
         KeyValue keyValue = result.get(0);
@@ -69,7 +69,7 @@ public class AttributesConverterTest {
                 .put(AttributeKey.longKey("someKey"), 10L)
                 .build();
 
-        List<KeyValue> result = Mapper.createDefault().map(attributes);
+        List<KeyValue> result = map(attributes);
 
         assertEquals(1, result.size());
         KeyValue keyValue = result.get(0);
@@ -83,7 +83,7 @@ public class AttributesConverterTest {
                 .put(AttributeKey.doubleKey("someKey"), 15.0)
                 .build();
 
-        List<KeyValue> result = Mapper.createDefault().map(attributes);
+        List<KeyValue> result = map(attributes);
 
         assertEquals(1, result.size());
         KeyValue keyValue = result.get(0);
@@ -97,7 +97,7 @@ public class AttributesConverterTest {
                 .put(AttributeKey.stringArrayKey("someKey"), listOf("first", "second"))
                 .build();
 
-        List<KeyValue> result = Mapper.createDefault().map(attributes);
+        List<KeyValue> result = map(attributes);
 
         assertEquals(1, result.size());
         KeyValue keyValue = result.get(0);
@@ -114,7 +114,7 @@ public class AttributesConverterTest {
                 .put(AttributeKey.booleanArrayKey("someKey"), listOf(true, false))
                 .build();
 
-        List<KeyValue> result = Mapper.createDefault().map(attributes);
+        List<KeyValue> result = map(attributes);
 
         assertEquals(1, result.size());
         KeyValue keyValue = result.get(0);
@@ -131,7 +131,7 @@ public class AttributesConverterTest {
                 .put(AttributeKey.longArrayKey("someKey"), listOf(2L, 5L))
                 .build();
 
-        List<KeyValue> result = Mapper.createDefault().map(attributes);
+        List<KeyValue> result = map(attributes);
 
         assertEquals(1, result.size());
         KeyValue keyValue = result.get(0);
@@ -148,7 +148,7 @@ public class AttributesConverterTest {
                 .put(AttributeKey.doubleArrayKey("someKey"), listOf(10.0, 1.0))
                 .build();
 
-        List<KeyValue> result = Mapper.createDefault().map(attributes);
+        List<KeyValue> result = map(attributes);
 
         assertEquals(1, result.size());
         KeyValue keyValue = result.get(0);

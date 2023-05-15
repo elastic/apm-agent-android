@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.common.mapping.AttributesConverter;
+import co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.mapping.LogCollectionConverter;
+import co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.models.LogCollection;
 import io.opentelemetry.api.common.Attributes;
 
 @SuppressWarnings("unchecked")
@@ -46,12 +48,16 @@ public class Mapper {
                 }
             }
         }
+        if (converter == null) {
+            throw new UnsupportedOperationException("Could not find converter for " + original);
+        }
         return (Converter<?, RESULT>) converter;
     }
 
     public static Mapper createDefault() {
         Map<Class<?>, Converter<?, ?>> map = new HashMap<>();
         map.put(Attributes.class, new AttributesConverter());
+        map.put(LogCollection.class, new LogCollectionConverter());
         return new Mapper(map);
     }
 }

@@ -16,14 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.features.storage.serialization.logs;
+package co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.models;
 
-import org.junit.Test;
+import java.util.List;
 
-public class LogsSerializerTest {
+import io.opentelemetry.sdk.logs.data.LogRecordData;
 
-    @Test
-    public void verifySerialization() {
+public class LogCollection {
+    public final List<LogRecordData> logs;
 
+    public LogCollection(List<LogRecordData> logs) {
+        this.logs = logs;
     }
 }

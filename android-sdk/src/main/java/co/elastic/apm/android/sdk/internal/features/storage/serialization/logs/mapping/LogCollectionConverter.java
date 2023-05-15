@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.features.storage.serialization.logs;
+package co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.mapping;
 
 import com.google.protobuf.ByteString;
 
@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.models.LogCollection;
+import co.elastic.apm.android.sdk.internal.features.storage.serialization.mapping.Converter;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.mapping.Mapper;
 import co.elastic.apm.android.sdk.internal.opentelemetry.proto.common.v1.AnyValue;
 import co.elastic.apm.android.sdk.internal.opentelemetry.proto.common.v1.InstrumentationScope;
@@ -39,25 +41,23 @@ import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import io.opentelemetry.sdk.resources.Resource;
 
-public class LogsSerializer {
-    private static final Mapper mapper = Mapper.createDefault();
+public class LogCollectionConverter extends Converter<LogCollection, LogsData> {
 
-    public static String serialize(List<LogRecordData> logs) {
-        LogsData logsData = LogsData.newBuilder()
-                .addAllResourceLogs(convertToResourceLogItems(logs))
+    @Override
+    protected LogsData doConvert(Mapper mapper, LogCollection from) {
+        return LogsData.newBuilder()
+                .addAllResourceLogs(convertToResourceLogItems(mapper, from.logs))
                 .build();
-
-        return logsData.toString();
     }
 
-    private static List<ResourceLogs> convertToResourceLogItems(List<LogRecordData> logs) {
+    private List<ResourceLogs> convertToResourceLogItems(Mapper mapper, List<LogRecordData> logs) {
         List<ResourceLogs> resourceLogItems = new ArrayList<>();
-        Map<Resource, Map<InstrumentationScopeInfo, List<LogRecord>>> logModelsByResource = getLogRecordsByResourceAndScope(logs);
+        Map<Resource, Map<InstrumentationScopeInfo, List<LogRecord>>> logModelsByResource = getLogRecordsByResourceAndScope(mapper, logs);
         logModelsByResource.forEach((resource, logsByScope) -> {
             List<ScopeLogs> scopeLogs = new ArrayList<>();
             logsByScope.forEach((scopeInfo, logRecords) -> {
                 ScopeLogs.Builder builder = ScopeLogs.newBuilder()
-                        .setScope(convertToScopeProto(scopeInfo))
+                        .setScope(convertToScopeProto(mapper, scopeInfo))
                         .addAllLogRecords(logRecords);
                 String schemaUrl = scopeInfo.getSchemaUrl();
                 if (schemaUrl != null) {
@@ -66,7 +66,7 @@ public class LogsSerializer {
                 scopeLogs.add(builder.build());
             });
             ResourceLogs.Builder builder = ResourceLogs.newBuilder()
-                    .setResource(convertToProtoResource(resource))
+                    .setResource(convertToProtoResource(mapper, resource))
                     .addAllScopeLogs(scopeLogs);
             String schemaUrl = resource.getSchemaUrl();
             if (schemaUrl != null) {
@@ -78,7 +78,7 @@ public class LogsSerializer {
         return resourceLogItems;
     }
 
-    private static InstrumentationScope convertToScopeProto(InstrumentationScopeInfo scopeInfo) {
+    private InstrumentationScope convertToScopeProto(Mapper mapper, InstrumentationScopeInfo scopeInfo) {
         InstrumentationScope.Builder builder = InstrumentationScope.newBuilder()
                 .setName(scopeInfo.getName())
                 .addAllAttributes(mapper.map(scopeInfo.getAttributes()));
@@ -89,7 +89,7 @@ public class LogsSerializer {
         return builder.build();
     }
 
-    private static Map<Resource, Map<InstrumentationScopeInfo, List<LogRecord>>> getLogRecordsByResourceAndScope(List<LogRecordData> logs) {
+    private Map<Resource, Map<InstrumentationScopeInfo, List<LogRecord>>> getLogRecordsByResourceAndScope(Mapper mapper, List<LogRecordData> logs) {
         Map<Resource, Map<InstrumentationScopeInfo, List<LogRecord>>> logsByResourceAndScope = new HashMap<>();
         logs.forEach(logRecordData -> {
             Map<InstrumentationScopeInfo, List<LogRecord>> logsByScope = logsByResourceAndScope.get(logRecordData.getResource());
@@ -103,12 +103,12 @@ public class LogsSerializer {
                 logsByScope.put(logRecordData.getInstrumentationScopeInfo(), logModels);
             }
 
-            logModels.add(createLogRecord(logRecordData));
+            logModels.add(createLogRecord(mapper, logRecordData));
         });
         return logsByResourceAndScope;
     }
 
-    private static LogRecord createLogRecord(LogRecordData logRecordData) {
+    private LogRecord createLogRecord(Mapper mapper, LogRecordData logRecordData) {
         SpanContext spanContext = logRecordData.getSpanContext();
         LogRecord.Builder builder = LogRecord.newBuilder()
                 .setTimeUnixNano(logRecordData.getEpochNanos())
@@ -125,11 +125,11 @@ public class LogsSerializer {
         return builder.build();
     }
 
-    private static SeverityNumber convertToSeverityNumber(Severity severity) {
+    private SeverityNumber convertToSeverityNumber(Severity severity) {
         return SeverityNumber.forNumber(severity.getSeverityNumber());
     }
 
-    private static co.elastic.apm.android.sdk.internal.opentelemetry.proto.resource.v1.Resource convertToProtoResource(Resource resource) {
+    private co.elastic.apm.android.sdk.internal.opentelemetry.proto.resource.v1.Resource convertToProtoResource(Mapper mapper, Resource resource) {
         return co.elastic.apm.android.sdk.internal.opentelemetry.proto.resource.v1.Resource.newBuilder()
                 .addAllAttributes(mapper.map(resource.getAttributes()))
                 .build();

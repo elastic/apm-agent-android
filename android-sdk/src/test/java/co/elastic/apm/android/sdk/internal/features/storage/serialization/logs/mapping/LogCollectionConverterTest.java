@@ -109,6 +109,33 @@ public class LogCollectionConverterTest extends BaseConverterTest {
         assertEquals(1, secondScopeLogs.size());
     }
 
+    @Test
+    public void verifyMultipleLogsWithDifferentResource() {
+        Resource firstResource = singleAttributeResource("oneResourceAttr", "oneResourceValue");
+        Resource secondResource = singleAttributeResource("otherResourceAttr", "otherResourceValue");
+        LogRecordData firstLog = createLogRecordData(firstResource, createScope("firstScope"),
+                "firstBody", singleItemAttributes("oneAttr", "oneValue"));
+        LogRecordData secondLog = createLogRecordData(secondResource, createScope("secondScope"),
+                "secondBody", singleItemAttributes("otherAttr", "otherValue"));
+
+        LogsData result = map(new LogCollection(listOf(firstLog, secondLog)));
+
+        List<ResourceLogs> resourceLogsList = result.getResourceLogsList();
+        assertEquals(2, resourceLogsList.size());
+        ResourceLogs firstResourceLogs = resourceLogsList.get(0);
+        ResourceLogs secondResourceLogs = resourceLogsList.get(1);
+        List<ScopeLogs> firstScopeLogsList = firstResourceLogs.getScopeLogsList();
+        List<ScopeLogs> secondScopeLogsList = secondResourceLogs.getScopeLogsList();
+        assertEquals(1, firstScopeLogsList.size());
+        assertEquals(1, secondScopeLogsList.size());
+        ScopeLogs firstScope = firstScopeLogsList.get(0);
+        ScopeLogs secondScope = secondScopeLogsList.get(0);
+        List<LogRecord> firstScopeLogs = firstScope.getLogRecordsList();
+        List<LogRecord> secondScopeLogs = secondScope.getLogRecordsList();
+        assertEquals(1, firstScopeLogs.size());
+        assertEquals(1, secondScopeLogs.size());
+    }
+
     private Attributes singleItemAttributes(String key, String value) {
         return Attributes.builder()
                 .put(AttributeKey.stringKey(key), value).build();

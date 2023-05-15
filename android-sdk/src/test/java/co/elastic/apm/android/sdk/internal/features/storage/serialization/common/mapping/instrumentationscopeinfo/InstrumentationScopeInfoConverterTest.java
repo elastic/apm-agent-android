@@ -50,4 +50,21 @@ public class InstrumentationScopeInfoConverterTest extends BaseConverterTest {
         assertEquals("someAttr", keyValue.getKey());
         assertEquals("someValue", keyValue.getValue().getStringValue());
     }
+
+    @Test
+    public void verifyConversionWithoutVersion() {
+        InstrumentationScopeInfo scopeInfo = InstrumentationScopeInfo.builder("scopeName")
+                .setAttributes(Attributes.of(AttributeKey.stringKey("someAttr"), "someValue"))
+                .build();
+
+        InstrumentationScope result = map(scopeInfo);
+
+        assertEquals("scopeName", result.getName());
+        assertEquals("", result.getVersion());
+        List<KeyValue> attributesList = result.getAttributesList();
+        assertEquals(1, attributesList.size());
+        KeyValue keyValue = attributesList.get(0);
+        assertEquals("someAttr", keyValue.getKey());
+        assertEquals("someValue", keyValue.getValue().getStringValue());
+    }
 }

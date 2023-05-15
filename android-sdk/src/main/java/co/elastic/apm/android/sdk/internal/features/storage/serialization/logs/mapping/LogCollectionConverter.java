@@ -57,7 +57,7 @@ public class LogCollectionConverter extends Converter<LogCollection, LogsData> {
             List<ScopeLogs> scopeLogs = new ArrayList<>();
             logsByScope.forEach((scopeInfo, logRecords) -> {
                 ScopeLogs.Builder builder = ScopeLogs.newBuilder()
-                        .setScope(convertToScopeProto(mapper, scopeInfo))
+                        .setScope(mapper.<InstrumentationScope>map(scopeInfo))
                         .addAllLogRecords(logRecords);
                 String schemaUrl = scopeInfo.getSchemaUrl();
                 if (schemaUrl != null) {
@@ -76,17 +76,6 @@ public class LogCollectionConverter extends Converter<LogCollection, LogsData> {
         });
 
         return resourceLogItems;
-    }
-
-    private InstrumentationScope convertToScopeProto(Mapper mapper, InstrumentationScopeInfo scopeInfo) {
-        InstrumentationScope.Builder builder = InstrumentationScope.newBuilder()
-                .setName(scopeInfo.getName())
-                .addAllAttributes(mapper.map(scopeInfo.getAttributes()));
-        String version = scopeInfo.getVersion();
-        if (version != null) {
-            builder.setVersion(version);
-        }
-        return builder.build();
     }
 
     private Map<Resource, Map<InstrumentationScopeInfo, List<LogRecord>>> getLogRecordsByResourceAndScope(Mapper mapper, List<LogRecordData> logs) {

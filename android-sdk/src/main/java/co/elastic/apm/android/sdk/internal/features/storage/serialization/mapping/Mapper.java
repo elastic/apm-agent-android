@@ -22,9 +22,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.common.mapping.attributes.AttributesConverter;
+import co.elastic.apm.android.sdk.internal.features.storage.serialization.common.mapping.instrumentationscopeinfo.InstrumentationScopeInfoConverter;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.mapping.LogCollectionConverter;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.models.LogCollection;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 
 @SuppressWarnings("unchecked")
 public class Mapper {
@@ -58,6 +60,7 @@ public class Mapper {
         Map<Class<?>, Converter<?, ?>> map = new HashMap<>();
         map.put(Attributes.class, new AttributesConverter());
         map.put(LogCollection.class, new LogCollectionConverter());
+        map.put(InstrumentationScopeInfo.class, new InstrumentationScopeInfoConverter());
         return new Mapper(map);
     }
 }

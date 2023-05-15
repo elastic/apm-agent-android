@@ -66,7 +66,7 @@ public class LogCollectionConverter extends Converter<LogCollection, LogsData> {
                 scopeLogs.add(builder.build());
             });
             ResourceLogs.Builder builder = ResourceLogs.newBuilder()
-                    .setResource(convertToProtoResource(mapper, resource))
+                    .setResource(mapper.<co.elastic.apm.android.sdk.internal.opentelemetry.proto.resource.v1.Resource>map(resource))
                     .addAllScopeLogs(scopeLogs);
             String schemaUrl = resource.getSchemaUrl();
             if (schemaUrl != null) {
@@ -116,11 +116,5 @@ public class LogCollectionConverter extends Converter<LogCollection, LogsData> {
 
     private SeverityNumber convertToSeverityNumber(Severity severity) {
         return SeverityNumber.forNumber(severity.getSeverityNumber());
-    }
-
-    private co.elastic.apm.android.sdk.internal.opentelemetry.proto.resource.v1.Resource convertToProtoResource(Mapper mapper, Resource resource) {
-        return co.elastic.apm.android.sdk.internal.opentelemetry.proto.resource.v1.Resource.newBuilder()
-                .addAllAttributes(mapper.map(resource.getAttributes()))
-                .build();
     }
 }

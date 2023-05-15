@@ -47,7 +47,7 @@ public class LogsSerializer {
                 .addAllResourceLogs(convertToResourceLogItems(logs))
                 .build();
 
-        return logsData.
+        return logsData.toString();
     }
 
     private static List<ResourceLogs> convertToResourceLogItems(List<LogRecordData> logs) {
@@ -55,29 +55,38 @@ public class LogsSerializer {
         Map<Resource, Map<InstrumentationScopeInfo, List<LogRecord>>> logModelsByResource = getLogRecordsByResourceAndScope(logs);
         logModelsByResource.forEach((resource, logsByScope) -> {
             List<ScopeLogs> scopeLogs = new ArrayList<>();
-            logsByScope.forEach((scopeInfo, logRecords) -> scopeLogs.add(ScopeLogs.newBuilder()
-                    .setScope(convertToScopeProto(scopeInfo))
-                    .setSchemaUrl(scopeInfo.getSchemaUrl())
-                    .addAllLogRecords(logRecords)
-                    .build()));
-            resourceLogItems.add(
-                    ResourceLogs.newBuilder()
-                            .setResource(convertToProtoResource(resource))
-                            .setSchemaUrl(resource.getSchemaUrl())
-                            .addAllScopeLogs(scopeLogs)
-                            .build()
-            );
+            logsByScope.forEach((scopeInfo, logRecords) -> {
+                ScopeLogs.Builder builder = ScopeLogs.newBuilder()
+                        .setScope(convertToScopeProto(scopeInfo))
+                        .addAllLogRecords(logRecords);
+                String schemaUrl = scopeInfo.getSchemaUrl();
+                if (schemaUrl != null) {
+                    builder.setSchemaUrl(schemaUrl);
+                }
+                scopeLogs.add(builder.build());
+            });
+            ResourceLogs.Builder builder = ResourceLogs.newBuilder()
+                    .setResource(convertToProtoResource(resource))
+                    .addAllScopeLogs(scopeLogs);
+            String schemaUrl = resource.getSchemaUrl();
+            if (schemaUrl != null) {
+                builder.setSchemaUrl(schemaUrl);
+            }
+            resourceLogItems.add(builder.build());
         });
 
         return resourceLogItems;
     }
 
     private static InstrumentationScope convertToScopeProto(InstrumentationScopeInfo scopeInfo) {
-        return InstrumentationScope.newBuilder()
+        InstrumentationScope.Builder builder = InstrumentationScope.newBuilder()
                 .setName(scopeInfo.getName())
-                .setVersion(scopeInfo.getVersion())
-                .addAllAttributes(mapper.map(scopeInfo.getAttributes()))
-                .build();
+                .addAllAttributes(mapper.map(scopeInfo.getAttributes()));
+        String version = scopeInfo.getVersion();
+        if (version != null) {
+            builder.setVersion(version);
+        }
+        return builder.build();
     }
 
     private static Map<Resource, Map<InstrumentationScopeInfo, List<LogRecord>>> getLogRecordsByResourceAndScope(List<LogRecordData> logs) {
@@ -101,16 +110,19 @@ public class LogsSerializer {
 
     private static LogRecord createLogRecord(LogRecordData logRecordData) {
         SpanContext spanContext = logRecordData.getSpanContext();
-        return LogRecord.newBuilder()
+        LogRecord.Builder builder = LogRecord.newBuilder()
                 .setTimeUnixNano(logRecordData.getEpochNanos())
                 .setSeverityNumber(convertToSeverityNumber(logRecordData.getSeverity()))
-                .setSeverityText(logRecordData.getSeverityText())
                 .setBody(AnyValue.newBuilder().setStringValue(logRecordData.getBody().asString()))
                 .addAllAttributes(mapper.map(logRecordData.getAttributes()))
                 .setFlags(spanContext.getTraceFlags().asByte())
                 .setTraceId(ByteString.copyFrom(spanContext.getTraceIdBytes()))
-                .setSpanId(ByteString.copyFrom(spanContext.getSpanIdBytes()))
-                .build();
+                .setSpanId(ByteString.copyFrom(spanContext.getSpanIdBytes()));
+        String severityText = logRecordData.getSeverityText();
+        if (severityText != null) {
+            builder.setSeverityText(severityText);
+        }
+        return builder.build();
     }
 
     private static SeverityNumber convertToSeverityNumber(Severity severity) {

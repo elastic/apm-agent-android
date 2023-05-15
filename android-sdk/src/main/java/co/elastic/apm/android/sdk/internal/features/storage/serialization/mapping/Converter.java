@@ -16,16 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.opentelemetry.proto.common.v1;
+package co.elastic.apm.android.sdk.internal.features.storage.serialization.mapping;
 
-public final class CommonProto {
-  private CommonProto() {}
-  public static void registerAllExtensions(
-      com.google.protobuf.ExtensionRegistryLite registry) {
-  }
+@SuppressWarnings("unchecked")
+public abstract class Converter<TARGET, RESULT> {
 
-  static {
-  }
+    public RESULT convert(Mapper mapper, Object from) {
+        return doConvert(mapper, (TARGET) from);
+    }
 
-  // @@protoc_insertion_point(outer_class_scope)
+    protected abstract RESULT doConvert(Mapper mapper, TARGET from);
 }

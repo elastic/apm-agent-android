@@ -16,16 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.opentelemetry.proto.common.v1;
+package co.elastic.apm.android.sdk.testutils;
 
-public final class CommonProto {
-  private CommonProto() {}
-  public static void registerAllExtensions(
-      com.google.protobuf.ExtensionRegistryLite registry) {
-  }
+import java.util.Arrays;
+import java.util.List;
 
-  static {
-  }
+public class ListUtils {
 
-  // @@protoc_insertion_point(outer_class_scope)
+    public static <T> List<T> listOf(T... items) {
+        return Arrays.asList(items);
+    }
 }

@@ -46,6 +46,7 @@ import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.logs.Severity;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.TraceFlags;
+import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 
 public class LogsDataConverterTest extends BaseConverterTest {
@@ -79,6 +80,17 @@ public class LogsDataConverterTest extends BaseConverterTest {
         Attributes attributes = logRecordData.getAttributes();
         assertEquals(1, attributes.size());
         assertEquals("someValue", attributes.get(AttributeKey.stringKey("someKey")));
+        assertEquals("resourceSchemaUrl", logRecordData.getResource().getSchemaUrl());
+        Attributes resourceAttrs = logRecordData.getResource().getAttributes();
+        assertEquals(1, resourceAttrs.size());
+        assertEquals("resourceAttrValue", resourceAttrs.get(AttributeKey.stringKey("resourceAttr")));
+        InstrumentationScopeInfo scopeInfo = logRecordData.getInstrumentationScopeInfo();
+        assertEquals("scopeSchemaUrl", scopeInfo.getSchemaUrl());
+        assertEquals("1.2.3", scopeInfo.getVersion());
+        assertEquals("scopeName", scopeInfo.getName());
+        Attributes scopeAttrs = scopeInfo.getAttributes();
+        assertEquals(1, scopeAttrs.size());
+        assertEquals("scopeAttrValue", scopeAttrs.get(AttributeKey.stringKey("scopeAttr")));
     }
 
     private LogRecord getLogRecord() {

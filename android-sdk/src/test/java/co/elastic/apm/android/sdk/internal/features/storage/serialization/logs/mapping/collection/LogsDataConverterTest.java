@@ -41,6 +41,12 @@ import co.elastic.apm.android.sdk.internal.opentelemetry.proto.logs.v1.ScopeLogs
 import co.elastic.apm.android.sdk.internal.opentelemetry.proto.logs.v1.SeverityNumber;
 import co.elastic.apm.android.sdk.internal.opentelemetry.proto.resource.v1.Resource;
 import co.elastic.apm.android.sdk.testutils.BaseConverterTest;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.logs.Severity;
+import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.api.trace.TraceFlags;
+import io.opentelemetry.sdk.logs.data.LogRecordData;
 
 public class LogsDataConverterTest extends BaseConverterTest {
 
@@ -61,6 +67,18 @@ public class LogsDataConverterTest extends BaseConverterTest {
         LogCollection collection = map(LogsData.newBuilder().addResourceLogs(resourceLogs).build());
 
         assertEquals(1, collection.logs.size());
+        LogRecordData logRecordData = collection.logs.get(0);
+        assertEquals(23456, logRecordData.getEpochNanos());
+        assertEquals(Severity.DEBUG3, logRecordData.getSeverity());
+        assertEquals("some severity text", logRecordData.getSeverityText());
+        assertEquals("some body", logRecordData.getBody().asString());
+        SpanContext spanContext = logRecordData.getSpanContext();
+        assertEquals(TraceFlags.getSampled(), spanContext.getTraceFlags());
+        assertEquals(TRACE_ID, spanContext.getTraceId());
+        assertEquals(SPAN_ID, spanContext.getSpanId());
+        Attributes attributes = logRecordData.getAttributes();
+        assertEquals(1, attributes.size());
+        assertEquals("someValue", attributes.get(AttributeKey.stringKey("someKey")));
     }
 
     private LogRecord getLogRecord() {
@@ -70,9 +88,9 @@ public class LogsDataConverterTest extends BaseConverterTest {
                 .setSeverityText("some severity text")
                 .setBody(AnyValue.newBuilder().setStringValue("some body").build())
                 .setFlags(0x01)
-                .addAttributes(singleItemAttributes("someKey", "someValue"))
                 .setTraceId(ByteString.copyFrom(TRACE_ID, StandardCharsets.UTF_8))
                 .setSpanId(ByteString.copyFrom(SPAN_ID, StandardCharsets.UTF_8))
+                .addAttributes(singleItemAttributes("someKey", "someValue"))
                 .build();
     }
 

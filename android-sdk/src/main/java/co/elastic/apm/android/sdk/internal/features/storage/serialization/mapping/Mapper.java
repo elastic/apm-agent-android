@@ -24,9 +24,11 @@ import java.util.Map;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.common.mapping.attributes.AttributesConverter;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.common.mapping.attributes.ProtoAttributesConverter;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.common.mapping.instrumentationscopeinfo.InstrumentationScopeInfoConverter;
+import co.elastic.apm.android.sdk.internal.features.storage.serialization.common.mapping.instrumentationscopeinfo.ProtoInstrumentationScopeConverter;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.common.mapping.resource.ProtoResourceConverter;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.common.mapping.resource.ResourceConverter;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.common.models.ProtoAttributes;
+import co.elastic.apm.android.sdk.internal.features.storage.serialization.common.models.ProtoInstrumentationScope;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.common.models.ProtoResource;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.mapping.LogRecordDataConverter;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.mapping.collection.LogCollectionConverter;
@@ -76,6 +78,7 @@ public class Mapper {
         map.put(LogsData.class, new LogsDataConverter());
         map.put(ProtoAttributes.class, new ProtoAttributesConverter());
         map.put(ProtoResource.class, new ProtoResourceConverter());
+        map.put(ProtoInstrumentationScope.class, new ProtoInstrumentationScopeConverter());
         return new Mapper(map);
     }
 }

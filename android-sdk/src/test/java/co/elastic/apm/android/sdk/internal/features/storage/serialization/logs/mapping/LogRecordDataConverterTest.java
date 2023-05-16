@@ -19,6 +19,8 @@
 package co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.mapping;
 
 import static org.junit.Assert.assertEquals;
+import static co.elastic.apm.android.sdk.testdata.LogRecordDataUtil.SPAN_ID;
+import static co.elastic.apm.android.sdk.testdata.LogRecordDataUtil.TRACE_ID;
 import static co.elastic.apm.android.sdk.testdata.LogRecordDataUtil.createLogRecordData;
 
 import org.junit.Test;
@@ -41,8 +43,8 @@ public class LogRecordDataConverterTest extends BaseConverterTest {
     public void verifyConversion() {
         InstrumentationScopeInfo scope = InstrumentationScopeInfo.create("scopeName");
         Resource resource = Resource.create(Attributes.of(AttributeKey.stringKey("resourceAttr"), "resourceValue"));
-        String traceId = "b535b3b5232b5dabced5b0ab8037eb78";
-        String spanId = "f3fc364fb6b77cff";
+        String traceId = TRACE_ID;
+        String spanId = SPAN_ID;
         LogRecordData logRecordData = createLogRecordData(resource, scope, "some body", Attributes.of(AttributeKey.stringKey("someAttr"), "someValue"),
                 1234, traceId, spanId, Severity.DEBUG3, "some severity text");
 
@@ -65,8 +67,8 @@ public class LogRecordDataConverterTest extends BaseConverterTest {
     public void verifyConversionWithSeverityTextNull() {
         InstrumentationScopeInfo scope = InstrumentationScopeInfo.create("scopeName");
         Resource resource = Resource.create(Attributes.of(AttributeKey.stringKey("resourceAttr"), "resourceValue"));
-        String traceId = "b535b3b5232b5dabced5b0ab8037eb78";
-        String spanId = "f3fc364fb6b77cff";
+        String traceId = TRACE_ID;
+        String spanId = SPAN_ID;
         LogRecordData logRecordData = createLogRecordData(resource, scope, "some body", Attributes.of(AttributeKey.stringKey("someAttr"), "someValue"),
                 1234, traceId, spanId, Severity.DEBUG3, null);
 

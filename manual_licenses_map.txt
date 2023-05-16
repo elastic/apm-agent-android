@@ -3,3 +3,4 @@ net.bytebuddy:byte-buddy-gradle-plugin:1.12.22|apache_v2
 org.slf4j:slf4j-api:2.0.0|mit
 com.squareup.okhttp3:okhttp:3.11.0|apache_v2
 com.github.instacart.truetime-android:library:3.5|apache_v2
+com.google.protobuf:protobuf-javalite:3.23.0|bsd3

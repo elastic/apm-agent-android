@@ -29,6 +29,7 @@ This product includes software licensed under the 'MIT License' license from the
 This product includes software licensed under the 'The 3-Clause BSD License' license from the following sources:
 
  - DSL Platform JSON (Java 8 API) (https://github.com/ngs-doo/dsl-json)
+ - Protocol Buffers [Lite]
 
 ###############################################################################
 

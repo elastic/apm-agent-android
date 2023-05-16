@@ -19,6 +19,7 @@
 package co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.mapping.collection;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static co.elastic.apm.android.sdk.testdata.LogRecordDataUtil.SPAN_ID;
 import static co.elastic.apm.android.sdk.testdata.LogRecordDataUtil.TRACE_ID;
 
@@ -29,6 +30,8 @@ import com.google.protobuf.ByteString;
 import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.models.LogCollection;
 import co.elastic.apm.android.sdk.internal.opentelemetry.proto.common.v1.AnyValue;
@@ -52,18 +55,10 @@ import io.opentelemetry.sdk.logs.data.LogRecordData;
 public class LogsDataConverterTest extends BaseConverterTest {
 
     @Test
-    public void verifyConversion() {
-        LogRecord log = getLogRecord();
-        ScopeLogs scopeLogs = ScopeLogs.newBuilder()
-                .addLogRecords(log)
-                .setSchemaUrl("scopeSchemaUrl")
-                .setScope(InstrumentationScope.newBuilder().setName("scopeName").setVersion("1.2.3").addAttributes(singleItemAttributes("scopeAttr", "scopeAttrValue")))
-                .build();
-        ResourceLogs resourceLogs = ResourceLogs.newBuilder()
-                .addScopeLogs(scopeLogs)
-                .setSchemaUrl("resourceSchemaUrl")
-                .setResource(Resource.newBuilder().addAttributes(singleItemAttributes("resourceAttr", "resourceAttrValue")))
-                .build();
+    public void verifyConversionData() {
+        LogRecord log = getLogRecord("some body");
+        ScopeLogs scopeLogs = getScopeLogs("scopeName", log);
+        ResourceLogs resourceLogs = getResourceLogs(scopeLogs);
 
         LogCollection collection = map(LogsData.newBuilder().addResourceLogs(resourceLogs).build());
 
@@ -93,16 +88,55 @@ public class LogsDataConverterTest extends BaseConverterTest {
         assertEquals("scopeAttrValue", scopeAttrs.get(AttributeKey.stringKey("scopeAttr")));
     }
 
-    private LogRecord getLogRecord() {
+    private ResourceLogs getResourceLogs(ScopeLogs... scopeLogs) {
+        return ResourceLogs.newBuilder()
+                .addAllScopeLogs(Arrays.asList(scopeLogs))
+                .setSchemaUrl("resourceSchemaUrl")
+                .setResource(Resource.newBuilder().addAttributes(singleItemAttributes("resourceAttr", "resourceAttrValue")))
+                .build();
+    }
+
+    @Test
+    public void verifyConversionStructureWithMultipleScopes() {
+        LogRecord firstLog = getLogRecord("first body");
+        LogRecord otherLog = getLogRecord("other body");
+        LogRecord secondLog = getLogRecord("second body");
+        ScopeLogs firstScope = getScopeLogs("firstScope", firstLog, otherLog);
+        ScopeLogs secondScope = getScopeLogs("secondScope", secondLog);
+        ResourceLogs resourceLogs = getResourceLogs(firstScope, secondScope);
+
+        LogCollection result = map(LogsData.newBuilder().addResourceLogs(resourceLogs).build());
+
+        List<LogRecordData> logs = result.logs;
+        assertEquals(3, logs.size());
+        LogRecordData firstLogRecord = logs.get(0);
+        LogRecordData secondLogRecord = logs.get(1);
+        LogRecordData thirdLogRecord = logs.get(2);
+        assertEquals(firstLogRecord.getInstrumentationScopeInfo(), secondLogRecord.getInstrumentationScopeInfo());
+        assertNotEquals(thirdLogRecord, firstLogRecord);
+        assertNotEquals(thirdLogRecord, secondLogRecord);
+        assertEquals("firstScope", firstLogRecord.getInstrumentationScopeInfo().getName());
+        assertEquals("secondScope", thirdLogRecord.getInstrumentationScopeInfo().getName());
+    }
+
+    private LogRecord getLogRecord(String body) {
         return LogRecord.newBuilder()
                 .setTimeUnixNano(23456)
                 .setSeverityNumber(SeverityNumber.SEVERITY_NUMBER_DEBUG3)
                 .setSeverityText("some severity text")
-                .setBody(AnyValue.newBuilder().setStringValue("some body").build())
+                .setBody(AnyValue.newBuilder().setStringValue(body).build())
                 .setFlags(0x01)
                 .setTraceId(ByteString.copyFrom(TRACE_ID, StandardCharsets.UTF_8))
                 .setSpanId(ByteString.copyFrom(SPAN_ID, StandardCharsets.UTF_8))
                 .addAttributes(singleItemAttributes("someKey", "someValue"))
+                .build();
+    }
+
+    private ScopeLogs getScopeLogs(String scopeName, LogRecord... logs) {
+        return ScopeLogs.newBuilder()
+                .addAllLogRecords(Arrays.asList(logs))
+                .setSchemaUrl("scopeSchemaUrl")
+                .setScope(InstrumentationScope.newBuilder().setName(scopeName).setVersion("1.2.3").addAttributes(singleItemAttributes("scopeAttr", "scopeAttrValue")))
                 .build();
     }
 

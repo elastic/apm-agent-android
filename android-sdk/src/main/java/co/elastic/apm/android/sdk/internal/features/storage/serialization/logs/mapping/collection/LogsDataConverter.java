@@ -52,13 +52,17 @@ public class LogsDataConverter extends Converter<LogsData, LogCollection> {
         List<ResourceLogs> resourceLogsList = from.getResourceLogsList();
         ResourceLogs resourceLogs = resourceLogsList.get(0);
         ProtoResource protoResource = new ProtoResource(resourceLogs.getResource(), resourceLogs.getSchemaUrl());
-        ScopeLogs scopeLogs = resourceLogs.getScopeLogsList().get(0);
-        ProtoInstrumentationScope protoScope = new ProtoInstrumentationScope(scopeLogs.getScope(), scopeLogs.getSchemaUrl());
 
-        Resource resource = mapper.map(protoResource);
-        InstrumentationScopeInfo scopeInfo = mapper.map(protoScope);
+        List<LogRecordData> logs = new ArrayList<>();
+        for (ScopeLogs scopeLogs : resourceLogs.getScopeLogsList()) {
+            ProtoInstrumentationScope protoScope = new ProtoInstrumentationScope(scopeLogs.getScope(), scopeLogs.getSchemaUrl());
 
-        return new LogCollection(convertLogs(mapper, resource, scopeInfo, scopeLogs.getLogRecordsList()));
+            Resource resource = mapper.map(protoResource);
+            InstrumentationScopeInfo scopeInfo = mapper.map(protoScope);
+            logs.addAll(convertLogs(mapper, resource, scopeInfo, scopeLogs.getLogRecordsList()));
+        }
+
+        return new LogCollection(logs);
     }
 
     private List<LogRecordData> convertLogs(Mapper mapper, Resource resource, InstrumentationScopeInfo scopeInfo, List<LogRecord> protoLogs) {

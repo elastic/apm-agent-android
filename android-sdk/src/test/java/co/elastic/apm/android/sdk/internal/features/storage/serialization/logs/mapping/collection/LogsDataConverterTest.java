@@ -58,7 +58,7 @@ public class LogsDataConverterTest extends BaseConverterTest {
     public void verifyConversionData() {
         LogRecord log = getLogRecord("some body");
         ScopeLogs scopeLogs = getScopeLogs("scopeName", log);
-        ResourceLogs resourceLogs = getResourceLogs(scopeLogs);
+        ResourceLogs resourceLogs = getResourceLogs("resourceSchemaUrl", scopeLogs);
 
         LogCollection collection = map(LogsData.newBuilder().addResourceLogs(resourceLogs).build());
 
@@ -88,14 +88,6 @@ public class LogsDataConverterTest extends BaseConverterTest {
         assertEquals("scopeAttrValue", scopeAttrs.get(AttributeKey.stringKey("scopeAttr")));
     }
 
-    private ResourceLogs getResourceLogs(ScopeLogs... scopeLogs) {
-        return ResourceLogs.newBuilder()
-                .addAllScopeLogs(Arrays.asList(scopeLogs))
-                .setSchemaUrl("resourceSchemaUrl")
-                .setResource(Resource.newBuilder().addAttributes(singleItemAttributes("resourceAttr", "resourceAttrValue")))
-                .build();
-    }
-
     @Test
     public void verifyConversionStructureWithMultipleScopes() {
         LogRecord firstLog = getLogRecord("first body");
@@ -103,7 +95,7 @@ public class LogsDataConverterTest extends BaseConverterTest {
         LogRecord secondLog = getLogRecord("second body");
         ScopeLogs firstScope = getScopeLogs("firstScope", firstLog, otherLog);
         ScopeLogs secondScope = getScopeLogs("secondScope", secondLog);
-        ResourceLogs resourceLogs = getResourceLogs(firstScope, secondScope);
+        ResourceLogs resourceLogs = getResourceLogs("resourceSchemaUrl", firstScope, secondScope);
 
         LogCollection result = map(LogsData.newBuilder().addResourceLogs(resourceLogs).build());
 
@@ -112,11 +104,39 @@ public class LogsDataConverterTest extends BaseConverterTest {
         LogRecordData firstLogRecord = logs.get(0);
         LogRecordData secondLogRecord = logs.get(1);
         LogRecordData thirdLogRecord = logs.get(2);
+        assertEquals("first body", firstLogRecord.getBody().asString());
+        assertEquals("other body", secondLogRecord.getBody().asString());
+        assertEquals("second body", thirdLogRecord.getBody().asString());
         assertEquals(firstLogRecord.getInstrumentationScopeInfo(), secondLogRecord.getInstrumentationScopeInfo());
         assertNotEquals(thirdLogRecord, firstLogRecord);
         assertNotEquals(thirdLogRecord, secondLogRecord);
         assertEquals("firstScope", firstLogRecord.getInstrumentationScopeInfo().getName());
         assertEquals("secondScope", thirdLogRecord.getInstrumentationScopeInfo().getName());
+    }
+
+    @Test
+    public void verifyConversionStructureWithMultipleResources() {
+        LogRecord firstLog = getLogRecord("first body");
+        LogRecord otherLog = getLogRecord("other body");
+        LogRecord secondLog = getLogRecord("second body");
+        ScopeLogs firstScope = getScopeLogs("firstScope", firstLog, otherLog);
+        ScopeLogs secondScope = getScopeLogs("secondScope", secondLog);
+        ResourceLogs firstResourceLogs = getResourceLogs("firstResourceSchema", firstScope);
+        ResourceLogs secondResourceLogs = getResourceLogs("secondResourceSchema", secondScope);
+
+        LogCollection result = map(LogsData.newBuilder().addResourceLogs(firstResourceLogs).addResourceLogs(secondResourceLogs).build());
+
+        List<LogRecordData> logs = result.logs;
+        assertEquals(3, logs.size());
+        LogRecordData firstLogRecord = logs.get(0);
+        LogRecordData secondLogRecord = logs.get(1);
+        LogRecordData thirdLogRecord = logs.get(2);
+        assertEquals("first body", firstLogRecord.getBody().asString());
+        assertEquals("other body", secondLogRecord.getBody().asString());
+        assertEquals("second body", thirdLogRecord.getBody().asString());
+        assertEquals(firstLogRecord.getResource(), secondLogRecord.getResource());
+        assertEquals(firstLogRecord.getInstrumentationScopeInfo(), secondLogRecord.getInstrumentationScopeInfo());
+        assertNotEquals(firstLogRecord.getResource(), thirdLogRecord.getResource());
     }
 
     private LogRecord getLogRecord(String body) {
@@ -129,6 +149,14 @@ public class LogsDataConverterTest extends BaseConverterTest {
                 .setTraceId(ByteString.copyFrom(TRACE_ID, StandardCharsets.UTF_8))
                 .setSpanId(ByteString.copyFrom(SPAN_ID, StandardCharsets.UTF_8))
                 .addAttributes(singleItemAttributes("someKey", "someValue"))
+                .build();
+    }
+
+    private ResourceLogs getResourceLogs(String resourceSchemaUrl, ScopeLogs... scopeLogs) {
+        return ResourceLogs.newBuilder()
+                .addAllScopeLogs(Arrays.asList(scopeLogs))
+                .setSchemaUrl(resourceSchemaUrl)
+                .setResource(Resource.newBuilder().addAttributes(singleItemAttributes("resourceAttr", "resourceAttrValue")))
                 .build();
     }
 

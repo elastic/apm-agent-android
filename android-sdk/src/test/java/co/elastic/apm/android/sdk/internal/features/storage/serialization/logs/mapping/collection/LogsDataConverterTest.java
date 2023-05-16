@@ -20,8 +20,8 @@ package co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-import static co.elastic.apm.android.sdk.testdata.LogRecordDataUtil.SPAN_ID;
-import static co.elastic.apm.android.sdk.testdata.LogRecordDataUtil.TRACE_ID;
+import static co.elastic.apm.android.sdk.testdata.LogRecordDataGenerator.SPAN_ID;
+import static co.elastic.apm.android.sdk.testdata.LogRecordDataGenerator.TRACE_ID;
 
 import androidx.annotation.NonNull;
 

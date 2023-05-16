@@ -42,7 +42,15 @@ import io.opentelemetry.sdk.resources.Resource;
 
 @SuppressWarnings("unchecked")
 public class Mapper {
+    private static Mapper INSTANCE;
     private final Map<Class<?>, Converter<?, ?>> converters;
+
+    public static Mapper get() {
+        if (INSTANCE == null) {
+            INSTANCE = create();
+        }
+        return INSTANCE;
+    }
 
     public Mapper(Map<Class<?>, Converter<?, ?>> converters) {
         this.converters = converters;
@@ -68,7 +76,7 @@ public class Mapper {
         return (Converter<?, RESULT>) converter;
     }
 
-    public static Mapper createDefault() {
+    private static Mapper create() {
         Map<Class<?>, Converter<?, ?>> map = new HashMap<>();
         map.put(Attributes.class, new AttributesConverter());
         map.put(LogCollection.class, new LogCollectionConverter());

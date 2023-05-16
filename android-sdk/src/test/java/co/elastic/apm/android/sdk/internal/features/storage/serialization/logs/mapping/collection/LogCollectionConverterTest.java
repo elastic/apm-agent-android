@@ -19,7 +19,7 @@
 package co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.mapping.collection;
 
 import static org.junit.Assert.assertEquals;
-import static co.elastic.apm.android.sdk.testdata.LogRecordDataUtil.createLogRecordData;
+import static co.elastic.apm.android.sdk.testdata.LogRecordDataGenerator.createLogRecordData;
 import static co.elastic.apm.android.sdk.testutils.ListUtils.listOf;
 
 import org.junit.Test;

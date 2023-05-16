@@ -28,7 +28,7 @@ import io.opentelemetry.sdk.logs.data.Body;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import io.opentelemetry.sdk.resources.Resource;
 
-public class LogRecordDataUtil {
+public class LogRecordDataGenerator {
 
     public static final String TRACE_ID = "b535b3b5232b5dabced5b0ab8037eb78";
     public static final String SPAN_ID = "f3fc364fb6b77cff";

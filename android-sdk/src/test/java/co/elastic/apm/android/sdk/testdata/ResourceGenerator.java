@@ -16,13 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.testutils;
+package co.elastic.apm.android.sdk.testdata;
 
-import co.elastic.apm.android.sdk.internal.features.storage.serialization.mapping.Mapper;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.sdk.resources.Resource;
 
-public abstract class BaseConverterTest {
+public class ResourceGenerator {
 
-    protected <RESULT> RESULT map(Object item) {
-        return Mapper.get().map(item);
+    public static Resource singleAttributeResource(String attrKey, String attrValue) {
+        return singleAttributeResource(attrKey, attrValue, null);
+    }
+
+    public static Resource singleAttributeResource(String attrKey, String attrValue, String schemaUrl) {
+        return Resource.create(Attributes.of(AttributeKey.stringKey(attrKey), attrValue), schemaUrl);
     }
 }

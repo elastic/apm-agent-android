@@ -19,9 +19,9 @@
 package co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.mapping;
 
 import static org.junit.Assert.assertEquals;
-import static co.elastic.apm.android.sdk.testdata.LogRecordDataUtil.SPAN_ID;
-import static co.elastic.apm.android.sdk.testdata.LogRecordDataUtil.TRACE_ID;
-import static co.elastic.apm.android.sdk.testdata.LogRecordDataUtil.createLogRecordData;
+import static co.elastic.apm.android.sdk.testdata.LogRecordDataGenerator.SPAN_ID;
+import static co.elastic.apm.android.sdk.testdata.LogRecordDataGenerator.TRACE_ID;
+import static co.elastic.apm.android.sdk.testdata.LogRecordDataGenerator.createLogRecordData;
 
 import org.junit.Test;
 
@@ -29,6 +29,7 @@ import java.util.List;
 
 import co.elastic.apm.android.sdk.internal.opentelemetry.proto.common.v1.KeyValue;
 import co.elastic.apm.android.sdk.internal.opentelemetry.proto.logs.v1.LogRecord;
+import co.elastic.apm.android.sdk.testdata.ResourceGenerator;
 import co.elastic.apm.android.sdk.testutils.BaseConverterTest;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
@@ -42,7 +43,7 @@ public class LogRecordDataConverterTest extends BaseConverterTest {
     @Test
     public void verifyConversion() {
         InstrumentationScopeInfo scope = InstrumentationScopeInfo.create("scopeName");
-        Resource resource = Resource.create(Attributes.of(AttributeKey.stringKey("resourceAttr"), "resourceValue"));
+        Resource resource = ResourceGenerator.singleAttributeResource("resourceAttr", "resourceValue");
         String traceId = TRACE_ID;
         String spanId = SPAN_ID;
         LogRecordData logRecordData = createLogRecordData(resource, scope, "some body", Attributes.of(AttributeKey.stringKey("someAttr"), "someValue"),
@@ -66,7 +67,7 @@ public class LogRecordDataConverterTest extends BaseConverterTest {
     @Test
     public void verifyConversionWithSeverityTextNull() {
         InstrumentationScopeInfo scope = InstrumentationScopeInfo.create("scopeName");
-        Resource resource = Resource.create(Attributes.of(AttributeKey.stringKey("resourceAttr"), "resourceValue"));
+        Resource resource = ResourceGenerator.singleAttributeResource("resourceAttr", "resourceValue");
         String traceId = TRACE_ID;
         String spanId = SPAN_ID;
         LogRecordData logRecordData = createLogRecordData(resource, scope, "some body", Attributes.of(AttributeKey.stringKey("someAttr"), "someValue"),

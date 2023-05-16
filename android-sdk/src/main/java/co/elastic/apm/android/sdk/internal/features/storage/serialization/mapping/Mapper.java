@@ -24,7 +24,7 @@ import java.util.Map;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.common.mapping.attributes.AttributesConverter;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.common.mapping.instrumentationscopeinfo.InstrumentationScopeInfoConverter;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.common.mapping.resource.ResourceConverter;
-import co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.mapping.LogCollectionConverter;
+import co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.mapping.collection.LogCollectionConverter;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.mapping.LogRecordDataConverter;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.models.LogCollection;
 import io.opentelemetry.api.common.Attributes;

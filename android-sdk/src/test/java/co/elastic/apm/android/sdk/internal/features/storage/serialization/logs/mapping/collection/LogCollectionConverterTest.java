@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.mapping;
+package co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.mapping.collection;
 
 import static org.junit.Assert.assertEquals;
 import static co.elastic.apm.android.sdk.testdata.LogRecordDataUtil.createLogRecordData;

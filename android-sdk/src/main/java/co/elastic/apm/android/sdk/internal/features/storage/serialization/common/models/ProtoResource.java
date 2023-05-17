@@ -18,7 +18,8 @@
  */
 package co.elastic.apm.android.sdk.internal.features.storage.serialization.common.models;
 
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.resource.v1.Resource;
+
+import io.opentelemetry.proto.resource.v1.Resource;
 
 public class ProtoResource {
     public final Resource resource;

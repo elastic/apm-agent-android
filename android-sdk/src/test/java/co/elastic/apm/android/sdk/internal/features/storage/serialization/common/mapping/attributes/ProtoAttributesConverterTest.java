@@ -31,12 +31,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.common.models.ProtoAttributes;
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.common.v1.AnyValue;
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.common.v1.ArrayValue;
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.common.v1.KeyValue;
 import co.elastic.apm.android.sdk.testutils.BaseConverterTest;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.proto.common.v1.AnyValue;
+import io.opentelemetry.proto.common.v1.ArrayValue;
+import io.opentelemetry.proto.common.v1.KeyValue;
 
 public class ProtoAttributesConverterTest extends BaseConverterTest {
 

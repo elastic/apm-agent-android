@@ -24,7 +24,7 @@ import java.util.List;
 
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.models.LogCollection;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.mapping.Mapper;
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.logs.v1.LogsData;
+import io.opentelemetry.proto.logs.v1.LogsData;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 
 public final class LogsSerializer {

@@ -18,7 +18,8 @@
  */
 package co.elastic.apm.android.sdk.internal.features.storage.serialization.common.models;
 
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.common.v1.InstrumentationScope;
+
+import io.opentelemetry.proto.common.v1.InstrumentationScope;
 
 public class ProtoInstrumentationScope {
     public final InstrumentationScope scope;

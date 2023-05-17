@@ -27,13 +27,13 @@ import org.junit.Test;
 
 import java.util.List;
 
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.common.v1.KeyValue;
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.logs.v1.LogRecord;
 import co.elastic.apm.android.sdk.testdata.ResourceGenerator;
 import co.elastic.apm.android.sdk.testutils.BaseConverterTest;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.logs.Severity;
+import io.opentelemetry.proto.common.v1.KeyValue;
+import io.opentelemetry.proto.logs.v1.LogRecord;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import io.opentelemetry.sdk.resources.Resource;

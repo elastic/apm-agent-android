@@ -24,9 +24,9 @@ import org.junit.Test;
 
 import java.util.List;
 
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.common.v1.KeyValue;
 import co.elastic.apm.android.sdk.testdata.ResourceGenerator;
 import co.elastic.apm.android.sdk.testutils.BaseConverterTest;
+import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.sdk.resources.Resource;
 
 public class ResourceConverterTest extends BaseConverterTest {
@@ -35,7 +35,7 @@ public class ResourceConverterTest extends BaseConverterTest {
     public void verifyConversion() {
         Resource resource = ResourceGenerator.singleAttributeResource("someAttr", "someValue");
 
-        co.elastic.apm.android.sdk.internal.opentelemetry.proto.resource.v1.Resource result = map(resource);
+        io.opentelemetry.proto.resource.v1.Resource result = map(resource);
 
         List<KeyValue> attributesList = result.getAttributesList();
         assertEquals(1, attributesList.size());

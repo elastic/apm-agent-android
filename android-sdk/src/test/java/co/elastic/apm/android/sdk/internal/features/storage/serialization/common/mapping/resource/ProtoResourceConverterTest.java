@@ -24,11 +24,11 @@ import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.common.models.ProtoResource;
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.common.v1.AnyValue;
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.common.v1.KeyValue;
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.resource.v1.Resource;
 import co.elastic.apm.android.sdk.testutils.BaseConverterTest;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.proto.common.v1.AnyValue;
+import io.opentelemetry.proto.common.v1.KeyValue;
+import io.opentelemetry.proto.resource.v1.Resource;
 
 public class ProtoResourceConverterTest extends BaseConverterTest {
 

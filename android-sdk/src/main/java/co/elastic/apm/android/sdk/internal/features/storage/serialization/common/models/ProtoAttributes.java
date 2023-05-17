@@ -20,7 +20,7 @@ package co.elastic.apm.android.sdk.internal.features.storage.serialization.commo
 
 import java.util.List;
 
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.common.v1.KeyValue;
+import io.opentelemetry.proto.common.v1.KeyValue;
 
 public class ProtoAttributes {
     public final List<KeyValue> values;

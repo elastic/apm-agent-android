@@ -34,8 +34,8 @@ import co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.m
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.mapping.collection.LogCollectionConverter;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.mapping.collection.LogsDataConverter;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.models.LogCollection;
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.logs.v1.LogsData;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.proto.logs.v1.LogsData;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import io.opentelemetry.sdk.resources.Resource;

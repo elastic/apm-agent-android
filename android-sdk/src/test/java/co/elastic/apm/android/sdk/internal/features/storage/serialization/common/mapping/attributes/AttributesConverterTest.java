@@ -27,11 +27,11 @@ import org.junit.Test;
 
 import java.util.List;
 
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.common.v1.ArrayValue;
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.common.v1.KeyValue;
 import co.elastic.apm.android.sdk.testutils.BaseConverterTest;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.proto.common.v1.ArrayValue;
+import io.opentelemetry.proto.common.v1.KeyValue;
 
 public class AttributesConverterTest extends BaseConverterTest {
 

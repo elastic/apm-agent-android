@@ -24,11 +24,11 @@ import java.nio.charset.StandardCharsets;
 
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.mapping.Converter;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.mapping.Mapper;
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.common.v1.AnyValue;
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.logs.v1.LogRecord;
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.logs.v1.SeverityNumber;
 import io.opentelemetry.api.logs.Severity;
 import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.proto.common.v1.AnyValue;
+import io.opentelemetry.proto.logs.v1.LogRecord;
+import io.opentelemetry.proto.logs.v1.SeverityNumber;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 
 public class LogRecordDataConverter extends Converter<LogRecordData, LogRecord> {

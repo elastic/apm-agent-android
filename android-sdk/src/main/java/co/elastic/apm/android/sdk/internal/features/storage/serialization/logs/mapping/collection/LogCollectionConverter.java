@@ -26,11 +26,11 @@ import java.util.Map;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.logs.models.LogCollection;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.mapping.Converter;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.mapping.Mapper;
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.common.v1.InstrumentationScope;
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.logs.v1.LogRecord;
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.logs.v1.LogsData;
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.logs.v1.ResourceLogs;
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.logs.v1.ScopeLogs;
+import io.opentelemetry.proto.common.v1.InstrumentationScope;
+import io.opentelemetry.proto.logs.v1.LogRecord;
+import io.opentelemetry.proto.logs.v1.LogsData;
+import io.opentelemetry.proto.logs.v1.ResourceLogs;
+import io.opentelemetry.proto.logs.v1.ScopeLogs;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import io.opentelemetry.sdk.resources.Resource;
@@ -60,7 +60,7 @@ public class LogCollectionConverter extends Converter<LogCollection, LogsData> {
                 scopeLogs.add(builder.build());
             });
             ResourceLogs.Builder builder = ResourceLogs.newBuilder()
-                    .setResource(mapper.<co.elastic.apm.android.sdk.internal.opentelemetry.proto.resource.v1.Resource>map(resource))
+                    .setResource(mapper.<io.opentelemetry.proto.resource.v1.Resource>map(resource))
                     .addAllScopeLogs(scopeLogs);
             String schemaUrl = resource.getSchemaUrl();
             if (schemaUrl != null) {

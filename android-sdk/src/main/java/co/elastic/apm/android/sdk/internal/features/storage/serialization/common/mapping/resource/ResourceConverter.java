@@ -22,11 +22,11 @@ import co.elastic.apm.android.sdk.internal.features.storage.serialization.mappin
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.mapping.Mapper;
 import io.opentelemetry.sdk.resources.Resource;
 
-public class ResourceConverter extends Converter<Resource, co.elastic.apm.android.sdk.internal.opentelemetry.proto.resource.v1.Resource> {
+public class ResourceConverter extends Converter<Resource, io.opentelemetry.proto.resource.v1.Resource> {
 
     @Override
-    protected co.elastic.apm.android.sdk.internal.opentelemetry.proto.resource.v1.Resource doConvert(Mapper mapper, Resource from) {
-        return co.elastic.apm.android.sdk.internal.opentelemetry.proto.resource.v1.Resource.newBuilder()
+    protected io.opentelemetry.proto.resource.v1.Resource doConvert(Mapper mapper, Resource from) {
+        return io.opentelemetry.proto.resource.v1.Resource.newBuilder()
                 .addAllAttributes(mapper.map(from.getAttributes()))
                 .build();
     }

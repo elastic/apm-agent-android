@@ -23,11 +23,11 @@ import java.util.List;
 
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.mapping.Converter;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.mapping.Mapper;
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.common.v1.AnyValue;
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.common.v1.ArrayValue;
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.proto.common.v1.AnyValue;
+import io.opentelemetry.proto.common.v1.ArrayValue;
+import io.opentelemetry.proto.common.v1.KeyValue;
 
 public class AttributesConverter extends Converter<Attributes, List<KeyValue>> {
 

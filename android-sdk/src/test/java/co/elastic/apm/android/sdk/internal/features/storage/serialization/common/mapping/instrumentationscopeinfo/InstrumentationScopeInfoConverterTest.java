@@ -24,11 +24,11 @@ import org.junit.Test;
 
 import java.util.List;
 
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.common.v1.InstrumentationScope;
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.common.v1.KeyValue;
 import co.elastic.apm.android.sdk.testutils.BaseConverterTest;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.proto.common.v1.InstrumentationScope;
+import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 
 public class InstrumentationScopeInfoConverterTest extends BaseConverterTest {

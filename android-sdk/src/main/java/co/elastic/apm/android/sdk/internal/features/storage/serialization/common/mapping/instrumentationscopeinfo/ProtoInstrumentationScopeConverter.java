@@ -22,7 +22,7 @@ import co.elastic.apm.android.sdk.internal.features.storage.serialization.common
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.common.models.ProtoInstrumentationScope;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.mapping.Converter;
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.mapping.Mapper;
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.common.v1.InstrumentationScope;
+import io.opentelemetry.proto.common.v1.InstrumentationScope;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 
 public class ProtoInstrumentationScopeConverter extends Converter<ProtoInstrumentationScope, InstrumentationScopeInfo> {

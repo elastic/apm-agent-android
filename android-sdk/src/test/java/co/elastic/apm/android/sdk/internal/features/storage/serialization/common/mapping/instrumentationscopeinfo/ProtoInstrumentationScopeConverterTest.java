@@ -24,11 +24,11 @@ import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
 import co.elastic.apm.android.sdk.internal.features.storage.serialization.common.models.ProtoInstrumentationScope;
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.common.v1.AnyValue;
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.common.v1.InstrumentationScope;
-import co.elastic.apm.android.sdk.internal.opentelemetry.proto.common.v1.KeyValue;
 import co.elastic.apm.android.sdk.testutils.BaseConverterTest;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.proto.common.v1.AnyValue;
+import io.opentelemetry.proto.common.v1.InstrumentationScope;
+import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 
 public class ProtoInstrumentationScopeConverterTest extends BaseConverterTest {

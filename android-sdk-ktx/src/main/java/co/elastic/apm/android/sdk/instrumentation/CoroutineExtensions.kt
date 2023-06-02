@@ -31,7 +31,7 @@ import kotlin.coroutines.EmptyCoroutineContext
 
 fun launch(
     scope: CoroutineScope,
-    providedContext: CoroutineContext? = EmptyCoroutineContext,
+    providedContext: CoroutineContext?,
     providedStart: CoroutineStart? = CoroutineStart.DEFAULT,
     block: suspend CoroutineScope.() -> Unit
 ): Job {

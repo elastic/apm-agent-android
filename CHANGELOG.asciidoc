@@ -35,6 +35,11 @@ ${next_release_notes}
 * Sending app's versionCode in the `service.build` attribute: {pull}153[#153]
 * Sending app's lifecycle events: {pull}159[#159]
 * Adding spans, logs and metrics filtering support: {pull}160[#160]
+
+[float]
+===== Bug fixes
+
+* Fix #164: {pull}165[#165]
 ////
 
 [[release-notes-0.6.0]]

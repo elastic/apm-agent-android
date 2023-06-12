@@ -58,6 +58,7 @@ import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.sdk.internal.utilities.logging.AndroidLoggerFactory;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.events.GlobalEventEmitterProvider;
 import io.opentelemetry.api.logs.GlobalLoggerProvider;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import io.opentelemetry.context.propagation.ContextPropagators;
@@ -65,6 +66,7 @@ import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.logs.LogRecordProcessor;
 import io.opentelemetry.sdk.logs.SdkLoggerProvider;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
+import io.opentelemetry.sdk.logs.internal.SdkEventEmitterProvider;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.resources.Resource;
@@ -213,6 +215,9 @@ public final class ElasticApmAgent {
 
         flusher.setMeterDelegator(meterProvider::forceFlush);
         flusher.setLoggerDelegator(loggerProvider::forceFlush);
+
+        SdkEventEmitterProvider eventEmitterProvider = SdkEventEmitterProvider.create(loggerProvider, ntpManager.getClock());
+        GlobalEventEmitterProvider.set(eventEmitterProvider);
 
         OpenTelemetrySdk.builder()
                 .setTracerProvider(getTracerProvider(signalConfiguration, resource, globalAttributesVisitor))

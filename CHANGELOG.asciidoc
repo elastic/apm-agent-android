@@ -32,7 +32,7 @@ ${next_release_notes}
 [float]
 ===== Features
 
-* Updating OpenTelemetry SDK to 1.27.0 where logs are stable: {pull}000[#000]
+* Updating OpenTelemetry SDK to 1.27.0 where logs are stable: {pull}168[#168]
 ////
 
 [[release-notes-0.7.0]]

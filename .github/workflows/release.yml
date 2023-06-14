@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: elastic/apm-pipeline-library/.github/actions/github-token@main
+      - uses: elastic/apm-pipeline-library/.github/actions/github-token@current
         with:
           url: ${{ secrets.VAULT_ADDR }}
           roleId: ${{ secrets.VAULT_ROLE_ID }}

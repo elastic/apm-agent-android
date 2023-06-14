@@ -34,7 +34,7 @@ public abstract class BaseLogVerifier<T extends LogVerifier<?>> implements LogVe
 
     @Override
     public T startedAt(long timeInNanoseconds) {
-        assertEquals(timeInNanoseconds, log.getEpochNanos());
+        assertEquals(timeInNanoseconds, log.getObservedTimestampEpochNanos());
         return (T) this;
     }
 

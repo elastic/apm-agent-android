@@ -46,10 +46,13 @@ public class PostDeployTask extends DefaultTask {
         updateChangelog(currentVersion);
 
         publishChanges();
+        log("Finished the post deploy task successfully");
     }
 
     private void publishChanges() {
+        log("Committing changes");
         runCommand("git commit -a -m \"Preparing for the next release\"");
+        log("Pushing changes");
         runCommand("git push");
     }
 
@@ -66,6 +69,7 @@ public class PostDeployTask extends DefaultTask {
     }
 
     private void updateChangelog(String newVersion) {
+        log("Updating changelog with version: " + newVersion);
         Path changelogPath = getChangelogPath();
         String contents = getContents(changelogPath);
         contents = uncommentNextRelease(contents);

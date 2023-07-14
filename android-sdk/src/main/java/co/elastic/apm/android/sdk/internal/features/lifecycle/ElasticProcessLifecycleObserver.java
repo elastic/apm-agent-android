@@ -23,20 +23,21 @@ import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 
-import co.elastic.apm.android.sdk.logs.ElasticLoggers;
+import co.elastic.apm.android.sdk.logs.ElasticEvents;
 import io.opentelemetry.api.common.AttributeKey;
-import io.opentelemetry.api.logs.Logger;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.events.EventEmitter;
 
 public class ElasticProcessLifecycleObserver implements DefaultLifecycleObserver {
-    private final Logger lifecycleLogger;
+    private final EventEmitter lifecycleEventEmitter;
 
     @VisibleForTesting
-    public ElasticProcessLifecycleObserver(Logger lifecycleLogger) {
-        this.lifecycleLogger = lifecycleLogger;
+    public ElasticProcessLifecycleObserver(EventEmitter lifecycleEventEmitter) {
+        this.lifecycleEventEmitter = lifecycleEventEmitter;
     }
 
     public ElasticProcessLifecycleObserver() {
-        this(ElasticLoggers.lifecycleReporter());
+        this(ElasticEvents.lifecycleReporter());
     }
 
     @Override
@@ -65,8 +66,7 @@ public class ElasticProcessLifecycleObserver implements DefaultLifecycleObserver
     }
 
     private void emitLifecycleState(String value) {
-        lifecycleLogger.eventBuilder("lifecycle")
-                .setAttribute(AttributeKey.stringKey("lifecycle.state"), value)
-                .emit();
+        lifecycleEventEmitter.emit("lifecycle",
+                Attributes.of(AttributeKey.stringKey("lifecycle.state"), value));
     }
 }

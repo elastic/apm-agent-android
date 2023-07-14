@@ -18,13 +18,9 @@
  */
 package co.elastic.apm.android.sdk.internal.features.lifecycle;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import androidx.lifecycle.LifecycleOwner;
 
@@ -33,24 +29,20 @@ import org.junit.Before;
 import org.junit.Test;
 
 import io.opentelemetry.api.common.AttributeKey;
-import io.opentelemetry.api.logs.EventBuilder;
-import io.opentelemetry.api.logs.Logger;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.events.EventEmitter;
 
 public class ElasticProcessLifecycleObserverTest {
 
     private ElasticProcessLifecycleObserver instance;
     private LifecycleOwner owner;
-    private Logger logger;
-    private EventBuilder builder;
+    private EventEmitter eventEmitter;
 
     @Before
     public void setUp() {
-        logger = mock(Logger.class);
         owner = mock(LifecycleOwner.class);
-        builder = mock(EventBuilder.class);
-        doReturn(builder).when(logger).eventBuilder(anyString());
-        doReturn(builder).when(builder).setAttribute(any(), any());
-        instance = new ElasticProcessLifecycleObserver(logger);
+        eventEmitter = mock(EventEmitter.class);
+        instance = new ElasticProcessLifecycleObserver(eventEmitter);
     }
 
     @Test
@@ -89,23 +81,11 @@ public class ElasticProcessLifecycleObserverTest {
     }
 
     private void verifyLifecycleEvent(String state) {
-        verifyEventName();
-        verifyStateAttribute(state);
-        verify(builder).emit();
-    }
-
-    private void verifyStateAttribute(String value) {
-        verify(builder).setAttribute(AttributeKey.stringKey("lifecycle.state"), value);
-    }
-
-    private void verifyEventName() {
-        verify(logger).eventBuilder("lifecycle");
+        verify(eventEmitter).emit("lifecycle", Attributes.of(AttributeKey.stringKey("lifecycle.state"), state));
     }
 
     @After
     public void tearDown() {
-        verifyNoMoreInteractions(builder);
-        verifyNoMoreInteractions(logger);
         verifyNoInteractions(owner);
     }
 }

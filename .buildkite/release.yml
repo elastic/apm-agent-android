@@ -2,16 +2,6 @@ agents:
   provider: "gcp"
 
 steps:
-  - uses: elastic/apm-pipeline-library/.github/actions/github-token@current
-    with:
-      url: ${{ secrets.VAULT_ADDR }}
-      roleId: ${{ secrets.VAULT_ROLE_ID }}
-      secretId: ${{ secrets.VAULT_SECRET_ID }}
-  - uses: elastic/apm-pipeline-library/.github/actions/setup-git@current
-    with:
-      username: ${{ env.GIT_USER }}
-      email: ${{ env.GIT_EMAIL }}
-      token: ${{ env.GITHUB_TOKEN }}
   - label: "Run the release"
     key: "release"
     commands: .ci/release-wrapper.sh

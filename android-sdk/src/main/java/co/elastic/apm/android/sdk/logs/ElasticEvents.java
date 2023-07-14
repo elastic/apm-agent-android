@@ -18,12 +18,22 @@
  */
 package co.elastic.apm.android.sdk.logs;
 
-import io.opentelemetry.api.GlobalOpenTelemetry;
-import io.opentelemetry.api.logs.LoggerBuilder;
+import io.opentelemetry.api.events.EventEmitter;
+import io.opentelemetry.api.events.EventEmitterBuilder;
+import io.opentelemetry.api.events.GlobalEventEmitterProvider;
 
-public final class ElasticLoggers {
+public final class ElasticEvents {
 
-    public static LoggerBuilder builder(String instrumentationScopeName) {
-        return GlobalOpenTelemetry.get().getLogsBridge().loggerBuilder(instrumentationScopeName);
+    public static EventEmitter crashReporter() {
+        return builder("CrashReport").build();
+    }
+
+    public static EventEmitter lifecycleReporter() {
+        return builder("ApplicationLifecycle").build();
+    }
+
+    public static EventEmitterBuilder builder(String instrumentationScopeName) {
+        return GlobalEventEmitterProvider.get().eventEmitterBuilder(instrumentationScopeName)
+                .setEventDomain("device");
     }
 }

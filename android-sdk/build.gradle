@@ -35,14 +35,13 @@ licensesConfig {
 dependencies {
     api "io.opentelemetry:opentelemetry-api:$openTelemetry_version"
     api "io.opentelemetry:opentelemetry-sdk:$openTelemetry_version"
-    api "io.opentelemetry:opentelemetry-sdk-logs:$openTelemetry_version-alpha"
+    api "io.opentelemetry:opentelemetry-api-events:$openTelemetry_version-alpha"
     api "com.squareup.okhttp3:okhttp:$okhttp_version"
     api 'org.stagemonitor:stagemonitor-configuration:0.89.1'
     implementation "androidx.lifecycle:lifecycle-process:2.5.1"
     implementation 'com.blogspot.mydailyjava:weak-lock-free:0.18'
     implementation project(':android-common')
     implementation "io.opentelemetry:opentelemetry-exporter-otlp:$openTelemetry_version"
-    implementation "io.opentelemetry:opentelemetry-exporter-otlp-logs:$openTelemetry_version-alpha"
     implementation "io.opentelemetry:opentelemetry-semconv:$openTelemetry_version-alpha"
     implementation "androidx.annotation:annotation:$androidAnnotations_version"
     implementation 'com.dslplatform:dsl-json-java8:1.10.0'

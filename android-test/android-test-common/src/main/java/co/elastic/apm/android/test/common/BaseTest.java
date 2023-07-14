@@ -52,7 +52,7 @@ public abstract class BaseTest {
             logs.addAll(capturedLogs);
         }
 
-        logs.sort(Comparator.comparing(LogRecordData::getEpochNanos));
+        logs.sort(Comparator.comparing(LogRecordData::getObservedTimestampEpochNanos));
         logRecordExporter.clearCapturedLogs();
         return logs;
     }

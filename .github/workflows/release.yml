@@ -66,6 +66,8 @@ jobs:
             dry_run=${{ inputs.dry_run || 'false' }}
 
       - if: ${{ success() }}
+        run: |
+          ./gradlew postDeploy -Prelease=true -Pversion_override=${{ inputs.version_override_specifier || '' }}
         uses: elastic/apm-pipeline-library/.github/actions/slack-message@current
         with:
           url: ${{ secrets.VAULT_ADDR }}

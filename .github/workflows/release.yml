@@ -47,7 +47,7 @@ jobs:
           vaultRoleId: ${{ secrets.VAULT_ROLE_ID }}
           vaultSecretId: ${{ secrets.VAULT_SECRET_ID }}
           pipeline: apm-agent-android-release
-          waitFor: false
+          waitFor: true
           printBuildLogs: false
           buildEnvVars: |
             branch_specifier=${{ inputs.branch_specifier || 'main' }}

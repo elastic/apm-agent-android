@@ -79,9 +79,9 @@ jobs:
     name: Post Release
     needs: release
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v3
       - uses: elastic/apm-pipeline-library/.github/actions/github-token@current
         with:
           url: ${{ secrets.VAULT_ADDR }}
@@ -91,5 +91,9 @@ jobs:
         with:
           username: ${{ env.GIT_USER }}
           email: ${{ env.GIT_EMAIL }}
+          token: ${{ env.GITHUB_TOKEN }}
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ env.TAG_NAME }}
           token: ${{ env.GITHUB_TOKEN }}
       - run: ./gradlew postDeploy -Prelease=true -Pversion_override=${{ inputs.version_override_specifier || '' }}

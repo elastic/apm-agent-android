@@ -94,6 +94,6 @@ jobs:
           token: ${{ env.GITHUB_TOKEN }}
       - uses: actions/checkout@v3
         with:
-          ref: ${{ env.TAG_NAME }}
+          ref: 'main'
           token: ${{ env.GITHUB_TOKEN }}
       - run: ./gradlew postDeploy -Prelease=true -Pversion_override=${{ inputs.version_override_specifier || '' }}

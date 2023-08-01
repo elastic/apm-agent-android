@@ -47,7 +47,7 @@ jobs:
           vaultRoleId: ${{ secrets.VAULT_ROLE_ID }}
           vaultSecretId: ${{ secrets.VAULT_SECRET_ID }}
           pipeline: apm-agent-android-release
-          waitFor: false
+          waitFor: true
           printBuildLogs: false
           buildEnvVars: |
             branch_specifier=${{ inputs.branch_specifier || 'main' }}
@@ -75,3 +75,25 @@ jobs:
           message: |
             :ghost: [${{ github.repository }}] Release *${{ github.ref_name }}* didn't get triggered in Buildkite.
             Build: (<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|here>)
+  post_release:
+    name: Post Release
+    needs: release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: elastic/apm-pipeline-library/.github/actions/github-token@current
+        with:
+          url: ${{ secrets.VAULT_ADDR }}
+          roleId: ${{ secrets.VAULT_ROLE_ID }}
+          secretId: ${{ secrets.VAULT_SECRET_ID }}
+      - uses: elastic/apm-pipeline-library/.github/actions/setup-git@current
+        with:
+          username: ${{ env.GIT_USER }}
+          email: ${{ env.GIT_EMAIL }}
+          token: ${{ env.GITHUB_TOKEN }}
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.branch_specifier || 'main' }}
+          token: ${{ env.GITHUB_TOKEN }}
+      - run: ./gradlew postDeploy -Prelease=true -Pversion_override=${{ inputs.version_override_specifier || '' }}

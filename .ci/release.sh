@@ -123,10 +123,3 @@ if [[ "$target_specifier" == "all" ||  "$target_specifier" == "pluginPortal" ]];
   fi
 fi
 set -x
-
-echo "--- Running post deploy process"
-if [[ "$dry_run" == "true" ]] ; then
-  echo './gradlew postDeploy'
-else
-  ./gradlew postDeploy $COMMON_GRADLE_CONFIG_PARAMS
-fi

@@ -5,10 +5,9 @@ import org.gradle.api.file.RegularFile;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Properties;
 
 public class NoticeMetadataHandler {
@@ -47,8 +46,8 @@ public class NoticeMetadataHandler {
     }
 
     public void save(File output) {
-        try (OutputStream out = new FileOutputStream(output)) {
-            properties.store(out, null);
+        try (FileWriter writer = new FileWriter(output, false)) {
+            writer.write(PROPERTY_DEPENDENCIES_HASH + "=" + getDependenciesHash());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -3,6 +3,7 @@ plugins {
 }
 
 android {
+    namespace = "co.elastic.apm.android.instrumentation"
     compileSdk androidCompileSdk
 
     defaultConfig {

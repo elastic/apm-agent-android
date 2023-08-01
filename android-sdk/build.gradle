@@ -4,7 +4,9 @@ plugins {
 }
 
 android {
+    namespace = "co.elastic.apm.android.sdk"
     compileSdk androidCompileSdk
+    buildFeatures.buildConfig true
 
     defaultConfig {
         minSdk androidMinSdk
@@ -43,7 +45,6 @@ dependencies {
     implementation project(':android-common')
     implementation "io.opentelemetry:opentelemetry-exporter-otlp:$openTelemetry_version"
     implementation "io.opentelemetry:opentelemetry-semconv:$openTelemetry_version-alpha"
-    implementation "io.opentelemetry.contrib:opentelemetry-disk-buffering:$openTelemetry_version-alpha"
     implementation "androidx.annotation:annotation:$androidAnnotations_version"
     implementation 'com.dslplatform:dsl-json-java8:1.10.0'
     embedded 'com.github.instacart.truetime-android:library:3.5'

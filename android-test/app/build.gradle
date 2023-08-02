@@ -6,7 +6,7 @@ buildscript {
     }
     dependencies {
         classpath "com.android.tools.build:gradle:$agp_version"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.10"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0"
         classpath "co.elastic.apm:android-plugin:$agent_version"
     }
 }
@@ -15,6 +15,7 @@ apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'co.elastic.apm.android'
 
 android {
+    namespace = "co.elastic.apm.android.test"
     compileSdk androidCompileSdk
     testOptions {
         unitTests {

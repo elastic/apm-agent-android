@@ -1,6 +1,6 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.7.10' apply false
-    id 'org.jetbrains.kotlin.android' version '1.7.10' apply false
+    id 'org.jetbrains.kotlin.jvm' version '1.8.22' apply false
+    id 'org.jetbrains.kotlin.android' version '1.8.22' apply false
     id 'co.elastic.apm.publishing'
 }
 
@@ -8,7 +8,7 @@ ext {
     jvmCompatibility = JavaVersion.VERSION_1_8
     androidMinSdk = 24
     androidCompileSdk = 32
-    openTelemetry_version = "1.27.0"
+    openTelemetry_version = "1.28.0"
     androidAnnotations_version = "1.4.0"
     bytebuddy_version = "1.12.22"
     okhttp_version = '3.11.0'

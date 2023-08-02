@@ -4,7 +4,9 @@ plugins {
 }
 
 android {
+    namespace = "co.elastic.apm.android.sdk"
     compileSdk androidCompileSdk
+    buildFeatures.buildConfig true
 
     defaultConfig {
         minSdk androidMinSdk

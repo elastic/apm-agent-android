@@ -3,6 +3,7 @@ plugins {
 }
 
 android {
+    namespace = "co.elastic.apm.android.test.common"
     compileSdk androidCompileSdk
 
     defaultConfig {

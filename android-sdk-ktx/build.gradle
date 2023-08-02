@@ -4,6 +4,7 @@ plugins {
 }
 
 android {
+    namespace = "co.elastic.apm.android.sdk.kotlin"
     compileSdk androidCompileSdk
 
     defaultConfig {
@@ -23,6 +24,9 @@ android {
     compileOptions {
         sourceCompatibility jvmCompatibility
         targetCompatibility jvmCompatibility
+    }
+    kotlinOptions {
+        jvmTarget = jvmCompatibility.toString()
     }
 }
 

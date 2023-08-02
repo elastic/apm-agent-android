@@ -132,6 +132,28 @@ public class SignalDiskExporterTest {
         verifyExportStoredBatchCall(logRecordDiskExporter, DEFAULT_EXPORT_TIMEOUT_IN_MILLIS);
     }
 
+    @Test
+    public void whenSpansExporterIsNull_returnFalse() throws IOException {
+        SignalDiskExporter instance = createInstance(null, metricDiskExporter, logRecordDiskExporter);
+
+        assertFalse(instance.exportBatchOfSpans());
+    }
+
+
+    @Test
+    public void whenMetricsExporterIsNull_returnFalse() throws IOException {
+        SignalDiskExporter instance = createInstance(spanDiskExporter, null, logRecordDiskExporter);
+
+        assertFalse(instance.exportBatchOfMetrics());
+    }
+
+    @Test
+    public void whenLogsExporterIsNull_returnFalse() throws IOException {
+        SignalDiskExporter instance = createInstance(spanDiskExporter, metricDiskExporter, null);
+
+        assertFalse(instance.exportBatchOfLogs());
+    }
+
     private void verifyExportStoredBatchCall(StoredBatchExporter exporter, long timeoutInMillis) throws IOException {
         verify(exporter).exportStoredBatch(timeoutInMillis, TimeUnit.MILLISECONDS);
     }

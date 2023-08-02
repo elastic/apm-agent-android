@@ -42,16 +42,25 @@ public final class SignalDiskExporter {
 
     @WorkerThread
     public boolean exportBatchOfSpans() throws IOException {
+        if (spanDiskExporter == null) {
+            return false;
+        }
         return spanDiskExporter.exportStoredBatch(exportTimeoutInMillis, TimeUnit.MILLISECONDS);
     }
 
     @WorkerThread
     public boolean exportBatchOfMetrics() throws IOException {
+        if (metricDiskExporter == null) {
+            return false;
+        }
         return metricDiskExporter.exportStoredBatch(exportTimeoutInMillis, TimeUnit.MILLISECONDS);
     }
 
     @WorkerThread
     public boolean exportBatchOfLogs() throws IOException {
+        if (logRecordDiskExporter == null) {
+            return false;
+        }
         return logRecordDiskExporter.exportStoredBatch(exportTimeoutInMillis, TimeUnit.MILLISECONDS);
     }
 

@@ -34,6 +34,7 @@ gradlePlugin {
             implementationClass = 'co.elastic.apm.android.plugin.ApmAndroidAgentPlugin'
             displayName = "Elastic APM Android Agent"
             description = project.description
+            tags.addAll("Android", "APM", "Elastic", "ELK", "opentelemetry")
         }
     }
 }

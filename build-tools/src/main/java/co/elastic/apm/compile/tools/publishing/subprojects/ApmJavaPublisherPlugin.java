@@ -1,13 +1,10 @@
 package co.elastic.apm.compile.tools.publishing.subprojects;
 
-import com.gradle.publish.PluginBundleExtension;
 import com.gradle.publish.PublishPlugin;
 
 import org.gradle.api.Project;
 import org.gradle.api.plugins.JavaPluginExtension;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 
 public class ApmJavaPublisherPlugin extends BaseApmPublisherPlugin {
     private static final String GRADLE_PLUGIN_PROJECT_PLUGIN = "java-gradle-plugin";
@@ -29,20 +26,12 @@ public class ApmJavaPublisherPlugin extends BaseApmPublisherPlugin {
 
     private void configureGradlePluginPublication() {
         project.getPlugins().apply(PublishPlugin.class);
-        configureGradlePluginPortalBundle(project.getExtensions().getByType(PluginBundleExtension.class));
+        configureGradlePluginPortalBundle(project.getExtensions().getByType(GradlePluginDevelopmentExtension.class));
     }
 
-    private void configureGradlePluginPortalBundle(PluginBundleExtension pluginBundle) {
-        pluginBundle.setWebsite(getWebsiteUrl());
-        pluginBundle.setVcsUrl(getRepositoryUrl());
-        pluginBundle.setDescription(project.getDescription());
-        List<String> tags = new ArrayList<>();
-        tags.add("Android");
-        tags.add("APM");
-        tags.add("Elastic");
-        tags.add("ELK");
-        tags.add("opentelemetry");
-        pluginBundle.setTags(tags);
+    private void configureGradlePluginPortalBundle(GradlePluginDevelopmentExtension pluginBundle) {
+        pluginBundle.getWebsite().set(getWebsiteUrl());
+        pluginBundle.getVcsUrl().set(getRepositoryUrl());
     }
 
     private boolean isAGradlePluginProject(Project project) {

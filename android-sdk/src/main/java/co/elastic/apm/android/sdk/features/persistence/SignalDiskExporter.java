@@ -18,6 +18,8 @@
  */
 package co.elastic.apm.android.sdk.features.persistence;
 
+import androidx.annotation.WorkerThread;
+
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
@@ -38,16 +40,31 @@ public final class SignalDiskExporter {
         this.exportTimeoutInMillis = exportTimeoutInMillis;
     }
 
+    @WorkerThread
     public boolean exportBatchOfSpans() throws IOException {
         return spanDiskExporter.exportStoredBatch(exportTimeoutInMillis, TimeUnit.MILLISECONDS);
     }
 
+    @WorkerThread
     public boolean exportBatchOfMetrics() throws IOException {
         return metricDiskExporter.exportStoredBatch(exportTimeoutInMillis, TimeUnit.MILLISECONDS);
     }
 
+    @WorkerThread
     public boolean exportBatchOfLogs() throws IOException {
         return logRecordDiskExporter.exportStoredBatch(exportTimeoutInMillis, TimeUnit.MILLISECONDS);
+    }
+
+    @WorkerThread
+    public boolean exportBatchOfEach() throws IOException {
+        boolean atLeastOneWorked = exportBatchOfSpans();
+        if (exportBatchOfMetrics()) {
+            atLeastOneWorked = true;
+        }
+        if (exportBatchOfLogs()) {
+            atLeastOneWorked = true;
+        }
+        return atLeastOneWorked;
     }
 
     public static class Builder {

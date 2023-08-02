@@ -18,6 +18,7 @@
  */
 package co.elastic.apm.android.sdk.features.persistence;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -82,6 +83,53 @@ public class SignalDiskExporterTest {
 
         verifyExportStoredBatchCall(logRecordDiskExporter, DEFAULT_EXPORT_TIMEOUT_IN_MILLIS);
         verifyNoInteractions(metricDiskExporter, spanDiskExporter);
+    }
+
+    @Test
+    public void verifyExportingEach_whenAllReturnFalse() throws IOException {
+        SignalDiskExporter instance = createInstance(spanDiskExporter, metricDiskExporter, logRecordDiskExporter);
+
+        assertFalse(instance.exportBatchOfEach());
+
+        verifyExportStoredBatchCall(spanDiskExporter, DEFAULT_EXPORT_TIMEOUT_IN_MILLIS);
+        verifyExportStoredBatchCall(metricDiskExporter, DEFAULT_EXPORT_TIMEOUT_IN_MILLIS);
+        verifyExportStoredBatchCall(logRecordDiskExporter, DEFAULT_EXPORT_TIMEOUT_IN_MILLIS);
+    }
+
+    @Test
+    public void verifyExportingEach_whenSpansReturnTrue() throws IOException {
+        SignalDiskExporter instance = createInstance(spanDiskExporter, metricDiskExporter, logRecordDiskExporter);
+        doReturn(true).when(spanDiskExporter).exportStoredBatch(anyLong(), any());
+
+        assertTrue(instance.exportBatchOfEach());
+
+        verifyExportStoredBatchCall(spanDiskExporter, DEFAULT_EXPORT_TIMEOUT_IN_MILLIS);
+        verifyExportStoredBatchCall(metricDiskExporter, DEFAULT_EXPORT_TIMEOUT_IN_MILLIS);
+        verifyExportStoredBatchCall(logRecordDiskExporter, DEFAULT_EXPORT_TIMEOUT_IN_MILLIS);
+    }
+
+    @Test
+    public void verifyExportingEach_whenMetricsReturnTrue() throws IOException {
+        SignalDiskExporter instance = createInstance(spanDiskExporter, metricDiskExporter, logRecordDiskExporter);
+        doReturn(true).when(metricDiskExporter).exportStoredBatch(anyLong(), any());
+
+        assertTrue(instance.exportBatchOfEach());
+
+        verifyExportStoredBatchCall(spanDiskExporter, DEFAULT_EXPORT_TIMEOUT_IN_MILLIS);
+        verifyExportStoredBatchCall(metricDiskExporter, DEFAULT_EXPORT_TIMEOUT_IN_MILLIS);
+        verifyExportStoredBatchCall(logRecordDiskExporter, DEFAULT_EXPORT_TIMEOUT_IN_MILLIS);
+    }
+
+    @Test
+    public void verifyExportingEach_whenLogsReturnTrue() throws IOException {
+        SignalDiskExporter instance = createInstance(spanDiskExporter, metricDiskExporter, logRecordDiskExporter);
+        doReturn(true).when(logRecordDiskExporter).exportStoredBatch(anyLong(), any());
+
+        assertTrue(instance.exportBatchOfEach());
+
+        verifyExportStoredBatchCall(spanDiskExporter, DEFAULT_EXPORT_TIMEOUT_IN_MILLIS);
+        verifyExportStoredBatchCall(metricDiskExporter, DEFAULT_EXPORT_TIMEOUT_IN_MILLIS);
+        verifyExportStoredBatchCall(logRecordDiskExporter, DEFAULT_EXPORT_TIMEOUT_IN_MILLIS);
     }
 
     private void verifyExportStoredBatchCall(StoredBatchExporter exporter, long timeoutInMillis) throws IOException {

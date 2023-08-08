@@ -20,12 +20,18 @@ package co.elastic.apm.android.sdk.features.persistence;
 
 import androidx.annotation.WorkerThread;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import co.elastic.apm.android.sdk.features.persistence.disk.DiskManager;
 import io.opentelemetry.contrib.disk.buffering.LogRecordDiskExporter;
 import io.opentelemetry.contrib.disk.buffering.MetricDiskExporter;
 import io.opentelemetry.contrib.disk.buffering.SpanDiskExporter;
+import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
+import io.opentelemetry.sdk.logs.export.LogRecordExporter;
+import io.opentelemetry.sdk.metrics.export.MetricExporter;
+import io.opentelemetry.sdk.trace.export.SpanExporter;
 
 public final class SignalDiskExporter {
     private final SpanDiskExporter spanDiskExporter;
@@ -33,11 +39,21 @@ public final class SignalDiskExporter {
     private final LogRecordDiskExporter logRecordDiskExporter;
     private final long exportTimeoutInMillis;
 
-    private SignalDiskExporter(SpanDiskExporter spanDiskExporter, MetricDiskExporter metricDiskExporter, LogRecordDiskExporter logRecordDiskExporter, long exportTimeoutInMillis) {
+    SignalDiskExporter(SpanDiskExporter spanDiskExporter, MetricDiskExporter metricDiskExporter, LogRecordDiskExporter logRecordDiskExporter, long exportTimeoutInMillis) {
         this.spanDiskExporter = spanDiskExporter;
         this.metricDiskExporter = metricDiskExporter;
         this.logRecordDiskExporter = logRecordDiskExporter;
         this.exportTimeoutInMillis = exportTimeoutInMillis;
+    }
+
+    public static Builder builder() throws IOException {
+        DiskManager diskManager = DiskManager.create();
+        StorageConfiguration storageConfiguration = StorageConfiguration.builder()
+                .setMaxFileSize(diskManager.getMaxCacheFileSize())
+                .setMaxFolderSize(diskManager.getMaxFolderSize())
+                .setTemporaryFileProvider(new SimpleTemporaryFileProvider(diskManager.getTemporaryDir()))
+                .build();
+        return new Builder(diskManager.getSignalsCacheDir(), storageConfiguration);
     }
 
     @WorkerThread
@@ -77,23 +93,30 @@ public final class SignalDiskExporter {
     }
 
     public static class Builder {
-        private SpanDiskExporter spanDiskExporter;
-        private MetricDiskExporter metricDiskExporter;
-        private LogRecordDiskExporter logRecordDiskExporter;
+        private final File rootDir;
+        private final StorageConfiguration storageConfiguration;
+        private SpanExporter spanExporter;
+        private MetricExporter metricExporter;
+        private LogRecordExporter logRecordExporter;
         private long exportTimeoutInMillis = TimeUnit.SECONDS.toMillis(5);
 
-        public Builder setSpanDiskExporter(SpanDiskExporter spanDiskExporter) {
-            this.spanDiskExporter = spanDiskExporter;
+        private Builder(File rootDir, StorageConfiguration storageConfiguration) {
+            this.rootDir = rootDir;
+            this.storageConfiguration = storageConfiguration;
+        }
+
+        public Builder setSpanExporter(SpanExporter spanExporter) {
+            this.spanExporter = spanExporter;
             return this;
         }
 
-        public Builder setMetricDiskExporter(MetricDiskExporter metricDiskExporter) {
-            this.metricDiskExporter = metricDiskExporter;
+        public Builder setMetricExporter(MetricExporter metricExporter) {
+            this.metricExporter = metricExporter;
             return this;
         }
 
-        public Builder setLogRecordDiskExporter(LogRecordDiskExporter logRecordDiskExporter) {
-            this.logRecordDiskExporter = logRecordDiskExporter;
+        public Builder setLogRecordExporter(LogRecordExporter logRecordExporter) {
+            this.logRecordExporter = logRecordExporter;
             return this;
         }
 
@@ -102,7 +125,10 @@ public final class SignalDiskExporter {
             return this;
         }
 
-        public SignalDiskExporter build() {
+        public SignalDiskExporter build() throws IOException {
+            SpanDiskExporter spanDiskExporter = (spanExporter != null) ? SpanDiskExporter.create(spanExporter, rootDir, storageConfiguration) : null;
+            MetricDiskExporter metricDiskExporter = (metricExporter != null) ? MetricDiskExporter.create(metricExporter, rootDir, storageConfiguration) : null;
+            LogRecordDiskExporter logRecordDiskExporter = (logRecordExporter != null) ? LogRecordDiskExporter.create(logRecordExporter, rootDir, storageConfiguration) : null;
             return new SignalDiskExporter(spanDiskExporter, metricDiskExporter, logRecordDiskExporter, exportTimeoutInMillis);
         }
     }

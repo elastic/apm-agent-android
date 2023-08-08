@@ -166,11 +166,6 @@ public class SignalDiskExporterTest {
 
     private SignalDiskExporter createInstance(SpanDiskExporter spanDiskExporter, MetricDiskExporter metricDiskExporter, LogRecordDiskExporter
             logRecordDiskExporter, long exportTimeoutInMillis) {
-        return new SignalDiskExporter.Builder()
-                .setSpanDiskExporter(spanDiskExporter)
-                .setMetricDiskExporter(metricDiskExporter)
-                .setLogRecordDiskExporter(logRecordDiskExporter)
-                .setExportTimeoutInMillis(exportTimeoutInMillis)
-                .build();
+        return new SignalDiskExporter(spanDiskExporter, metricDiskExporter, logRecordDiskExporter, exportTimeoutInMillis);
     }
 }

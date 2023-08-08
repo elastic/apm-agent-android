@@ -90,6 +90,16 @@ public class DiskManagerTest {
     }
 
     @Test
+    public void getMaxCacheFileSize() {
+        int persistenceSize = 1024 * 1024 * 2;
+        doReturn(persistenceSize).when(persistenceConfiguration).getMaxCacheFileSize();
+
+        assertEquals(persistenceSize, diskManager.getMaxCacheFileSize());
+
+        verify(persistenceConfiguration).getMaxCacheFileSize();
+    }
+
+    @Test
     public void getMaxSignalFolderSize() {
         long maxCacheSize = 10 * 1024 * 1024; // 10 MB
         int maxCacheFileSize = 1024 * 1024; // 1 MB

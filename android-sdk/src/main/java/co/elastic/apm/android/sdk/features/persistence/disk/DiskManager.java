@@ -21,7 +21,10 @@ package co.elastic.apm.android.sdk.features.persistence.disk;
 import java.io.File;
 import java.io.IOException;
 
+import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.configuration.impl.SignalPersistenceConfiguration;
+import co.elastic.apm.android.sdk.internal.services.Service;
+import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService;
 import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
 
@@ -31,7 +34,14 @@ public final class DiskManager {
     private final SignalPersistenceConfiguration persistenceConfiguration;
     private static final String MAX_FOLDER_SIZE_KEY = "max_signal_folder_size";
 
-    public DiskManager(AppInfoService appInfoService, PreferencesService preferencesService, SignalPersistenceConfiguration persistenceConfiguration) {
+    public static DiskManager create() {
+        ServiceManager serviceManager = ServiceManager.get();
+        return new DiskManager(serviceManager.getService(Service.Names.APP_INFO),
+                serviceManager.getService(Service.Names.PREFERENCES),
+                Configurations.get(SignalPersistenceConfiguration.class));
+    }
+
+    DiskManager(AppInfoService appInfoService, PreferencesService preferencesService, SignalPersistenceConfiguration persistenceConfiguration) {
         this.appInfoService = appInfoService;
         this.preferencesService = preferencesService;
         this.persistenceConfiguration = persistenceConfiguration;
@@ -63,9 +73,14 @@ public final class DiskManager {
         if (storedSize != -1) {
             return storedSize;
         }
-        int calculatedSize = ((persistenceConfiguration.getMaxCacheSize()) / 3) - persistenceConfiguration.getMaxCacheFileSize();
+        int availableCacheSize = (int) appInfoService.getAvailableCacheSpace(persistenceConfiguration.getMaxCacheSize());
+        int calculatedSize = (availableCacheSize / 3) - persistenceConfiguration.getMaxCacheFileSize();
         preferencesService.store(MAX_FOLDER_SIZE_KEY, calculatedSize);
         return calculatedSize;
+    }
+
+    public int getMaxCacheFileSize() {
+        return persistenceConfiguration.getMaxCacheFileSize();
     }
 
     private static void deleteFiles(File dir) {

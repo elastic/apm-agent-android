@@ -24,7 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import co.elastic.apm.android.sdk.features.persistence.disk.DiskManager;
+import co.elastic.apm.android.sdk.internal.features.persistence.DiskManager;
 import io.opentelemetry.contrib.disk.buffering.LogRecordDiskExporter;
 import io.opentelemetry.contrib.disk.buffering.MetricDiskExporter;
 import io.opentelemetry.contrib.disk.buffering.SpanDiskExporter;

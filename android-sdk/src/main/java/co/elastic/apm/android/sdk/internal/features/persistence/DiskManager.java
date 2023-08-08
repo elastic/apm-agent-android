@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.features.persistence.disk;
+package co.elastic.apm.android.sdk.internal.features.persistence;
 
 import java.io.File;
 import java.io.IOException;

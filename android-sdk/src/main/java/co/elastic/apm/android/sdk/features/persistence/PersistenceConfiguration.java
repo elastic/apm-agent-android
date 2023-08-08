@@ -19,10 +19,12 @@
 package co.elastic.apm.android.sdk.features.persistence;
 
 public final class PersistenceConfiguration {
+    public final boolean enabled;
     public final int maxCacheSize;
 
-    private PersistenceConfiguration(int maxCacheSize) {
-        this.maxCacheSize = maxCacheSize;
+    private PersistenceConfiguration(Builder builder) {
+        this.maxCacheSize = builder.maxCacheSize;
+        this.enabled = builder.enabled;
     }
 
     public static Builder builder() {
@@ -30,18 +32,33 @@ public final class PersistenceConfiguration {
     }
 
     public static class Builder {
+        public boolean enabled = false;
         private int maxCacheSize = 60 * 1024 * 1024; // 60 MB
 
         private Builder() {
         }
 
+        /**
+         * Enables/disables the feature to store signal items in disk and exporting them later.
+         * Disabled by default.
+         */
+        public Builder setEnabled(boolean enabled) {
+            this.enabled = enabled;
+            return this;
+        }
+
+        /**
+         * Sets the maximum amount of bytes that this tool can use to store cached signals in disk.
+         * A smaller amount of space will be used if there's not enough space in disk to allocate
+         * the value set in here.
+         */
         public Builder setMaxCacheSize(int maxCacheSize) {
             this.maxCacheSize = maxCacheSize;
             return this;
         }
 
         public PersistenceConfiguration build() {
-            return new PersistenceConfiguration(maxCacheSize);
+            return new PersistenceConfiguration(this);
         }
     }
 }

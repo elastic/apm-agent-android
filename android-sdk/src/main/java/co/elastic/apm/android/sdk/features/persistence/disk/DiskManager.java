@@ -37,11 +37,20 @@ public final class DiskManager {
     }
 
     public File getSignalsCacheDir() {
-        return new File(appInfoService.getCacheDir(), "opentelemetry/signals");
+        File dir = new File(appInfoService.getCacheDir(), "opentelemetry/signals");
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        return dir;
     }
 
     public File getTemporaryDir() {
-        return new File(appInfoService.getCacheDir(), "opentelemetry/temp");
+        File dir = new File(appInfoService.getCacheDir(), "opentelemetry/temp");
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        deleteFiles(dir);
+        return dir;
     }
 
     public int getMaxFolderSize() {
@@ -52,5 +61,17 @@ public final class DiskManager {
         int calculatedSize = ((persistenceConfiguration.getMaxCacheSize()) / 3) - persistenceConfiguration.getMaxCacheFileSize();
         preferencesService.store(MAX_FOLDER_SIZE_KEY, calculatedSize);
         return calculatedSize;
+    }
+
+    private static void deleteFiles(File dir) {
+        File[] files = dir.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    deleteFiles(file);
+                }
+                file.delete();
+            }
+        }
     }
 }

@@ -19,6 +19,7 @@
 package co.elastic.apm.android.sdk.features.persistence.disk;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -33,6 +34,7 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
 import co.elastic.apm.android.sdk.internal.configuration.impl.SignalPersistenceConfiguration;
 import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService;
@@ -60,16 +62,35 @@ public class DiskManagerTest {
 
     @Test
     public void provideSignalCacheDir() {
-        assertEquals(new File(cacheDir, "opentelemetry/signals"), diskManager.getSignalsCacheDir());
+        File expected = new File(cacheDir, "opentelemetry/signals");
+        assertEquals(expected, diskManager.getSignalsCacheDir());
+        assertTrue(expected.exists());
     }
 
     @Test
     public void provideTemporaryDir() {
-        assertEquals(new File(cacheDir, "opentelemetry/temp"), diskManager.getTemporaryDir());
+        File expected = new File(cacheDir, "opentelemetry/temp");
+        assertEquals(expected, diskManager.getTemporaryDir());
+        assertTrue(expected.exists());
     }
 
     @Test
-    public void calculateMaxSignalFolderSize() {
+    public void cleanupTemporaryDirBeforeProvidingIt() throws IOException {
+        File dir = new File(cacheDir, "opentelemetry/temp");
+        assertTrue(dir.mkdirs());
+        assertTrue(new File(dir, "somefile.tmp").createNewFile());
+        assertTrue(new File(dir, "some_other_file.tmp").createNewFile());
+        assertTrue(new File(dir, "somedir").mkdirs());
+        assertTrue(new File(dir, "somedir/some_other_file.tmp").createNewFile());
+
+        File temporaryDir = diskManager.getTemporaryDir();
+
+        assertTrue(temporaryDir.exists());
+        assertEquals(0, Objects.requireNonNull(temporaryDir.listFiles()).length);
+    }
+
+    @Test
+    public void getMaxSignalFolderSize() {
         long maxCacheSize = 10 * 1024 * 1024; // 10 MB
         int maxCacheFileSize = 1024 * 1024; // 1 MB
         doReturn((int) maxCacheSize).when(persistenceConfiguration).getMaxCacheSize();

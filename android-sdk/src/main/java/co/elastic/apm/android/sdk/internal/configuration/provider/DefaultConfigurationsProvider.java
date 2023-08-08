@@ -28,6 +28,7 @@ import co.elastic.apm.android.sdk.internal.configuration.Configuration;
 import co.elastic.apm.android.sdk.internal.configuration.impl.AllInstrumentationConfiguration;
 import co.elastic.apm.android.sdk.internal.configuration.impl.ConnectivityConfiguration;
 import co.elastic.apm.android.sdk.internal.configuration.impl.GeneralConfiguration;
+import co.elastic.apm.android.sdk.internal.configuration.impl.SignalPersistenceConfiguration;
 
 public class DefaultConfigurationsProvider implements ConfigurationsProvider {
     public final List<Configuration> configurations = new ArrayList<>();
@@ -36,6 +37,7 @@ public class DefaultConfigurationsProvider implements ConfigurationsProvider {
         configurations.add(new GeneralConfiguration(configuration));
         configurations.add(new ConnectivityConfiguration(connectivity));
         configurations.add(new AllInstrumentationConfiguration());
+        configurations.add(new SignalPersistenceConfiguration(configuration));
     }
 
     @Override

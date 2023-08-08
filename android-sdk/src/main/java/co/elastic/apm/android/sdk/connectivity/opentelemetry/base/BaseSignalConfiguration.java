@@ -19,6 +19,8 @@
 package co.elastic.apm.android.sdk.connectivity.opentelemetry.base;
 
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration;
+import co.elastic.apm.android.sdk.connectivity.opentelemetry.exporters.ExporterVisitor;
+import co.elastic.apm.android.sdk.connectivity.opentelemetry.exporters.VisitableExporters;
 import io.opentelemetry.sdk.logs.LogRecordProcessor;
 import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
@@ -26,21 +28,22 @@ import io.opentelemetry.sdk.metrics.export.MetricReader;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
-public abstract class BaseSignalConfiguration implements SignalConfiguration {
+public abstract class BaseSignalConfiguration implements SignalConfiguration, VisitableExporters {
+    private ExporterVisitor exporterVisitor;
 
     @Override
     public SpanProcessor getSpanProcessor() {
-        return provideSpanProcessor(provideSpanExporter());
+        return provideSpanProcessor(visitExporter(provideSpanExporter()));
     }
 
     @Override
     public LogRecordProcessor getLogProcessor() {
-        return provideLogProcessor(provideLogExporter());
+        return provideLogProcessor(visitExporter(provideLogExporter()));
     }
 
     @Override
     public MetricReader getMetricReader() {
-        return provideMetricReader(provideMetricExporter());
+        return provideMetricReader(visitExporter(provideMetricExporter()));
     }
 
     protected abstract SpanProcessor provideSpanProcessor(SpanExporter exporter);
@@ -54,4 +57,16 @@ public abstract class BaseSignalConfiguration implements SignalConfiguration {
     protected abstract MetricReader provideMetricReader(MetricExporter exporter);
 
     protected abstract MetricExporter provideMetricExporter();
+
+    protected <T> T visitExporter(T exporter) {
+        if (exporterVisitor != null) {
+            return exporterVisitor.visitExporter(exporter);
+        }
+        return exporter;
+    }
+
+    @Override
+    public void setExporterVisitor(ExporterVisitor visitor) {
+        this.exporterVisitor = visitor;
+    }
 }

@@ -61,14 +61,14 @@ public class DiskManagerTest {
     }
 
     @Test
-    public void provideSignalCacheDir() {
+    public void provideSignalCacheDir() throws IOException {
         File expected = new File(cacheDir, "opentelemetry/signals");
         assertEquals(expected, diskManager.getSignalsCacheDir());
         assertTrue(expected.exists());
     }
 
     @Test
-    public void provideTemporaryDir() {
+    public void provideTemporaryDir() throws IOException {
         File expected = new File(cacheDir, "opentelemetry/temp");
         assertEquals(expected, diskManager.getTemporaryDir());
         assertTrue(expected.exists());

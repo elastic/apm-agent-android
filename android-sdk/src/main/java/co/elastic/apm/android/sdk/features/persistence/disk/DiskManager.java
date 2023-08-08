@@ -19,6 +19,7 @@
 package co.elastic.apm.android.sdk.features.persistence.disk;
 
 import java.io.File;
+import java.io.IOException;
 
 import co.elastic.apm.android.sdk.internal.configuration.impl.SignalPersistenceConfiguration;
 import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService;
@@ -36,18 +37,22 @@ public final class DiskManager {
         this.persistenceConfiguration = persistenceConfiguration;
     }
 
-    public File getSignalsCacheDir() {
+    public File getSignalsCacheDir() throws IOException {
         File dir = new File(appInfoService.getCacheDir(), "opentelemetry/signals");
         if (!dir.exists()) {
-            dir.mkdirs();
+            if (!dir.mkdirs()) {
+                throw new IOException("Could not create dir " + dir);
+            }
         }
         return dir;
     }
 
-    public File getTemporaryDir() {
+    public File getTemporaryDir() throws IOException {
         File dir = new File(appInfoService.getCacheDir(), "opentelemetry/temp");
         if (!dir.exists()) {
-            dir.mkdirs();
+            if (!dir.mkdirs()) {
+                throw new IOException("Could not create dir " + dir);
+            }
         }
         deleteFiles(dir);
         return dir;

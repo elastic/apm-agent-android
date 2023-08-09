@@ -24,6 +24,7 @@ import co.elastic.apm.android.sdk.internal.configuration.Configuration;
 import co.elastic.apm.android.sdk.internal.configuration.provider.ConfigurationsProvider;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigurationManager;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer;
+import co.elastic.apm.android.sdk.internal.features.persistence.PersistenceInitializer;
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
@@ -51,6 +52,7 @@ public class BaseRobolectricTestApplication extends Application implements Expor
     private final List<Configuration> configurations = new ArrayList<>();
     private NtpManager ntpManager;
     private CentralConfigurationInitializer centralConfigurationInitializer;
+    private PersistenceInitializer persistenceInitializer;
 
     protected void initializeAgent() {
         initializeAgent(null, null);
@@ -104,6 +106,7 @@ public class BaseRobolectricTestApplication extends Application implements Expor
     private void setUpAgentDependencies() {
         setUpNtpManager();
         setUpCentralConfigurationInitializer();
+        persistenceInitializer = mock(PersistenceInitializer.class);
     }
 
     private void setUpCentralConfigurationInitializer() {
@@ -174,6 +177,11 @@ public class BaseRobolectricTestApplication extends Application implements Expor
     @Override
     public ConfigurationsProvider getConfigurationsProvider() {
         return this;
+    }
+
+    @Override
+    public PersistenceInitializer getPersistenceInitializer() {
+        return persistenceInitializer;
     }
 
     @Override

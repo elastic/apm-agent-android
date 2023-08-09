@@ -5,32 +5,54 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import org.junit.Test;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 
+import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.ElasticApmConfiguration;
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.connectivity.auth.impl.ApiKeyConfiguration;
 import co.elastic.apm.android.sdk.connectivity.auth.impl.SecretTokenConfiguration;
+import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration;
+import co.elastic.apm.android.sdk.connectivity.opentelemetry.exporters.ExporterVisitor;
+import co.elastic.apm.android.sdk.connectivity.opentelemetry.exporters.VisitableExporters;
+import co.elastic.apm.android.sdk.features.persistence.PersistenceConfiguration;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.poll.ConfigurationPollManager;
+import co.elastic.apm.android.sdk.internal.features.persistence.PersistenceInitializer;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
 import co.elastic.apm.android.sdk.session.impl.DefaultSessionIdProvider;
+import co.elastic.apm.android.test.testutils.MainApp;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTestApplication;
+import io.opentelemetry.sdk.logs.LogRecordProcessor;
+import io.opentelemetry.sdk.metrics.export.MetricReader;
+import io.opentelemetry.sdk.trace.SpanProcessor;
 
 public class InitializationTest extends BaseRobolectricTest {
+
+    @Config(application = MainApp.class)
+    @Test
+    public void verifyDefaults() throws IOException {
+        MainApp app = getApp();
+
+        PersistenceInitializer persistenceInitializer = app.getPersistenceInitializer();
+        verify(persistenceInitializer, never()).prepare();
+        verify(persistenceInitializer, never()).createSignalDiskExporter();
+    }
 
     @Config(application = AppWithMockSessionId.class)
     @Test
     public void whenSessionIdProviderIsInitializable_initializeIt() {
-        AppWithMockSessionId app = (AppWithMockSessionId) RuntimeEnvironment.getApplication();
+        AppWithMockSessionId app = getApp();
 
         verify(app.sessionIdProvider).initialize();
     }
@@ -38,7 +60,7 @@ public class InitializationTest extends BaseRobolectricTest {
     @Config(application = AppWithMockPollManager.class)
     @Test
     public void verifyCentralConfiguration_isInitialized() {
-        AppWithMockPollManager app = (AppWithMockPollManager) RuntimeEnvironment.getApplication();
+        AppWithMockPollManager app = getApp();
 
         verify(getAgentDependenciesInjector().getCentralConfigurationInitializer()).initialize();
 
@@ -83,6 +105,34 @@ public class InitializationTest extends BaseRobolectricTest {
         assertNull(Connectivity.getDefault().authConfiguration());
     }
 
+    @Config(application = AppWithPersistenceEnabled.class)
+    @Test
+    public void verifyPersistenceInitialization() throws IOException {
+        AppWithPersistenceEnabled app = getApp();
+
+        PersistenceInitializer persistenceInitializer = app.getPersistenceInitializer();
+
+        verify(persistenceInitializer).prepare();
+        verify(persistenceInitializer).createSignalDiskExporter();
+        assertEquals(persistenceInitializer, app.capturedExporterVisitor);
+    }
+
+    @Config(application = AppWithPersistenceEnabledWithoutVisitableExporters.class)
+    @Test
+    public void whenSignalConfigurationDoesNotAllowVisitingExporters_verifyPersistenceInitialization() throws IOException {
+        AppWithPersistenceEnabledWithoutVisitableExporters app = getApp();
+
+        PersistenceInitializer persistenceInitializer = app.getPersistenceInitializer();
+
+        verify(persistenceInitializer, never()).prepare();
+        verify(persistenceInitializer, never()).createSignalDiskExporter();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T extends BaseRobolectricTestApplication> T getApp() {
+        return (T) RuntimeEnvironment.getApplication();
+    }
+
     private static class AppWithMockPollManager extends BaseRobolectricTestApplication {
         private ConfigurationPollManager pollManager;
 
@@ -116,6 +166,57 @@ public class InitializationTest extends BaseRobolectricTest {
             } catch (NoSuchFieldException | IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
+        }
+    }
+
+    private static class AppWithPersistenceEnabled extends BaseRobolectricTestApplication implements SignalConfiguration, VisitableExporters {
+        private ExporterVisitor capturedExporterVisitor;
+
+        @Override
+        public void onCreate() {
+            super.onCreate();
+            PersistenceConfiguration persistenceConfiguration = PersistenceConfiguration.builder().setEnabled(true).build();
+
+            initializeAgentWithCustomConfig(ElasticApmConfiguration.builder()
+                    .setPersistenceConfiguration(persistenceConfiguration)
+                    .build());
+        }
+
+        @Override
+        protected SignalConfiguration getSignalConfiguration() {
+            return this;
+        }
+
+        @Override
+        public SpanProcessor getSpanProcessor() {
+            return mock(SpanProcessor.class);
+        }
+
+        @Override
+        public LogRecordProcessor getLogProcessor() {
+            return mock(LogRecordProcessor.class);
+        }
+
+        @Override
+        public MetricReader getMetricReader() {
+            return mock(MetricReader.class);
+        }
+
+        @Override
+        public void setExporterVisitor(ExporterVisitor exporterVisitor) {
+            capturedExporterVisitor = exporterVisitor;
+        }
+    }
+
+    private static class AppWithPersistenceEnabledWithoutVisitableExporters extends BaseRobolectricTestApplication {
+        @Override
+        public void onCreate() {
+            super.onCreate();
+            PersistenceConfiguration persistenceConfiguration = PersistenceConfiguration.builder().setEnabled(true).build();
+
+            initializeAgentWithCustomConfig(ElasticApmConfiguration.builder()
+                    .setPersistenceConfiguration(persistenceConfiguration)
+                    .build());
         }
     }
 }

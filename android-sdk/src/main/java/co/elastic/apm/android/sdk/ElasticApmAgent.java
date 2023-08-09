@@ -24,6 +24,8 @@ import android.content.Context;
 import androidx.annotation.RestrictTo;
 import androidx.lifecycle.ProcessLifecycleOwner;
 
+import java.io.IOException;
+
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.attributes.AttributesCreator;
 import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
@@ -39,6 +41,8 @@ import co.elastic.apm.android.sdk.attributes.resources.SdkIdVisitor;
 import co.elastic.apm.android.sdk.attributes.resources.ServiceIdVisitor;
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration;
+import co.elastic.apm.android.sdk.connectivity.opentelemetry.exporters.VisitableExporters;
+import co.elastic.apm.android.sdk.features.persistence.SignalDiskExporter;
 import co.elastic.apm.android.sdk.instrumentation.Instrumentations;
 import co.elastic.apm.android.sdk.internal.api.Initializable;
 import co.elastic.apm.android.sdk.internal.api.filter.ComposableFilter;
@@ -48,6 +52,7 @@ import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.Ce
 import co.elastic.apm.android.sdk.internal.features.centralconfig.poll.ConfigurationPollManager;
 import co.elastic.apm.android.sdk.internal.features.launchtime.LaunchTimeActivityCallback;
 import co.elastic.apm.android.sdk.internal.features.lifecycle.ElasticProcessLifecycleObserver;
+import co.elastic.apm.android.sdk.internal.features.persistence.PersistenceInitializer;
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.injection.DefaultAgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.logs.ElasticLogRecordProcessor;
@@ -154,7 +159,7 @@ public final class ElasticApmAgent {
     private void onInitializationFinished(Context context, AgentDependenciesInjector injector) {
         initializeNtpManager(injector);
         initializeConfigurations(injector);
-        initializeOpentelemetry();
+        initializeOpentelemetry(injector);
         initializeCrashReports();
         initializeSessionIdProvider();
         initializeLaunchTimeTracker(context);
@@ -199,11 +204,12 @@ public final class ElasticApmAgent {
         }
     }
 
-    private void initializeOpentelemetry() {
+    private void initializeOpentelemetry(AgentDependenciesInjector injector) {
         SignalConfiguration signalConfiguration = configuration.signalConfiguration;
         if (signalConfiguration == null) {
             signalConfiguration = SignalConfiguration.getDefault();
         }
+        PersistenceInitializer persistenceInitializer = tryInitializePersistence(signalConfiguration, injector);
         Attributes resourceAttrs = AttributesCreator.from(getResourceAttributesVisitor()).create();
         AttributesVisitor globalAttributesVisitor = new SessionAttributesVisitor();
         Resource resource = Resource.getDefault()
@@ -224,6 +230,25 @@ public final class ElasticApmAgent {
                 .setMeterProvider(meterProvider)
                 .setPropagators(getContextPropagator())
                 .buildAndRegisterGlobal();
+
+        if (persistenceInitializer != null) {
+            SignalDiskExporter.set(persistenceInitializer.createSignalDiskExporter());
+        }
+    }
+
+    private PersistenceInitializer tryInitializePersistence(SignalConfiguration signalConfiguration, AgentDependenciesInjector injector) {
+        if (configuration.persistenceConfiguration.enabled && signalConfiguration instanceof VisitableExporters) {
+            Elog.getLogger().debug("Initializing the persistence feature");
+            try {
+                PersistenceInitializer persistenceInitializer = injector.getPersistenceInitializer();
+                persistenceInitializer.prepare();
+                ((VisitableExporters) signalConfiguration).setExporterVisitor(persistenceInitializer);
+                return persistenceInitializer;
+            } catch (IOException e) {
+                Elog.getLogger().error("Could not initialize the persistence feature", e);
+            }
+        }
+        return null;
     }
 
     private AttributesVisitor getResourceAttributesVisitor() {

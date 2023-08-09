@@ -21,6 +21,7 @@ package co.elastic.apm.android.sdk.internal.features.persistence;
 import java.io.File;
 import java.io.IOException;
 
+import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.configuration.impl.SignalPersistenceConfiguration;
 import co.elastic.apm.android.sdk.internal.services.Service;
@@ -71,11 +72,15 @@ public final class DiskManager {
     public int getMaxFolderSize() {
         int storedSize = preferencesService.retrieveInt(MAX_FOLDER_SIZE_KEY, -1);
         if (storedSize != -1) {
+            Elog.getLogger().debug("Returning max folder size from preferences: {}", storedSize);
             return storedSize;
         }
-        int availableCacheSize = (int) appInfoService.getAvailableCacheSpace(persistenceConfiguration.getMaxCacheSize());
+        int requestedSize = persistenceConfiguration.getMaxCacheSize();
+        int availableCacheSize = (int) appInfoService.getAvailableCacheSpace(requestedSize);
         int calculatedSize = (availableCacheSize / 3) - persistenceConfiguration.getMaxCacheFileSize();
         preferencesService.store(MAX_FOLDER_SIZE_KEY, calculatedSize);
+
+        Elog.getLogger().debug("Requested cache size: {}, available cache size: {}, folder size: {}", requestedSize, availableCacheSize, calculatedSize);
         return calculatedSize;
     }
 

@@ -28,6 +28,9 @@ import io.opentelemetry.contrib.disk.buffering.LogRecordDiskExporter;
 import io.opentelemetry.contrib.disk.buffering.MetricDiskExporter;
 import io.opentelemetry.contrib.disk.buffering.SpanDiskExporter;
 
+/**
+ * Entrypoint to read and export previously cached signals.
+ */
 public final class SignalDiskExporter {
     private static SignalDiskExporter instance;
     private final SpanDiskExporter spanDiskExporter;
@@ -66,6 +69,7 @@ public final class SignalDiskExporter {
     @WorkerThread
     public boolean exportBatchOfSpans() throws IOException {
         if (spanDiskExporter == null) {
+            Elog.getLogger().debug("Ignoring call to export batch of spans as no disk exporter is set for spans");
             return false;
         }
         return spanDiskExporter.exportStoredBatch(exportTimeoutInMillis, TimeUnit.MILLISECONDS);
@@ -74,6 +78,7 @@ public final class SignalDiskExporter {
     @WorkerThread
     public boolean exportBatchOfMetrics() throws IOException {
         if (metricDiskExporter == null) {
+            Elog.getLogger().debug("Ignoring call to export batch of metrics as no disk exporter is set for metrics");
             return false;
         }
         return metricDiskExporter.exportStoredBatch(exportTimeoutInMillis, TimeUnit.MILLISECONDS);
@@ -82,6 +87,7 @@ public final class SignalDiskExporter {
     @WorkerThread
     public boolean exportBatchOfLogs() throws IOException {
         if (logRecordDiskExporter == null) {
+            Elog.getLogger().debug("Ignoring call to export batch of logs as no disk exporter is set for logs");
             return false;
         }
         return logRecordDiskExporter.exportStoredBatch(exportTimeoutInMillis, TimeUnit.MILLISECONDS);

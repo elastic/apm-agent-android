@@ -10,6 +10,7 @@ This product includes software licensed under the 'Apache License Version 2.0' l
  - com.github.instacart.truetime-android:library:3.5
  - okhttp (https://square.github.io/okhttp/)
  - OpenTelemetry Java (https://github.com/open-telemetry/opentelemetry-java)
+ - OpenTelemetry Java Contrib (https://github.com/open-telemetry/opentelemetry-java-contrib)
  - org.stagemonitor:stagemonitor-configuration (http://www.stagemonitor.org)
  - Weakly referenced lock-free data structures (https://github.com/raphw/weak-lock-free)
 

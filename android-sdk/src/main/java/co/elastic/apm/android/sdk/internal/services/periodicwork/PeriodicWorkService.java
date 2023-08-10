@@ -23,6 +23,9 @@ public class PeriodicWorkService implements Service, Runnable {
 
     @Override
     public void start() {
+        if (isStopped.get()) {
+            throw new IllegalStateException("The periodic work service has been stopped");
+        }
         executorService = Executors.newSingleThreadScheduledExecutor(new DaemonThreadFactory());
         scheduleNextWorkRun();
     }
@@ -40,7 +43,11 @@ public class PeriodicWorkService implements Service, Runnable {
     @Override
     public void run() {
         for (PeriodicTask task : tasks) {
-            task.execute();
+            try {
+                task.execute();
+            } catch (Throwable t) {
+                Elog.getLogger().error("Failed to execute periodic task", t);
+            }
         }
         if (!isStopped.get()) {
             scheduleNextWorkRun();

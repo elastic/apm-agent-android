@@ -36,7 +36,9 @@ public class PeriodicWorkService implements Service, Runnable {
     private static final long DELAY_BETWEEN_WORK_RUNS_IN_MILLIS = 5 * 1000; // 5 seconds
 
     public synchronized void addTask(PeriodicTask task) {
-        tasks.add(task);
+        if (!tasks.contains(task)) {
+            tasks.add(task);
+        }
     }
 
     @Override
@@ -65,7 +67,7 @@ public class PeriodicWorkService implements Service, Runnable {
             List<PeriodicTask> removeTasks = new ArrayList<>();
             for (PeriodicTask task : tasks) {
                 try {
-                    if (!task.runPeriodicTask()) {
+                    if (task.runPeriodicTask() && task.isFinished()) {
                         removeTasks.add(task);
                     }
                 } catch (Throwable t) {

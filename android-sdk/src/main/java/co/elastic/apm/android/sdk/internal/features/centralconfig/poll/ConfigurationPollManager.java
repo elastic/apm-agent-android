@@ -28,31 +28,29 @@ import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicTask;
 import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicWorkService;
-import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
 
-public final class ConfigurationPollManager implements PeriodicTask {
-    private final CentralConfigurationManager manager;
-    private final SystemTimeProvider timeProvider;
+public final class ConfigurationPollManager extends PeriodicTask {
     private static ConfigurationPollManager INSTANCE;
-    private final Logger logger = Elog.getLogger();
-    long nextExecutionTime;
     private static final long DEFAULT_DELAY_IN_SECONDS = 60;
+    private final CentralConfigurationManager manager;
+    private final Logger logger = Elog.getLogger();
+    private long delayForNextRunInMillis = DEFAULT_DELAY_IN_SECONDS * 1000;
 
     public static ConfigurationPollManager create(CentralConfigurationManager manager) {
-        return create(manager, ServiceManager.get().getService(Service.Names.PERIODIC_WORK), SystemTimeProvider.get());
+        return create(manager, ServiceManager.get().getService(Service.Names.PERIODIC_WORK));
     }
 
     @VisibleForTesting
-    public static ConfigurationPollManager create(CentralConfigurationManager manager, PeriodicWorkService periodicWorkService, SystemTimeProvider timeProvider) {
-        ConfigurationPollManager configurationPollManager = new ConfigurationPollManager(manager, timeProvider);
+    public static ConfigurationPollManager create(CentralConfigurationManager manager, PeriodicWorkService periodicWorkService) {
+        ConfigurationPollManager configurationPollManager = new ConfigurationPollManager(manager);
         periodicWorkService.addTask(configurationPollManager);
         return configurationPollManager;
     }
 
     @VisibleForTesting
-    private ConfigurationPollManager(CentralConfigurationManager manager, SystemTimeProvider timeProvider) {
+    private ConfigurationPollManager(CentralConfigurationManager manager) {
+        super();
         this.manager = manager;
-        this.timeProvider = timeProvider;
     }
 
     public static ConfigurationPollManager get() {
@@ -73,14 +71,15 @@ public final class ConfigurationPollManager implements PeriodicTask {
     public synchronized void scheduleInSeconds(long delayInSeconds) {
         logger.info("Scheduling next central config poll");
         logger.debug("Next central config poll in {} seconds", delayInSeconds);
-        nextExecutionTime = timeProvider.getCurrentTimeMillis() + (delayInSeconds * 1000);
+        delayForNextRunInMillis = delayInSeconds * 1000;
     }
 
     public void scheduleDefault() {
         scheduleInSeconds(DEFAULT_DELAY_IN_SECONDS);
     }
 
-    private void run() {
+    @Override
+    protected void onPeriodicTaskRun() {
         try {
             Integer maxAgeInSeconds = manager.sync();
             if (maxAgeInSeconds == null) {
@@ -96,14 +95,12 @@ public final class ConfigurationPollManager implements PeriodicTask {
     }
 
     @Override
-    public boolean runPeriodicTask() {
-        if (isTimeToRun()) {
-            run();
-        }
-        return true;
+    protected long getMillisToWaitBeforeNextRun() {
+        return delayForNextRunInMillis;
     }
 
-    private synchronized boolean isTimeToRun() {
-        return timeProvider.getCurrentTimeMillis() >= nextExecutionTime;
+    @Override
+    public boolean isFinished() {
+        return false;
     }
 }

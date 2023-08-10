@@ -19,11 +19,10 @@
 package co.elastic.apm.android.sdk.internal.features.centralconfig.poll;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import org.junit.Before;
@@ -33,27 +32,23 @@ import java.io.IOException;
 
 import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigurationManager;
 import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicWorkService;
-import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
 
 public class ConfigurationPollManagerTest {
     private CentralConfigurationManager manager;
     private ConfigurationPollManager pollManager;
-    private SystemTimeProvider timeProvider;
     private PeriodicWorkService periodicWorkService;
-    private static final long INITIAL_CURRENT_TIME_MILLIS = 1000;
 
     @Before
     public void setUp() {
         manager = mock(CentralConfigurationManager.class);
-        timeProvider = mock(SystemTimeProvider.class);
-        doReturn(INITIAL_CURRENT_TIME_MILLIS).when(timeProvider).getCurrentTimeMillis();
         periodicWorkService = mock(PeriodicWorkService.class);
-        pollManager = ConfigurationPollManager.create(manager, periodicWorkService, timeProvider);
+        pollManager = ConfigurationPollManager.create(manager, periodicWorkService);
     }
 
     @Test
     public void verifyInitialization() {
         verify(periodicWorkService).addTask(pollManager);
+        assertFalse(pollManager.isFinished());
     }
 
     @Test
@@ -61,9 +56,10 @@ public class ConfigurationPollManagerTest {
         Integer maxAgeReturned = 15;
         doReturn(maxAgeReturned).when(manager).sync();
 
-        assertTrue(pollManager.runPeriodicTask());
+        pollManager.onPeriodicTaskRun();
 
         verify(manager).sync();
+        assertFalse(pollManager.isFinished());
         verifyNextPollIsScheduledAfterSeconds(15);
     }
 
@@ -71,9 +67,10 @@ public class ConfigurationPollManagerTest {
     public void whenScheduledPollSucceeds_withNoMaxAgeResponse_rescheduleWithDefaultDelay() throws IOException {
         doReturn(null).when(manager).sync();
 
-        assertTrue(pollManager.runPeriodicTask());
+        pollManager.onPeriodicTaskRun();
 
         verify(manager).sync();
+        assertFalse(pollManager.isFinished());
         verifyNextPollIsScheduledAfterSeconds(60);
     }
 
@@ -81,33 +78,10 @@ public class ConfigurationPollManagerTest {
     public void whenScheduledPollFails_rescheduleWithDefaultDelay() throws IOException {
         doThrow(IOException.class).when(manager).sync();
 
-        assertTrue(pollManager.runPeriodicTask());
+        pollManager.onPeriodicTaskRun();
 
+        assertFalse(pollManager.isFinished());
         verifyNextPollIsScheduledAfterSeconds(60);
-    }
-
-    @Test
-    public void whenNextScheduleIsNotDue_doNotRun() throws IOException {
-        pollManager.scheduleInSeconds(10);
-
-        assertTrue(pollManager.runPeriodicTask());
-
-        // It shouldn't have run.
-        verify(manager, never()).sync();
-
-        // Fast forward time to just before it's due and run again.
-        fastForwardCurrentTimeInSeconds(9);
-        assertTrue(pollManager.runPeriodicTask());
-
-        // It shouldn't have run yet.
-        verify(manager, never()).sync();
-
-        // Fast forward time to just in time for the next run and run again.
-        fastForwardCurrentTimeInSeconds(1);
-        assertTrue(pollManager.runPeriodicTask());
-
-        //  Now it should have run.
-        verify(manager).sync();
     }
 
     @Test
@@ -117,11 +91,7 @@ public class ConfigurationPollManagerTest {
         verifyNextPollIsScheduledAfterSeconds(60);
     }
 
-    private void fastForwardCurrentTimeInSeconds(long seconds) {
-        doReturn(timeProvider.getCurrentTimeMillis() + (seconds * 1000)).when(timeProvider).getCurrentTimeMillis();
-    }
-
     private void verifyNextPollIsScheduledAfterSeconds(long seconds) {
-        assertEquals((seconds * 1000) + timeProvider.getCurrentTimeMillis(), pollManager.nextExecutionTime);
+        assertEquals(seconds * 1000, pollManager.getMillisToWaitBeforeNextRun());
     }
 }

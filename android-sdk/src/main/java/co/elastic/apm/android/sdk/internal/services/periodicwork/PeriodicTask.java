@@ -18,12 +18,55 @@
  */
 package co.elastic.apm.android.sdk.internal.services.periodicwork;
 
-public interface PeriodicTask {
+import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
+
+public abstract class PeriodicTask {
+    private final SystemTimeProvider timeProvider;
+    private long lastTimeItRan = 0;
+
+    public PeriodicTask() {
+        this(SystemTimeProvider.get());
+    }
+
+    protected PeriodicTask(SystemTimeProvider timeProvider) {
+        this.timeProvider = timeProvider;
+    }
+
+    /**
+     * Calls {@link #onPeriodicTaskRun()} if the task is due to be run, noop otherwise.
+     *
+     * @return true when the task was run, false otherwise.
+     */
+    public final boolean runPeriodicTask() {
+        if (isReadyToRun()) {
+            onPeriodicTaskRun();
+            lastTimeItRan = timeProvider.getCurrentTimeMillis();
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Runs a task when it's due.
-     *
-     * @return true when the task wants to keep getting invoked in the future, false when it's finished
-     * and doesn't need to run again.
      */
-    boolean runPeriodicTask();
+    protected abstract void onPeriodicTaskRun();
+
+    /**
+     * Returns the amount of milliseconds that need to pass before this task gets to run again.
+     */
+    protected abstract long getMillisToWaitBeforeNextRun();
+
+    /**
+     * Indicates whether this task needs to keep running in future iterations or not.
+     *
+     * @return false if this task needs to be called again in the future, true otherwise.
+     */
+    public abstract boolean isFinished();
+
+    private boolean isReadyToRun() {
+        if (lastTimeItRan < 1) {
+            return true;
+        }
+        return timeProvider.getCurrentTimeMillis() >= (lastTimeItRan + getMillisToWaitBeforeNextRun());
+    }
 }

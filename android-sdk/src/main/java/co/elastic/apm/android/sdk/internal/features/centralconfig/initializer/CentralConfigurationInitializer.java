@@ -22,9 +22,9 @@ import androidx.annotation.VisibleForTesting;
 
 import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigurationManager;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.poll.ConfigurationPollManager;
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.singletask.BackgroundExecutor;
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.singletask.Result;
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.singletask.impl.SimpleBackgroundExecutor;
+import co.elastic.apm.android.sdk.internal.utilities.concurrency.BackgroundExecutor;
+import co.elastic.apm.android.sdk.internal.utilities.concurrency.Result;
+import co.elastic.apm.android.sdk.internal.utilities.concurrency.impl.SimpleBackgroundExecutor;
 
 public final class CentralConfigurationInitializer implements BackgroundExecutor.Callback<Integer> {
     private final BackgroundExecutor executor;

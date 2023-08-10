@@ -31,7 +31,7 @@ import java.io.IOException;
 
 import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigurationManager;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.poll.ConfigurationPollManager;
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.singletask.Result;
+import co.elastic.apm.android.sdk.internal.utilities.concurrency.Result;
 import co.elastic.apm.android.sdk.testutils.ImmediateBackgroundExecutor;
 
 public class CentralConfigurationInitializerTest {

@@ -22,31 +22,37 @@ import androidx.annotation.VisibleForTesting;
 
 import org.slf4j.Logger;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigurationManager;
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.DaemonThreadFactory;
-import co.elastic.apm.android.sdk.internal.utilities.providers.LazyProvider;
-import co.elastic.apm.android.sdk.internal.utilities.providers.Provider;
+import co.elastic.apm.android.sdk.internal.services.Service;
+import co.elastic.apm.android.sdk.internal.services.ServiceManager;
+import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicTask;
+import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicWorkService;
+import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
 
-public final class ConfigurationPollManager implements Runnable {
-    private static ConfigurationPollManager INSTANCE;
-    private final Provider<ScheduledExecutorService> executorProvider;
+public final class ConfigurationPollManager implements PeriodicTask {
     private final CentralConfigurationManager manager;
+    private final SystemTimeProvider timeProvider;
+    private static ConfigurationPollManager INSTANCE;
     private final Logger logger = Elog.getLogger();
+    long nextExecutionTime;
     private static final long DEFAULT_DELAY_IN_SECONDS = 60;
 
-    @VisibleForTesting
-    public ConfigurationPollManager(CentralConfigurationManager manager, Provider<ScheduledExecutorService> executorProvider) {
-        this.manager = manager;
-        this.executorProvider = executorProvider;
+    public static ConfigurationPollManager create(CentralConfigurationManager manager) {
+        return create(manager, ServiceManager.get().getService(Service.Names.PERIODIC_WORK), SystemTimeProvider.get());
     }
 
-    public ConfigurationPollManager(CentralConfigurationManager manager) {
-        this(manager, LazyProvider.of(() -> Executors.newSingleThreadScheduledExecutor(new DaemonThreadFactory())));
+    @VisibleForTesting
+    public static ConfigurationPollManager create(CentralConfigurationManager manager, PeriodicWorkService periodicWorkService, SystemTimeProvider timeProvider) {
+        ConfigurationPollManager configurationPollManager = new ConfigurationPollManager(manager, timeProvider);
+        periodicWorkService.addTask(configurationPollManager);
+        return configurationPollManager;
+    }
+
+    @VisibleForTesting
+    private ConfigurationPollManager(CentralConfigurationManager manager, SystemTimeProvider timeProvider) {
+        this.manager = manager;
+        this.timeProvider = timeProvider;
     }
 
     public static ConfigurationPollManager get() {
@@ -64,18 +70,17 @@ public final class ConfigurationPollManager implements Runnable {
         INSTANCE = null;
     }
 
-    public void scheduleInSeconds(long delayInSeconds) {
+    public synchronized void scheduleInSeconds(long delayInSeconds) {
         logger.info("Scheduling next central config poll");
         logger.debug("Next central config poll in {} seconds", delayInSeconds);
-        executorProvider.get().schedule(this, delayInSeconds, TimeUnit.SECONDS);
+        nextExecutionTime = timeProvider.getCurrentTimeMillis() + (delayInSeconds * 1000);
     }
 
     public void scheduleDefault() {
         scheduleInSeconds(DEFAULT_DELAY_IN_SECONDS);
     }
 
-    @Override
-    public void run() {
+    private void run() {
         try {
             Integer maxAgeInSeconds = manager.sync();
             if (maxAgeInSeconds == null) {
@@ -88,5 +93,17 @@ public final class ConfigurationPollManager implements Runnable {
             logger.error("Central config poll error", t);
             scheduleDefault();
         }
+    }
+
+    @Override
+    public boolean runPeriodicTask() {
+        if (isTimeToRun()) {
+            run();
+        }
+        return true;
+    }
+
+    private synchronized boolean isTimeToRun() {
+        return timeProvider.getCurrentTimeMillis() >= nextExecutionTime;
     }
 }

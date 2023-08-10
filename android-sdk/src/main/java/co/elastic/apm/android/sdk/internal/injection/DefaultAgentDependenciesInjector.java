@@ -49,7 +49,7 @@ public class DefaultAgentDependenciesInjector implements AgentDependenciesInject
     @Override
     public CentralConfigurationInitializer getCentralConfigurationInitializer() {
         CentralConfigurationManager manager = new CentralConfigurationManager(appContext);
-        return new CentralConfigurationInitializer(manager, new ConfigurationPollManager(manager));
+        return new CentralConfigurationInitializer(manager, ConfigurationPollManager.create(manager));
     }
 
     @Override

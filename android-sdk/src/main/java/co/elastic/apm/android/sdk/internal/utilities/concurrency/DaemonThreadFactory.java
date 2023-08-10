@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.features.centralconfig.poll;
+package co.elastic.apm.android.sdk.internal.utilities.concurrency;
 
 import java.util.concurrent.ThreadFactory;
 
-public final class PollThreadFactory implements ThreadFactory {
+public final class DaemonThreadFactory implements ThreadFactory {
 
     @Override
     public Thread newThread(Runnable r) {

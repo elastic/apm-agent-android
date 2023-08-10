@@ -28,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigurationManager;
+import co.elastic.apm.android.sdk.internal.utilities.concurrency.DaemonThreadFactory;
 import co.elastic.apm.android.sdk.internal.utilities.providers.LazyProvider;
 import co.elastic.apm.android.sdk.internal.utilities.providers.Provider;
 
@@ -45,7 +46,7 @@ public final class ConfigurationPollManager implements Runnable {
     }
 
     public ConfigurationPollManager(CentralConfigurationManager manager) {
-        this(manager, LazyProvider.of(() -> Executors.newSingleThreadScheduledExecutor(new PollThreadFactory())));
+        this(manager, LazyProvider.of(() -> Executors.newSingleThreadScheduledExecutor(new DaemonThreadFactory())));
     }
 
     public static ConfigurationPollManager get() {

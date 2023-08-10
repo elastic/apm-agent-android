@@ -35,7 +35,7 @@ public class PeriodicWorkService implements Service, Runnable {
     private ScheduledExecutorService executorService;
     private static final long DELAY_BETWEEN_WORK_RUNS_IN_MILLIS = 5 * 1000; // 5 seconds
 
-    public void addTask(PeriodicTask task) {
+    public synchronized void addTask(PeriodicTask task) {
         tasks.add(task);
     }
 
@@ -61,11 +61,13 @@ public class PeriodicWorkService implements Service, Runnable {
 
     @Override
     public void run() {
-        for (PeriodicTask task : tasks) {
-            try {
-                task.execute();
-            } catch (Throwable t) {
-                Elog.getLogger().error("Failed to execute periodic task", t);
+        synchronized (this) {
+            for (PeriodicTask task : tasks) {
+                try {
+                    task.execute();
+                } catch (Throwable t) {
+                    Elog.getLogger().error("Failed to execute periodic task", t);
+                }
             }
         }
         if (!isStopped.get()) {

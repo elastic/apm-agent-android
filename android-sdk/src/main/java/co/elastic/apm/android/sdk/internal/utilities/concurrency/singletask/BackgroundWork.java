@@ -16,24 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.utilities.concurrency;
+package co.elastic.apm.android.sdk.internal.utilities.concurrency.singletask;
 
-public final class Result<T> {
-    public final T value;
-    public final Throwable error;
-    public final boolean isSuccess;
-
-    private Result(T result, Throwable error, boolean isSuccess) {
-        this.value = result;
-        this.error = error;
-        this.isSuccess = isSuccess;
-    }
-
-    public static <T> Result<T> success(T value) {
-        return new Result<>(value, null, true);
-    }
-
-    public static <T> Result<T> error(Throwable error) {
-        return new Result<>(null, error, false);
-    }
+public interface BackgroundWork<T> {
+    T execute() throws Throwable;
 }

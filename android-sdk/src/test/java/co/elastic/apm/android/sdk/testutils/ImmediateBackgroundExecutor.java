@@ -18,9 +18,9 @@
  */
 package co.elastic.apm.android.sdk.testutils;
 
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.BackgroundExecutor;
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.BackgroundWork;
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.Result;
+import co.elastic.apm.android.sdk.internal.utilities.concurrency.singletask.BackgroundExecutor;
+import co.elastic.apm.android.sdk.internal.utilities.concurrency.singletask.BackgroundWork;
+import co.elastic.apm.android.sdk.internal.utilities.concurrency.singletask.Result;
 
 public class ImmediateBackgroundExecutor implements BackgroundExecutor {
     private int executions = 0;

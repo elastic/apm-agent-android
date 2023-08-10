@@ -25,10 +25,10 @@ import androidx.annotation.VisibleForTesting;
 import java.io.IOException;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.BackgroundExecutor;
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.Result;
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.impl.SimpleBackgroundExecutor;
 import co.elastic.apm.android.sdk.internal.opentelemetry.tools.ElasticClock;
+import co.elastic.apm.android.sdk.internal.utilities.concurrency.singletask.BackgroundExecutor;
+import co.elastic.apm.android.sdk.internal.utilities.concurrency.singletask.Result;
+import co.elastic.apm.android.sdk.internal.utilities.concurrency.singletask.impl.SimpleBackgroundExecutor;
 import io.opentelemetry.sdk.common.Clock;
 
 public final class NtpManager implements BackgroundExecutor.Callback<Void> {

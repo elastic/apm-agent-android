@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Set;
 
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration;
+import co.elastic.apm.android.sdk.features.persistence.PersistenceConfiguration;
 import co.elastic.apm.android.sdk.instrumentation.InstrumentationConfiguration;
 import co.elastic.apm.android.sdk.logs.tools.LogFilter;
 import co.elastic.apm.android.sdk.metrics.tools.MetricFilter;
@@ -41,6 +42,7 @@ public final class ElasticApmConfiguration {
     public final String deploymentEnvironment;
     public final SessionIdProvider sessionIdProvider;
     public final SignalConfiguration signalConfiguration;
+    public final PersistenceConfiguration persistenceConfiguration;
     public final List<SpanFilter> spanFilters;
     public final List<LogFilter> logFilters;
     public final List<MetricFilter> metricFilters;
@@ -61,6 +63,7 @@ public final class ElasticApmConfiguration {
         instrumentationConfiguration = builder.instrumentationConfiguration;
         signalConfiguration = builder.signalConfiguration;
         deploymentEnvironment = builder.deploymentEnvironment;
+        persistenceConfiguration = builder.persistenceConfiguration;
         spanFilters = Collections.unmodifiableList(new ArrayList<>(builder.spanFilters));
         logFilters = Collections.unmodifiableList(new ArrayList<>(builder.logFilters));
         metricFilters = Collections.unmodifiableList(new ArrayList<>(builder.metricFilters));
@@ -69,6 +72,7 @@ public final class ElasticApmConfiguration {
     public static class Builder {
         private HttpTraceConfiguration httpTraceConfiguration;
         private InstrumentationConfiguration instrumentationConfiguration;
+        private PersistenceConfiguration persistenceConfiguration;
         private String serviceName;
         private String serviceVersion;
         private String deploymentEnvironment;
@@ -141,6 +145,14 @@ public final class ElasticApmConfiguration {
         }
 
         /**
+         * Sets the parameters for caching signals in disk in order to export them later.
+         */
+        public Builder setPersistenceConfiguration(PersistenceConfiguration persistenceConfiguration) {
+            this.persistenceConfiguration = persistenceConfiguration;
+            return this;
+        }
+
+        /**
          * The span filter can be used to control which spans are exported and which shouldn't
          * leave the device. An implementation that always excludes all spans is essentially a way
          * to turn all spans off.
@@ -179,6 +191,9 @@ public final class ElasticApmConfiguration {
             }
             if (sessionIdProvider == null) {
                 sessionIdProvider = new DefaultSessionIdProvider();
+            }
+            if (persistenceConfiguration == null) {
+                persistenceConfiguration = PersistenceConfiguration.builder().build();
             }
             return new ElasticApmConfiguration(this);
         }

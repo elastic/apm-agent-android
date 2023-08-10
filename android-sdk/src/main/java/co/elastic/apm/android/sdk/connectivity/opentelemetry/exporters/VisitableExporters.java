@@ -16,24 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.injection;
+package co.elastic.apm.android.sdk.connectivity.opentelemetry.exporters;
 
-import co.elastic.apm.android.sdk.internal.configuration.provider.ConfigurationsProvider;
-import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer;
-import co.elastic.apm.android.sdk.internal.features.persistence.PersistenceInitializer;
-import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
-
-public interface AgentDependenciesInjector {
-
-    NtpManager getNtpManager();
-
-    CentralConfigurationInitializer getCentralConfigurationInitializer();
-
-    ConfigurationsProvider getConfigurationsProvider();
-
-    PersistenceInitializer getPersistenceInitializer();
-
-    interface Interceptor {
-        AgentDependenciesInjector intercept(AgentDependenciesInjector injector);
-    }
+public interface VisitableExporters {
+    void setExporterVisitor(ExporterVisitor visitor);
 }

@@ -16,24 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.injection;
+package co.elastic.apm.android.sdk.features.persistence;
 
-import co.elastic.apm.android.sdk.internal.configuration.provider.ConfigurationsProvider;
-import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer;
-import co.elastic.apm.android.sdk.internal.features.persistence.PersistenceInitializer;
-import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
+import java.io.File;
 
-public interface AgentDependenciesInjector {
+import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
+import io.opentelemetry.contrib.disk.buffering.internal.files.TemporaryFileProvider;
 
-    NtpManager getNtpManager();
+public class SimpleTemporaryFileProvider implements TemporaryFileProvider {
+    private final File tempDir;
 
-    CentralConfigurationInitializer getCentralConfigurationInitializer();
+    public SimpleTemporaryFileProvider(File tempDir) {
+        this.tempDir = tempDir;
+    }
 
-    ConfigurationsProvider getConfigurationsProvider();
-
-    PersistenceInitializer getPersistenceInitializer();
-
-    interface Interceptor {
-        AgentDependenciesInjector intercept(AgentDependenciesInjector injector);
+    @Override
+    public File createTemporaryFile(String prefix) {
+        return new File(tempDir, prefix + "_" + SystemTimeProvider.get().getCurrentTimeMillis() + ".tmp");
     }
 }

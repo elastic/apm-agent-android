@@ -16,24 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.injection;
+package co.elastic.apm.android.sdk.internal.configuration.impl;
 
-import co.elastic.apm.android.sdk.internal.configuration.provider.ConfigurationsProvider;
-import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer;
-import co.elastic.apm.android.sdk.internal.features.persistence.PersistenceInitializer;
-import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
+import co.elastic.apm.android.sdk.ElasticApmConfiguration;
+import co.elastic.apm.android.sdk.internal.configuration.Configuration;
 
-public interface AgentDependenciesInjector {
+public final class SignalPersistenceConfiguration extends Configuration {
+    private final int maxCacheSize;
+    private final int maxCacheFileSize;
 
-    NtpManager getNtpManager();
+    public SignalPersistenceConfiguration(ElasticApmConfiguration apmConfiguration) {
+        this.maxCacheSize = apmConfiguration.persistenceConfiguration.maxCacheSize;
+        maxCacheFileSize = 1024 * 1024; // 1 MB
+    }
 
-    CentralConfigurationInitializer getCentralConfigurationInitializer();
+    public int getMaxCacheSize() {
+        return maxCacheSize;
+    }
 
-    ConfigurationsProvider getConfigurationsProvider();
-
-    PersistenceInitializer getPersistenceInitializer();
-
-    interface Interceptor {
-        AgentDependenciesInjector intercept(AgentDependenciesInjector injector);
+    public int getMaxCacheFileSize() {
+        return maxCacheFileSize;
     }
 }

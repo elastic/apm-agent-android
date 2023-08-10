@@ -19,5 +19,11 @@
 package co.elastic.apm.android.sdk.internal.services.periodicwork;
 
 public interface PeriodicTask {
-    void execute();
+    /**
+     * Runs a task when it's due.
+     *
+     * @return true when the task wants to keep getting invoked in the future, false when it's finished
+     * and doesn't need to run again.
+     */
+    boolean runPeriodicTask();
 }

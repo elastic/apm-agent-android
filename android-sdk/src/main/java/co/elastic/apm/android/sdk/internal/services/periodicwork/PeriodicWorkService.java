@@ -18,8 +18,8 @@
  */
 package co.elastic.apm.android.sdk.internal.services.periodicwork;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -30,7 +30,7 @@ import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.utilities.concurrency.DaemonThreadFactory;
 
 public class PeriodicWorkService implements Service, Runnable {
-    private final Set<PeriodicTask> tasks = new HashSet<>();
+    private final List<PeriodicTask> tasks = new ArrayList<>();
     private final AtomicBoolean isStopped = new AtomicBoolean(false);
     private ScheduledExecutorService executorService;
     private static final long DELAY_BETWEEN_WORK_RUNS_IN_MILLIS = 5 * 1000; // 5 seconds
@@ -62,13 +62,17 @@ public class PeriodicWorkService implements Service, Runnable {
     @Override
     public void run() {
         synchronized (this) {
+            List<PeriodicTask> removeTasks = new ArrayList<>();
             for (PeriodicTask task : tasks) {
                 try {
-                    task.execute();
+                    if (!task.runPeriodicTask()) {
+                        removeTasks.add(task);
+                    }
                 } catch (Throwable t) {
                     Elog.getLogger().error("Failed to execute periodic task", t);
                 }
             }
+            tasks.removeAll(removeTasks);
         }
         if (!isStopped.get()) {
             scheduleNextWorkRun();

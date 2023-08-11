@@ -19,6 +19,7 @@
 package co.elastic.apm.android.sdk.internal.services.periodicwork;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -64,6 +65,14 @@ public class PeriodicWorkService implements Service, Runnable {
         if (isInitialized.compareAndSet(false, true)) {
             executorService.execute(this);
         }
+    }
+
+    public boolean isInitialized() {
+        return isInitialized.get();
+    }
+
+    public List<PeriodicTask> getTasks() {
+        return Collections.unmodifiableList(tasks);
     }
 
     @Override

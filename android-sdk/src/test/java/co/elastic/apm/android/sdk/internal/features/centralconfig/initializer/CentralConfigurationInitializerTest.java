@@ -60,7 +60,6 @@ public class CentralConfigurationInitializerTest {
         inOrder.verify(manager).sync();
         assertEquals(0, initializer.getMillisToWaitBeforeNextRun());
         assertTrue(initializer.isFinished());
-        verify(periodicWorkService).addTask(initializer);
     }
 
     @Test

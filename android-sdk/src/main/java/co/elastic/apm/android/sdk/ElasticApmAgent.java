@@ -170,7 +170,7 @@ public final class ElasticApmAgent {
     }
 
     private static void initializePeriodicWork() {
-        ((PeriodicWorkService) ServiceManager.get().getService(Service.Names.PERIODIC_WORK)).initialize();
+        getPeriodicWorkService().initialize();
     }
 
     private void initializeLifecycleObserver() {
@@ -191,6 +191,8 @@ public final class ElasticApmAgent {
         builder.registerAll(injector.getConfigurationsProvider().provideConfigurations());
         configuration.instrumentationConfiguration.instrumentations.forEach(builder::register);
         builder.buildAndRegisterGlobal();
+
+        getPeriodicWorkService().addTask(centralConfigInitializer);
     }
 
     private void initializeSessionIdProvider() {
@@ -322,5 +324,9 @@ public final class ElasticApmAgent {
 
     private ContextPropagators getContextPropagator() {
         return ContextPropagators.create(W3CTraceContextPropagator.getInstance());
+    }
+
+    private static PeriodicWorkService getPeriodicWorkService() {
+        return ServiceManager.get().getService(Service.Names.PERIODIC_WORK);
     }
 }

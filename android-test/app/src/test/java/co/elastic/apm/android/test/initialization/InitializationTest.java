@@ -29,6 +29,7 @@ import co.elastic.apm.android.sdk.internal.features.persistence.PersistenceIniti
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
+import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicWorkService;
 import co.elastic.apm.android.sdk.session.impl.DefaultSessionIdProvider;
 import co.elastic.apm.android.test.testutils.MainApp;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
@@ -47,6 +48,9 @@ public class InitializationTest extends BaseRobolectricTest {
         PersistenceInitializer persistenceInitializer = app.getPersistenceInitializer();
         verify(persistenceInitializer, never()).prepare();
         verify(persistenceInitializer, never()).createSignalDiskExporter();
+
+        PeriodicWorkService periodicWorkService = getPeriodicWorkService();
+        assertTrue(periodicWorkService.isInitialized());
     }
 
     @Config(application = AppWithMockSessionId.class)
@@ -62,8 +66,7 @@ public class InitializationTest extends BaseRobolectricTest {
     public void verifyCentralConfiguration_isInitialized() {
         AppWithMockPollManager app = getApp();
 
-        verify(getAgentDependenciesInjector().getCentralConfigurationInitializer()).initialize();
-
+        assertTrue(getPeriodicWorkService().getTasks().contains(getApp().getCentralConfigurationInitializer()));
         assertEquals(app.pollManager, ConfigurationPollManager.get());
     }
 
@@ -126,6 +129,10 @@ public class InitializationTest extends BaseRobolectricTest {
 
         verify(persistenceInitializer, never()).prepare();
         verify(persistenceInitializer, never()).createSignalDiskExporter();
+    }
+
+    private static PeriodicWorkService getPeriodicWorkService() {
+        return ServiceManager.get().getService(Service.Names.PERIODIC_WORK);
     }
 
     @SuppressWarnings("unchecked")

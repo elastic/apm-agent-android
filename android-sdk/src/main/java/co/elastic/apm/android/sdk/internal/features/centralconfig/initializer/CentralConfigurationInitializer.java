@@ -41,7 +41,6 @@ public final class CentralConfigurationInitializer extends PeriodicTask {
         this.manager = manager;
         this.pollManager = pollManager;
         this.periodicWorkService = periodicWorkService;
-        periodicWorkService.addTask(this);
     }
 
     public CentralConfigurationInitializer(CentralConfigurationManager manager, ConfigurationPollManager pollManager) {

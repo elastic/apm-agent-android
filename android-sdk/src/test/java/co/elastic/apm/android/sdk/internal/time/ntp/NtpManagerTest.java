@@ -18,8 +18,10 @@
  */
 package co.elastic.apm.android.sdk.internal.time.ntp;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -32,7 +34,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.io.IOException;
 
 import co.elastic.apm.android.sdk.testutils.BaseTest;
-import co.elastic.apm.android.sdk.testutils.ImmediateBackgroundExecutor;
 
 @RunWith(MockitoJUnitRunner.class)
 public class NtpManagerTest extends BaseTest {
@@ -40,37 +41,50 @@ public class NtpManagerTest extends BaseTest {
     @Mock
     public TrueTimeWrapper trueTimeWrapper;
 
-    private final ImmediateBackgroundExecutor immediateExecutor = new ImmediateBackgroundExecutor();
-
     private NtpManager ntpManager;
 
     @Before
     public void setUp() {
-        ntpManager = new NtpManager(trueTimeWrapper, immediateExecutor);
+        ntpManager = new NtpManager(trueTimeWrapper);
     }
 
     @Test
-    public void whenInitializing_setUpSharedPreferenceCache() {
+    public void verifyInitializationParameters() {
         ntpManager.initialize();
 
         verify(trueTimeWrapper).withSharedPreferencesCache();
+        verify(trueTimeWrapper).withRootDispersionMax(200);
+        verify(trueTimeWrapper).withRootDelayMax(200);
     }
 
     @Test
-    public void whenInitializing_callInitializeInTheBackground() throws IOException {
-        ntpManager.initialize();
+    public void whenInitializationSucceeds_setManagerInitialized() throws IOException {
+        assertFalse(ntpManager.isInitialized());
+
+        ntpManager.onPeriodicTaskRun();
 
         verify(trueTimeWrapper).initialize();
-        assertEquals(1, immediateExecutor.getExecutions());
+        assertTrue(ntpManager.isInitialized());
+        assertTrue(ntpManager.isFinished());
     }
 
     @Test
-    public void whenInitializing_avoidReinitializing() throws IOException {
+    public void whenInitializationFails_doNotSetManagerInitialized() throws IOException {
+        doThrow(new IOException()).when(trueTimeWrapper).initialize();
+
+        ntpManager.onPeriodicTaskRun();
+
+        assertFalse(ntpManager.isInitialized());
+        assertFalse(ntpManager.isFinished());
+    }
+
+    @Test
+    public void whenAlreadyInitialized_avoidReInitializing() throws IOException {
         doReturn(true).when(trueTimeWrapper).isInitialized();
 
         ntpManager.initialize();
+        ntpManager.onPeriodicTaskRun();
 
-        verify(trueTimeWrapper).withSharedPreferencesCache();
         verify(trueTimeWrapper, never()).initialize();
     }
 }

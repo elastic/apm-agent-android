@@ -34,8 +34,8 @@ public class PeriodicWorkService implements Service, Runnable {
     private final List<PeriodicTask> tasks = new ArrayList<>();
     private final AtomicBoolean isInitialized = new AtomicBoolean(false);
     private final AtomicBoolean isStopped = new AtomicBoolean(false);
-    private ScheduledExecutorService executorService;
-    private static final long DELAY_BETWEEN_WORK_RUNS_IN_MILLIS = 5 * 1000; // 5 seconds
+    private final ScheduledExecutorService executorService;
+    private static final long DELAY_BETWEEN_ITERATIONS_IN_MILLIS = 5 * 1000; // 5 seconds
 
     public synchronized void addTask(PeriodicTask task) {
         if (!tasks.contains(task)) {
@@ -43,11 +43,16 @@ public class PeriodicWorkService implements Service, Runnable {
         }
     }
 
+    public PeriodicWorkService() {
+        this(Executors.newSingleThreadScheduledExecutor(new DaemonThreadFactory()));
+    }
+
+    PeriodicWorkService(ScheduledExecutorService executorService) {
+        this.executorService = executorService;
+    }
+
     @Override
     public void start() {
-        Elog.getLogger().debug("Starting PeriodicWorkService");
-        verifyNotStopped();
-        executorService = Executors.newSingleThreadScheduledExecutor(new DaemonThreadFactory());
     }
 
     @Override
@@ -96,7 +101,7 @@ public class PeriodicWorkService implements Service, Runnable {
     }
 
     private void scheduleNextWorkRun() {
-        executorService.schedule(this, DELAY_BETWEEN_WORK_RUNS_IN_MILLIS, TimeUnit.MILLISECONDS);
+        executorService.schedule(this, DELAY_BETWEEN_ITERATIONS_IN_MILLIS, TimeUnit.MILLISECONDS);
     }
 
     private void verifyNotStopped() {

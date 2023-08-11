@@ -78,7 +78,7 @@ public final class ConfigurationPollManager extends PeriodicTask {
     }
 
     @Override
-    protected long getMillisToWaitBeforeNextRun() {
+    protected long getMinDelayBeforeNextRunInMillis() {
         return delayForNextRunInMillis;
     }
 

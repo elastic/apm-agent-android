@@ -58,7 +58,7 @@ public class CentralConfigurationInitializerTest {
         InOrder inOrder = inOrder(manager);
         inOrder.verify(manager).publishCachedConfig();
         inOrder.verify(manager).sync();
-        assertEquals(0, initializer.getMillisToWaitBeforeNextRun());
+        assertEquals(0, initializer.getMinDelayBeforeNextRunInMillis());
         assertTrue(initializer.isFinished());
     }
 

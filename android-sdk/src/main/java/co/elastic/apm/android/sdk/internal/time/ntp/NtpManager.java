@@ -79,7 +79,7 @@ public final class NtpManager extends PeriodicTask {
     }
 
     @Override
-    protected long getMillisToWaitBeforeNextRun() {
+    protected long getMinDelayBeforeNextRunInMillis() {
         return 0;
     }
 

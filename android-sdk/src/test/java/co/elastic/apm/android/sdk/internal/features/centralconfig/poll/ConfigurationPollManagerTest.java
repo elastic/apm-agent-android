@@ -83,6 +83,6 @@ public class ConfigurationPollManagerTest {
     }
 
     private void verifyNextPollIsScheduledAfterSeconds(long seconds) {
-        assertEquals(seconds * 1000, pollManager.getMillisToWaitBeforeNextRun());
+        assertEquals(seconds * 1000, pollManager.getMinDelayBeforeNextRunInMillis());
     }
 }

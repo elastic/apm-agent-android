@@ -52,9 +52,12 @@ public abstract class PeriodicTask {
     protected abstract void onPeriodicTaskRun();
 
     /**
-     * Returns the amount of milliseconds that need to pass before this task gets to run again.
+     * Returns the minimum amount of milliseconds that need to pass before this task gets to run again.
+     * The actual time before running this task can be higher than the one provided in here,
+     * given that tasks are run from the {@link PeriodicWorkService} class which has its own internal
+     * delay between iterations.
      */
-    protected abstract long getMillisToWaitBeforeNextRun();
+    protected abstract long getMinDelayBeforeNextRunInMillis();
 
     /**
      * Indicates whether this task needs to keep running in future iterations or not.
@@ -67,6 +70,6 @@ public abstract class PeriodicTask {
         if (lastTimeItRan < 1) {
             return true;
         }
-        return timeProvider.getCurrentTimeMillis() >= (lastTimeItRan + getMillisToWaitBeforeNextRun());
+        return timeProvider.getCurrentTimeMillis() >= (lastTimeItRan + getMinDelayBeforeNextRunInMillis());
     }
 }

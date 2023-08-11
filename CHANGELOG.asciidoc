@@ -33,6 +33,8 @@ ${next_release_notes}
 ===== Features
 
 * Updating OpenTelemetry SDK to 1.27.0 where logs are stable: {pull}168[#168]
+* Updating OpenTelemetry SDK to 1.28.0 where the new disk buffering lib is present: {pull}170[#170]
+* Adding network connectivity attributes to logs: {pull}?[#?]
 ////
 
 [[release-notes-0.7.0]]

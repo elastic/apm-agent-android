@@ -180,6 +180,7 @@ public final class ElasticApmAgent {
     private void initializeNtpManager(AgentDependenciesInjector injector) {
         ntpManager = injector.getNtpManager();
         ntpManager.initialize();
+        getPeriodicWorkService().addTask(ntpManager);
     }
 
     private void initializeConfigurations(AgentDependenciesInjector injector) {

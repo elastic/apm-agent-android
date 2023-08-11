@@ -30,6 +30,7 @@ import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
 import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicWorkService;
+import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.sdk.session.impl.DefaultSessionIdProvider;
 import co.elastic.apm.android.test.testutils.MainApp;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
@@ -68,6 +69,14 @@ public class InitializationTest extends BaseRobolectricTest {
 
         assertTrue(getPeriodicWorkService().getTasks().contains(getApp().getCentralConfigurationInitializer()));
         assertEquals(app.pollManager, ConfigurationPollManager.get());
+    }
+
+    @Test
+    public void verifyNtpManager_isInitialized() {
+        NtpManager ntpManager = getAgentDependenciesInjector().getNtpManager();
+
+        verify(ntpManager).initialize();
+        assertTrue(getPeriodicWorkService().getTasks().contains(ntpManager));
     }
 
     @Test

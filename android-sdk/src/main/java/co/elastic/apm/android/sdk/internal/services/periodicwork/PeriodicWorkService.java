@@ -31,6 +31,7 @@ import co.elastic.apm.android.sdk.internal.utilities.concurrency.DaemonThreadFac
 
 public class PeriodicWorkService implements Service, Runnable {
     private final List<PeriodicTask> tasks = new ArrayList<>();
+    private final AtomicBoolean isInitialized = new AtomicBoolean(false);
     private final AtomicBoolean isStopped = new AtomicBoolean(false);
     private ScheduledExecutorService executorService;
     private static final long DELAY_BETWEEN_WORK_RUNS_IN_MILLIS = 5 * 1000; // 5 seconds
@@ -44,11 +45,8 @@ public class PeriodicWorkService implements Service, Runnable {
     @Override
     public void start() {
         Elog.getLogger().debug("Starting PeriodicWorkService");
-        if (isStopped.get()) {
-            throw new IllegalStateException("The periodic work service has been stopped");
-        }
+        verifyNotStopped();
         executorService = Executors.newSingleThreadScheduledExecutor(new DaemonThreadFactory());
-        scheduleNextWorkRun();
     }
 
     @Override
@@ -59,6 +57,13 @@ public class PeriodicWorkService implements Service, Runnable {
     @Override
     public String name() {
         return Names.PERIODIC_WORK;
+    }
+
+    public void initialize() {
+        verifyNotStopped();
+        if (isInitialized.compareAndSet(false, true)) {
+            executorService.execute(this);
+        }
     }
 
     @Override
@@ -83,5 +88,11 @@ public class PeriodicWorkService implements Service, Runnable {
 
     private void scheduleNextWorkRun() {
         executorService.schedule(this, DELAY_BETWEEN_WORK_RUNS_IN_MILLIS, TimeUnit.MILLISECONDS);
+    }
+
+    private void verifyNotStopped() {
+        if (isStopped.get()) {
+            throw new IllegalStateException("The periodic work service has been stopped");
+        }
     }
 }

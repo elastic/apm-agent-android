@@ -29,8 +29,16 @@ import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 
 public class ConnectionHttpAttributesVisitor implements AttributesVisitor {
     private final Provider<NetworkService> networkServiceProvider;
+    private static ConnectionHttpAttributesVisitor instance;
 
-    public ConnectionHttpAttributesVisitor() {
+    public static ConnectionHttpAttributesVisitor getInstance() {
+        if (instance == null) {
+            instance = new ConnectionHttpAttributesVisitor();
+        }
+        return instance;
+    }
+
+    private ConnectionHttpAttributesVisitor() {
         networkServiceProvider = ServiceManager.getServiceProvider(Service.Names.NETWORK);
     }
 

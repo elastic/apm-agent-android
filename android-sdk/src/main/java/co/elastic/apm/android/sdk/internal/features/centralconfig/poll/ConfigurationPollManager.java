@@ -18,16 +18,11 @@
  */
 package co.elastic.apm.android.sdk.internal.features.centralconfig.poll;
 
-import androidx.annotation.VisibleForTesting;
-
 import org.slf4j.Logger;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigurationManager;
-import co.elastic.apm.android.sdk.internal.services.Service;
-import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicTask;
-import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicWorkService;
 
 public final class ConfigurationPollManager extends PeriodicTask {
     private static ConfigurationPollManager INSTANCE;
@@ -36,19 +31,7 @@ public final class ConfigurationPollManager extends PeriodicTask {
     private final Logger logger = Elog.getLogger();
     private long delayForNextRunInMillis = DEFAULT_DELAY_IN_SECONDS * 1000;
 
-    public static ConfigurationPollManager create(CentralConfigurationManager manager) {
-        return create(manager, ServiceManager.get().getService(Service.Names.PERIODIC_WORK));
-    }
-
-    @VisibleForTesting
-    public static ConfigurationPollManager create(CentralConfigurationManager manager, PeriodicWorkService periodicWorkService) {
-        ConfigurationPollManager configurationPollManager = new ConfigurationPollManager(manager);
-        periodicWorkService.addTask(configurationPollManager);
-        return configurationPollManager;
-    }
-
-    @VisibleForTesting
-    private ConfigurationPollManager(CentralConfigurationManager manager) {
+    public ConfigurationPollManager(CentralConfigurationManager manager) {
         super();
         this.manager = manager;
     }

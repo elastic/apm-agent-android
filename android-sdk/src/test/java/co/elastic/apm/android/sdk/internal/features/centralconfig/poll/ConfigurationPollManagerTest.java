@@ -31,24 +31,15 @@ import org.junit.Test;
 import java.io.IOException;
 
 import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigurationManager;
-import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicWorkService;
 
 public class ConfigurationPollManagerTest {
     private CentralConfigurationManager manager;
     private ConfigurationPollManager pollManager;
-    private PeriodicWorkService periodicWorkService;
 
     @Before
     public void setUp() {
         manager = mock(CentralConfigurationManager.class);
-        periodicWorkService = mock(PeriodicWorkService.class);
-        pollManager = ConfigurationPollManager.create(manager, periodicWorkService);
-    }
-
-    @Test
-    public void verifyInitialization() {
-        verify(periodicWorkService).addTask(pollManager);
-        assertFalse(pollManager.isFinished());
+        pollManager = new ConfigurationPollManager(manager);
     }
 
     @Test

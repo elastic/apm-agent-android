@@ -59,7 +59,9 @@ import co.elastic.apm.android.sdk.internal.opentelemetry.processors.logs.Elastic
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.metrics.ElasticMetricReader;
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.spans.ElasticSpanProcessor;
 import co.elastic.apm.android.sdk.internal.opentelemetry.tools.Flusher;
+import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
+import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicWorkService;
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.sdk.internal.utilities.logging.AndroidLoggerFactory;
 import io.opentelemetry.api.common.Attributes;
@@ -118,6 +120,7 @@ public final class ElasticApmAgent {
         AgentDependenciesInjector injector = process(new DefaultAgentDependenciesInjector(appContext, finalConfiguration, finalConnectivity), interceptor);
         instance = new ElasticApmAgent(finalConfiguration);
         instance.onInitializationFinished(appContext, injector);
+        initializePeriodicWork();
         return instance;
     }
 
@@ -166,6 +169,10 @@ public final class ElasticApmAgent {
         initializeLifecycleObserver();
     }
 
+    private static void initializePeriodicWork() {
+        ((PeriodicWorkService) ServiceManager.get().getService(Service.Names.PERIODIC_WORK)).initialize();
+    }
+
     private void initializeLifecycleObserver() {
         ProcessLifecycleOwner.get().getLifecycle().addObserver(new ElasticProcessLifecycleObserver());
     }
@@ -184,8 +191,6 @@ public final class ElasticApmAgent {
         builder.registerAll(injector.getConfigurationsProvider().provideConfigurations());
         configuration.instrumentationConfiguration.instrumentations.forEach(builder::register);
         builder.buildAndRegisterGlobal();
-
-        centralConfigInitializer.initialize();
     }
 
     private void initializeSessionIdProvider() {

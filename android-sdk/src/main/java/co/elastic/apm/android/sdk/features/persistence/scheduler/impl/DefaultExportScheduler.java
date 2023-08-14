@@ -101,6 +101,7 @@ public final class DefaultExportScheduler implements PeriodicTask, ExportSchedul
         } catch (IOException e) {
             Elog.getLogger().error("A problem happened while exporting signals from disk", e);
         }
+        Elog.getLogger().debug("Finished running default export scheduler");
     }
 
     @Override

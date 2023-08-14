@@ -90,6 +90,7 @@ public final class DefaultExportScheduler implements PeriodicTask, ExportSchedul
 
     @Override
     public void runTask() {
+        Elog.getLogger().debug("Running default export scheduler");
         lastTimeRunInMillis = timeProvider.getCurrentTimeMillis();
         preferencesService.store(LAST_TIME_RUN_KEY, lastTimeRunInMillis);
         try {

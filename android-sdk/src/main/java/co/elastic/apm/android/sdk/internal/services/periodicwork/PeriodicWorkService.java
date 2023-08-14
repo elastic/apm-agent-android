@@ -86,7 +86,10 @@ public class PeriodicWorkService implements Service, Runnable {
             List<PeriodicTask> removeTasks = new ArrayList<>();
             for (PeriodicTask task : tasks) {
                 try {
-                    if (task.runPeriodicTask() && task.isFinished()) {
+                    if (task.shouldRunTask()) {
+                        task.runTask();
+                    }
+                    if (task.isTaskFinished()) {
                         removeTasks.add(task);
                     }
                 } catch (Throwable t) {

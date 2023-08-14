@@ -18,58 +18,22 @@
  */
 package co.elastic.apm.android.sdk.internal.services.periodicwork;
 
-import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
-
-public abstract class PeriodicTask {
-    private final SystemTimeProvider timeProvider;
-    private long lastTimeItRan = 0;
-
-    public PeriodicTask() {
-        this(SystemTimeProvider.get());
-    }
-
-    protected PeriodicTask(SystemTimeProvider timeProvider) {
-        this.timeProvider = timeProvider;
-    }
+public interface PeriodicTask {
+    /**
+     * Indicates whether this task should run as part of the ongoing {@link PeriodicWorkService} iteration
+     * or not.
+     */
+    boolean shouldRunTask();
 
     /**
-     * Calls {@link #onPeriodicTaskRun()} if the task is due to be run, noop otherwise.
-     *
-     * @return true when the task was run, false otherwise.
+     * Runs only if {@link #shouldRunTask()} returs true.
      */
-    public final boolean runPeriodicTask() {
-        if (isReadyToRun()) {
-            onPeriodicTaskRun();
-            lastTimeItRan = timeProvider.getCurrentTimeMillis();
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Runs a task when it's due.
-     */
-    protected abstract void onPeriodicTaskRun();
-
-    /**
-     * Returns the minimum amount of milliseconds that need to pass before this task gets to run again.
-     * The actual time before running this task can be higher than the one provided in here,
-     * given that tasks are run from the {@link PeriodicWorkService} class which has its own internal
-     * delay between iterations.
-     */
-    protected abstract long getMinDelayBeforeNextRunInMillis();
+    void runTask();
 
     /**
      * Indicates whether this task needs to keep running in future iterations or not.
      *
      * @return false if this task needs to be called again in the future, true otherwise.
      */
-    public abstract boolean isFinished();
-
-    private boolean isReadyToRun() {
-        if (lastTimeItRan < 1) {
-            return true;
-        }
-        return timeProvider.getCurrentTimeMillis() >= (lastTimeItRan + getMinDelayBeforeNextRunInMillis());
-    }
+    boolean isTaskFinished();
 }

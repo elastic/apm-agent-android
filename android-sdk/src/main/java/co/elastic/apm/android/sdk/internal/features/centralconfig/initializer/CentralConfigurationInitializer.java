@@ -25,10 +25,10 @@ import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigu
 import co.elastic.apm.android.sdk.internal.features.centralconfig.poll.ConfigurationPollManager;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
-import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicTask;
+import co.elastic.apm.android.sdk.internal.services.periodicwork.ManagedPeriodicTask;
 import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicWorkService;
 
-public final class CentralConfigurationInitializer extends PeriodicTask {
+public final class CentralConfigurationInitializer extends ManagedPeriodicTask {
     private final CentralConfigurationManager manager;
     private final ConfigurationPollManager pollManager;
     private final PeriodicWorkService periodicWorkService;
@@ -56,7 +56,7 @@ public final class CentralConfigurationInitializer extends PeriodicTask {
     }
 
     @Override
-    protected void onPeriodicTaskRun() {
+    protected void onTaskRun() {
         try {
             manager.publishCachedConfig();
             Integer delayForNextPollInSeconds = manager.sync();
@@ -79,7 +79,7 @@ public final class CentralConfigurationInitializer extends PeriodicTask {
     }
 
     @Override
-    public boolean isFinished() {
+    public boolean isTaskFinished() {
         // Will only run once.
         return true;
     }

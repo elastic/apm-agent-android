@@ -47,10 +47,10 @@ public class ConfigurationPollManagerTest {
         Integer maxAgeReturned = 15;
         doReturn(maxAgeReturned).when(manager).sync();
 
-        pollManager.onPeriodicTaskRun();
+        pollManager.onTaskRun();
 
         verify(manager).sync();
-        assertFalse(pollManager.isFinished());
+        assertFalse(pollManager.isTaskFinished());
         verifyNextPollIsScheduledAfterSeconds(15);
     }
 
@@ -58,10 +58,10 @@ public class ConfigurationPollManagerTest {
     public void whenScheduledPollSucceeds_withNoMaxAgeResponse_rescheduleWithDefaultDelay() throws IOException {
         doReturn(null).when(manager).sync();
 
-        pollManager.onPeriodicTaskRun();
+        pollManager.onTaskRun();
 
         verify(manager).sync();
-        assertFalse(pollManager.isFinished());
+        assertFalse(pollManager.isTaskFinished());
         verifyNextPollIsScheduledAfterSeconds(60);
     }
 
@@ -69,9 +69,9 @@ public class ConfigurationPollManagerTest {
     public void whenScheduledPollFails_rescheduleWithDefaultDelay() throws IOException {
         doThrow(IOException.class).when(manager).sync();
 
-        pollManager.onPeriodicTaskRun();
+        pollManager.onTaskRun();
 
-        assertFalse(pollManager.isFinished());
+        assertFalse(pollManager.isTaskFinished());
         verifyNextPollIsScheduledAfterSeconds(60);
     }
 

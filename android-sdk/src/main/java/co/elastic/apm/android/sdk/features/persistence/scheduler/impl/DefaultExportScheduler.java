@@ -26,13 +26,13 @@ import co.elastic.apm.android.sdk.features.persistence.SignalDiskExporter;
 import co.elastic.apm.android.sdk.features.persistence.scheduler.ExportScheduler;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
-import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicTask;
+import co.elastic.apm.android.sdk.internal.services.periodicwork.ManagedPeriodicTask;
 import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicWorkService;
 
 /**
  * Default export scheduler that executes periodically while the app is running.
  */
-public final class DefaultExportScheduler extends PeriodicTask implements ExportScheduler {
+public final class DefaultExportScheduler extends ManagedPeriodicTask implements ExportScheduler {
     private final PeriodicWorkService periodicWorkService;
     private final long delayTimeInMillis;
     private final AtomicBoolean isDisabled = new AtomicBoolean(false);
@@ -65,8 +65,8 @@ public final class DefaultExportScheduler extends PeriodicTask implements Export
     }
 
     @Override
-    protected void onPeriodicTaskRun() {
-        if (isFinished()) {
+    protected void onTaskRun() {
+        if (isTaskFinished()) {
             return;
         }
         try {
@@ -85,7 +85,7 @@ public final class DefaultExportScheduler extends PeriodicTask implements Export
     }
 
     @Override
-    public boolean isFinished() {
+    public boolean isTaskFinished() {
         return isDisabled.get();
     }
 }

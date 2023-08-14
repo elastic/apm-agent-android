@@ -61,21 +61,21 @@ public class DefaultExportSchedulerTest {
         exportScheduler.onPersistenceEnabled();
 
         verify(service).addTask(exportScheduler);
-        assertFalse(exportScheduler.isFinished());
+        assertFalse(exportScheduler.isTaskFinished());
     }
 
     @Test
     public void whenPersistenceIsDisabled_disableTask() {
         exportScheduler.onPersistenceDisabled();
 
-        assertTrue(exportScheduler.isFinished());
+        assertTrue(exportScheduler.isTaskFinished());
     }
 
     @Test
     public void whenEnabledAndRunning_exportAllSignals() throws IOException {
         when(signalDiskExporter.exportBatchOfEach()).thenReturn(true).thenReturn(true).thenReturn(false);
 
-        exportScheduler.onPeriodicTaskRun();
+        exportScheduler.onTaskRun();
 
         verify(signalDiskExporter, times(3)).exportBatchOfEach();
     }
@@ -84,7 +84,7 @@ public class DefaultExportSchedulerTest {
     public void whenDisabledAndRunning_doNotExportSignals() throws IOException {
         exportScheduler.onPersistenceDisabled();
 
-        exportScheduler.onPeriodicTaskRun();
+        exportScheduler.onTaskRun();
 
         verify(signalDiskExporter, never()).exportBatchOfEach();
     }
@@ -98,7 +98,7 @@ public class DefaultExportSchedulerTest {
         exportScheduler.onPersistenceEnabled();
 
         verify(service).addTask(exportScheduler);
-        assertFalse(exportScheduler.isFinished());
+        assertFalse(exportScheduler.isTaskFinished());
     }
 
     @Test

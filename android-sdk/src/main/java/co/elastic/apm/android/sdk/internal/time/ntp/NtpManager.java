@@ -26,10 +26,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.opentelemetry.tools.ElasticClock;
-import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicTask;
+import co.elastic.apm.android.sdk.internal.services.periodicwork.ManagedPeriodicTask;
 import io.opentelemetry.sdk.common.Clock;
 
-public final class NtpManager extends PeriodicTask {
+public final class NtpManager extends ManagedPeriodicTask {
     private final TrueTimeWrapper trueTimeWrapper;
     private final AtomicBoolean isInitialized = new AtomicBoolean(false);
     private ElasticClock clock;
@@ -62,7 +62,7 @@ public final class NtpManager extends PeriodicTask {
     }
 
     @Override
-    protected void onPeriodicTaskRun() {
+    protected void onTaskRun() {
         Elog.getLogger().info("About to initialize the NTP");
         if (trueTimeWrapper.isInitialized()) {
             isInitialized.set(true);
@@ -84,7 +84,7 @@ public final class NtpManager extends PeriodicTask {
     }
 
     @Override
-    public boolean isFinished() {
+    public boolean isTaskFinished() {
         return isInitialized();
     }
 }

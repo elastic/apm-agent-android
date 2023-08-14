@@ -61,21 +61,21 @@ public class NtpManagerTest extends BaseTest {
     public void whenInitializationSucceeds_setManagerInitialized() throws IOException {
         assertFalse(ntpManager.isInitialized());
 
-        ntpManager.onPeriodicTaskRun();
+        ntpManager.onTaskRun();
 
         verify(trueTimeWrapper).initialize();
         assertTrue(ntpManager.isInitialized());
-        assertTrue(ntpManager.isFinished());
+        assertTrue(ntpManager.isTaskFinished());
     }
 
     @Test
     public void whenInitializationFails_doNotSetManagerInitialized() throws IOException {
         doThrow(new IOException()).when(trueTimeWrapper).initialize();
 
-        ntpManager.onPeriodicTaskRun();
+        ntpManager.onTaskRun();
 
         assertFalse(ntpManager.isInitialized());
-        assertFalse(ntpManager.isFinished());
+        assertFalse(ntpManager.isTaskFinished());
     }
 
     @Test
@@ -83,7 +83,7 @@ public class NtpManagerTest extends BaseTest {
         doReturn(true).when(trueTimeWrapper).isInitialized();
 
         ntpManager.initialize();
-        ntpManager.onPeriodicTaskRun();
+        ntpManager.onTaskRun();
 
         verify(trueTimeWrapper, never()).initialize();
     }

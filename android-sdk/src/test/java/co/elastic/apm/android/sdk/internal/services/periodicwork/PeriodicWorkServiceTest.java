@@ -82,32 +82,37 @@ public class PeriodicWorkServiceTest {
 
     @Test
     public void whenRunning_executeTasks() {
-        PeriodicTask task = mock(PeriodicTask.class);
-        PeriodicTask task2 = mock(PeriodicTask.class);
+        PeriodicTask task = getPeriodicTask(true);
+        PeriodicTask task2 = getPeriodicTask(true);
         periodicWorkService.addTask(task);
         periodicWorkService.addTask(task2);
 
         periodicWorkService.run();
 
-        verify(task).runPeriodicTask();
-        verify(task2).runPeriodicTask();
+        verify(task).runTask();
+        verify(task2).runTask();
         assertTrue(periodicWorkService.getTasks().contains(task));
         assertTrue(periodicWorkService.getTasks().contains(task2));
     }
 
+    private static PeriodicTask getPeriodicTask(boolean shouldRun) {
+        PeriodicTask mock = mock(PeriodicTask.class);
+        doReturn(shouldRun).when(mock).shouldRunTask();
+        return mock;
+    }
+
     @Test
     public void whenATaskFinishesAfterRunning_removeThemForNextIteration() {
-        PeriodicTask task = mock(PeriodicTask.class);
-        doReturn(true).when(task).runPeriodicTask();
-        doReturn(true).when(task).isFinished();
-        PeriodicTask task2 = mock(PeriodicTask.class);
+        PeriodicTask task = getPeriodicTask(true);
+        doReturn(true).when(task).isTaskFinished();
+        PeriodicTask task2 = getPeriodicTask(true);
         periodicWorkService.addTask(task);
         periodicWorkService.addTask(task2);
 
         periodicWorkService.run();
 
-        verify(task).runPeriodicTask();
-        verify(task2).runPeriodicTask();
+        verify(task).runTask();
+        verify(task2).runTask();
         assertFalse(periodicWorkService.getTasks().contains(task));
         assertTrue(periodicWorkService.getTasks().contains(task2));
     }

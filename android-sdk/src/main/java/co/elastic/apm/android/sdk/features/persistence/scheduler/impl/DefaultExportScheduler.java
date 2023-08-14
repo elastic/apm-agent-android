@@ -26,16 +26,22 @@ import co.elastic.apm.android.sdk.features.persistence.SignalDiskExporter;
 import co.elastic.apm.android.sdk.features.persistence.scheduler.ExportScheduler;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
-import co.elastic.apm.android.sdk.internal.services.periodicwork.ManagedPeriodicTask;
+import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicTask;
 import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicWorkService;
+import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
+import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
 
 /**
  * Default export scheduler that executes periodically while the app is running.
  */
-public final class DefaultExportScheduler extends ManagedPeriodicTask implements ExportScheduler {
+public final class DefaultExportScheduler implements PeriodicTask, ExportScheduler {
     private final PeriodicWorkService periodicWorkService;
+    private final PreferencesService preferencesService;
+    private final SystemTimeProvider timeProvider;
     private final long delayTimeInMillis;
     private final AtomicBoolean isDisabled = new AtomicBoolean(false);
+    private static final String LAST_TIME_RUN_KEY = "last_time_exported_from_disk";
+    private long lastTimeRunInMillis = 0;
 
     /**
      * Default export scheduler that executes periodically while the app is running.
@@ -44,19 +50,28 @@ public final class DefaultExportScheduler extends ManagedPeriodicTask implements
      *                                       exporting iteration.
      */
     public DefaultExportScheduler(long minDelayBetweenExportsInMillis) {
-        this(ServiceManager.get().getService(Service.Names.PERIODIC_WORK), minDelayBetweenExportsInMillis);
+        this(ServiceManager.get().getService(Service.Names.PERIODIC_WORK),
+                ServiceManager.get().getService(Service.Names.PREFERENCES),
+                SystemTimeProvider.get(),
+                minDelayBetweenExportsInMillis);
     }
 
-    DefaultExportScheduler(PeriodicWorkService periodicWorkService, long delayTimeInMillis) {
+    DefaultExportScheduler(PeriodicWorkService periodicWorkService,
+                           PreferencesService preferencesService,
+                           SystemTimeProvider timeProvider,
+                           long delayTimeInMillis) {
         super();
         this.periodicWorkService = periodicWorkService;
         this.delayTimeInMillis = delayTimeInMillis;
+        this.preferencesService = preferencesService;
+        this.timeProvider = timeProvider;
     }
 
     @Override
     public void onPersistenceEnabled() {
         periodicWorkService.addTask(this);
         isDisabled.set(false);
+        lastTimeRunInMillis = preferencesService.retrieveLong(LAST_TIME_RUN_KEY, 0);
     }
 
     @Override
@@ -65,10 +80,18 @@ public final class DefaultExportScheduler extends ManagedPeriodicTask implements
     }
 
     @Override
-    protected void onTaskRun() {
-        if (isTaskFinished()) {
-            return;
-        }
+    public boolean shouldRunTask() {
+        return !isDisabled.get() && delayHasPassed();
+    }
+
+    private boolean delayHasPassed() {
+        return timeProvider.getCurrentTimeMillis() >= (lastTimeRunInMillis + delayTimeInMillis);
+    }
+
+    @Override
+    public void runTask() {
+        lastTimeRunInMillis = timeProvider.getCurrentTimeMillis();
+        preferencesService.store(LAST_TIME_RUN_KEY, lastTimeRunInMillis);
         try {
             SignalDiskExporter signalDiskExporter = SignalDiskExporter.get();
             while (true) {
@@ -77,11 +100,6 @@ public final class DefaultExportScheduler extends ManagedPeriodicTask implements
         } catch (IOException e) {
             Elog.getLogger().error("A problem happened while exporting signals from disk", e);
         }
-    }
-
-    @Override
-    protected long getMinDelayBeforeNextRunInMillis() {
-        return delayTimeInMillis;
     }
 
     @Override

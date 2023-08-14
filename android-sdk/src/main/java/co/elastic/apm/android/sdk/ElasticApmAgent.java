@@ -241,6 +241,9 @@ public final class ElasticApmAgent {
 
         if (persistenceInitializer != null) {
             SignalDiskExporter.set(persistenceInitializer.createSignalDiskExporter());
+            configuration.persistenceConfiguration.exportScheduler.onPersistenceEnabled();
+        } else {
+            configuration.persistenceConfiguration.exportScheduler.onPersistenceDisabled();
         }
     }
 

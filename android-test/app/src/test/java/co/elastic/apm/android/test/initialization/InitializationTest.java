@@ -7,6 +7,8 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import org.junit.Test;
 import org.robolectric.RuntimeEnvironment;
@@ -24,6 +26,7 @@ import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.exporters.ExporterVisitor;
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.exporters.VisitableExporters;
 import co.elastic.apm.android.sdk.features.persistence.PersistenceConfiguration;
+import co.elastic.apm.android.sdk.features.persistence.scheduler.ExportScheduler;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.poll.ConfigurationPollManager;
 import co.elastic.apm.android.sdk.internal.features.persistence.PersistenceInitializer;
 import co.elastic.apm.android.sdk.internal.services.Service;
@@ -126,6 +129,8 @@ public class InitializationTest extends BaseRobolectricTest {
 
         verify(persistenceInitializer).prepare();
         verify(persistenceInitializer).createSignalDiskExporter();
+        verify(app.exportScheduler).onPersistenceEnabled();
+        verifyNoMoreInteractions(app.exportScheduler);
         assertEquals(persistenceInitializer, app.capturedExporterVisitor);
     }
 
@@ -138,6 +143,7 @@ public class InitializationTest extends BaseRobolectricTest {
 
         verify(persistenceInitializer, never()).prepare();
         verify(persistenceInitializer, never()).createSignalDiskExporter();
+        verify(app.exportScheduler).onPersistenceDisabled();
     }
 
     private static PeriodicWorkService getPeriodicWorkService() {
@@ -186,12 +192,16 @@ public class InitializationTest extends BaseRobolectricTest {
     }
 
     private static class AppWithPersistenceEnabled extends BaseRobolectricTestApplication implements SignalConfiguration, VisitableExporters {
+        private ExportScheduler exportScheduler;
         private ExporterVisitor capturedExporterVisitor;
 
         @Override
         public void onCreate() {
             super.onCreate();
-            PersistenceConfiguration persistenceConfiguration = PersistenceConfiguration.builder().setEnabled(true).build();
+            exportScheduler = mock(ExportScheduler.class);
+            PersistenceConfiguration persistenceConfiguration = PersistenceConfiguration.builder()
+                    .setExportScheduler(exportScheduler)
+                    .setEnabled(true).build();
 
             initializeAgentWithCustomConfig(ElasticApmConfiguration.builder()
                     .setPersistenceConfiguration(persistenceConfiguration)
@@ -225,10 +235,15 @@ public class InitializationTest extends BaseRobolectricTest {
     }
 
     private static class AppWithPersistenceEnabledWithoutVisitableExporters extends BaseRobolectricTestApplication {
+        private ExportScheduler exportScheduler;
+
         @Override
         public void onCreate() {
             super.onCreate();
-            PersistenceConfiguration persistenceConfiguration = PersistenceConfiguration.builder().setEnabled(true).build();
+            exportScheduler = mock(ExportScheduler.class);
+            PersistenceConfiguration persistenceConfiguration = PersistenceConfiguration.builder()
+                    .setExportScheduler(exportScheduler)
+                    .setEnabled(true).build();
 
             initializeAgentWithCustomConfig(ElasticApmConfiguration.builder()
                     .setPersistenceConfiguration(persistenceConfiguration)

@@ -37,6 +37,7 @@ import co.elastic.apm.android.sdk.features.persistence.SignalDiskExporter;
 import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicWorkService;
 import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
+import co.elastic.apm.android.sdk.testutils.providers.SimpleProvider;
 
 public class DefaultExportSchedulerTest {
     private PeriodicWorkService service;
@@ -56,7 +57,10 @@ public class DefaultExportSchedulerTest {
         timeProvider = mock(SystemTimeProvider.class);
         doReturn(INITIAL_CURRENT_TIME).when(timeProvider).getCurrentTimeMillis();
         SignalDiskExporter.set(signalDiskExporter);
-        exportScheduler = new DefaultExportScheduler(service, preferencesService, timeProvider, DELAY_TIME_IN_MILLIS);
+        exportScheduler = new DefaultExportScheduler(SimpleProvider.create(service),
+                SimpleProvider.create(preferencesService),
+                timeProvider,
+                DELAY_TIME_IN_MILLIS);
     }
 
     @After

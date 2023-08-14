@@ -30,13 +30,14 @@ import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicTask;
 import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicWorkService;
 import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
+import co.elastic.apm.android.sdk.internal.utilities.providers.Provider;
 
 /**
  * Default export scheduler that executes periodically while the app is running.
  */
 public final class DefaultExportScheduler implements PeriodicTask, ExportScheduler {
-    private final PeriodicWorkService periodicWorkService;
-    private final PreferencesService preferencesService;
+    private final Provider<PeriodicWorkService> periodicWorkService;
+    private final Provider<PreferencesService> preferencesService;
     private final SystemTimeProvider timeProvider;
     private final long delayTimeInMillis;
     private final AtomicBoolean isDisabled = new AtomicBoolean(false);
@@ -50,29 +51,29 @@ public final class DefaultExportScheduler implements PeriodicTask, ExportSchedul
      *                                       exporting iteration.
      */
     public DefaultExportScheduler(long minDelayBetweenExportsInMillis) {
-        this(ServiceManager.get().getService(Service.Names.PERIODIC_WORK),
-                ServiceManager.get().getService(Service.Names.PREFERENCES),
+        this(ServiceManager.getServiceProvider(Service.Names.PERIODIC_WORK),
+                ServiceManager.getServiceProvider(Service.Names.PREFERENCES),
                 SystemTimeProvider.get(),
                 minDelayBetweenExportsInMillis);
     }
 
-    DefaultExportScheduler(PeriodicWorkService periodicWorkService,
-                           PreferencesService preferencesService,
+    DefaultExportScheduler(Provider<PeriodicWorkService> periodicWorkService,
+                           Provider<PreferencesService> preferencesService,
                            SystemTimeProvider timeProvider,
                            long delayTimeInMillis) {
         super();
         this.periodicWorkService = periodicWorkService;
-        this.delayTimeInMillis = delayTimeInMillis;
         this.preferencesService = preferencesService;
+        this.delayTimeInMillis = delayTimeInMillis;
         this.timeProvider = timeProvider;
     }
 
     @Override
     public void onPersistenceEnabled() {
         Elog.getLogger().debug("On persistence enabled in default export scheduler");
-        periodicWorkService.addTask(this);
+        periodicWorkService.get().addTask(this);
         isDisabled.set(false);
-        lastTimeRunInMillis = preferencesService.retrieveLong(LAST_TIME_RUN_KEY, 0);
+        lastTimeRunInMillis = preferencesService.get().retrieveLong(LAST_TIME_RUN_KEY, 0);
     }
 
     @Override
@@ -94,7 +95,7 @@ public final class DefaultExportScheduler implements PeriodicTask, ExportSchedul
     public void runTask() {
         Elog.getLogger().debug("Running default export scheduler");
         lastTimeRunInMillis = timeProvider.getCurrentTimeMillis();
-        preferencesService.store(LAST_TIME_RUN_KEY, lastTimeRunInMillis);
+        preferencesService.get().store(LAST_TIME_RUN_KEY, lastTimeRunInMillis);
         try {
             SignalDiskExporter signalDiskExporter = SignalDiskExporter.get();
             while (true) {

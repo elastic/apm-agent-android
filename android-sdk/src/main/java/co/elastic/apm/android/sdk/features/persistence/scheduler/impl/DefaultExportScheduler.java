@@ -69,6 +69,7 @@ public final class DefaultExportScheduler implements PeriodicTask, ExportSchedul
 
     @Override
     public void onPersistenceEnabled() {
+        Elog.getLogger().debug("On persistence enabled in default export scheduler");
         periodicWorkService.addTask(this);
         isDisabled.set(false);
         lastTimeRunInMillis = preferencesService.retrieveLong(LAST_TIME_RUN_KEY, 0);
@@ -76,6 +77,7 @@ public final class DefaultExportScheduler implements PeriodicTask, ExportSchedul
 
     @Override
     public void onPersistenceDisabled() {
+        Elog.getLogger().debug("On persistence disabled in default export scheduler");
         isDisabled.set(true);
     }
 

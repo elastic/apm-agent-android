@@ -59,7 +59,9 @@ import co.elastic.apm.android.sdk.internal.opentelemetry.processors.logs.Elastic
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.metrics.ElasticMetricReader;
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.spans.ElasticSpanProcessor;
 import co.elastic.apm.android.sdk.internal.opentelemetry.tools.Flusher;
+import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
+import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicWorkService;
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.sdk.internal.utilities.logging.AndroidLoggerFactory;
 import io.opentelemetry.api.common.Attributes;
@@ -118,6 +120,7 @@ public final class ElasticApmAgent {
         AgentDependenciesInjector injector = process(new DefaultAgentDependenciesInjector(appContext, finalConfiguration, finalConnectivity), interceptor);
         instance = new ElasticApmAgent(finalConfiguration);
         instance.onInitializationFinished(appContext, injector);
+        initializePeriodicWork();
         return instance;
     }
 
@@ -166,6 +169,10 @@ public final class ElasticApmAgent {
         initializeLifecycleObserver();
     }
 
+    private static void initializePeriodicWork() {
+        getPeriodicWorkService().initialize();
+    }
+
     private void initializeLifecycleObserver() {
         ProcessLifecycleOwner.get().getLifecycle().addObserver(new ElasticProcessLifecycleObserver());
     }
@@ -173,6 +180,7 @@ public final class ElasticApmAgent {
     private void initializeNtpManager(AgentDependenciesInjector injector) {
         ntpManager = injector.getNtpManager();
         ntpManager.initialize();
+        getPeriodicWorkService().addTask(ntpManager);
     }
 
     private void initializeConfigurations(AgentDependenciesInjector injector) {
@@ -185,7 +193,7 @@ public final class ElasticApmAgent {
         configuration.instrumentationConfiguration.instrumentations.forEach(builder::register);
         builder.buildAndRegisterGlobal();
 
-        centralConfigInitializer.initialize();
+        getPeriodicWorkService().addTask(centralConfigInitializer);
     }
 
     private void initializeSessionIdProvider() {
@@ -317,5 +325,9 @@ public final class ElasticApmAgent {
 
     private ContextPropagators getContextPropagator() {
         return ContextPropagators.create(W3CTraceContextPropagator.getInstance());
+    }
+
+    private static PeriodicWorkService getPeriodicWorkService() {
+        return ServiceManager.get().getService(Service.Names.PERIODIC_WORK);
     }
 }

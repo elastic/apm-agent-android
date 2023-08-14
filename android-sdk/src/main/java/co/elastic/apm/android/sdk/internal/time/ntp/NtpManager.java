@@ -22,47 +22,36 @@ import android.content.Context;
 
 import androidx.annotation.VisibleForTesting;
 
-import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.BackgroundExecutor;
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.Result;
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.impl.SimpleBackgroundExecutor;
 import co.elastic.apm.android.sdk.internal.opentelemetry.tools.ElasticClock;
+import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicTask;
 import io.opentelemetry.sdk.common.Clock;
 
-public final class NtpManager implements BackgroundExecutor.Callback<Void> {
+public final class NtpManager extends PeriodicTask {
     private final TrueTimeWrapper trueTimeWrapper;
-    private final BackgroundExecutor executor;
+    private final AtomicBoolean isInitialized = new AtomicBoolean(false);
     private ElasticClock clock;
 
     @VisibleForTesting()
-    public NtpManager(TrueTimeWrapper trueTimeWrapper, BackgroundExecutor executor) {
+    public NtpManager(TrueTimeWrapper trueTimeWrapper) {
+        super();
         this.trueTimeWrapper = trueTimeWrapper;
-        this.executor = executor;
     }
 
     public NtpManager(Context context) {
-        this(new TrueTimeWrapper(context), new SimpleBackgroundExecutor());
+        this(new TrueTimeWrapper(context));
+    }
+
+    public boolean isInitialized() {
+        return isInitialized.get();
     }
 
     public void initialize() {
         trueTimeWrapper.withSharedPreferencesCache();
         trueTimeWrapper.withRootDispersionMax(200);
         trueTimeWrapper.withRootDelayMax(200);
-        if (trueTimeWrapper.isInitialized()) {
-            Elog.getLogger().info("NTP already initialized");
-            return;
-        }
-        Elog.getLogger().info("About to initialize the NTP");
-        executor.execute(() -> {
-            try {
-                trueTimeWrapper.initialize();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            return null;
-        }, this);
     }
 
     public Clock getClock() {
@@ -73,11 +62,29 @@ public final class NtpManager implements BackgroundExecutor.Callback<Void> {
     }
 
     @Override
-    public void onFinish(Result<Void> result) {
-        if (result.isSuccess) {
-            Elog.getLogger().info("NTP successfully initialized");
-        } else {
-            Elog.getLogger().info("NTP failed to initialize", result.error);
+    protected void onPeriodicTaskRun() {
+        Elog.getLogger().info("About to initialize the NTP");
+        if (trueTimeWrapper.isInitialized()) {
+            isInitialized.set(true);
+            Elog.getLogger().info("NTP already initialized");
+            return;
         }
+        try {
+            trueTimeWrapper.initialize();
+            isInitialized.set(true);
+            Elog.getLogger().info("NTP successfully initialized");
+        } catch (Throwable t) {
+            Elog.getLogger().info("NTP failed to initialize", t);
+        }
+    }
+
+    @Override
+    protected long getMinDelayBeforeNextRunInMillis() {
+        return 0;
+    }
+
+    @Override
+    public boolean isFinished() {
+        return isInitialized();
     }
 }

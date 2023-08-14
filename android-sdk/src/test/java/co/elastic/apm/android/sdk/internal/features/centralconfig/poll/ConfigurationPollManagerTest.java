@@ -18,6 +18,8 @@
  */
 package co.elastic.apm.android.sdk.internal.features.centralconfig.poll;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -27,22 +29,17 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigurationManager;
-import co.elastic.apm.android.sdk.internal.utilities.providers.SimpleProvider;
 
 public class ConfigurationPollManagerTest {
     private CentralConfigurationManager manager;
     private ConfigurationPollManager pollManager;
-    private ScheduledExecutorService executor;
 
     @Before
     public void setUp() {
         manager = mock(CentralConfigurationManager.class);
-        executor = mock(ScheduledExecutorService.class);
-        pollManager = new ConfigurationPollManager(manager, new SimpleProvider<>(executor));
+        pollManager = new ConfigurationPollManager(manager);
     }
 
     @Test
@@ -50,33 +47,42 @@ public class ConfigurationPollManagerTest {
         Integer maxAgeReturned = 15;
         doReturn(maxAgeReturned).when(manager).sync();
 
-        pollManager.run();
+        pollManager.onPeriodicTaskRun();
 
-        verify(executor).schedule(pollManager, 15, TimeUnit.SECONDS);
+        verify(manager).sync();
+        assertFalse(pollManager.isFinished());
+        verifyNextPollIsScheduledAfterSeconds(15);
     }
 
     @Test
     public void whenScheduledPollSucceeds_withNoMaxAgeResponse_rescheduleWithDefaultDelay() throws IOException {
         doReturn(null).when(manager).sync();
 
-        pollManager.run();
+        pollManager.onPeriodicTaskRun();
 
-        verify(executor).schedule(pollManager, 60, TimeUnit.SECONDS);
+        verify(manager).sync();
+        assertFalse(pollManager.isFinished());
+        verifyNextPollIsScheduledAfterSeconds(60);
     }
 
     @Test
     public void whenScheduledPollFails_rescheduleWithDefaultDelay() throws IOException {
         doThrow(IOException.class).when(manager).sync();
 
-        pollManager.run();
+        pollManager.onPeriodicTaskRun();
 
-        verify(executor).schedule(pollManager, 60, TimeUnit.SECONDS);
+        assertFalse(pollManager.isFinished());
+        verifyNextPollIsScheduledAfterSeconds(60);
     }
 
     @Test
     public void verifyScheduleDefault() {
         pollManager.scheduleDefault();
 
-        verify(executor).schedule(pollManager, 60, TimeUnit.SECONDS);
+        verifyNextPollIsScheduledAfterSeconds(60);
+    }
+
+    private void verifyNextPollIsScheduledAfterSeconds(long seconds) {
+        assertEquals(seconds * 1000, pollManager.getMinDelayBeforeNextRunInMillis());
     }
 }

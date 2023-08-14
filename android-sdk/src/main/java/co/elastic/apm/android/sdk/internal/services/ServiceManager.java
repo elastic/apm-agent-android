@@ -27,6 +27,7 @@ import java.util.HashMap;
 import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService;
 import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
 import co.elastic.apm.android.sdk.internal.services.network.NetworkService;
+import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicWorkService;
 import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
 import co.elastic.apm.android.sdk.internal.utilities.providers.LazyProvider;
 import co.elastic.apm.android.sdk.internal.utilities.providers.Provider;
@@ -45,6 +46,7 @@ public final class ServiceManager implements Lifecycle {
         INSTANCE.addService(new AppInfoService(appContext));
         INSTANCE.addService(new ApmMetadataService(appContext));
         INSTANCE.addService(new PreferencesService(appContext));
+        INSTANCE.addService(new PeriodicWorkService());
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)

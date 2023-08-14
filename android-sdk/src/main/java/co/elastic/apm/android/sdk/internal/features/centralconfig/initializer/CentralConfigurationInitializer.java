@@ -20,26 +20,31 @@ package co.elastic.apm.android.sdk.internal.features.centralconfig.initializer;
 
 import androidx.annotation.VisibleForTesting;
 
+import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigurationManager;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.poll.ConfigurationPollManager;
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.BackgroundExecutor;
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.Result;
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.impl.SimpleBackgroundExecutor;
+import co.elastic.apm.android.sdk.internal.services.Service;
+import co.elastic.apm.android.sdk.internal.services.ServiceManager;
+import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicTask;
+import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicWorkService;
 
-public final class CentralConfigurationInitializer implements BackgroundExecutor.Callback<Integer> {
-    private final BackgroundExecutor executor;
+public final class CentralConfigurationInitializer extends PeriodicTask {
     private final CentralConfigurationManager manager;
     private final ConfigurationPollManager pollManager;
+    private final PeriodicWorkService periodicWorkService;
 
     @VisibleForTesting
-    public CentralConfigurationInitializer(BackgroundExecutor executor, CentralConfigurationManager manager, ConfigurationPollManager pollManager) {
-        this.executor = executor;
+    public CentralConfigurationInitializer(CentralConfigurationManager manager,
+                                           ConfigurationPollManager pollManager,
+                                           PeriodicWorkService periodicWorkService) {
+        super();
         this.manager = manager;
         this.pollManager = pollManager;
+        this.periodicWorkService = periodicWorkService;
     }
 
     public CentralConfigurationInitializer(CentralConfigurationManager manager, ConfigurationPollManager pollManager) {
-        this(new SimpleBackgroundExecutor(), manager, pollManager);
+        this(manager, pollManager, ServiceManager.get().getService(Service.Names.PERIODIC_WORK));
     }
 
     public CentralConfigurationManager getManager() {
@@ -50,19 +55,32 @@ public final class CentralConfigurationInitializer implements BackgroundExecutor
         return pollManager;
     }
 
-    public void initialize() {
-        executor.execute(() -> {
+    @Override
+    protected void onPeriodicTaskRun() {
+        try {
             manager.publishCachedConfig();
-            return manager.sync();
-        }, this);
+            Integer delayForNextPollInSeconds = manager.sync();
+            if (delayForNextPollInSeconds != null) {
+                pollManager.scheduleInSeconds(delayForNextPollInSeconds);
+            } else {
+                pollManager.scheduleDefault();
+            }
+        } catch (Throwable t) {
+            Elog.getLogger().error("CentralConfigurationInitializer error", t);
+            pollManager.scheduleDefault();
+        }
+        periodicWorkService.addTask(pollManager);
     }
 
     @Override
-    public void onFinish(Result<Integer> result) {
-        if (result.isSuccess && result.value != null) {
-            pollManager.scheduleInSeconds(result.value);
-        } else {
-            pollManager.scheduleDefault();
-        }
+    protected long getMinDelayBeforeNextRunInMillis() {
+        // Doesn't need to delay its execution further than the Periodic work service internal delays.
+        return 0;
+    }
+
+    @Override
+    public boolean isFinished() {
+        // Will only run once.
+        return true;
     }
 }

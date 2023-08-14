@@ -18,34 +18,22 @@
  */
 package co.elastic.apm.android.sdk.internal.features.centralconfig.poll;
 
-import androidx.annotation.VisibleForTesting;
-
 import org.slf4j.Logger;
-
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigurationManager;
-import co.elastic.apm.android.sdk.internal.utilities.providers.LazyProvider;
-import co.elastic.apm.android.sdk.internal.utilities.providers.Provider;
+import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicTask;
 
-public final class ConfigurationPollManager implements Runnable {
+public final class ConfigurationPollManager extends PeriodicTask {
     private static ConfigurationPollManager INSTANCE;
-    private final Provider<ScheduledExecutorService> executorProvider;
+    private static final long DEFAULT_DELAY_IN_SECONDS = 60;
     private final CentralConfigurationManager manager;
     private final Logger logger = Elog.getLogger();
-    private static final long DEFAULT_DELAY_IN_SECONDS = 60;
-
-    @VisibleForTesting
-    public ConfigurationPollManager(CentralConfigurationManager manager, Provider<ScheduledExecutorService> executorProvider) {
-        this.manager = manager;
-        this.executorProvider = executorProvider;
-    }
+    private long delayForNextRunInMillis = DEFAULT_DELAY_IN_SECONDS * 1000;
 
     public ConfigurationPollManager(CentralConfigurationManager manager) {
-        this(manager, LazyProvider.of(() -> Executors.newSingleThreadScheduledExecutor(new PollThreadFactory())));
+        super();
+        this.manager = manager;
     }
 
     public static ConfigurationPollManager get() {
@@ -63,10 +51,10 @@ public final class ConfigurationPollManager implements Runnable {
         INSTANCE = null;
     }
 
-    public void scheduleInSeconds(long delayInSeconds) {
+    public synchronized void scheduleInSeconds(long delayInSeconds) {
         logger.info("Scheduling next central config poll");
         logger.debug("Next central config poll in {} seconds", delayInSeconds);
-        executorProvider.get().schedule(this, delayInSeconds, TimeUnit.SECONDS);
+        delayForNextRunInMillis = delayInSeconds * 1000;
     }
 
     public void scheduleDefault() {
@@ -74,7 +62,7 @@ public final class ConfigurationPollManager implements Runnable {
     }
 
     @Override
-    public void run() {
+    protected void onPeriodicTaskRun() {
         try {
             Integer maxAgeInSeconds = manager.sync();
             if (maxAgeInSeconds == null) {
@@ -87,5 +75,15 @@ public final class ConfigurationPollManager implements Runnable {
             logger.error("Central config poll error", t);
             scheduleDefault();
         }
+    }
+
+    @Override
+    protected long getMinDelayBeforeNextRunInMillis() {
+        return delayForNextRunInMillis;
+    }
+
+    @Override
+    public boolean isFinished() {
+        return false;
     }
 }

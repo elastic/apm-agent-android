@@ -18,6 +18,10 @@
  */
 package co.elastic.apm.android.sdk.internal.features.centralconfig.initializer;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -31,52 +35,64 @@ import java.io.IOException;
 
 import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigurationManager;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.poll.ConfigurationPollManager;
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.Result;
-import co.elastic.apm.android.sdk.testutils.ImmediateBackgroundExecutor;
+import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicWorkService;
 
 public class CentralConfigurationInitializerTest {
     private CentralConfigurationManager manager;
     private CentralConfigurationInitializer initializer;
     private ConfigurationPollManager pollManager;
+    private PeriodicWorkService periodicWorkService;
 
     @Before
     public void setUp() {
         manager = mock(CentralConfigurationManager.class);
         pollManager = mock(ConfigurationPollManager.class);
-        initializer = new CentralConfigurationInitializer(new ImmediateBackgroundExecutor(), manager, pollManager);
+        periodicWorkService = mock(PeriodicWorkService.class);
+        initializer = new CentralConfigurationInitializer(manager, pollManager, periodicWorkService);
     }
 
     @Test
     public void verifyInitialization() throws IOException {
-        initializer.initialize();
+        initializer.onPeriodicTaskRun();
 
         InOrder inOrder = inOrder(manager);
         inOrder.verify(manager).publishCachedConfig();
         inOrder.verify(manager).sync();
+        assertEquals(0, initializer.getMinDelayBeforeNextRunInMillis());
+        assertTrue(initializer.isFinished());
     }
 
     @Test
-    public void whenFirstFetchSucceeds_schedulePollsBasedOnReceivedMaxAge() {
+    public void whenFirstFetchSucceeds_schedulePollsBasedOnReceivedMaxAge() throws IOException {
         Integer maxAgeReceived = 14;
-        initializer.onFinish(Result.success(maxAgeReceived));
+        doReturn(maxAgeReceived).when(manager).sync();
+
+        initializer.onPeriodicTaskRun();
 
         verify(pollManager).scheduleInSeconds(14);
+        verify(periodicWorkService).addTask(pollManager);
         verifyNoMoreInteractions(pollManager);
     }
 
     @Test
-    public void whenFirstFetchSucceeds_withNoMaxAgeProvided_scheduleNextPollOnDefaultDelay() {
-        initializer.onFinish(Result.success(null));
+    public void whenFirstFetchSucceeds_withNoMaxAgeProvided_scheduleNextPollOnDefaultDelay() throws IOException {
+        doReturn(null).when(manager).sync();
+
+        initializer.onPeriodicTaskRun();
 
         verify(pollManager).scheduleDefault();
+        verify(periodicWorkService).addTask(pollManager);
         verifyNoMoreInteractions(pollManager);
     }
 
     @Test
-    public void whenFirstFetchFailed_scheduleNextPollOnDefaultDelay() {
-        initializer.onFinish(Result.error(new Exception()));
+    public void whenFirstFetchFailed_scheduleNextPollOnDefaultDelay() throws IOException {
+        doThrow(new IOException()).when(manager).sync();
+
+        initializer.onPeriodicTaskRun();
 
         verify(pollManager).scheduleDefault();
+        verify(periodicWorkService).addTask(pollManager);
         verifyNoMoreInteractions(pollManager);
     }
 }

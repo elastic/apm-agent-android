@@ -26,5 +26,6 @@ public interface Service extends Lifecycle {
         public static final String NETWORK = "network";
         public static final String METADATA = "apm-metadata";
         public static final String PREFERENCES = "preferences";
+        public static final String PERIODIC_WORK = "periodic-work";
     }
 }

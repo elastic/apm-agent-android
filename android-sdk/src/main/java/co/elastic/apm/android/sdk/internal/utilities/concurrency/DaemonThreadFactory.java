@@ -16,23 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.utilities.concurrency.impl;
+package co.elastic.apm.android.sdk.internal.utilities.concurrency;
 
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.BackgroundExecutor;
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.BackgroundWork;
-import co.elastic.apm.android.sdk.internal.utilities.concurrency.Result;
+import java.util.concurrent.ThreadFactory;
 
-public class SimpleBackgroundExecutor implements BackgroundExecutor {
+public final class DaemonThreadFactory implements ThreadFactory {
 
     @Override
-    public <T> void execute(BackgroundWork<T> work, Callback<T> callback) {
-        new Thread(() -> {
-            try {
-                T result = work.execute();
-                callback.onFinish(Result.success(result));
-            } catch (Throwable t) {
-                callback.onFinish(Result.error(t));
-            }
-        }).start();
+    public Thread newThread(Runnable r) {
+        Thread thread = new Thread(r);
+        thread.setDaemon(true);
+        return thread;
     }
 }

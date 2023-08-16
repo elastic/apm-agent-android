@@ -123,8 +123,8 @@ class MyApp extends android.app.Application {
         super.onCreate();
         PersistenceConfiguration persistenceConfiguration = PersistenceConfiguration.builder()
                 .setEnabled(true) // False by default.
-                .setMaxCacheSize(62914560) // 60 MB by default
-                .setExportScheduler(ExportScheduler.getDefault(3600000)) // One hour by default. The default ExportScheduler will run only when the host app is running, though you can create your own implementation of it in order to create a better suited scheduler for your app.
+                .setMaxCacheSize(60 * 1024 * 1024) // 60 MB by default
+                .setExportScheduler(ExportScheduler.getDefault(60 * 60 * 1000)) // One hour by default. The default ExportScheduler will run only when the host app is running, though you can create your own implementation of it in order to create a better suited scheduler for your app.
                 .build();
         ElasticApmConfiguration configuration = ElasticApmConfiguration.builder()
                 .setPersistenceConfiguration(persistenceConfiguration)

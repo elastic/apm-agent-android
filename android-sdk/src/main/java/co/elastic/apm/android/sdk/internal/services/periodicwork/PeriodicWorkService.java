@@ -21,6 +21,7 @@ package co.elastic.apm.android.sdk.internal.services.periodicwork;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -31,13 +32,13 @@ import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.utilities.concurrency.DaemonThreadFactory;
 
 public class PeriodicWorkService implements Service, Runnable {
-    private final List<PeriodicTask> tasks = new ArrayList<>();
+    private final CopyOnWriteArrayList<PeriodicTask> tasks = new CopyOnWriteArrayList<>();
     private final AtomicBoolean isInitialized = new AtomicBoolean(false);
     private final AtomicBoolean isStopped = new AtomicBoolean(false);
     private final ScheduledExecutorService executorService;
     private static final long DELAY_BETWEEN_ITERATIONS_IN_MILLIS = 5 * 1000; // 5 seconds
 
-    public synchronized void addTask(PeriodicTask task) {
+    public void addTask(PeriodicTask task) {
         if (!tasks.contains(task)) {
             tasks.add(task);
         }
@@ -82,22 +83,24 @@ public class PeriodicWorkService implements Service, Runnable {
 
     @Override
     public void run() {
-        synchronized (this) {
-            List<PeriodicTask> removeTasks = new ArrayList<>();
-            for (PeriodicTask task : tasks) {
-                try {
-                    if (task.shouldRunTask()) {
-                        task.runTask();
-                    }
-                    if (task.isTaskFinished()) {
-                        removeTasks.add(task);
-                    }
-                } catch (Throwable t) {
-                    Elog.getLogger().error("Failed to execute periodic task", t);
+        List<PeriodicTask> removeTasks = new ArrayList<>();
+        for (PeriodicTask task : tasks) {
+            try {
+                if (task.shouldRunTask()) {
+                    task.runTask();
                 }
+                if (task.isTaskFinished()) {
+                    removeTasks.add(task);
+                }
+            } catch (Throwable t) {
+                Elog.getLogger().error("Failed to execute periodic task", t);
             }
+        }
+        if (!removeTasks.isEmpty()) {
+            Elog.getLogger().debug("Removing periodic tasks: " + removeTasks);
             tasks.removeAll(removeTasks);
         }
+
         if (!isStopped.get()) {
             scheduleNextWorkRun();
         }

@@ -33,6 +33,7 @@ ${next_release_notes}
 ===== Features
 
 * Updating OpenTelemetry SDK to 1.27.0 where logs are stable: {pull}168[#168]
+* Adding local persistence/caching support: {pull}?[#?]
 ////
 
 [[release-notes-0.7.0]]

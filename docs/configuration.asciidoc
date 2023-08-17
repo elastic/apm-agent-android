@@ -108,9 +108,9 @@ class MyApp extends android.app.Application {
 [[persistence-configuration]]
 ==== Persistence configuration
 
-By default all the APM data is sent to the backend right away.
-This sometimes might not be possible or feasible for an Android application due to the potential network issues an Android device might encounter, as well as the need for handling resources the best possible way such as mobile data connectivity and battery life.
-In order to prevent these issues, the Agent provides disk persistence, or local cache, support where all the APM data will be stored in disk first and then it will be sent to the backend later based on the configuration parameters that allow to define how often the data should get exported.
+By default, all APM data is sent to the backend right away.
+However, this may not be possible or feasible for an Android application. For example, an Android device may run into network issues or the device may need to handle resources in a particular way due to mobile data connectivity and battery life.
+To prevent these issues, the agent provides disk persistence or local cache support. This enables you to store APM data in disk first, and define how often data should be exported to the backend.
 
 The example below shows how to enable and configure the persistence feature.
 

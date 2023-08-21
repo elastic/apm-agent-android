@@ -74,7 +74,7 @@ public final class PersistenceConfiguration {
 
         public PersistenceConfiguration build() {
             if (exportScheduler == null) {
-                exportScheduler = ExportScheduler.getDefault(60 * 60 * 1000); // Every hour by default
+                exportScheduler = ExportScheduler.getDefault(60 * 1000); // Every minute by default.
             }
             return new PersistenceConfiguration(this);
         }

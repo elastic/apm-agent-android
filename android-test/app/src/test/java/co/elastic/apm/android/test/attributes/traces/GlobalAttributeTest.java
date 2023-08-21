@@ -1,25 +1,16 @@
 package co.elastic.apm.android.test.attributes.traces;
 
-import static org.mockito.Mockito.doReturn;
-
-import android.Manifest;
 import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkCapabilities;
 import android.telephony.TelephonyManager;
 
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
-import org.robolectric.shadows.ShadowApplication;
-import org.robolectric.shadows.ShadowConnectivityManager;
 import org.robolectric.shadows.ShadowTelephonyManager;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import co.elastic.apm.android.test.attributes.traces.common.AppsWithConnectivity;
 import co.elastic.apm.android.test.common.spans.Spans;
 import co.elastic.apm.android.test.testutils.MainApp;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
@@ -55,7 +46,7 @@ public class GlobalAttributeTest extends BaseRobolectricTest {
                 .hasAttribute("net.host.carrier.icc", AppWithCarrierInfo.SIM_COUNTRY_ISO);
     }
 
-    @Config(application = AppWithWifiConnectivity.class)
+    @Config(application = AppsWithConnectivity.WithWifi.class)
     @Test
     public void whenASpanIsCreated_andThereIsAWifiConnection_verifyItHasWifiConnectivityParams() {
         SpanData span = getSpanData();
@@ -64,7 +55,7 @@ public class GlobalAttributeTest extends BaseRobolectricTest {
                 .hasAttribute("net.host.connection.type", "wifi");
     }
 
-    @Config(application = AppWithMobileConnectivity.class)
+    @Config(application = AppsWithConnectivity.WithCellular.class)
     @Test
     public void whenASpanIsCreated_andThereIsAMobileConnection_verifyItHasMobileConnectivityParams() {
         SpanData span = getSpanData();
@@ -73,7 +64,7 @@ public class GlobalAttributeTest extends BaseRobolectricTest {
                 .hasAttribute("net.host.connection.type", "cell");
     }
 
-    @Config(application = AppWithMobileConnectivityAndSubtype.class)
+    @Config(application = AppsWithConnectivity.WithCellularAndSubtype.class)
     @Test
     public void whenASpanIsCreated_andThereIsAMobileConnectionWithSubtype_verifyItHasMobileConnectivityParams() {
         SpanData span = getSpanData();
@@ -105,53 +96,6 @@ public class GlobalAttributeTest extends BaseRobolectricTest {
             shadowTelephonyManager.setSimOperatorName(SIM_OPERATOR_NAME);
             shadowTelephonyManager.setSimCountryIso(SIM_COUNTRY_ISO);
             super.onCreate();
-        }
-    }
-
-    private static class AppWithWifiConnectivity extends MainApp {
-        @Override
-        public void onCreate() {
-            super.onCreate();
-            ShadowConnectivityManager shadowConnectivityManager = Shadows.shadowOf((ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE));
-            List<ConnectivityManager.NetworkCallback> callbacks = new ArrayList<>(shadowConnectivityManager.getNetworkCallbacks());
-            ConnectivityManager.NetworkCallback defaultNetworkCallback = callbacks.get(0);
-
-            NetworkCapabilities capabilities = Mockito.mock(NetworkCapabilities.class);
-            doReturn(true).when(capabilities).hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
-            defaultNetworkCallback.onCapabilitiesChanged(Mockito.mock(Network.class), capabilities);
-        }
-    }
-
-    private static class AppWithMobileConnectivity extends MainApp {
-        @Override
-        public void onCreate() {
-            super.onCreate();
-            ShadowConnectivityManager shadowConnectivityManager = Shadows.shadowOf((ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE));
-            List<ConnectivityManager.NetworkCallback> callbacks = new ArrayList<>(shadowConnectivityManager.getNetworkCallbacks());
-            ConnectivityManager.NetworkCallback defaultNetworkCallback = callbacks.get(0);
-
-            NetworkCapabilities capabilities = Mockito.mock(NetworkCapabilities.class);
-            doReturn(true).when(capabilities).hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR);
-            defaultNetworkCallback.onCapabilitiesChanged(Mockito.mock(Network.class), capabilities);
-        }
-    }
-
-    private static class AppWithMobileConnectivityAndSubtype extends MainApp {
-        @Override
-        public void onCreate() {
-            super.onCreate();
-            ShadowConnectivityManager shadowConnectivityManager = Shadows.shadowOf((ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE));
-            ShadowTelephonyManager shadowTelephonyManager = Shadows.shadowOf((TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE));
-            ShadowApplication shadowContext = Shadows.shadowOf(this);
-            shadowContext.grantPermissions(Manifest.permission.READ_PHONE_STATE);
-            List<ConnectivityManager.NetworkCallback> callbacks = new ArrayList<>(shadowConnectivityManager.getNetworkCallbacks());
-            ConnectivityManager.NetworkCallback defaultNetworkCallback = callbacks.get(0);
-
-            NetworkCapabilities capabilities = Mockito.mock(NetworkCapabilities.class);
-            doReturn(true).when(capabilities).hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR);
-            shadowTelephonyManager.setDataNetworkType(TelephonyManager.NETWORK_TYPE_EDGE);
-
-            defaultNetworkCallback.onCapabilitiesChanged(Mockito.mock(Network.class), capabilities);
         }
     }
 }

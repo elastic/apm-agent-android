@@ -279,8 +279,8 @@ public final class ElasticApmAgent {
         SpanProcessor spanProcessor = signalConfiguration.getSpanProcessor();
         ComposeAttributesVisitor spanAttributesVisitor = AttributesVisitor.compose(
                 commonAttrVisitor,
-                new CarrierHttpAttributesVisitor(),
-                new ConnectionHttpAttributesVisitor()
+                ConnectionHttpAttributesVisitor.getInstance(),
+                new CarrierHttpAttributesVisitor()
         );
         ElasticSpanProcessor processor = new ElasticSpanProcessor(spanProcessor, spanAttributesVisitor);
         ComposableFilter<ReadableSpan> filter = new ComposableFilter<>();
@@ -299,7 +299,11 @@ public final class ElasticApmAgent {
                                                 Resource resource,
                                                 AttributesVisitor commonAttrVisitor) {
         LogRecordProcessor logProcessor = signalConfiguration.getLogProcessor();
-        ElasticLogRecordProcessor elasticProcessor = new ElasticLogRecordProcessor(logProcessor, commonAttrVisitor);
+        ComposeAttributesVisitor logAttributes = AttributesVisitor.compose(
+                commonAttrVisitor,
+                ConnectionHttpAttributesVisitor.getInstance()
+        );
+        ElasticLogRecordProcessor elasticProcessor = new ElasticLogRecordProcessor(logProcessor, logAttributes);
         ComposableFilter<LogRecordData> logFilter = new ComposableFilter<>();
         logFilter.addAllFilters(configuration.logFilters);
         elasticProcessor.setFilter(logFilter);

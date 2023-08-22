@@ -29,7 +29,7 @@ import org.junit.Test;
 
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
 
-public class PeriodicTaskTest {
+public class ManagedPeriodicTaskTest {
     private TestPeriodicTask periodicTask;
     private SystemTimeProvider timeProvider;
     private static final long INITIAL_TIME_IN_MILLIS = 1000;
@@ -43,7 +43,8 @@ public class PeriodicTaskTest {
 
     @Test
     public void verifyFirstRun() {
-        assertTrue(periodicTask.runPeriodicTask());
+        assertTrue(periodicTask.shouldRunTask());
+        periodicTask.runTask();
 
         assertEquals(1, periodicTask.timesRan);
     }
@@ -51,31 +52,30 @@ public class PeriodicTaskTest {
     @Test
     public void verifyContinuousRuns() {
         periodicTask.millisToWaitBeforeNextRun = 10_000;
-        assertTrue(periodicTask.runPeriodicTask());
+        assertTrue(periodicTask.shouldRunTask());
+        periodicTask.runTask();
 
         // Timeout has not completed, so it should not run next time.
-        assertFalse(periodicTask.runPeriodicTask());
+        assertFalse(periodicTask.shouldRunTask());
 
         // Fast forward to just before the timeout is done.
         fastForwardTimeByMillis(9_999);
 
         // It should still not run.
-        assertFalse(periodicTask.runPeriodicTask());
+        assertFalse(periodicTask.shouldRunTask());
 
         // Fast forward to just in time for the next run.
         fastForwardTimeByMillis(1);
 
         // Now it should run again.
-        assertTrue(periodicTask.runPeriodicTask());
-
-        assertEquals(2, periodicTask.timesRan);
+        assertTrue(periodicTask.shouldRunTask());
     }
 
     private void fastForwardTimeByMillis(long millis) {
         doReturn(timeProvider.getCurrentTimeMillis() + millis).when(timeProvider).getCurrentTimeMillis();
     }
 
-    private static class TestPeriodicTask extends PeriodicTask {
+    private static class TestPeriodicTask extends ManagedPeriodicTask {
         private long millisToWaitBeforeNextRun;
         private int timesRan;
 
@@ -84,7 +84,7 @@ public class PeriodicTaskTest {
         }
 
         @Override
-        protected void onPeriodicTaskRun() {
+        protected void onTaskRun() {
             timesRan++;
         }
 
@@ -94,7 +94,7 @@ public class PeriodicTaskTest {
         }
 
         @Override
-        public boolean isFinished() {
+        public boolean isTaskFinished() {
             return false;
         }
     }

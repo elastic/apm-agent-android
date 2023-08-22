@@ -18,13 +18,17 @@
  */
 package co.elastic.apm.android.sdk.features.persistence;
 
+import co.elastic.apm.android.sdk.features.persistence.scheduler.ExportScheduler;
+
 public final class PersistenceConfiguration {
     public final boolean enabled;
     public final int maxCacheSize;
+    public final ExportScheduler exportScheduler;
 
     private PersistenceConfiguration(Builder builder) {
         this.maxCacheSize = builder.maxCacheSize;
         this.enabled = builder.enabled;
+        exportScheduler = builder.exportScheduler;
     }
 
     public static Builder builder() {
@@ -34,6 +38,8 @@ public final class PersistenceConfiguration {
     public static class Builder {
         public boolean enabled = false;
         private int maxCacheSize = 60 * 1024 * 1024; // 60 MB
+
+        public ExportScheduler exportScheduler;
 
         private Builder() {
         }
@@ -57,7 +63,19 @@ public final class PersistenceConfiguration {
             return this;
         }
 
+        /**
+         * Sets a scheduler that will take care of periodically read data stored in disk and
+         * export it.
+         */
+        public Builder setExportScheduler(ExportScheduler exportScheduler) {
+            this.exportScheduler = exportScheduler;
+            return this;
+        }
+
         public PersistenceConfiguration build() {
+            if (exportScheduler == null) {
+                exportScheduler = ExportScheduler.getDefault(60 * 1000); // Every minute by default.
+            }
             return new PersistenceConfiguration(this);
         }
     }

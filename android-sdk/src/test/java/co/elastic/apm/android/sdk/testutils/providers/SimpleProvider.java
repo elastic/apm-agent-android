@@ -16,24 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.services.periodicwork;
+package co.elastic.apm.android.sdk.testutils.providers;
 
-public interface PeriodicTask {
-    /**
-     * Indicates whether this task should run as part of the ongoing {@link PeriodicWorkService} iteration
-     * or not.
-     */
-    boolean shouldRunTask();
+import co.elastic.apm.android.sdk.internal.utilities.providers.Provider;
 
-    /**
-     * Runs only if {@link #shouldRunTask()} returs true.
-     */
-    void runTask();
+public class SimpleProvider<T> implements Provider<T> {
+    private final T item;
 
-    /**
-     * Indicates whether this task needs to keep running in future iterations or not.
-     *
-     * @return false if this task needs to be called again in the future, true otherwise.
-     */
-    boolean isTaskFinished();
+    public static <T> SimpleProvider<T> create(T item) {
+        return new SimpleProvider<>(item);
+    }
+
+    private SimpleProvider(T item) {
+        this.item = item;
+    }
+
+    @Override
+    public T get() {
+        return item;
+    }
 }

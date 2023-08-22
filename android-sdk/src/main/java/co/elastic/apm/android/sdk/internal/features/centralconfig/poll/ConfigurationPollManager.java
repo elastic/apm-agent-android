@@ -22,9 +22,9 @@ import org.slf4j.Logger;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigurationManager;
-import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicTask;
+import co.elastic.apm.android.sdk.internal.services.periodicwork.ManagedPeriodicTask;
 
-public final class ConfigurationPollManager extends PeriodicTask {
+public final class ConfigurationPollManager extends ManagedPeriodicTask {
     private static ConfigurationPollManager INSTANCE;
     private static final long DEFAULT_DELAY_IN_SECONDS = 60;
     private final CentralConfigurationManager manager;
@@ -62,7 +62,7 @@ public final class ConfigurationPollManager extends PeriodicTask {
     }
 
     @Override
-    protected void onPeriodicTaskRun() {
+    protected void onTaskRun() {
         try {
             Integer maxAgeInSeconds = manager.sync();
             if (maxAgeInSeconds == null) {
@@ -83,7 +83,7 @@ public final class ConfigurationPollManager extends PeriodicTask {
     }
 
     @Override
-    public boolean isFinished() {
+    public boolean isTaskFinished() {
         return false;
     }
 }

@@ -53,13 +53,13 @@ public class CentralConfigurationInitializerTest {
 
     @Test
     public void verifyInitialization() throws IOException {
-        initializer.onPeriodicTaskRun();
+        initializer.onTaskRun();
 
         InOrder inOrder = inOrder(manager);
         inOrder.verify(manager).publishCachedConfig();
         inOrder.verify(manager).sync();
         assertEquals(0, initializer.getMinDelayBeforeNextRunInMillis());
-        assertTrue(initializer.isFinished());
+        assertTrue(initializer.isTaskFinished());
     }
 
     @Test
@@ -67,7 +67,7 @@ public class CentralConfigurationInitializerTest {
         Integer maxAgeReceived = 14;
         doReturn(maxAgeReceived).when(manager).sync();
 
-        initializer.onPeriodicTaskRun();
+        initializer.onTaskRun();
 
         verify(pollManager).scheduleInSeconds(14);
         verify(periodicWorkService).addTask(pollManager);
@@ -78,7 +78,7 @@ public class CentralConfigurationInitializerTest {
     public void whenFirstFetchSucceeds_withNoMaxAgeProvided_scheduleNextPollOnDefaultDelay() throws IOException {
         doReturn(null).when(manager).sync();
 
-        initializer.onPeriodicTaskRun();
+        initializer.onTaskRun();
 
         verify(pollManager).scheduleDefault();
         verify(periodicWorkService).addTask(pollManager);
@@ -89,7 +89,7 @@ public class CentralConfigurationInitializerTest {
     public void whenFirstFetchFailed_scheduleNextPollOnDefaultDelay() throws IOException {
         doThrow(new IOException()).when(manager).sync();
 
-        initializer.onPeriodicTaskRun();
+        initializer.onTaskRun();
 
         verify(pollManager).scheduleDefault();
         verify(periodicWorkService).addTask(pollManager);

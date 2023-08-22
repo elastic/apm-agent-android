@@ -55,6 +55,10 @@ public final class SignalDiskExporter {
         instance = signalDiskExporter;
     }
 
+    public static void resetForTesting() {
+        instance = null;
+    }
+
     SignalDiskExporter(SpanDiskExporter spanDiskExporter, MetricDiskExporter metricDiskExporter, LogRecordDiskExporter logRecordDiskExporter, long exportTimeoutInMillis) {
         this.spanDiskExporter = spanDiskExporter;
         this.metricDiskExporter = metricDiskExporter;

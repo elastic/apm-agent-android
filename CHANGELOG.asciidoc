@@ -32,11 +32,19 @@ ${next_release_notes}
 [float]
 ===== Features
 
+* New feature: {pull}000[#000]
+////
+
+[[release-notes-0.8.0]]
+==== 0.8.0 - 2023/08/23
+
+[float]
+===== Features
+
 * Updating OpenTelemetry SDK to 1.27.0 where logs are stable: {pull}168[#168]
 * Updating OpenTelemetry SDK to 1.28.0 where the new disk buffering lib is present: {pull}170[#170]
 * Adding network connectivity attributes to logs: {pull}173[#173]
 * Adding local persistence/caching support: {pull}174[#174]
-////
 
 [[release-notes-0.7.0]]
 ==== 0.7.0 - 2023/06/02

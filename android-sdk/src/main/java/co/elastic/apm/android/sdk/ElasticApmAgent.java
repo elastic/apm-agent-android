@@ -145,8 +145,9 @@ public final class ElasticApmAgent {
         ElasticExceptionHandler.resetForTest();
         ConfigurationPollManager.resetForTest();
         Configurations.resetForTest();
-        ServiceManager.resetForTest();
         SessionManager.resetForTest();
+        ConnectionHttpAttributesVisitor.resetForTest();
+        ServiceManager.resetForTest();
         instance = null;
     }
 

@@ -109,7 +109,7 @@ public class BaseRobolectricTestApplication extends Application implements Expor
         setUpNtpManager();
         setUpCentralConfigurationInitializer();
         persistenceInitializer = mock(PersistenceInitializer.class);
-        sessionManager = mock(SessionManager.class);
+        setUpSessionManager();
     }
 
     private void setUpCentralConfigurationInitializer() {
@@ -122,6 +122,11 @@ public class BaseRobolectricTestApplication extends Application implements Expor
         Clock clock = new TestElasticClock();
         ntpManager = mock(NtpManager.class);
         doReturn(clock).when(ntpManager).getClock();
+    }
+
+    private void setUpSessionManager() {
+        sessionManager = mock(SessionManager.class);
+        doReturn("SESSION-ID").when(sessionManager).getSessionId();
     }
 
     @Override

@@ -29,8 +29,8 @@ import co.elastic.apm.android.sdk.features.persistence.PersistenceConfiguration;
 import co.elastic.apm.android.sdk.instrumentation.InstrumentationConfiguration;
 import co.elastic.apm.android.sdk.logs.tools.LogFilter;
 import co.elastic.apm.android.sdk.metrics.tools.MetricFilter;
-import co.elastic.apm.android.sdk.session.SessionIdProvider;
-import co.elastic.apm.android.sdk.session.impl.DefaultSessionIdProvider;
+import co.elastic.apm.android.sdk.session.SessionIdGenerator;
+import co.elastic.apm.android.sdk.session.impl.DefaultSessionIdGenerator;
 import co.elastic.apm.android.sdk.traces.http.HttpTraceConfiguration;
 import co.elastic.apm.android.sdk.traces.tools.SpanFilter;
 
@@ -40,7 +40,7 @@ public final class ElasticApmConfiguration {
     public final String serviceName;
     public final String serviceVersion;
     public final String deploymentEnvironment;
-    public final SessionIdProvider sessionIdProvider;
+    public final SessionIdGenerator sessionIdGenerator;
     public final SignalConfiguration signalConfiguration;
     public final PersistenceConfiguration persistenceConfiguration;
     public final List<SpanFilter> spanFilters;
@@ -59,7 +59,7 @@ public final class ElasticApmConfiguration {
         httpTraceConfiguration = builder.httpTraceConfiguration;
         serviceName = builder.serviceName;
         serviceVersion = builder.serviceVersion;
-        sessionIdProvider = builder.sessionIdProvider;
+        sessionIdGenerator = builder.sessionIdGenerator;
         instrumentationConfiguration = builder.instrumentationConfiguration;
         signalConfiguration = builder.signalConfiguration;
         deploymentEnvironment = builder.deploymentEnvironment;
@@ -76,7 +76,7 @@ public final class ElasticApmConfiguration {
         private String serviceName;
         private String serviceVersion;
         private String deploymentEnvironment;
-        private SessionIdProvider sessionIdProvider;
+        private SessionIdGenerator sessionIdGenerator;
         private SignalConfiguration signalConfiguration;
         private final Set<SpanFilter> spanFilters = new HashSet<>();
         private final Set<LogFilter> logFilters = new HashSet<>();
@@ -189,8 +189,8 @@ public final class ElasticApmConfiguration {
             if (instrumentationConfiguration == null) {
                 instrumentationConfiguration = InstrumentationConfiguration.allEnabled();
             }
-            if (sessionIdProvider == null) {
-                sessionIdProvider = new DefaultSessionIdProvider();
+            if (sessionIdGenerator == null) {
+                sessionIdGenerator = new DefaultSessionIdGenerator();
             }
             if (persistenceConfiguration == null) {
                 persistenceConfiguration = PersistenceConfiguration.builder().build();

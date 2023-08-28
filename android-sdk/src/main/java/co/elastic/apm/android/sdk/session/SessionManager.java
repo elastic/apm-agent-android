@@ -16,11 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.session.impl;
+package co.elastic.apm.android.sdk.session;
 
 import androidx.annotation.NonNull;
 
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import co.elastic.apm.android.sdk.internal.api.Initializable;
@@ -29,34 +28,53 @@ import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
 import co.elastic.apm.android.sdk.internal.utilities.providers.Provider;
-import co.elastic.apm.android.sdk.session.SessionIdProvider;
 
 /**
  * Provides an ID that has a 30 mins timeout that gets reset on every call to
- * {@link SessionIdProvider#getSessionId()} - If 30 mins or more have passed since the last call,
+ * {@link #getSessionId()} - If 30 mins or more have passed since the last call,
  * then a new session id is generated.
  * <p>
  * The session ID is persisted until the timeout completes, even after an app relaunch.
  */
-public class DefaultSessionIdProvider implements SessionIdProvider, Initializable {
+public final class SessionManager implements Initializable {
     private static final String KEY_SESSION_ID = "session_id";
     private static final String KEY_SESSION_ID_EXPIRATION_TIME = "session_id_expiration_time";
+    private static SessionManager instance;
     private final SystemTimeProvider systemTimeProvider;
     private final Provider<PreferencesService> preferencesServiceProvider;
+    private final SessionIdGenerator sessionIdGenerator;
     private long expireTimeMillis;
     private String sessionId;
 
-    DefaultSessionIdProvider(SystemTimeProvider systemTimeProvider, Provider<PreferencesService> preferencesServiceProvider) {
-        this.systemTimeProvider = systemTimeProvider;
-        this.preferencesServiceProvider = preferencesServiceProvider;
+    public static SessionManager get() {
+        if (instance == null) {
+            throw new IllegalStateException("Session manager has not been set.");
+        }
+        return instance;
     }
 
-    public DefaultSessionIdProvider() {
-        this(SystemTimeProvider.get(), ServiceManager.getServiceProvider(Service.Names.PREFERENCES));
+    public static void set(SessionManager sessionManager) {
+        if (instance != null) {
+            throw new IllegalStateException("Session manager can be set only once.");
+        }
+        instance = sessionManager;
+    }
+
+    public static void resetForTest() {
+        instance = null;
+    }
+
+    public SessionManager(SessionIdGenerator sessionIdGenerator) {
+        this(SystemTimeProvider.get(), ServiceManager.getServiceProvider(Service.Names.PREFERENCES), sessionIdGenerator);
+    }
+
+    SessionManager(SystemTimeProvider systemTimeProvider, Provider<PreferencesService> preferencesServiceProvider, SessionIdGenerator sessionIdGenerator) {
+        this.systemTimeProvider = systemTimeProvider;
+        this.preferencesServiceProvider = preferencesServiceProvider;
+        this.sessionIdGenerator = sessionIdGenerator;
     }
 
     @NonNull
-    @Override
     public String getSessionId() {
         verifySessionExpiration();
         if (sessionId == null) {
@@ -73,7 +91,7 @@ public class DefaultSessionIdProvider implements SessionIdProvider, Initializabl
     }
 
     private String generateSessionId() {
-        String generatedId = UUID.randomUUID().toString();
+        String generatedId = sessionIdGenerator.generate();
         persistSessionId(generatedId);
         return generatedId;
     }
@@ -83,11 +101,11 @@ public class DefaultSessionIdProvider implements SessionIdProvider, Initializabl
         persistExpirationTime(expireTimeMillis);
     }
 
-    protected void persistSessionId(String generatedId) {
+    private void persistSessionId(String generatedId) {
         preferencesServiceProvider.get().store(KEY_SESSION_ID, generatedId);
     }
 
-    protected void persistExpirationTime(long expireTimeMillis) {
+    private void persistExpirationTime(long expireTimeMillis) {
         preferencesServiceProvider.get().store(KEY_SESSION_ID_EXPIRATION_TIME, expireTimeMillis);
     }
 

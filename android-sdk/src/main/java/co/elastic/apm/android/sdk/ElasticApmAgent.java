@@ -44,7 +44,6 @@ import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.exporters.VisitableExporters;
 import co.elastic.apm.android.sdk.features.persistence.SignalDiskExporter;
 import co.elastic.apm.android.sdk.instrumentation.Instrumentations;
-import co.elastic.apm.android.sdk.internal.api.Initializable;
 import co.elastic.apm.android.sdk.internal.api.filter.ComposableFilter;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.exceptions.ElasticExceptionHandler;
@@ -64,6 +63,7 @@ import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicWorkService;
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.sdk.internal.utilities.logging.AndroidLoggerFactory;
+import co.elastic.apm.android.sdk.session.SessionManager;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.events.GlobalEventEmitterProvider;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
@@ -146,6 +146,7 @@ public final class ElasticApmAgent {
         ConfigurationPollManager.resetForTest();
         Configurations.resetForTest();
         ServiceManager.resetForTest();
+        SessionManager.resetForTest();
         instance = null;
     }
 
@@ -161,10 +162,10 @@ public final class ElasticApmAgent {
 
     private void onInitializationFinished(Context context, AgentDependenciesInjector injector) {
         initializeNtpManager(injector);
+        initializeSessionManager(injector);
         initializeConfigurations(injector);
         initializeOpentelemetry(injector);
         initializeCrashReports();
-        initializeSessionIdProvider();
         initializeLaunchTimeTracker(context);
         initializeLifecycleObserver();
     }
@@ -196,10 +197,10 @@ public final class ElasticApmAgent {
         getPeriodicWorkService().addTask(centralConfigInitializer);
     }
 
-    private void initializeSessionIdProvider() {
-        if (configuration.sessionIdProvider instanceof Initializable) {
-            ((Initializable) configuration.sessionIdProvider).initialize();
-        }
+    private void initializeSessionManager(AgentDependenciesInjector injector) {
+        SessionManager sessionManager = injector.getSessionManager();
+        sessionManager.initialize();
+        SessionManager.set(sessionManager);
     }
 
     private void initializeLaunchTimeTracker(Context context) {

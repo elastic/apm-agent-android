@@ -28,6 +28,7 @@ import co.elastic.apm.android.sdk.internal.configuration.Configuration;
 import co.elastic.apm.android.sdk.internal.configuration.impl.AllInstrumentationConfiguration;
 import co.elastic.apm.android.sdk.internal.configuration.impl.ConnectivityConfiguration;
 import co.elastic.apm.android.sdk.internal.configuration.impl.GeneralConfiguration;
+import co.elastic.apm.android.sdk.internal.configuration.impl.SampleRateConfiguration;
 import co.elastic.apm.android.sdk.internal.configuration.impl.SignalPersistenceConfiguration;
 
 public class DefaultConfigurationsProvider implements ConfigurationsProvider {
@@ -38,6 +39,7 @@ public class DefaultConfigurationsProvider implements ConfigurationsProvider {
         configurations.add(new ConnectivityConfiguration(connectivity));
         configurations.add(new AllInstrumentationConfiguration());
         configurations.add(new SignalPersistenceConfiguration(configuration));
+        configurations.add(new SampleRateConfiguration(configuration.sampleRate));
     }
 
     @Override

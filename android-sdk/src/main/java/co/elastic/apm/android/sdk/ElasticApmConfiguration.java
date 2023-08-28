@@ -156,8 +156,9 @@ public final class ElasticApmConfiguration {
          * The session ID generator will be used when a new session is created, the id provided by this generator will be the session ID.
          * By default, a UUID is generated.
          */
-        public void setSessionIdGenerator(SessionIdGenerator sessionIdGenerator) {
+        public Builder setSessionIdGenerator(SessionIdGenerator sessionIdGenerator) {
             this.sessionIdGenerator = sessionIdGenerator;
+            return this;
         }
 
         /**

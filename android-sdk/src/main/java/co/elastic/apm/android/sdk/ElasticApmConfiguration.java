@@ -43,6 +43,7 @@ public final class ElasticApmConfiguration {
     public final SessionIdProvider sessionIdProvider;
     public final SignalConfiguration signalConfiguration;
     public final PersistenceConfiguration persistenceConfiguration;
+    public final double sampleRate;
     public final List<SpanFilter> spanFilters;
     public final List<LogFilter> logFilters;
     public final List<MetricFilter> metricFilters;
@@ -64,6 +65,7 @@ public final class ElasticApmConfiguration {
         signalConfiguration = builder.signalConfiguration;
         deploymentEnvironment = builder.deploymentEnvironment;
         persistenceConfiguration = builder.persistenceConfiguration;
+        sampleRate = builder.sampleRate;
         spanFilters = Collections.unmodifiableList(new ArrayList<>(builder.spanFilters));
         logFilters = Collections.unmodifiableList(new ArrayList<>(builder.logFilters));
         metricFilters = Collections.unmodifiableList(new ArrayList<>(builder.metricFilters));
@@ -78,6 +80,7 @@ public final class ElasticApmConfiguration {
         private String deploymentEnvironment;
         private SessionIdProvider sessionIdProvider;
         private SignalConfiguration signalConfiguration;
+        private double sampleRate = 1.0;
         private final Set<SpanFilter> spanFilters = new HashSet<>();
         private final Set<LogFilter> logFilters = new HashSet<>();
         private final Set<MetricFilter> metricFilters = new HashSet<>();
@@ -149,6 +152,19 @@ public final class ElasticApmConfiguration {
          */
         public Builder setPersistenceConfiguration(PersistenceConfiguration persistenceConfiguration) {
             this.persistenceConfiguration = persistenceConfiguration;
+            return this;
+        }
+
+        /**
+         * Allows values from 0 to 1 where 1 means that all signals from a session are exported, and 0 means no
+         * signals are exported. The value set in here is applied per session, at the time a new session
+         * is created, this value will define whether the whole session's signals get exported or not.
+         */
+        public Builder setSampleRate(double sampleRate) {
+            if (sampleRate < 0 || sampleRate > 1) {
+                throw new IllegalArgumentException("Only values between 0 and 1 are allowed, the value provided was: " + sampleRate);
+            }
+            this.sampleRate = sampleRate;
             return this;
         }
 

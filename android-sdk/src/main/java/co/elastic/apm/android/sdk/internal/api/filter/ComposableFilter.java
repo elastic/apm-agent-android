@@ -18,15 +18,15 @@
  */
 package co.elastic.apm.android.sdk.internal.api.filter;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 public class ComposableFilter<T> implements Filter<T> {
-    private final Set<Filter<T>> filters = new HashSet<>();
+    private final List<Filter<T>> filters = new ArrayList<>();
 
     public void addFilter(Filter<T> filter) {
-        if (filter == null) {
+        if (filter == null || filters.contains(filter)) {
             return;
         }
         filters.add(filter);

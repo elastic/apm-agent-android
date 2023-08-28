@@ -153,6 +153,14 @@ public final class ElasticApmConfiguration {
         }
 
         /**
+         * The session ID generator will be used when a new session is created, the id provided by this generator will be the session ID.
+         * By default, a UUID is generated.
+         */
+        public void setSessionIdGenerator(SessionIdGenerator sessionIdGenerator) {
+            this.sessionIdGenerator = sessionIdGenerator;
+        }
+
+        /**
          * The span filter can be used to control which spans are exported and which shouldn't
          * leave the device. An implementation that always excludes all spans is essentially a way
          * to turn all spans off.

@@ -70,6 +70,19 @@ public class SessionManagerTest extends BaseTest implements Provider<Preferences
     }
 
     @Test
+    public void whenSessionIdIsRequestedAfterForcingIdRefresh_provideNewId() {
+        SessionManager sessionManager = getSessionManager();
+        String firstSessionId = sessionManager.getSessionId();
+
+        assertEquals(firstSessionId, sessionManager.getSessionId());
+
+        sessionManager.forceRefreshId();
+
+        assertNotEquals(firstSessionId, sessionManager.getSessionId());
+        assertNotNull(sessionManager.getSessionId());
+    }
+
+    @Test
     public void whenSessionIdIsRequestedAgainAfter30Min_provideNewId_andKeepItWhenLessThan30MinsTimePassed() {
         int initialTime = 1_000_000;
         SystemTimeProvider systemTimeProvider = getSystemTimeProvider(initialTime);

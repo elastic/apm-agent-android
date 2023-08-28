@@ -75,7 +75,7 @@ public final class SessionManager implements Initializable {
     }
 
     @NonNull
-    public String getSessionId() {
+    public synchronized String getSessionId() {
         verifySessionExpiration();
         if (sessionId == null) {
             sessionId = generateSessionId();
@@ -84,9 +84,13 @@ public final class SessionManager implements Initializable {
         return sessionId;
     }
 
+    public synchronized void forceRefreshId() {
+        sessionId = null;
+    }
+
     private void verifySessionExpiration() {
         if (systemTimeProvider.getCurrentTimeMillis() >= expireTimeMillis) {
-            sessionId = null;
+            forceRefreshId();
         }
     }
 

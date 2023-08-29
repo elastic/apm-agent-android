@@ -33,6 +33,7 @@ ${next_release_notes}
 ===== Features
 
 * Making Session ID generator configurable: {pull}178[#178]
+* Adding sample rate support: {pull}?[#?]
 ////
 
 [[release-notes-0.8.0]]

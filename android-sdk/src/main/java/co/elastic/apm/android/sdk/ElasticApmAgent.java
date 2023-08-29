@@ -52,6 +52,7 @@ import co.elastic.apm.android.sdk.internal.features.centralconfig.poll.Configura
 import co.elastic.apm.android.sdk.internal.features.launchtime.LaunchTimeActivityCallback;
 import co.elastic.apm.android.sdk.internal.features.lifecycle.ElasticProcessLifecycleObserver;
 import co.elastic.apm.android.sdk.internal.features.persistence.PersistenceInitializer;
+import co.elastic.apm.android.sdk.internal.features.sampling.SampleRateManager;
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.injection.DefaultAgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.logs.ElasticLogRecordProcessor;
@@ -219,14 +220,15 @@ public final class ElasticApmAgent {
         if (signalConfiguration == null) {
             signalConfiguration = SignalConfiguration.getDefault();
         }
+        SampleRateManager sampleRateManager = new SampleRateManager();
         PersistenceInitializer persistenceInitializer = tryInitializePersistence(signalConfiguration, injector);
         Attributes resourceAttrs = AttributesCreator.from(getResourceAttributesVisitor()).create();
         AttributesVisitor globalAttributesVisitor = new SessionAttributesVisitor();
         Resource resource = Resource.getDefault()
                 .merge(Resource.create(resourceAttrs));
 
-        SdkMeterProvider meterProvider = getMeterProvider(signalConfiguration, resource);
-        SdkLoggerProvider loggerProvider = getLoggerProvider(signalConfiguration, resource, globalAttributesVisitor);
+        SdkMeterProvider meterProvider = getMeterProvider(signalConfiguration, resource, sampleRateManager);
+        SdkLoggerProvider loggerProvider = getLoggerProvider(signalConfiguration, resource, globalAttributesVisitor, sampleRateManager);
 
         flusher.setMeterDelegator(meterProvider::forceFlush);
         flusher.setLoggerDelegator(loggerProvider::forceFlush);
@@ -235,7 +237,7 @@ public final class ElasticApmAgent {
         GlobalEventEmitterProvider.set(eventEmitterProvider);
 
         OpenTelemetrySdk.builder()
-                .setTracerProvider(getTracerProvider(signalConfiguration, resource, globalAttributesVisitor))
+                .setTracerProvider(getTracerProvider(signalConfiguration, resource, globalAttributesVisitor, sampleRateManager))
                 .setLoggerProvider(loggerProvider)
                 .setMeterProvider(meterProvider)
                 .setPropagators(getContextPropagator())
@@ -277,7 +279,7 @@ public final class ElasticApmAgent {
 
     private SdkTracerProvider getTracerProvider(SignalConfiguration signalConfiguration,
                                                 Resource resource,
-                                                AttributesVisitor commonAttrVisitor) {
+                                                AttributesVisitor commonAttrVisitor, SampleRateManager sampleRateManager) {
         SpanProcessor spanProcessor = signalConfiguration.getSpanProcessor();
         ComposeAttributesVisitor spanAttributesVisitor = AttributesVisitor.compose(
                 commonAttrVisitor,
@@ -286,6 +288,7 @@ public final class ElasticApmAgent {
         );
         ElasticSpanProcessor processor = new ElasticSpanProcessor(spanProcessor, spanAttributesVisitor);
         ComposableFilter<ReadableSpan> filter = new ComposableFilter<>();
+        filter.addFilter(sampleRateManager.spanFilter);
         filter.addAllFilters(configuration.spanFilters);
         filter.addAllFilters(configuration.httpTraceConfiguration.httpFilters);
         processor.setFilter(filter);
@@ -299,7 +302,8 @@ public final class ElasticApmAgent {
 
     private SdkLoggerProvider getLoggerProvider(SignalConfiguration signalConfiguration,
                                                 Resource resource,
-                                                AttributesVisitor commonAttrVisitor) {
+                                                AttributesVisitor commonAttrVisitor,
+                                                SampleRateManager sampleRateManager) {
         LogRecordProcessor logProcessor = signalConfiguration.getLogProcessor();
         ComposeAttributesVisitor logAttributes = AttributesVisitor.compose(
                 commonAttrVisitor,
@@ -307,21 +311,23 @@ public final class ElasticApmAgent {
         );
         ElasticLogRecordProcessor elasticProcessor = new ElasticLogRecordProcessor(logProcessor, logAttributes);
         ComposableFilter<LogRecordData> logFilter = new ComposableFilter<>();
+        logFilter.addFilter(sampleRateManager.logFilter);
         logFilter.addAllFilters(configuration.logFilters);
         elasticProcessor.setFilter(logFilter);
 
-        SdkLoggerProvider loggerProvider = SdkLoggerProvider.builder()
+        return SdkLoggerProvider.builder()
                 .setResource(resource)
                 .setClock(ntpManager.getClock())
                 .addLogRecordProcessor(elasticProcessor)
                 .build();
-        return loggerProvider;
     }
 
     private SdkMeterProvider getMeterProvider(SignalConfiguration signalConfiguration,
-                                              Resource resource) {
+                                              Resource resource,
+                                              SampleRateManager sampleRateManager) {
         ElasticMetricReader elasticMetricReader = new ElasticMetricReader(signalConfiguration.getMetricReader());
         ComposableFilter<MetricData> metricFilter = new ComposableFilter<>();
+        metricFilter.addFilter(sampleRateManager.metricFilter);
         metricFilter.addAllFilters(configuration.metricFilters);
         elasticMetricReader.setFilter(metricFilter);
 

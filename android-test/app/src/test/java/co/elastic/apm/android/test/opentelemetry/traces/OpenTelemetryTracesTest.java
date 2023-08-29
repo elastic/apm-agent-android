@@ -3,11 +3,15 @@ package co.elastic.apm.android.test.opentelemetry.traces;
 import static org.mockito.Mockito.doReturn;
 
 import org.junit.Test;
+import org.robolectric.annotation.Config;
 
+import co.elastic.apm.android.sdk.ElasticApmConfiguration;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.configuration.impl.AllInstrumentationConfiguration;
 import co.elastic.apm.android.sdk.traces.ElasticTracers;
+import co.elastic.apm.android.test.opentelemetry.common.AppUseCases;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
+import co.elastic.apm.android.test.testutils.base.BaseRobolectricTestApplication;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 
@@ -26,6 +30,16 @@ public class OpenTelemetryTracesTest extends BaseRobolectricTest {
     public void whenRecordingIsNotEnabled_doNotExportTraces() {
         doReturn(false).when(Configurations.get(AllInstrumentationConfiguration.class)).isEnabled();
 
+        Tracer tracer = ElasticTracers.create("example");
+        Span span = tracer.spanBuilder("someSpan").startSpan();
+        span.end();
+
+        getRecordedSpans(0);
+    }
+
+    @Config(application = AppUseCases.AppWithSampleRateZero.class)
+    @Test
+    public void whenSampleRateIsZero_doNotExportTraces() {
         Tracer tracer = ElasticTracers.create("example");
         Span span = tracer.spanBuilder("someSpan").startSpan();
         span.end();

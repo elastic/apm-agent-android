@@ -18,10 +18,13 @@
  */
 package co.elastic.apm.android.sdk.internal.features.sampling;
 
+import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.configuration.impl.SampleRateConfiguration;
 import co.elastic.apm.android.sdk.internal.features.sampling.filters.SampleLogRecordFilter;
 import co.elastic.apm.android.sdk.internal.features.sampling.filters.SampleMetricFilter;
 import co.elastic.apm.android.sdk.internal.features.sampling.filters.SampleSpanFilter;
+import co.elastic.apm.android.sdk.internal.services.Service;
+import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
 import co.elastic.apm.android.sdk.internal.utilities.NumberTools;
 import co.elastic.apm.android.sdk.logs.tools.LogFilter;
@@ -38,6 +41,11 @@ public final class SampleRateManager implements SessionObserver, SamplingPolicy 
     private final PreferencesService preferencesService;
     private boolean allowSignalExporting = false;
     private static final String ENABLE_SIGNAL_EXPORTING_KEY = "sampling_exporting_enabled";
+
+    public SampleRateManager() {
+        this(Configurations.get(SampleRateConfiguration.class), NumberTools.get(),
+                ServiceManager.get().getService(Service.Names.PREFERENCES));
+    }
 
     SampleRateManager(SampleRateConfiguration sampleRateConfiguration, NumberTools numberTools,
                       PreferencesService preferencesService) {

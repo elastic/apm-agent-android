@@ -29,8 +29,8 @@ import co.elastic.apm.android.sdk.features.persistence.PersistenceConfiguration;
 import co.elastic.apm.android.sdk.instrumentation.InstrumentationConfiguration;
 import co.elastic.apm.android.sdk.logs.tools.LogFilter;
 import co.elastic.apm.android.sdk.metrics.tools.MetricFilter;
-import co.elastic.apm.android.sdk.session.SessionIdProvider;
-import co.elastic.apm.android.sdk.session.impl.DefaultSessionIdProvider;
+import co.elastic.apm.android.sdk.session.SessionIdGenerator;
+import co.elastic.apm.android.sdk.session.impl.DefaultSessionIdGenerator;
 import co.elastic.apm.android.sdk.traces.http.HttpTraceConfiguration;
 import co.elastic.apm.android.sdk.traces.tools.SpanFilter;
 
@@ -40,7 +40,7 @@ public final class ElasticApmConfiguration {
     public final String serviceName;
     public final String serviceVersion;
     public final String deploymentEnvironment;
-    public final SessionIdProvider sessionIdProvider;
+    public final SessionIdGenerator sessionIdGenerator;
     public final SignalConfiguration signalConfiguration;
     public final PersistenceConfiguration persistenceConfiguration;
     public final double sampleRate;
@@ -60,7 +60,7 @@ public final class ElasticApmConfiguration {
         httpTraceConfiguration = builder.httpTraceConfiguration;
         serviceName = builder.serviceName;
         serviceVersion = builder.serviceVersion;
-        sessionIdProvider = builder.sessionIdProvider;
+        sessionIdGenerator = builder.sessionIdGenerator;
         instrumentationConfiguration = builder.instrumentationConfiguration;
         signalConfiguration = builder.signalConfiguration;
         deploymentEnvironment = builder.deploymentEnvironment;
@@ -78,7 +78,7 @@ public final class ElasticApmConfiguration {
         private String serviceName;
         private String serviceVersion;
         private String deploymentEnvironment;
-        private SessionIdProvider sessionIdProvider;
+        private SessionIdGenerator sessionIdGenerator;
         private SignalConfiguration signalConfiguration;
         private double sampleRate = 1.0;
         private final Set<SpanFilter> spanFilters = new HashSet<>();
@@ -156,6 +156,15 @@ public final class ElasticApmConfiguration {
         }
 
         /**
+         * The session ID generator will be used when a new session is created, the id provided by this generator will be the session ID.
+         * By default, a UUID is generated.
+         */
+        public Builder setSessionIdGenerator(SessionIdGenerator sessionIdGenerator) {
+            this.sessionIdGenerator = sessionIdGenerator;
+            return this;
+        }
+
+        /**
          * Allows values from 0 to 1 where 1 means that all signals from a session are exported, and 0 means no
          * signals are exported. The value set in here is applied per session, at the time a new session
          * is created, this value will define whether the whole session's signals get exported or not.
@@ -205,8 +214,8 @@ public final class ElasticApmConfiguration {
             if (instrumentationConfiguration == null) {
                 instrumentationConfiguration = InstrumentationConfiguration.allEnabled();
             }
-            if (sessionIdProvider == null) {
-                sessionIdProvider = new DefaultSessionIdProvider();
+            if (sessionIdGenerator == null) {
+                sessionIdGenerator = new DefaultSessionIdGenerator();
             }
             if (persistenceConfiguration == null) {
                 persistenceConfiguration = PersistenceConfiguration.builder().build();

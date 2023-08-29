@@ -64,8 +64,12 @@ public class NetworkService extends ConnectivityManager.NetworkCallback implemen
     }
 
     @NotNull
-    public NetworkType getType() {
+    public synchronized NetworkType getType() {
         return networkType;
+    }
+
+    private synchronized void setType(NetworkType networkType) {
+        this.networkType = networkType;
     }
 
     @Nullable
@@ -86,7 +90,7 @@ public class NetworkService extends ConnectivityManager.NetworkCallback implemen
     @Override
     public void onCapabilitiesChanged(@NonNull Network network, @NonNull NetworkCapabilities networkCapabilities) {
         super.onCapabilitiesChanged(network, networkCapabilities);
-        networkType = getNetworkType(networkCapabilities);
+        setType(getNetworkType(networkCapabilities));
     }
 
     private NetworkType getNetworkType(NetworkCapabilities networkCapabilities) {
@@ -102,7 +106,7 @@ public class NetworkService extends ConnectivityManager.NetworkCallback implemen
     @Override
     public void onLost(@NonNull Network network) {
         super.onLost(network);
-        networkType = NetworkType.none();
+        setType(NetworkType.none());
     }
 
     private boolean canQueryCarrierInfo() {

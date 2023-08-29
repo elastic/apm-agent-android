@@ -16,27 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.attributes.common;
+package co.elastic.apm.android.sdk.session.impl;
 
-import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
-import co.elastic.apm.android.sdk.session.SessionManager;
-import io.opentelemetry.api.common.AttributeKey;
-import io.opentelemetry.api.common.AttributesBuilder;
+import androidx.annotation.NonNull;
 
-public class SessionAttributesVisitor implements AttributesVisitor {
-    private static final AttributeKey<String> SESSION_ID_ATTRIBUTE_KEY = AttributeKey.stringKey("session.id");
-    private final SessionManager sessionManager;
+import java.util.UUID;
 
-    public SessionAttributesVisitor() {
-        this.sessionManager = SessionManager.get();
-    }
+import co.elastic.apm.android.sdk.session.SessionIdGenerator;
 
+public class DefaultSessionIdGenerator implements SessionIdGenerator {
+    @NonNull
     @Override
-    public void visit(AttributesBuilder builder) {
-        builder.put(SESSION_ID_ATTRIBUTE_KEY, getSessionId());
-    }
-
-    private synchronized String getSessionId() {
-        return sessionManager.getSessionId();
+    public String generate() {
+        return UUID.randomUUID().toString();
     }
 }

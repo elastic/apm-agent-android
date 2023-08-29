@@ -23,12 +23,11 @@ import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.network.NetworkService;
 import co.elastic.apm.android.sdk.internal.services.network.data.type.NetworkType;
-import co.elastic.apm.android.sdk.internal.utilities.providers.Provider;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 
 public class ConnectionHttpAttributesVisitor implements AttributesVisitor {
-    private final Provider<NetworkService> networkServiceProvider;
+    private final NetworkService networkService;
     private static ConnectionHttpAttributesVisitor instance;
 
     public static ConnectionHttpAttributesVisitor getInstance() {
@@ -38,13 +37,17 @@ public class ConnectionHttpAttributesVisitor implements AttributesVisitor {
         return instance;
     }
 
+    public static void resetForTest() {
+        instance = null;
+    }
+
     private ConnectionHttpAttributesVisitor() {
-        networkServiceProvider = ServiceManager.getServiceProvider(Service.Names.NETWORK);
+        networkService = ServiceManager.get().getService(Service.Names.NETWORK);
     }
 
     @Override
     public void visit(AttributesBuilder builder) {
-        NetworkType networkType = networkServiceProvider.get().getType();
+        NetworkType networkType = networkService.getType();
         builder.put(SemanticAttributes.NET_HOST_CONNECTION_TYPE, networkType.getName());
         if (networkType.getSubTypeName() != null) {
             builder.put(SemanticAttributes.NET_HOST_CONNECTION_SUBTYPE, networkType.getSubTypeName());

@@ -32,7 +32,7 @@ ${next_release_notes}
 [float]
 ===== Features
 
-* New feature: {pull}000[#000]
+* Making Session ID generator configurable: {pull}178[#178]
 ////
 
 [[release-notes-0.8.0]]

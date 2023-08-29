@@ -29,6 +29,7 @@ import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
+import co.elastic.apm.android.sdk.session.SessionManager;
 import co.elastic.apm.android.test.common.agent.AgentInitializer;
 import co.elastic.apm.android.test.common.logs.LogRecordExporterCaptor;
 import co.elastic.apm.android.test.common.metrics.MetricExporterCaptor;
@@ -51,6 +52,7 @@ public class BaseRobolectricTestApplication extends Application implements Expor
     private final MetricExporterCaptor metricExporter;
     private final List<Configuration> configurations = new ArrayList<>();
     private NtpManager ntpManager;
+    private SessionManager sessionManager;
     private CentralConfigurationInitializer centralConfigurationInitializer;
     private PersistenceInitializer persistenceInitializer;
 
@@ -107,6 +109,7 @@ public class BaseRobolectricTestApplication extends Application implements Expor
         setUpNtpManager();
         setUpCentralConfigurationInitializer();
         persistenceInitializer = mock(PersistenceInitializer.class);
+        setUpSessionManager();
     }
 
     private void setUpCentralConfigurationInitializer() {
@@ -119,6 +122,11 @@ public class BaseRobolectricTestApplication extends Application implements Expor
         Clock clock = new TestElasticClock();
         ntpManager = mock(NtpManager.class);
         doReturn(clock).when(ntpManager).getClock();
+    }
+
+    private void setUpSessionManager() {
+        sessionManager = mock(SessionManager.class);
+        doReturn("SESSION-ID").when(sessionManager).getSessionId();
     }
 
     @Override
@@ -167,6 +175,11 @@ public class BaseRobolectricTestApplication extends Application implements Expor
     @Override
     public NtpManager getNtpManager() {
         return ntpManager;
+    }
+
+    @Override
+    public SessionManager getSessionManager() {
+        return sessionManager;
     }
 
     @Override

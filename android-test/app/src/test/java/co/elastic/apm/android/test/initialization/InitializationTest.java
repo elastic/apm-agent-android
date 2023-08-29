@@ -7,7 +7,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import org.junit.Test;
@@ -15,9 +14,7 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 
-import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.ElasticApmConfiguration;
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.connectivity.auth.impl.ApiKeyConfiguration;
@@ -34,7 +31,6 @@ import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
 import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicWorkService;
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
-import co.elastic.apm.android.sdk.session.impl.DefaultSessionIdProvider;
 import co.elastic.apm.android.test.testutils.MainApp;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTestApplication;
@@ -44,7 +40,6 @@ import io.opentelemetry.sdk.trace.SpanProcessor;
 
 public class InitializationTest extends BaseRobolectricTest {
 
-    @Config(application = MainApp.class)
     @Test
     public void verifyDefaults() throws IOException {
         MainApp app = getApp();
@@ -52,17 +47,10 @@ public class InitializationTest extends BaseRobolectricTest {
         PersistenceInitializer persistenceInitializer = app.getPersistenceInitializer();
         verify(persistenceInitializer, never()).prepare();
         verify(persistenceInitializer, never()).createSignalDiskExporter();
+        verify(getAgentDependenciesInjector().getSessionManager()).initialize();
 
         PeriodicWorkService periodicWorkService = getPeriodicWorkService();
         assertTrue(periodicWorkService.isInitialized());
-    }
-
-    @Config(application = AppWithMockSessionId.class)
-    @Test
-    public void whenSessionIdProviderIsInitializable_initializeIt() {
-        AppWithMockSessionId app = getApp();
-
-        verify(app.sessionIdProvider).initialize();
     }
 
     @Config(application = AppWithMockPollManager.class)
@@ -164,30 +152,6 @@ public class InitializationTest extends BaseRobolectricTest {
             pollManager = mock(ConfigurationPollManager.class);
             doReturn(pollManager).when(getCentralConfigurationInitializer()).getPollManager();
             initializeAgent();
-        }
-    }
-
-    private static class AppWithMockSessionId extends BaseRobolectricTestApplication {
-        private DefaultSessionIdProvider sessionIdProvider;
-
-        @Override
-        public void onCreate() {
-            super.onCreate();
-            sessionIdProvider = mock(DefaultSessionIdProvider.class);
-            ElasticApmConfiguration configuration = ElasticApmConfiguration.builder().build();
-            setSessionIdProvider(configuration, sessionIdProvider);
-
-            initializeAgentWithCustomConfig(configuration);
-        }
-
-        private void setSessionIdProvider(ElasticApmConfiguration configuration, DefaultSessionIdProvider sessionIdProvider) {
-            try {
-                Field sessionIdProviderField = configuration.getClass().getDeclaredField("sessionIdProvider");
-                sessionIdProviderField.setAccessible(true);
-                sessionIdProviderField.set(configuration, sessionIdProvider);
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
         }
     }
 

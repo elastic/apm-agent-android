@@ -184,12 +184,14 @@ class MyApp extends android.app.Application {
     public void onCreate() {
         super.onCreate();
         ElasticApmConfiguration configuration = ElasticApmConfiguration.builder()
-                .setSampleRate(0.5) // Only values between 0 and 1.
+                .setSampleRate(0.5) <1>
                 .build();
         ElasticApmAgent.initialize(this, configuration);
     }
 }
 ----
+
+<1> Only values between 0 and 1.
 
 [float]
 ==== Signal filtering

@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -80,6 +81,27 @@ public class SessionManagerTest extends BaseTest implements Provider<Preferences
 
         assertNotEquals(firstSessionId, sessionManager.getSessionId());
         assertNotNull(sessionManager.getSessionId());
+    }
+
+    @Test
+    public void whenSessionIdChanges_notifyObservers() {
+        SessionManager sessionManager = getSessionManager();
+        String firstId = sessionManager.getSessionId();
+        SessionObserver observer1 = mock(SessionObserver.class);
+        SessionObserver observer2 = mock(SessionObserver.class);
+        sessionManager.addObserver(observer1);
+        sessionManager.addObserver(observer2);
+
+        assertEquals(firstId, sessionManager.getSessionId());
+        verifyNoInteractions(observer1, observer2);
+
+        sessionManager.forceRefreshId();
+
+        String secondId = sessionManager.getSessionId();
+        assertNotEquals(firstId, secondId);
+
+        verify(observer1).onSessionIdChanged(secondId);
+        verify(observer2).onSessionIdChanged(secondId);
     }
 
     @Test

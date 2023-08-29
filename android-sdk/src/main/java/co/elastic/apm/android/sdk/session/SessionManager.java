@@ -20,6 +20,8 @@ package co.elastic.apm.android.sdk.session;
 
 import androidx.annotation.NonNull;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import co.elastic.apm.android.sdk.internal.api.Initializable;
@@ -43,6 +45,8 @@ public final class SessionManager implements Initializable {
     private final SystemTimeProvider systemTimeProvider;
     private final Provider<PreferencesService> preferencesServiceProvider;
     private final SessionIdGenerator sessionIdGenerator;
+
+    private final List<SessionObserver> observers = new ArrayList<>();
     private long expireTimeMillis;
     private String sessionId;
 
@@ -88,6 +92,12 @@ public final class SessionManager implements Initializable {
         sessionId = null;
     }
 
+    public void addObserver(SessionObserver observer) {
+        if (!observers.contains(observer)) {
+            observers.add(observer);
+        }
+    }
+
     private void verifySessionExpiration() {
         if (systemTimeProvider.getCurrentTimeMillis() >= expireTimeMillis) {
             forceRefreshId();
@@ -97,7 +107,14 @@ public final class SessionManager implements Initializable {
     private String generateSessionId() {
         String generatedId = sessionIdGenerator.generate();
         persistSessionId(generatedId);
+        notifyObservers(generatedId);
         return generatedId;
+    }
+
+    private void notifyObservers(String generatedId) {
+        for (SessionObserver observer : observers) {
+            observer.onSessionIdChanged(generatedId);
+        }
     }
 
     private void scheduleExpireTime() {

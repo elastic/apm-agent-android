@@ -174,7 +174,7 @@ Sessions are currently time-based and will kept alive for at least 30 mins. A `s
 When the time's up, a new session ID will be generated and the sample rate will be evaluated to determine whether the new session's signals will get exported or ignored.
 
 You can set the sample rate value at runtime either programmatically, as shown below, or remotely through the <<configuration-dynamic, Central configuration>>.
-The values set through the Central configuration will override the ones set programmatically.
+Values set through Central configuration will override the ones set programmatically.
 
 [source,java]
 ----

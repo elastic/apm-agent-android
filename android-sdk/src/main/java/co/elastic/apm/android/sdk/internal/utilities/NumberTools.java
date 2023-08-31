@@ -16,35 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.api.filter;
+package co.elastic.apm.android.sdk.internal.utilities;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.Random;
 
-public class ComposableFilter<T> implements Filter<T> {
-    private final List<Filter<T>> filters = new ArrayList<>();
+public class NumberTools {
+    private static NumberTools INSTANCE;
 
-    public void addFilter(Filter<T> filter) {
-        if (filter == null || filters.contains(filter)) {
-            return;
+    public static NumberTools get() {
+        if (INSTANCE == null) {
+            INSTANCE = new NumberTools();
         }
-        filters.add(filter);
+
+        return INSTANCE;
     }
 
-    public void addAllFilters(Collection<? extends Filter<T>> filters) {
-        for (Filter<T> filter : filters) {
-            addFilter(filter);
-        }
+    private NumberTools() {
     }
 
-    @Override
-    public boolean shouldInclude(T item) {
-        for (Filter<T> filter : filters) {
-            if (!filter.shouldInclude(item)) {
-                return false;
-            }
-        }
-        return true;
+    public double random() {
+        return new Random().nextDouble();
     }
 }

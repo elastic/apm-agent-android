@@ -29,6 +29,10 @@ public abstract class Configuration extends ConfigurationOptionProvider {
         return ConfigurationOption.booleanOption(key, defaultValue);
     }
 
+    protected ConfigurationOption<Double> createDoubleOption(String key, double defaultValue) {
+        return ConfigurationOption.doubleOption(key, defaultValue);
+    }
+
     @Override
     public final List<org.stagemonitor.configuration.ConfigurationOption<?>> getConfigurationOptions() {
         OptionsRegistry optionsRegistry = new OptionsRegistry();

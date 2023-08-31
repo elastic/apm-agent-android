@@ -29,6 +29,10 @@ public final class ConfigurationOption<T> {
         return configureAndBuild(org.stagemonitor.configuration.ConfigurationOption.booleanOption(), key, defaultValue);
     }
 
+    public static ConfigurationOption<Double> doubleOption(String key, double defaultValue) {
+        return configureAndBuild(org.stagemonitor.configuration.ConfigurationOption.doubleOption(), key, defaultValue);
+    }
+
     private static <T> ConfigurationOption<T> configureAndBuild(org.stagemonitor.configuration.ConfigurationOption.ConfigurationOptionBuilder<T> builder,
                                                                 String key, T defaultValue) {
         return new ConfigurationOption<>(builder.key(key)

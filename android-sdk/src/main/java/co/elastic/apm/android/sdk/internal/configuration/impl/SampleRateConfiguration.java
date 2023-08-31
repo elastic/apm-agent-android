@@ -16,35 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.api.filter;
+package co.elastic.apm.android.sdk.internal.configuration.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import co.elastic.apm.android.sdk.internal.configuration.Configuration;
+import co.elastic.apm.android.sdk.internal.configuration.ConfigurationOption;
+import co.elastic.apm.android.sdk.internal.configuration.OptionsRegistry;
 
-public class ComposableFilter<T> implements Filter<T> {
-    private final List<Filter<T>> filters = new ArrayList<>();
+public final class SampleRateConfiguration extends Configuration {
+    private final ConfigurationOption<Double> sampleRate;
 
-    public void addFilter(Filter<T> filter) {
-        if (filter == null || filters.contains(filter)) {
-            return;
-        }
-        filters.add(filter);
+    public SampleRateConfiguration(double initialSampleRate) {
+        this.sampleRate = createDoubleOption("session_sample_rate", initialSampleRate);
     }
 
-    public void addAllFilters(Collection<? extends Filter<T>> filters) {
-        for (Filter<T> filter : filters) {
-            addFilter(filter);
-        }
+    public double getSampleRate() {
+        return sampleRate.get();
     }
 
     @Override
-    public boolean shouldInclude(T item) {
-        for (Filter<T> filter : filters) {
-            if (!filter.shouldInclude(item)) {
-                return false;
-            }
-        }
-        return true;
+    protected void visitOptions(OptionsRegistry options) {
+        super.visitOptions(options);
+        options.register(sampleRate);
     }
 }

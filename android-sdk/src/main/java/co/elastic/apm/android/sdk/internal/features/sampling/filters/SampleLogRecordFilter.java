@@ -16,35 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.api.filter;
+package co.elastic.apm.android.sdk.internal.features.sampling.filters;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import co.elastic.apm.android.sdk.internal.features.sampling.SamplingPolicy;
+import co.elastic.apm.android.sdk.logs.tools.LogFilter;
+import io.opentelemetry.sdk.logs.data.LogRecordData;
 
-public class ComposableFilter<T> implements Filter<T> {
-    private final List<Filter<T>> filters = new ArrayList<>();
+public final class SampleLogRecordFilter implements LogFilter {
+    private final SamplingPolicy policy;
 
-    public void addFilter(Filter<T> filter) {
-        if (filter == null || filters.contains(filter)) {
-            return;
-        }
-        filters.add(filter);
-    }
-
-    public void addAllFilters(Collection<? extends Filter<T>> filters) {
-        for (Filter<T> filter : filters) {
-            addFilter(filter);
-        }
+    public SampleLogRecordFilter(SamplingPolicy policy) {
+        this.policy = policy;
     }
 
     @Override
-    public boolean shouldInclude(T item) {
-        for (Filter<T> filter : filters) {
-            if (!filter.shouldInclude(item)) {
-                return false;
-            }
-        }
-        return true;
+    public boolean shouldInclude(LogRecordData item) {
+        return policy.allowSignalExporting();
     }
 }

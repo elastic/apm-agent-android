@@ -38,8 +38,9 @@ public class PostDeployTask extends DefaultTask {
         Properties properties = getProperties(gradlePropertiesFile);
 
         String currentVersion = properties.getProperty("version");
-        setGitTag(currentVersion);
-        setGitHubRelease(currentVersion);
+        String releaseTag = "v" + version;
+        setGitTag(releaseTag);
+        setGitHubRelease(version, releaseTag);
 
         String newVersion = VersionUtility.bumpMinorVersion(currentVersion);
 
@@ -58,13 +59,12 @@ public class PostDeployTask extends DefaultTask {
     }
 
     private void setGitTag(String version) {
-        log("Setting git tag to: v" + version);
-        runCommand("git tag v" + version);
+        log("Setting git tag to: " + version);
+        runCommand("git tag " + version);
         runCommand("git push --tags");
     }
 
-    private void setGitHubRelease(String version) {
-        String releaseTag = "v" + version;
+    private void setGitHubRelease(String version, String releaseTag) {
         log("Setting GitHub release to: " + releaseTag);
         String title = "Release " + version;
         String notes = "[Release Notes for " + version + "](https://www.elastic.co/guide/en/apm/agent/android/current/release-notes-0.x.html#release-notes-" + version + ")";

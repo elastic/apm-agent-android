@@ -38,9 +38,9 @@ public class PostDeployTask extends DefaultTask {
         Properties properties = getProperties(gradlePropertiesFile);
 
         String currentVersion = properties.getProperty("version");
-        String releaseTag = "v" + version;
+        String releaseTag = "v" + currentVersion;
         setGitTag(releaseTag);
-        setGitHubRelease(version, releaseTag);
+        setGitHubRelease(currentVersion, releaseTag);
 
         String newVersion = VersionUtility.bumpMinorVersion(currentVersion);
 

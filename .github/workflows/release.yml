@@ -31,6 +31,7 @@ on:
       dry_run:
         description: If set, this will not run a release but run a dry-run
         default: false
+        required: true
         type: boolean
 
 jobs:
@@ -96,4 +97,6 @@ jobs:
         with:
           ref: ${{ inputs.branch_specifier || 'main' }}
           token: ${{ env.GITHUB_TOKEN }}
-      - run: ./gradlew postDeploy -Prelease=true -Pversion_override=${{ inputs.version_override_specifier || '' }}
+
+      - if: ${{ ! inputs.dry_run }}
+        run: ./gradlew postDeploy -Prelease=true -Pversion_override=${{ inputs.version_override_specifier || '' }}

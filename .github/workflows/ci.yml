@@ -1,16 +1,24 @@
-name: Continous Integration
+name: ci
 
 on:
   pull_request:
+    paths-ignore:
+      - "**/*.asciidoc"
+      - "**/*.md"
+      - "**/*.png"
   push:
     branches:
-      - "main"
+      - main
+    paths-ignore:
+      - "**/*.asciidoc"
+      - "**/*.md"
+      - "**/*.png"
 
 permissions:
   contents: read
 
 jobs:
-  process:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -18,6 +26,11 @@ jobs:
         run: ./gradlew lint
       - name: Verify OSS compliance
         run: ./gradlew verifyNoticeFile
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
       - name: Build
         run: ./gradlew assemble
       - name: Test
@@ -30,3 +43,18 @@ jobs:
           path: |
             **/build/test-results/testRelease*/TEST-*.xml
             **/build/test-results/test/TEST-*.xml
+
+  # The very last job to report whether the Workflow passed.
+  # This will act as the Branch Protection gatekeeper
+  ci:
+    if: always()
+    runs-on: ubuntu-latest
+    needs:
+      - lint
+      - test
+    steps:
+      - id: check
+        uses: elastic/apm-pipeline-library/.github/actions/check-dependent-jobs@current
+        with:
+          needs: ${{ toJSON(needs) }}
+      - run: ${{ steps.check.outputs.isSuccess }}

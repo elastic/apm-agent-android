@@ -60,7 +60,11 @@ public class CentralConfigurationFetcherTest extends BaseRobolectricTest impleme
     private void setUpConnectivity() {
         webServer = new MockWebServer();
         connectivity = mock(ConnectivityConfiguration.class);
-        doReturn("http://" + webServer.getHostName() + ":" + webServer.getPort()).when(connectivity).getEndpoint();
+        setConnectivityEndpoint("");
+    }
+
+    private void setConnectivityEndpoint(String path) {
+        doReturn("http://" + webServer.getHostName() + ":" + webServer.getPort() + path).when(connectivity).getEndpoint();
     }
 
     @Test
@@ -93,6 +97,18 @@ public class CentralConfigurationFetcherTest extends BaseRobolectricTest impleme
     }
 
     @Test
+    public void whenPreparingRequest_keep_original_url_path() throws IOException, InterruptedException {
+        enqueueSimpleResponse();
+
+        setConnectivityEndpoint("/some/path");
+        fetcher = new CentralConfigurationFetcher(connectivity, this, preferences);
+        fetcher.fetch();
+
+        HttpUrl recordedRequestUrl = webServer.takeRequest().getRequestUrl();
+        assertEquals("/some/path/config%2Fv1%2Fagents", recordedRequestUrl.encodedPath());
+    }
+
+    @Test
     public void whenPreparingRequest_sendContentType() throws IOException, InterruptedException {
         enqueueSimpleResponse();
 
@@ -102,7 +118,8 @@ public class CentralConfigurationFetcherTest extends BaseRobolectricTest impleme
     }
 
     @Test
-    public void whenPreparingRequest_andThereIsAuthenticationAvailable_sendAuthHeader() throws IOException, InterruptedException {
+    public void whenPreparingRequest_andThereIsAuthenticationAvailable_sendAuthHeader() throws
+            IOException, InterruptedException {
         String authHeaderValue = "Bearer something";
         AuthConfiguration authConfiguration = mock(AuthConfiguration.class);
         doReturn(authHeaderValue).when(authConfiguration).asAuthorizationHeaderValue();
@@ -125,7 +142,8 @@ public class CentralConfigurationFetcherTest extends BaseRobolectricTest impleme
     }
 
     @Test
-    public void whenPreparingRequest_andEtagIsAvailable_sendIt() throws IOException, InterruptedException {
+    public void whenPreparingRequest_andEtagIsAvailable_sendIt() throws
+            IOException, InterruptedException {
         String theEtag = "someEtag";
         doReturn(theEtag).when(preferences).retrieveString("central_configuration_etag");
         enqueueSimpleResponse();
@@ -148,7 +166,8 @@ public class CentralConfigurationFetcherTest extends BaseRobolectricTest impleme
     }
 
     @Test
-    public void whenCacheControlReceived_WithoutMaxAge_returnMaxAgeTimeAsNull() throws IOException {
+    public void whenCacheControlReceived_WithoutMaxAge_returnMaxAgeTimeAsNull() throws
+            IOException {
         String headerValue = "no-cache";
         enqueueResponse(getResponse(200, "{}").setHeader("Cache-Control", headerValue));
 

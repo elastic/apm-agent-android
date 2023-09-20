@@ -105,7 +105,7 @@ public class CentralConfigurationFetcherTest extends BaseRobolectricTest impleme
         fetcher.fetch();
 
         HttpUrl recordedRequestUrl = webServer.takeRequest().getRequestUrl();
-        assertEquals("/some/path/config%2Fv1%2Fagents", recordedRequestUrl.encodedPath());
+        assertEquals("/some/path/config/v1/agents", recordedRequestUrl.encodedPath());
     }
 
     @Test

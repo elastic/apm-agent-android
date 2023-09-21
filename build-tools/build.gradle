@@ -12,6 +12,9 @@ dependencies {
     implementation 'org.apache.commons:commons-text:1.10.0'
     implementation 'commons-io:commons-io:2.11.0'
     implementation "com.android.tools.build:gradle:${properties["androidGradlePlugin_version"]}"
+
+    // This is needed to enforce a higher version than the transitive one (3.0.0) requested by: "com.diffplug.spotless:spotless-plugin-gradle:6.21.0"
+    implementation "com.squareup.okio:okio:3.5.0"
     implementation "com.diffplug.spotless:spotless-plugin-gradle:6.21.0"
     implementation "org.jetbrains.dokka:dokka-gradle-plugin:1.6.10"
     implementation "io.github.gradle-nexus:publish-plugin:1.1.0"

@@ -18,10 +18,11 @@
  */
 package co.elastic.apm.android.plugin;
 
-import com.android.build.api.artifact.MultipleArtifact;
+import com.android.build.api.artifact.ScopedArtifact;
 import com.android.build.api.instrumentation.InstrumentationScope;
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension;
 import com.android.build.api.variant.ApplicationVariant;
+import com.android.build.api.variant.ScopedArtifacts;
 import com.android.build.gradle.BaseExtension;
 
 import net.bytebuddy.build.gradle.android.ByteBuddyAndroidPlugin;
@@ -117,9 +118,9 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
             task.getAppRuntimeClasspath().from(classpathProvider.getRuntimeClasspath(applicationVariant));
             task.getJvmTargetVersion().set(androidExtension.getCompileOptions().getTargetCompatibility().toString());
         });
-        applicationVariant.getArtifacts().use(taskProvider)
-                .wiredWith(OkHttpEventlistenerGenerator::getOutputDir)
-                .toAppendTo(MultipleArtifact.ALL_CLASSES_DIRS.INSTANCE);
+        applicationVariant.getArtifacts().forScope(ScopedArtifacts.Scope.PROJECT)
+                .use(taskProvider)
+                .toAppend(ScopedArtifact.CLASSES.INSTANCE, OkHttpEventlistenerGenerator::getOutputDir);
     }
 
     private void addApmInfoGenerator(ApplicationVariant variant) {

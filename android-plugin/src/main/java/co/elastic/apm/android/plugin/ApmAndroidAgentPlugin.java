@@ -28,18 +28,22 @@ import net.bytebuddy.build.gradle.android.ByteBuddyAndroidPlugin;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.ModuleVersionIdentifier;
+import org.gradle.api.artifacts.ResolveException;
+import org.gradle.api.artifacts.ResolvedArtifact;
+import org.gradle.api.artifacts.ResolvedConfiguration;
 import org.gradle.api.plugins.ExtensionContainer;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.TaskProvider;
 
-import co.elastic.apm.android.agp.api.AgpCompatibilityEntrypoint;
-import co.elastic.apm.android.agp.api.AgpCompatibilityManager;
-import co.elastic.apm.android.agp.api.tools.ClasspathProvider;
-import co.elastic.apm.android.agp.api.usecase.ApmInfoUseCase;
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.plugin.extensions.ElasticApmExtension;
 import co.elastic.apm.android.plugin.instrumentation.ElasticLocalInstrumentationFactory;
 import co.elastic.apm.android.plugin.logging.GradleLoggerFactory;
+import co.elastic.apm.android.plugin.tasks.ApmInfoGeneratorTask;
 import co.elastic.apm.android.plugin.tasks.OkHttpEventlistenerGenerator;
+import co.elastic.apm.android.plugin.tasks.tools.ClasspathProvider;
 import co.elastic.apm.generated.BuildConfig;
 import kotlin.Unit;
 
@@ -48,20 +52,19 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
     private Project project;
     private BaseExtension androidExtension;
     private ElasticApmExtension defaultExtension;
-    private AgpCompatibilityManager compatibleManager;
+    private ClasspathProvider classpathProvider;
 
     @Override
     public void apply(Project project) {
         this.project = project;
         Elog.init(new GradleLoggerFactory());
         androidExtension = project.getExtensions().getByType(BaseExtension.class);
-        compatibleManager = AgpCompatibilityEntrypoint.findCompatibleManager(project);
+        classpathProvider = new ClasspathProvider();
         initializeElasticExtension(project);
         addBytebuddyPlugin();
         addSdkDependency();
         addInstrumentationDependency();
         addTasks();
-        applyCompatibleUseCases();
     }
 
     private void initializeElasticExtension(Project project) {
@@ -97,15 +100,16 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
     }
 
     private void enhanceVariant(ApplicationVariant applicationVariant) {
-        addOkhttpEventListenerGenerator(applicationVariant, compatibleManager.getClasspathProvider());
+        addOkhttpEventListenerGenerator(applicationVariant);
         addLocalRemapping(applicationVariant);
+        addApmInfoGenerator(applicationVariant);
     }
 
     private void addLocalRemapping(ApplicationVariant applicationVariant) {
         applicationVariant.getInstrumentation().transformClassesWith(ElasticLocalInstrumentationFactory.class, InstrumentationScope.PROJECT, none -> Unit.INSTANCE);
     }
 
-    private void addOkhttpEventListenerGenerator(ApplicationVariant applicationVariant, ClasspathProvider classpathProvider) {
+    private void addOkhttpEventListenerGenerator(ApplicationVariant applicationVariant) {
         TaskProvider<OkHttpEventlistenerGenerator> taskProvider =
                 project.getTasks().register(applicationVariant.getName() + "GenerateOkhttpEventListener", OkHttpEventlistenerGenerator.class);
         taskProvider.configure(task -> {
@@ -118,15 +122,35 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
                 .toAppendTo(MultipleArtifact.ALL_CLASSES_DIRS.INSTANCE);
     }
 
-    private void applyCompatibleUseCases() {
-        ApmInfoUseCase apmInfoUseCase = compatibleManager.getApmInfoUseCase(parameters -> {
-            parameters.getServiceName().set(defaultExtension.getServiceName());
-            parameters.getServiceVersion().set(defaultExtension.getServiceVersion());
-            parameters.getServerUrl().set(defaultExtension.getServerUrl());
-            parameters.getSecretToken().set(defaultExtension.getSecretToken());
-            parameters.getApiKey().set(defaultExtension.getApiKey());
-            parameters.getClasspathProvider().set(compatibleManager.getClasspathProvider());
+    private void addApmInfoGenerator(ApplicationVariant variant) {
+        String variantName = variant.getName();
+        TaskProvider<ApmInfoGeneratorTask> taskProvider = project.getTasks().register(variantName + "GenerateApmInfo", ApmInfoGeneratorTask.class);
+        taskProvider.configure(apmInfoGenerator -> {
+            apmInfoGenerator.getServiceName().set(defaultExtension.getServiceName());
+            apmInfoGenerator.getServiceVersion().set(defaultExtension.getServiceVersion());
+            apmInfoGenerator.getServerUrl().set(defaultExtension.getServerUrl());
+            apmInfoGenerator.getSecretToken().set(defaultExtension.getSecretToken());
+            apmInfoGenerator.getApiKey().set(defaultExtension.getApiKey());
+            apmInfoGenerator.getVariantName().set(variantName);
+            apmInfoGenerator.getOutputDir().set(project.getLayout().getBuildDirectory().dir(apmInfoGenerator.getName()));
+            apmInfoGenerator.getOkHttpVersion().set(getOkhttpVersion(project, classpathProvider.getRuntimeConfiguration(variant)));
         });
-        apmInfoUseCase.execute();
+        variant.getSources().getAssets().addGeneratedSourceDirectory(taskProvider, ApmInfoGeneratorTask::getOutputDir);
+    }
+
+    private static Provider<String> getOkhttpVersion(Project project, Configuration runtimeConfiguration) {
+        return project.provider(() -> {
+            ResolvedConfiguration resolvedConfiguration = runtimeConfiguration.getResolvedConfiguration();
+            try {
+                for (ResolvedArtifact artifact : resolvedConfiguration.getResolvedArtifacts()) {
+                    ModuleVersionIdentifier identifier = artifact.getModuleVersion().getId();
+                    if (identifier.getGroup().equals("com.squareup.okhttp3") && identifier.getName().equals("okhttp")) {
+                        return identifier.getVersion();
+                    }
+                }
+            } catch (ResolveException ignored) {
+            }
+            return null;
+        });
     }
 }

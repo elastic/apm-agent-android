@@ -16,17 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.agp72.usecase.apminfo;
-
-import com.android.build.api.variant.Variant;
+package co.elastic.apm.android.plugin.tasks;
 
 import org.gradle.api.DefaultTask;
-import org.gradle.api.Project;
-import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.artifacts.ModuleVersionIdentifier;
-import org.gradle.api.artifacts.ResolveException;
-import org.gradle.api.artifacts.ResolvedArtifact;
-import org.gradle.api.artifacts.ResolvedConfiguration;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.internal.provider.MissingValueException;
 import org.gradle.api.provider.Property;
@@ -35,7 +27,6 @@ import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
-import org.gradle.api.tasks.TaskProvider;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -43,8 +34,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Properties;
 
-import co.elastic.apm.android.agp.api.tools.ClasspathProvider;
-import co.elastic.apm.android.agp.api.usecase.ApmInfoUseCase;
 import co.elastic.apm.android.common.ApmInfo;
 import co.elastic.apm.android.common.internal.logging.Elog;
 
@@ -156,39 +145,5 @@ public abstract class ApmInfoGeneratorTask extends DefaultTask {
 
     private String provideValueFromEnvironmentVariable(String environmentName) {
         return System.getenv(environmentName);
-    }
-
-    public static TaskProvider<ApmInfoGeneratorTask> create(Project project, ApmInfoUseCase.Parameters parameters, Variant variant) {
-        String variantName = variant.getName();
-        TaskProvider<ApmInfoGeneratorTask> taskProvider = project.getTasks().register(variantName + "GenerateApmInfo", ApmInfoGeneratorTask.class);
-        ClasspathProvider classpathProvider = parameters.getClasspathProvider().get();
-        taskProvider.configure(apmInfoGenerator -> {
-            apmInfoGenerator.getServiceName().set(parameters.getServiceName());
-            apmInfoGenerator.getServiceVersion().set(parameters.getServiceVersion());
-            apmInfoGenerator.getServerUrl().set(parameters.getServerUrl());
-            apmInfoGenerator.getSecretToken().set(parameters.getSecretToken());
-            apmInfoGenerator.getApiKey().set(parameters.getApiKey());
-            apmInfoGenerator.getVariantName().set(variantName);
-            apmInfoGenerator.getOutputDir().set(project.getLayout().getBuildDirectory().dir(apmInfoGenerator.getName()));
-            apmInfoGenerator.getOkHttpVersion().set(getOkhttpVersion(project, classpathProvider.getRuntimeConfiguration(variant)));
-        });
-
-        return taskProvider;
-    }
-
-    private static Provider<String> getOkhttpVersion(Project project, Configuration runtimeConfiguration) {
-        return project.provider(() -> {
-            ResolvedConfiguration resolvedConfiguration = runtimeConfiguration.getResolvedConfiguration();
-            try {
-                for (ResolvedArtifact artifact : resolvedConfiguration.getResolvedArtifacts()) {
-                    ModuleVersionIdentifier identifier = artifact.getModuleVersion().getId();
-                    if (identifier.getGroup().equals("com.squareup.okhttp3") && identifier.getName().equals("okhttp")) {
-                        return identifier.getVersion();
-                    }
-                }
-            } catch (ResolveException ignored) {
-            }
-            return null;
-        });
     }
 }

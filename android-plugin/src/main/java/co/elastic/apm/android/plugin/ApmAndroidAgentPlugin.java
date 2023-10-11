@@ -23,6 +23,7 @@ import com.android.build.api.instrumentation.InstrumentationScope;
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension;
 import com.android.build.api.variant.ApplicationVariant;
 import com.android.build.api.variant.ScopedArtifacts;
+import com.android.build.api.variant.SourceDirectories;
 import com.android.build.gradle.BaseExtension;
 
 import net.bytebuddy.build.gradle.android.ByteBuddyAndroidPlugin;
@@ -136,7 +137,12 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
             apmInfoGenerator.getOutputDir().set(project.getLayout().getBuildDirectory().dir(apmInfoGenerator.getName()));
             apmInfoGenerator.getOkHttpVersion().set(getOkhttpVersion(project, classpathProvider.getRuntimeConfiguration(variant)));
         });
-        variant.getSources().getAssets().addGeneratedSourceDirectory(taskProvider, ApmInfoGeneratorTask::getOutputDir);
+        SourceDirectories.Layered assets = variant.getSources().getAssets();
+        if (assets != null) {
+            assets.addGeneratedSourceDirectory(taskProvider, ApmInfoGeneratorTask::getOutputDir);
+        } else {
+            Elog.getLogger().warn("Could not attach ApmInfoGeneratorTask");
+        }
     }
 
     private static Provider<String> getOkhttpVersion(Project project, Configuration runtimeConfiguration) {

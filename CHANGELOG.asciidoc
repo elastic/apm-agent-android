@@ -34,8 +34,8 @@ ${next_release_notes}
 
 * Making Session ID generator configurable: {pull}178[#178]
 * Adding sample rate support: {pull}179[#179]
-* Adding support for AGP > 8: {pull}?[#?]
-* Setting minimum AGP version to 7.4.0: {pull}?[#?]
+* Adding support for AGP > 8: {pull}197[#?]
+* Setting minimum AGP version to 7.4.0: {pull}197[#?]
 ////
 
 [[release-notes-0.8.0]]

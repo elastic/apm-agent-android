@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.agp73.tools;
+package co.elastic.apm.android.plugin.tasks.tools;
 
 import com.android.build.api.variant.Variant;
 
@@ -26,14 +26,11 @@ import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.attributes.Attribute;
 import org.gradle.api.file.FileCollection;
 
-import co.elastic.apm.android.agp.api.tools.ClasspathProvider;
-
-public class ClasspathProvider73 implements ClasspathProvider, Action<ArtifactView.ViewConfiguration> {
+public class ClasspathProvider implements Action<ArtifactView.ViewConfiguration> {
 
     private static final Attribute<String> ARTIFACT_TYPE_ATTR = Attribute.of("artifactType", String.class);
     private FileCollection runtimeClasspath;
 
-    @Override
     public FileCollection getRuntimeClasspath(Variant variant) {
         if (runtimeClasspath == null) {
             runtimeClasspath = findClasspath(variant);
@@ -42,7 +39,6 @@ public class ClasspathProvider73 implements ClasspathProvider, Action<ArtifactVi
         return runtimeClasspath;
     }
 
-    @Override
     public Configuration getRuntimeConfiguration(Variant variant) {
         return variant.getRuntimeConfiguration();
     }

@@ -21,7 +21,7 @@ public abstract class BaseAssetsVerificationTest extends BaseFunctionalTest {
     }
 
     protected String getRelativePathToGeneratedAssetFile(String taskName) {
-        return "intermediates/assets/debug/" + taskName + "/" + ApmInfo.ASSET_FILE_NAME;
+        return "generated/assets/" + taskName + "/" + ApmInfo.ASSET_FILE_NAME;
     }
 
     protected Properties loadProperties(File propertiesFile) {

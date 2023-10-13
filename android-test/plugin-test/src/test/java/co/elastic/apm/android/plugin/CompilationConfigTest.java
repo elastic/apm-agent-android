@@ -291,6 +291,6 @@ public class CompilationConfigTest extends BaseAssetsVerificationTest {
 
     @Override
     protected String getAndroidGradlePluginVersion() {
-        return "7.2.0";
+        return "7.4.0";
     }
 }

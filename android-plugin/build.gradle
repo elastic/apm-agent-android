@@ -10,9 +10,6 @@ dependencies {
     implementation "net.bytebuddy:byte-buddy-gradle-plugin:$bytebuddy_version"
     implementation "net.bytebuddy:byte-buddy:$bytebuddy_version"
     implementation project(':android-common')
-    implementation project(':agp-compatibility:agp-compatibility-api')
-    implementation project(':agp-compatibility:agp-compatibility-7-2')
-    implementation project(':agp-compatibility:agp-compatibility-7-3')
     compileOnly "com.android.tools.build:gradle:$androidGradlePlugin_version"
 }
 

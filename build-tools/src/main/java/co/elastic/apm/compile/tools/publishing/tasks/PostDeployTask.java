@@ -40,8 +40,8 @@ public class PostDeployTask extends DefaultTask {
 
         String currentVersion = properties.getProperty("version");
         String releaseTag = "v" + currentVersion;
-//        setGitTag(releaseTag);
-//        setGitHubRelease(currentVersion, releaseTag);
+        setGitTag(releaseTag);
+        setGitHubRelease(currentVersion, releaseTag);
 
         String newVersion = VersionUtility.bumpMinorVersion(currentVersion);
 

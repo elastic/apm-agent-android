@@ -11,6 +11,9 @@
 
 set -e
 
+echo "--- Debug keys context :closed_lock_with_key:"
+ls -l "$SECRING_FILE"
+
 echo "--- Prepare release context"
 # Avoid detached HEAD since the release plugin requires to be on a branch
 git checkout -f "${branch_specifier}"

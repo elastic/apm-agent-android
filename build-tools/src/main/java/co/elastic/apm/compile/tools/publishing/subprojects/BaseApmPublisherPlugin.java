@@ -64,6 +64,7 @@ public abstract class BaseApmPublisherPlugin implements Plugin<Project> {
 
     private void signPublication(MavenPublication publication) {
         SigningExtension signing = project.getExtensions().getByType(SigningExtension.class);
+        signing.useInMemoryPgpKeys(System.getenv("SECRING_ASC"), System.getenv("KEYPASS_SECRET"));
         signing.sign(publication);
     }
 

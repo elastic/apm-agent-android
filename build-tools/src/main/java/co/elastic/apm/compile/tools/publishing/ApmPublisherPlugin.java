@@ -2,6 +2,7 @@ package co.elastic.apm.compile.tools.publishing;
 
 import org.gradle.api.plugins.PluginContainer;
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
+import org.gradle.plugins.signing.SigningExtension;
 import org.gradle.plugins.signing.SigningPlugin;
 
 import co.elastic.apm.compile.tools.base.BaseProjectTypePlugin;
@@ -28,6 +29,8 @@ public class ApmPublisherPlugin extends BaseProjectTypePlugin {
         plugins.apply(MavenPublishPlugin.class);
         if (PublishingUtils.isRelease(project)) {
             plugins.apply(SigningPlugin.class);
+            SigningExtension signing = project.getExtensions().getByType(SigningExtension.class);
+            signing.useInMemoryPgpKeys(System.getenv("SECRING_ASC"), System.getenv("KEYPASS_SECRET"));
         }
     }
 }

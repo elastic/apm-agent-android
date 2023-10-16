@@ -67,14 +67,8 @@ KEYPASS_SECRET=$(vault read -field=passphrase secret/release/signing)
 export KEYPASS_SECRET
 unset VAULT_TOKEN
 
-echo "--- Listing keys before"
-gpg --list-keys
-
 # Import the key into the keyring
 echo "$KEYPASS_SECRET" | gpg --batch --import "$KEY_FILE"
-
-echo "--- Listing keys after"
-gpg --list-keys
 
 # Export secring
 gpg --enarmor $KEY_FILE

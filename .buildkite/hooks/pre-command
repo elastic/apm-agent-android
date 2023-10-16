@@ -75,6 +75,9 @@ echo "$KEYPASS_SECRET" | gpg --batch --import "$KEY_FILE"
 export SECRING_FILE=$GNUPGHOME"/secring.gpg"
 gpg --pinentry-mode=loopback --passphrase "$KEYPASS_SECRET" --export-secret-key $KEY_ID_SECRET > "$SECRING_FILE"
 
+echo "--- Debug keys context :closed_lock_with_key:"
+ls -l "$SECRING_FILE"
+
 echo "--- Configure git context :git:"
 # Configure the committer since the maven release requires to push changes to GitHub
 # This will help with the SLSA requirements.

@@ -75,9 +75,6 @@ gpg --enarmor $KEY_FILE
 SECRING_ASC=$(cat "$KEY_FILE.asc")
 export SECRING_ASC
 
-echo "--- Debug keys context :closed_lock_with_key:"
-ls -l "$SECRING_ASC"
-
 echo "--- Configure git context :git:"
 # Configure the committer since the maven release requires to push changes to GitHub
 # This will help with the SLSA requirements.

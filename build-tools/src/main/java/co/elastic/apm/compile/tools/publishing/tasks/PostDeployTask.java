@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -39,8 +40,8 @@ public class PostDeployTask extends DefaultTask {
 
         String currentVersion = properties.getProperty("version");
         String releaseTag = "v" + currentVersion;
-        setGitTag(releaseTag);
-        setGitHubRelease(currentVersion, releaseTag);
+//        setGitTag(releaseTag);
+//        setGitHubRelease(currentVersion, releaseTag);
 
         String newVersion = VersionUtility.bumpMinorVersion(currentVersion);
 
@@ -159,26 +160,52 @@ public class PostDeployTask extends DefaultTask {
 
     private void runCommand(String command) {
         ProcessBuilder processBuilder = new ProcessBuilder();
-        processBuilder.command("bash", "-c", command);
+        processBuilder.command("bash", "-c", scapeSpecialChars(command));
 
         try {
             Process process = processBuilder.start();
-            StringBuilder output = new StringBuilder();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            BufferedReader successReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
 
-            String line;
-            while ((line = reader.readLine()) != null) {
-                output.append(line).append("\n");
-            }
+            new OutputPrinter(successReader, System.out).start();
+            new OutputPrinter(errorReader, System.err).start();
 
             int exitCode = process.waitFor();
-            if (exitCode == 0) {
-                System.out.println(output);
-            } else {
-                throw new RuntimeException(output.toString());
+            if (exitCode != 0) {
+                throw new RuntimeException("Error running command: " + command);
             }
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private String scapeSpecialChars(String command) {
+        return command.replaceAll("([()])", "\\\\$1");
+    }
+
+    private static class OutputPrinter implements Runnable {
+        private final BufferedReader reader;
+        private final PrintStream output;
+
+        private OutputPrinter(BufferedReader reader, PrintStream output) {
+            this.reader = reader;
+            this.output = output;
+        }
+
+        public void start() {
+            new Thread(this).start();
+        }
+
+        @Override
+        public void run() {
+            try {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    output.println(line);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

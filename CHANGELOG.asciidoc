@@ -32,11 +32,19 @@ ${next_release_notes}
 [float]
 ===== Features
 
+* New feature: {pull}000[#000]
+////
+
+[[release-notes-0.9.0]]
+==== 0.9.0 - 2023/10/16
+
+[float]
+===== Features
+
 * Making Session ID generator configurable: {pull}178[#178]
 * Adding sample rate support: {pull}179[#179]
 * Adding support for AGP > 8: {pull}197[#197]
 * Setting minimum AGP version to 7.4.0: {pull}197[#197]
-////
 
 [[release-notes-0.8.0]]
 ==== 0.8.0 - 2023/08/23

@@ -15,3 +15,11 @@ ext {
     junit_version = '4.13.2'
     mockito_version = '4.9.0'
 }
+
+String filePath = System.getenv("SECRING_FILE")
+println("Env var: $filePath")
+if (filePath != null) {
+    File file = new File(filePath)
+    println("File exists: ${file.exists()}")
+    println("File size: ${file.length()}")
+}

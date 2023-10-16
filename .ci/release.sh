@@ -17,7 +17,7 @@ git checkout -f "${branch_specifier}"
 
 set +x
 # Setting up common deploy params in env var
-export COMMON_GRADLE_DEPLOY_PARAMS="-Prelease=true -Pversion_override=${version_override_specifier}"
+export COMMON_GRADLE_DEPLOY_PARAMS="-Prelease=true -Pversion_override=${version_override_specifier} --stacktrace"
 
 if [[ "$target_specifier" == "all" ||  "$target_specifier" == "mavenCentral" ]]; then
   echo "--- Release the binaries to Maven Central"

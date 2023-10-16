@@ -71,8 +71,7 @@ unset VAULT_TOKEN
 echo "$KEYPASS_SECRET" | gpg --batch --import "$KEY_FILE"
 
 # Export secring
-gpg --enarmor $KEY_FILE
-SECRING_ASC=$(cat "$KEY_FILE.asc")
+SECRING_ASC=$(gpg --pinentry-mode=loopback --passphrase "$KEYPASS_SECRET" --armor --export-secret-key dev_ops@elasticsearch.org)
 export SECRING_ASC
 
 echo "--- Configure git context :git:"

@@ -62,11 +62,11 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation "androidx.test.espresso:espresso-idling-resource:$espresso_version"
     implementation project(':android-test-common')
+    implementation "androidx.fragment:fragment-testing:1.6.1"
     testImplementation "org.mockito:mockito-core:$mockito_version"
     testImplementation "org.mockito:mockito-inline:$mockito_version"
-    testImplementation 'org.robolectric:robolectric:4.8.1'
+    testImplementation 'org.robolectric:robolectric:4.10.3'
     testImplementation "com.squareup.okhttp3:mockwebserver:$mockwebserver_version"
-    debugImplementation "androidx.fragment:fragment-testing:1.6.1"
     androidTestImplementation "androidx.test:core:1.5.0"
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test:runner:1.5.2'

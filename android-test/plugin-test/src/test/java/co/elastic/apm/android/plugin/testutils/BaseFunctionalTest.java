@@ -134,7 +134,7 @@ public abstract class BaseFunctionalTest {
     }
 
     protected int getAndroidCompileSdk() {
-        return 32;
+        return 33;
     }
 
     protected String getAndroidAppId() {

@@ -27,6 +27,30 @@
         <activity
             android:name=".okhttp.NetworkCallingActivity"
             android:exported="true" />
+        <activity
+            android:name=".activities.MissingOnResumeActivity"
+            android:exported="true" />
+        <activity
+            android:name=".activities.MissingOnStartAndOnResumeActivity"
+            android:exported="true" />
+        <activity
+            android:name=".activities.ErrorHalfWayActivity"
+            android:exported="true" />
+        <activity
+            android:name=".activities.ErrorActivity"
+            android:exported="true" />
+        <activity
+            android:name=".activities.Hilt_InstrumentedActivity"
+            android:exported="true" />
+        <activity
+            android:name=".activities.SimpleCoroutineActivity"
+            android:exported="true" />
+        <activity
+            android:name=".activities.TitleActivity"
+            android:exported="true" />
+        <activity
+            android:name=".activities.NoLifecycleMethodsActivity"
+            android:exported="true" />
     </application>
 
 </manifest>

@@ -2,6 +2,7 @@ package co.elastic.apm.android.test.base;
 
 import android.app.Activity;
 
+import androidx.test.core.app.ActivityScenario;
 import androidx.test.espresso.IdlingRegistry;
 import androidx.test.espresso.IdlingResource;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
@@ -16,20 +17,19 @@ public abstract class ActivityEspressoTest<T extends Activity> extends BaseEspre
     private IdlingResource idlingResource;
     protected T activity;
 
-    @Rule
-    public ActivityScenarioRule<T> activityScenarioRule = new ActivityScenarioRule<>(getActivityClass());
-
     @Before
-    public void baseSetUp() {
+    public void activitySetUp() {
         onBefore();
-        activityScenarioRule.getScenario().onActivity(activity -> {
-            if (activity instanceof IdlingResourceProvider) {
-                idlingResource = ((IdlingResourceProvider) activity).getIdlingResource();
-                IdlingRegistry.getInstance().register(idlingResource);
-            }
-            this.activity = activity;
-            onActivity(activity);
-        });
+        try (ActivityScenario<T> scenario = ActivityScenario.launch(getActivityClass())) {
+            scenario.onActivity(activity -> {
+                if (activity instanceof IdlingResourceProvider) {
+                    idlingResource = ((IdlingResourceProvider) activity).getIdlingResource();
+                    IdlingRegistry.getInstance().register(idlingResource);
+                }
+                this.activity = activity;
+                onActivity(activity);
+            });
+        }
     }
 
     protected void onActivity(T activity) {

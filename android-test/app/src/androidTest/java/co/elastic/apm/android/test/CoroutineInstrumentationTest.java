@@ -1,10 +1,8 @@
 package co.elastic.apm.android.test;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.util.List;
 

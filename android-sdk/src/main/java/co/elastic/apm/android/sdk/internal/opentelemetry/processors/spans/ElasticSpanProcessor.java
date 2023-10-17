@@ -23,8 +23,8 @@ import org.slf4j.Logger;
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.attributes.AttributesCreator;
 import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
+import co.elastic.apm.android.sdk.instrumentation.Instrumentation;
 import co.elastic.apm.android.sdk.internal.api.filter.Filter;
-import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.configuration.impl.AllInstrumentationConfiguration;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.trace.StatusCode;
@@ -62,7 +62,7 @@ public final class ElasticSpanProcessor implements SpanProcessor {
 
     @Override
     public void onEnd(ReadableSpan span) {
-        if (!Configurations.get(AllInstrumentationConfiguration.class).isEnabled()) {
+        if (!Instrumentation.isEnabled(AllInstrumentationConfiguration.class)) {
             Elog.getLogger().debug("Ignoring all spans");
             return;
         }

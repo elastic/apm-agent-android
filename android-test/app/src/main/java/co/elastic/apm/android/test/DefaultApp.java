@@ -1,7 +1,12 @@
 package co.elastic.apm.android.test;
 
 import android.app.Application;
+import android.os.Handler;
+import android.os.Looper;
 
+import java.util.concurrent.CountDownLatch;
+
+import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.ElasticApmConfiguration;
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration;
 import co.elastic.apm.android.test.common.agent.AgentInitializer;
@@ -18,11 +23,33 @@ public class DefaultApp extends Application implements ExportersProvider {
     private final SpanExporterCaptor spanExporter;
     private final LogRecordExporterCaptor logRecordExporter;
     private final MetricExporterCaptor metricExporter;
+    private ElasticApmConfiguration originalAgentConfig;
+    private ElasticApmConfiguration currentAgentConfig;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        ElasticApmConfiguration configuration = ElasticApmConfiguration.builder().setSignalConfiguration(getSignalConfiguration()).build();
+        originalAgentConfig = ElasticApmConfiguration.builder().setSignalConfiguration(getSignalConfiguration()).build();
+        initializeAgent(originalAgentConfig);
+    }
+
+    public void reInitializeAgent(ElasticApmConfiguration configuration) throws InterruptedException {
+        ElasticApmAgent.resetForTest();
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            initializeAgent(configuration);
+        } else {
+            CountDownLatch countDownLatch = new CountDownLatch(1);
+            Handler handler = new Handler(Looper.getMainLooper());
+            handler.post(() -> {
+                initializeAgent(configuration);
+                countDownLatch.countDown();
+            });
+            countDownLatch.await();
+        }
+    }
+
+    private void initializeAgent(ElasticApmConfiguration configuration) {
+        currentAgentConfig = configuration;
         AgentInitializer.initialize(this, configuration);
     }
 
@@ -39,6 +66,15 @@ public class DefaultApp extends Application implements ExportersProvider {
         spanExporter = new SpanExporterCaptor();
         metricExporter = new MetricExporterCaptor();
         logRecordExporter = new LogRecordExporterCaptor();
+    }
+
+    public void reset() throws InterruptedException {
+        spanExporter.clearCapturedSpans();
+        metricExporter.clearCapturedMetrics();
+        logRecordExporter.clearCapturedLogs();
+        if (currentAgentConfig != originalAgentConfig || !ElasticApmAgent.isInitialized()) {
+            reInitializeAgent(originalAgentConfig);
+        }
     }
 
     @Override

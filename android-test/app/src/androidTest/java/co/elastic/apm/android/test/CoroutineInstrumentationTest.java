@@ -9,13 +9,12 @@ import org.junit.runner.RunWith;
 import java.util.List;
 
 import co.elastic.apm.android.test.activities.CoroutineActivity;
-import co.elastic.apm.android.test.base.BaseEspressoTest;
+import co.elastic.apm.android.test.base.ActivityEspressoTest;
 import co.elastic.apm.android.test.common.spans.Spans;
 import io.opentelemetry.sdk.trace.data.SpanData;
 
 @LargeTest
-@RunWith(AndroidJUnit4.class)
-public class CoroutineInstrumentationTest extends BaseEspressoTest<CoroutineActivity> {
+public class CoroutineInstrumentationTest extends ActivityEspressoTest<CoroutineActivity> {
 
     @Test
     public void onCreation_whenCoroutineGetsLaunched_propagateCurrentSpanContext() {

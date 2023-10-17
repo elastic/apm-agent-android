@@ -2,22 +2,18 @@ package co.elastic.apm.android.test.okhttp;
 
 import static org.junit.Assert.assertNotNull;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
-
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import co.elastic.apm.android.test.base.BaseEspressoTest;
+import co.elastic.apm.android.test.base.ActivityEspressoTest;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 
-@RunWith(AndroidJUnit4.class)
-public class NetworkCallingActivityTest extends BaseEspressoTest<NetworkCallingActivity> {
+public class NetworkCallingActivityTest extends ActivityEspressoTest<NetworkCallingActivity> {
 
     private MockWebServer mockWebServer;
     private HttpUrl mockUrl;

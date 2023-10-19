@@ -23,6 +23,12 @@ import androidx.annotation.NonNull;
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.base.DefaultSignalProcessorConfiguration;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.configuration.impl.ConnectivityConfiguration;
+import io.opentelemetry.exporter.otlp.http.logs.OtlpHttpLogRecordExporter;
+import io.opentelemetry.exporter.otlp.http.logs.OtlpHttpLogRecordExporterBuilder;
+import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter;
+import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporterBuilder;
+import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter;
+import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporterBuilder;
 import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporter;
 import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporterBuilder;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
@@ -44,6 +50,42 @@ public final class DefaultSignalConfiguration extends DefaultSignalProcessorConf
 
     @Override
     protected SpanExporter provideSpanExporter() {
+        switch (connectivity.getExportProtocol()) {
+            case GRPC:
+                return getOtlpGrpcSpanExporter();
+            case HTTP:
+                return getOtlpHttpSpanExporter();
+            default:
+                throw new IllegalArgumentException();
+        }
+    }
+
+    @Override
+    protected LogRecordExporter provideLogExporter() {
+        switch (connectivity.getExportProtocol()) {
+            case GRPC:
+                return getOtlpGrpcLogRecordExporter();
+            case HTTP:
+                return getOtlpHttpLogRecordExporter();
+            default:
+                throw new IllegalArgumentException();
+        }
+    }
+
+    @Override
+    protected MetricExporter provideMetricExporter() {
+        switch (connectivity.getExportProtocol()) {
+            case GRPC:
+                return getOtlpGrpcMetricExporter();
+            case HTTP:
+                return getOtlpHttpMetricExporter();
+            default:
+                throw new IllegalArgumentException();
+        }
+    }
+
+    @NonNull
+    private OtlpGrpcSpanExporter getOtlpGrpcSpanExporter() {
         OtlpGrpcSpanExporterBuilder exporterBuilder = OtlpGrpcSpanExporter.builder().setEndpoint(connectivity.getEndpoint());
         if (connectivity.getAuthConfiguration() != null) {
             exporterBuilder.addHeader(AUTHORIZATION_HEADER_NAME, getAuthorizationHeaderValue());
@@ -51,8 +93,8 @@ public final class DefaultSignalConfiguration extends DefaultSignalProcessorConf
         return exporterBuilder.build();
     }
 
-    @Override
-    protected LogRecordExporter provideLogExporter() {
+    @NonNull
+    private OtlpGrpcLogRecordExporter getOtlpGrpcLogRecordExporter() {
         OtlpGrpcLogRecordExporterBuilder exporterBuilder = OtlpGrpcLogRecordExporter.builder().setEndpoint(connectivity.getEndpoint());
         if (connectivity.getAuthConfiguration() != null) {
             exporterBuilder.addHeader(AUTHORIZATION_HEADER_NAME, getAuthorizationHeaderValue());
@@ -60,9 +102,38 @@ public final class DefaultSignalConfiguration extends DefaultSignalProcessorConf
         return exporterBuilder.build();
     }
 
-    @Override
-    protected MetricExporter provideMetricExporter() {
+    @NonNull
+    private OtlpGrpcMetricExporter getOtlpGrpcMetricExporter() {
         OtlpGrpcMetricExporterBuilder exporterBuilder = OtlpGrpcMetricExporter.builder()
+                .setAggregationTemporalitySelector(AggregationTemporalitySelector.deltaPreferred())
+                .setEndpoint(connectivity.getEndpoint());
+        if (connectivity.getAuthConfiguration() != null) {
+            exporterBuilder.addHeader(AUTHORIZATION_HEADER_NAME, getAuthorizationHeaderValue());
+        }
+        return exporterBuilder.build();
+    }
+
+    @NonNull
+    private OtlpHttpSpanExporter getOtlpHttpSpanExporter() {
+        OtlpHttpSpanExporterBuilder exporterBuilder = OtlpHttpSpanExporter.builder().setEndpoint(connectivity.getEndpoint());
+        if (connectivity.getAuthConfiguration() != null) {
+            exporterBuilder.addHeader(AUTHORIZATION_HEADER_NAME, getAuthorizationHeaderValue());
+        }
+        return exporterBuilder.build();
+    }
+
+    @NonNull
+    private OtlpHttpLogRecordExporter getOtlpHttpLogRecordExporter() {
+        OtlpHttpLogRecordExporterBuilder exporterBuilder = OtlpHttpLogRecordExporter.builder().setEndpoint(connectivity.getEndpoint());
+        if (connectivity.getAuthConfiguration() != null) {
+            exporterBuilder.addHeader(AUTHORIZATION_HEADER_NAME, getAuthorizationHeaderValue());
+        }
+        return exporterBuilder.build();
+    }
+
+    @NonNull
+    private OtlpHttpMetricExporter getOtlpHttpMetricExporter() {
+        OtlpHttpMetricExporterBuilder exporterBuilder = OtlpHttpMetricExporter.builder()
                 .setAggregationTemporalitySelector(AggregationTemporalitySelector.deltaPreferred())
                 .setEndpoint(connectivity.getEndpoint());
         if (connectivity.getAuthConfiguration() != null) {

@@ -36,7 +36,7 @@ public class DefaultConfigurationsProvider implements ConfigurationsProvider {
 
     public DefaultConfigurationsProvider(ElasticApmConfiguration configuration, Connectivity connectivity) {
         configurations.add(new GeneralConfiguration(configuration));
-        configurations.add(new ConnectivityConfiguration(connectivity));
+        configurations.add(new ConnectivityConfiguration(connectivity, configuration.exportProtocol));
         configurations.add(new AllInstrumentationConfiguration());
         configurations.add(new SignalPersistenceConfiguration(configuration));
         configurations.add(new SampleRateConfiguration(configuration.sampleRate));

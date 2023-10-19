@@ -32,7 +32,7 @@ ${next_release_notes}
 [float]
 ===== Features
 
-* New feature: {pull}000[#000]
+* Marking okhttp spans as failed when receiving an error response code: {pull}000[#000]
 ////
 
 [[release-notes-0.9.0]]

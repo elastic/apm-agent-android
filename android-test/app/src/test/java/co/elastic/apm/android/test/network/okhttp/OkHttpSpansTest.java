@@ -84,7 +84,7 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
         List<SpanData> spans = getRecordedSpans(2);
         SpanData httpSpan = spans.get(1);
 
-        Spans.verify(httpSpan)
+        Spans.verifyFailed(httpSpan)
                 .isNamed("GET localhost")
                 .isOfKind(SpanKind.CLIENT)
                 .hasAttribute("http.url", "http://localhost:" + webServer.getPort() + "/")

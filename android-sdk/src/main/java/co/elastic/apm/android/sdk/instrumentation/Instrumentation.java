@@ -49,7 +49,7 @@ public abstract class Instrumentation extends Configuration {
         }
     }
 
-    static boolean isEnabled(Class<? extends Instrumentation> instrumentationClass) {
+    public static boolean isEnabled(Class<? extends Instrumentation> instrumentationClass) {
         if (!Configurations.isInitialized()) {
             Elog.getLogger().info("Configurations has not been initialized");
             return false;

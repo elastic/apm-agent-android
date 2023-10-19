@@ -65,6 +65,7 @@ import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicWorkSer
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.sdk.internal.utilities.logging.AndroidLoggerFactory;
 import co.elastic.apm.android.sdk.session.SessionManager;
+import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.events.GlobalEventEmitterProvider;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
@@ -149,6 +150,8 @@ public final class ElasticApmAgent {
         SessionManager.resetForTest();
         ConnectionHttpAttributesVisitor.resetForTest();
         ServiceManager.resetForTest();
+        GlobalOpenTelemetry.resetForTest();
+        GlobalEventEmitterProvider.resetForTest();
         instance = null;
     }
 

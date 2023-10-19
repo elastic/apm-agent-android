@@ -37,8 +37,6 @@ import co.elastic.apm.android.test.common.metrics.MetricsFlusher;
 import co.elastic.apm.android.test.common.spans.SpanExporterCaptor;
 import co.elastic.apm.android.test.providers.ExportersProvider;
 import co.elastic.apm.android.test.testutils.TestElasticClock;
-import io.opentelemetry.api.GlobalOpenTelemetry;
-import io.opentelemetry.api.events.GlobalEventEmitterProvider;
 import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.logs.export.SimpleLogRecordProcessor;
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
@@ -168,8 +166,6 @@ public class BaseRobolectricTestApplication extends Application implements Expor
         configurations.clear();
         ElasticApmAgent.resetForTest();
         Thread.setDefaultUncaughtExceptionHandler(null);
-        GlobalOpenTelemetry.resetForTest();
-        GlobalEventEmitterProvider.resetForTest();
     }
 
     @Override

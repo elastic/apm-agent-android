@@ -63,7 +63,7 @@ public class ResourcesTest extends BaseRobolectricTest {
         SpanData customSpan = captureSpan();
 
         Spans.verify(customSpan)
-                .hasResource("os.description", "Android 12, API level 32, BUILD unknown");
+                .hasResource("os.description", "Android 13, API level 33, BUILD unknown");
     }
 
     @Test
@@ -79,7 +79,7 @@ public class ResourcesTest extends BaseRobolectricTest {
         SpanData customSpan = captureSpan();
 
         Spans.verify(customSpan)
-                .hasResource("os.version", "12");
+                .hasResource("os.version", "13");
     }
 
     @Test

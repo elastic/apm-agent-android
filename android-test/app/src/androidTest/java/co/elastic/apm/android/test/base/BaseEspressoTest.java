@@ -1,67 +1,46 @@
 package co.elastic.apm.android.test.base;
 
-import android.app.Activity;
-
-import androidx.test.espresso.IdlingRegistry;
-import androidx.test.espresso.IdlingResource;
-import androidx.test.ext.junit.rules.ActivityScenarioRule;
-
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 
+import co.elastic.apm.android.sdk.ElasticApmConfiguration;
 import co.elastic.apm.android.test.DefaultApp;
-import co.elastic.apm.android.test.activities.espresso.IdlingResourceProvider;
 import co.elastic.apm.android.test.common.BaseTest;
 import co.elastic.apm.android.test.common.logs.LogRecordExporterCaptor;
 import co.elastic.apm.android.test.common.metrics.MetricExporterCaptor;
 import co.elastic.apm.android.test.common.spans.SpanExporterCaptor;
 
-public abstract class BaseEspressoTest<T extends Activity> extends BaseTest {
+public class BaseEspressoTest extends BaseTest {
     private SpanExporterCaptor spanExporterCaptor;
     private LogRecordExporterCaptor logRecordExporterCaptor;
     private MetricExporterCaptor metricExporterCaptor;
-    private IdlingResource idlingResource;
-    protected T activity;
-
-    @Rule
-    public ActivityScenarioRule<T> activityScenarioRule = new ActivityScenarioRule<>(getActivityClass());
 
     @Before
     public void baseSetUp() {
-        onBefore();
-        activityScenarioRule.getScenario().onActivity(activity -> {
-            DefaultApp application = (DefaultApp) activity.getApplication();
-            spanExporterCaptor = application.getSpanExporter();
-            logRecordExporterCaptor = application.getLogRecordExporter();
-            metricExporterCaptor = application.getMetricExporter();
-            if (activity instanceof IdlingResourceProvider) {
-                idlingResource = ((IdlingResourceProvider) activity).getIdlingResource();
-                IdlingRegistry.getInstance().register(idlingResource);
-            }
-            this.activity = activity;
-            onActivity(activity);
-        });
-    }
-
-    protected void onActivity(T activity) {
-
-    }
-
-    protected void onBefore() {
-
-    }
-
-    protected void onAfter() {
-
+        DefaultApp application = getDefaultApp();
+        spanExporterCaptor = application.getSpanExporter();
+        logRecordExporterCaptor = application.getLogRecordExporter();
+        metricExporterCaptor = application.getMetricExporter();
     }
 
     @After
-    public void cleanUp() {
-        onAfter();
-        if (idlingResource != null) {
-            IdlingRegistry.getInstance().unregister(idlingResource);
-            idlingResource = null;
+    public void baseTearDown() {
+        try {
+            getDefaultApp().reset();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static DefaultApp getDefaultApp() {
+        return (DefaultApp) TestRunner.application;
+    }
+
+    protected void overrideAgentConfiguration(ElasticApmConfiguration configuration) {
+        try {
+            getDefaultApp().reInitializeAgent(configuration);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -79,6 +58,4 @@ public abstract class BaseEspressoTest<T extends Activity> extends BaseTest {
     protected LogRecordExporterCaptor getLogRecordExporter() {
         return logRecordExporterCaptor;
     }
-
-    protected abstract Class<T> getActivityClass();
 }

@@ -24,8 +24,8 @@ import java.util.Collections;
 import java.util.List;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
+import co.elastic.apm.android.sdk.instrumentation.Instrumentation;
 import co.elastic.apm.android.sdk.internal.api.filter.Filter;
-import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.configuration.impl.AllInstrumentationConfiguration;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.metrics.InstrumentType;
@@ -78,7 +78,7 @@ public final class ElasticMetricReader implements MetricReader {
 
         @Override
         public Collection<MetricData> collectAllMetrics() {
-            if (!Configurations.get(AllInstrumentationConfiguration.class).isEnabled()) {
+            if (!Instrumentation.isEnabled(AllInstrumentationConfiguration.class)) {
                 Elog.getLogger().debug("Ignoring all metrics");
                 return Collections.emptyList();
             }

@@ -13,7 +13,11 @@ import org.junit.Test;
 import org.robolectric.annotation.Config;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.BiConsumer;
 
 import co.elastic.apm.android.sdk.ElasticApmConfiguration;
 import co.elastic.apm.android.sdk.instrumentation.InstrumentationConfiguration;
@@ -63,7 +67,9 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
 
     @Test
     public void verifyHttpSpanStructure_whenSucceeded() {
-        executeSuccessfulHttpCall(request);
+        Map<String, String> responseHeaders = new HashMap<>();
+        responseHeaders.put("Content-Length", "2");
+        executeSuccessfulHttpCall(request, 200, "{}", responseHeaders);
 
         List<SpanData> spans = getRecordedSpans(2);
         SpanData httpSpan = spans.get(1);
@@ -73,7 +79,8 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
                 .isOfKind(SpanKind.CLIENT)
                 .hasAttribute("http.url", "http://localhost:" + webServer.getPort() + "/")
                 .hasAttribute("http.method", "GET")
-                .hasAttribute("http.status_code", 200);
+                .hasAttribute("http.status_code", 200)
+                .hasAttribute("http.response_content_length", 2);
         verify(contextStore).remove(any());
     }
 
@@ -227,7 +234,13 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
     }
 
     private void executeSuccessfulHttpCall(Request request, int responseCode) {
-        webServer.enqueue(new MockResponse().setResponseCode(responseCode).setBody("{}"));
+        executeSuccessfulHttpCall(request, responseCode, "{}", Collections.emptyMap());
+    }
+
+    private void executeSuccessfulHttpCall(Request request, int responseCode, String body, Map<String, String> headers) {
+        MockResponse mockResponse = new MockResponse().setResponseCode(responseCode).setBody(body);
+        headers.forEach(mockResponse::addHeader);
+        webServer.enqueue(mockResponse);
         try {
             Response response = executeHttpCall(request);
             assertEquals("{}", response.body().string());

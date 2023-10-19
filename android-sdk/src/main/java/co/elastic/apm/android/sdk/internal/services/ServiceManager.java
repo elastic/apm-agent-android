@@ -35,6 +35,7 @@ import co.elastic.apm.android.sdk.internal.utilities.providers.Provider;
 public final class ServiceManager implements Lifecycle {
     private final HashMap<String, Service> services = new HashMap<>();
     private static ServiceManager INSTANCE;
+    private static InitializationCallback initializationCallback;
 
     private ServiceManager() {
     }
@@ -47,6 +48,18 @@ public final class ServiceManager implements Lifecycle {
         INSTANCE.addService(new ApmMetadataService(appContext));
         INSTANCE.addService(new PreferencesService(appContext));
         INSTANCE.addService(new PeriodicWorkService());
+        notifyInitializationFinished();
+        cleanUp();
+    }
+
+    private static void cleanUp() {
+        initializationCallback = null;
+    }
+
+    private static void notifyInitializationFinished() {
+        if (initializationCallback != null) {
+            initializationCallback.onInitializationFinished();
+        }
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -55,6 +68,11 @@ public final class ServiceManager implements Lifecycle {
             throw new IllegalStateException("Services haven't been initialized");
         }
         return INSTANCE;
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    public static void setInitializationCallback(InitializationCallback initializationCallback) {
+        ServiceManager.initializationCallback = initializationCallback;
     }
 
     public void addService(Service service) {
@@ -104,5 +122,9 @@ public final class ServiceManager implements Lifecycle {
         if (services.containsKey(name)) {
             throw new IllegalArgumentException("Service already registered with name: " + name);
         }
+    }
+
+    public interface InitializationCallback {
+        void onInitializationFinished();
     }
 }

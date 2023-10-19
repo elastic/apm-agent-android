@@ -15,6 +15,7 @@ import org.robolectric.annotation.Config;
 
 import java.io.IOException;
 
+import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.ElasticApmConfiguration;
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.connectivity.auth.impl.ApiKeyConfiguration;
@@ -60,6 +61,16 @@ public class InitializationTest extends BaseRobolectricTest {
 
         assertTrue(getPeriodicWorkService().getTasks().contains(getApp().getCentralConfigurationInitializer()));
         assertEquals(app.pollManager, ConfigurationPollManager.get());
+    }
+
+    @Config(application = AppWithoutServerUrlSetInGradle.class)
+    @Test
+    public void whenServerUrlIsNotFound_failInitialization() {
+        AppWithoutServerUrlSetInGradle app = getApp();
+
+        assertTrue(app.errorWhenInitializing);
+        assertEquals("serverUrl not found. You need to provide it in the Gradle config or set it up manually in the ElasticAgent runtime configuration. More info on: https://www.elastic.co/guide/en/apm/agent/android/current/configuration.html",
+                app.errorMessage);
     }
 
     @Test
@@ -212,6 +223,27 @@ public class InitializationTest extends BaseRobolectricTest {
             initializeAgentWithCustomConfig(ElasticApmConfiguration.builder()
                     .setPersistenceConfiguration(persistenceConfiguration)
                     .build());
+        }
+    }
+
+    private static class AppWithoutServerUrlSetInGradle extends BaseRobolectricTestApplication {
+        public boolean errorWhenInitializing = false;
+        public String errorMessage;
+
+        @Override
+        public void onCreate() {
+            super.onCreate();
+            ServiceManager.setInitializationCallback(() -> {
+                spyOnServices();
+                ApmMetadataService service = ServiceManager.get().getService(Service.Names.METADATA);
+                doReturn(null).when(service).getServerUrl();
+            });
+            try {
+                ElasticApmAgent.initialize(this);
+            } catch (IllegalArgumentException e) {
+                errorWhenInitializing = true;
+                errorMessage = e.getMessage();
+            }
         }
     }
 }

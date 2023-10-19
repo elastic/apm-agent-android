@@ -80,9 +80,12 @@ public abstract class ApmInfoGeneratorTask extends DefaultTask {
         Properties properties = new Properties();
         properties.put(ApmInfo.KEY_SERVICE_NAME, provideServiceName());
         properties.put(ApmInfo.KEY_SERVICE_VERSION, provideServiceVersion());
-        properties.put(ApmInfo.KEY_SERVER_URL, provideServerUrl());
         properties.put(ApmInfo.KEY_SERVICE_ENVIRONMENT, getVariantName().get());
 
+        String serverUrl = provideServerUrl();
+        if (serverUrl != null) {
+            properties.put(ApmInfo.KEY_SERVER_URL, serverUrl);
+        }
         String secretToken = provideSecretToken();
         if (secretToken != null) {
             properties.put(ApmInfo.KEY_SERVER_SECRET_TOKEN, secretToken);
@@ -120,7 +123,7 @@ public abstract class ApmInfoGeneratorTask extends DefaultTask {
     }
 
     private String provideServerUrl() {
-        return provideValue("serverUrl", SERVER_URL_ENVIRONMENT_VARIABLE, getServerUrl());
+        return provideOptionalValue("serverUrl", SERVER_URL_ENVIRONMENT_VARIABLE, getServerUrl());
     }
 
     private String provideValue(String id, String environmentName, Provider<String> defaultValueProvider) {

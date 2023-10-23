@@ -416,8 +416,7 @@ class MyApp extends android.app.Application {
     }
 }
 ----
-
-<1> You can either create your own implementation for the SignalConfiguration interface, or you could use the `SignalConfiguration.custom` function and pass your implementations for OpenTelemetry's processors and/or exporters.
+<1> You can either create your own implementation for the SignalConfiguration interface, or you can use the `SignalConfiguration.custom` function and pass your implementations for OpenTelemetry's processors and/or exporters.
 
 [float]
 [[opentelemetry-sdk-configuration]]

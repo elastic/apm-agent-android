@@ -32,9 +32,7 @@ ${next_release_notes}
 [float]
 ===== Features
 
-* Upgrading Byte Buddy version to 1.14.9: {pull}207[#207]
-* Setting minimum AGP version to 7.4.0 to use the Gradle plugin: {pull}207[#207]
-* Removing Gradle's warning on missing serverUrl param: {pull}209[#209]
+* New feature: {pull}000[#000]
 ////
 
 [[release-notes-0.9.0]]

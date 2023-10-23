@@ -124,7 +124,6 @@ class MyApp extends android.app.Application {
     }
 }
 ----
-
 <1> Note that this configuration may not work if a <<custom-signal-configuration, custom signal configuration>> is set.
 
 NOTE: OTLP over HTTP is supported in APM server versions 8.3.0+. OTLP over gRPC is supported in APM Server versions 7.12.0+.

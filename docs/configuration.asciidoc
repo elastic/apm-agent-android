@@ -108,7 +108,8 @@ class MyApp extends android.app.Application {
 [[server-export-protocol]]
 ==== APM Server export protocol
 
-Signals are exported using the gRPC protocol by default. You can change the export protocol to HTTP by using the ExportProtocol configuration as shown below:
+Signals are exported using the gRPC protocol by default.
+You can change the export protocol to HTTP by using the ExportProtocol configuration as shown below:
 
 [source,java]
 ----
@@ -124,9 +125,11 @@ class MyApp extends android.app.Application {
     }
 }
 ----
+
 <1> Note that this configuration may not work if a <<custom-signal-configuration, custom signal configuration>> is set.
 
-NOTE: OTLP over HTTP is supported in APM server versions 8.3.0+. OTLP over gRPC is supported in APM Server versions 7.12.0+.
+NOTE: OTLP over HTTP is supported in APM server versions 8.3.0+.
+OTLP over gRPC is supported in APM Server versions 7.12.0+.
 
 [float]
 [[persistence-configuration]]
@@ -391,7 +394,7 @@ This table outlines the attributes and their corresponding permissions:
 [[custom-signal-configuration]]
 ==== Custom SignalConfiguration
 
-A SignalConfiguration object contains OpenTelemetry's processors for all signals: spans, metrics, and logs).
+A SignalConfiguration object contains OpenTelemetry's processors for all signals: spans, metrics, and logs.
 The agent takes care of creating a default SignalConfiguration implementation based on the <<app-server-connectivity, Connectivity parameters>> passed during the agent's initialization, as well as the <<server-export-protocol, export protocol>> chosen for sending data to the APM Server.
 However, if you need more control over OpenTelemetry's processors and exporters, you can override the default SignalConfiguration object and provide your own with custom processors and/or exporters, as shown below:
 
@@ -416,6 +419,7 @@ class MyApp extends android.app.Application {
     }
 }
 ----
+
 <1> You can either create your own implementation for the SignalConfiguration interface, or you can use the `SignalConfiguration.custom` function and pass your implementations for OpenTelemetry's processors and/or exporters.
 
 [float]

@@ -32,7 +32,12 @@ ${next_release_notes}
 [float]
 ===== Features
 
-* New feature: {pull}000[#000]
+* Adding setExportProtocol configuration to choose between HTTP and gRPC, defaulting to gRPC: {pull}213[#213]
+* Upgrading Byte Buddy version to 1.14.9: {pull}207[#207]
+* Setting minimum AGP version to 7.4.0 to use the Gradle plugin: {pull}207[#207]
+* Removing Gradle's warning on missing serverUrl param: {pull}209[#209]
+* Adding http response content length attr to okhttp spans: {pull}211[#211]
+* Marking okhttp spans as failed when receiving an error response code: {pull}212[#212]* New feature: {pull}000[#000]
 ////
 
 [[release-notes-0.9.0]]

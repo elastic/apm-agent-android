@@ -108,7 +108,7 @@ class MyApp extends android.app.Application {
 [[server-export-protocol]]
 ==== APM Server export protocol
 
-The signals will be exported using the gRPC protocol by default, you could change it to HTTP using the ExportProtocol configuration as shown below:
+Signals are exported using the gRPC protocol by default. You can change the export protocol to HTTP by using the ExportProtocol configuration as shown below:
 
 [source,java]
 ----

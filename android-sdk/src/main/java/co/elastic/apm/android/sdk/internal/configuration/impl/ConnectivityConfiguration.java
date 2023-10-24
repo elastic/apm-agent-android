@@ -19,14 +19,17 @@
 package co.elastic.apm.android.sdk.internal.configuration.impl;
 
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
+import co.elastic.apm.android.sdk.connectivity.ExportProtocol;
 import co.elastic.apm.android.sdk.connectivity.auth.AuthConfiguration;
 import co.elastic.apm.android.sdk.internal.configuration.Configuration;
 
 public final class ConnectivityConfiguration extends Configuration {
     private final Connectivity connectivity;
+    private final ExportProtocol exportProtocol;
 
-    public ConnectivityConfiguration(Connectivity connectivity) {
+    public ConnectivityConfiguration(Connectivity connectivity, ExportProtocol exportProtocol) {
         this.connectivity = connectivity;
+        this.exportProtocol = exportProtocol;
     }
 
     public String getEndpoint() {
@@ -35,5 +38,9 @@ public final class ConnectivityConfiguration extends Configuration {
 
     public AuthConfiguration getAuthConfiguration() {
         return connectivity.authConfiguration();
+    }
+
+    public ExportProtocol getExportProtocol() {
+        return exportProtocol;
     }
 }

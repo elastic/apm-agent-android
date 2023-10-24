@@ -119,6 +119,11 @@ public class OtelOkHttpEventListener extends EventListener {
     public void responseHeadersEnd(@NonNull Call call, @NonNull Response response) {
         Span span = retrieveSpan(call.request());
         if (span != null) {
+            span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, response.code());
+            String contentLength = response.header("Content-Length");
+            if (contentLength != null) {
+                span.setAttribute(SemanticAttributes.HTTP_RESPONSE_CONTENT_LENGTH, Long.valueOf(contentLength));
+            }
             int code = response.code();
             span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, code);
             if (isHttpError(code)) {

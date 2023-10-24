@@ -17,8 +17,10 @@ import java.io.IOException;
 
 import co.elastic.apm.android.sdk.ElasticApmConfiguration;
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
+import co.elastic.apm.android.sdk.connectivity.ExportProtocol;
 import co.elastic.apm.android.sdk.connectivity.auth.impl.ApiKeyConfiguration;
 import co.elastic.apm.android.sdk.connectivity.auth.impl.SecretTokenConfiguration;
+import co.elastic.apm.android.sdk.connectivity.opentelemetry.DefaultSignalConfiguration;
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration;
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.exporters.ExporterVisitor;
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.exporters.VisitableExporters;
@@ -34,9 +36,18 @@ import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.test.testutils.MainApp;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTestApplication;
+import io.opentelemetry.exporter.otlp.http.logs.OtlpHttpLogRecordExporter;
+import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter;
+import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter;
+import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporter;
+import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
+import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.sdk.logs.LogRecordProcessor;
+import io.opentelemetry.sdk.logs.export.LogRecordExporter;
+import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.metrics.export.MetricReader;
 import io.opentelemetry.sdk.trace.SpanProcessor;
+import io.opentelemetry.sdk.trace.export.SpanExporter;
 
 public class InitializationTest extends BaseRobolectricTest {
 
@@ -134,6 +145,26 @@ public class InitializationTest extends BaseRobolectricTest {
         verify(app.exportScheduler).onPersistenceDisabled();
     }
 
+    @Config(application = AppWithDefaultExporterProtocol.class)
+    @Test
+    public void verifyDefaultExporters() {
+        AppWithDefaultExporterProtocol app = getApp();
+
+        assertTrue(app.spanExporter instanceof OtlpGrpcSpanExporter);
+        assertTrue(app.metricExporter instanceof OtlpGrpcMetricExporter);
+        assertTrue(app.logRecordExporter instanceof OtlpGrpcLogRecordExporter);
+    }
+
+    @Config(application = AppWithHTTPExporterProtocol.class)
+    @Test
+    public void verifyHttpExporters() {
+        AppWithHTTPExporterProtocol app = getApp();
+
+        assertTrue(app.spanExporter instanceof OtlpHttpSpanExporter);
+        assertTrue(app.metricExporter instanceof OtlpHttpMetricExporter);
+        assertTrue(app.logRecordExporter instanceof OtlpHttpLogRecordExporter);
+    }
+
     private static PeriodicWorkService getPeriodicWorkService() {
         return ServiceManager.get().getService(Service.Names.PERIODIC_WORK);
     }
@@ -212,6 +243,56 @@ public class InitializationTest extends BaseRobolectricTest {
             initializeAgentWithCustomConfig(ElasticApmConfiguration.builder()
                     .setPersistenceConfiguration(persistenceConfiguration)
                     .build());
+        }
+    }
+
+    private static class BaseAppWithCustomSignalConfiguration extends BaseRobolectricTestApplication implements ExporterVisitor {
+        public SpanExporter spanExporter;
+        public LogRecordExporter logRecordExporter;
+        public MetricExporter metricExporter;
+        private DefaultSignalConfiguration signalConfiguration;
+
+        @Override
+        public void onCreate() {
+            super.onCreate();
+            signalConfiguration = SignalConfiguration.create();
+            signalConfiguration.setExporterVisitor(this);
+        }
+
+        @Override
+        protected SignalConfiguration getSignalConfiguration() {
+            return signalConfiguration;
+        }
+
+        @Override
+        public <T> T visitExporter(T exporter) {
+            if (exporter instanceof SpanExporter) {
+                spanExporter = (SpanExporter) exporter;
+            } else if (exporter instanceof LogRecordExporter) {
+                logRecordExporter = (LogRecordExporter) exporter;
+            } else if (exporter instanceof MetricExporter) {
+                metricExporter = (MetricExporter) exporter;
+            }
+            return exporter;
+        }
+    }
+
+    private static class AppWithHTTPExporterProtocol extends BaseAppWithCustomSignalConfiguration {
+        @Override
+        public void onCreate() {
+            super.onCreate();
+
+            initializeAgentWithCustomConfig(ElasticApmConfiguration.builder()
+                    .setExportProtocol(ExportProtocol.HTTP)
+                    .build());
+        }
+    }
+
+    private static class AppWithDefaultExporterProtocol extends BaseAppWithCustomSignalConfiguration {
+        @Override
+        public void onCreate() {
+            super.onCreate();
+            initializeAgent();
         }
     }
 }

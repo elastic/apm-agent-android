@@ -105,6 +105,33 @@ class MyApp extends android.app.Application {
 ----
 
 [float]
+[[server-export-protocol]]
+==== APM Server export protocol
+
+Signals are exported using the gRPC protocol by default.
+You can change the export protocol to HTTP by using the ExportProtocol configuration as shown below:
+
+[source,java]
+----
+class MyApp extends android.app.Application {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        ElasticApmConfiguration configuration = ElasticApmConfiguration.builder()
+                .setExportProtocol(ExportProtocol.HTTP) <1>
+                .build();
+        ElasticApmAgent.initialize(this, configuration);
+    }
+}
+----
+
+<1> Note that this configuration may not work if a <<custom-signal-configuration, custom signal configuration>> is set.
+
+NOTE: OTLP over HTTP is supported in APM server versions 8.3.0+.
+OTLP over gRPC is supported in APM Server versions 7.12.0+.
+
+[float]
 [[persistence-configuration]]
 ==== Persistence configuration
 
@@ -169,7 +196,8 @@ class MyApp extends android.app.Application {
 ==== Sample rate configuration
 
 You can set a session sample rate that will be evaluated on every new session to determine whether the full session is exported or ignored.
-Sessions are currently time-based and will kept alive for at least 30 mins. A `session.id` attribute will be sent on every signal until the timer ends, resetting the timer whenever a new signal is created.
+Sessions are currently time-based and will kept alive for at least 30 mins.
+A `session.id` attribute will be sent on every signal until the timer ends, resetting the timer whenever a new signal is created.
 
 When the time's up, a new session ID will be generated and the sample rate will be evaluated to determine whether the new session's signals will get exported or ignored.
 
@@ -360,7 +388,43 @@ This table outlines the attributes and their corresponding permissions:
 |===
 
 [float]
-==== Advanced configurable options
+=== Advanced configurable options
+
+[float]
+[[custom-signal-configuration]]
+==== Custom SignalConfiguration
+
+A SignalConfiguration object contains OpenTelemetry's processors for all signals: spans, metrics, and logs.
+The agent takes care of creating a default SignalConfiguration implementation based on the <<app-server-connectivity, Connectivity parameters>> passed during the agent's initialization, as well as the <<server-export-protocol, export protocol>> chosen for sending data to the APM Server.
+However, if you need more control over OpenTelemetry's processors and exporters, you can override the default SignalConfiguration object and provide your own with custom processors and/or exporters, as shown below:
+
+[source,java]
+----
+class MyApp extends android.app.Application {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        SpanExporter mySpanExporter;
+        LogRecordExporter myLogRecordExporter;
+        MetricExporter myMetricExporter;
+
+        // You could also pass processors instead of exporters.
+        SignalConfiguration mySignalConfiguration = SignalConfiguration.custom(mySpanExporter, myLogRecordExporter, myMetricExporter); <1>
+
+        ElasticApmConfiguration.builder()
+                .setSignalConfiguration(mySignalConfiguration)
+                .build();
+        ElasticApmAgent.initialize(this, configuration);
+    }
+}
+----
+
+<1> You can either create your own implementation for the SignalConfiguration interface, or you can use the `SignalConfiguration.custom` function and pass your implementations for OpenTelemetry's processors and/or exporters.
+
+[float]
+[[opentelemetry-sdk-configuration]]
+==== Further configurations from the OpenTelemetry SDK.
 
 The configurable parameters provided by the Elastic APM agent aim to help configuring common use cases in an easy way, in most of the cases it means to act as a facade between your application and the OpenTelemetry Java SDK that this agent is built on top.
 If your project requires to configure more advanced aspects of the overall APM processes, you could directly apply that configuration using the https://opentelemetry.io/docs/instrumentation/java/getting-started/[OpenTelemetry SDK], which becomes available for you to use within your project by adding the Elastic agent plugin, as explained in <<setup,the agent setup guide>>.

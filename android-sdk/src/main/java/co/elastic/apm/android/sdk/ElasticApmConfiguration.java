@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import co.elastic.apm.android.sdk.connectivity.ExportProtocol;
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration;
 import co.elastic.apm.android.sdk.features.persistence.PersistenceConfiguration;
 import co.elastic.apm.android.sdk.instrumentation.InstrumentationConfiguration;
@@ -44,6 +45,7 @@ public final class ElasticApmConfiguration {
     public final SignalConfiguration signalConfiguration;
     public final PersistenceConfiguration persistenceConfiguration;
     public final double sampleRate;
+    public final ExportProtocol exportProtocol;
     public final List<SpanFilter> spanFilters;
     public final List<LogFilter> logFilters;
     public final List<MetricFilter> metricFilters;
@@ -66,6 +68,7 @@ public final class ElasticApmConfiguration {
         deploymentEnvironment = builder.deploymentEnvironment;
         persistenceConfiguration = builder.persistenceConfiguration;
         sampleRate = builder.sampleRate;
+        exportProtocol = builder.exportProtocol;
         spanFilters = Collections.unmodifiableList(new ArrayList<>(builder.spanFilters));
         logFilters = Collections.unmodifiableList(new ArrayList<>(builder.logFilters));
         metricFilters = Collections.unmodifiableList(new ArrayList<>(builder.metricFilters));
@@ -81,6 +84,7 @@ public final class ElasticApmConfiguration {
         private SessionIdGenerator sessionIdGenerator;
         private SignalConfiguration signalConfiguration;
         private double sampleRate = 1.0;
+        private ExportProtocol exportProtocol = ExportProtocol.GRPC;
         private final Set<SpanFilter> spanFilters = new HashSet<>();
         private final Set<LogFilter> logFilters = new HashSet<>();
         private final Set<MetricFilter> metricFilters = new HashSet<>();
@@ -174,6 +178,16 @@ public final class ElasticApmConfiguration {
                 throw new IllegalArgumentException("Only values between 0 and 1 are allowed, the value provided was: " + sampleRate);
             }
             this.sampleRate = sampleRate;
+            return this;
+        }
+
+        /**
+         * Sets the protocol that will be used to export OpenTelemetry signals. This is meant to work
+         * with the default {@link SignalConfiguration}, so if a custom {@link SignalConfiguration} is set, then
+         * the export protocol used in there might not be determined by this configuration param.
+         */
+        public Builder setExportProtocol(ExportProtocol exportProtocol) {
+            this.exportProtocol = exportProtocol;
             return this;
         }
 

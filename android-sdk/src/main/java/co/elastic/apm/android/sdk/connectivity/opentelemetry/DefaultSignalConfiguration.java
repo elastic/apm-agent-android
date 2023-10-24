@@ -23,6 +23,14 @@ import androidx.annotation.NonNull;
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.base.DefaultSignalProcessorConfiguration;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.configuration.impl.ConnectivityConfiguration;
+import co.elastic.apm.android.sdk.internal.utilities.providers.LazyProvider;
+import co.elastic.apm.android.sdk.internal.utilities.providers.Provider;
+import io.opentelemetry.exporter.otlp.http.logs.OtlpHttpLogRecordExporter;
+import io.opentelemetry.exporter.otlp.http.logs.OtlpHttpLogRecordExporterBuilder;
+import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter;
+import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporterBuilder;
+import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter;
+import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporterBuilder;
 import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporter;
 import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporterBuilder;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
@@ -36,43 +44,112 @@ import io.opentelemetry.sdk.trace.export.SpanExporter;
 
 public final class DefaultSignalConfiguration extends DefaultSignalProcessorConfiguration {
     private final static String AUTHORIZATION_HEADER_NAME = "Authorization";
-    private final ConnectivityConfiguration connectivity;
+    private final Provider<ConnectivityConfiguration> connectivity;
 
     public DefaultSignalConfiguration() {
-        connectivity = Configurations.get(ConnectivityConfiguration.class);
+        connectivity = LazyProvider.of(() -> Configurations.get(ConnectivityConfiguration.class));
     }
 
     @Override
     protected SpanExporter provideSpanExporter() {
-        OtlpGrpcSpanExporterBuilder exporterBuilder = OtlpGrpcSpanExporter.builder().setEndpoint(connectivity.getEndpoint());
-        if (connectivity.getAuthConfiguration() != null) {
-            exporterBuilder.addHeader(AUTHORIZATION_HEADER_NAME, getAuthorizationHeaderValue());
+        switch (getConnectivity().getExportProtocol()) {
+            case GRPC:
+                return getOtlpGrpcSpanExporter();
+            case HTTP:
+                return getOtlpHttpSpanExporter();
+            default:
+                throw new IllegalArgumentException();
         }
-        return exporterBuilder.build();
     }
 
     @Override
     protected LogRecordExporter provideLogExporter() {
-        OtlpGrpcLogRecordExporterBuilder exporterBuilder = OtlpGrpcLogRecordExporter.builder().setEndpoint(connectivity.getEndpoint());
-        if (connectivity.getAuthConfiguration() != null) {
-            exporterBuilder.addHeader(AUTHORIZATION_HEADER_NAME, getAuthorizationHeaderValue());
+        switch (getConnectivity().getExportProtocol()) {
+            case GRPC:
+                return getOtlpGrpcLogRecordExporter();
+            case HTTP:
+                return getOtlpHttpLogRecordExporter();
+            default:
+                throw new IllegalArgumentException();
         }
-        return exporterBuilder.build();
     }
 
     @Override
     protected MetricExporter provideMetricExporter() {
-        OtlpGrpcMetricExporterBuilder exporterBuilder = OtlpGrpcMetricExporter.builder()
-                .setAggregationTemporalitySelector(AggregationTemporalitySelector.deltaPreferred())
-                .setEndpoint(connectivity.getEndpoint());
-        if (connectivity.getAuthConfiguration() != null) {
+        switch (getConnectivity().getExportProtocol()) {
+            case GRPC:
+                return getOtlpGrpcMetricExporter();
+            case HTTP:
+                return getOtlpHttpMetricExporter();
+            default:
+                throw new IllegalArgumentException();
+        }
+    }
+
+    @NonNull
+    private OtlpGrpcSpanExporter getOtlpGrpcSpanExporter() {
+        OtlpGrpcSpanExporterBuilder exporterBuilder = OtlpGrpcSpanExporter.builder().setEndpoint(getConnectivity().getEndpoint());
+        if (getConnectivity().getAuthConfiguration() != null) {
             exporterBuilder.addHeader(AUTHORIZATION_HEADER_NAME, getAuthorizationHeaderValue());
         }
         return exporterBuilder.build();
     }
 
     @NonNull
+    private OtlpGrpcLogRecordExporter getOtlpGrpcLogRecordExporter() {
+        OtlpGrpcLogRecordExporterBuilder exporterBuilder = OtlpGrpcLogRecordExporter.builder().setEndpoint(getConnectivity().getEndpoint());
+        if (getConnectivity().getAuthConfiguration() != null) {
+            exporterBuilder.addHeader(AUTHORIZATION_HEADER_NAME, getAuthorizationHeaderValue());
+        }
+        return exporterBuilder.build();
+    }
+
+    @NonNull
+    private OtlpGrpcMetricExporter getOtlpGrpcMetricExporter() {
+        OtlpGrpcMetricExporterBuilder exporterBuilder = OtlpGrpcMetricExporter.builder()
+                .setAggregationTemporalitySelector(AggregationTemporalitySelector.deltaPreferred())
+                .setEndpoint(getConnectivity().getEndpoint());
+        if (getConnectivity().getAuthConfiguration() != null) {
+            exporterBuilder.addHeader(AUTHORIZATION_HEADER_NAME, getAuthorizationHeaderValue());
+        }
+        return exporterBuilder.build();
+    }
+
+    @NonNull
+    private OtlpHttpSpanExporter getOtlpHttpSpanExporter() {
+        OtlpHttpSpanExporterBuilder exporterBuilder = OtlpHttpSpanExporter.builder().setEndpoint(getConnectivity().getEndpoint());
+        if (getConnectivity().getAuthConfiguration() != null) {
+            exporterBuilder.addHeader(AUTHORIZATION_HEADER_NAME, getAuthorizationHeaderValue());
+        }
+        return exporterBuilder.build();
+    }
+
+    @NonNull
+    private OtlpHttpLogRecordExporter getOtlpHttpLogRecordExporter() {
+        OtlpHttpLogRecordExporterBuilder exporterBuilder = OtlpHttpLogRecordExporter.builder().setEndpoint(getConnectivity().getEndpoint());
+        if (getConnectivity().getAuthConfiguration() != null) {
+            exporterBuilder.addHeader(AUTHORIZATION_HEADER_NAME, getAuthorizationHeaderValue());
+        }
+        return exporterBuilder.build();
+    }
+
+    @NonNull
+    private OtlpHttpMetricExporter getOtlpHttpMetricExporter() {
+        OtlpHttpMetricExporterBuilder exporterBuilder = OtlpHttpMetricExporter.builder()
+                .setAggregationTemporalitySelector(AggregationTemporalitySelector.deltaPreferred())
+                .setEndpoint(getConnectivity().getEndpoint());
+        if (getConnectivity().getAuthConfiguration() != null) {
+            exporterBuilder.addHeader(AUTHORIZATION_HEADER_NAME, getAuthorizationHeaderValue());
+        }
+        return exporterBuilder.build();
+    }
+
+    private ConnectivityConfiguration getConnectivity() {
+        return connectivity.get();
+    }
+
+    @NonNull
     private String getAuthorizationHeaderValue() {
-        return connectivity.getAuthConfiguration().asAuthorizationHeaderValue();
+        return getConnectivity().getAuthConfiguration().asAuthorizationHeaderValue();
     }
 }

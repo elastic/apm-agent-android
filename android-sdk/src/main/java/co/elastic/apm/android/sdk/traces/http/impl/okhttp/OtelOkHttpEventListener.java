@@ -119,12 +119,30 @@ public class OtelOkHttpEventListener extends EventListener {
     public void responseHeadersEnd(@NonNull Call call, @NonNull Response response) {
         Span span = retrieveSpan(call.request());
         if (span != null) {
-            span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, response.code());
-            String contentLength = response.header("Content-Length");
-            if (contentLength != null) {
-                span.setAttribute(SemanticAttributes.HTTP_RESPONSE_CONTENT_LENGTH, Long.valueOf(contentLength));
+            int code = response.code();
+
+            setStatusCode(span, code);
+            setResponseSize(response, span);
+
+            if (isHttpError(code)) {
+                span.setStatus(StatusCode.ERROR);
             }
         }
+    }
+
+    private static void setResponseSize(@NonNull Response response, Span span) {
+        String contentLength = response.header("Content-Length");
+        if (contentLength != null) {
+            span.setAttribute(SemanticAttributes.HTTP_RESPONSE_CONTENT_LENGTH, Long.valueOf(contentLength));
+        }
+    }
+
+    private static void setStatusCode(Span span, int code) {
+        span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, code);
+    }
+
+    private static boolean isHttpError(int code) {
+        return code > 399;
     }
 
     @Override

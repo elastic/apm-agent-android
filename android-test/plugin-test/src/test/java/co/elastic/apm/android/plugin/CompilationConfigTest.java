@@ -47,15 +47,6 @@ public class CompilationConfigTest extends BaseAssetsVerificationTest {
     }
 
     @Test
-    public void compileConfig_whenNoServerUrlIsSet_fail() {
-        setUpProject();
-
-        runFailedGradle("assembleDebug");
-
-        verifyOutputContains("'serverUrl' because it has no value available");
-    }
-
-    @Test
     public void compileConfig_verifyDefaultValues() {
         String serverUrl = "http://some.url";
         getDefaultElasticBlockBuilder().setServerUrl(serverUrl);

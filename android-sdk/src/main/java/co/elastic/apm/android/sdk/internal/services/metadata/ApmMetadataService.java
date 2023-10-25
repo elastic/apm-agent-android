@@ -48,7 +48,7 @@ public class ApmMetadataService implements Service {
         return apmInfoPropertiesProvider.get().getProperty(ApmInfo.KEY_SERVICE_VERSION);
     }
 
-    @NonNull
+    @Nullable
     public String getServerUrl() {
         return apmInfoPropertiesProvider.get().getProperty(ApmInfo.KEY_SERVER_URL);
     }

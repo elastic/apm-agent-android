@@ -18,6 +18,8 @@
  */
 package co.elastic.apm.android.sdk.connectivity;
 
+import androidx.annotation.NonNull;
+
 import co.elastic.apm.android.sdk.connectivity.auth.AuthConfiguration;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
@@ -39,7 +41,7 @@ public interface Connectivity {
 
     static Connectivity getDefault() {
         ApmMetadataService service = ServiceManager.get().getService(Service.Names.METADATA);
-        String serverUrl = service.getServerUrl();
+        String serverUrl = getServerUrl(service);
         String apiKey = service.getApiKey();
         String secretToken = service.getSecretToken();
         if (apiKey != null) {
@@ -49,6 +51,15 @@ public interface Connectivity {
         } else {
             return Connectivity.simple(serverUrl);
         }
+    }
+
+    @NonNull
+    private static String getServerUrl(ApmMetadataService service) {
+        String serverUrl = service.getServerUrl();
+        if (serverUrl == null) {
+            throw new IllegalArgumentException("serverUrl not found. You need to provide it in the Gradle config or set it up manually in the ElasticAgent runtime configuration. More info on: https://www.elastic.co/guide/en/apm/agent/android/current/configuration.html");
+        }
+        return serverUrl;
     }
 
     String endpoint();

@@ -24,7 +24,7 @@ public class GlobalAttributeTest extends BaseRobolectricTest {
         LogRecordData log = captureLog();
 
         Logs.verifyRecord(log)
-                .hasAttribute("net.host.connection.type", "wifi");
+                .hasAttribute("network.connection.type", "wifi");
     }
 
     @Config(application = AppsWithConnectivity.WithCellular.class)
@@ -33,7 +33,7 @@ public class GlobalAttributeTest extends BaseRobolectricTest {
         LogRecordData log = captureLog();
 
         Logs.verifyRecord(log)
-                .hasAttribute("net.host.connection.type", "cell");
+                .hasAttribute("network.connection.type", "cell");
     }
 
     @Config(application = AppsWithConnectivity.WithCellularAndSubtype.class)
@@ -42,8 +42,8 @@ public class GlobalAttributeTest extends BaseRobolectricTest {
         LogRecordData log = captureLog();
 
         Logs.verifyRecord(log)
-                .hasAttribute("net.host.connection.type", "cell")
-                .hasAttribute("net.host.connection.subtype", "EDGE");
+                .hasAttribute("network.connection.type", "cell")
+                .hasAttribute("network.connection.subtype", "EDGE");
     }
 
     private LogRecordData captureLog() {

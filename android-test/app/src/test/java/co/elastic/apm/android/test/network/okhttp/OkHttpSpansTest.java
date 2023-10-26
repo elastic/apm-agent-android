@@ -77,10 +77,10 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
         Spans.verify(httpSpan)
                 .isNamed("GET localhost")
                 .isOfKind(SpanKind.CLIENT)
-                .hasAttribute("http.url", "http://localhost:" + webServer.getPort() + "/")
-                .hasAttribute("http.method", "GET")
-                .hasAttribute("http.status_code", 200)
-                .hasAttribute("http.response_content_length", 2);
+                .hasAttribute("url.full", "http://localhost:" + webServer.getPort() + "/")
+                .hasAttribute("http.request.method", "GET")
+                .hasAttribute("http.response.status_code", 200)
+                .hasAttribute("http.response.body.size", 2);
         verify(contextStore).remove(any());
     }
 
@@ -94,9 +94,9 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
         Spans.verifyFailed(httpSpan)
                 .isNamed("GET localhost")
                 .isOfKind(SpanKind.CLIENT)
-                .hasAttribute("http.url", "http://localhost:" + webServer.getPort() + "/")
-                .hasAttribute("http.method", "GET")
-                .hasAttribute("http.status_code", 500);
+                .hasAttribute("url.full", "http://localhost:" + webServer.getPort() + "/")
+                .hasAttribute("http.request.method", "GET")
+                .hasAttribute("http.response.status_code", 500);
     }
 
     @Test
@@ -110,8 +110,8 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
                 .isNamed("GET localhost")
                 .isOfKind(SpanKind.CLIENT)
                 .hasAmountOfRecordedExceptions(1)
-                .hasAttribute("http.url", "http://localhost:" + webServer.getPort() + "/")
-                .hasAttribute("http.method", "GET");
+                .hasAttribute("url.full", "http://localhost:" + webServer.getPort() + "/")
+                .hasAttribute("http.request.method", "GET");
 
         verify(contextStore).remove(any());
     }

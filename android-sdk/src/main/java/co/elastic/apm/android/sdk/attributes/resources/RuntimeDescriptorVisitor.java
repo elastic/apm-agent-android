@@ -20,7 +20,7 @@ package co.elastic.apm.android.sdk.attributes.resources;
 
 import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
 import io.opentelemetry.api.common.AttributesBuilder;
-import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
+import io.opentelemetry.semconv.ResourceAttributes;
 
 public class RuntimeDescriptorVisitor implements AttributesVisitor {
 

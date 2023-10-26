@@ -18,6 +18,8 @@
  */
 package co.elastic.apm.android.sdk.internal.opentelemetry.processors.metrics;
 
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -33,7 +35,6 @@ import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.export.CollectionRegistration;
 import io.opentelemetry.sdk.metrics.export.MetricReader;
-import io.opentelemetry.sdk.metrics.internal.export.MetricProducer;
 
 public final class ElasticMetricReader implements MetricReader {
     private final MetricReader wrapped;
@@ -44,12 +45,8 @@ public final class ElasticMetricReader implements MetricReader {
     }
 
     @Override
-    public void register(CollectionRegistration registration) {
-        if (registration instanceof MetricProducer) {
-            wrapped.register(new ElasticMetricProducer((MetricProducer) registration, filter));
-        } else {
-            wrapped.register(registration);
-        }
+    public void register(@NonNull CollectionRegistration registration) {
+        wrapped.register(new ElasticCollectionRegistration(registration, filter));
     }
 
     @Override
@@ -67,11 +64,11 @@ public final class ElasticMetricReader implements MetricReader {
         return wrapped.getAggregationTemporality(instrumentType);
     }
 
-    private static class ElasticMetricProducer implements MetricProducer {
-        private final MetricProducer wrapped;
+    private static class ElasticCollectionRegistration implements CollectionRegistration {
+        private final CollectionRegistration wrapped;
         private final Filter<MetricData> filter;
 
-        private ElasticMetricProducer(MetricProducer wrapped, Filter<MetricData> filter) {
+        private ElasticCollectionRegistration(CollectionRegistration wrapped, Filter<MetricData> filter) {
             this.wrapped = wrapped;
             this.filter = filter;
         }

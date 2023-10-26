@@ -38,7 +38,7 @@ import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.ContextKey;
-import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
+import io.opentelemetry.semconv.SemanticAttributes;
 import okhttp3.Call;
 import okhttp3.EventListener;
 import okhttp3.HttpUrl;
@@ -133,12 +133,12 @@ public class OtelOkHttpEventListener extends EventListener {
     private static void setResponseSize(@NonNull Response response, Span span) {
         String contentLength = response.header("Content-Length");
         if (contentLength != null) {
-            span.setAttribute(SemanticAttributes.HTTP_RESPONSE_CONTENT_LENGTH, Long.valueOf(contentLength));
+            span.setAttribute(SemanticAttributes.HTTP_RESPONSE_BODY_SIZE, Long.valueOf(contentLength));
         }
     }
 
     private static void setStatusCode(Span span, int code) {
-        span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, code);
+        span.setAttribute(SemanticAttributes.HTTP_RESPONSE_STATUS_CODE, code);
     }
 
     private static boolean isHttpError(int code) {

@@ -25,7 +25,7 @@ import co.elastic.apm.android.sdk.internal.services.network.NetworkService;
 import co.elastic.apm.android.sdk.internal.services.network.data.CarrierInfo;
 import co.elastic.apm.android.sdk.internal.utilities.providers.Provider;
 import io.opentelemetry.api.common.AttributesBuilder;
-import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
+import io.opentelemetry.semconv.SemanticAttributes;
 
 public class CarrierHttpAttributesVisitor implements AttributesVisitor {
     private final Provider<NetworkService> networkServiceProvider;
@@ -38,10 +38,10 @@ public class CarrierHttpAttributesVisitor implements AttributesVisitor {
     public void visit(AttributesBuilder builder) {
         CarrierInfo carrierInfo = networkServiceProvider.get().getCarrierInfo();
         if (carrierInfo != null) {
-            builder.put(SemanticAttributes.NET_HOST_CARRIER_NAME, carrierInfo.name);
-            builder.put(SemanticAttributes.NET_HOST_CARRIER_MCC, carrierInfo.mcc);
-            builder.put(SemanticAttributes.NET_HOST_CARRIER_MNC, carrierInfo.mnc);
-            builder.put(SemanticAttributes.NET_HOST_CARRIER_ICC, carrierInfo.icc);
+            builder.put(SemanticAttributes.NETWORK_CARRIER_NAME, carrierInfo.name);
+            builder.put(SemanticAttributes.NETWORK_CARRIER_MCC, carrierInfo.mcc);
+            builder.put(SemanticAttributes.NETWORK_CARRIER_MNC, carrierInfo.mnc);
+            builder.put(SemanticAttributes.NETWORK_CARRIER_ICC, carrierInfo.icc);
         }
     }
 }

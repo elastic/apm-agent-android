@@ -22,7 +22,7 @@ import android.os.Build;
 
 import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
 import io.opentelemetry.api.common.AttributesBuilder;
-import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
+import io.opentelemetry.semconv.ResourceAttributes;
 
 public class OsDescriptorVisitor implements AttributesVisitor {
 

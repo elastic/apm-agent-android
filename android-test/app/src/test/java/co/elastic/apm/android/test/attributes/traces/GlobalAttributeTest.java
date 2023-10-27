@@ -40,10 +40,10 @@ public class GlobalAttributeTest extends BaseRobolectricTest {
         SpanData customSpan = getSpanData();
 
         Spans.verify(customSpan)
-                .hasAttribute("net.host.carrier.name", AppWithCarrierInfo.SIM_OPERATOR_NAME)
-                .hasAttribute("net.host.carrier.mcc", "123")
-                .hasAttribute("net.host.carrier.mnc", "456")
-                .hasAttribute("net.host.carrier.icc", AppWithCarrierInfo.SIM_COUNTRY_ISO);
+                .hasAttribute("network.carrier.name", AppWithCarrierInfo.SIM_OPERATOR_NAME)
+                .hasAttribute("network.carrier.mcc", "123")
+                .hasAttribute("network.carrier.mnc", "456")
+                .hasAttribute("network.carrier.icc", AppWithCarrierInfo.SIM_COUNTRY_ISO);
     }
 
     @Config(application = AppsWithConnectivity.WithWifi.class)
@@ -52,7 +52,7 @@ public class GlobalAttributeTest extends BaseRobolectricTest {
         SpanData span = getSpanData();
 
         Spans.verify(span)
-                .hasAttribute("net.host.connection.type", "wifi");
+                .hasAttribute("network.connection.type", "wifi");
     }
 
     @Config(application = AppsWithConnectivity.WithCellular.class)
@@ -61,7 +61,7 @@ public class GlobalAttributeTest extends BaseRobolectricTest {
         SpanData span = getSpanData();
 
         Spans.verify(span)
-                .hasAttribute("net.host.connection.type", "cell");
+                .hasAttribute("network.connection.type", "cell");
     }
 
     @Config(application = AppsWithConnectivity.WithCellularAndSubtype.class)
@@ -70,8 +70,8 @@ public class GlobalAttributeTest extends BaseRobolectricTest {
         SpanData span = getSpanData();
 
         Spans.verify(span)
-                .hasAttribute("net.host.connection.type", "cell")
-                .hasAttribute("net.host.connection.subtype", "EDGE");
+                .hasAttribute("network.connection.type", "cell")
+                .hasAttribute("network.connection.subtype", "EDGE");
     }
 
     private SpanData getSpanData() {

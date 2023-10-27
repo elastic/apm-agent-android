@@ -38,6 +38,7 @@ ${next_release_notes}
 * Removing Gradle's warning on missing serverUrl param: {pull}209[#209]
 * Adding http response content length attr to okhttp spans: {pull}211[#211]
 * Marking okhttp spans as failed when receiving an error response code: {pull}212[#212]
+* Bumping OTel SDK to 1.31.0 and adding new semconv dependency: {pull}217[#217]
 ////
 
 [[release-notes-0.9.0]]

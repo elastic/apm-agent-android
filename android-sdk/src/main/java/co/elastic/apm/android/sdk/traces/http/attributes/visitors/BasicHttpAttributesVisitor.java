@@ -21,13 +21,13 @@ package co.elastic.apm.android.sdk.traces.http.attributes.visitors;
 import co.elastic.apm.android.sdk.traces.http.attributes.HttpAttributesVisitor;
 import co.elastic.apm.android.sdk.traces.http.data.HttpRequest;
 import io.opentelemetry.api.common.AttributesBuilder;
-import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
+import io.opentelemetry.semconv.SemanticAttributes;
 
 public class BasicHttpAttributesVisitor implements HttpAttributesVisitor {
 
     @Override
     public void visit(AttributesBuilder builder, HttpRequest request) {
-        builder.put(SemanticAttributes.HTTP_URL, request.url.toString())
-                .put(SemanticAttributes.HTTP_METHOD, request.method);
+        builder.put(SemanticAttributes.URL_FULL, request.url.toString())
+                .put(SemanticAttributes.HTTP_REQUEST_METHOD, request.method);
     }
 }

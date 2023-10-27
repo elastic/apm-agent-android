@@ -23,16 +23,16 @@ import androidx.annotation.NonNull;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import co.elastic.apm.android.sdk.traces.tools.SpanFilter;
 import co.elastic.apm.android.sdk.traces.http.data.HttpRequest;
+import co.elastic.apm.android.sdk.traces.tools.SpanFilter;
 import io.opentelemetry.sdk.trace.ReadableSpan;
-import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
+import io.opentelemetry.semconv.SemanticAttributes;
 
 abstract public class HttpFilter implements SpanFilter {
 
     @Override
     public boolean shouldInclude(ReadableSpan item) {
-        String httpMethod = item.getAttribute(SemanticAttributes.HTTP_METHOD);
+        String httpMethod = item.getAttribute(SemanticAttributes.HTTP_REQUEST_METHOD);
         if (httpMethod == null) {
             // Not an http-related Span.
             return false;
@@ -42,7 +42,7 @@ abstract public class HttpFilter implements SpanFilter {
     }
 
     private URL getUrl(ReadableSpan span) {
-        String urlString = span.getAttribute(SemanticAttributes.HTTP_URL);
+        String urlString = span.getAttribute(SemanticAttributes.URL_FULL);
         try {
             return new URL(urlString);
         } catch (MalformedURLException e) {

@@ -69,7 +69,7 @@ public class PostDeployTask extends DefaultTask {
         log("Setting GitHub release to: " + releaseTag);
         String title = "Release " + version;
         String notes = "[Release Notes for " + version + "](https://www.elastic.co/guide/en/apm/agent/android/current/release-notes-0.x.html#release-notes-" + version + ")";
-        runCommand("gh release create " + releaseTag + " --title " + title + " --notes " + notes);
+        runCommand("gh release create " + releaseTag + " --title \"" + title + "\" --notes \"" + notes + "\"");
     }
 
     private void updateNextVersion(File gradlePropertiesFile, Properties properties, String newVersion) {

@@ -30,10 +30,18 @@ ${next_release_notes}
 ==== ${version} - ${release_date}
 
 [float]
+===== Features
+
+* New feature: {pull}000[#000]
+////
+
+[[release-notes-0.11.0]]
+==== 0.11.0 - 2023/10/31
+
+[float]
 ===== Bug fixes
 
 * Fix truetime duplicated classes: {pull}222[#222]
-////
 
 [[release-notes-0.10.0]]
 ==== 0.10.0 - 2023/10/27

@@ -2,60 +2,52 @@ package co.elastic.apm.compile.tools.embedding;
 
 import static co.elastic.apm.compile.tools.utils.Constants.ARTIFACT_TYPE_ATTR;
 
-import com.android.build.api.artifact.MultipleArtifact;
+import com.android.build.api.artifact.ScopedArtifact;
 import com.android.build.api.variant.AndroidComponentsExtension;
+import com.android.build.api.variant.ScopedArtifacts;
 import com.android.build.api.variant.Variant;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.file.ConfigurableFileCollection;
-import org.gradle.api.file.Directory;
-import org.gradle.api.file.FileCollection;
-import org.gradle.api.file.FileTree;
-import org.gradle.api.provider.Provider;
-import org.gradle.api.tasks.Sync;
 import org.gradle.api.tasks.TaskProvider;
 
-import java.io.File;
-import java.util.concurrent.Callable;
+import java.util.Collections;
 
-import co.elastic.apm.compile.tools.embedding.tasks.EmbeddedClassesGathererTask;
+import co.elastic.apm.compile.tools.embedding.extensions.ShadowExtension;
+import co.elastic.apm.compile.tools.embedding.tasks.EmbeddedClassesMergerTask;
 import kotlin.Unit;
 
 @SuppressWarnings("unchecked")
 public class EmbeddingDependenciesPlugin implements Plugin<Project> {
 
     public static final String EMBEDDED_CLASSPATH_NAME = "embeddedClasspath";
+    private static final String SHADOW_EXTENSION_NAME = "shadowJar";
+    private ShadowExtension shadowExtension;
 
     @Override
     public void apply(Project project) {
         AndroidComponentsExtension<?, ?, Variant> componentsExtension = project.getExtensions().getByType(AndroidComponentsExtension.class);
         Configuration embeddedClasspath = getEmbeddedClasspath(project);
-        Provider<FileCollection> classesProvider = getClassesProvider(project, embeddedClasspath);
-        String embeddedClassesTaskName = "embeddedClasses";
-        Provider<Directory> classesDir = project.getLayout().getBuildDirectory().dir(embeddedClassesTaskName);
-        TaskProvider<Sync> syncEmbeddedClassesTask = project.getTasks().register(embeddedClassesTaskName, Sync.class, sync -> {
-            sync.from(classesProvider);
-            sync.into(classesDir);
-        });
+        shadowExtension = project.getExtensions().create(SHADOW_EXTENSION_NAME, ShadowExtension.class);
 
         componentsExtension.onVariants(componentsExtension.selector().all(), variant -> {
-            TaskProvider<EmbeddedClassesGathererTask> taskProvider = getEmbeddedClassesGathererTaskProvider(project, classesDir, variant);
-            taskProvider.configure(task -> task.dependsOn(syncEmbeddedClassesTask));
 
-            variant.getArtifacts().use(taskProvider)
-                    .wiredWith(EmbeddedClassesGathererTask::getOutputDir)
-                    .toAppendTo(MultipleArtifact.ALL_CLASSES_DIRS.INSTANCE);
+            variant.getArtifacts().forScope(ScopedArtifacts.Scope.PROJECT).use(getEmbeddedClassesMergerTaskProvider(project, embeddedClasspath, variant))
+                    .toTransform(ScopedArtifact.CLASSES.INSTANCE, EmbeddedClassesMergerTask::getInputJars,
+                            EmbeddedClassesMergerTask::getLocalClassesDirs, EmbeddedClassesMergerTask::getOutputFile);
             return Unit.INSTANCE;
         });
     }
 
-    private TaskProvider<EmbeddedClassesGathererTask> getEmbeddedClassesGathererTaskProvider(Project project, Provider<Directory> classesDir, Variant variant) {
-        TaskProvider<EmbeddedClassesGathererTask> taskProvider = project.getTasks().register(variant.getName() + "EmbeddedClassesGatherer", EmbeddedClassesGathererTask.class);
+    private TaskProvider<EmbeddedClassesMergerTask> getEmbeddedClassesMergerTaskProvider(Project project, Configuration embedded, Variant variant) {
+        TaskProvider<EmbeddedClassesMergerTask> taskProvider = project.getTasks().register(variant.getName() + "EmbeddedClassesMerger", EmbeddedClassesMergerTask.class);
         taskProvider.configure(task -> {
-            task.getClassesDir().set(classesDir);
-            task.getOutputDir().set(project.getLayout().getBuildDirectory().dir(task.getName()));
+            task.from(task.getLocalClassesDirs());
+            task.setConfigurations(Collections.singletonList(embedded));
+            for (ShadowExtension.Relocation relocation : shadowExtension.getRelocations()) {
+                task.relocate(relocation.getPattern().get(), relocation.getDestination().get());
+            }
         });
         return taskProvider;
     }
@@ -75,37 +67,5 @@ public class EmbeddingDependenciesPlugin implements Plugin<Project> {
         compileOnly.extendsFrom(embedded);
 
         return classpath;
-    }
-
-    private Provider<FileCollection> getClassesProvider(Project project, Configuration classpath) {
-        return project.provider(new LazyFileCollectionProvider(project, classpath));
-    }
-
-    private static class LazyFileCollectionProvider implements Callable<FileCollection> {
-        private final Project project;
-        private final Configuration classpath;
-        private FileCollection cachedFileCollection;
-
-        private LazyFileCollectionProvider(Project project, Configuration classpath) {
-            this.project = project;
-            this.classpath = classpath;
-        }
-
-        @Override
-        public FileCollection call() {
-            if (cachedFileCollection != null) {
-                return cachedFileCollection;
-            }
-            ConfigurableFileCollection fileCollection = project.files();
-            for (File file : classpath.getFiles()) {
-                if (file.getName().endsWith(".jar")) {
-                    FileTree files = project.zipTree(file);
-                    fileCollection.from(files);
-                }
-            }
-
-            cachedFileCollection = fileCollection;
-            return fileCollection;
-        }
     }
 }

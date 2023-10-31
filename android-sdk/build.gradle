@@ -34,6 +34,10 @@ licensesConfig {
     manualMappingFile = rootProject.file("manual_licenses_map.txt")
 }
 
+shadowJar {
+    relocate 'com.instacart.library.truetime', 'co.elastic.apm.android.truetime'
+}
+
 dependencies {
     api "io.opentelemetry:opentelemetry-api:$openTelemetry_version"
     api "io.opentelemetry:opentelemetry-sdk:$openTelemetry_version"

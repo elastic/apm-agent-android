@@ -14,6 +14,7 @@ import org.gradle.api.tasks.TaskProvider;
 
 import java.util.Collections;
 
+import co.elastic.apm.compile.tools.embedding.extensions.ShadowExtension;
 import co.elastic.apm.compile.tools.embedding.tasks.EmbeddedClassesMergerTask;
 import kotlin.Unit;
 
@@ -21,11 +22,14 @@ import kotlin.Unit;
 public class EmbeddingDependenciesPlugin implements Plugin<Project> {
 
     public static final String EMBEDDED_CLASSPATH_NAME = "embeddedClasspath";
+    private static final String SHADOW_EXTENSION_NAME = "shadowJar";
+    private ShadowExtension shadowExtension;
 
     @Override
     public void apply(Project project) {
         AndroidComponentsExtension<?, ?, Variant> componentsExtension = project.getExtensions().getByType(AndroidComponentsExtension.class);
         Configuration embeddedClasspath = getEmbeddedClasspath(project);
+        shadowExtension = project.getExtensions().create(SHADOW_EXTENSION_NAME, ShadowExtension.class);
 
         componentsExtension.onVariants(componentsExtension.selector().all(), variant -> {
 
@@ -41,6 +45,9 @@ public class EmbeddingDependenciesPlugin implements Plugin<Project> {
         taskProvider.configure(task -> {
             task.from(task.getLocalClassesDirs());
             task.setConfigurations(Collections.singletonList(embedded));
+            for (ShadowExtension.Relocation relocation : shadowExtension.getRelocations()) {
+                task.relocate(relocation.getPattern().get(), relocation.getDestination().get());
+            }
         });
         return taskProvider;
     }

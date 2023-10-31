@@ -35,7 +35,7 @@ licensesConfig {
 }
 
 shadowJar {
-    relocate 'com.instacart.library.truetime', 'shadow.truetime'
+    relocate 'com.instacart.library.truetime', 'co.elastic.apm.android.truetime'
 }
 
 dependencies {

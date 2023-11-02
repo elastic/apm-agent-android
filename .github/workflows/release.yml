@@ -93,7 +93,7 @@ jobs:
           username: ${{ env.GIT_USER }}
           email: ${{ env.GIT_EMAIL }}
           token: ${{ env.GITHUB_TOKEN }}
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.branch_specifier || 'main' }}
           token: ${{ env.GITHUB_TOKEN }}

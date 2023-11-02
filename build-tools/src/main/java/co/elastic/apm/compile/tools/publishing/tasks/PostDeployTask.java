@@ -47,7 +47,7 @@ public class PostDeployTask extends DefaultTask {
         updateNextVersion(gradlePropertiesFile, properties, newVersion);
         updateChangelog(currentVersion);
 
-        createPullRequestWithChanges(newVersion);
+        createPullRequestWithChanges(currentVersion);
         setGitHubRelease(currentVersion, releaseTag);
         log("Finished the post deploy task successfully");
     }

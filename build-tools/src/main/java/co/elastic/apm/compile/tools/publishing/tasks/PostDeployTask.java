@@ -47,16 +47,21 @@ public class PostDeployTask extends DefaultTask {
         updateNextVersion(gradlePropertiesFile, properties, newVersion);
         updateChangelog(currentVersion);
 
-        publishChanges();
+        createPullRequestWithChanges(currentVersion);
         setGitHubRelease(currentVersion, releaseTag);
         log("Finished the post deploy task successfully");
     }
 
-    private void publishChanges() {
+    private void createPullRequestWithChanges(String version) {
+        log("Create new branch");
+        String title = "Release " + version;
+        String newBranch = "post-release/" + version;
+        runCommand("git checkout -b " + newBranch);
         log("Committing changes");
         runCommand("git commit -a -m \"Preparing for the next release\"");
         log("Pushing changes");
-        runCommand("git push");
+        runCommand("git push origin " + newBranch);
+        runCommand("gh pr create --title \"" + title + "\" --body \"" + title + "\" --base main --reviewer elastic/apm-agent-android --repo elastic/apm-agent-android");
     }
 
     private void setGitTag(String version) {

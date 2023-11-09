@@ -1,5 +1,6 @@
 package co.elastic.apm.android.test.common.spans.verifiers;
 
+import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.sdk.trace.data.SpanData;
 
@@ -27,4 +28,6 @@ public interface SpanVerifier<T extends SpanVerifier<?>> {
     T startedAt(long timeInNanoseconds);
 
     T isOfKind(SpanKind kind);
+
+    T hasEvent(String eventName, Attributes attributes);
 }

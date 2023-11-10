@@ -29,6 +29,7 @@ import co.elastic.apm.android.test.common.spans.Spans;
 import co.elastic.apm.android.test.testutils.AppWithoutInitializedAgent;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTestApplication;
+import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Scope;
@@ -96,7 +97,10 @@ public class OkHttpSpansTest extends BaseRobolectricTest {
                 .isOfKind(SpanKind.CLIENT)
                 .hasAttribute("url.full", "http://localhost:" + webServer.getPort() + "/")
                 .hasAttribute("http.request.method", "GET")
-                .hasAttribute("http.response.status_code", 500);
+                .hasAttribute("http.response.status_code", 500)
+                .hasEvent("exception", Attributes.builder().put("exception.type", "500")
+                        .put("exception.escaped", false)
+                        .put("exception.message", "Server Error").build());
     }
 
     @Test

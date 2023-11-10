@@ -32,6 +32,7 @@ import co.elastic.apm.android.sdk.traces.ElasticTracers;
 import co.elastic.apm.android.sdk.traces.http.HttpTraceConfiguration;
 import co.elastic.apm.android.sdk.traces.http.data.HttpRequest;
 import co.elastic.apm.android.sdk.traces.http.impl.okhttp.utils.WrapperSpanCloser;
+import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.StatusCode;
@@ -126,6 +127,10 @@ public class OtelOkHttpEventListener extends EventListener {
 
             if (isHttpError(code)) {
                 span.setStatus(StatusCode.ERROR);
+                span.addEvent(SemanticAttributes.EXCEPTION_EVENT_NAME, Attributes.builder()
+                        .put(SemanticAttributes.EXCEPTION_TYPE, String.valueOf(code))
+                        .put(SemanticAttributes.EXCEPTION_ESCAPED, false)
+                        .put(SemanticAttributes.EXCEPTION_MESSAGE, response.message()).build());
             }
         }
     }

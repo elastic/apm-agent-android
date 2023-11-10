@@ -3,9 +3,12 @@ package co.elastic.apm.android.test.common.spans.verifiers;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.sdk.trace.data.EventData;
 import io.opentelemetry.sdk.trace.data.SpanData;
 
 @SuppressWarnings("unchecked")
@@ -84,6 +87,25 @@ public abstract class BaseSpanVerifier<T extends SpanVerifier<?>> implements Spa
     @Override
     public T isOfKind(SpanKind kind) {
         assertEquals(kind, span.getKind());
+        return (T) this;
+    }
+
+    @Override
+    public T hasEvent(String eventName, Attributes attributes) {
+        boolean foundEvent = false;
+
+        for (EventData event : span.getEvents()) {
+            if (event.getName().equals(eventName)) {
+                assertEquals(attributes, event.getAttributes());
+                foundEvent = true;
+                break;
+            }
+        }
+
+        if (!foundEvent) {
+            fail("Event not found");
+        }
+
         return (T) this;
     }
 }

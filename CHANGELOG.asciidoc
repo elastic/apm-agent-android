@@ -33,6 +33,7 @@ ${next_release_notes}
 ===== Features
 
 * Adding exception event to failed http responses: {pull}237[#237]
+* Upgrading Byte Buddy to 1.14.10: {pull}238[#238]
 ////
 
 [[release-notes-0.11.0]]

@@ -32,9 +32,17 @@ ${next_release_notes}
 [float]
 ===== Features
 
+* New feature: {pull}000[#000]
+////
+
+[[release-notes-0.12.0]]
+==== 0.12.0 - 2023/11/21
+
+[float]
+===== Features
+
 * Adding exception event to failed http responses: {pull}237[#237]
 * Upgrading Byte Buddy to 1.14.10: {pull}238[#238]
-////
 
 [[release-notes-0.11.0]]
 ==== 0.11.0 - 2023/10/31

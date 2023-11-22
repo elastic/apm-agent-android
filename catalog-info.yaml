@@ -1,0 +1,26 @@
+---
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: buildkite-pipeline-apm-agent-android-release
+spec:
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      description: 'The APM Android Agent Release :pipeline:'
+      name: apm-agent-android-release
+    spec:
+      pipeline_file: .buildkite/release.yml
+      provider_settings:
+        trigger_mode: none
+      repository: elastic/apm-agent-android
+      teams:
+        apm-agent-android: {}
+        everyone:
+          access_level: READ_ONLY
+        observablt-robots: {}
+        observablt-robots-automation: {}
+  owner: group:observablt-robots
+  type: buildkite-pipeline

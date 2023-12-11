@@ -43,7 +43,7 @@ public final class ServiceManager implements Lifecycle {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     public static void initialize(Context appContext) {
         INSTANCE = new ServiceManager();
-        INSTANCE.addService(new NetworkService(appContext));
+        INSTANCE.addService(NetworkService.create(appContext));
         INSTANCE.addService(new AppInfoService(appContext));
         INSTANCE.addService(new ApmMetadataService(appContext));
         INSTANCE.addService(new PreferencesService(appContext));

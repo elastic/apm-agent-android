@@ -42,10 +42,15 @@ public class NetworkService extends ConnectivityManager.NetworkCallback implemen
     private NetworkType networkType = NetworkType.none();
     private AppInfoService appInfoService;
 
-    public NetworkService(Context context) {
-        Context appContext = context.getApplicationContext();
-        connectivityManager = (ConnectivityManager) appContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        telephonyManager = (TelephonyManager) appContext.getSystemService(Context.TELEPHONY_SERVICE);
+    public static NetworkService create(Context context) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        return new NetworkService(connectivityManager, telephonyManager);
+    }
+
+    NetworkService(ConnectivityManager connectivityManager, TelephonyManager telephonyManager) {
+        this.connectivityManager = connectivityManager;
+        this.telephonyManager = telephonyManager;
     }
 
     @Override
@@ -110,8 +115,9 @@ public class NetworkService extends ConnectivityManager.NetworkCallback implemen
     }
 
     private boolean canQueryCarrierInfo() {
+        String simOperator = telephonyManager.getSimOperator();
         return telephonyManager.getSimState() == TelephonyManager.SIM_STATE_READY
-                && telephonyManager.getSimOperator() != null;
+                && simOperator != null && simOperator.length() > 3;
     }
 
     private AppInfoService getAppInfoService() {

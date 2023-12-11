@@ -35,7 +35,7 @@ public class NetworkServiceTest {
     @Mock
     private ConnectivityManager connectivityManager;
     @Mock
-    TelephonyManager telephonyManager;
+    private TelephonyManager telephonyManager;
     private NetworkService networkService;
 
     @Before

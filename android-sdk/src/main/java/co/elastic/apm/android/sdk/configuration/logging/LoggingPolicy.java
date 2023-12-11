@@ -18,10 +18,33 @@
  */
 package co.elastic.apm.android.sdk.configuration.logging;
 
+import co.elastic.apm.android.sdk.configuration.logging.impl.DefaultLoggingPolicy;
+import co.elastic.apm.android.sdk.configuration.logging.impl.SimpleLoggingPolicy;
+
 /**
  * Defines the internal logging behavior of this library.
  */
 public interface LoggingPolicy {
+
+    /**
+     * Provides the default logging policy which will log all the {@link LogLevel}s on debuggable applications
+     * and only logs from level INFO and above for non-debuggable applications.
+     * <p>
+     * No logs will be created until the Agent is initialized.
+     */
+    static LoggingPolicy getDefault() {
+        return DefaultLoggingPolicy.create();
+    }
+
+    /**
+     * Convenience method for creating a static logging policy.
+     *
+     * @param isEnabled    - Whether the logs are enabled or not.
+     * @param minimumLevel - The minimum {@link LogLevel}, all the logs with this level and above will get printed, others will be ignored.
+     */
+    static LoggingPolicy create(boolean isEnabled, LogLevel minimumLevel) {
+        return new SimpleLoggingPolicy(isEnabled, minimumLevel);
+    }
 
     /**
      * Whether logging in general is enabled or not. This value will be checked before the log level.

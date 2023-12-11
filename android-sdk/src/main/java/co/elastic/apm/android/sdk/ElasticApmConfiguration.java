@@ -24,6 +24,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import co.elastic.apm.android.sdk.configuration.logging.LogLevel;
+import co.elastic.apm.android.sdk.configuration.logging.LoggingPolicy;
 import co.elastic.apm.android.sdk.connectivity.ExportProtocol;
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration;
 import co.elastic.apm.android.sdk.features.persistence.PersistenceConfiguration;
@@ -49,6 +51,7 @@ public final class ElasticApmConfiguration {
     public final List<SpanFilter> spanFilters;
     public final List<LogFilter> logFilters;
     public final List<MetricFilter> metricFilters;
+    public final LoggingPolicy libraryLoggingPolicy;
 
     public static Builder builder() {
         return new Builder();
@@ -69,6 +72,7 @@ public final class ElasticApmConfiguration {
         persistenceConfiguration = builder.persistenceConfiguration;
         sampleRate = builder.sampleRate;
         exportProtocol = builder.exportProtocol;
+        libraryLoggingPolicy = builder.libraryLoggingPolicy;
         spanFilters = Collections.unmodifiableList(new ArrayList<>(builder.spanFilters));
         logFilters = Collections.unmodifiableList(new ArrayList<>(builder.logFilters));
         metricFilters = Collections.unmodifiableList(new ArrayList<>(builder.metricFilters));
@@ -85,6 +89,7 @@ public final class ElasticApmConfiguration {
         private SignalConfiguration signalConfiguration;
         private double sampleRate = 1.0;
         private ExportProtocol exportProtocol = ExportProtocol.GRPC;
+        private LoggingPolicy libraryLoggingPolicy = LoggingPolicy.getDefault();
         private final Set<SpanFilter> spanFilters = new HashSet<>();
         private final Set<LogFilter> logFilters = new HashSet<>();
         private final Set<MetricFilter> metricFilters = new HashSet<>();
@@ -188,6 +193,15 @@ public final class ElasticApmConfiguration {
          */
         public Builder setExportProtocol(ExportProtocol exportProtocol) {
             this.exportProtocol = exportProtocol;
+            return this;
+        }
+
+        /**
+         * Sets the logging policy for this library's internal logs. By default, it will log all the {@link LogLevel}s on debuggable applications
+         * and only logs from level INFO and above for non-debuggable applications.
+         */
+        public Builder setLibraryLoggingPolicy(LoggingPolicy libraryLoggingPolicy) {
+            this.libraryLoggingPolicy = libraryLoggingPolicy;
             return this;
         }
 

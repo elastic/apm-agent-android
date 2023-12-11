@@ -26,15 +26,12 @@ import android.net.Uri;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.features.launchtime.LaunchTimeTracker;
-import co.elastic.apm.android.sdk.internal.utilities.logging.AndroidLoggerFactory;
 
 public final class ElasticInitializer extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        Elog.init(new AndroidLoggerFactory());
         LaunchTimeTracker.startTimer();
         return true;
     }

@@ -95,10 +95,10 @@ public class AndroidLoggerTest {
     }
 
     private AndroidLogger getLogger(LogLevel minimumLevel) {
-        return new AndroidLogger("TAG", LoggingPolicy.create(true, minimumLevel));
+        return new AndroidLogger("TAG", LoggingPolicy.enabled(minimumLevel));
     }
 
     private AndroidLogger getLoggerWithDisabledPolicy() {
-        return new AndroidLogger("TAG", LoggingPolicy.create(false, LogLevel.TRACE));
+        return new AndroidLogger("TAG", LoggingPolicy.disabled());
     }
 }

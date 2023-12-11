@@ -37,13 +37,19 @@ public interface LoggingPolicy {
     }
 
     /**
-     * Convenience method for creating a static logging policy.
+     * Convenience method for creating an enabled logging policy with a static minimum level.
      *
-     * @param isEnabled    - Whether the logs are enabled or not.
      * @param minimumLevel - The minimum {@link LogLevel}, all the logs with this level and above will get printed, others will be ignored.
      */
-    static LoggingPolicy create(boolean isEnabled, LogLevel minimumLevel) {
-        return new SimpleLoggingPolicy(isEnabled, minimumLevel);
+    static LoggingPolicy enabled(LogLevel minimumLevel) {
+        return new SimpleLoggingPolicy(true, minimumLevel);
+    }
+
+    /**
+     * Convenience method for creating a policy that disables all internal logs.
+     */
+    static LoggingPolicy disabled() {
+        return new SimpleLoggingPolicy(false, LogLevel.TRACE);
     }
 
     /**

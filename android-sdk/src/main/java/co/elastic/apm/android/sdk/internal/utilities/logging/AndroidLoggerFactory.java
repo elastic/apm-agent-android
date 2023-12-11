@@ -21,11 +21,17 @@ package co.elastic.apm.android.sdk.internal.utilities.logging;
 import org.slf4j.Logger;
 
 import co.elastic.apm.android.common.internal.logging.ELoggerFactory;
+import co.elastic.apm.android.sdk.configuration.logging.LoggingPolicy;
 
 public class AndroidLoggerFactory extends ELoggerFactory {
+    private final LoggingPolicy policy;
+
+    public AndroidLoggerFactory(LoggingPolicy policy) {
+        this.policy = policy;
+    }
 
     @Override
     public Logger getLogger(String name) {
-        return new AndroidLogger(name);
+        return new AndroidLogger(name, policy);
     }
 }

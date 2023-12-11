@@ -19,6 +19,7 @@
 package co.elastic.apm.android.sdk.configuration.logging.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -29,9 +30,15 @@ import co.elastic.apm.android.sdk.testutils.providers.SimpleProvider;
 public class DefaultLoggingPolicyTest {
 
     @Test
-    public void isEnabled_returnTrue() {
+    public void isEnabled_true_whenAgentIsInitialized() {
         assertTrue(getInstance(true).isEnabled());
         assertTrue(getInstance(false).isEnabled());
+    }
+
+    @Test
+    public void isEnabled_false_whenAgentNotInitialized() {
+        assertFalse(getInstance(true, false).isEnabled());
+        assertFalse(getInstance(false, false).isEnabled());
     }
 
     @Test
@@ -45,6 +52,10 @@ public class DefaultLoggingPolicyTest {
     }
 
     private static DefaultLoggingPolicy getInstance(boolean appIsDebuggable) {
-        return new DefaultLoggingPolicy(SimpleProvider.create(appIsDebuggable));
+        return getInstance(appIsDebuggable, true);
+    }
+
+    private static DefaultLoggingPolicy getInstance(boolean appIsDebuggable, boolean agentIsInitialized) {
+        return new DefaultLoggingPolicy(SimpleProvider.create(appIsDebuggable), SimpleProvider.create(agentIsInitialized));
     }
 }

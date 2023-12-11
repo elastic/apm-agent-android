@@ -30,24 +30,27 @@ import co.elastic.apm.android.sdk.internal.utilities.providers.Provider;
 public class DefaultLoggingPolicy implements LoggingPolicy {
 
     private final Provider<Boolean> appIsDebuggable;
+    private final Provider<Boolean> agentIsInitialized;
 
     public static DefaultLoggingPolicy create() {
+        final Provider<Boolean> agentIsInitialized = ElasticApmAgent::isInitialized;
         return new DefaultLoggingPolicy(LazyProvider.of(() -> {
-            if (!ElasticApmAgent.isInitialized()) {
+            if (!agentIsInitialized.get()) {
                 return false;
             }
             AppInfoService service = ServiceManager.get().getService(Service.Names.APP_INFO);
             return service.isInDebugMode();
-        }));
+        }), agentIsInitialized);
     }
 
-    public DefaultLoggingPolicy(Provider<Boolean> appIsDebuggable) {
+    public DefaultLoggingPolicy(Provider<Boolean> appIsDebuggable, Provider<Boolean> agentIsInitialized) {
         this.appIsDebuggable = appIsDebuggable;
+        this.agentIsInitialized = agentIsInitialized;
     }
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return agentIsInitialized.get();
     }
 
     @Override

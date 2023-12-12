@@ -30,6 +30,11 @@ ${next_release_notes}
 ==== ${version} - ${release_date}
 
 [float]
+===== Features
+
+* Making internal logs configurable: {pull}245[#245]
+
+[float]
 ===== Bug Fixes
 
 * Fix #242: {pull}244[#244]

@@ -16,22 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.utilities.logging;
+package co.elastic.apm.android.sdk.configuration.logging.impl;
 
-import org.slf4j.Logger;
-
-import co.elastic.apm.android.common.internal.logging.ELoggerFactory;
+import co.elastic.apm.android.sdk.configuration.logging.LogLevel;
 import co.elastic.apm.android.sdk.configuration.logging.LoggingPolicy;
 
-public class AndroidLoggerFactory extends ELoggerFactory {
-    private final LoggingPolicy policy;
+public final class SimpleLoggingPolicy implements LoggingPolicy {
+    private final boolean isEnabled;
+    private final LogLevel minimumLevel;
 
-    public AndroidLoggerFactory(LoggingPolicy policy) {
-        this.policy = policy;
+    public SimpleLoggingPolicy(boolean isEnabled, LogLevel minimumLevel) {
+        this.isEnabled = isEnabled;
+        this.minimumLevel = minimumLevel;
     }
 
     @Override
-    public Logger getLogger(String name) {
-        return new AndroidLogger(name, policy);
+    public boolean isEnabled() {
+        return isEnabled;
+    }
+
+    @Override
+    public LogLevel getMinimumLevel() {
+        return minimumLevel;
     }
 }

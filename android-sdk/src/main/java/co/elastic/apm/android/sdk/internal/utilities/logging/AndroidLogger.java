@@ -23,24 +23,15 @@ import android.util.Log;
 import org.slf4j.event.Level;
 
 import co.elastic.apm.android.common.internal.logging.BaseELogger;
-import co.elastic.apm.android.sdk.ElasticApmAgent;
-import co.elastic.apm.android.sdk.internal.services.Service;
-import co.elastic.apm.android.sdk.internal.services.ServiceManager;
-import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService;
-import co.elastic.apm.android.sdk.internal.utilities.providers.LazyProvider;
+import co.elastic.apm.android.sdk.configuration.logging.LogLevel;
+import co.elastic.apm.android.sdk.configuration.logging.LoggingPolicy;
 
 class AndroidLogger extends BaseELogger {
-    private final LazyProvider<Boolean> appIsDebuggable;
+    private final LoggingPolicy policy;
 
-    AndroidLogger(String tag) {
+    AndroidLogger(String tag, LoggingPolicy policy) {
         super(tag);
-        appIsDebuggable = LazyProvider.of(() -> {
-            if (!ElasticApmAgent.isInitialized()) {
-                return false;
-            }
-            AppInfoService service = ServiceManager.get().getService(Service.Names.APP_INFO);
-            return service.isInDebugMode();
-        });
+        this.policy = policy;
     }
 
     @Override
@@ -66,26 +57,34 @@ class AndroidLogger extends BaseELogger {
 
     @Override
     public boolean isTraceEnabled() {
-        return appIsDebuggable.get();
+        return checkIfEnabledFor(LogLevel.TRACE);
     }
 
     @Override
     public boolean isDebugEnabled() {
-        return appIsDebuggable.get();
+        return checkIfEnabledFor(LogLevel.DEBUG);
     }
 
     @Override
     public boolean isInfoEnabled() {
-        return true;
+        return checkIfEnabledFor(LogLevel.INFO);
     }
 
     @Override
     public boolean isWarnEnabled() {
-        return true;
+        return checkIfEnabledFor(LogLevel.WARN);
     }
 
     @Override
     public boolean isErrorEnabled() {
-        return true;
+        return checkIfEnabledFor(LogLevel.ERROR);
+    }
+
+    private boolean checkIfEnabledFor(LogLevel logLevel) {
+        if (!policy.isEnabled()) {
+            return false;
+        }
+
+        return logLevel.value >= policy.getMinimumLevel().value;
     }
 }

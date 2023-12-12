@@ -388,6 +388,32 @@ This table outlines the attributes and their corresponding permissions:
 |===
 
 [float]
+==== Internal logging policy
+
+By default, all logs created by this library are printed for a debuggable app build.
+In the case of non-debuggable builds, only logs at the INFO level and above are printed.
+
+If you would like to create a custom log policy or even disable all of the logs from this library altogether, you can do so by providing your own `LoggingPolicy` configuration. The below example policy will allow all logs of level WARN and higher to be printed. Levels below WARN will be ignored.
+
+[source,java]
+----
+class MyApp extends android.app.Application {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        // This example policy will allow all logs of level WARN and higher to get printed, ignoring levels below it.
+        LoggingPolicy loggingPolicy = LoggingPolicy.enabled(LogLevel.WARN);
+
+        ElasticApmConfiguration.builder()
+                .setLibraryLoggingPolicy(loggingPolicy)
+                .build();
+        ElasticApmAgent.initialize(this, configuration);
+    }
+}
+----
+
+[float]
 === Advanced configurable options
 
 [float]

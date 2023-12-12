@@ -114,10 +114,10 @@ public final class ElasticApmAgent {
             throw new IllegalStateException("Already initialized");
         }
         Context appContext = context.getApplicationContext();
-        Elog.init(new AndroidLoggerFactory());
+        ElasticApmConfiguration finalConfiguration = (configuration == null) ? ElasticApmConfiguration.getDefault() : configuration;
+        Elog.init(new AndroidLoggerFactory(finalConfiguration.libraryLoggingPolicy));
         ServiceManager.initialize(appContext);
         ServiceManager.get().start();
-        ElasticApmConfiguration finalConfiguration = (configuration == null) ? ElasticApmConfiguration.getDefault() : configuration;
         Connectivity finalConnectivity = (connectivity == null) ? Connectivity.getDefault() : connectivity;
         AgentDependenciesInjector injector = process(new DefaultAgentDependenciesInjector(appContext, finalConfiguration, finalConnectivity), interceptor);
         instance = new ElasticApmAgent(finalConfiguration);

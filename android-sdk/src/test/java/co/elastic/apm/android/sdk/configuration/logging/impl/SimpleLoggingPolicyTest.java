@@ -16,22 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.utilities.logging;
+package co.elastic.apm.android.sdk.configuration.logging.impl;
 
-import org.slf4j.Logger;
 
-import co.elastic.apm.android.common.internal.logging.ELoggerFactory;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
+
+import co.elastic.apm.android.sdk.configuration.logging.LogLevel;
 import co.elastic.apm.android.sdk.configuration.logging.LoggingPolicy;
 
-public class AndroidLoggerFactory extends ELoggerFactory {
-    private final LoggingPolicy policy;
+public class SimpleLoggingPolicyTest {
 
-    public AndroidLoggerFactory(LoggingPolicy policy) {
-        this.policy = policy;
-    }
+    @Test
+    public void verifyProvidedValues() {
+        LoggingPolicy policy = new SimpleLoggingPolicy(true, LogLevel.INFO);
+        LoggingPolicy policy2 = new SimpleLoggingPolicy(false, LogLevel.ERROR);
 
-    @Override
-    public Logger getLogger(String name) {
-        return new AndroidLogger(name, policy);
+        assertTrue(policy.isEnabled());
+        assertEquals(LogLevel.INFO, policy.getMinimumLevel());
+        assertFalse(policy2.isEnabled());
+        assertEquals(LogLevel.ERROR, policy2.getMinimumLevel());
     }
 }

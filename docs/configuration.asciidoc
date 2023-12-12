@@ -388,12 +388,12 @@ This table outlines the attributes and their corresponding permissions:
 |===
 
 [float]
-==== Configuring this library's logging policy
+==== Logging policy
 
-By default, this library's internal logs are all printed for a debuggable app build.
-In the case of non-debuggable builds, only logs starting from level INFO onwards are printed.
+By default, all logs created by this library are printed for a debuggable app build.
+In the case of non-debuggable builds, only logs at the INFO level and above are printed.
 
-In case you would like to have a more customized policy, or even disable all of the logs from this library altogether, you could do so by providing your own `LoggingPolicy` config like so:
+If you would like to create a custom log policy or even disable all of the logs from this library altogether, you can do so by providing your own `LoggingPolicy` configuration. The below example policy will allow all logs of level WARN and higher to be printed. Levels below WARN will be ignored.
 
 [source,java]
 ----

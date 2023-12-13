@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">Sample weather app</string>
+    <string name="action_settings">Settings</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">City Selection</string>
+    <string name="second_fragment_label">City Weather Forecast</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">"Select a city and click on the button below to see how the city's temperature is right now!"</string>
+    <string name="temperature_title">%1$s\'s temperature</string>
+    <string name="temperature_in_celsius">%.1f °C</string>
+    <string name="unknown_error_message">Something unexpected happened</string>
+    <string name="weather_api_notice_message">&lt;a href="https://open-meteo.com/">Weather data by Open-Meteo.com&lt;a/></string>
+    <string name="city_name">City name</string>
+    <string-array name="city_array">
+        <item>Berlin</item>
+        <item>London</item>
+        <item>New York</item>
+        <item>Paris</item>
+    </string-array>
+</resources>

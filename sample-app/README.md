@@ -1,0 +1,1 @@
+# Sample Android application for the Elastic APM Agent

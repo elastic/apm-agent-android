@@ -38,7 +38,7 @@ android {
 
 elasticApm {
     serviceName = "weather-sample-app"
-    serverUrl = "http://10.0.2.2:8200"
+    serverUrl = "http://10.0.2.2:8200" // Your Elastic APM server endpoint.
 //    secretToken = "my-apm-secret-token" // Uncomment and set it if this is your preferred auth method.
 }
 

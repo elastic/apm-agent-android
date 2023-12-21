@@ -6,8 +6,7 @@ Follow these steps to start reporting your Android application's performance to 
 1. <<gradle-setup>>.
 2. <<application-setup>>.
 3. <<compile-and-run>>.
-4. <<manual-setup>>.
-5. <<whats-next>>.
+4. <<whats-next>>.
 
 [float]
 [[gradle-setup]]
@@ -80,9 +79,13 @@ That's it!
 [[whats-next]]
 === What's next?
 
-After initializing the agent (by using the gradle plugin), your application will automatically create traces for all OkHttp network requests (including those created by tools that make use of OkHttp, like Retrofit) and all https://developer.android.com/reference/android/app/Activity[Activity] and https://developer.android.com/reference/androidx/fragment/app/Fragment[Fragment] starting methods.
+After initializing the agent, your application will:
 
-Apart from the automatic instrumentation helped by the Gradle plugin, you'll get automatic crash reports when an unexpected error occurs in your app, regardless of whether the Gradle plugin is available or not.
+- Create traces for all https://developer.android.com/reference/android/app/Activity[Activity] and https://developer.android.com/reference/androidx/fragment/app/Fragment[Fragment] classes' starting methods.
+- Generate crash reports when an unexpected error occurs in your app.
+- Send all your manually created traces, metrics and logs to the configured APM Server containing all https://github.com/elastic/apm/tree/main/specs/agents/mobile[these attributes].
+
+You can also apply any of the automatic instrumentations https://github.com/open-telemetry/opentelemetry-android/tree/main/auto-instrumentation[available here].
 
 All of these events will contain a "Session ID" that links related events together—allowing you to make sense of and diagnose any issues that arise.
 Head to the **APM app in {kib}** to start exploring your data.

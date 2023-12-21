@@ -21,7 +21,7 @@ public class ResourcesTest extends BaseRobolectricTest {
         LogRecordData log = captureLog();
 
         Logs.verifyRecord(log)
-                .hasResource("service.name", "my-app");
+                .hasResource("service.name", "android-test");
     }
 
     @Test

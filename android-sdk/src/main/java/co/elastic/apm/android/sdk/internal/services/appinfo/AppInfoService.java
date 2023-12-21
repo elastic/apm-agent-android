@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.storage.StorageManager;
 
@@ -30,6 +31,7 @@ import androidx.annotation.WorkerThread;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Locale;
 import java.util.UUID;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
@@ -65,11 +67,28 @@ public class AppInfoService implements Service {
     }
 
     public String getAppName() {
+        String labelResName = getAppLabelFromResources();
+        if (labelResName != null) {
+            return labelResName;
+        }
+
         CharSequence nonLocalizedLabel = applicationInfo.nonLocalizedLabel;
         if (nonLocalizedLabel != null) {
             return nonLocalizedLabel.toString();
         }
+
         return "unknown_name";
+    }
+
+    private String getAppLabelFromResources() {
+        int stringId = applicationInfo.labelRes;
+        if (stringId == 0) {
+            return null;
+        }
+
+        Configuration config = new Configuration();
+        config.setLocale(Locale.ROOT);
+        return appContext.createConfigurationContext(config).getResources().getString(stringId);
     }
 
     public String getAppVersion() {
@@ -85,7 +104,7 @@ public class AppInfoService implements Service {
         try {
             Class<?> buildConfigClass = Class.forName(applicationInfo.packageName + ".BuildConfig");
             Object buildType = buildConfigClass.getDeclaredField("BUILD_TYPE").get(null);
-            if (buildType != null) {
+            if (buildType instanceof String) {
                 type = (String) buildType;
             }
         } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException ignored) {

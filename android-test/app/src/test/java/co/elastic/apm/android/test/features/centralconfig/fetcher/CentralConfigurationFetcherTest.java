@@ -92,7 +92,7 @@ public class CentralConfigurationFetcherTest extends BaseRobolectricTest impleme
         fetcher.fetch();
 
         HttpUrl recordedRequestUrl = webServer.takeRequest().getRequestUrl();
-        assertEquals("my-app", recordedRequestUrl.queryParameter("service.name"));
+        assertEquals("android-test", recordedRequestUrl.queryParameter("service.name"));
         assertEquals(BuildConfig.BUILD_TYPE, recordedRequestUrl.queryParameter("service.environment"));
     }
 

@@ -35,9 +35,10 @@ class MyApp extends android.app.Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        Connectivity myConnectivityConfig = Connectivity.simple("https://my-apm-server"); <1>
-//        Connectivity myConnectivityConfig = Connectivity.withApiKey("https://my-apm-server", "my_api_key"); <2>
-//        Connectivity myConnectivityConfig = Connectivity.withSecretToken("https://my-apm-server", "my_secret_token"); <3>
+        String apmServerUrl = "https://my-apm-server";
+        Connectivity myConnectivityConfig = Connectivity.simple(apmServerUrl); <1>
+//        Connectivity myConnectivityConfig = Connectivity.withApiKey(apmServerUrl, "my_api_key"); <2>
+//        Connectivity myConnectivityConfig = Connectivity.withSecretToken(apmServerUrl, "my_secret_token"); <3>
         ElasticApmAgent.initialize(this, myConnectivityConfig);
 
         // Optionally if you also define a custom configuration:

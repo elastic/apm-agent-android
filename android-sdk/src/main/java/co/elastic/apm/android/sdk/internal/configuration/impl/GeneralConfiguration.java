@@ -22,30 +22,30 @@ import co.elastic.apm.android.sdk.ElasticApmConfiguration;
 import co.elastic.apm.android.sdk.internal.configuration.Configuration;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
-import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
+import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService;
 
 public final class GeneralConfiguration extends Configuration {
-    private final ApmMetadataService metadata;
+    private final AppInfoService appInfoService;
     private final String providedServiceName;
     private final String providedServiceVersion;
     private final String providedDeploymentEnvironment;
 
     public GeneralConfiguration(ElasticApmConfiguration configuration) {
-        this.metadata = ServiceManager.get().getService(Service.Names.METADATA);
+        this.appInfoService = ServiceManager.get().getService(Service.Names.APP_INFO);
         providedServiceName = configuration.serviceName;
         providedServiceVersion = configuration.serviceVersion;
         providedDeploymentEnvironment = configuration.deploymentEnvironment;
     }
 
     public String getServiceName() {
-        return (providedServiceName != null) ? providedServiceName : metadata.getServiceName();
+        return (providedServiceName != null) ? providedServiceName : appInfoService.getAppName();
     }
 
     public String getServiceVersion() {
-        return (providedServiceVersion != null) ? providedServiceVersion : metadata.getServiceVersion();
+        return (providedServiceVersion != null) ? providedServiceVersion : appInfoService.getAppVersion();
     }
 
     public String getServiceEnvironment() {
-        return (providedDeploymentEnvironment != null) ? providedDeploymentEnvironment : metadata.getDeploymentEnvironment();
+        return (providedDeploymentEnvironment != null) ? providedDeploymentEnvironment : appInfoService.getAppBuildType();
     }
 }

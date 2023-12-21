@@ -25,7 +25,6 @@ import androidx.annotation.RestrictTo;
 import java.util.HashMap;
 
 import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService;
-import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
 import co.elastic.apm.android.sdk.internal.services.network.NetworkService;
 import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicWorkService;
 import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
@@ -45,7 +44,6 @@ public final class ServiceManager implements Lifecycle {
         INSTANCE = new ServiceManager();
         INSTANCE.addService(NetworkService.create(appContext));
         INSTANCE.addService(new AppInfoService(appContext));
-        INSTANCE.addService(new ApmMetadataService(appContext));
         INSTANCE.addService(new PreferencesService(appContext));
         INSTANCE.addService(new PeriodicWorkService());
         notifyInitializationFinished();

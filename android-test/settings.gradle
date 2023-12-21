@@ -16,4 +16,3 @@ dependencyResolutionManagement {
 }
 include ':app'
 include ':android-test-common'
-include ':plugin-test'

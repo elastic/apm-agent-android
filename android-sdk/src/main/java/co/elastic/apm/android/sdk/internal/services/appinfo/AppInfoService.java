@@ -34,12 +34,26 @@ import java.util.UUID;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.internal.services.Service;
+import co.elastic.apm.android.sdk.internal.utilities.providers.LazyProvider;
+import co.elastic.apm.android.sdk.internal.utilities.providers.Provider;
 
 public class AppInfoService implements Service {
     private final Context appContext;
+    private final ApplicationInfo applicationInfo;
+    private final Provider<String> versionName;
+    private final Provider<Integer> versionCode;
+    private PackageInfo packageInfo = null;
 
     public AppInfoService(Context appContext) {
         this.appContext = appContext;
+        this.applicationInfo = appContext.getApplicationInfo();
+        try {
+            packageInfo = appContext.getPackageManager().getPackageInfo(appContext.getPackageName(), 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            Elog.getLogger().error("Could not find this app's package info", e);
+        }
+        versionCode = initializeVersionCodeProvider();
+        versionName = initializeVersionNameProvider();
     }
 
     public boolean isPermissionGranted(String permissionName) {
@@ -47,17 +61,37 @@ public class AppInfoService implements Service {
     }
 
     public boolean isInDebugMode() {
-        return (appContext.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+        return (applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+    }
+
+    public String getAppName() {
+        CharSequence nonLocalizedLabel = applicationInfo.nonLocalizedLabel;
+        if (nonLocalizedLabel != null) {
+            return nonLocalizedLabel.toString();
+        }
+        return "unknown_name";
+    }
+
+    public String getAppVersion() {
+        return versionName.get();
     }
 
     public int getVersionCode() {
+        return versionCode.get();
+    }
+
+    public String getAppBuildType() {
+        String type = "unknown_build_type";
         try {
-            PackageInfo packageInfo = appContext.getPackageManager().getPackageInfo(appContext.getPackageName(), 0);
-            return packageInfo.versionCode;
-        } catch (PackageManager.NameNotFoundException e) {
-            Elog.getLogger().error("Error providing versionCode", e);
-            return 0;
+            Class<?> buildConfigClass = Class.forName(applicationInfo.packageName + ".BuildConfig");
+            Object buildType = buildConfigClass.getDeclaredField("BUILD_TYPE").get(null);
+            if (buildType != null) {
+                type = (String) buildType;
+            }
+        } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException ignored) {
         }
+
+        return type;
     }
 
     public File getCacheDir() {
@@ -93,6 +127,14 @@ public class AppInfoService implements Service {
     private long getLegacyAvailableSpace(File directory, long maxSpaceNeeded) {
         Elog.getLogger().debug("Getting legacy available space for {}, max needed is: {}", directory, maxSpaceNeeded);
         return Math.min(directory.getUsableSpace(), maxSpaceNeeded);
+    }
+
+    private Provider<String> initializeVersionNameProvider() {
+        return LazyProvider.of(() -> packageInfo != null ? packageInfo.versionName : "unknown_version");
+    }
+
+    private Provider<Integer> initializeVersionCodeProvider() {
+        return LazyProvider.of(() -> packageInfo != null ? packageInfo.versionCode : 0);
     }
 
     @Override

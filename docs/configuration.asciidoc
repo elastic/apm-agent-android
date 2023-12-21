@@ -2,68 +2,10 @@
 == Configuration
 
 [float]
-=== Gradle configuration
-
-Configure your application at compile time within your application's `build.gradle` file:
-
-[source,groovy]
-----
-// Android app's build.gradle file
-plugins {
-    //...
-    id "co.elastic.apm.android" version "[latest_version]" <1>
-}
-
-elasticApm {
-    // Minimal configuration
-    serverUrl = "https://your.elastic.server"
-
-    // Optional
-    serviceName = "your app name" <2>
-    serviceVersion = "0.0.0" <3>
-    apiKey = "your server api key" <4>
-    secretToken = "your server auth token" <5>
-}
-----
-
-<1> You can find the latest version in the https://plugins.gradle.org/plugin/co.elastic.apm.android[Gradle plugin portal].
-<2> Defaults to your `android.defaultConfig.applicationId` value.
-<3> Defaults to your `android.defaultConfig.versionName` value.
-<4> Defaults to null.
-More info on API Keys {ref}/security-api-create-api-key.html[here].
-<5> Defaults to null.
-
-NOTE: When both `secretToken` and `apiKey` are provided, apiKey has priority and secretToken is ignored.
-
-All of the values provided in the Gradle configuration can be overridden with the following environment variables:
-
-|===
-|Config |Associated Environment variable
-
-|serviceName
-|`ELASTIC_APM_SERVICE_NAME`
-
-|serviceVersion
-|`ELASTIC_APM_SERVICE_VERSION`
-
-|serverUrl
-|`ELASTIC_APM_SERVER_URL`
-
-|apiKey
-|`ELASTIC_APM_API_KEY`
-
-|secretToken
-|`ELASTIC_APM_SECRET_TOKEN`
-
-|===
-
-[float]
 === Runtime configuration
 
 The runtime configuration is provided within your https://developer.android.com/reference/android/app/Application[Application] class when initializing the Elastic agent.
-This configuration overrides any previously-set compile time configuration.
-
-Runtime configuration works by providing your own instance of the `ElasticApmConfiguration` class as shown below:
+It works by providing your own instance of the `ElasticApmConfiguration` class as shown below:
 
 [source,java]
 ----
@@ -83,10 +25,8 @@ class MyApp extends android.app.Application {
 [[app-server-connectivity]]
 ==== APM Server connectivity
 
-The APM Server connectivity parameters can be provided at compile time, either by using the Gradle DSL configuration or by providing the APM Server connectivity-related environment variables as mentioned above.
-Later on, when the app is running, the connectivity parameters can be overridden by providing a custom `Connectivity` instance when initializing the Elastic agent.
-
-Once you've created your `Connectivity` instance, you can set it into the agent's initialization as show below:
+The connectivity parameters allow to connect the agent to your APM Server for exporting telemetry data.
+They can be set by providing a custom `Connectivity` instance when initializing the Elastic agent as shown below.
 
 [source,java]
 ----
@@ -95,14 +35,20 @@ class MyApp extends android.app.Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        Connectivity myCustomConnectivity = Connectivity.simple(/*params*/);
-        ElasticApmAgent.initialize(this, myCustomConnectivity);
+        Connectivity myConnectivityConfig = Connectivity.simple("https://my-apm-server"); <1>
+//        Connectivity myConnectivityConfig = Connectivity.withApiKey("https://my-apm-server", "my_api_key"); <2>
+//        Connectivity myConnectivityConfig = Connectivity.withSecretToken("https://my-apm-server", "my_secret_token"); <3>
+        ElasticApmAgent.initialize(this, myConnectivityConfig);
 
         // Optionally if you also define a custom configuration:
-        // ElasticApmAgent.initialize(this, ElasticApmConfiguration.builder().build(), myCustomConnectivity);
+        // ElasticApmAgent.initialize(this, ElasticApmConfiguration.builder().build(), myConnectivityConfig);
     }
 }
 ----
+
+<1> Connects to an APM server that requires no authentication.
+<2> Connects to an APM server that requires an https://www.elastic.co/guide/en/apm/guide/current/api-key.html[API KEY] for authentication.
+<3> Connects to an APM server that requires a https://www.elastic.co/guide/en/apm/guide/current/secret-token.html[SECRET TOKEN] for authentication.
 
 [float]
 [[server-export-protocol]]
@@ -393,7 +339,9 @@ This table outlines the attributes and their corresponding permissions:
 By default, all logs created by this library are printed for a debuggable app build.
 In the case of non-debuggable builds, only logs at the INFO level and above are printed.
 
-If you would like to create a custom log policy or even disable all of the logs from this library altogether, you can do so by providing your own `LoggingPolicy` configuration. The below example policy will allow all logs of level WARN and higher to be printed. Levels below WARN will be ignored.
+If you would like to create a custom log policy or even disable all of the logs from this library altogether, you can do so by providing your own `LoggingPolicy` configuration.
+The below example policy will allow all logs of level WARN and higher to be printed.
+Levels below WARN will be ignored.
 
 [source,java]
 ----

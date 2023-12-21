@@ -22,11 +22,10 @@ class MyApp extends android.app.Application {
 ----
 
 [float]
-[[app-server-connectivity]]
-==== APM Server connectivity
+[[app-id-configuration]]
+==== Application ID configuration
 
-The connectivity parameters allow to connect the agent to your APM Server for exporting telemetry data.
-They can be set by providing a custom `Connectivity` instance when initializing the Elastic agent as shown below.
+You can provide your application name, version, and environment dynamically when building your `ElasticApmConfiguration` instance as shown below:
 
 [source,java]
 ----
@@ -35,21 +34,20 @@ class MyApp extends android.app.Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        String apmServerUrl = "https://my-apm-server";
-        Connectivity myConnectivityConfig = Connectivity.simple(apmServerUrl); <1>
-//        Connectivity myConnectivityConfig = Connectivity.withApiKey(apmServerUrl, "my_api_key"); <2>
-//        Connectivity myConnectivityConfig = Connectivity.withSecretToken(apmServerUrl, "my_secret_token"); <3>
-        ElasticApmAgent.initialize(this, myConnectivityConfig);
-
-        // Optionally if you also define a custom configuration:
-        // ElasticApmAgent.initialize(this, ElasticApmConfiguration.builder().build(), myConnectivityConfig);
+        ElasticApmConfiguration configuration = ElasticApmConfiguration.builder()
+                .setServiceName("my-custom-name") <1>
+                .setServiceVersion("1.0.0") <2>
+                .setDeploymentEnvironment("debug") <3>
+                .build();
+        ElasticApmAgent.initialize(this, configuration);
     }
 }
 ----
 
-<1> Connects to an APM server that requires no authentication.
-<2> Connects to an APM server that requires an https://www.elastic.co/guide/en/apm/guide/current/api-key.html[API KEY] for authentication.
-<3> Connects to an APM server that requires a https://www.elastic.co/guide/en/apm/guide/current/secret-token.html[SECRET TOKEN] for authentication.
+<1> Defaults to your manifest's application label value.
+<2> Defaults to your app's https://developer.android.com/reference/android/content/pm/PackageInfo#versionName[PackageInfo.versionName] value.
+<3> Defaults to your app's `BuildConfig.BUILD_TYPE` value which is gotten using reflection.
+It is recommended not to rely on this default value and instead setting up your app's `deploymentEnvironment` manually.
 
 [float]
 [[server-export-protocol]]
@@ -114,29 +112,6 @@ class MyApp extends android.app.Application {
 <2> Defaults to 60 MB.
 <3> Defaults to one minute.
 The default `ExportScheduler` will run only when the host app is running, though you can create your own implementation of it in order to provide a better-suited scheduler for your app.
-
-[float]
-[[app-id-configuration]]
-==== Application ID configuration
-
-You can provide your application name, version, and environment dynamically when building your `ElasticApmConfiguration` instance as shown below:
-
-[source,java]
-----
-class MyApp extends android.app.Application {
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        ElasticApmConfiguration configuration = ElasticApmConfiguration.builder()
-                .setServiceName("my-custom-name")
-                .setServiceVersion("1.0.0")
-                .setDeploymentEnvironment("debug")
-                .build();
-        ElasticApmAgent.initialize(this, configuration);
-    }
-}
-----
 
 [float]
 [[sample-rate-configuration]]

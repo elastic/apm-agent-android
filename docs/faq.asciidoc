@@ -17,6 +17,12 @@ You can then use the APM app in Kibana to gain insight into latency issues and e
 No, although if you'd like to get automatic instrumentations, you can add https://github.com/open-telemetry/opentelemetry-android/tree/main/auto-instrumentation[extensions] to do so that make use of bytecode instrumentation.
 
 [float]
+[[faw-metrics-aggregation]]
+=== Metrics aggregation strategy
+
+The metrics aggregation strategy used by the agent is https://github.com/open-telemetry/opentelemetry-java/blob/976edfde504193f84d19936b97e2eb8d8cf060e2/sdk/metrics/src/main/java/io/opentelemetry/sdk/metrics/data/AggregationTemporality.java#L15[DELTA].
+
+[float]
 [[faq-unsupported-technologies]]
 === What if the agent doesn't support the technologies I'm using?
 

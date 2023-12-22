@@ -12,7 +12,35 @@ Follow these steps to start reporting your Android application's performance to 
 [[gradle-setup]]
 === Set up Gradle
 
-First, add the https://central.sonatype.com/artifact/co.elastic.apm/android-sdk[Elastic APM agent SDK] to your application's `build.gradle` file as shown below:
+[float]
+[[gradle-requirements]]
+==== Requirements
+
+|===
+|Requirement |Minimum version
+
+|Android Gradle plugin
+|7.4.0
+
+|Android API level
+|24
+
+|===
+
+[float]
+[[minsdk-24-support]]
+==== For projects using minSdk version < 26
+
+Due to Android's limited support for Java 8 features on devices with API level < 26, or in other words, older than Android 8.0, you must add https://developer.android.com/studio/write/java8-support#library-desugaring[Java 8+ desugaring support] to apps with a minSdk version lower than 26.
+If you don't, your app can crash when running on devices using Android OS versions older than 8.0. This is because the https://github.com/open-telemetry/opentelemetry-java[OpenTelemetry Java SDK], which this SDK is built upon, uses Java 8 features.
+
+If your minSdk is 26 or higher, you can skip this step.
+
+[float]
+[[gradle-dependencies]]
+==== Dependency
+
+Add the https://central.sonatype.com/artifact/co.elastic.apm/android-sdk[Elastic APM agent SDK] to your application's `build.gradle` file as shown below:
 
 [source,groovy]
 ----
@@ -23,15 +51,6 @@ dependencies {
 ----
 
 <1> You can find the latest version https://central.sonatype.com/artifact/co.elastic.apm/android-sdk[here].
-
-[float]
-[[minsdk-24-support]]
-==== For projects using minSdk version < 26
-
-Due to Android's limited support for Java 8 features on devices with API level < 26, or in other words, older than Android 8.0, you must add https://developer.android.com/studio/write/java8-support#library-desugaring[Java 8+ desugaring support] to apps with a minSdk version lower than 26.
-If you don't, your app can crash when running on devices using Android OS versions older than 8.0. This is because the https://github.com/open-telemetry/opentelemetry-java[OpenTelemetry Java SDK], which this SDK is built upon, uses Java 8 features.
-
-If your minSdk is 26 or higher, you can skip this step.
 
 [float]
 [[application-setup]]

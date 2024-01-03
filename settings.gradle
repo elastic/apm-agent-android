@@ -23,4 +23,3 @@ rootProject.name = "APM Android Agent"
 includeBuild "build-tools"
 include ':android-sdk'
 include ':android-common'
-include ':android-sdk-ktx'

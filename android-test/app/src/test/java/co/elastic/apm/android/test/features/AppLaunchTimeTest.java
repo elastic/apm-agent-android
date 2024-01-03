@@ -6,7 +6,6 @@ import org.robolectric.Robolectric;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 
-import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.ElasticApmConfiguration;
 import co.elastic.apm.android.sdk.instrumentation.InstrumentationConfiguration;
 import co.elastic.apm.android.sdk.internal.features.launchtime.LaunchTimeTracker;

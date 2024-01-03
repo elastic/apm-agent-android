@@ -1,7 +1,7 @@
 [[manual-instrumentation]]
 == Manual Instrumentation
 
-If you need to create your own, custom spans, metrics and logs, you can do so by accessing the https://opentelemetry.io/docs/instrumentation/java/manual/[OpenTelemetry Java SDK APIs] that this agent is built on top.
+If you need to create your own custom spans, metrics, and logs, you can do so by accessing the https://opentelemetry.io/docs/instrumentation/java/manual/[OpenTelemetry Java SDK APIs] that this agent is built on top of.
 
 [float]
 [[opentelemetry-entrypoint]]

@@ -5,7 +5,7 @@
 [[faq-bytecode-instrumentation]]
 === Is the agent doing bytecode instrumentation?
 
-No, although if you'd like to get automatic instrumentations, you can add https://github.com/open-telemetry/opentelemetry-android/tree/main/auto-instrumentation[extensions] to do so that make use of bytecode instrumentation.
+No, although if you'd like to get automatic instrumentations, you can add https://github.com/open-telemetry/opentelemetry-android/tree/main/auto-instrumentation[extensions] that make use of bytecode instrumentation.
 
 [float]
 [[faq-metrics-aggregation]]
@@ -17,5 +17,5 @@ The metrics aggregation strategy used by the agent is https://github.com/open-te
 [[faq-unsupported-technologies]]
 === What if the agent doesn't support the technologies I'm using?
 
-The agent is built on top of https://opentelemetry.io/docs/instrumentation/java/getting-started/[OpenTelemetry] You can use its public API to create custom spans and transactions.
+The agent is built on top of https://opentelemetry.io/docs/instrumentation/java/getting-started/[OpenTelemetry]. You can use its public API to create custom spans and transactions.
 You should also take a look at the https://github.com/open-telemetry/opentelemetry-android/tree/main/auto-instrumentation[automatic instrumentation extensions] currently available where the tool you need to instrument might be supported already.

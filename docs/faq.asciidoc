@@ -7,7 +7,7 @@
 
 The agent is built on top of https://github.com/open-telemetry/opentelemetry-android[OpenTelemetry Android]. It works as an extension, making it easier to set up and configure Elastic APM with minimum overhead.
 
-All the data created using the agent, either automatically or manually, is sent to the APM Server which converts it to a format suitable for Elasticsearch, and sends them to an Elasticsearch cluster.
+All data created by the agent, either automatically or manually, is sent to the APM Server, which converts it to a format suitable for Elasticsearch and sends it to an Elasticsearch cluster.
 You can then use the APM app in Kibana to gain insight into latency issues and error culprits within your application and more.
 
 [float]

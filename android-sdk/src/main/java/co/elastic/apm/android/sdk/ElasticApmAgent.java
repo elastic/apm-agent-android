@@ -43,10 +43,8 @@ import co.elastic.apm.android.sdk.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration;
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.exporters.VisitableExporters;
 import co.elastic.apm.android.sdk.features.persistence.SignalDiskExporter;
-import co.elastic.apm.android.sdk.instrumentation.Instrumentations;
 import co.elastic.apm.android.sdk.internal.api.filter.ComposableFilter;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
-import co.elastic.apm.android.sdk.internal.exceptions.ElasticExceptionHandler;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.poll.ConfigurationPollManager;
 import co.elastic.apm.android.sdk.internal.features.launchtime.LaunchTimeActivityCallback;
@@ -144,7 +142,6 @@ public final class ElasticApmAgent {
     }
 
     public static void resetForTest() {
-        ElasticExceptionHandler.resetForTest();
         ConfigurationPollManager.resetForTest();
         Configurations.resetForTest();
         SessionManager.resetForTest();
@@ -170,7 +167,6 @@ public final class ElasticApmAgent {
         initializeSessionManager(injector);
         initializeConfigurations(injector);
         initializeOpentelemetry(injector);
-        initializeCrashReports();
         initializeLaunchTimeTracker(context);
         initializeLifecycleObserver();
     }
@@ -210,12 +206,6 @@ public final class ElasticApmAgent {
 
     private void initializeLaunchTimeTracker(Context context) {
         ((Application) context).registerActivityLifecycleCallbacks(new LaunchTimeActivityCallback());
-    }
-
-    private void initializeCrashReports() {
-        if (Instrumentations.isCrashReportingEnabled()) {
-            Thread.setDefaultUncaughtExceptionHandler(ElasticExceptionHandler.getInstance());
-        }
     }
 
     private void initializeOpentelemetry(AgentDependenciesInjector injector) {

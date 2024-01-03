@@ -23,7 +23,7 @@ public class ResourcesTest extends BaseRobolectricTest {
         SpanData customSpan = captureSpan();
 
         Spans.verify(customSpan)
-                .hasResource("service.name", "my-app");
+                .hasResource("service.name", "android-test");
     }
 
     @Test

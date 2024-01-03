@@ -1,27 +1,19 @@
 [[intro]]
 == Introduction
 
-The Elastic APM Android Agent automatically measures the performance of your application and tracks errors.
-It has a default configuration that suits most common use cases and built-in support for popular frameworks and technologies.
-The agent is built on top of https://opentelemetry.io/[OpenTelemetry], enabling you to add custom instrumentation with the
-https://opentelemetry.io/docs/instrumentation/java/manual/[OpenTelemetry Java API].
+The Elastic APM Android Agent measures the performance of your application and tracks errors.
+It has a default configuration that suits most common use cases.
 
 [float]
 [[how-it-works]]
 === How does the Agent work?
 
-The Agent auto-instruments <<supported-technologies>> and records interesting events, like spans for outgoing HTTP requests and UI rendering processes.
-To do this, it leverages the capability of the Android Gradle plugin API to instrument the bytecode of classes.
-This means that for supported technologies, there are no code changes required.
+The Agent is built on top of https://github.com/open-telemetry/opentelemetry-android[OpenTelemetry Android] and helps setting everything up to get your project up and running with Elastic without having to get too deep into the OpenTelemetry API to make it all work.
+It also serves as an extension to provide support for Elastic-specific features, such as <<configuration-dynamic, dynamic configuration>>.
 
-Spans are grouped in transactions -- by default, one for each outgoing HTTP request or UI rendering process.
-It's also possible to create custom transactions, as well as logs and metrics, with the https://opentelemetry.io/docs/instrumentation/java/manual/[OpenTelemetry Java API], which is automatically provided to the Agent's host app.
+It makes sure to configure OpenTelemetry in a way that any custom Spans, as well as Logs and Metrics, created using the https://opentelemetry.io/docs/instrumentation/java/manual/[OpenTelemetry Java API], contain useful attributes that enrich the overall telemetry data.
 Spans, Logs and Metrics are sent to the APM Server, where they're converted to a format suitable for Elasticsearch.
 You can then use the APM app in Kibana to gain insight into latency issues and error culprits within your application.
-
-NOTE: The metrics aggregation strategy used by the agent is https://github.com/open-telemetry/opentelemetry-java/blob/976edfde504193f84d19936b97e2eb8d8cf060e2/sdk/metrics/src/main/java/io/opentelemetry/sdk/metrics/data/AggregationTemporality.java#L15[DELTA].
-
-More detailed information on how the Agent works can be found in the <<faq-how-does-it-work,FAQ>>.
 
 [float]
 [[additional-components]]

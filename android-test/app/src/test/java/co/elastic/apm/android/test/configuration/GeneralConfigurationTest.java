@@ -15,8 +15,8 @@ import co.elastic.apm.android.test.testutils.base.BaseRobolectricTestApplication
 public class GeneralConfigurationTest extends BaseRobolectricTest {
 
     @Test
-    public void whenNoServiceNameIsProvided_useServiceNameFromMetadata() {
-        assertEquals("my-app", getConfiguration().getServiceName());
+    public void whenNoServiceNameIsProvided_useServiceNameFromRuntimeApis() {
+        assertEquals("android-test", getConfiguration().getServiceName());
     }
 
     @Config(application = AppWithCustomServiceName.class)
@@ -26,7 +26,7 @@ public class GeneralConfigurationTest extends BaseRobolectricTest {
     }
 
     @Test
-    public void whenNoServiceVersionIsProvided_useServiceVersionFromMetadata() {
+    public void whenNoServiceVersionIsProvided_useServiceVersionFromRuntimeApis() {
         assertEquals("1.0", getConfiguration().getServiceVersion());
     }
 

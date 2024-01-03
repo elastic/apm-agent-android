@@ -2,68 +2,10 @@
 == Configuration
 
 [float]
-=== Gradle configuration
-
-Configure your application at compile time within your application's `build.gradle` file:
-
-[source,groovy]
-----
-// Android app's build.gradle file
-plugins {
-    //...
-    id "co.elastic.apm.android" version "[latest_version]" <1>
-}
-
-elasticApm {
-    // Minimal configuration
-    serverUrl = "https://your.elastic.server"
-
-    // Optional
-    serviceName = "your app name" <2>
-    serviceVersion = "0.0.0" <3>
-    apiKey = "your server api key" <4>
-    secretToken = "your server auth token" <5>
-}
-----
-
-<1> You can find the latest version in the https://plugins.gradle.org/plugin/co.elastic.apm.android[Gradle plugin portal].
-<2> Defaults to your `android.defaultConfig.applicationId` value.
-<3> Defaults to your `android.defaultConfig.versionName` value.
-<4> Defaults to null.
-More info on API Keys {ref}/security-api-create-api-key.html[here].
-<5> Defaults to null.
-
-NOTE: When both `secretToken` and `apiKey` are provided, apiKey has priority and secretToken is ignored.
-
-All of the values provided in the Gradle configuration can be overridden with the following environment variables:
-
-|===
-|Config |Associated Environment variable
-
-|serviceName
-|`ELASTIC_APM_SERVICE_NAME`
-
-|serviceVersion
-|`ELASTIC_APM_SERVICE_VERSION`
-
-|serverUrl
-|`ELASTIC_APM_SERVER_URL`
-
-|apiKey
-|`ELASTIC_APM_API_KEY`
-
-|secretToken
-|`ELASTIC_APM_SECRET_TOKEN`
-
-|===
-
-[float]
 === Runtime configuration
 
 The runtime configuration is provided within your https://developer.android.com/reference/android/app/Application[Application] class when initializing the Elastic agent.
-This configuration overrides any previously-set compile time configuration.
-
-Runtime configuration works by providing your own instance of the `ElasticApmConfiguration` class as shown below:
+It works by providing your own instance of the `ElasticApmConfiguration` class as shown below:
 
 [source,java]
 ----
@@ -80,13 +22,10 @@ class MyApp extends android.app.Application {
 ----
 
 [float]
-[[app-server-connectivity]]
-==== APM Server connectivity
+[[app-id-configuration]]
+==== Application ID configuration
 
-The APM Server connectivity parameters can be provided at compile time, either by using the Gradle DSL configuration or by providing the APM Server connectivity-related environment variables as mentioned above.
-Later on, when the app is running, the connectivity parameters can be overridden by providing a custom `Connectivity` instance when initializing the Elastic agent.
-
-Once you've created your `Connectivity` instance, you can set it into the agent's initialization as show below:
+You can provide your application name, version, and environment dynamically when building your `ElasticApmConfiguration` instance as shown below:
 
 [source,java]
 ----
@@ -95,14 +34,20 @@ class MyApp extends android.app.Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        Connectivity myCustomConnectivity = Connectivity.simple(/*params*/);
-        ElasticApmAgent.initialize(this, myCustomConnectivity);
-
-        // Optionally if you also define a custom configuration:
-        // ElasticApmAgent.initialize(this, ElasticApmConfiguration.builder().build(), myCustomConnectivity);
+        ElasticApmConfiguration configuration = ElasticApmConfiguration.builder()
+                .setServiceName("my-custom-name") <1>
+                .setServiceVersion("1.0.0") <2>
+                .setDeploymentEnvironment("debug") <3>
+                .build();
+        ElasticApmAgent.initialize(this, configuration);
     }
 }
 ----
+
+<1> Defaults to your manifest's application label value.
+<2> Defaults to your app's https://developer.android.com/reference/android/content/pm/PackageInfo#versionName[PackageInfo.versionName] value.
+<3> Defaults to your app's `BuildConfig.BUILD_TYPE` value which is gotten using reflection.
+It is recommended not to rely on this default value and instead setting up your app's `deploymentEnvironment` manually.
 
 [float]
 [[server-export-protocol]]
@@ -167,29 +112,6 @@ class MyApp extends android.app.Application {
 <2> Defaults to 60 MB.
 <3> Defaults to one minute.
 The default `ExportScheduler` will run only when the host app is running, though you can create your own implementation of it in order to provide a better-suited scheduler for your app.
-
-[float]
-[[app-id-configuration]]
-==== Application ID configuration
-
-You can provide your application name, version, and environment dynamically when building your `ElasticApmConfiguration` instance as shown below:
-
-[source,java]
-----
-class MyApp extends android.app.Application {
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        ElasticApmConfiguration configuration = ElasticApmConfiguration.builder()
-                .setServiceName("my-custom-name")
-                .setServiceVersion("1.0.0")
-                .setDeploymentEnvironment("debug")
-                .build();
-        ElasticApmAgent.initialize(this, configuration);
-    }
-}
-----
 
 [float]
 [[sample-rate-configuration]]
@@ -259,36 +181,6 @@ Each filter will contain a `shouldInclude` function which provides the signal it
 This function must return a boolean value--`true` when the provided item is allowed to continue or `false` when it must be discarded.
 
 You can add multiple filters per signal which will be iterated over (in the order they were added) until all the filters are checked or until one of them decides to discard the signal item provided.
-
-[float]
-==== Automatic instrumentation enabling/disabling
-
-The agent provides automatic instrumentation for its <<supported-technologies>> which are all enabled by default.
-You can choose which ones to keep enabled, as well as and disabling those you don't need, at runtime, like so:
-
-[source,java]
-----
-class MyApp extends android.app.Application {
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-
-        // When building an InstrumentationConfiguration object using `InstrumentationConfiguration.builder()`
-        // all of the instrumentations are disabled by default, so you only need to enable the ones you need.
-        InstrumentationConfiguration instrumentations = InstrumentationConfiguration.builder()
-            .enableHttpTracing(true)
-            .build();
-        ElasticApmConfiguration configuration = ElasticApmConfiguration.builder()
-                .setInstrumentationConfiguration(instrumentations)
-                .build();
-        ElasticApmAgent.initialize(this, configuration);
-    }
-}
-----
-
-NOTE: When building an InstrumentationConfiguration object using `InstrumentationConfiguration.builder()`, all instrumentations are disabled by default.
-Only enable the instrumentations you need using the builder setter methods.
 
 [float]
 ==== HTTP Configuration
@@ -393,7 +285,9 @@ This table outlines the attributes and their corresponding permissions:
 By default, all logs created by this library are printed for a debuggable app build.
 In the case of non-debuggable builds, only logs at the INFO level and above are printed.
 
-If you would like to create a custom log policy or even disable all of the logs from this library altogether, you can do so by providing your own `LoggingPolicy` configuration. The below example policy will allow all logs of level WARN and higher to be printed. Levels below WARN will be ignored.
+If you would like to create a custom log policy or even disable all of the logs from this library altogether, you can do so by providing your own `LoggingPolicy` configuration.
+The below example policy will allow all logs of level WARN and higher to be printed.
+Levels below WARN will be ignored.
 
 [source,java]
 ----

@@ -8,6 +8,7 @@ import java.util.concurrent.CountDownLatch;
 
 import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.ElasticApmConfiguration;
+import co.elastic.apm.android.sdk.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration;
 import co.elastic.apm.android.test.common.agent.AgentInitializer;
 import co.elastic.apm.android.test.common.logs.LogRecordExporterCaptor;
@@ -29,7 +30,9 @@ public class DefaultApp extends Application implements ExportersProvider {
     @Override
     public void onCreate() {
         super.onCreate();
-        originalAgentConfig = ElasticApmConfiguration.builder().setSignalConfiguration(getSignalConfiguration()).build();
+        originalAgentConfig = ElasticApmConfiguration.builder()
+                .setServiceName("my-app")
+                .setSignalConfiguration(getSignalConfiguration()).build();
         initializeAgent(originalAgentConfig);
     }
 

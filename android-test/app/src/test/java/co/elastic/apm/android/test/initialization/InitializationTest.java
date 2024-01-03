@@ -19,8 +19,6 @@ import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.ElasticApmConfiguration;
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.connectivity.ExportProtocol;
-import co.elastic.apm.android.sdk.connectivity.auth.impl.ApiKeyConfiguration;
-import co.elastic.apm.android.sdk.connectivity.auth.impl.SecretTokenConfiguration;
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.DefaultSignalConfiguration;
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration;
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.exporters.ExporterVisitor;
@@ -31,7 +29,6 @@ import co.elastic.apm.android.sdk.internal.features.centralconfig.poll.Configura
 import co.elastic.apm.android.sdk.internal.features.persistence.PersistenceInitializer;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
-import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
 import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicWorkService;
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.test.testutils.MainApp;
@@ -74,16 +71,6 @@ public class InitializationTest extends BaseRobolectricTest {
         assertEquals(app.pollManager, ConfigurationPollManager.get());
     }
 
-    @Config(application = AppWithoutServerUrlSetInGradle.class)
-    @Test
-    public void whenServerUrlIsNotFound_failInitialization() {
-        AppWithoutServerUrlSetInGradle app = getApp();
-
-        assertTrue(app.errorWhenInitializing);
-        assertEquals("serverUrl not found. You need to provide it in the Gradle config or set it up manually in the ElasticAgent runtime configuration. More info on: https://www.elastic.co/guide/en/apm/agent/android/current/configuration.html",
-                app.errorMessage);
-    }
-
     @Test
     public void verifyNtpManager_isInitialized() {
         NtpManager ntpManager = getAgentDependenciesInjector().getNtpManager();
@@ -93,39 +80,8 @@ public class InitializationTest extends BaseRobolectricTest {
     }
 
     @Test
-    public void whenSecretTokenIsProvided_createConnectivityWithIt() {
+    public void whenUsingDefaultConnectivity_createSimpleConnectivity() {
         spyOnServices();
-        ApmMetadataService service = ServiceManager.get().getService(Service.Names.METADATA);
-        doReturn("someSecretToken").when(service).getSecretToken();
-
-        assertTrue(Connectivity.getDefault().authConfiguration() instanceof SecretTokenConfiguration);
-    }
-
-    @Test
-    public void whenApiKeyIsProvided_createConnectivityWithIt() {
-        spyOnServices();
-        ApmMetadataService service = ServiceManager.get().getService(Service.Names.METADATA);
-        doReturn("someApiKey").when(service).getApiKey();
-
-        assertTrue(Connectivity.getDefault().authConfiguration() instanceof ApiKeyConfiguration);
-    }
-
-    @Test
-    public void whenSecretTokenAndApiKeyAreProvided_createConnectivityWithApiKey() {
-        spyOnServices();
-        ApmMetadataService service = ServiceManager.get().getService(Service.Names.METADATA);
-        doReturn("someSecretToken").when(service).getSecretToken();
-        doReturn("someApiKey").when(service).getApiKey();
-
-        assertTrue(Connectivity.getDefault().authConfiguration() instanceof ApiKeyConfiguration);
-    }
-
-    @Test
-    public void whenNoAuthKeysAreProvided_createSimpleConnectivity() {
-        spyOnServices();
-        ApmMetadataService service = ServiceManager.get().getService(Service.Names.METADATA);
-        doReturn(null).when(service).getSecretToken();
-        doReturn(null).when(service).getApiKey();
 
         assertNull(Connectivity.getDefault().authConfiguration());
     }
@@ -254,27 +210,6 @@ public class InitializationTest extends BaseRobolectricTest {
             initializeAgentWithCustomConfig(ElasticApmConfiguration.builder()
                     .setPersistenceConfiguration(persistenceConfiguration)
                     .build());
-        }
-    }
-
-    private static class AppWithoutServerUrlSetInGradle extends BaseRobolectricTestApplication {
-        public boolean errorWhenInitializing = false;
-        public String errorMessage;
-
-        @Override
-        public void onCreate() {
-            super.onCreate();
-            ServiceManager.setInitializationCallback(() -> {
-                spyOnServices();
-                ApmMetadataService service = ServiceManager.get().getService(Service.Names.METADATA);
-                doReturn(null).when(service).getServerUrl();
-            });
-            try {
-                ElasticApmAgent.initialize(this);
-            } catch (IllegalArgumentException e) {
-                errorWhenInitializing = true;
-                errorMessage = e.getMessage();
-            }
         }
     }
 

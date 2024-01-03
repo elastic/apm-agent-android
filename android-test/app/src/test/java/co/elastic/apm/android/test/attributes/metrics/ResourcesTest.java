@@ -21,7 +21,7 @@ public class ResourcesTest extends BaseRobolectricTest {
         MetricData metric = captureMetric();
 
         Metrics.verify(metric)
-                .hasResource("service.name", "my-app");
+                .hasResource("service.name", "android-test");
     }
 
     @Test

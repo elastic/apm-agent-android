@@ -38,10 +38,6 @@ public final class ElasticTracers {
         return create(name, null);
     }
 
-    public static Tracer okhttp() {
-        return create("OkHttp");
-    }
-
     public static Tracer androidActivity() {
         return create("Android Activity");
     }

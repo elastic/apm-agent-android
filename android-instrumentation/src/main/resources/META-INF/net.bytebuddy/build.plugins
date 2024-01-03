@@ -1,4 +1,2 @@
-co.elastic.apm.android.instrumentation.okhttp.client.OkHttpClientPlugin
 co.elastic.apm.android.instrumentation.ui.activities.ActivityLifecyclePlugin
-co.elastic.apm.android.instrumentation.okhttp.eventlistener.CompositeEventListenerFactoryPlugin
 co.elastic.apm.android.instrumentation.ui.fragments.FragmentLifecyclePlugin

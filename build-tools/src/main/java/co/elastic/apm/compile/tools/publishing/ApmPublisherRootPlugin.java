@@ -25,10 +25,8 @@ public class ApmPublisherRootPlugin implements Plugin<Project> {
         addPostDeployTask(project);
         configureMavenCentral(project);
         project.subprojects(subproject -> {
-            if (!subproject.getName().equals("agp-compatibility")) {
-                applySubprojectPlugins(subproject.getPlugins());
-                project.getDependencies().add("noticeProducer", subproject);
-            }
+            applySubprojectPlugins(subproject.getPlugins());
+            project.getDependencies().add("noticeProducer", subproject);
         });
     }
 

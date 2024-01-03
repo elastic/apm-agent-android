@@ -42,10 +42,6 @@ artifacts:
     files_pattern: 'android-sdk-(?P<version>debug|release)\.aar'
     output_pattern: '{project}/{github_branch_name}/elastic-apm-android-sdk-{version}-{github_sha_short}.aar'
     metadata: *metadata
-  - path: './android-sdk-ktx/build/outputs/aar'
-    files_pattern: 'android-sdk-ktx-(?P<version>debug|release)\.aar'
-    output_pattern: '{project}/{github_branch_name}/elastic-apm-android-sdk-ktx-{version}-{github_sha_short}.aar'
-    metadata: *metadata
   - path: './agp-compatibility/agp-compatibility-7-2/build/libs'
     files_pattern: 'agp-compatibility-(?P<agp_major>\d+)-(?P<agp_minor>\d+)-(?P<app_version>\d+\.\d+\.\d+)\.jar'
     output_pattern: '{project}/{github_branch_name}/elastic-apm-android-agp-compatibility-{agp_major}-{agp_minor}-{app_version}-{github_sha_short}.jar'

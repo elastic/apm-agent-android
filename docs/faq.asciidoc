@@ -14,7 +14,7 @@ You can then use the APM app in Kibana to gain insight into latency issues and e
 [[faq-bytecode-instrumentation]]
 === Is the agent doing bytecode instrumentation?
 
-No, although if you'd like to get automatic instrumentations, you can add https://github.com/open-telemetry/opentelemetry-android/tree/main/auto-instrumentation[extensions] to do so that make use of bytecode instrumentation.
+No, although if you'd like to get automatic instrumentations, you can add https://github.com/open-telemetry/opentelemetry-android/tree/main/auto-instrumentation[extensions] that make use of bytecode instrumentation.
 
 [float]
 [[faq-metrics-aggregation]]

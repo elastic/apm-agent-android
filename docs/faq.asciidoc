@@ -2,15 +2,6 @@
 == Frequently asked questions
 
 [float]
-[[faq-how-does-it-work]]
-=== How does the agent work?
-
-The agent is built on top of https://github.com/open-telemetry/opentelemetry-android[OpenTelemetry Android] and works as an extension that makes it easier to configure and set it all up to work with the Elastic tools with minimum overhead.
-
-All the data created using the agent, either automatically or manually, is sent to the APM Server which converts it to a format suitable for Elasticsearch, and sends them to an Elasticsearch cluster.
-You can then use the APM app in Kibana to gain insight into latency issues and error culprits within your application and more.
-
-[float]
 [[faq-bytecode-instrumentation]]
 === Is the agent doing bytecode instrumentation?
 

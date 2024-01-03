@@ -15,8 +15,6 @@ It makes sure to configure OpenTelemetry in a way that any custom Spans, as well
 Spans, Logs and Metrics are sent to the APM Server, where they're converted to a format suitable for Elasticsearch.
 You can then use the APM app in Kibana to gain insight into latency issues and error culprits within your application.
 
-More detailed information on how the Agent works can be found in the <<faq-how-does-it-work,FAQ>>.
-
 [float]
 [[additional-components]]
 === Additional components

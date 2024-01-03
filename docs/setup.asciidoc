@@ -81,8 +81,8 @@ class MyApp extends android.app.Application {
 ----
 
 <1> Connects to an APM server that requires no authentication.
-<2> Connects to an APM server that requires an https://www.elastic.co/guide/en/apm/guide/current/api-key.html[API KEY] for authentication.
-<3> Connects to an APM server that requires a https://www.elastic.co/guide/en/apm/guide/current/secret-token.html[SECRET TOKEN] for authentication.
+<2> Connects to an APM server that requires an {apm-guide-ref}/api-key.html[API key] for authentication.
+<3> Connects to an APM server that requires a {apm-guide-ref}/secret-token.html[secret token] for authentication.
 <4> Make sure to initialize the Elastic APM agent only once.
 
 The values related to your app's identification such as https://opentelemetry.io/docs/specs/semconv/resource/#service[service.name], https://opentelemetry.io/docs/specs/semconv/resource/#service[service.version] and https://opentelemetry.io/docs/specs/semconv/resource/deployment-environment/[deployment.environment] can be configured by following <<app-id-configuration, these instructions>>.

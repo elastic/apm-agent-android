@@ -8,7 +8,6 @@ This product includes software licensed under the 'Apache License Version 2.0' l
  - Android Lifecycle Process (https://developer.android.com/jetpack/androidx/releases/lifecycle#2.5.1)
  - Android Support Library Annotations (https://developer.android.com/jetpack/androidx/releases/annotation#1.4.0)
  - com.github.instacart.truetime-android:library:3.5
- - okhttp (https://square.github.io/okhttp/)
  - OpenTelemetry Java (https://github.com/open-telemetry/opentelemetry-java)
  - OpenTelemetry Java Contrib (https://github.com/open-telemetry/opentelemetry-java-contrib)
  - OpenTelemetry Semantic Conventions Java (https://github.com/open-telemetry/semantic-conventions-java)

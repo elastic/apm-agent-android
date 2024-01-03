@@ -100,7 +100,7 @@ That's it!
 
 After initializing the agent, your application will:
 
-- Create traces for all https://developer.android.com/reference/android/app/Activity[Activity] and https://developer.android.com/reference/androidx/fragment/app/Fragment[Fragment] classes' starting methods.
+- Create traces for all https://developer.android.com/reference/android/app/Activity[Activity] and https://developer.android.com/reference/androidx/fragment/app/Fragment[Fragment] classes starting methods.
 - Generate crash reports when an unexpected error occurs in your app.
 - Send all your manually created traces, metrics and logs to the configured APM Server containing all https://github.com/elastic/apm/tree/main/specs/agents/mobile[these attributes].
 

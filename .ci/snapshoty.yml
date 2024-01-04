@@ -34,31 +34,7 @@ artifacts:
     output_pattern: '{project}/{github_branch_name}/elastic-apm-android-common-{app_version}-{github_sha_short}.jar'
     # List of metadata processors to use.
     metadata: *metadata
-  - path: './android-instrumentation/build/outputs/aar'
-    files_pattern: 'android-instrumentation-(?P<version>debug|release)\.aar'
-    output_pattern: '{project}/{github_branch_name}/elastic-apm-android-instrumentation-{version}-{github_sha_short}.aar'
-    metadata: *metadata
-  - path: './android-plugin/build/libs'
-    files_pattern: 'android-plugin-(?P<app_version>\d+\.\d+\.\d+)\.jar'
-    output_pattern: '{project}/{github_branch_name}/elastic-apm-android-plugin-{app_version}-{github_sha_short}.jar'
-    metadata: *metadata
   - path: './android-sdk/build/outputs/aar'
     files_pattern: 'android-sdk-(?P<version>debug|release)\.aar'
     output_pattern: '{project}/{github_branch_name}/elastic-apm-android-sdk-{version}-{github_sha_short}.aar'
-    metadata: *metadata
-  - path: './android-sdk-ktx/build/outputs/aar'
-    files_pattern: 'android-sdk-ktx-(?P<version>debug|release)\.aar'
-    output_pattern: '{project}/{github_branch_name}/elastic-apm-android-sdk-ktx-{version}-{github_sha_short}.aar'
-    metadata: *metadata
-  - path: './agp-compatibility/agp-compatibility-7-2/build/libs'
-    files_pattern: 'agp-compatibility-(?P<agp_major>\d+)-(?P<agp_minor>\d+)-(?P<app_version>\d+\.\d+\.\d+)\.jar'
-    output_pattern: '{project}/{github_branch_name}/elastic-apm-android-agp-compatibility-{agp_major}-{agp_minor}-{app_version}-{github_sha_short}.jar'
-    metadata: *metadata
-  - path: './agp-compatibility/agp-compatibility-7-3/build/libs'
-    files_pattern: 'agp-compatibility-(?P<agp_major>\d+)-(?P<agp_minor>\d+)-(?P<app_version>\d+\.\d+\.\d+)\.jar'
-    output_pattern: '{project}/{github_branch_name}/elastic-apm-android-agp-compatibility-{agp_major}-{agp_minor}-{app_version}-{github_sha_short}.jar'
-    metadata: *metadata
-  - path: './agp-compatibility/agp-compatibility-api/build/libs'
-    files_pattern: 'agp-compatibility-api-(?P<app_version>\d+\.\d+\.\d+)\.jar'
-    output_pattern: '{project}/{github_branch_name}/elastic-apm-android-agp-compatibility-api-{app_version}-{github_sha_short}.jar'
     metadata: *metadata

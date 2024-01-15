@@ -15,6 +15,7 @@ fi
 
 echo "--- Prepare vault context"
 set +x
+# TODO: this should be removed.
 VAULT_ROLE_ID_SECRET=$(vault read -field=role-id secret/ci/elastic-apm-agent-android/internal-ci-approle)
 export VAULT_ROLE_ID_SECRET
 VAULT_SECRET_ID_SECRET=$(vault read -field=secret-id secret/ci/elastic-apm-agent-android/internal-ci-approle)
@@ -44,28 +45,36 @@ clean_up () {
 }
 trap clean_up EXIT
 
-echo "--- Prepare keys context"
+echo "--- Prepare keys context :key:"
 set +x
-VAULT_TOKEN=$(vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID_SECRET" secret_id="$VAULT_SECRET_ID_SECRET")
-export VAULT_TOKEN
 # Nexus credentials (they cannot use the _SECRET pattern since they are in-memory based)
 # See https://docs.gradle.org/current/userguide/signing_plugin.html#sec:in-memory-keys
-ORG_GRADLE_PROJECT_sonatypeUsername=$(vault read -field=username secret/release/nexus)
+NEXUS_SECRET=kv/ci-shared/release-eng/team-release-secrets/apm/maven_central
+ORG_GRADLE_PROJECT_sonatypeUsername=$(vault read -field username $NEXUS_SECRET)
 export ORG_GRADLE_PROJECT_sonatypeUsername
-ORG_GRADLE_PROJECT_sonatypePassword=$(vault read -field=password secret/release/nexus)
+ORG_GRADLE_PROJECT_sonatypePassword=$(vault read -field password $NEXUS_SECRET)
 export ORG_GRADLE_PROJECT_sonatypePassword
 
+# Signing keys
+GPG_SECRET=kv/data/ci-shared/release-eng/team-release-secrets/apm/gpg
+vault read -field="keyring" $GPG_SECRET | base64 -d > $KEY_FILE
+## NOTE: passphase is the name of the field.
+KEYPASS_SECRET=$(vault read -field="passphase" $GPG_SECRET)
+export KEYPASS_SECRET
+KEY_ID=$(vault kv get --field="key_id" $GPG_SECRET)
+KEY_ID_SECRET=${KEY_ID: -8}
+export KEY_ID_SECRET
+
+# TODO: this should be removed.
+VAULT_TOKEN=$(vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID_SECRET" secret_id="$VAULT_SECRET_ID_SECRET")
+export VAULT_TOKEN
+
+# TODO: this should be changed with the new vault secrets.
 # Gradle Plugin portal credentials
 PLUGIN_PORTAL_KEY=$(vault read secret/release/gradle-plugin-portal -format=json  | jq -r .data.key)
 export PLUGIN_PORTAL_KEY
 PLUGIN_PORTAL_SECRET=$(vault read secret/release/gradle-plugin-portal -format=json  | jq -r .data.secret)
 export PLUGIN_PORTAL_SECRET
-
-# Signing keys
-vault read -field=key secret/release/signing >$KEY_FILE
-KEYPASS_SECRET=$(vault read -field=passphrase secret/release/signing)
-export KEYPASS_SECRET
-unset VAULT_TOKEN
 
 # Import the key into the keyring
 echo "$KEYPASS_SECRET" | gpg --batch --import "$KEY_FILE"

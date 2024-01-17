@@ -44,7 +44,7 @@ export ORG_GRADLE_PROJECT_sonatypePassword
 GRADLE_SECRET=kv/ci-shared/release-eng/team-release-secrets/apm/gradle_plugin_portal
 PLUGIN_PORTAL_KEY=$(vault kv get --field="key" $GRADLE_SECRET)
 export PLUGIN_PORTAL_KEY
-PLUGIN_PORTAL_SECRET=$(vault kv get --field="secret" $GRADLE_SECRET -format=json)
+PLUGIN_PORTAL_SECRET=$(vault kv get --field="secret" $GRADLE_SECRET)
 export PLUGIN_PORTAL_SECRET
 
 # Signing keys

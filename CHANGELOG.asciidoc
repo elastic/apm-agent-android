@@ -30,9 +30,9 @@ ${next_release_notes}
 ==== ${version} - ${release_date}
 
 [float]
-===== Features
+===== Bug fixes
 
-* New feature: {pull}000[#000]
+* Fix for #254: {pull}261[#261]
 ////
 
 [[release-notes-0.13.0]]

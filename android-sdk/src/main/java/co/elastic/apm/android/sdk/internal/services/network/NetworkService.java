@@ -79,11 +79,11 @@ public class NetworkService extends ConnectivityManager.NetworkCallback implemen
 
     @Nullable
     public CarrierInfo getCarrierInfo() {
-        if (!canQueryCarrierInfo()) {
+        String simOperator = getSimOperator();
+        if (simOperator == null) {
             return null;
         }
 
-        String simOperator = telephonyManager.getSimOperator();
         String mcc = simOperator.substring(0, 3);
         String mnc = simOperator.substring(3);
         return new CarrierInfo(telephonyManager.getSimOperatorName(),
@@ -114,10 +114,15 @@ public class NetworkService extends ConnectivityManager.NetworkCallback implemen
         setType(NetworkType.none());
     }
 
-    private boolean canQueryCarrierInfo() {
-        String simOperator = telephonyManager.getSimOperator();
-        return telephonyManager.getSimState() == TelephonyManager.SIM_STATE_READY
-                && simOperator != null && simOperator.length() > 3;
+    private String getSimOperator() {
+        if (telephonyManager.getSimState() == TelephonyManager.SIM_STATE_READY) {
+            String simOperator = telephonyManager.getSimOperator();
+            if (simOperator != null && simOperator.length() > 3) {
+                return simOperator;
+            }
+        }
+
+        return null;
     }
 
     private AppInfoService getAppInfoService() {

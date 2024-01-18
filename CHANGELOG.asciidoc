@@ -30,10 +30,18 @@ ${next_release_notes}
 ==== ${version} - ${release_date}
 
 [float]
+===== Features
+
+* New feature: {pull}000[#000]
+////
+
+[[release-notes-0.14.0]]
+==== 0.14.0 - 2024/01/18
+
+[float]
 ===== Bug fixes
 
 * Fix for #254: {pull}261[#261]
-////
 
 [[release-notes-0.13.0]]
 ==== 0.13.0 - 2023/12/12

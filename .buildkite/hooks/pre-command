@@ -61,7 +61,7 @@ export KEY_ID_SECRET
 echo "$KEYPASS_SECRET" | gpg --batch --import "$KEY_FILE"
 
 # Export secring
-SECRING_ASC=$(gpg --pinentry-mode=loopback --passphrase "$KEYPASS_SECRET" --armor --export-secret-key dev_ops@elasticsearch.org)
+SECRING_ASC=$(gpg --pinentry-mode=loopback --passphrase "$KEYPASS_SECRET" --armor --export-secret-key "$KEY_ID_SECRET")
 export SECRING_ASC
 
 echo "--- Configure git context :git:"

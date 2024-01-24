@@ -47,7 +47,6 @@ metadata:
     github.com/team-slug: elastic/apm-agent-android
   tags:
     - github
-    - github-action
     - gpg-sign
     - gradle-portal
     - maven-central
@@ -58,8 +57,10 @@ metadata:
     - title: GitHub action
       url: https://github.com/elastic/apm-agent-android/actions/workflows/release.yml
 spec:
-  type: service
+  type: github-actions
   owner: group:apm-agent-android
   lifecycle: production
   dependsOn:
     - "system:github-actions"
+    - "resource:user-apmmachine"
+    - "resource:user-obltmachine"

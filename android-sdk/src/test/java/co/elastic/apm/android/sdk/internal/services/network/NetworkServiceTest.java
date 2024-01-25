@@ -18,8 +18,10 @@
  */
 package co.elastic.apm.android.sdk.internal.services.network;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
 
 import android.net.ConnectivityManager;
 import android.telephony.TelephonyManager;
@@ -57,5 +59,13 @@ public class NetworkServiceTest {
         doReturn(TelephonyManager.SIM_STATE_READY).when(telephonyManager).getSimState();
 
         assertNull(networkService.getCarrierInfo());
+    }
+
+    @Test
+    public void getCarrierInfo_fromFirstSimOperatorResponse() {
+        when(telephonyManager.getSimOperator()).thenReturn("1234").thenReturn("");
+        doReturn(TelephonyManager.SIM_STATE_READY).when(telephonyManager).getSimState();
+
+        assertNotNull(networkService.getCarrierInfo());
     }
 }

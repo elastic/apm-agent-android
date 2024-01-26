@@ -4,6 +4,13 @@ apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
   name: buildkite-pipeline-apm-agent-android-release
+  tags:
+    - buildkite
+    - gpg-sign
+    - gradle-portal
+    - maven-central
+    - release
+    - user:apmmachine
 spec:
   implementation:
     apiVersion: buildkite.elastic.dev/v1
@@ -24,3 +31,36 @@ spec:
         observablt-robots-automation: {}
   owner: group:observablt-robots
   type: buildkite-pipeline
+
+---
+# A Component for the release GitHub action
+#
+# yaml-language-server: $schema=https://json.schemastore.org/catalog-info.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: apm-agent-android-release
+  description: GitHub action to run the release process for the APM Agent Android
+  annotations:
+    backstage.io/source-location: url:https://github.com/elastic/apm-agent-android/blob/main/.github/workflows/release.yml
+    github.com/project-slug: elastic/apm-agent-android
+    github.com/team-slug: elastic/apm-agent-android
+  tags:
+    - github
+    - gpg-sign
+    - gradle-portal
+    - maven-central
+    - release
+    - user:apmmachine
+    - user:obltmachine
+  links:
+    - title: GitHub action
+      url: https://github.com/elastic/apm-agent-android/actions/workflows/release.yml
+spec:
+  type: github-actions
+  owner: group:apm-agent-android
+  lifecycle: production
+  dependsOn:
+    - "system:github-actions"
+    - "user:apmmachine"
+    - "user:obltmachine"

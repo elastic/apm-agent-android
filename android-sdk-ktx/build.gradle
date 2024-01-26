@@ -35,8 +35,8 @@ licensesConfig {
 }
 
 dependencies {
-    api "io.opentelemetry:opentelemetry-extension-kotlin:$openTelemetry_version"
+    api libs.opentelemetry.kotlin
     implementation project(':android-sdk')
     implementation project(':android-common')
-    compileOnly "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
+    compileOnly libs.kotlin.coroutines
 }

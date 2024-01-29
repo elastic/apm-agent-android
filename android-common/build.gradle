@@ -10,7 +10,6 @@ licensesConfig {
 }
 
 dependencies {
-    api libs.okhttp
     api libs.slf4j.api
     implementation libs.androidx.annotations
 }

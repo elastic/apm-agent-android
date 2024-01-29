@@ -2,8 +2,6 @@ plugins {
     id 'java-library'
 }
 
-def autoService_version = '1.0.1'
-
 dependencies {
     implementation libs.squareup.javaPoet
     compileOnly libs.google.autoService.annotations

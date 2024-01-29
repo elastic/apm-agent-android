@@ -66,6 +66,7 @@ import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.sdk.internal.utilities.logging.AndroidLoggerFactory;
 import co.elastic.apm.android.sdk.session.SessionManager;
 import io.opentelemetry.android.OpenTelemetryRum;
+import io.opentelemetry.android.config.OtelRumConfig;
 import io.opentelemetry.android.instrumentation.activity.VisibleScreenTracker;
 import io.opentelemetry.android.instrumentation.lifecycle.AndroidLifecycleInstrumentationBuilder;
 import io.opentelemetry.android.instrumentation.startup.AppStartupTimer;
@@ -280,7 +281,10 @@ public final class ElasticApmAgent {
         Resource resource = Resource.getDefault()
                 .merge(Resource.create(resourceAttrs));
 
-        OpenTelemetryRum rum = OpenTelemetryRum.builder(app)
+        OtelRumConfig rumConfig = new OtelRumConfig();
+        rumConfig.disableNetworkAttributes();
+        rumConfig.disableNetworkChangeMonitoring();
+        OpenTelemetryRum rum = OpenTelemetryRum.builder(app, rumConfig)
                 .addTracerProviderCustomizer((sdkTracerProviderBuilder, application) -> configureTracerProviderBuilder(sdkTracerProviderBuilder, signalConfiguration, resource, globalAttributesVisitor, sampleRateManager))
                 .addMeterProviderCustomizer((sdkMeterProviderBuilder, application) -> configureMeterProviderBuilder(sdkMeterProviderBuilder, signalConfiguration, resource, sampleRateManager))
                 .addLoggerProviderCustomizer((sdkLoggerProviderBuilder, application) -> configureLoggerProviderBuilder(sdkLoggerProviderBuilder, signalConfiguration, resource, globalAttributesVisitor, sampleRateManager))

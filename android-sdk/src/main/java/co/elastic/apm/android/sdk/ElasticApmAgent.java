@@ -49,7 +49,7 @@ import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.exceptions.ElasticExceptionHandler;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.poll.ConfigurationPollManager;
-import co.elastic.apm.android.sdk.internal.features.launchtime.LaunchTimeActivityCallback;
+import co.elastic.apm.android.sdk.internal.features.launchtime.LaunchTimeApplicationListener;
 import co.elastic.apm.android.sdk.internal.features.lifecycle.ElasticProcessLifecycleObserver;
 import co.elastic.apm.android.sdk.internal.features.persistence.PersistenceInitializer;
 import co.elastic.apm.android.sdk.internal.features.sampling.SampleRateManager;

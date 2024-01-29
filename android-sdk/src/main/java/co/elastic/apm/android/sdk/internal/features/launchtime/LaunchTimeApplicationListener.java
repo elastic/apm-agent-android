@@ -18,29 +18,21 @@
  */
 package co.elastic.apm.android.sdk.internal.features.launchtime;
 
-import android.app.Activity;
-import android.app.Application;
-import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import java.util.concurrent.TimeUnit;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.instrumentation.Instrumentations;
 import co.elastic.apm.android.sdk.metrics.ElasticMeters;
+import io.opentelemetry.android.instrumentation.ApplicationStateListener;
 import io.opentelemetry.api.metrics.BatchCallback;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.metrics.ObservableDoubleMeasurement;
 
-public final class LaunchTimeActivityCallback implements Application.ActivityLifecycleCallbacks {
+public final class LaunchTimeApplicationListener implements ApplicationStateListener {
 
     @Override
-    public void onActivityPreResumed(@NonNull Activity activity) {
-        unregisterCallback(activity);
-
+    public void onApplicationForegrounded() {
         if (LaunchTimeTracker.stopTimer()) {
             if (Instrumentations.isAppLaunchTimeEnabled()) {
                 long launchTimeInNanos = LaunchTimeTracker.getElapsedTimeInNanos();
@@ -61,43 +53,8 @@ public final class LaunchTimeActivityCallback implements Application.ActivityLif
         batchCallback.close();
     }
 
-    private void unregisterCallback(@NonNull Activity activity) {
-        Elog.getLogger().debug("Unregistering launch time activity callback");
-        activity.getApplication().unregisterActivityLifecycleCallbacks(this);
-    }
-
     @Override
-    public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {
-
-    }
-
-    @Override
-    public void onActivityStarted(@NonNull Activity activity) {
-
-    }
-
-    @Override
-    public void onActivityResumed(@NonNull Activity activity) {
-
-    }
-
-    @Override
-    public void onActivityPaused(@NonNull Activity activity) {
-
-    }
-
-    @Override
-    public void onActivityStopped(@NonNull Activity activity) {
-
-    }
-
-    @Override
-    public void onActivitySaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState) {
-
-    }
-
-    @Override
-    public void onActivityDestroyed(@NonNull Activity activity) {
+    public void onApplicationBackgrounded() {
 
     }
 }

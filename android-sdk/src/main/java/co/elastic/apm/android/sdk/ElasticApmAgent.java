@@ -224,7 +224,6 @@ public final class ElasticApmAgent {
         initializeConfigurations(injector);
         initializeOpentelemetry(application, injector);
         initializeCrashReports();
-        initializeLaunchTimeTracker(application);
         initializeLifecycleObserver();
     }
 
@@ -259,10 +258,6 @@ public final class ElasticApmAgent {
         SessionManager sessionManager = injector.getSessionManager();
         sessionManager.initialize();
         SessionManager.set(sessionManager);
-    }
-
-    private void initializeLaunchTimeTracker(Context context) {
-        ((Application) context).registerActivityLifecycleCallbacks(new LaunchTimeActivityCallback());
     }
 
     private void initializeCrashReports() {

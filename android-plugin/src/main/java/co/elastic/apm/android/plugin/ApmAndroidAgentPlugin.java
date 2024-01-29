@@ -18,11 +18,9 @@
  */
 package co.elastic.apm.android.plugin;
 
-import com.android.build.api.artifact.ScopedArtifact;
 import com.android.build.api.instrumentation.InstrumentationScope;
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension;
 import com.android.build.api.variant.ApplicationVariant;
-import com.android.build.api.variant.ScopedArtifacts;
 import com.android.build.api.variant.SourceDirectories;
 import com.android.build.gradle.BaseExtension;
 
@@ -44,7 +42,6 @@ import co.elastic.apm.android.plugin.extensions.ElasticApmExtension;
 import co.elastic.apm.android.plugin.instrumentation.ElasticLocalInstrumentationFactory;
 import co.elastic.apm.android.plugin.logging.GradleLoggerFactory;
 import co.elastic.apm.android.plugin.tasks.ApmInfoGeneratorTask;
-import co.elastic.apm.android.plugin.tasks.OkHttpEventlistenerGenerator;
 import co.elastic.apm.android.plugin.tasks.tools.ClasspathProvider;
 import co.elastic.apm.generated.BuildConfig;
 import kotlin.Unit;
@@ -102,26 +99,12 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
     }
 
     private void enhanceVariant(ApplicationVariant applicationVariant) {
-        addOkhttpEventListenerGenerator(applicationVariant);
         addLocalRemapping(applicationVariant);
         addApmInfoGenerator(applicationVariant);
     }
 
     private void addLocalRemapping(ApplicationVariant applicationVariant) {
         applicationVariant.getInstrumentation().transformClassesWith(ElasticLocalInstrumentationFactory.class, InstrumentationScope.PROJECT, none -> Unit.INSTANCE);
-    }
-
-    private void addOkhttpEventListenerGenerator(ApplicationVariant applicationVariant) {
-        TaskProvider<OkHttpEventlistenerGenerator> taskProvider =
-                project.getTasks().register(applicationVariant.getName() + "GenerateOkhttpEventListener", OkHttpEventlistenerGenerator.class);
-        taskProvider.configure(task -> {
-            task.getOutputDir().set(project.getLayout().getBuildDirectory().dir(task.getName()));
-            task.getAppRuntimeClasspath().from(classpathProvider.getRuntimeClasspath(applicationVariant));
-            task.getJvmTargetVersion().set(androidExtension.getCompileOptions().getTargetCompatibility().toString());
-        });
-        applicationVariant.getArtifacts().forScope(ScopedArtifacts.Scope.PROJECT)
-                .use(taskProvider)
-                .toAppend(ScopedArtifact.CLASSES.INSTANCE, OkHttpEventlistenerGenerator::getOutputDir);
     }
 
     private void addApmInfoGenerator(ApplicationVariant variant) {

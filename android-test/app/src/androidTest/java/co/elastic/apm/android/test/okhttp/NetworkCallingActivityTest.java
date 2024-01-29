@@ -12,16 +12,24 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
+import co.elastic.apm.android.sdk.ElasticApmConfiguration;
+import co.elastic.apm.android.sdk.instrumentation.InstrumentationConfiguration;
 import co.elastic.apm.android.sdk.traces.ElasticTracers;
 import co.elastic.apm.android.test.base.BaseEspressoTest;
+import co.elastic.apm.android.test.common.spans.Spans;
+import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Scope;
+import io.opentelemetry.sdk.trace.data.SpanData;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -73,6 +81,73 @@ public class NetworkCallingActivityTest extends BaseEspressoTest {
 
         assertNotNull(recordedRequest.getHeader("MY-HEADER"));
         assertNotNull(recordedRequest.getHeader("traceparent"));
+    }
+
+    @Test
+    public void verifyHttpSpanStructure_whenSucceeded() {
+        Map<String, String> responseHeaders = new HashMap<>();
+        responseHeaders.put("Content-Length", "2");
+        executeSuccessfulHttpCall(200, "{}", responseHeaders);
+
+        List<SpanData> spans = getRecordedSpans(2);
+        SpanData httpSpan = spans.get(1);
+
+        Spans.verify(httpSpan)
+                .isNamed("GET localhost")
+                .isOfKind(SpanKind.CLIENT)
+                .hasAttribute("url.full", "http://localhost:" + webServer.getPort() + "/")
+                .hasAttribute("http.request.method", "GET")
+                .hasAttribute("http.response.status_code", 200)
+                .hasAttribute("http.response.body.size", 2);
+    }
+
+    @Test
+    public void verifyHttpSpanStructure_whenReceivingHttpError() {
+        executeSuccessfulHttpCall(500);
+
+        List<SpanData> spans = getRecordedSpans(2);
+        SpanData httpSpan = spans.get(1);
+
+        Spans.verifyFailed(httpSpan)
+                .isNamed("GET localhost")
+                .isOfKind(SpanKind.CLIENT)
+                .hasAttribute("url.full", "http://localhost:" + webServer.getPort() + "/")
+                .hasAttribute("http.request.method", "GET")
+                .hasAttribute("http.response.status_code", 500)
+                .hasEvent("exception", Attributes.builder().put("exception.type", "500")
+                        .put("exception.escaped", false)
+                        .put("exception.message", "Server Error").build());
+    }
+
+    @Test
+    public void verifyHttpSpanStructure_whenFailed() {
+        executeFailedHttpCall();
+
+        List<SpanData> spans = getRecordedSpans(2);
+        SpanData httpSpan = spans.get(1);
+
+        Spans.verifyFailed(httpSpan)
+                .isNamed("GET localhost")
+                .isOfKind(SpanKind.CLIENT)
+                .hasAmountOfRecordedExceptions(1)
+                .hasAttribute("url.full", "http://localhost:" + webServer.getPort() + "/")
+                .hasAttribute("http.request.method", "GET");
+    }
+
+    @Test
+    public void whenHttpInstrumentationIsDisabled_doNotSendAnyOkHttpSpans() {
+        ElasticApmConfiguration configuration = ElasticApmConfiguration.builder().setInstrumentationConfiguration(InstrumentationConfiguration.builder()
+                .enableHttpTracing(false)
+                .build()).build();
+        overrideAgentConfiguration(configuration);
+
+        executeSuccessfulHttpCall(200);
+
+        getRecordedSpans(0);
+    }
+
+    private void executeSuccessfulHttpCall(int responseCode) {
+        executeSuccessfulHttpCall(responseCode, "{}", Collections.emptyMap());
     }
 
     private void executeSuccessfulHttpCall(int responseCode, String responseBody, Map<String, String> responseHeaders) {

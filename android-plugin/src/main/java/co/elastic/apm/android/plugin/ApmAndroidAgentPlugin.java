@@ -88,7 +88,8 @@ class ApmAndroidAgentPlugin implements Plugin<Project> {
     }
 
     private void addInstrumentationDependency() {
-        project.getDependencies().add("byteBuddy", BuildConfig.INSTRUMENTATION_DEPENDENCY_URI);
+        project.getDependencies().add("implementation", BuildConfig.OTEL_OKHTTP_LIBRARY_URI);
+        project.getDependencies().add("byteBuddy", BuildConfig.OTEL_OKHTTP_AGENT_URI);
     }
 
     private void addTasks() {

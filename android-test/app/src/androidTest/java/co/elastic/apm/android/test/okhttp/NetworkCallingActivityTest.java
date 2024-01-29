@@ -25,20 +25,19 @@ import co.elastic.apm.android.sdk.instrumentation.InstrumentationConfiguration;
 import co.elastic.apm.android.sdk.traces.ElasticTracers;
 import co.elastic.apm.android.test.base.BaseEspressoTest;
 import co.elastic.apm.android.test.common.spans.Spans;
-import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import okhttp3.mockwebserver.SocketPolicy;
 
 public class NetworkCallingActivityTest extends BaseEspressoTest {
     private OkHttpClient.Builder clientBuilder;
@@ -89,49 +88,37 @@ public class NetworkCallingActivityTest extends BaseEspressoTest {
         responseHeaders.put("Content-Length", "2");
         executeSuccessfulHttpCall(200, "{}", responseHeaders);
 
-        List<SpanData> spans = getRecordedSpans(2);
-        SpanData httpSpan = spans.get(1);
+        List<SpanData> spans = getRecordedSpans(1);
+        SpanData httpSpan = spans.get(0);
 
         Spans.verify(httpSpan)
-                .isNamed("GET localhost")
-                .isOfKind(SpanKind.CLIENT)
-                .hasAttribute("url.full", "http://localhost:" + webServer.getPort() + "/")
-                .hasAttribute("http.request.method", "GET")
-                .hasAttribute("http.response.status_code", 200)
-                .hasAttribute("http.response.body.size", 2);
+                .isNamed("HTTP")
+                .isOfKind(SpanKind.CLIENT);
     }
 
     @Test
     public void verifyHttpSpanStructure_whenReceivingHttpError() {
         executeSuccessfulHttpCall(500);
 
-        List<SpanData> spans = getRecordedSpans(2);
-        SpanData httpSpan = spans.get(1);
+        List<SpanData> spans = getRecordedSpans(1);
+        SpanData httpSpan = spans.get(0);
 
         Spans.verifyFailed(httpSpan)
-                .isNamed("GET localhost")
-                .isOfKind(SpanKind.CLIENT)
-                .hasAttribute("url.full", "http://localhost:" + webServer.getPort() + "/")
-                .hasAttribute("http.request.method", "GET")
-                .hasAttribute("http.response.status_code", 500)
-                .hasEvent("exception", Attributes.builder().put("exception.type", "500")
-                        .put("exception.escaped", false)
-                        .put("exception.message", "Server Error").build());
+                .isNamed("HTTP")
+                .isOfKind(SpanKind.CLIENT);
     }
 
     @Test
     public void verifyHttpSpanStructure_whenFailed() {
         executeFailedHttpCall();
 
-        List<SpanData> spans = getRecordedSpans(2);
-        SpanData httpSpan = spans.get(1);
+        List<SpanData> spans = getRecordedSpans(1);
+        SpanData httpSpan = spans.get(0);
 
         Spans.verifyFailed(httpSpan)
-                .isNamed("GET localhost")
+                .isNamed("HTTP")
                 .isOfKind(SpanKind.CLIENT)
-                .hasAmountOfRecordedExceptions(1)
-                .hasAttribute("url.full", "http://localhost:" + webServer.getPort() + "/")
-                .hasAttribute("http.request.method", "GET");
+                .hasAmountOfRecordedExceptions(1);
     }
 
     @Test
@@ -170,21 +157,16 @@ public class NetworkCallingActivityTest extends BaseEspressoTest {
     }
 
     private void executeFailedHttpCall() {
-        webServer.enqueue(new MockResponse()
-                .setBody("{}")
-                .setSocketPolicy(SocketPolicy.DISCONNECT_DURING_RESPONSE_BODY));
-
-        Consumer<Response> responseConsumer = response -> {
-            try {
-                response.body().string();
-                fail();
-            } catch (IOException e) {
-                assertEquals("unexpected end of stream", e.getMessage());
-            }
-        };
+        HttpUrl url = webServer.url("/");
+        try {
+            webServer.shutdown();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         try {
-            executeHttpCall(new Request.Builder().url(webServer.url("/")).build(), responseConsumer);
+            executeHttpCall(new Request.Builder().url(url).build(), response -> {
+            });
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

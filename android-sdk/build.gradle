@@ -39,7 +39,7 @@ shadowJar {
 }
 
 dependencies {
-    api libs.opentelemetry.sdk
+    api libs.opentelemetry.android
     api libs.opentelemetry.events
     api libs.stagemonitor.configuration
     api libs.okhttp

@@ -1,7 +1,5 @@
 package co.elastic.apm.android.test.lifecycle;
 
-import static org.junit.Assert.assertNull;
-
 import androidx.lifecycle.Lifecycle;
 import androidx.test.core.app.ActivityScenario;
 

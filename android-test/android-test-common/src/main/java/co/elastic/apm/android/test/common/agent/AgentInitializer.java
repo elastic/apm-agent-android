@@ -1,5 +1,6 @@
 package co.elastic.apm.android.test.common.agent;
 
+import android.app.Application;
 import android.content.Context;
 
 import java.lang.reflect.Field;
@@ -14,16 +15,16 @@ import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
 
 public class AgentInitializer {
 
-    public static void initialize(Context context, ElasticApmConfiguration configuration) {
-        initialize(context, configuration, null, null);
+    public static void initialize(Application application, ElasticApmConfiguration configuration) {
+        initialize(application, configuration, null, null);
     }
 
-    public static void initialize(Context context, ElasticApmConfiguration
+    public static void initialize(Application application, ElasticApmConfiguration
             configuration, Connectivity connectivity, AgentDependenciesInjector.Interceptor injectInterceptor) {
         if (configuration == null) {
             configuration = ElasticApmConfiguration.getDefault();
         }
-        internalInitialize(context, configuration, connectivity, injectInterceptor);
+        internalInitialize(application, configuration, connectivity, injectInterceptor);
     }
 
     public static void injectSignalConfiguration(ElasticApmConfiguration configuration,
@@ -37,12 +38,12 @@ public class AgentInitializer {
         }
     }
 
-    private static void internalInitialize(Context context, ElasticApmConfiguration configuration,
+    private static void internalInitialize(Application application, ElasticApmConfiguration configuration,
                                            Connectivity connectivity, AgentDependenciesInjector.Interceptor interceptor) {
         try {
-            Method method = ElasticApmAgent.class.getDeclaredMethod("initialize", Context.class, ElasticApmConfiguration.class, Connectivity.class, AgentDependenciesInjector.Interceptor.class);
+            Method method = ElasticApmAgent.class.getDeclaredMethod("initialize", Application.class, ElasticApmConfiguration.class, Connectivity.class, AgentDependenciesInjector.Interceptor.class);
             method.setAccessible(true);
-            method.invoke(null, context, configuration, connectivity, interceptor);
+            method.invoke(null, application, configuration, connectivity, interceptor);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }

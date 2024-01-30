@@ -5,9 +5,10 @@ import co.elastic.apm.android.test.base.BaseEspressoTest;
 public abstract class BaseLifecycleInstrumentationTest extends BaseEspressoTest {
 
     protected enum ActivityMethod {
-        ON_CREATE("onCreate"),
-        ON_RESUME("onResume"),
-        ON_START("onStart");
+        ON_CREATE("Created"),
+        ON_RESUME("Restarted"),
+        ON_PAUSE("Paused"),
+        ON_STOP("Stopped");
 
         private final String name;
 
@@ -17,9 +18,7 @@ public abstract class BaseLifecycleInstrumentationTest extends BaseEspressoTest 
     }
 
     protected enum FragmentMethod {
-        ON_CREATE("onCreate"),
-        ON_CREATE_VIEW("onCreateView"),
-        ON_VIEW_CREATED("onViewCreated");
+        ON_CREATE("Created");
 
         private final String name;
 
@@ -34,9 +33,5 @@ public abstract class BaseLifecycleInstrumentationTest extends BaseEspressoTest 
 
     protected String getSpanMethodName(FragmentMethod method) {
         return method.name;
-    }
-
-    protected String getRootLifecycleSpanName(Class<?> theClass) {
-        return theClass.getSimpleName() + " - View appearing";
     }
 }

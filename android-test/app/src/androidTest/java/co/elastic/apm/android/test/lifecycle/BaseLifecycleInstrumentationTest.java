@@ -18,7 +18,10 @@ public abstract class BaseLifecycleInstrumentationTest extends BaseEspressoTest 
     }
 
     protected enum FragmentMethod {
-        ON_CREATE("Created");
+        ON_CREATE("Created"),
+        ON_VIEW_DESTROYED("ViewDestroyed"),
+        ON_PAUSE("Paused"),
+        ON_DESTROY("Destroyed");
 
         private final String name;
 

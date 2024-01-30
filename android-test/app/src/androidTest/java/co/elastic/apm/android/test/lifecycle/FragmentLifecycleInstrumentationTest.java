@@ -2,6 +2,7 @@ package co.elastic.apm.android.test.lifecycle;
 
 
 import androidx.fragment.app.testing.FragmentScenario;
+import androidx.lifecycle.Lifecycle;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -41,6 +42,36 @@ public class FragmentLifecycleInstrumentationTest extends BaseLifecycleInstrumen
                 Spans.verify(fragment.getOnCreateSpanContext()).belongsTo(onCreateFragmentSpan);
                 Spans.verify(fragment.getOnCreateViewSpanContext()).belongsTo(onCreateFragmentSpan);
                 Spans.verify(fragment.getOnViewCreatedSpanContext()).belongsTo(onCreateFragmentSpan);
+            });
+        }
+    }
+
+    @Test
+    public void onDestruction_wrapWithSpans() {
+        try (FragmentScenario<FullCreationFragment> scenario = FragmentScenario.launchInContainer(FullCreationFragment.class)) {
+            scenario.onFragment(fragment -> {
+                getSpanExporter().clearCapturedSpans();
+
+                scenario.moveToState(Lifecycle.State.DESTROYED);
+
+                List<SpanData> spans = getRecordedSpans(3);
+
+                SpanData paused = spans.get(0);
+                SpanData viewDestroyed = spans.get(1);
+                SpanData destroyed = spans.get(2);
+
+                Spans.verify(paused)
+                        .hasNoParent()
+                        .isNamed(getSpanMethodName(FragmentMethod.ON_PAUSE))
+                        .hasAttribute("screen.name", "FullCreationFragment");
+                Spans.verify(viewDestroyed)
+                        .hasNoParent()
+                        .isNamed(getSpanMethodName(FragmentMethod.ON_VIEW_DESTROYED))
+                        .hasAttribute("screen.name", "FullCreationFragment");
+                Spans.verify(destroyed)
+                        .hasNoParent()
+                        .isNamed(getSpanMethodName(FragmentMethod.ON_DESTROY))
+                        .hasAttribute("screen.name", "FullCreationFragment");
             });
         }
     }

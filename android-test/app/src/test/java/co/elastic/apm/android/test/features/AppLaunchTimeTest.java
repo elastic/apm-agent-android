@@ -25,14 +25,14 @@ public class AppLaunchTimeTest extends BaseRobolectricTest {
     }
 
     @Test
-    public void whenFirstActivityIsOpen_trackStartupTime_in_onResume() {
+    public void whenFirstActivityIsOpen_trackStartupTime_in_onStart() {
         try (ActivityController<FullCreationActivity> controller = Robolectric.buildActivity(FullCreationActivity.class)) {
-            controller.create().start().postCreate(null);
+            controller.create();
 
             // Checking that there's no metrics up to this point
             getRecordedMetrics(0);
 
-            controller.resume();
+            controller.start().postCreate(null);
 
             MetricData startupMetric = getRecordedMetric();
 

@@ -1,5 +1,12 @@
 # apm-agent-android
 
+> [!NOTE]
+> This agent is based on
+> the [OpenTelemetry Android lib](https://github.com/open-telemetry/opentelemetry-android) which is
+> currently unstable, however, we're proactively contributing to it in order to make it stable as
+> soon as possible (on its version 1.x) and will avoid introducing API breaking changes in the
+> meantime.
+
 Elastic APM Android Agent
 
 See the [documentation](https://www.elastic.co/guide/en/apm/agent/android/current/index.html) for

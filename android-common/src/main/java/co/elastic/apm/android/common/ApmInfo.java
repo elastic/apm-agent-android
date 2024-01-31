@@ -25,6 +25,5 @@ public class ApmInfo {
     public static String KEY_SERVER_SECRET_TOKEN = "server.secret_token";
     public static String KEY_SERVER_API_KEY = "server.api_key";
     public static String KEY_SERVICE_ENVIRONMENT = "service.deployment_environment";
-    public static String KEY_SCOPE_OKHTTP_VERSION = "scope.okhttp.version";
     public static String ASSET_FILE_NAME = "co_elastic_apm_android.properties";
 }

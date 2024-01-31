@@ -68,11 +68,6 @@ public class ApmMetadataService implements Service {
         return apmInfoPropertiesProvider.get().getProperty(ApmInfo.KEY_SERVICE_ENVIRONMENT);
     }
 
-    @Nullable
-    public String getOkHttpVersion() {
-        return apmInfoPropertiesProvider.get().getProperty(ApmInfo.KEY_SCOPE_OKHTTP_VERSION);
-    }
-
     @Override
     public void start() {
 

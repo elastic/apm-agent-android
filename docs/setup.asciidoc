@@ -4,16 +4,43 @@
 Follow these steps to start reporting your Android application's performance to Elastic APM:
 
 1. <<gradle-setup>>.
-2. <<application-setup>>.
+2. <<manual-setup>>.
 3. <<compile-and-run>>.
-4. <<manual-setup>>.
-5. <<whats-next>>.
+4. <<whats-next>>.
 
 [float]
 [[gradle-setup]]
 === Set up Gradle
 
-First, add the https://plugins.gradle.org/plugin/co.elastic.apm.android[Elastic APM agent plugin] to your application's `build.gradle` file as shown below:
+[float]
+[[gradle-requirements]]
+==== Requirements
+
+|===
+|Requirement |Minimum version
+
+|Android Gradle plugin
+|7.4.0
+
+|Android API level
+|24
+
+|===
+
+[float]
+[[minsdk-24-support]]
+==== For projects using minSdk version < 26
+
+Due to Android's limited support for Java 8 features on devices with API level < 26, or in other words, older than Android 8.0, you must add https://developer.android.com/studio/write/java8-support#library-desugaring[Java 8+ desugaring support] to apps with a minSdk version lower than 26.
+If you don't, your app can crash when running on devices using Android OS versions older than 8.0. This is because the https://github.com/open-telemetry/opentelemetry-java[OpenTelemetry Java SDK], which this SDK is built upon, uses Java 8 features.
+
+If your minSdk is 26 or higher, you can skip this step.
+
+[float]
+[[adding-gradle-plugin]]
+==== Adding the Elastic Agent Gradle plugin
+
+In order to get the <<supported-technologies,Supported Technologies>> automatically instrumented, you'd need to add the https://plugins.gradle.org/plugin/co.elastic.apm.android[Elastic APM agent plugin] to your application's `build.gradle` file as shown below:
 
 [source,groovy]
 ----
@@ -59,17 +86,8 @@ More info on API Keys {ref}/security-api-create-api-key.html[here].
 NOTE: When both `secretToken` and `apiKey` are provided, apiKey has priority and secretToken is ignored.
 
 [float]
-[[minsdk-24-support]]
-==== For projects using minSdk version < 26
-
-Due to Android's limited support for Java 8 features on devices with API level < 26, or in other words, older than Android 8.0, you must add https://developer.android.com/studio/write/java8-support#library-desugaring[Java 8+ desugaring support] to apps with a minSdk version lower than 26.
-If you don't, your app can crash when running on devices using Android OS versions older than 8.0. This is because the https://github.com/open-telemetry/opentelemetry-java[OpenTelemetry Java SDK], which this SDK is built upon, uses Java 8 features.
-
-If your minSdk is 26 or higher, you can skip this step.
-
-[float]
 [[application-setup]]
-=== Set up your application
+==== Set up your application
 
 After syncing your project with the Gradle changes above, the Elastic APM agent needs to be initialized within your https://developer.android.com/reference/android/app/Application[Application class].
 This example shows the simplest way to configure the agent:
@@ -91,22 +109,42 @@ class MyApp extends android.app.Application {
 <1> Initialize the Elastic APM agent once.
 
 [float]
-[[compile-and-run]]
-=== Compile and run
-
-All that's left is to compile and run your application.
-That's it!
-
-[float]
 [[manual-setup]]
 === (Optional) Manual set up
 
-If you need to set up the Elastic SDK manually, without having to add the Gradle plugin as shown above, you'll need to provide the following configuration parameters at runtime:
+If you need to set up the Elastic SDK manually, without having to add the Gradle plugin as shown above, you'll need to do the following:
+
+[float]
+[[gradle-dependencies]]
+==== Add the SDK dependency
+
+Add the https://central.sonatype.com/artifact/co.elastic.apm/android-sdk[Elastic APM agent SDK] to your application's `build.gradle` file as shown below:
+
+[source,groovy]
+----
+// Android app's build.gradle file
+dependencies {
+    implementation "co.elastic.apm:android-sdk:[latest_version]" <1>
+}
+----
+
+<1> You can find the latest version https://central.sonatype.com/artifact/co.elastic.apm/android-sdk[here].
+
+[float]
+[[manual-configuration]]
+==== Configure your app's info and connectivity parameters
 
 - Set your app name, version, and environment name, as explained <<app-id-configuration, here>>.
 - Set your server connectivity parameters, as explained <<app-server-connectivity, here>>.
 
 NOTE: Without the Gradle plugin, the Elastic SDK won't be able to provide automatic instrumentations for its <<supported-technologies>>.
+
+[float]
+[[compile-and-run]]
+=== Compile and run
+
+All that's left is to compile and run your application.
+That's it!
 
 [float]
 [[whats-next]]

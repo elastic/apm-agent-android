@@ -49,7 +49,7 @@ public class BaseTask extends DefaultTask {
         }
 
         if (!externalDependenciesIds.isEmpty()) {
-            throw new RuntimeException("POM files not found for the following dependencies: " + externalDependenciesIds);
+            getLogger().warn("POM files not found for the following dependencies: " + externalDependenciesIds);
         }
 
         return identifiers;

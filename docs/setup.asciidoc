@@ -6,7 +6,7 @@ Follow these steps to start reporting your Android application's performance to 
 1. <<gradle-setup>>.
 2. <<manual-setup>>.
 3. <<compile-and-run>>.
-4. <<whats-next>>.
+4. <<whats-next>>
 
 [float]
 [[gradle-setup]]

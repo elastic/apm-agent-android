@@ -3,9 +3,9 @@
 > [!NOTE]
 > This agent is based on
 > the [OpenTelemetry Android lib](https://github.com/open-telemetry/opentelemetry-android) which is
-> currently unstable, however, we're proactively contributing to it in order to make it stable as
-> soon as possible (on its version 1.x) and will avoid introducing API breaking changes in the
-> Elastic agent in the meantime.
+> not stable yet. Elastic is proactively making contributions to this OpenTelemetry initiative and
+> we will release v1.x of the Elastic Android APM agent after a stable release of the OTel Android
+> SDK/API becomes available.
 
 Elastic APM Android Agent
 

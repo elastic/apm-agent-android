@@ -38,9 +38,9 @@ You can skip this step if your `minSdkVersion` is 26 or higher.
 
 [float]
 [[adding-gradle-plugin]]
-==== Adding the Elastic Agent Gradle plugin
+==== Add the Elastic Agent Gradle plugin
 
-In order to get the <<supported-technologies,Supported Technologies>> automatically instrumented, you'd need to add the https://plugins.gradle.org/plugin/co.elastic.apm.android[Elastic APM agent plugin] to your application's `build.gradle` file as shown below:
+To automatically instrument <<supported-technologies,Supported Technologies>>, add the https://plugins.gradle.org/plugin/co.elastic.apm.android[Elastic APM agent plugin] to your application's `build.gradle` file as shown below:
 
 [source,groovy]
 ----

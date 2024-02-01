@@ -112,7 +112,7 @@ class MyApp extends android.app.Application {
 [[manual-setup]]
 === (Optional) Manual set up
 
-If you need to set up the Elastic SDK manually, without having to add the Gradle plugin as shown above, you'll need to do the following:
+If you can't add the Elastic Agent Gradle plugin to your application as shown above, complete the following steps to set up the Elastic SDK manually.
 
 [float]
 [[gradle-dependencies]]

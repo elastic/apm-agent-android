@@ -35,6 +35,14 @@ ${next_release_notes}
 * New feature: {pull}000[#000]
 ////
 
+[[release-notes-0.14.0]]
+==== 0.14.0 - 2024/02/02
+
+[float]
+===== Features
+
+* New feature: {pull}000[#000]
+
 [[release-notes-0.13.1]]
 ==== 0.13.1 - 2024/01/18
 

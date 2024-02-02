@@ -41,7 +41,7 @@ ${next_release_notes}
 [float]
 ===== Features
 
-* New feature: {pull}000[#000]
+* Making OpenTelemetry Android the base project: {pull}268[#268]
 
 [[release-notes-0.13.1]]
 ==== 0.13.1 - 2024/01/18

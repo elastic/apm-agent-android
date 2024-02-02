@@ -39,25 +39,36 @@ shadowJar {
 }
 
 dependencies {
-    api "io.opentelemetry:opentelemetry-api:$openTelemetry_version"
-    api "io.opentelemetry:opentelemetry-sdk:$openTelemetry_version"
-    api "io.opentelemetry:opentelemetry-api-events:$openTelemetry_version-alpha"
-    api "com.squareup.okhttp3:okhttp:$okhttp_version"
-    api 'org.stagemonitor:stagemonitor-configuration:0.89.1'
-    implementation "androidx.lifecycle:lifecycle-process:2.5.1"
-    implementation 'com.blogspot.mydailyjava:weak-lock-free:0.18'
+    api libs.opentelemetry.sdk
+    api libs.opentelemetry.android
+    api libs.opentelemetry.events
+    api libs.stagemonitor.configuration
+    api libs.okhttp
     implementation project(':android-common')
-    implementation "io.opentelemetry:opentelemetry-exporter-otlp:$openTelemetry_version"
-    implementation "io.opentelemetry.semconv:opentelemetry-semconv:1.21.0-alpha"
-    implementation "io.opentelemetry.contrib:opentelemetry-disk-buffering:$openTelemetry_version-alpha"
-    implementation "androidx.annotation:annotation:$androidAnnotations_version"
-    implementation 'com.dslplatform:dsl-json-java8:1.10.0'
-    embedded 'com.github.instacart.truetime-android:library:3.5'
+    implementation libs.androidx.lifecycle
+    implementation libs.weaklockfree
+    implementation libs.opentelemetry.exporter.otlp
+    implementation libs.opentelemetry.semconv
+    implementation libs.opentelemetry.diskBuffering
+    implementation libs.androidx.annotations
+    implementation libs.dsl.json
+    embedded libs.truetime
     annotationProcessor 'co.elastic.apm.compile:processor'
     compileOnly 'co.elastic.apm.compile:processor'
-    testImplementation "org.mockito:mockito-core:$mockito_version"
-    testImplementation "org.mockito:mockito-inline:$mockito_version"
-    testImplementation "junit:junit:$junit_version"
-    androidTestImplementation 'androidx.test:runner:1.4.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    testImplementation libs.bundles.mocking
+    testImplementation libs.junit
+
+    // To avoid enforcing compileSdk > 33:
+    constraints {
+        add("implementation", "androidx.navigation:navigation-fragment") {
+            version {
+                strictly("2.6.0")
+            }
+        }
+        add("implementation", "androidx.core:core") {
+            version {
+                strictly("1.10.1")
+            }
+        }
+    }
 }

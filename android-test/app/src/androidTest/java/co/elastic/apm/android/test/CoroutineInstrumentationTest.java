@@ -16,14 +16,13 @@ public class CoroutineInstrumentationTest extends ActivityEspressoTest<Coroutine
 
     @Test
     public void onCreation_whenCoroutineGetsLaunched_propagateCurrentSpanContext() {
-        List<SpanData> spans = getRecordedSpans(3);
+        List<SpanData> spans = getRecordedSpans(7);
 
-        SpanData rootSpan = spans.get(0);
-        SpanData onCreateSpan = spans.get(1);
-        SpanData myCoroutineSpan = spans.get(2);
+        SpanData onCreateSpan = spans.get(0);
+        SpanData myCoroutineSpan = spans.get(1);
 
         Spans.verify(onCreateSpan)
-                .isDirectChildOf(rootSpan);
+                .hasNoParent();
 
         Spans.verify(myCoroutineSpan)
                 .isNamed("My span inside a coroutine")

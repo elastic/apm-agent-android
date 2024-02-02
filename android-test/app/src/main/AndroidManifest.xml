@@ -25,9 +25,6 @@
             android:name=".activities.CoroutineActivity"
             android:exported="true" />
         <activity
-            android:name=".okhttp.NetworkCallingActivity"
-            android:exported="true" />
-        <activity
             android:name=".activities.MissingOnResumeActivity"
             android:exported="true" />
         <activity

@@ -1,17 +1,17 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
-    id 'co.elastic.apm.android' version '0.13.0'
+    id 'co.elastic.apm.android'
 }
 
 android {
     namespace 'co.elastic.apm.android.sample'
-    compileSdk 32
+    compileSdk 33
 
     defaultConfig {
         applicationId "co.elastic.apm.android.sample"
         minSdk 26
-        targetSdk 32
+        targetSdk 33
         versionCode 1
         versionName "1.0"
 

@@ -49,7 +49,7 @@ import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.exceptions.ElasticExceptionHandler;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.poll.ConfigurationPollManager;
-import co.elastic.apm.android.sdk.internal.features.launchtime.LaunchTimeActivityCallback;
+import co.elastic.apm.android.sdk.internal.features.launchtime.LaunchTimeApplicationListener;
 import co.elastic.apm.android.sdk.internal.features.lifecycle.ElasticProcessLifecycleObserver;
 import co.elastic.apm.android.sdk.internal.features.persistence.PersistenceInitializer;
 import co.elastic.apm.android.sdk.internal.features.sampling.SampleRateManager;
@@ -65,21 +65,24 @@ import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicWorkSer
 import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.sdk.internal.utilities.logging.AndroidLoggerFactory;
 import co.elastic.apm.android.sdk.session.SessionManager;
+import io.opentelemetry.android.OpenTelemetryRum;
+import io.opentelemetry.android.config.OtelRumConfig;
+import io.opentelemetry.android.instrumentation.activity.VisibleScreenTracker;
+import io.opentelemetry.android.instrumentation.lifecycle.AndroidLifecycleInstrumentationBuilder;
+import io.opentelemetry.android.instrumentation.startup.AppStartupTimer;
 import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.events.GlobalEventEmitterProvider;
-import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
-import io.opentelemetry.context.propagation.ContextPropagators;
-import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.logs.LogRecordProcessor;
-import io.opentelemetry.sdk.logs.SdkLoggerProvider;
+import io.opentelemetry.sdk.logs.SdkLoggerProviderBuilder;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import io.opentelemetry.sdk.logs.internal.SdkEventEmitterProvider;
-import io.opentelemetry.sdk.metrics.SdkMeterProvider;
+import io.opentelemetry.sdk.metrics.SdkMeterProviderBuilder;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.ReadableSpan;
-import io.opentelemetry.sdk.trace.SdkTracerProvider;
+import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 
 public final class ElasticApmAgent {
@@ -93,35 +96,86 @@ public final class ElasticApmAgent {
         return instance;
     }
 
+    /**
+     * Initializes the Elastic Agent.
+     *
+     * @param context The Application context.
+     * @deprecated Use {@link ElasticApmAgent#initialize(Application)} instead. This method will be
+     * removed in the next major version release.
+     */
+    @Deprecated
     public static ElasticApmAgent initialize(Context context) {
         return initialize(context, null, null);
     }
 
+    /**
+     * Initializes the Elastic Agent.
+     *
+     * @param context       The Application context.
+     * @param configuration The Elastic configuration.
+     * @deprecated Use {@link ElasticApmAgent#initialize(Application, ElasticApmConfiguration)} instead. This method will be
+     * removed in the next major version release.
+     */
+    @Deprecated
     public static ElasticApmAgent initialize(Context context, ElasticApmConfiguration configuration) {
         return initialize(context, configuration, null);
     }
 
+    /**
+     * Initializes the Elastic Agent.
+     *
+     * @param context      The Application context.
+     * @param connectivity The APM server connectivity config.
+     * @deprecated Use {@link ElasticApmAgent#initialize(Application, Connectivity)} instead. This method will be
+     * removed in the next major version release.
+     */
+    @Deprecated
     public static ElasticApmAgent initialize(Context context, Connectivity connectivity) {
         return initialize(context, null, connectivity);
     }
 
+    /**
+     * Initializes the Elastic Agent.
+     *
+     * @param context       The Application context.
+     * @param configuration The Elastic configuration.
+     * @param connectivity  The APM server connectivity config.
+     * @deprecated Use {@link ElasticApmAgent#initialize(Application, ElasticApmConfiguration, Connectivity)} instead. This method will be
+     * removed in the next major version release.
+     */
+    @Deprecated
     public static ElasticApmAgent initialize(Context context, ElasticApmConfiguration configuration, Connectivity connectivity) {
-        return initialize(context, configuration, connectivity, null);
+        return initialize((Application) context, configuration, connectivity, null);
     }
 
-    private synchronized static ElasticApmAgent initialize(Context context, ElasticApmConfiguration configuration, Connectivity connectivity, AgentDependenciesInjector.Interceptor interceptor) {
+    public static ElasticApmAgent initialize(Application application) {
+        return initialize(application, null, null);
+    }
+
+    public static ElasticApmAgent initialize(Application application, ElasticApmConfiguration configuration) {
+        return initialize(application, configuration, null);
+    }
+
+    public static ElasticApmAgent initialize(Application application, Connectivity connectivity) {
+        return initialize(application, null, connectivity);
+    }
+
+    public static ElasticApmAgent initialize(Application application, ElasticApmConfiguration configuration, Connectivity connectivity) {
+        return initialize(application, configuration, connectivity, null);
+    }
+
+    private synchronized static ElasticApmAgent initialize(Application application, ElasticApmConfiguration configuration, Connectivity connectivity, AgentDependenciesInjector.Interceptor interceptor) {
         if (instance != null) {
             throw new IllegalStateException("Already initialized");
         }
-        Context appContext = context.getApplicationContext();
         ElasticApmConfiguration finalConfiguration = (configuration == null) ? ElasticApmConfiguration.getDefault() : configuration;
         Elog.init(new AndroidLoggerFactory(finalConfiguration.libraryLoggingPolicy));
-        ServiceManager.initialize(appContext);
+        ServiceManager.initialize(application);
         ServiceManager.get().start();
         Connectivity finalConnectivity = (connectivity == null) ? Connectivity.getDefault() : connectivity;
-        AgentDependenciesInjector injector = process(new DefaultAgentDependenciesInjector(appContext, finalConfiguration, finalConnectivity), interceptor);
+        AgentDependenciesInjector injector = process(new DefaultAgentDependenciesInjector(application, finalConfiguration, finalConnectivity), interceptor);
         instance = new ElasticApmAgent(finalConfiguration);
-        instance.onInitializationFinished(appContext, injector);
+        instance.onInitializationFinished(application, injector);
         initializePeriodicWork();
         return instance;
     }
@@ -165,13 +219,12 @@ public final class ElasticApmAgent {
         flusher = new Flusher();
     }
 
-    private void onInitializationFinished(Context context, AgentDependenciesInjector injector) {
+    private void onInitializationFinished(Application application, AgentDependenciesInjector injector) {
         initializeNtpManager(injector);
         initializeSessionManager(injector);
         initializeConfigurations(injector);
-        initializeOpentelemetry(injector);
+        initializeOpentelemetry(application, injector);
         initializeCrashReports();
-        initializeLaunchTimeTracker(context);
         initializeLifecycleObserver();
     }
 
@@ -208,20 +261,18 @@ public final class ElasticApmAgent {
         SessionManager.set(sessionManager);
     }
 
-    private void initializeLaunchTimeTracker(Context context) {
-        ((Application) context).registerActivityLifecycleCallbacks(new LaunchTimeActivityCallback());
-    }
-
     private void initializeCrashReports() {
         if (Instrumentations.isCrashReportingEnabled()) {
             Thread.setDefaultUncaughtExceptionHandler(ElasticExceptionHandler.getInstance());
         }
     }
 
-    private void initializeOpentelemetry(AgentDependenciesInjector injector) {
-        SignalConfiguration signalConfiguration = configuration.signalConfiguration;
-        if (signalConfiguration == null) {
+    private void initializeOpentelemetry(Application app, AgentDependenciesInjector injector) {
+        SignalConfiguration signalConfiguration;
+        if (configuration.signalConfiguration == null) {
             signalConfiguration = SignalConfiguration.getDefault();
+        } else {
+            signalConfiguration = configuration.signalConfiguration;
         }
         SampleRateManager sampleRateManager = new SampleRateManager();
         PersistenceInitializer persistenceInitializer = tryInitializePersistence(signalConfiguration, injector);
@@ -230,21 +281,28 @@ public final class ElasticApmAgent {
         Resource resource = Resource.getDefault()
                 .merge(Resource.create(resourceAttrs));
 
-        SdkMeterProvider meterProvider = getMeterProvider(signalConfiguration, resource, sampleRateManager);
-        SdkLoggerProvider loggerProvider = getLoggerProvider(signalConfiguration, resource, globalAttributesVisitor, sampleRateManager);
+        OtelRumConfig rumConfig = new OtelRumConfig();
+        rumConfig.disableNetworkAttributes();
+        rumConfig.disableNetworkChangeMonitoring();
+        OpenTelemetryRum rum = OpenTelemetryRum.builder(app, rumConfig)
+                .addTracerProviderCustomizer((sdkTracerProviderBuilder, application) -> configureTracerProviderBuilder(sdkTracerProviderBuilder, signalConfiguration, resource, globalAttributesVisitor, sampleRateManager))
+                .addMeterProviderCustomizer((sdkMeterProviderBuilder, application) -> configureMeterProviderBuilder(sdkMeterProviderBuilder, signalConfiguration, resource, sampleRateManager))
+                .addLoggerProviderCustomizer((sdkLoggerProviderBuilder, application) -> configureLoggerProviderBuilder(sdkLoggerProviderBuilder, signalConfiguration, resource, globalAttributesVisitor, sampleRateManager))
+                .addInstrumentation(instrumentedApplication -> {
+                    // Adding screen spans
+                    new AndroidLifecycleInstrumentationBuilder()
+                            .setVisibleScreenTracker(new VisibleScreenTracker())
+                            .setStartupTimer(new AppStartupTimer())
+                            .build().installOn(instrumentedApplication);
 
-        flusher.setMeterDelegator(meterProvider::forceFlush);
-        flusher.setLoggerDelegator(loggerProvider::forceFlush);
+                    // Adding launch time metrics
+                    instrumentedApplication.registerApplicationStateListener(new LaunchTimeApplicationListener());
+                })
+                .build();
 
-        SdkEventEmitterProvider eventEmitterProvider = SdkEventEmitterProvider.create(loggerProvider, ntpManager.getClock());
-        GlobalEventEmitterProvider.set(eventEmitterProvider);
-
-        OpenTelemetrySdk.builder()
-                .setTracerProvider(getTracerProvider(signalConfiguration, resource, globalAttributesVisitor, sampleRateManager))
-                .setLoggerProvider(loggerProvider)
-                .setMeterProvider(meterProvider)
-                .setPropagators(getContextPropagator())
-                .buildAndRegisterGlobal();
+        OpenTelemetry openTelemetry = rum.getOpenTelemetry();
+        GlobalOpenTelemetry.set(openTelemetry);
+        GlobalEventEmitterProvider.set(SdkEventEmitterProvider.create(openTelemetry.getLogsBridge(), ntpManager.getClock()));
 
         if (persistenceInitializer != null) {
             SignalDiskExporter.set(persistenceInitializer.createSignalDiskExporter());
@@ -280,9 +338,10 @@ public final class ElasticApmAgent {
         );
     }
 
-    private SdkTracerProvider getTracerProvider(SignalConfiguration signalConfiguration,
-                                                Resource resource,
-                                                AttributesVisitor commonAttrVisitor, SampleRateManager sampleRateManager) {
+    private SdkTracerProviderBuilder configureTracerProviderBuilder(SdkTracerProviderBuilder builder,
+                                                                    SignalConfiguration signalConfiguration,
+                                                                    Resource resource,
+                                                                    AttributesVisitor commonAttrVisitor, SampleRateManager sampleRateManager) {
         SpanProcessor spanProcessor = signalConfiguration.getSpanProcessor();
         ComposeAttributesVisitor spanAttributesVisitor = AttributesVisitor.compose(
                 commonAttrVisitor,
@@ -296,17 +355,17 @@ public final class ElasticApmAgent {
         filter.addAllFilters(configuration.httpTraceConfiguration.httpFilters);
         processor.setFilter(filter);
 
-        return SdkTracerProvider.builder()
+        return builder
                 .setClock(ntpManager.getClock())
                 .addSpanProcessor(processor)
-                .setResource(resource)
-                .build();
+                .setResource(resource);
     }
 
-    private SdkLoggerProvider getLoggerProvider(SignalConfiguration signalConfiguration,
-                                                Resource resource,
-                                                AttributesVisitor commonAttrVisitor,
-                                                SampleRateManager sampleRateManager) {
+    private SdkLoggerProviderBuilder configureLoggerProviderBuilder(SdkLoggerProviderBuilder builder,
+                                                                    SignalConfiguration signalConfiguration,
+                                                                    Resource resource,
+                                                                    AttributesVisitor commonAttrVisitor,
+                                                                    SampleRateManager sampleRateManager) {
         LogRecordProcessor logProcessor = signalConfiguration.getLogProcessor();
         ComposeAttributesVisitor logAttributes = AttributesVisitor.compose(
                 commonAttrVisitor,
@@ -318,31 +377,31 @@ public final class ElasticApmAgent {
         logFilter.addAllFilters(configuration.logFilters);
         elasticProcessor.setFilter(logFilter);
 
-        return SdkLoggerProvider.builder()
+        flusher.setLoggerDelegator(elasticProcessor::forceFlush);
+
+        return builder
                 .setResource(resource)
                 .setClock(ntpManager.getClock())
-                .addLogRecordProcessor(elasticProcessor)
-                .build();
+                .addLogRecordProcessor(elasticProcessor);
     }
 
-    private SdkMeterProvider getMeterProvider(SignalConfiguration signalConfiguration,
-                                              Resource resource,
-                                              SampleRateManager sampleRateManager) {
+    private SdkMeterProviderBuilder configureMeterProviderBuilder(
+            SdkMeterProviderBuilder builder,
+            SignalConfiguration signalConfiguration,
+            Resource resource,
+            SampleRateManager sampleRateManager) {
         ElasticMetricReader elasticMetricReader = new ElasticMetricReader(signalConfiguration.getMetricReader());
         ComposableFilter<MetricData> metricFilter = new ComposableFilter<>();
         metricFilter.addFilter(sampleRateManager.metricFilter);
         metricFilter.addAllFilters(configuration.metricFilters);
         elasticMetricReader.setFilter(metricFilter);
 
-        return SdkMeterProvider.builder()
+        flusher.setMeterDelegator(elasticMetricReader::forceFlush);
+
+        return builder
                 .setClock(ntpManager.getClock())
                 .registerMetricReader(elasticMetricReader)
-                .setResource(resource)
-                .build();
-    }
-
-    private ContextPropagators getContextPropagator() {
-        return ContextPropagators.create(W3CTraceContextPropagator.getInstance());
+                .setResource(resource);
     }
 
     private static PeriodicWorkService getPeriodicWorkService() {

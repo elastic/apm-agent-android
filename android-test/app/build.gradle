@@ -66,7 +66,7 @@ dependencies {
     testImplementation "io.opentelemetry:opentelemetry-exporter-otlp:1.28.0"
     testImplementation "org.mockito:mockito-core:$mockito_version"
     testImplementation "org.mockito:mockito-inline:$mockito_version"
-    testImplementation 'org.robolectric:robolectric:4.10.3'
+    testImplementation 'org.robolectric:robolectric:4.11.1'
     testImplementation "com.squareup.okhttp3:mockwebserver:$mockwebserver_version"
     androidTestImplementation "androidx.test:core:1.5.0"
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

@@ -60,10 +60,6 @@ public abstract class ApmInfoGeneratorTask extends DefaultTask {
     @Input
     public abstract Property<String> getApiKey();
 
-    @Optional
-    @Input
-    public abstract Property<String> getOkHttpVersion();
-
     @OutputDirectory
     public abstract DirectoryProperty getOutputDir();
 
@@ -93,10 +89,6 @@ public abstract class ApmInfoGeneratorTask extends DefaultTask {
         String apiKey = provideApiKey();
         if (apiKey != null) {
             properties.put(ApmInfo.KEY_SERVER_API_KEY, apiKey);
-        }
-        String okhttpVersion = getOkHttpVersion().getOrNull();
-        if (okhttpVersion != null) {
-            properties.put(ApmInfo.KEY_SCOPE_OKHTTP_VERSION, okhttpVersion);
         }
 
         try (OutputStream outputStream = new FileOutputStream(propertiesFile)) {

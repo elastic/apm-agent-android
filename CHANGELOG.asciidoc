@@ -32,7 +32,7 @@ ${next_release_notes}
 [float]
 ===== Features
 
-* New feature: {pull}000[#000]
+* Added configuration to set a base OpenTelemetry Resource object: {pull}276[#276]
 ////
 
 [[release-notes-0.14.0]]

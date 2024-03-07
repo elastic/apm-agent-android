@@ -36,6 +36,7 @@ import co.elastic.apm.android.sdk.session.SessionIdGenerator;
 import co.elastic.apm.android.sdk.session.impl.DefaultSessionIdGenerator;
 import co.elastic.apm.android.sdk.traces.http.HttpTraceConfiguration;
 import co.elastic.apm.android.sdk.traces.tools.SpanFilter;
+import io.opentelemetry.sdk.resources.Resource;
 
 public final class ElasticApmConfiguration {
     public final HttpTraceConfiguration httpTraceConfiguration;
@@ -46,6 +47,7 @@ public final class ElasticApmConfiguration {
     public final SessionIdGenerator sessionIdGenerator;
     public final SignalConfiguration signalConfiguration;
     public final PersistenceConfiguration persistenceConfiguration;
+    public final Resource resource;
     public final double sampleRate;
     public final ExportProtocol exportProtocol;
     public final List<SpanFilter> spanFilters;
@@ -73,6 +75,7 @@ public final class ElasticApmConfiguration {
         sampleRate = builder.sampleRate;
         exportProtocol = builder.exportProtocol;
         libraryLoggingPolicy = builder.libraryLoggingPolicy;
+        resource = builder.resource;
         spanFilters = Collections.unmodifiableList(new ArrayList<>(builder.spanFilters));
         logFilters = Collections.unmodifiableList(new ArrayList<>(builder.logFilters));
         metricFilters = Collections.unmodifiableList(new ArrayList<>(builder.metricFilters));
@@ -90,6 +93,7 @@ public final class ElasticApmConfiguration {
         private double sampleRate = 1.0;
         private ExportProtocol exportProtocol = ExportProtocol.GRPC;
         private LoggingPolicy libraryLoggingPolicy = LoggingPolicy.getDefault();
+        private Resource resource = Resource.getDefault();
         private final Set<SpanFilter> spanFilters = new HashSet<>();
         private final Set<LogFilter> logFilters = new HashSet<>();
         private final Set<MetricFilter> metricFilters = new HashSet<>();
@@ -202,6 +206,14 @@ public final class ElasticApmConfiguration {
          */
         public Builder setLibraryLoggingPolicy(LoggingPolicy libraryLoggingPolicy) {
             this.libraryLoggingPolicy = libraryLoggingPolicy;
+            return this;
+        }
+
+        /**
+         * Sets the base OpenTelemetry resource for all signals.
+         */
+        public Builder setResource(Resource resource) {
+            this.resource = resource;
             return this;
         }
 

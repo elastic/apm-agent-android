@@ -278,7 +278,7 @@ public final class ElasticApmAgent {
         PersistenceInitializer persistenceInitializer = tryInitializePersistence(signalConfiguration, injector);
         Attributes resourceAttrs = AttributesCreator.from(getResourceAttributesVisitor()).create();
         AttributesVisitor globalAttributesVisitor = new SessionAttributesVisitor();
-        Resource resource = Resource.getDefault()
+        Resource resource = configuration.resource
                 .merge(Resource.create(resourceAttrs));
 
         OtelRumConfig rumConfig = new OtelRumConfig();

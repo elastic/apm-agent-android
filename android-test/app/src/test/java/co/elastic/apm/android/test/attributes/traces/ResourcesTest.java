@@ -2,6 +2,8 @@ package co.elastic.apm.android.test.attributes.traces;
 
 import static co.elastic.apm.android.test.attributes.common.ResourcesApp.DEVICE_MANUFACTURER;
 import static co.elastic.apm.android.test.attributes.common.ResourcesApp.DEVICE_MODEL_NAME;
+import static co.elastic.apm.android.test.attributes.common.ResourcesApp.RESOURCE_KEY;
+import static co.elastic.apm.android.test.attributes.common.ResourcesApp.RESOURCE_VALUE;
 import static co.elastic.apm.android.test.attributes.common.ResourcesApp.RUNTIME_VERSION;
 
 import org.junit.Test;
@@ -24,6 +26,14 @@ public class ResourcesTest extends BaseRobolectricTest {
 
         Spans.verify(customSpan)
                 .hasResource("service.name", "my-app");
+    }
+
+    @Test
+    public void whenASpanIsCreated_itHasProvidedResources() {
+        SpanData customSpan = captureSpan();
+
+        Spans.verify(customSpan)
+                .hasResource(RESOURCE_KEY, RESOURCE_VALUE);
     }
 
     @Test

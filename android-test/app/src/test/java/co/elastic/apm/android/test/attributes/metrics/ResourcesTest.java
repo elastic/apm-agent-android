@@ -2,6 +2,8 @@ package co.elastic.apm.android.test.attributes.metrics;
 
 import static co.elastic.apm.android.test.attributes.common.ResourcesApp.DEVICE_MANUFACTURER;
 import static co.elastic.apm.android.test.attributes.common.ResourcesApp.DEVICE_MODEL_NAME;
+import static co.elastic.apm.android.test.attributes.common.ResourcesApp.RESOURCE_KEY;
+import static co.elastic.apm.android.test.attributes.common.ResourcesApp.RESOURCE_VALUE;
 import static co.elastic.apm.android.test.attributes.common.ResourcesApp.RUNTIME_VERSION;
 
 import org.junit.Test;
@@ -22,6 +24,14 @@ public class ResourcesTest extends BaseRobolectricTest {
 
         Metrics.verify(metric)
                 .hasResource("service.name", "my-app");
+    }
+
+    @Test
+    public void whenAMetricIsCreated_itHasProvidedResources() {
+        MetricData metric = captureMetric();
+
+        Metrics.verify(metric)
+                .hasResource(RESOURCE_KEY, RESOURCE_VALUE);
     }
 
     @Test

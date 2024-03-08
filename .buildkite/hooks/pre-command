@@ -71,7 +71,7 @@ git config --global user.email "infra-root+apmmachine@elastic.co"
 git config --global user.name "apmmachine"
 
 # Configure the java version
-JAVA_VERSION=$(cat .java-version)
+JAVA_VERSION=$(cat .java-version | xargs | tr -dc '[:print:]')
 JAVA_HOME="${HOME}/.java/openjdk${JAVA_VERSION}"
 export JAVA_HOME
 PATH="${JAVA_HOME}/bin:$PATH"
@@ -90,7 +90,7 @@ if [ ! -d "${JAVA_HOME}" ] ; then
 fi
 
 # Configure the Android SDK
-ANDROID_HOME=$PWD/.android-sdk
+ANDROID_HOME="${PWD}/.android-sdk"
 PATH="${PATH}:${ANDROID_HOME}/tools/bin"
 export ANDROID_HOME
 export PATH

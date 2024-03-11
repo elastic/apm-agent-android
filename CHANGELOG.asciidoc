@@ -32,8 +32,16 @@ ${next_release_notes}
 [float]
 ===== Features
 
-* Added configuration to set a base OpenTelemetry Resource object: {pull}276[#276]
+* New feature: {pull}000[#000]
 ////
+
+[[release-notes-0.15.0]]
+==== 0.15.0 - 2024/03/11
+
+[float]
+===== Features
+
+* Added configuration to set a base OpenTelemetry Resource object: {pull}276[#276]
 
 [[release-notes-0.14.0]]
 ==== 0.14.0 - 2024/02/02

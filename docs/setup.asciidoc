@@ -57,8 +57,6 @@ A minimal configuration sets the Elastic APM Server endpoint as shown below:
 NOTE: We unintentionally released a 1.x version, `1.13.1`.
 Please avoid using it as it doesn't contain our latest changes and we will continue to release `0.x` versions for now.
 Please make sure to only use `0.x.x` versions of our plugin until further notice.
-Please avoid using it as it doesn't contain our latest changes.
-Our current major version is "0", so please make sure to only use `0.x.x` versions of our plugin until further notice.
 
 [source,groovy]
 ----
@@ -132,9 +130,9 @@ dependencies {
 }
 ----
 
-NOTE: We've released a version `1.13.1` by mistake.
-Please avoid using it as it doesn't contain our latest changes.
-Our current major version is "0", so please make sure to only use `0.x.x` versions of our library until further notice.
+NOTE: We unintentionally released a 1.x version, `1.13.1`.
+Please avoid using it as it doesn't contain our latest changes and we will continue to release `0.x` versions for now.
+Please make sure to only use `0.x.x` versions of our library until further notice.
 
 [float]
 [[manual-configuration]]

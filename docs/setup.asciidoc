@@ -54,6 +54,10 @@ plugins {
 After adding the agent plugin, configure it.
 A minimal configuration sets the Elastic APM Server endpoint as shown below:
 
+NOTE: We've released a version `1.13.1` by mistake.
+Please avoid using it as it doesn't contain our latest changes.
+Our current major version is "0", so please make sure to only use `0.x.x` versions of our plugin until further notice.
+
 [source,groovy]
 ----
 // Android app's build.gradle file
@@ -125,6 +129,10 @@ dependencies {
     implementation "co.elastic.apm:android-sdk:0.15.0"
 }
 ----
+
+NOTE: We've released a version `1.13.1` by mistake.
+Please avoid using it as it doesn't contain our latest changes.
+Our current major version is "0", so please make sure to only use `0.x.x` versions of our library until further notice.
 
 [float]
 [[manual-configuration]]

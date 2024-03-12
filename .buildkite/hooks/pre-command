@@ -70,24 +70,42 @@ echo "--- Configure git context :git:"
 git config --global user.email "infra-root+apmmachine@elastic.co"
 git config --global user.name "apmmachine"
 
-echo "--- Install JDK11"
-JAVA_URL=https://jvm-catalog.elastic.co/jdk
-JAVA_HOME=$(pwd)/.openjdk11
-JAVA_PKG="$JAVA_URL/latest_openjdk_11_linux.tar.gz"
-curl -L --output /tmp/jdk.tar.gz "$JAVA_PKG"; \
-  mkdir -p "$JAVA_HOME"; \
-  tar --extract --file /tmp/jdk.tar.gz --directory "$JAVA_HOME" --strip-components 1
+# Configure the java version
+JAVA_VERSION=$(cat .java-version | xargs | tr -dc '[:print:]')
+JAVA_HOME="${HOME}/.java/openjdk${JAVA_VERSION}"
 export JAVA_HOME
-export PATH=$JAVA_HOME/bin:$PATH
-
-echo "--- Install Android SDK"
-# Configure Android SDK using the script
-./install-android-sdk.sh
-export PATH=${PATH}:$PWD/.android-sdk/tools/bin/
-export ANDROID_HOME=$PWD/.android-sdk
-
-export JAVA_HOME
-PATH=$JAVA_HOME/bin:$PATH
+PATH="${JAVA_HOME}/bin:$PATH"
 export PATH
 
-java -version || true
+# Fallback to install at runtime
+if [ ! -d "${JAVA_HOME}" ] ; then
+  # This should not be the case normally untless the .java-version file has been changed
+  # and the VM Image is not yet available with the latest version.
+  echo "--- Install JDK${JAVA_VERSION} :java:"
+  JAVA_URL=https://jvm-catalog.elastic.co/jdk
+  JAVA_PKG="${JAVA_URL}/latest_openjdk_${JAVA_VERSION}_linux.tar.gz"
+  curl -L --output /tmp/jdk.tar.gz "${JAVA_PKG}"
+  mkdir -p "${JAVA_HOME}"
+  tar --extract --file /tmp/jdk.tar.gz --directory "${JAVA_HOME}" --strip-components 1
+fi
+
+# Configure the Android SDK
+ANDROID_HOME="${PWD}/.android-sdk"
+PATH="${PATH}:${ANDROID_HOME}/tools/bin"
+export ANDROID_HOME
+export PATH
+
+# Fallback to install at runtime
+if [ ! -d "${ANDROID_HOME}" ] ; then
+  # This should not be the case normally.
+  echo "--- Install Android SDK"
+  ./install-android-sdk.sh
+fi
+
+# Validate java is installed
+echo "--- Validate java is installed :java:"
+java -version
+
+# Validate Android SDK is installed
+echo "--- Validate Android SDK :android:"
+sdkmanager --list

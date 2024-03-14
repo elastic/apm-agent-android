@@ -38,18 +38,22 @@ public class ApmPublisherRootPlugin implements Plugin<Project> {
         String versionOverride = getVersionOverride(project);
         if (versionOverride != null) {
             validateVersionOverrideFormatting(versionOverride);
-            VersionNumber comparableVersion = VersionNumber.parse(project.getVersion().toString());
-            VersionNumber comparableVersionOverride = VersionNumber.parse(versionOverride);
-            if (comparableVersionOverride.getMajor() > comparableVersion.getMajor() || comparableVersionOverride.getMinor() > comparableVersion.getMinor()) {
-                throw new IllegalArgumentException(String.format("The version override, '%s', cannot provide greater major or minor numbers than the existing version from the gradle.properties file: '%s'.", versionOverride, project.getVersion()));
-            }
+            validateVersionOverrideValues(project, versionOverride);
             System.out.println("Overriding version with: '" + versionOverride + "'");
             project.setVersion(versionOverride);
             project.subprojects(subproject -> subproject.setVersion(versionOverride));
         }
     }
 
-    private void validateVersionOverrideFormatting(String versionOverride) {
+    private static void validateVersionOverrideValues(Project project, String versionOverride) {
+        VersionNumber comparableVersion = VersionNumber.parse(project.getVersion().toString());
+        VersionNumber comparableVersionOverride = VersionNumber.parse(versionOverride);
+        if (comparableVersionOverride.getMajor() > comparableVersion.getMajor() || comparableVersionOverride.getMinor() > comparableVersion.getMinor()) {
+            throw new IllegalArgumentException(String.format("The version override, '%s', cannot provide greater major or minor numbers than the existing version from the gradle.properties file: '%s'.", versionOverride, project.getVersion()));
+        }
+    }
+
+    private static void validateVersionOverrideFormatting(String versionOverride) {
         Pattern semverPattern = Pattern.compile("\\d+\\.\\d+\\.\\d+");
         if (!semverPattern.matcher(versionOverride).matches()) {
             throw new IllegalArgumentException(String.format("The provided version override, '%s', does not have a valid format.", versionOverride));

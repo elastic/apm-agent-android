@@ -46,6 +46,7 @@ public class PostDeployTask extends DefaultTask {
 
         updateNextVersion(gradlePropertiesFile, properties, newVersion);
         updateChangelog(currentVersion);
+        updateSetupDoc(currentVersion);
 
         createPullRequestWithChanges(currentVersion);
         setGitHubRelease(currentVersion, releaseTag);
@@ -85,10 +86,21 @@ public class PostDeployTask extends DefaultTask {
 
     private void updateChangelog(String newVersion) {
         log("Updating changelog with version: " + newVersion);
-        Path changelogPath = getChangelogPath();
+        Path changelogPath = getProjectPath("CHANGELOG.asciidoc");
         String contents = getContents(changelogPath);
         contents = uncommentNextRelease(contents);
         replaceFileContents(changelogPath, resolvePlaceholders(contents, newVersion));
+    }
+
+    private void updateSetupDoc(String currentVersion) {
+        log("Updating setup doc to show version: " + currentVersion);
+        Path setupDocPath = getProjectPath("docs/setup.asciidoc");
+        String contents = getContents(setupDocPath);
+        Pattern versionMentionsPattern = Pattern.compile("(?<=co\\.elastic\\.apm\\.android/)\\d+\\.\\d+\\.\\d+|(?<=co\\.elastic\\.apm:android-sdk:)\\d+\\.\\d+\\.\\d+|(?<=id\\s\"co\\.elastic\\.apm\\.android\"\\sversion\\s\")\\d+\\.\\d+\\.\\d+");
+        Matcher versionMentionMatcher = versionMentionsPattern.matcher(contents);
+
+        String setupDocWithNewVersion = versionMentionMatcher.replaceAll(currentVersion);
+        replaceFileContents(setupDocPath, setupDocWithNewVersion.getBytes(StandardCharsets.UTF_8));
     }
 
     private byte[] resolvePlaceholders(String text, String newVersion) {
@@ -100,8 +112,8 @@ public class PostDeployTask extends DefaultTask {
         return substitutor.replace(text).getBytes(StandardCharsets.UTF_8);
     }
 
-    private Path getChangelogPath() {
-        File changelog = new File("CHANGELOG.asciidoc");
+    private Path getProjectPath(String relativePath) {
+        File changelog = new File(relativePath);
         return changelog.toPath();
     }
 

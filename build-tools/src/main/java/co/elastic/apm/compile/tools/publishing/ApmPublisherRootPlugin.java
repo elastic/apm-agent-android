@@ -38,14 +38,14 @@ public class ApmPublisherRootPlugin implements Plugin<Project> {
         String versionOverride = getVersionOverride(project);
         if (versionOverride != null) {
             validateVersionOverrideFormatting(versionOverride);
-            validateVersionOverrideValues(project.getVersion().toString(), versionOverride);
+            validateVersionPatchChangeOnly(project.getVersion().toString(), versionOverride);
             System.out.println("Overriding version with: '" + versionOverride + "'");
             project.setVersion(versionOverride);
             project.subprojects(subproject -> subproject.setVersion(versionOverride));
         }
     }
 
-    private static void validateVersionOverrideValues(String currentVersion, String versionOverride) {
+    private static void validateVersionPatchChangeOnly(String currentVersion, String versionOverride) {
         VersionNumber comparableVersion = VersionNumber.parse(currentVersion);
         VersionNumber comparableVersionOverride = VersionNumber.parse(versionOverride);
         if (comparableVersionOverride.getMajor() > comparableVersion.getMajor() || comparableVersionOverride.getMinor() > comparableVersion.getMinor()) {

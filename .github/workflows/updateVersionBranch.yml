@@ -1,0 +1,40 @@
+name: Update version branch
+
+#When a release is done, this creates a PR from main to the released version branch to keep it updated.
+#For example, if version "0.1.0" is released off of the main branch, then a PR from "main" to "0.x" will be created right after the release post-deploy is done.
+
+on:
+  pull_request:
+    types:
+      - closed
+
+permissions:
+  contents: read
+
+jobs:
+  if_merged_postDeploy:
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'post-release/')
+    runs-on: ubuntu-latest
+    name: Create PR to update version branch
+    steps:
+      - uses: elastic/apm-pipeline-library/.github/actions/github-token@current
+        with:
+          url: ${{ secrets.VAULT_ADDR }}
+          roleId: ${{ secrets.VAULT_ROLE_ID }}
+          secretId: ${{ secrets.VAULT_SECRET_ID }}
+      - uses: elastic/apm-pipeline-library/.github/actions/setup-git@current
+        with:
+          username: ${{ env.GIT_USER }}
+          email: ${{ env.GIT_EMAIL }}
+          token: ${{ env.GITHUB_TOKEN }}
+      - uses: actions/checkout@v4
+      - uses: actions-ecosystem/action-regex-match@v2
+        id: major-version
+        with:
+          text: ${{ github.event.pull_request.head.ref }}
+          regex: 'post-release/(\d+).+'
+
+      - run: gh pr create --base ${{ env.BASE_BRANCH }} --title 'Merge main into version branch' --body 'Created by Github action' --reviewer elastic/apm-agent-android
+        env:
+          GH_TOKEN: ${{ env.GITHUB_TOKEN }}
+          BASE_BRANCH: "${{ steps.major-version.outputs.group1 }}.x"

@@ -40,18 +40,16 @@ You can skip this step if your `minSdkVersion` is 26 or higher.
 [[adding-gradle-plugin]]
 ==== Add the Elastic Agent Gradle plugin
 
-To automatically instrument <<supported-technologies,Supported Technologies>>, add the https://plugins.gradle.org/plugin/co.elastic.apm.android[Elastic APM agent plugin] to your application's `build.gradle` file as shown below:
+To automatically instrument <<supported-technologies,Supported Technologies>>, add the https://plugins.gradle.org/plugin/co.elastic.apm.android/0.15.0[Elastic APM agent plugin] to your application's `build.gradle` file as shown below:
 
 [source,groovy]
 ----
 // Android app's build.gradle file
 plugins {
     id "com.android.application"
-    id "co.elastic.apm.android" version "[latest_version]" <1>
+    id "co.elastic.apm.android" version "0.15.0"
 }
 ----
-
-<1> The Elastic plugin declaration must be added below the Android app plugin declaration (`com.android.application`) and below the Kotlin plugin declaration (if used).
 
 After adding the agent plugin, configure it.
 A minimal configuration sets the Elastic APM Server endpoint as shown below:
@@ -118,17 +116,15 @@ If you can't add the Elastic Agent Gradle plugin to your application as shown ab
 [[gradle-dependencies]]
 ==== Add the SDK dependency
 
-Add the https://central.sonatype.com/artifact/co.elastic.apm/android-sdk[Elastic APM agent SDK] to your application's `build.gradle` file as shown below:
+Add the Elastic APM agent SDK to your application's `build.gradle` file as shown below:
 
 [source,groovy]
 ----
 // Android app's build.gradle file
 dependencies {
-    implementation "co.elastic.apm:android-sdk:[latest_version]" <1>
+    implementation "co.elastic.apm:android-sdk:0.15.0"
 }
 ----
-
-<1> You can find the latest version https://central.sonatype.com/artifact/co.elastic.apm/android-sdk[here].
 
 [float]
 [[manual-configuration]]

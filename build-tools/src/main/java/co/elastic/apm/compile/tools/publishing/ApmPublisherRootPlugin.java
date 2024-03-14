@@ -38,18 +38,18 @@ public class ApmPublisherRootPlugin implements Plugin<Project> {
         String versionOverride = getVersionOverride(project);
         if (versionOverride != null) {
             validateVersionOverrideFormatting(versionOverride);
-            validateVersionOverrideValues(project, versionOverride);
+            validateVersionOverrideValues(project.getVersion().toString(), versionOverride);
             System.out.println("Overriding version with: '" + versionOverride + "'");
             project.setVersion(versionOverride);
             project.subprojects(subproject -> subproject.setVersion(versionOverride));
         }
     }
 
-    private static void validateVersionOverrideValues(Project project, String versionOverride) {
-        VersionNumber comparableVersion = VersionNumber.parse(project.getVersion().toString());
+    private static void validateVersionOverrideValues(String currentVersion, String versionOverride) {
+        VersionNumber comparableVersion = VersionNumber.parse(currentVersion);
         VersionNumber comparableVersionOverride = VersionNumber.parse(versionOverride);
         if (comparableVersionOverride.getMajor() > comparableVersion.getMajor() || comparableVersionOverride.getMinor() > comparableVersion.getMinor()) {
-            throw new IllegalArgumentException(String.format("The version override, '%s', cannot provide greater major or minor numbers than the existing version from the gradle.properties file: '%s'.", versionOverride, project.getVersion()));
+            throw new IllegalArgumentException(String.format("The version override, '%s', cannot provide greater major or minor numbers than the existing version from the gradle.properties file: '%s'.", versionOverride, currentVersion));
         }
     }
 

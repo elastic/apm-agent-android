@@ -34,4 +34,7 @@ jobs:
           text: ${{ github.event.pull_request.head.ref }}
           regex: 'post-release/(\d+).+'
 
-      - run: gh pr create --base ${{ steps.major-version.outputs.group1 }}.x --title 'Merge main into version branch' --body 'Created by Github action' --reviewer elastic/apm-agent-android
+      - run: gh pr create --base ${{ env.BASE_BRANCH }} --title 'Merge main into version branch' --body 'Created by Github action' --reviewer elastic/apm-agent-android
+        env:
+          GH_TOKEN: ${{ env.GITHUB_TOKEN }}
+          BASE_BRANCH: "${{ steps.major-version.outputs.group1 }}.x"

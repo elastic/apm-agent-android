@@ -40,6 +40,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - id: notification
+        name: Notify that a release will start
+        uses: elastic/apm-pipeline-library/.github/actions/slack-message@current
+        with:
+          url: ${{ secrets.VAULT_ADDR }}
+          roleId: ${{ secrets.VAULT_ROLE_ID }}
+          secretId: ${{ secrets.VAULT_SECRET_ID }}
+          channel: "#apm-agent-mobile"
+          message: |
+            :runner: [${{ github.repository }}] Release *${{ github.ref_name }}* has been triggered in Buildkite: (<${{ steps.buildkite.outputs.build }}|build>)
+
       - id: buildkite
         name: Run Release
         uses: elastic/apm-pipeline-library/.github/actions/buildkite@current
@@ -64,7 +75,7 @@ jobs:
           secretId: ${{ secrets.VAULT_SECRET_ID }}
           channel: "#apm-agent-mobile"
           message: |
-            :runner: [${{ github.repository }}] Release *${{ github.ref_name }}* has been triggered in Buildkite: (<${{ steps.buildkite.outputs.build }}|build>)
+            :tada: :rocket: [${{ github.repository }}] Release *${{ github.ref_name }}* has been successful in Buildkite: (<${{ steps.buildkite.outputs.build }}|build>)
 
       - if: ${{ failure() }}
         uses: elastic/apm-pipeline-library/.github/actions/slack-message@current

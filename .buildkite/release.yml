@@ -1,5 +1,6 @@
 agents:
   provider: "gcp"
+  image: "family/apm-agent-android-ubuntu-2204"
 
 steps:
   - label: "Run the release"

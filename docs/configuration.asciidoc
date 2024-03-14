@@ -105,6 +105,29 @@ class MyApp extends android.app.Application {
 ----
 
 [float]
+[[opentelemetry-resource]]
+==== OpenTelemetry resource
+
+You can provide your own https://opentelemetry.io/docs/languages/java/resources/[resource] object which will be used for all of the OpenTelemetry signals (Spans, Metrics and Logs) as shown below:
+
+[source,java]
+----
+class MyApp extends android.app.Application {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        Resource myResource = Resource.create(Attributes.builder().put(RESOURCE_KEY, RESOURCE_VALUE).build());
+        ElasticApmConfiguration configuration = ElasticApmConfiguration.builder()
+                .setResource(myResource)
+                .build();
+        ElasticApmAgent.initialize(this, configuration);
+    }
+}
+----
+
+[float]
 [[server-export-protocol]]
 ==== APM Server export protocol
 
@@ -393,7 +416,9 @@ This table outlines the attributes and their corresponding permissions:
 By default, all logs created by this library are printed for a debuggable app build.
 In the case of non-debuggable builds, only logs at the INFO level and above are printed.
 
-If you would like to create a custom log policy or even disable all of the logs from this library altogether, you can do so by providing your own `LoggingPolicy` configuration. The below example policy will allow all logs of level WARN and higher to be printed. Levels below WARN will be ignored.
+If you would like to create a custom log policy or even disable all of the logs from this library altogether, you can do so by providing your own `LoggingPolicy` configuration.
+The below example policy will allow all logs of level WARN and higher to be printed.
+Levels below WARN will be ignored.
 
 [source,java]
 ----

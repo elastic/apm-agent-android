@@ -58,3 +58,22 @@ jobs:
         with:
           needs: ${{ toJSON(needs) }}
       - run: ${{ steps.check.outputs.isSuccess }}
+
+  test-release:
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    steps:
+      - id: buildkite
+        name: Run Release dry-run
+        uses: elastic/apm-pipeline-library/.github/actions/buildkite@current
+        with:
+          vaultUrl: ${{ secrets.VAULT_ADDR }}
+          vaultRoleId: ${{ secrets.VAULT_ROLE_ID }}
+          vaultSecretId: ${{ secrets.VAULT_SECRET_ID }}
+          pipeline: apm-agent-android-release
+          waitFor: true
+          printBuildLogs: false
+          buildEnvVars: |
+            branch_specifier=main
+            target_specifier=all
+            dry_run=true

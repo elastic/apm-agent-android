@@ -25,7 +25,7 @@ if [[ "$target_specifier" == "all" ||  "$target_specifier" == "mavenCentral" ]];
     ./gradlew publishElasticPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository $COMMON_GRADLE_DEPLOY_PARAMS
   else
     echo "--- Release the binaries to Maven Central :package: (dry-run)"
-    ./gradlew tasks
+    ./gradlew assemble jar
   fi
 fi
 
@@ -35,7 +35,7 @@ if [[ "$target_specifier" == "all" ||  "$target_specifier" == "pluginPortal" ]];
     ./gradlew publishPlugins -Pgradle.publish.key=$PLUGIN_PORTAL_KEY -Pgradle.publish.secret=$PLUGIN_PORTAL_SECRET $COMMON_GRADLE_DEPLOY_PARAMS
   else
     echo "--- Release the binaries to Gradle Plugin portal :package: (dry-run)"
-    ./gradlew tasks
+    ./gradlew assemble jar
   fi
 fi
 set -x

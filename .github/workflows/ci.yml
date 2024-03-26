@@ -9,6 +9,7 @@ on:
   push:
     branches:
       - main
+      - provenance
     paths-ignore:
       - "**/*.asciidoc"
       - "**/*.md"
@@ -62,6 +63,9 @@ jobs:
   test-release:
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
+    permissions:
+      contents: write
+      id-token: write
     steps:
       - id: buildkite
         name: Run Release dry-run
@@ -73,7 +77,23 @@ jobs:
           pipeline: apm-agent-android-release
           waitFor: true
           printBuildLogs: false
+          artifactName: signed-artifacts
+          artifactPath: android-common/build/libs/*.jar
           buildEnvVars: |
             branch_specifier=main
             target_specifier=all
             dry_run=true
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: signed-artifacts
+          path: android-common/build/libs
+
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: android-common/build/libs
+
+      - name: generate build provenance
+        uses: github-early-access/generate-build-provenance@main
+        with:
+          subject-path: "${{ github.workspace }}/android-common/build/libs/*.jar"

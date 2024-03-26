@@ -80,7 +80,7 @@ jobs:
           artifactName: signed-artifacts
           artifactPath: android-common/build/libs/*.jar
           buildEnvVars: |
-            branch_specifier=main
+            branch_specifier=${{ github.ref_name }}
             target_specifier=all
             dry_run=true
 

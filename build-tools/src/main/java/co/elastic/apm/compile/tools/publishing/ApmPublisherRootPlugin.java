@@ -3,8 +3,10 @@ package co.elastic.apm.compile.tools.publishing;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.PluginContainer;
+import org.gradle.util.internal.VersionNumber;
 
 import java.time.Duration;
+import java.util.regex.Pattern;
 
 import co.elastic.apm.compile.tools.NoticeProviderPlugin;
 import co.elastic.apm.compile.tools.plugins.RootNoticeProviderPlugin;
@@ -35,9 +37,26 @@ public class ApmPublisherRootPlugin implements Plugin<Project> {
     private void configureVersion(Project project) {
         String versionOverride = getVersionOverride(project);
         if (versionOverride != null) {
+            validateVersionOverrideFormatting(versionOverride);
+            validateVersionPatchChangeOnly(project.getVersion().toString(), versionOverride);
             System.out.println("Overriding version with: '" + versionOverride + "'");
             project.setVersion(versionOverride);
             project.subprojects(subproject -> subproject.setVersion(versionOverride));
+        }
+    }
+
+    private static void validateVersionPatchChangeOnly(String currentVersion, String versionOverride) {
+        VersionNumber comparableVersion = VersionNumber.parse(currentVersion);
+        VersionNumber comparableVersionOverride = VersionNumber.parse(versionOverride);
+        if (comparableVersionOverride.getMajor() > comparableVersion.getMajor() || comparableVersionOverride.getMinor() > comparableVersion.getMinor()) {
+            throw new IllegalArgumentException(String.format("The version override, '%s', cannot provide greater major or minor numbers than the existing version from the gradle.properties file: '%s'.", versionOverride, currentVersion));
+        }
+    }
+
+    private static void validateVersionOverrideFormatting(String versionOverride) {
+        Pattern semverPattern = Pattern.compile("\\d+\\.\\d+\\.\\d+");
+        if (!semverPattern.matcher(versionOverride).matches()) {
+            throw new IllegalArgumentException(String.format("The provided version override, '%s', does not have a valid format.", versionOverride));
         }
     }
 

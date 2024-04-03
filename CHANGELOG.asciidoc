@@ -30,9 +30,9 @@ ${next_release_notes}
 ==== ${version} - ${release_date}
 
 [float]
-===== Features
+===== Bug fixes
 
-* New feature: {pull}000[#000]
+* Removing strict version constraint that prevented enforcing compileSdk > 33: {pull}292[#292]
 ////
 
 [[release-notes-0.15.0]]

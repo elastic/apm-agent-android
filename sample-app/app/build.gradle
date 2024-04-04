@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace 'co.elastic.apm.android.sample'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "co.elastic.apm.android.sample"
         minSdk 26
-        targetSdk 33
+        targetSdk 34
         versionCode 1
         versionName "1.0"
 

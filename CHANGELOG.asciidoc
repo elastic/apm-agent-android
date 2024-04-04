@@ -35,6 +35,14 @@ ${next_release_notes}
 * New feature: {pull}000[#000]
 ////
 
+[[release-notes-0.16.0]]
+==== 0.16.0 - 2024/04/03
+
+[float]
+===== Bug fixes
+
+* Removing strict version constraint that prevented enforcing compileSdk > 33: {pull}292[#292]
+
 [[release-notes-0.15.0]]
 ==== 0.15.0 - 2024/03/11
 

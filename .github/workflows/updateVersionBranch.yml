@@ -34,7 +34,13 @@ jobs:
           text: ${{ github.event.pull_request.head.ref }}
           regex: 'post-release/(\d+).+'
 
-      - run: gh pr create --base ${{ env.BASE_BRANCH }} --title 'Merge main into version branch' --body 'Created by Github action' --reviewer elastic/apm-agent-android
+      - run: |
+          CONFLICT_RESOLUTION_BRANCH="post-release/main-to-${{ env.BASE_BRANCH }}"
+          git switch ${{ env.BASE_BRANCH }}
+          git checkout -b $CONFLICT_RESOLUTION_BRANCH
+          git merge main --strategy-option theirs
+          git push -u origin $CONFLICT_RESOLUTION_BRANCH
+          gh pr create --base ${{ env.BASE_BRANCH }} --title 'Merge main into version branch' --body 'Created by Github action :robot:' --reviewer elastic/apm-agent-android
         env:
           GH_TOKEN: ${{ env.GITHUB_TOKEN }}
           BASE_BRANCH: "${{ steps.major-version.outputs.group1 }}.x"

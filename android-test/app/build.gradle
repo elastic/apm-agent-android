@@ -35,6 +35,9 @@ android {
 
         testInstrumentationRunner "co.elastic.apm.android.test.base.TestRunner"
     }
+    buildFeatures {
+        buildConfig = true
+    }
 
     buildTypes {
         release {

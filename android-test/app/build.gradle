@@ -74,18 +74,4 @@ dependencies {
     androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_version"
     androidTestImplementation "androidx.test.espresso:espresso-contrib:$espresso_version"
     androidTestImplementation "com.squareup.okhttp3:mockwebserver:$mockwebserver_version"
-
-    // To avoid enforcing compileSdk > 33:
-    constraints {
-        add("implementation", "androidx.navigation:navigation-fragment") {
-            version {
-                strictly("2.6.0")
-            }
-        }
-        add("implementation", "androidx.core:core") {
-            version {
-                strictly("1.10.1")
-            }
-        }
-    }
 }

@@ -10,7 +10,7 @@ on:
       branch_specifier:
         description: The branch to release ex. main or 0.6.
         required: true
-        default: "main"
+        default: "test-provenance"
         type: string
 
       target_specifier:
@@ -30,7 +30,7 @@ on:
 
       dry_run:
         description: If set, this will not run a release but run a dry-run
-        default: false
+        default: true
         required: true
         type: boolean
 
@@ -99,7 +99,7 @@ jobs:
           url: ${{ secrets.VAULT_ADDR }}
           roleId: ${{ secrets.VAULT_ROLE_ID }}
           secretId: ${{ secrets.VAULT_SECRET_ID }}
-          channel: "#apm-agent-mobile"
+          channel: "#observablt-bots"
           message: |
             :tada: :rocket: [${{ github.repository }}] Release *${{ github.ref_name }}* has been successful in Buildkite: (<${{ steps.buildkite.outputs.build }}|build>)
 
@@ -109,7 +109,7 @@ jobs:
           url: ${{ secrets.VAULT_ADDR }}
           roleId: ${{ secrets.VAULT_ROLE_ID }}
           secretId: ${{ secrets.VAULT_SECRET_ID }}
-          channel: "#apm-agent-mobile"
+          channel: "#observablt-bots"
           message: |
             :ghost: [${{ github.repository }}] Release *${{ github.ref_name }}* didn't get triggered in Buildkite.
             Build: (<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|here>)
@@ -136,4 +136,4 @@ jobs:
           token: ${{ env.GITHUB_TOKEN }}
 
       - if: ${{ ! inputs.dry_run }}
-        run: ./gradlew postDeploy -Prelease=true -Pversion_override=${{ inputs.version_override_specifier || '' }}
+        run: echo "./gradlew postDeploy -Prelease=true -Pversion_override=${{ inputs.version_override_specifier || '' }}"

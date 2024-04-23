@@ -22,7 +22,7 @@ export COMMON_GRADLE_DEPLOY_PARAMS="-Prelease=true -Pversion_override=${version_
 if [[ "$target_specifier" == "all" ||  "$target_specifier" == "mavenCentral" ]]; then
   if [[ "$dry_run" == "false" ]] ; then
     echo "--- Release the binaries to Maven Central"
-    ./gradlew publishElasticPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository $COMMON_GRADLE_DEPLOY_PARAMS
+    echo "./gradlew publishElasticPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository $COMMON_GRADLE_DEPLOY_PARAMS"
   else
     echo "--- Release the binaries to Maven Central :package: (dry-run)"
     ./gradlew assemble
@@ -32,7 +32,7 @@ fi
 if [[ "$target_specifier" == "all" ||  "$target_specifier" == "pluginPortal" ]]; then
   if [[ "$dry_run" == "false" ]] ; then
     echo "--- Release the binaries to the Gradle Plugin portal"
-    ./gradlew publishPlugins -Pgradle.publish.key=$PLUGIN_PORTAL_KEY -Pgradle.publish.secret=$PLUGIN_PORTAL_SECRET $COMMON_GRADLE_DEPLOY_PARAMS
+    echo "./gradlew publishPlugins -Pgradle.publish.key=$PLUGIN_PORTAL_KEY -Pgradle.publish.secret=$PLUGIN_PORTAL_SECRET $COMMON_GRADLE_DEPLOY_PARAMS"
   else
     echo "--- Release the binaries to Gradle Plugin portal :package: (dry-run)"
     ./gradlew assemble

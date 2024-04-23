@@ -62,6 +62,11 @@ jobs:
   test-release:
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
+    permissions:
+      contents: write
+      id-token: write
+    env:
+      TARBALL_FILE: dist.tar
     steps:
       - id: buildkite
         name: Run Release dry-run
@@ -71,9 +76,30 @@ jobs:
           vaultRoleId: ${{ secrets.VAULT_ROLE_ID }}
           vaultSecretId: ${{ secrets.VAULT_SECRET_ID }}
           pipeline: apm-agent-android-release
+          pipelineBranch: ${{ github.ref_name }}
           waitFor: true
           printBuildLogs: false
+          artifactName: signed-artifacts
+          artifactPath: ${{ env.TARBALL_FILE }}
           buildEnvVars: |
-            branch_specifier=main
+            branch_specifier=${{ github.ref_name }}
             target_specifier=all
             dry_run=true
+            TARBALL_FILE=${{ env.TARBALL_FILE }}
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: signed-artifacts
+
+      - name: untar the buildkite tarball
+        run: tar xvf ${{ env.TARBALL_FILE }}
+
+      - name: generate build provenance (jar files)
+        uses: github-early-access/generate-build-provenance@main
+        with:
+          subject-path: "${{ github.workspace }}/**/build/libs/*.jar"
+
+      - name: generate build provenance (aar files)
+        uses: github-early-access/generate-build-provenance@main
+        with:
+          subject-path: "${{ github.workspace }}/**/build/outputs/aar/*.aar"

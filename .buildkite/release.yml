@@ -2,11 +2,16 @@ agents:
   provider: "gcp"
   image: "family/apm-agent-android-ubuntu-2204"
 
+env:
+  TARBALL_FILE: ${TARBALL_FILE:-dist.tar}
+
 steps:
   - label: "Run the release"
     key: "release"
     commands: .ci/release-wrapper.sh
-    artifact_paths: "release.out"
+    artifact_paths:
+      - "release.out"
+      - "${TARBALL_FILE}"
 
 notify:
   - slack:

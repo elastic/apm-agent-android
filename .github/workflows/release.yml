@@ -38,7 +38,8 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-
+    env:
+      TARBALL_FILE: dist.tar
     permissions:
       contents: write
       id-token: write
@@ -63,29 +64,34 @@ jobs:
           vaultRoleId: ${{ secrets.VAULT_ROLE_ID }}
           vaultSecretId: ${{ secrets.VAULT_SECRET_ID }}
           pipeline: apm-agent-android-release
+          pipelineBranch: ${{ github.ref_name }}
           waitFor: true
           printBuildLogs: false
           artifactName: signed-artifacts
-          artifactPath: android-common/build/libs/*.jar
+          artifactPath: ${{ env.TARBALL_FILE }}
           buildEnvVars: |
             branch_specifier=${{ inputs.branch_specifier || 'main' }}
             target_specifier=${{ inputs.target_specifier || 'all' }}
             version_override_specifier=${{ inputs.version_override_specifier || '' }}
             dry_run=${{ inputs.dry_run || 'false' }}
+            TARBALL_FILE=${{ env.TARBALL_FILE }}
 
       - uses: actions/download-artifact@v3
         with:
           name: signed-artifacts
-          path: android-common/build/libs
 
-      - name: Display structure of downloaded files
-        run: ls -R
-        working-directory: android-common/build/libs
+      - name: untar the buildkite tarball
+        run: tar xvf ${{ env.TARBALL_FILE }}
 
-      - name: generate build provenance
+      - name: generate build provenance (jar files)
         uses: github-early-access/generate-build-provenance@main
         with:
-          subject-path: "${{ github.workspace }}/android-common/build/libs/*.jar"
+          subject-path: "${{ github.workspace }}/**/build/libs/*.jar"
+
+      - name: generate build provenance (aar files)
+        uses: github-early-access/generate-build-provenance@main
+        with:
+          subject-path: "${{ github.workspace }}/**/build/outputs/aar/*.aar"
 
       - if: ${{ success() }}
         uses: elastic/apm-pipeline-library/.github/actions/slack-message@current

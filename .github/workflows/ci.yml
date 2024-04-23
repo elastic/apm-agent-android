@@ -98,7 +98,7 @@ jobs:
       - name: generate build provenance (jar files)
         uses: github-early-access/generate-build-provenance@main
         with:
-          subject-path: "${{ github.workspace }}/**/build/libs/*-[0-9]+*.jar"
+          subject-path: "${{ github.workspace }}/**/build/libs/*.jar"
 
       - name: generate build provenance (aar files)
         uses: github-early-access/generate-build-provenance@main

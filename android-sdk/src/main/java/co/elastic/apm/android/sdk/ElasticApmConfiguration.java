@@ -36,6 +36,12 @@ import co.elastic.apm.android.sdk.session.SessionIdGenerator;
 import co.elastic.apm.android.sdk.session.impl.DefaultSessionIdGenerator;
 import co.elastic.apm.android.sdk.traces.http.HttpTraceConfiguration;
 import co.elastic.apm.android.sdk.traces.tools.SpanFilter;
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.logs.Logger;
+import io.opentelemetry.api.metrics.LongCounter;
+import io.opentelemetry.api.metrics.LongCounterBuilder;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.sdk.resources.Resource;
 
 public final class ElasticApmConfiguration {
@@ -244,6 +250,15 @@ public final class ElasticApmConfiguration {
          */
         public Builder addMetricFilter(MetricFilter metricFilter) {
             metricFilters.add(metricFilter);
+            LongCounter counter = GlobalOpenTelemetry.meterBuilder("meterScope").build().counterBuilder("myCounter").build();
+            counter.add(1);
+            Tracer tracer = GlobalOpenTelemetry.getTracer("my-tracer-scope-name");
+            Span span = tracer.spanBuilder("spanName").startSpan();
+            //...
+            span.end();
+
+            Logger logger = GlobalOpenTelemetry.get().getLogsBridge().get("logScope");
+            logger.logRecordBuilder().setBody("Log body").emit();
             return this;
         }
 

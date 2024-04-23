@@ -46,7 +46,7 @@ The Kotlin version refers to the Kotlin gradle plugin versions, also aligned wit
 |11
 
 |Kotlin
-|1.5+
+|1.8+
 
 |===
 

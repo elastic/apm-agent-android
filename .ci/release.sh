@@ -39,7 +39,7 @@ if [[ "$target_specifier" == "all" ||  "$target_specifier" == "pluginPortal" ]];
   fi
 fi
 
-echo "--- Archive the target folder with jar files"
+echo "--- Archive the build folders with jar/aar files"
 find . -type d -name build -exec find {} \( -name '*.jar' -o -name '*.aar' \) -print0 \; | xargs -0 tar -cvf "${TARBALL_FILE:-dist.tar}"
 
 set -x

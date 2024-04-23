@@ -16,4 +16,4 @@ steps:
 notify:
   - slack:
       channels:
-        - "#apm-agent-mobile"
+        - "#observablt-bots"

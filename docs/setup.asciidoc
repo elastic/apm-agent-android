@@ -150,7 +150,7 @@ After initializing the agent (by using the gradle plugin), your application will
 
 Apart from the automatic instrumentation helped by the Gradle plugin, you'll get automatic crash reports when an unexpected error occurs in your app, regardless of whether the Gradle plugin is available or not.
 
-All of these events will contain a "Session ID" that links related events together—allowing you to make sense of and diagnose any issues that arise.
+All of these events will contain a https://opentelemetry.io/docs/specs/semconv/general/session/[Session] ID that links related events together—allowing you to make sense of and diagnose any issues that arise.
 Head to the **APM app in {kib}** to start exploring your data.
 
 If you need to customize the Elastic APM agent to your project's needs, see <<configuration,configuration>>.

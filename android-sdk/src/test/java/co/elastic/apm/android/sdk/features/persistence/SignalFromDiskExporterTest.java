@@ -38,7 +38,7 @@ import io.opentelemetry.contrib.disk.buffering.MetricDiskExporter;
 import io.opentelemetry.contrib.disk.buffering.SpanDiskExporter;
 import io.opentelemetry.contrib.disk.buffering.StoredBatchExporter;
 
-public class SignalDiskExporterTest {
+public class SignalFromDiskExporterTest {
 
     private SpanDiskExporter spanDiskExporter;
     private MetricDiskExporter metricDiskExporter;
@@ -54,7 +54,7 @@ public class SignalDiskExporterTest {
 
     @Test
     public void verifyExportingSpans() throws IOException {
-        SignalDiskExporter instance = createInstance(spanDiskExporter, metricDiskExporter, logRecordDiskExporter);
+        SignalFromDiskExporter instance = createInstance(spanDiskExporter, metricDiskExporter, logRecordDiskExporter);
         doReturn(true).when(spanDiskExporter).exportStoredBatch(anyLong(), any());
 
         assertTrue(instance.exportBatchOfSpans());
@@ -65,7 +65,7 @@ public class SignalDiskExporterTest {
 
     @Test
     public void verifyExportingMetrics() throws IOException {
-        SignalDiskExporter instance = createInstance(spanDiskExporter, metricDiskExporter, logRecordDiskExporter);
+        SignalFromDiskExporter instance = createInstance(spanDiskExporter, metricDiskExporter, logRecordDiskExporter);
         doReturn(true).when(metricDiskExporter).exportStoredBatch(anyLong(), any());
 
         assertTrue(instance.exportBatchOfMetrics());
@@ -76,7 +76,7 @@ public class SignalDiskExporterTest {
 
     @Test
     public void verifyExportingLogs() throws IOException {
-        SignalDiskExporter instance = createInstance(spanDiskExporter, metricDiskExporter, logRecordDiskExporter);
+        SignalFromDiskExporter instance = createInstance(spanDiskExporter, metricDiskExporter, logRecordDiskExporter);
         doReturn(true).when(logRecordDiskExporter).exportStoredBatch(anyLong(), any());
 
         assertTrue(instance.exportBatchOfLogs());
@@ -87,7 +87,7 @@ public class SignalDiskExporterTest {
 
     @Test
     public void verifyExportingEach_whenAllReturnFalse() throws IOException {
-        SignalDiskExporter instance = createInstance(spanDiskExporter, metricDiskExporter, logRecordDiskExporter);
+        SignalFromDiskExporter instance = createInstance(spanDiskExporter, metricDiskExporter, logRecordDiskExporter);
 
         assertFalse(instance.exportBatchOfEach());
 
@@ -98,7 +98,7 @@ public class SignalDiskExporterTest {
 
     @Test
     public void verifyExportingEach_whenSpansReturnTrue() throws IOException {
-        SignalDiskExporter instance = createInstance(spanDiskExporter, metricDiskExporter, logRecordDiskExporter);
+        SignalFromDiskExporter instance = createInstance(spanDiskExporter, metricDiskExporter, logRecordDiskExporter);
         doReturn(true).when(spanDiskExporter).exportStoredBatch(anyLong(), any());
 
         assertTrue(instance.exportBatchOfEach());
@@ -110,7 +110,7 @@ public class SignalDiskExporterTest {
 
     @Test
     public void verifyExportingEach_whenMetricsReturnTrue() throws IOException {
-        SignalDiskExporter instance = createInstance(spanDiskExporter, metricDiskExporter, logRecordDiskExporter);
+        SignalFromDiskExporter instance = createInstance(spanDiskExporter, metricDiskExporter, logRecordDiskExporter);
         doReturn(true).when(metricDiskExporter).exportStoredBatch(anyLong(), any());
 
         assertTrue(instance.exportBatchOfEach());
@@ -122,7 +122,7 @@ public class SignalDiskExporterTest {
 
     @Test
     public void verifyExportingEach_whenLogsReturnTrue() throws IOException {
-        SignalDiskExporter instance = createInstance(spanDiskExporter, metricDiskExporter, logRecordDiskExporter);
+        SignalFromDiskExporter instance = createInstance(spanDiskExporter, metricDiskExporter, logRecordDiskExporter);
         doReturn(true).when(logRecordDiskExporter).exportStoredBatch(anyLong(), any());
 
         assertTrue(instance.exportBatchOfEach());
@@ -134,7 +134,7 @@ public class SignalDiskExporterTest {
 
     @Test
     public void whenSpansExporterIsNull_returnFalse() throws IOException {
-        SignalDiskExporter instance = createInstance(null, metricDiskExporter, logRecordDiskExporter);
+        SignalFromDiskExporter instance = createInstance(null, metricDiskExporter, logRecordDiskExporter);
 
         assertFalse(instance.exportBatchOfSpans());
     }
@@ -142,14 +142,14 @@ public class SignalDiskExporterTest {
 
     @Test
     public void whenMetricsExporterIsNull_returnFalse() throws IOException {
-        SignalDiskExporter instance = createInstance(spanDiskExporter, null, logRecordDiskExporter);
+        SignalFromDiskExporter instance = createInstance(spanDiskExporter, null, logRecordDiskExporter);
 
         assertFalse(instance.exportBatchOfMetrics());
     }
 
     @Test
     public void whenLogsExporterIsNull_returnFalse() throws IOException {
-        SignalDiskExporter instance = createInstance(spanDiskExporter, metricDiskExporter, null);
+        SignalFromDiskExporter instance = createInstance(spanDiskExporter, metricDiskExporter, null);
 
         assertFalse(instance.exportBatchOfLogs());
     }
@@ -159,13 +159,13 @@ public class SignalDiskExporterTest {
     }
 
 
-    private SignalDiskExporter createInstance(SpanDiskExporter spanDiskExporter, MetricDiskExporter metricDiskExporter, LogRecordDiskExporter logRecordDiskExporter
+    private SignalFromDiskExporter createInstance(SpanDiskExporter spanDiskExporter, MetricDiskExporter metricDiskExporter, LogRecordDiskExporter logRecordDiskExporter
     ) {
         return createInstance(spanDiskExporter, metricDiskExporter, logRecordDiskExporter, DEFAULT_EXPORT_TIMEOUT_IN_MILLIS);
     }
 
-    private SignalDiskExporter createInstance(SpanDiskExporter spanDiskExporter, MetricDiskExporter metricDiskExporter, LogRecordDiskExporter
+    private SignalFromDiskExporter createInstance(SpanDiskExporter spanDiskExporter, MetricDiskExporter metricDiskExporter, LogRecordDiskExporter
             logRecordDiskExporter, long exportTimeoutInMillis) {
-        return new SignalDiskExporter(spanDiskExporter, metricDiskExporter, logRecordDiskExporter, exportTimeoutInMillis);
+        return new SignalFromDiskExporter(spanDiskExporter, metricDiskExporter, logRecordDiskExporter, exportTimeoutInMillis);
     }
 }

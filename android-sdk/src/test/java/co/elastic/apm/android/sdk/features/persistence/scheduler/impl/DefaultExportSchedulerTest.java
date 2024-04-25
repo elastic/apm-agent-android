@@ -33,7 +33,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import co.elastic.apm.android.sdk.features.persistence.SignalDiskExporter;
+import co.elastic.apm.android.sdk.features.persistence.SignalFromDiskExporter;
 import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicWorkService;
 import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
@@ -41,7 +41,7 @@ import co.elastic.apm.android.sdk.testutils.providers.SimpleProvider;
 
 public class DefaultExportSchedulerTest {
     private PeriodicWorkService service;
-    private SignalDiskExporter signalDiskExporter;
+    private SignalFromDiskExporter signalFromDiskExporter;
     private DefaultExportScheduler exportScheduler;
     private PreferencesService preferencesService;
     private SystemTimeProvider timeProvider;
@@ -52,11 +52,11 @@ public class DefaultExportSchedulerTest {
     @Before
     public void setUp() {
         service = mock(PeriodicWorkService.class);
-        signalDiskExporter = mock(SignalDiskExporter.class);
+        signalFromDiskExporter = mock(SignalFromDiskExporter.class);
         preferencesService = mock(PreferencesService.class);
         timeProvider = mock(SystemTimeProvider.class);
         doReturn(INITIAL_CURRENT_TIME).when(timeProvider).getCurrentTimeMillis();
-        SignalDiskExporter.set(signalDiskExporter);
+        SignalFromDiskExporter.set(signalFromDiskExporter);
         exportScheduler = new DefaultExportScheduler(SimpleProvider.create(service),
                 SimpleProvider.create(preferencesService),
                 timeProvider,
@@ -65,7 +65,7 @@ public class DefaultExportSchedulerTest {
 
     @After
     public void tearDown() {
-        SignalDiskExporter.resetForTesting();
+        SignalFromDiskExporter.resetForTesting();
     }
 
     @Test
@@ -106,11 +106,11 @@ public class DefaultExportSchedulerTest {
 
     @Test
     public void whenRunning_exportAllSignals() throws IOException {
-        when(signalDiskExporter.exportBatchOfEach()).thenReturn(true).thenReturn(true).thenReturn(false);
+        when(signalFromDiskExporter.exportBatchOfEach()).thenReturn(true).thenReturn(true).thenReturn(false);
 
         exportScheduler.runTask();
 
-        verify(signalDiskExporter, times(3)).exportBatchOfEach();
+        verify(signalFromDiskExporter, times(3)).exportBatchOfEach();
     }
 
     @Test

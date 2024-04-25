@@ -18,25 +18,26 @@
  */
 package co.elastic.apm.android.sdk.internal.features.persistence;
 
-import java.io.File;
 import java.io.IOException;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.exporters.ExporterVisitor;
-import co.elastic.apm.android.sdk.features.persistence.SignalDiskExporter;
+import co.elastic.apm.android.sdk.features.persistence.SignalFromDiskExporter;
 import co.elastic.apm.android.sdk.features.persistence.SimpleTemporaryFileProvider;
-import io.opentelemetry.contrib.disk.buffering.LogRecordDiskExporter;
-import io.opentelemetry.contrib.disk.buffering.MetricDiskExporter;
-import io.opentelemetry.contrib.disk.buffering.SpanDiskExporter;
-import io.opentelemetry.contrib.disk.buffering.internal.StorageConfiguration;
+import io.opentelemetry.contrib.disk.buffering.LogRecordFromDiskExporter;
+import io.opentelemetry.contrib.disk.buffering.LogRecordToDiskExporter;
+import io.opentelemetry.contrib.disk.buffering.MetricFromDiskExporter;
+import io.opentelemetry.contrib.disk.buffering.MetricToDiskExporter;
+import io.opentelemetry.contrib.disk.buffering.SpanFromDiskExporter;
+import io.opentelemetry.contrib.disk.buffering.SpanToDiskExporter;
+import io.opentelemetry.contrib.disk.buffering.StorageConfiguration;
 import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
 public final class PersistenceInitializer implements ExporterVisitor {
-    private SignalDiskExporter.Builder signalDiskExporterBuilder;
+    private SignalFromDiskExporter.Builder signalFromDiskExporterBuilder;
     private StorageConfiguration storageConfiguration;
-    private File signalsDir;
 
     public void prepare() throws IOException {
         DiskManager diskManager = DiskManager.create();
@@ -44,14 +45,14 @@ public final class PersistenceInitializer implements ExporterVisitor {
                 .setMaxFileSize(diskManager.getMaxCacheFileSize())
                 .setMaxFolderSize(diskManager.getMaxFolderSize())
                 .setTemporaryFileProvider(new SimpleTemporaryFileProvider(diskManager.getTemporaryDir()))
+                .setRootDir(diskManager.getSignalsCacheDir())
                 .build();
-        signalsDir = diskManager.getSignalsCacheDir();
-        signalDiskExporterBuilder = SignalDiskExporter.builder();
+        signalFromDiskExporterBuilder = SignalFromDiskExporter.builder();
     }
 
-    public SignalDiskExporter createSignalDiskExporter() {
-        if (signalDiskExporterBuilder != null) {
-            return signalDiskExporterBuilder.build();
+    public SignalFromDiskExporter createSignalDiskExporter() {
+        if (signalFromDiskExporterBuilder != null) {
+            return signalFromDiskExporterBuilder.build();
         }
         throw new IllegalStateException("You must call prepare() first");
     }
@@ -59,7 +60,7 @@ public final class PersistenceInitializer implements ExporterVisitor {
     @Override
     public <T> T visitExporter(T exporter) {
         Elog.getLogger().debug("Visiting exporter: {}", exporter);
-        if (signalDiskExporterBuilder != null) {
+        if (signalFromDiskExporterBuilder != null) {
             try {
                 return persistExporterSignals(exporter);
             } catch (Exception e) {
@@ -73,17 +74,14 @@ public final class PersistenceInitializer implements ExporterVisitor {
     @SuppressWarnings("unchecked")
     private <T> T persistExporterSignals(T exporter) throws IOException {
         if (exporter instanceof SpanExporter) {
-            SpanDiskExporter spanDiskExporter = SpanDiskExporter.create((SpanExporter) exporter, signalsDir, storageConfiguration);
-            signalDiskExporterBuilder.setSpanDiskExporter(spanDiskExporter);
-            return (T) spanDiskExporter;
+            signalFromDiskExporterBuilder.setSpanFromDiskExporter(SpanFromDiskExporter.create((SpanExporter) exporter, storageConfiguration));
+            return (T) SpanToDiskExporter.create((SpanExporter) exporter, storageConfiguration);
         } else if (exporter instanceof MetricExporter) {
-            MetricDiskExporter metricDiskExporter = MetricDiskExporter.create((MetricExporter) exporter, signalsDir, storageConfiguration);
-            signalDiskExporterBuilder.setMetricDiskExporter(metricDiskExporter);
-            return (T) metricDiskExporter;
+            signalFromDiskExporterBuilder.setMetricFromDiskExporter(MetricFromDiskExporter.create((MetricExporter) exporter, storageConfiguration));
+            return (T) MetricToDiskExporter.create((MetricExporter) exporter, storageConfiguration, ((MetricExporter) exporter)::getAggregationTemporality);
         } else if (exporter instanceof LogRecordExporter) {
-            LogRecordDiskExporter logRecordDiskExporter = LogRecordDiskExporter.create((LogRecordExporter) exporter, signalsDir, storageConfiguration);
-            signalDiskExporterBuilder.setLogRecordDiskExporter(logRecordDiskExporter);
-            return (T) logRecordDiskExporter;
+            signalFromDiskExporterBuilder.setLogRecordFromDiskExporter(LogRecordFromDiskExporter.create((LogRecordExporter) exporter, storageConfiguration));
+            return (T) LogRecordToDiskExporter.create((LogRecordExporter) exporter, storageConfiguration);
         }
         throw new IllegalArgumentException("Could not wrap exporter of type: " + exporter.getClass());
     }

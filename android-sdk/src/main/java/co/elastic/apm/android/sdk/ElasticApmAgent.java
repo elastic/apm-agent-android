@@ -21,6 +21,7 @@ package co.elastic.apm.android.sdk;
 import android.app.Application;
 import android.content.Context;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RestrictTo;
 import androidx.lifecycle.ProcessLifecycleOwner;
 
@@ -42,7 +43,7 @@ import co.elastic.apm.android.sdk.attributes.resources.ServiceIdVisitor;
 import co.elastic.apm.android.sdk.connectivity.Connectivity;
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration;
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.exporters.VisitableExporters;
-import co.elastic.apm.android.sdk.features.persistence.SignalDiskExporter;
+import co.elastic.apm.android.sdk.features.persistence.SignalFromDiskExporter;
 import co.elastic.apm.android.sdk.instrumentation.Instrumentations;
 import co.elastic.apm.android.sdk.internal.api.filter.ComposableFilter;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
@@ -67,6 +68,7 @@ import co.elastic.apm.android.sdk.internal.utilities.logging.AndroidLoggerFactor
 import co.elastic.apm.android.sdk.session.SessionManager;
 import io.opentelemetry.android.OpenTelemetryRum;
 import io.opentelemetry.android.config.OtelRumConfig;
+import io.opentelemetry.android.features.diskbuffering.DiskBufferingConfiguration;
 import io.opentelemetry.android.instrumentation.activity.VisibleScreenTracker;
 import io.opentelemetry.android.instrumentation.lifecycle.AndroidLifecycleInstrumentationBuilder;
 import io.opentelemetry.android.instrumentation.startup.AppStartupTimer;
@@ -281,9 +283,8 @@ public final class ElasticApmAgent {
         Resource resource = configuration.resource
                 .merge(Resource.create(resourceAttrs));
 
-        OtelRumConfig rumConfig = new OtelRumConfig();
-        rumConfig.disableNetworkAttributes();
-        rumConfig.disableNetworkChangeMonitoring();
+        OtelRumConfig rumConfig = getOtelRumConfig();
+
         OpenTelemetryRum rum = OpenTelemetryRum.builder(app, rumConfig)
                 .addTracerProviderCustomizer((sdkTracerProviderBuilder, application) -> configureTracerProviderBuilder(sdkTracerProviderBuilder, signalConfiguration, resource, globalAttributesVisitor, sampleRateManager))
                 .addMeterProviderCustomizer((sdkMeterProviderBuilder, application) -> configureMeterProviderBuilder(sdkMeterProviderBuilder, signalConfiguration, resource, sampleRateManager))
@@ -305,11 +306,23 @@ public final class ElasticApmAgent {
         GlobalEventLoggerProvider.set(SdkEventLoggerProvider.create(openTelemetry.getLogsBridge(), ntpManager.getClock()));
 
         if (persistenceInitializer != null) {
-            SignalDiskExporter.set(persistenceInitializer.createSignalDiskExporter());
+            SignalFromDiskExporter.set(persistenceInitializer.createSignalDiskExporter());
             configuration.persistenceConfiguration.exportScheduler.onPersistenceEnabled();
         } else {
             configuration.persistenceConfiguration.exportScheduler.onPersistenceDisabled();
         }
+    }
+
+    @NonNull
+    private static OtelRumConfig getOtelRumConfig() {
+        OtelRumConfig rumConfig = new OtelRumConfig();
+        rumConfig.disableNetworkAttributes();
+        rumConfig.disableNetworkChangeMonitoring();
+        rumConfig.disableAnrDetection();
+        rumConfig.disableCrashReporting();
+        rumConfig.disableSlowRenderingDetection();
+        rumConfig.setDiskBufferingConfiguration(DiskBufferingConfiguration.builder().setEnabled(false).build());
+        return rumConfig;
     }
 
     private PersistenceInitializer tryInitializePersistence(SignalConfiguration signalConfiguration, AgentDependenciesInjector injector) {

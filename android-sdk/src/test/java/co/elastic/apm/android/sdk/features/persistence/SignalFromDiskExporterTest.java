@@ -33,23 +33,23 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import io.opentelemetry.contrib.disk.buffering.LogRecordDiskExporter;
-import io.opentelemetry.contrib.disk.buffering.MetricDiskExporter;
-import io.opentelemetry.contrib.disk.buffering.SpanDiskExporter;
-import io.opentelemetry.contrib.disk.buffering.StoredBatchExporter;
+import io.opentelemetry.contrib.disk.buffering.LogRecordFromDiskExporter;
+import io.opentelemetry.contrib.disk.buffering.MetricFromDiskExporter;
+import io.opentelemetry.contrib.disk.buffering.SpanFromDiskExporter;
+import io.opentelemetry.contrib.disk.buffering.internal.exporter.FromDiskExporter;
 
 public class SignalFromDiskExporterTest {
 
-    private SpanDiskExporter spanDiskExporter;
-    private MetricDiskExporter metricDiskExporter;
-    private LogRecordDiskExporter logRecordDiskExporter;
+    private SpanFromDiskExporter spanDiskExporter;
+    private MetricFromDiskExporter metricDiskExporter;
+    private LogRecordFromDiskExporter logRecordDiskExporter;
     private static final long DEFAULT_EXPORT_TIMEOUT_IN_MILLIS = 1000;
 
     @Before
     public void setUp() {
-        spanDiskExporter = mock(SpanDiskExporter.class);
-        metricDiskExporter = mock(MetricDiskExporter.class);
-        logRecordDiskExporter = mock(LogRecordDiskExporter.class);
+        spanDiskExporter = mock(SpanFromDiskExporter.class);
+        metricDiskExporter = mock(MetricFromDiskExporter.class);
+        logRecordDiskExporter = mock(LogRecordFromDiskExporter.class);
     }
 
     @Test
@@ -154,17 +154,17 @@ public class SignalFromDiskExporterTest {
         assertFalse(instance.exportBatchOfLogs());
     }
 
-    private void verifyExportStoredBatchCall(StoredBatchExporter exporter, long timeoutInMillis) throws IOException {
+    private void verifyExportStoredBatchCall(FromDiskExporter exporter, long timeoutInMillis) throws IOException {
         verify(exporter).exportStoredBatch(timeoutInMillis, TimeUnit.MILLISECONDS);
     }
 
 
-    private SignalFromDiskExporter createInstance(SpanDiskExporter spanDiskExporter, MetricDiskExporter metricDiskExporter, LogRecordDiskExporter logRecordDiskExporter
+    private SignalFromDiskExporter createInstance(SpanFromDiskExporter spanDiskExporter, MetricFromDiskExporter metricDiskExporter, LogRecordFromDiskExporter logRecordDiskExporter
     ) {
         return createInstance(spanDiskExporter, metricDiskExporter, logRecordDiskExporter, DEFAULT_EXPORT_TIMEOUT_IN_MILLIS);
     }
 
-    private SignalFromDiskExporter createInstance(SpanDiskExporter spanDiskExporter, MetricDiskExporter metricDiskExporter, LogRecordDiskExporter
+    private SignalFromDiskExporter createInstance(SpanFromDiskExporter spanDiskExporter, MetricFromDiskExporter metricDiskExporter, LogRecordFromDiskExporter
             logRecordDiskExporter, long exportTimeoutInMillis) {
         return new SignalFromDiskExporter(spanDiskExporter, metricDiskExporter, logRecordDiskExporter, exportTimeoutInMillis);
     }

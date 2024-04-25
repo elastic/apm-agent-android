@@ -15,6 +15,7 @@ opentelemetry-sdk = { module = "io.opentelemetry:opentelemetry-sdk", version.ref
 opentelemetry-api-incubator = { module = "io.opentelemetry:opentelemetry-api-incubator", version.ref = "opentelemetry-alpha" }
 opentelemetry-android = { module = "io.opentelemetry.android:android-agent", version.ref = "opentelemetry-android" }
 opentelemetry-android-instrumentation-api = { module = "io.opentelemetry.android:instrumentation-common-api", version.ref = "opentelemetry-android" }
+opentelemetry-android-instrumentation-lifecycle = { module = "io.opentelemetry.android:instrumentation-lifecycle", version.ref = "opentelemetry-android" }
 opentelemetry-android-okhttpLib = { module = "io.opentelemetry.android:okhttp-3.0-library", version.ref = "opentelemetry-android" }
 opentelemetry-android-okhttpAgent = { module = "io.opentelemetry.android:okhttp-3.0-agent", version.ref = "opentelemetry-android" }
 stagemonitor-configuration = "org.stagemonitor:stagemonitor-configuration:0.89.1"

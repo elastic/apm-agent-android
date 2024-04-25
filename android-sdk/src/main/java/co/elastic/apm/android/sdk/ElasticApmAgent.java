@@ -67,6 +67,9 @@ import co.elastic.apm.android.sdk.internal.utilities.logging.AndroidLoggerFactor
 import co.elastic.apm.android.sdk.session.SessionManager;
 import io.opentelemetry.android.OpenTelemetryRum;
 import io.opentelemetry.android.config.OtelRumConfig;
+import io.opentelemetry.android.instrumentation.activity.VisibleScreenTracker;
+import io.opentelemetry.android.instrumentation.lifecycle.AndroidLifecycleInstrumentationBuilder;
+import io.opentelemetry.android.instrumentation.startup.AppStartupTimer;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.common.Attributes;

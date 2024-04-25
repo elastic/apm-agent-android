@@ -1,8 +1,7 @@
 [versions]
-opentelemetry-android = "0.3.0"
-opentelemetry-android-alpha = "0.3.0-alpha"
-opentelemetry = "1.34.1"
-opentelemetry-alpha = "1.34.1-alpha"
+opentelemetry-android = "0.5.0-alpha"
+opentelemetry = "1.37.0"
+opentelemetry-alpha = "1.37.0-alpha"
 opentelemetry-semconv = "1.21.0-alpha"
 opentelemetry-contrib = "1.31.0-alpha"
 mockito = "4.11.0"
@@ -13,8 +12,8 @@ google-autoService = "1.1.1"
 
 [libraries]
 opentelemetry-sdk = { module = "io.opentelemetry:opentelemetry-sdk", version.ref = "opentelemetry" }
-opentelemetry-android = { module = "io.opentelemetry.android:instrumentation", version.ref = "opentelemetry-android-alpha" }
-opentelemetry-events = { module = "io.opentelemetry:opentelemetry-api-events", version.ref = "opentelemetry-alpha" }
+opentelemetry-api-incubator = { module = "io.opentelemetry:opentelemetry-api-incubator", version.ref = "opentelemetry-alpha" }
+opentelemetry-android = { module = "io.opentelemetry.android:android-agent", version.ref = "opentelemetry-android" }
 opentelemetry-android-okhttpLib = { module = "io.opentelemetry.android:okhttp-3.0-library", version.ref = "opentelemetry-android" }
 opentelemetry-android-okhttpAgent = { module = "io.opentelemetry.android:okhttp-3.0-agent", version.ref = "opentelemetry-android" }
 stagemonitor-configuration = "org.stagemonitor:stagemonitor-configuration:0.89.1"

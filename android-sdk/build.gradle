@@ -41,7 +41,7 @@ shadowJar {
 dependencies {
     api libs.opentelemetry.sdk
     api libs.opentelemetry.android
-    api libs.opentelemetry.events
+    api libs.opentelemetry.api.incubator
     api libs.stagemonitor.configuration
     api libs.okhttp
     implementation project(':android-common')

@@ -45,6 +45,7 @@ dependencies {
     api libs.stagemonitor.configuration
     api libs.okhttp
     implementation project(':android-common')
+    implementation libs.opentelemetry.android.instrumentation.api
     implementation libs.androidx.lifecycle
     implementation libs.weaklockfree
     implementation libs.opentelemetry.exporter.otlp

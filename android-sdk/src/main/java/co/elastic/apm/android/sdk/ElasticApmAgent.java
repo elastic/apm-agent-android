@@ -67,17 +67,14 @@ import co.elastic.apm.android.sdk.internal.utilities.logging.AndroidLoggerFactor
 import co.elastic.apm.android.sdk.session.SessionManager;
 import io.opentelemetry.android.OpenTelemetryRum;
 import io.opentelemetry.android.config.OtelRumConfig;
-import io.opentelemetry.android.instrumentation.activity.VisibleScreenTracker;
-import io.opentelemetry.android.instrumentation.lifecycle.AndroidLifecycleInstrumentationBuilder;
-import io.opentelemetry.android.instrumentation.startup.AppStartupTimer;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.events.GlobalEventEmitterProvider;
+import io.opentelemetry.api.incubator.events.GlobalEventLoggerProvider;
 import io.opentelemetry.sdk.logs.LogRecordProcessor;
 import io.opentelemetry.sdk.logs.SdkLoggerProviderBuilder;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
-import io.opentelemetry.sdk.logs.internal.SdkEventEmitterProvider;
+import io.opentelemetry.sdk.logs.internal.SdkEventLoggerProvider;
 import io.opentelemetry.sdk.metrics.SdkMeterProviderBuilder;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.resources.Resource;
@@ -205,7 +202,7 @@ public final class ElasticApmAgent {
         ConnectionHttpAttributesVisitor.resetForTest();
         ServiceManager.resetForTest();
         GlobalOpenTelemetry.resetForTest();
-        GlobalEventEmitterProvider.resetForTest();
+        GlobalEventLoggerProvider.resetForTest();
         instance = null;
     }
 
@@ -302,7 +299,7 @@ public final class ElasticApmAgent {
 
         OpenTelemetry openTelemetry = rum.getOpenTelemetry();
         GlobalOpenTelemetry.set(openTelemetry);
-        GlobalEventEmitterProvider.set(SdkEventEmitterProvider.create(openTelemetry.getLogsBridge(), ntpManager.getClock()));
+        GlobalEventLoggerProvider.set(SdkEventLoggerProvider.create(openTelemetry.getLogsBridge(), ntpManager.getClock()));
 
         if (persistenceInitializer != null) {
             SignalDiskExporter.set(persistenceInitializer.createSignalDiskExporter());

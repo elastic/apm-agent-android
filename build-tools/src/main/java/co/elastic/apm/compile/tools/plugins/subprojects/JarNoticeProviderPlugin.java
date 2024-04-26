@@ -51,7 +51,7 @@ public class JarNoticeProviderPlugin extends BaseSubprojectPlugin {
             task.getDependenciesHashFile().set(dependenciesHasher.flatMap(DependenciesHasherTask::getOutputFile));
             task.getOutputDir().set(project.getLayout().getProjectDirectory().dir("src/main/resources"));
         });
-        project.getTasks().named("processResources").configure(task -> task.dependsOn(createNoticeFileTask));
+        project.getTasks().named("processResources").configure(task -> task.mustRunAfter(createNoticeFileTask));
 
         project.getTasks().register(TASK_VERIFY_NOTICE_FILE_NAME, DependenciesVerifierTask.class, task -> {
             task.getDependenciesHashFile().set(dependenciesHasher.flatMap(DependenciesHasherTask::getOutputFile));

@@ -19,7 +19,6 @@ import co.elastic.apm.compile.tools.tasks.CreateNoticeTask;
 import co.elastic.apm.compile.tools.tasks.NoticeMergerTask;
 import co.elastic.apm.compile.tools.tasks.dependencies.DependenciesHasherTask;
 import co.elastic.apm.compile.tools.tasks.dependencies.DependenciesVerifierTask;
-import co.elastic.apm.compile.tools.tasks.subprojects.CopySingleFileTask;
 import co.elastic.apm.compile.tools.tasks.subprojects.NoticeFilesCollectorTask;
 import co.elastic.apm.compile.tools.tasks.subprojects.PomLicensesCollectorTask;
 import co.elastic.apm.compile.tools.utils.Constants;
@@ -64,12 +63,12 @@ public class AarNoticeProviderPlugin extends BaseSubprojectPlugin {
                 task.getLicensedDependencies().set(licensesDependencies.flatMap(CreateDependenciesListTask::getOutputFile));
                 task.getFoundLicensesIds().set(pomLicensesFinder.flatMap(PomLicensesCollectorTask::getLicensesFound));
                 task.getDependenciesHashFile().set(dependenciesHasher.flatMap(DependenciesHasherTask::getOutputFile));
-                task.getOutputFile().set(project.getLayout().getBuildDirectory().file(task.getName() + "/" + "notice_file.txt"));
+                task.getOutputDir().set(project.getLayout().getBuildDirectory().dir(task.getName()));
             });
             if (apmExtension.variantName.get().equals(variant.getName())) {
-                project.getTasks().register(TASK_CREATE_NOTICE_FILE_NAME, CopySingleFileTask.class, task -> {
-                    task.getInputFile().set(createNotice.flatMap(CreateNoticeTask::getOutputFile));
-                    task.getOutputFile().set(project.getLayout().getProjectDirectory().file("src/main/resources/META-INF/NOTICE"));
+                component.getSources().getResources().addGeneratedSourceDirectory(createNotice, CreateNoticeTask::getOutputDir);
+                project.getTasks().register(TASK_CREATE_NOTICE_FILE_NAME, task -> {
+                    task.dependsOn(createNotice);
                 });
                 project.getTasks().register(TASK_VERIFY_NOTICE_FILE_NAME, DependenciesVerifierTask.class, task -> {
                     task.getDependenciesHashFile().set(dependenciesHasher.flatMap(DependenciesHasherTask::getOutputFile));

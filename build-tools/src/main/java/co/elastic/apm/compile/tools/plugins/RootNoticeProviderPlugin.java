@@ -10,6 +10,7 @@ import co.elastic.apm.compile.tools.tasks.CreateNoticeTask;
 import co.elastic.apm.compile.tools.tasks.NoticeMergerTask;
 import co.elastic.apm.compile.tools.tasks.rootproject.SubprojectNoticesCollectorTask;
 import co.elastic.apm.compile.tools.tasks.rootproject.SubprojectPomLicensesMergerTask;
+import co.elastic.apm.compile.tools.tasks.subprojects.CopySingleFileTask;
 
 public class RootNoticeProviderPlugin extends BaseNoticePlugin {
 
@@ -42,10 +43,15 @@ public class RootNoticeProviderPlugin extends BaseNoticePlugin {
             task.getOutputFile().set(project.getLayout().getBuildDirectory().file(task.getName() + "/" + "licensed_dependencies.txt"));
         });
 
-        project.getTasks().register(TASK_CREATE_NOTICE_FILE_NAME, CreateNoticeTask.class, task -> {
+        TaskProvider<CreateNoticeTask> createRootNoticeFile = project.getTasks().register("createRootNoticeFile", CreateNoticeTask.class, task -> {
             task.getMergedNoticeFiles().from(noticeFilesMerger.flatMap(NoticeMergerTask::getOutputFile));
             task.getLicensedDependencies().set(licensesDependencies.flatMap(CreateDependenciesListTask::getOutputFile));
             task.getFoundLicensesIds().set(pomLicenses.flatMap(SubprojectPomLicensesMergerTask::getMergedSubprojectLicensedDependencies));
+            task.getOutputDir().set(project.getLayout().getBuildDirectory().dir(task.getName()));
+        });
+
+        project.getTasks().register(TASK_CREATE_NOTICE_FILE_NAME, CopySingleFileTask.class, task -> {
+            task.getInputFile().set(createRootNoticeFile.get().getOutputDir().file("META-INF/NOTICE"));
             task.getOutputFile().set(project.getLayout().getProjectDirectory().file("NOTICE"));
         });
     }

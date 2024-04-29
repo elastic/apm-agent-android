@@ -77,7 +77,7 @@ jobs:
             dry_run=${{ inputs.dry_run || 'false' }}
             TARBALL_FILE=${{ env.TARBALL_FILE }}
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v3
         with:
           name: signed-artifacts
 

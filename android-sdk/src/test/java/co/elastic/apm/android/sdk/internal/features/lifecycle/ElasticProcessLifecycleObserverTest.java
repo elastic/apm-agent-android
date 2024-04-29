@@ -18,6 +18,8 @@
  */
 package co.elastic.apm.android.sdk.internal.features.lifecycle;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -30,18 +32,19 @@ import org.junit.Test;
 
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.events.EventEmitter;
+import io.opentelemetry.api.incubator.events.EventBuilder;
 
 public class ElasticProcessLifecycleObserverTest {
 
     private ElasticProcessLifecycleObserver instance;
     private LifecycleOwner owner;
-    private EventEmitter eventEmitter;
+    private EventBuilder eventEmitter;
 
     @Before
     public void setUp() {
         owner = mock(LifecycleOwner.class);
-        eventEmitter = mock(EventEmitter.class);
+        eventEmitter = mock(EventBuilder.class);
+        doReturn(eventEmitter).when(eventEmitter).setAttributes(any());
         instance = new ElasticProcessLifecycleObserver(eventEmitter);
     }
 
@@ -81,7 +84,8 @@ public class ElasticProcessLifecycleObserverTest {
     }
 
     private void verifyLifecycleEvent(String state) {
-        verify(eventEmitter).emit("lifecycle", Attributes.of(AttributeKey.stringKey("lifecycle.state"), state));
+        verify(eventEmitter).setAttributes(Attributes.of(AttributeKey.stringKey("lifecycle.state"), state));
+        verify(eventEmitter).emit();
     }
 
     @After

@@ -35,6 +35,47 @@ Unlike other bytecode instrumentation libraries, Byte Buddy is designed so that 
 It also respects other transformations applied to your application at the same time.
 
 [float]
+[[faq-ssl]]
+=== How can I configure SSL/TLS?
+
+Please not that the Elastic Agent does not handle SSL/TLS configs internally, therefore, the recommended way to manage these types of configurations is by doing so as part of your app's network security configurations, as explained in Android's official https://developer.android.com/privacy-and-security/security-ssl[security guidelines].
+Below we show a set of common use-cases and quick tips on what could be done on each one, however, each case might be different, so please refer to Android's https://developer.android.com/privacy-and-security/security-config[official docs] on this topic in case you need more details.
+
+[float]
+[[faq-ssl-elastic-cloud]]
+==== Connecting to Elastic Cloud
+
+If your ELK stack is hosted in Elastic Cloud, you shouldn't need to add any SSL/TLS config changes in your app, it should work out of the box.
+
+[float]
+[[faq-ssl-on-prem]]
+==== Connecting to an on-prem server
+
+If your ELK stack is hosted on-prem, then it depends on the type of CA your host uses to sign its certificates, if it's a commonly trusted CA, then you shouldn't have to worry about changing your app's SSL/TLS configuration as it all should work well out of the box, however, if your CAs are unknown/private or your server uses a self-signed certificate, then you would need to configure your app to trust custom CAs by following https://developer.android.com/privacy-and-security/security-config[Android's guide on it].
+
+[float]
+[[faq-ssl-debug]]
+==== Debugging purposes
+
+If you're running a local server and need to connect to it without using https in order to run a quick test, then you could temporarily https://developer.android.com/guide/topics/manifest/application-element#usesCleartextTraffic[enable clearttext traffic] within your `AndroidManifest.xml` file, inside the `<application>` tag.
+As shown below:
+
+[source,xml]
+----
+<application
+    ...
+    android:usesCleartextTraffic="true">
+    ...
+</application>
+----
+
+NOTE: You should only enable clearttext traffic for debugging purposes and not for production code.
+
+If enabling cleartext traffic isn't a valid option for your debugging use-case, you should refer to Android's guide on https://developer.android.com/privacy-and-security/security-config#TrustingDebugCa[configuring CAs for debugging].
+
+For more information on how Android handles network security, please refer to the official https://developer.android.com/privacy-and-security/security-ssl[Android docs on it].
+
+[float]
 [[faq-unsupported-technologies]]
 === What if the agent doesn't support the technologies I'm using?
 

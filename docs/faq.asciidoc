@@ -38,7 +38,7 @@ It also respects other transformations applied to your application at the same t
 [[faq-ssl]]
 === How can I configure SSL/TLS?
 
-Please not that the Elastic Agent does not handle SSL/TLS configs internally, therefore, the recommended way to manage these types of configurations is by doing so as part of your app's network security configurations, as explained in Android's official https://developer.android.com/privacy-and-security/security-ssl[security guidelines].
+Please note that the Elastic Agent does not handle SSL/TLS configs internally, therefore, the recommended way to manage these types of configurations is by doing so as part of your app's network security configurations, as explained in Android's official https://developer.android.com/privacy-and-security/security-ssl[security guidelines].
 Below we show a set of common use-cases and quick tips on what could be done on each one, however, each case might be different, so please refer to Android's https://developer.android.com/privacy-and-security/security-config[official docs] on this topic in case you need more details.
 
 [float]

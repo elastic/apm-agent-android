@@ -32,7 +32,7 @@ ${next_release_notes}
 [float]
 ===== Features
 
-* New feature: {pull}000[#000]
+* Adding consumer R8 rules to address R8 full mode: {pull}309[#309]
 ////
 
 [[release-notes-0.16.0]]

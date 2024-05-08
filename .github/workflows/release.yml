@@ -135,6 +135,6 @@ jobs:
         with:
           ref: ${{ inputs.branch_specifier || 'main' }}
           token: ${{ env.GITHUB_TOKEN }}
-
+      - uses: ./.github/actions/setup
       - if: ${{ ! inputs.dry_run }}
         run: ./gradlew postDeploy -Prelease=true -Pversion_override=${{ inputs.version_override_specifier || '' }}

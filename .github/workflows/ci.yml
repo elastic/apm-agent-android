@@ -22,6 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
       - name: lint
         run: ./gradlew lint
       - name: Verify OSS compliance
@@ -31,6 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
       - name: Build
         run: ./gradlew assemble
       - name: Test

@@ -69,7 +69,7 @@ As shown below:
 </application>
 ----
 
-NOTE: You should only enable clearttext traffic for debugging purposes and not for production code.
+NOTE: You should only enable cleartext traffic for debugging purposes and not for production code.
 
 If enabling cleartext traffic isn't a valid option for your debugging use-case, you should refer to Android's guide on https://developer.android.com/privacy-and-security/security-config#TrustingDebugCa[configuring CAs for debugging].
 

@@ -57,7 +57,7 @@ If your Elastic Stack is hosted on-prem, then it depends on the type of CA your 
 [[faq-ssl-debug]]
 ==== Debugging purposes
 
-If you're running a local server and need to connect to it without using https in order to run a quick test, then you could temporarily https://developer.android.com/guide/topics/manifest/application-element#usesCleartextTraffic[enable clearttext traffic] within your `AndroidManifest.xml` file, inside the `<application>` tag.
+If you're running a local server and need to connect to it without using https in order to run a quick test, then you could temporarily https://developer.android.com/guide/topics/manifest/application-element#usesCleartextTraffic[enable cleartext traffic] within your `AndroidManifest.xml` file, inside the `<application>` tag.
 As shown below:
 
 [source,xml]

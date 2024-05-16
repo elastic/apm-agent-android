@@ -45,7 +45,7 @@ Below we show a set of common use-cases and quick tips on what could be done on 
 [[faq-ssl-elastic-cloud]]
 ==== Connecting to Elastic Cloud
 
-If your ELK stack is hosted in Elastic Cloud, you shouldn't need to add any SSL/TLS config changes in your app, it should work out of the box.
+If your Elastic Stack is hosted in Elastic Cloud, you shouldn't need to add any SSL/TLS config changes in your app, it should work out of the box.
 
 [float]
 [[faq-ssl-on-prem]]

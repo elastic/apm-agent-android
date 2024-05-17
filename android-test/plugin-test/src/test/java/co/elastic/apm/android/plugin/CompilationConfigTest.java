@@ -24,18 +24,18 @@ import static org.junit.Assert.assertNull;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.util.Properties;
 
 import co.elastic.apm.android.common.ApmInfo;
+import uk.org.webcompere.systemstubs.rules.EnvironmentVariablesRule;
 
 public class CompilationConfigTest extends BaseAssetsVerificationTest {
 
     @Rule
-    public EnvironmentVariables environmentVariables = new EnvironmentVariables();
+    public EnvironmentVariablesRule environmentVariables = new EnvironmentVariablesRule();
 
     @Rule
     public TemporaryFolder projectTemporaryFolder = new TemporaryFolder();

@@ -64,11 +64,12 @@ public class AarNoticeProviderPlugin extends BaseSubprojectPlugin {
                 task.getLicensedDependencies().set(licensesDependencies.flatMap(CreateDependenciesListTask::getOutputFile));
                 task.getFoundLicensesIds().set(pomLicensesFinder.flatMap(PomLicensesCollectorTask::getLicensesFound));
                 task.getDependenciesHashFile().set(dependenciesHasher.flatMap(DependenciesHasherTask::getOutputFile));
-                task.getOutputFile().set(project.getLayout().getBuildDirectory().file(task.getName() + "/" + "notice_file.txt"));
+                task.getOutputDir().set(project.getLayout().getBuildDirectory().dir(task.getName()));
             });
             if (apmExtension.variantName.get().equals(variant.getName())) {
+                component.getSources().getResources().addGeneratedSourceDirectory(createNotice, CreateNoticeTask::getOutputDir);
                 project.getTasks().register(TASK_CREATE_NOTICE_FILE_NAME, CopySingleFileTask.class, task -> {
-                    task.getInputFile().set(createNotice.flatMap(CreateNoticeTask::getOutputFile));
+                    task.getInputFile().set(createNotice.get().getOutputDir().file("META-INF/NOTICE"));
                     task.getOutputFile().set(project.getLayout().getProjectDirectory().file("src/main/resources/META-INF/NOTICE"));
                 });
                 project.getTasks().register(TASK_VERIFY_NOTICE_FILE_NAME, DependenciesVerifierTask.class, task -> {

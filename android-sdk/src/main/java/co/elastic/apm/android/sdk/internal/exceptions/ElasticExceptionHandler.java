@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.logs.ElasticEvents;
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.events.EventEmitter;
+import io.opentelemetry.api.incubator.events.EventBuilder;
 import io.opentelemetry.semconv.SemanticAttributes;
 
 public final class ElasticExceptionHandler implements Thread.UncaughtExceptionHandler {
@@ -65,12 +65,13 @@ public final class ElasticExceptionHandler implements Thread.UncaughtExceptionHa
         }
     }
 
-    private void emitCrashEvent(EventEmitter crashReporter, @NonNull Throwable e) {
-        crashReporter.emit("crash", Attributes.builder()
-                .put(SemanticAttributes.EXCEPTION_MESSAGE, e.getMessage())
-                .put(SemanticAttributes.EXCEPTION_STACKTRACE, stackTraceToString(e))
-                .put(SemanticAttributes.EXCEPTION_TYPE, e.getClass().getName())
-                .build());
+    private void emitCrashEvent(EventBuilder crashReporter, @NonNull Throwable e) {
+        crashReporter.setAttributes(Attributes.builder()
+                        .put(SemanticAttributes.EXCEPTION_MESSAGE, e.getMessage())
+                        .put(SemanticAttributes.EXCEPTION_STACKTRACE, stackTraceToString(e))
+                        .put(SemanticAttributes.EXCEPTION_TYPE, e.getClass().getName())
+                        .build())
+                .emit();
     }
 
     private String stackTraceToString(Throwable throwable) {

@@ -3,10 +3,12 @@ package co.elastic.apm.compile.tools.tasks;
 import org.apache.commons.io.FileUtils;
 import org.gradle.api.Project;
 import org.gradle.api.file.ConfigurableFileCollection;
+import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Optional;
+import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 
@@ -43,8 +45,8 @@ public abstract class CreateNoticeTask extends BaseTask {
     @Optional
     public abstract RegularFileProperty getDependenciesHashFile();
 
-    @OutputFile
-    public abstract RegularFileProperty getOutputFile();
+    @OutputDirectory
+    public abstract DirectoryProperty getOutputDir();
 
     @OutputFile
     public abstract RegularFileProperty getMetadataOutputFile();
@@ -70,7 +72,9 @@ public abstract class CreateNoticeTask extends BaseTask {
         }
 
         try {
-            OutputStream outputStream = new FileOutputStream(getOutputFile().get().getAsFile());
+            File metaInfDir = new File(getOutputDir().getAsFile().get(), "META-INF");
+            metaInfDir.mkdirs();
+            OutputStream outputStream = new FileOutputStream(new File(metaInfDir, "NOTICE"));
             addToOutputStreamAndCloseInput(outputStream, getNoticeHeaderInputStream());
             if (!filesToMerge.isEmpty()) {
                 addPanelSeparator(outputStream);

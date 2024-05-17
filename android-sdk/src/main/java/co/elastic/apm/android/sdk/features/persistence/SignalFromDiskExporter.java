@@ -24,42 +24,42 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
-import io.opentelemetry.contrib.disk.buffering.LogRecordDiskExporter;
-import io.opentelemetry.contrib.disk.buffering.MetricDiskExporter;
-import io.opentelemetry.contrib.disk.buffering.SpanDiskExporter;
+import io.opentelemetry.contrib.disk.buffering.LogRecordFromDiskExporter;
+import io.opentelemetry.contrib.disk.buffering.MetricFromDiskExporter;
+import io.opentelemetry.contrib.disk.buffering.SpanFromDiskExporter;
 
 /**
  * Entrypoint to read and export previously cached signals.
  */
-public final class SignalDiskExporter {
-    private static SignalDiskExporter instance;
-    private final SpanDiskExporter spanDiskExporter;
-    private final MetricDiskExporter metricDiskExporter;
-    private final LogRecordDiskExporter logRecordDiskExporter;
+public final class SignalFromDiskExporter {
+    private static SignalFromDiskExporter instance;
+    private final SpanFromDiskExporter spanDiskExporter;
+    private final MetricFromDiskExporter metricDiskExporter;
+    private final LogRecordFromDiskExporter logRecordDiskExporter;
     private final long exportTimeoutInMillis;
 
-    public static SignalDiskExporter get() {
-        Elog.getLogger().debug("Getting SignalDiskExporter");
+    public static SignalFromDiskExporter get() {
+        Elog.getLogger().debug("Getting SignalFromDiskExporter");
         if (instance == null) {
-            Elog.getLogger().debug("Returning noop SignalDiskExporter");
-            return new SignalDiskExporter(null, null, null, 0);
+            Elog.getLogger().debug("Returning noop SignalFromDiskExporter");
+            return new SignalFromDiskExporter(null, null, null, 0);
         }
         return instance;
     }
 
-    public static void set(SignalDiskExporter signalDiskExporter) {
-        Elog.getLogger().debug("Setting SignalDiskExporter");
+    public static void set(SignalFromDiskExporter signalFromDiskExporter) {
+        Elog.getLogger().debug("Setting SignalFromDiskExporter");
         if (instance != null) {
             throw new IllegalStateException("An instance is already set. You can only set it once.");
         }
-        instance = signalDiskExporter;
+        instance = signalFromDiskExporter;
     }
 
     public static void resetForTesting() {
         instance = null;
     }
 
-    SignalDiskExporter(SpanDiskExporter spanDiskExporter, MetricDiskExporter metricDiskExporter, LogRecordDiskExporter logRecordDiskExporter, long exportTimeoutInMillis) {
+    SignalFromDiskExporter(SpanFromDiskExporter spanDiskExporter, MetricFromDiskExporter metricDiskExporter, LogRecordFromDiskExporter logRecordDiskExporter, long exportTimeoutInMillis) {
         this.spanDiskExporter = spanDiskExporter;
         this.metricDiskExporter = metricDiskExporter;
         this.logRecordDiskExporter = logRecordDiskExporter;
@@ -110,25 +110,25 @@ public final class SignalDiskExporter {
     }
 
     public static class Builder {
-        private SpanDiskExporter spanDiskExporter;
-        private MetricDiskExporter metricDiskExporter;
-        private LogRecordDiskExporter logRecordDiskExporter;
+        private SpanFromDiskExporter spanDiskExporter;
+        private MetricFromDiskExporter metricDiskExporter;
+        private LogRecordFromDiskExporter logRecordDiskExporter;
         private long exportTimeoutInMillis = TimeUnit.SECONDS.toMillis(5);
 
         private Builder() {
         }
 
-        public Builder setSpanDiskExporter(SpanDiskExporter spanDiskExporter) {
+        public Builder setSpanFromDiskExporter(SpanFromDiskExporter spanDiskExporter) {
             this.spanDiskExporter = spanDiskExporter;
             return this;
         }
 
-        public Builder setMetricDiskExporter(MetricDiskExporter metricDiskExporter) {
+        public Builder setMetricFromDiskExporter(MetricFromDiskExporter metricDiskExporter) {
             this.metricDiskExporter = metricDiskExporter;
             return this;
         }
 
-        public Builder setLogRecordDiskExporter(LogRecordDiskExporter logRecordDiskExporter) {
+        public Builder setLogRecordFromDiskExporter(LogRecordFromDiskExporter logRecordDiskExporter) {
             this.logRecordDiskExporter = logRecordDiskExporter;
             return this;
         }
@@ -138,8 +138,8 @@ public final class SignalDiskExporter {
             return this;
         }
 
-        public SignalDiskExporter build() {
-            return new SignalDiskExporter(spanDiskExporter, metricDiskExporter, logRecordDiskExporter, exportTimeoutInMillis);
+        public SignalFromDiskExporter build() {
+            return new SignalFromDiskExporter(spanDiskExporter, metricDiskExporter, logRecordDiskExporter, exportTimeoutInMillis);
         }
     }
 }

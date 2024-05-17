@@ -25,7 +25,7 @@ import co.elastic.apm.compile.processor.generators.instrumentations.Instrumentat
 
 @AutoService(Processor.class)
 @SupportedAnnotationTypes("co.elastic.apm.compile.processor.annotations.AutoInstrumentation")
-@SupportedSourceVersion(SourceVersion.RELEASE_8)
+@SupportedSourceVersion(SourceVersion.RELEASE_11)
 public class AutoInstrumentationProcessor extends AbstractProcessor {
 
     @Override

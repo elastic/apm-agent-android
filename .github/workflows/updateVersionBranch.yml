@@ -36,6 +36,7 @@ jobs:
 
       - run: |
           CONFLICT_RESOLUTION_BRANCH="post-release/main-to-${{ env.BASE_BRANCH }}"
+          git fetch --all
           git switch ${{ env.BASE_BRANCH }}
           git checkout -b $CONFLICT_RESOLUTION_BRANCH
           git merge main --strategy-option theirs

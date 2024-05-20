@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import co.elastic.apm.android.common.internal.logging.Elog;
-import co.elastic.apm.android.sdk.features.persistence.SignalDiskExporter;
+import co.elastic.apm.android.sdk.features.persistence.SignalFromDiskExporter;
 import co.elastic.apm.android.sdk.features.persistence.scheduler.ExportScheduler;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
@@ -97,9 +97,9 @@ public final class DefaultExportScheduler implements PeriodicTask, ExportSchedul
         lastTimeRunInMillis = timeProvider.getCurrentTimeMillis();
         preferencesService.get().store(LAST_TIME_RUN_KEY, lastTimeRunInMillis);
         try {
-            SignalDiskExporter signalDiskExporter = SignalDiskExporter.get();
+            SignalFromDiskExporter signalFromDiskExporter = SignalFromDiskExporter.get();
             while (true) {
-                if (!signalDiskExporter.exportBatchOfEach()) break;
+                if (!signalFromDiskExporter.exportBatchOfEach()) break;
             }
         } catch (IOException e) {
             Elog.getLogger().error("A problem happened while exporting signals from disk", e);

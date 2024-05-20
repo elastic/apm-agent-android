@@ -28,7 +28,6 @@ import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
 import co.elastic.apm.android.sdk.instrumentation.Instrumentation;
 import co.elastic.apm.android.sdk.internal.api.filter.Filter;
 import co.elastic.apm.android.sdk.internal.configuration.impl.AllInstrumentationConfiguration;
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.common.CompletableResultCode;
@@ -62,8 +61,7 @@ public final class ElasticLogRecordProcessor implements LogRecordProcessor {
     }
 
     private void setAllAttributes(ReadWriteLogRecord logRecord, Attributes attributes) {
-        attributes.forEach((attributeKey, value) ->
-                logRecord.setAttribute((AttributeKey<Object>) attributeKey, value));
+        logRecord.setAllAttributes(attributes);
     }
 
     @Override

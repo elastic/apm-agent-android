@@ -35,6 +35,14 @@ ${next_release_notes}
 * New feature: {pull}000[#000]
 ////
 
+[[release-notes-0.17.0]]
+==== 0.17.0 - 2024/05/17
+
+[float]
+===== Features
+
+* Adding consumer R8 rules to address R8 full mode: {pull}309[#309]
+
 [[release-notes-0.16.0]]
 ==== 0.16.0 - 2024/04/03
 

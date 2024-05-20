@@ -18,22 +18,25 @@
  */
 package co.elastic.apm.android.sdk.logs;
 
-import io.opentelemetry.api.events.EventEmitter;
-import io.opentelemetry.api.events.EventEmitterBuilder;
-import io.opentelemetry.api.events.GlobalEventEmitterProvider;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.incubator.events.EventBuilder;
+import io.opentelemetry.api.incubator.events.GlobalEventLoggerProvider;
 
 public final class ElasticEvents {
+    private static final AttributeKey<String> EVENT_DOMAIN = AttributeKey.stringKey("event.domain");
 
-    public static EventEmitter crashReporter() {
-        return builder("CrashReport").build();
+    public static EventBuilder crashReporter() {
+        return builder("CrashReport", "crash");
     }
 
-    public static EventEmitter lifecycleReporter() {
-        return builder("ApplicationLifecycle").build();
+    public static EventBuilder lifecycleReporter() {
+        return builder("ApplicationLifecycle", "lifecycle");
     }
 
-    public static EventEmitterBuilder builder(String instrumentationScopeName) {
-        return GlobalEventEmitterProvider.get().eventEmitterBuilder(instrumentationScopeName)
-                .setEventDomain("device");
+    public static EventBuilder builder(String instrumentationScopeName, String eventName) {
+        return GlobalEventLoggerProvider.get().eventLoggerBuilder(instrumentationScopeName)
+                .build().builder(eventName)
+                .setAttributes(Attributes.of(EVENT_DOMAIN, "device"));
     }
 }

@@ -1,0 +1,27 @@
+---
+
+name: common build tasks
+description: Install specific JDK
+
+inputs:
+  java-version:
+    description: 'Testing Java version'
+    required: true
+    default: '17'
+  java-distribution:
+    description: 'Testing Java distribution'
+    required: true
+    default: 'temurin'
+  shell:
+    description: 'Default shell'
+    default: 'bash'
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up testing JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ inputs.java-version }}
+        distribution: ${{ inputs.java-distribution }}

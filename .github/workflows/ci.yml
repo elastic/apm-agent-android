@@ -22,6 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
       - name: lint
         run: ./gradlew lint
       - name: Verify OSS compliance
@@ -31,6 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
       - name: Build
         run: ./gradlew assemble
       - name: Test
@@ -62,6 +64,12 @@ jobs:
   test-release:
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
+    permissions:
+      attestations: write
+      contents: write
+      id-token: write
+    env:
+      TARBALL_FILE: dist.tar
     steps:
       - id: buildkite
         name: Run Release dry-run
@@ -71,9 +79,30 @@ jobs:
           vaultRoleId: ${{ secrets.VAULT_ROLE_ID }}
           vaultSecretId: ${{ secrets.VAULT_SECRET_ID }}
           pipeline: apm-agent-android-release
+          pipelineBranch: ${{ github.ref_name }}
           waitFor: true
           printBuildLogs: false
+          artifactName: signed-artifacts
+          artifactPath: ${{ env.TARBALL_FILE }}
           buildEnvVars: |
-            branch_specifier=main
+            branch_specifier=${{ github.ref_name }}
             target_specifier=all
             dry_run=true
+            TARBALL_FILE=${{ env.TARBALL_FILE }}
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: signed-artifacts
+
+      - name: untar the buildkite tarball
+        run: tar xvf ${{ env.TARBALL_FILE }}
+
+      - name: generate build provenance (jar files)
+        uses: actions/attest-build-provenance@951c0c5f8e375ad4efad33405ab77f7ded2358e4  # v1.1.1
+        with:
+          subject-path: "${{ github.workspace }}/**/build/libs/*.jar"
+
+      - name: generate build provenance (aar files)
+        uses: actions/attest-build-provenance@951c0c5f8e375ad4efad33405ab77f7ded2358e4  # v1.1.1
+        with:
+          subject-path: "${{ github.workspace }}/**/build/outputs/aar/*.aar"

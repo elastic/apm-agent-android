@@ -24,7 +24,7 @@ import co.elastic.apm.android.common.internal.logging.Elog;
 import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.instrumentation.Instrumentations;
 import co.elastic.apm.android.sdk.metrics.ElasticMeters;
-import io.opentelemetry.android.instrumentation.ApplicationStateListener;
+import io.opentelemetry.android.instrumentation.common.ApplicationStateListener;
 import io.opentelemetry.api.metrics.BatchCallback;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.metrics.ObservableDoubleMeasurement;

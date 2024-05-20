@@ -28,6 +28,8 @@ jobs:
           email: ${{ env.GIT_EMAIL }}
           token: ${{ env.GITHUB_TOKEN }}
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions-ecosystem/action-regex-match@v2
         id: major-version
         with:

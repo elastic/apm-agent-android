@@ -28,6 +28,8 @@ jobs:
           email: ${{ env.GIT_EMAIL }}
           token: ${{ env.GITHUB_TOKEN }}
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions-ecosystem/action-regex-match@v2
         id: major-version
         with:
@@ -36,7 +38,6 @@ jobs:
 
       - run: |
           CONFLICT_RESOLUTION_BRANCH="post-release/main-to-${{ env.BASE_BRANCH }}"
-          git fetch --all
           git switch ${{ env.BASE_BRANCH }}
           git checkout -b $CONFLICT_RESOLUTION_BRANCH
           git merge main --strategy-option theirs

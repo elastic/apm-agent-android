@@ -30,9 +30,9 @@ ${next_release_notes}
 ==== ${version} - ${release_date}
 
 [float]
-===== Features
+===== Bug fixes
 
-* New feature: {pull}000[#000]
+* HTTP exporting fix: {pull}319[#319]
 ////
 
 [[release-notes-0.17.0]]

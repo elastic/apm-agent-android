@@ -9,7 +9,7 @@ on:
       - closed
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   if_merged_postDeploy:

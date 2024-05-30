@@ -30,10 +30,18 @@ ${next_release_notes}
 ==== ${version} - ${release_date}
 
 [float]
+===== Features
+
+* New feature: {pull}000[#000]
+////
+
+[[release-notes-0.19.0]]
+==== 0.19.0 - 2024/05/30
+
+[float]
 ===== Bug fixes
 
 * Bytecode instrumentation issue in #323: {pull}324[#324]
-////
 
 [[release-notes-0.18.0]]
 ==== 0.18.0 - 2024/05/24

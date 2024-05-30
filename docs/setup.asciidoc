@@ -40,14 +40,14 @@ You can skip this step if your `minSdkVersion` is 26 or higher.
 [[adding-gradle-plugin]]
 ==== Add the Elastic Agent Gradle plugin
 
-To automatically instrument <<supported-technologies,Supported Technologies>>, add the https://plugins.gradle.org/plugin/co.elastic.apm.android/0.17.0[Elastic APM agent plugin] to your application's `build.gradle` file as shown below:
+To automatically instrument <<supported-technologies,Supported Technologies>>, add the https://plugins.gradle.org/plugin/co.elastic.apm.android/0.19.0[Elastic APM agent plugin] to your application's `build.gradle` file as shown below:
 
 [source,groovy]
 ----
 // Android app's build.gradle file
 plugins {
     id "com.android.application"
-    id "co.elastic.apm.android" version "0.17.0"
+    id "co.elastic.apm.android" version "0.19.0"
 }
 ----
 
@@ -122,7 +122,7 @@ Add the Elastic APM agent SDK to your application's `build.gradle` file as shown
 ----
 // Android app's build.gradle file
 dependencies {
-    implementation "co.elastic.apm:android-sdk:0.17.0"
+    implementation "co.elastic.apm:android-sdk:0.19.0"
 }
 ----
 

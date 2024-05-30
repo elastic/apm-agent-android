@@ -30,9 +30,9 @@ ${next_release_notes}
 ==== ${version} - ${release_date}
 
 [float]
-===== Features
+===== Bug fixes
 
-* New feature: {pull}000[#000]
+* Bytecode instrumentation issue in #323: {pull}324[#324]
 ////
 
 [[release-notes-0.18.0]]

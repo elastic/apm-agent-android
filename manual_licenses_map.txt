@@ -1,5 +1,5 @@
-net.bytebuddy:byte-buddy:1.14.11|apache_v2
-net.bytebuddy:byte-buddy-gradle-plugin:1.14.11|apache_v2
+net.bytebuddy:byte-buddy:1.14.17|apache_v2
+net.bytebuddy:byte-buddy-gradle-plugin:1.14.17|apache_v2
 org.slf4j:slf4j-api:2.0.0|mit
 com.squareup.okhttp3:okhttp:3.11.0|apache_v2
 com.github.instacart.truetime-android:library:3.5|apache_v2

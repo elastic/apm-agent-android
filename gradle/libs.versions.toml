@@ -5,7 +5,7 @@ opentelemetry-alpha = "1.37.0-alpha"
 opentelemetry-semconv = "1.25.0-alpha"
 opentelemetry-contrib = "1.35.0-alpha"
 mockito = "4.11.0"
-byteBuddy = "1.14.11"
+byteBuddy = "1.14.17"
 okhttp = "4.12.0"
 kotlin = "1.9.22"
 google-autoService = "1.1.1"
@@ -38,6 +38,8 @@ kotlin-coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockito" }
 junit = "junit:junit:4.13.2"
+mockwebserver = "com.squareup.okhttp3:mockwebserver:4.12.0"
+opentelemetry-testing = { module = "io.opentelemetry:opentelemetry-sdk-testing", version.ref = "opentelemetry" }
 
 #Compilation tools
 apache-commons-text = "org.apache.commons:commons-text:1.10.0"

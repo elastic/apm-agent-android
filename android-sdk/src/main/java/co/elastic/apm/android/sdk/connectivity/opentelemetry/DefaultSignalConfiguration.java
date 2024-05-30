@@ -47,7 +47,11 @@ public final class DefaultSignalConfiguration extends DefaultSignalProcessorConf
     private final Provider<ConnectivityConfiguration> connectivity;
 
     public DefaultSignalConfiguration() {
-        connectivity = LazyProvider.of(() -> Configurations.get(ConnectivityConfiguration.class));
+        this(LazyProvider.of(() -> Configurations.get(ConnectivityConfiguration.class)));
+    }
+
+    DefaultSignalConfiguration(Provider<ConnectivityConfiguration> connectivity) {
+        this.connectivity = connectivity;
     }
 
     @Override
@@ -117,7 +121,7 @@ public final class DefaultSignalConfiguration extends DefaultSignalProcessorConf
 
     @NonNull
     private OtlpHttpSpanExporter getOtlpHttpSpanExporter() {
-        OtlpHttpSpanExporterBuilder exporterBuilder = OtlpHttpSpanExporter.builder().setEndpoint(getConnectivity().getEndpoint());
+        OtlpHttpSpanExporterBuilder exporterBuilder = OtlpHttpSpanExporter.builder().setEndpoint(getHttpEndpoint("traces"));
         if (getConnectivity().getAuthConfiguration() != null) {
             exporterBuilder.addHeader(AUTHORIZATION_HEADER_NAME, getAuthorizationHeaderValue());
         }
@@ -126,7 +130,7 @@ public final class DefaultSignalConfiguration extends DefaultSignalProcessorConf
 
     @NonNull
     private OtlpHttpLogRecordExporter getOtlpHttpLogRecordExporter() {
-        OtlpHttpLogRecordExporterBuilder exporterBuilder = OtlpHttpLogRecordExporter.builder().setEndpoint(getConnectivity().getEndpoint());
+        OtlpHttpLogRecordExporterBuilder exporterBuilder = OtlpHttpLogRecordExporter.builder().setEndpoint(getHttpEndpoint("logs"));
         if (getConnectivity().getAuthConfiguration() != null) {
             exporterBuilder.addHeader(AUTHORIZATION_HEADER_NAME, getAuthorizationHeaderValue());
         }
@@ -137,7 +141,7 @@ public final class DefaultSignalConfiguration extends DefaultSignalProcessorConf
     private OtlpHttpMetricExporter getOtlpHttpMetricExporter() {
         OtlpHttpMetricExporterBuilder exporterBuilder = OtlpHttpMetricExporter.builder()
                 .setAggregationTemporalitySelector(AggregationTemporalitySelector.deltaPreferred())
-                .setEndpoint(getConnectivity().getEndpoint());
+                .setEndpoint(getHttpEndpoint("metrics"));
         if (getConnectivity().getAuthConfiguration() != null) {
             exporterBuilder.addHeader(AUTHORIZATION_HEADER_NAME, getAuthorizationHeaderValue());
         }
@@ -151,5 +155,9 @@ public final class DefaultSignalConfiguration extends DefaultSignalProcessorConf
     @NonNull
     private String getAuthorizationHeaderValue() {
         return getConnectivity().getAuthConfiguration().asAuthorizationHeaderValue();
+    }
+
+    private String getHttpEndpoint(String signalId) {
+        return String.format("%s/v1/%s", getConnectivity().getEndpoint(), signalId);
     }
 }

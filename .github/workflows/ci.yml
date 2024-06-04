@@ -63,15 +63,7 @@ jobs:
 
   test-release:
     runs-on: ubuntu-latest
-    # If no PR event or if a PR event that's caused by a non-fork and non dependabot actor
-    if: |
-      ( github.event_name != 'pull_request'
-        ||
-        ( github.event_name == 'pull_request' &&
-          github.event.pull_request.head.repo.fork == false &&
-          github.actor != 'dependabot[bot]'
-        )
-      )
+    if: github.event_name != 'pull_request'
     permissions:
       attestations: write
       contents: write

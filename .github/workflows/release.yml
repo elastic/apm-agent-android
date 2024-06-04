@@ -95,22 +95,18 @@ jobs:
           subject-path: "${{ github.workspace }}/**/build/outputs/aar/*.aar"
 
       - if: ${{ success() }}
-        uses: elastic/apm-pipeline-library/.github/actions/slack-message@current
+        uses: elastic/oblt-actions/slack/send@v1.5.0
         with:
-          url: ${{ secrets.VAULT_ADDR }}
-          roleId: ${{ secrets.VAULT_ROLE_ID }}
-          secretId: ${{ secrets.VAULT_SECRET_ID }}
-          channel: "#apm-agent-mobile"
+          bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
+          channel-id: "#apm-agent-mobile"
           message: |
             :tada: :rocket: [${{ github.repository }}] Release *${{ github.ref_name }}* has been successful in Buildkite: (<${{ steps.buildkite.outputs.build }}|build>)
 
       - if: ${{ failure() }}
-        uses: elastic/apm-pipeline-library/.github/actions/slack-message@current
+        uses: elastic/oblt-actions/slack/send@v1.5.0
         with:
-          url: ${{ secrets.VAULT_ADDR }}
-          roleId: ${{ secrets.VAULT_ROLE_ID }}
-          secretId: ${{ secrets.VAULT_SECRET_ID }}
-          channel: "#apm-agent-mobile"
+          bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
+          channel-id: "#apm-agent-mobile"
           message: |
             :ghost: [${{ github.repository }}] Release *${{ github.ref_name }}* didn't get triggered in Buildkite.
             Build: (<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|here>)

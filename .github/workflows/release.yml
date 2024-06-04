@@ -57,29 +57,27 @@ jobs:
             :runner: [${{ github.repository }}] Release *${{ github.ref_name }}* has been triggered with the following params:
             ```${{ toJSON(github.event.inputs) }}```
 
-      - id: buildkite
+      - id: buildkite-run
         name: Run Release
-        uses: elastic/apm-pipeline-library/.github/actions/buildkite@current
+        uses: elastic/oblt-actions/buildkite/run@v1.5.0
         with:
-          vaultUrl: ${{ secrets.VAULT_ADDR }}
-          vaultRoleId: ${{ secrets.VAULT_ROLE_ID }}
-          vaultSecretId: ${{ secrets.VAULT_SECRET_ID }}
-          pipeline: apm-agent-android-release
-          pipelineBranch: ${{ github.ref_name }}
-          waitFor: true
-          printBuildLogs: false
-          artifactName: signed-artifacts
-          artifactPath: ${{ env.TARBALL_FILE }}
-          buildEnvVars: |
+          branch: ${{ github.ref_name }}
+          pipeline: "apm-agent-android-release"
+          token: ${{ secrets.BUILDKITE_TOKEN }}
+          wait-for: true
+          env-vars: |
             branch_specifier=${{ inputs.branch_specifier || 'main' }}
             target_specifier=${{ inputs.target_specifier || 'all' }}
             version_override_specifier=${{ inputs.version_override_specifier || '' }}
             dry_run=${{ inputs.dry_run || 'false' }}
             TARBALL_FILE=${{ env.TARBALL_FILE }}
 
-      - uses: actions/download-artifact@v3
+      - uses: elastic/oblt-actions/buildkite/download-artifact@v1.5.0
         with:
-          name: signed-artifacts
+          build-number: ${{ steps.buildkite-run.outputs.number }}
+          path: ${{ env.TARBALL_FILE }}
+          pipeline: ${{ steps.buildkite-run.outputs.pipeline }}
+          token: ${{ secrets.BUILDKITE_TOKEN }}
 
       - name: untar the buildkite tarball
         run: tar xvf ${{ env.TARBALL_FILE }}
@@ -102,7 +100,7 @@ jobs:
           secretId: ${{ secrets.VAULT_SECRET_ID }}
           channel: "#apm-agent-mobile"
           message: |
-            :tada: :rocket: [${{ github.repository }}] Release *${{ github.ref_name }}* has been successful in Buildkite: (<${{ steps.buildkite.outputs.build }}|build>)
+            :tada: :rocket: [${{ github.repository }}] Release *${{ github.ref_name }}* has been successful in Buildkite: (<${{ steps.buildkite-run.outputs.build }}|build>)
 
       - if: ${{ failure() }}
         uses: elastic/apm-pipeline-library/.github/actions/slack-message@current

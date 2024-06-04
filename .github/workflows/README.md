@@ -5,10 +5,6 @@ There are 2 main stages that run on GitHub actions for every push or Pull Reques
 * Linting
 * Test
 
-There are some other stages that run for every push on the main branches:
-
-* [Snapshoty](./snapshoty.yml)
-
 ## Scenarios
 
 * Tests should be triggered on branch, tag and PR basis.
@@ -35,6 +31,5 @@ for further details please go to [the buildkite folder](../../.buildkite/README.
 
 ## OpenTelemetry
 
-There is a [GitHub workflow](./opentelemetry.yml) in charge to populate what the workflow run in terms of jobs and steps. Those details can be seen in
+Every workflow and its logs are exported to OpenTelemetry traces/logs/metrics. Those details can be seen in
 [here](https://ela.st/oblt-ci-cd-stats) (**NOTE**: only available for Elasticians).
-

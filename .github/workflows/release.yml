@@ -59,7 +59,7 @@ jobs:
 
       - id: buildkite-run
         name: Run Release
-        uses: elastic/oblt-actions/buildkite/run@v1.5.0
+        uses: elastic/oblt-actions/buildkite/run@v1.9.1
         with:
           branch: ${{ github.ref_name }}
           pipeline: "apm-agent-android-release"
@@ -72,7 +72,7 @@ jobs:
             dry_run=${{ inputs.dry_run || 'false' }}
             TARBALL_FILE=${{ env.TARBALL_FILE }}
 
-      - uses: elastic/oblt-actions/buildkite/download-artifact@v1.5.0
+      - uses: elastic/oblt-actions/buildkite/download-artifact@v1.9.1
         with:
           build-number: ${{ steps.buildkite-run.outputs.number }}
           path: ${{ env.TARBALL_FILE }}
@@ -83,17 +83,17 @@ jobs:
         run: tar xvf ${{ env.TARBALL_FILE }}
 
       - name: generate build provenance (jar files)
-        uses: actions/attest-build-provenance@173725a1209d09b31f9d30a3890cf2757ebbff0d  # v1.1.2
+        uses: actions/attest-build-provenance@49df96e17e918a15956db358890b08e61c704919  # v1.2.0
         with:
           subject-path: "${{ github.workspace }}/**/build/libs/*.jar"
 
       - name: generate build provenance (aar files)
-        uses: actions/attest-build-provenance@173725a1209d09b31f9d30a3890cf2757ebbff0d  # v1.1.2
+        uses: actions/attest-build-provenance@49df96e17e918a15956db358890b08e61c704919  # v1.2.0
         with:
           subject-path: "${{ github.workspace }}/**/build/outputs/aar/*.aar"
 
       - if: ${{ success() }}
-        uses: elastic/oblt-actions/slack/send@v1.5.0
+        uses: elastic/oblt-actions/slack/send@v1.9.1
         with:
           bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
           channel-id: "#apm-agent-mobile"
@@ -101,7 +101,7 @@ jobs:
             :tada: :rocket: [${{ github.repository }}] Release *${{ github.ref_name }}* has been successful in Buildkite: (<${{ steps.buildkite-run.outputs.build }}|build>)
 
       - if: ${{ failure() }}
-        uses: elastic/oblt-actions/slack/send@v1.5.0
+        uses: elastic/oblt-actions/slack/send@v1.9.1
         with:
           bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
           channel-id: "#apm-agent-mobile"

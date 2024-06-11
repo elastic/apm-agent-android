@@ -47,19 +47,17 @@ jobs:
     steps:
       - id: notification
         name: Notify that a release will start
-        uses: elastic/apm-pipeline-library/.github/actions/slack-message@current
+        uses: elastic/oblt-actions/slack/send@v1
         with:
-          url: ${{ secrets.VAULT_ADDR }}
-          roleId: ${{ secrets.VAULT_ROLE_ID }}
-          secretId: ${{ secrets.VAULT_SECRET_ID }}
-          channel: "#apm-agent-mobile"
+          bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
+          channel-id: "#apm-agent-mobile"
           message: |
             :runner: [${{ github.repository }}] Release *${{ github.ref_name }}* has been triggered with the following params:
             ```${{ toJSON(github.event.inputs) }}```
 
       - id: buildkite-run
         name: Run Release
-        uses: elastic/oblt-actions/buildkite/run@v1.5.0
+        uses: elastic/oblt-actions/buildkite/run@v1
         with:
           branch: ${{ github.ref_name }}
           pipeline: "apm-agent-android-release"
@@ -72,7 +70,7 @@ jobs:
             dry_run=${{ inputs.dry_run || 'false' }}
             TARBALL_FILE=${{ env.TARBALL_FILE }}
 
-      - uses: elastic/oblt-actions/buildkite/download-artifact@v1.5.0
+      - uses: elastic/oblt-actions/buildkite/download-artifact@v1
         with:
           build-number: ${{ steps.buildkite-run.outputs.number }}
           path: ${{ env.TARBALL_FILE }}
@@ -93,7 +91,7 @@ jobs:
           subject-path: "${{ github.workspace }}/**/build/outputs/aar/*.aar"
 
       - if: ${{ success() }}
-        uses: elastic/oblt-actions/slack/send@v1.5.0
+        uses: elastic/oblt-actions/slack/send@v1
         with:
           bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
           channel-id: "#apm-agent-mobile"
@@ -101,7 +99,7 @@ jobs:
             :tada: :rocket: [${{ github.repository }}] Release *${{ github.ref_name }}* has been successful in Buildkite: (<${{ steps.buildkite-run.outputs.build }}|build>)
 
       - if: ${{ failure() }}
-        uses: elastic/oblt-actions/slack/send@v1.5.0
+        uses: elastic/oblt-actions/slack/send@v1
         with:
           bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
           channel-id: "#apm-agent-mobile"
@@ -114,21 +112,14 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
     steps:
-      - uses: elastic/apm-pipeline-library/.github/actions/github-token@current
-        with:
-          url: ${{ secrets.VAULT_ADDR }}
-          roleId: ${{ secrets.VAULT_ROLE_ID }}
-          secretId: ${{ secrets.VAULT_SECRET_ID }}
-      - uses: elastic/apm-pipeline-library/.github/actions/setup-git@current
-        with:
-          username: ${{ env.GIT_USER }}
-          email: ${{ env.GIT_EMAIL }}
-          token: ${{ env.GITHUB_TOKEN }}
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.branch_specifier || 'main' }}
           token: ${{ env.GITHUB_TOKEN }}
+      - uses: elastic/oblt-actions/git/setup@v1
       - uses: ./.github/actions/setup
       - if: ${{ ! inputs.dry_run }}
         run: ./gradlew postDeploy -Prelease=true -Pversion_override=${{ inputs.version_override_specifier || '' }}

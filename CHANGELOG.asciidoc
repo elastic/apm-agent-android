@@ -32,7 +32,11 @@ ${next_release_notes}
 [float]
 ===== Features
 
-* New feature: {pull}000[#000]
+* Bumping upstream libs: {pull}340[#340]
+
+===== Bug fixes
+
+* Addressing TrueTime issue #339: {pull}340[#340]
 ////
 
 [[release-notes-0.19.0]]

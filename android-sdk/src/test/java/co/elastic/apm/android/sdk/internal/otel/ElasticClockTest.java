@@ -20,6 +20,7 @@ package co.elastic.apm.android.sdk.internal.otel;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 import org.junit.Before;
@@ -31,9 +32,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import co.elastic.apm.android.sdk.internal.opentelemetry.tools.ElasticClock;
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
 import co.elastic.apm.android.sdk.internal.time.ntp.TrueTimeWrapper;
-import co.elastic.apm.android.sdk.internal.opentelemetry.tools.ElasticClock;
 import co.elastic.apm.android.sdk.testutils.BaseTest;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -61,11 +62,22 @@ public class ElasticClockTest extends BaseTest {
     }
 
     @Test
-    public void whenProvidingNow_withNoTrueTimeAvailable_returnSystemCurrentTimeInNanos() {
+    public void whenProvidingNow_withTrueTimeNotInitialized_returnSystemCurrentTimeInNanos() {
         long systemTimeMillis = 12345;
         long systemTimeNanos = TimeUnit.MILLISECONDS.toNanos(systemTimeMillis);
         doReturn(systemTimeMillis).when(systemTimeProvider).getCurrentTimeMillis();
         doReturn(false).when(trueTimeWrapper).isInitialized();
+
+        assertEquals(systemTimeNanos, elasticClock.now());
+    }
+
+    @Test
+    public void whenProvidingNow_withNoTrueTimeAvailable_returnSystemCurrentTimeInNanos() {
+        long systemTimeMillis = 12345;
+        long systemTimeNanos = TimeUnit.MILLISECONDS.toNanos(systemTimeMillis);
+        doReturn(systemTimeMillis).when(systemTimeProvider).getCurrentTimeMillis();
+        doReturn(true).when(trueTimeWrapper).isInitialized();
+        doThrow(IllegalStateException.class).when(trueTimeWrapper).now();
 
         assertEquals(systemTimeNanos, elasticClock.now());
     }

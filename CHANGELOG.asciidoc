@@ -32,12 +32,20 @@ ${next_release_notes}
 [float]
 ===== Features
 
+* New feature: {pull}000[#000]
+////
+
+[[release-notes-0.20.0]]
+==== 0.20.0 - 2024/07/29
+
+[float]
+===== Features
+
 * Bumping upstream libs: {pull}340[#340]
 
 ===== Bug fixes
 
 * Addressing TrueTime issue #339: {pull}340[#340]
-////
 
 [[release-notes-0.19.0]]
 ==== 0.19.0 - 2024/05/30

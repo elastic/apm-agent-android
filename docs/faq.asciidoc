@@ -1,6 +1,8 @@
 [[faq]]
 == Frequently asked questions
 
+preview::[]
+
 [float]
 [[faq-how-does-it-work]]
 === How does the agent work?

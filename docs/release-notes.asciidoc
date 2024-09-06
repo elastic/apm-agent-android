@@ -4,6 +4,8 @@
 [[release-notes]]
 == Release notes
 
+preview::[]
+
 // new major versions go here
 * <<release-notes-0.x>>
 

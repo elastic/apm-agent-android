@@ -1,6 +1,8 @@
 [[manual-instrumentation]]
 == Manual Instrumentation
 
+preview::[]
+
 The Elastic APM Android Agent automatically instruments <<supported-technologies>>, creating spans for interesting events for each case, and some of those automated spans can be <<configuration,configured>> to better suit different app's needs.
 However, if you need to create your own, custom spans, metrics and logs, you can do so by accessing the https://opentelemetry.io/docs/instrumentation/java/manual/[OpenTelemetry Java SDK APIs] that this agent is built on top.
 

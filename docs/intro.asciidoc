@@ -1,6 +1,8 @@
 [[intro]]
 == Introduction
 
+preview::[]
+
 The Elastic APM Android Agent automatically measures the performance of your application and tracks errors.
 It has a default configuration that suits most common use cases and built-in support for popular frameworks and technologies.
 The agent is built on top of https://opentelemetry.io/[OpenTelemetry], enabling you to add custom instrumentation with the

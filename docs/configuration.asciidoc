@@ -1,6 +1,8 @@
 [[configuration]]
 == Configuration
 
+preview::[]
+
 [float]
 === Gradle configuration
 

@@ -1,6 +1,8 @@
 [[setup]]
 == Set up the Agent
 
+preview::[]
+
 Follow these steps to start reporting your Android application's performance to Elastic APM:
 
 1. <<gradle-setup>>.

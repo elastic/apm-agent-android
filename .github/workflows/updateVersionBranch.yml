@@ -9,21 +9,36 @@ on:
       - closed
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   if_merged_postDeploy:
     if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'post-release/')
     runs-on: ubuntu-latest
     name: Create PR to update version branch
-    env:
-      GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
     steps:
+      - name: Get token
+        id: get_token
+        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
+        with:
+          app_id: ${{ secrets.OBS_AUTOMATION_APP_ID }}
+          private_key: ${{ secrets.OBS_AUTOMATION_APP_PEM }}
+          permissions: >-
+            {
+              "contents": "write",
+              "pull_requests": "write"
+            }
+          repositories: >-
+            ["${{github.repository}}"]
+
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ steps.get_token.outputs.token }}
 
       - uses: elastic/oblt-actions/git/setup@v1
+        with:
+          github-token: ${{ steps.get_token.outputs.token }}
 
       - uses: actions-ecosystem/action-regex-match@v2
         id: major-version
@@ -39,5 +54,5 @@ jobs:
           git push -u origin $CONFLICT_RESOLUTION_BRANCH
           gh pr create --base ${{ env.BASE_BRANCH }} --title 'Merge main into version branch' --body 'Created by Github action :robot:' --reviewer elastic/apm-agent-android
         env:
-          GH_TOKEN: ${{ env.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.get_token.outputs.token }}
           BASE_BRANCH: "${{ steps.major-version.outputs.group1 }}.x"

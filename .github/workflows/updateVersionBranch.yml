@@ -29,7 +29,7 @@ jobs:
               "pull_requests": "write"
             }
           repositories: >-
-            ["${{github.repository}}"]
+            ["apm-agent-android"]
 
       - uses: actions/checkout@v4
         with:

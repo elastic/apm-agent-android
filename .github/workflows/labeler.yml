@@ -4,8 +4,6 @@ on:
     types: [opened]
   pull_request_target:
     types: [opened]
-env:
-  MY_GITHUB_TOKEN: ${{ secrets.APM_TECH_USER_TOKEN }}
 permissions:
   contents: read
   issues: write
@@ -15,6 +13,19 @@ jobs:
   triage:
     runs-on: ubuntu-latest
     steps:
+    - name: Get token
+      id: get_token
+      uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
+      with:
+        app_id: ${{ secrets.OBS_AUTOMATION_APP_ID }}
+        private_key: ${{ secrets.OBS_AUTOMATION_APP_PEM }}
+        permissions: >-
+          {
+            "members": "read",
+            "organization_projects": "write",
+            "issues": "read"
+          }
+
     - name: Add agent-android and agent-mobile labels
       uses: AlexanderWert/issue-labeler@v2.3
       with:
@@ -31,12 +42,12 @@ jobs:
           apmmachine
           dependabot
           dependabot[bot]
-        GITHUB_TOKEN: ${{ secrets.APM_TECH_USER_TOKEN }}
+        GITHUB_TOKEN: ${{ steps.get_token.outputs.token }}
     - name: Show team membership
       run: |
         echo "::debug::isTeamMember: ${{ steps.checkUserMember.outputs.isTeamMember }}"
         echo "::debug::isExcluded: ${{ steps.checkUserMember.outputs.isExcluded }}"
-    - name: Add community and triage lables
+    - name: Add community and triage labels
       if: steps.checkUserMember.outputs.isTeamMember != 'true' && steps.checkUserMember.outputs.isExcluded != 'true'
       uses: AlexanderWert/issue-labeler@v2.3
       with:
@@ -50,3 +61,5 @@ jobs:
         project: 'https://github.com/orgs/elastic/projects/454'
         project_id: '5882982'
         column_name: 'In Progress'
+      env:
+        MY_GITHUB_TOKEN: ${{ steps.get_token.outputs.token }}

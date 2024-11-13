@@ -51,9 +51,7 @@ elasticApm {
 }
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.5.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation libs.espresso.idlingResource
     implementation project(':android-test-common')
     implementation "androidx.fragment:fragment-testing:1.6.1"
@@ -62,9 +60,6 @@ dependencies {
     testImplementation 'org.robolectric:robolectric:4.12.1'
     testImplementation libs.mockito
     testImplementation libs.mockWebServer
-    androidTestImplementation "androidx.test:core:1.5.0"
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test:runner:1.5.2'
     androidTestImplementation libs.espresso.core
     androidTestImplementation libs.espresso.contrib
     androidTestImplementation libs.mockWebServer

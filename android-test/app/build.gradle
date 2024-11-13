@@ -10,6 +10,9 @@ android {
     testOptions {
         unitTests {
             includeAndroidResources = true
+            all {
+                systemProperty "agentVersion", agentVersion
+            }
         }
         animationsDisabled = true
     }
@@ -57,6 +60,7 @@ dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
     testImplementation "io.opentelemetry:opentelemetry-exporter-otlp:1.28.0"
     testImplementation 'org.robolectric:robolectric:4.12.1'
+    testImplementation libs.mockito
     testImplementation libs.mockWebServer
     androidTestImplementation "androidx.test:core:1.5.0"
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

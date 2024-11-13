@@ -1,5 +1,12 @@
+Properties agentProperties = new Properties()
+File propertiesFile = new File(rootDir, '../gradle.properties')
+propertiesFile.withInputStream {
+    agentProperties.load(it)
+}
+
 ext {
     jvmCompatibility = JavaVersion.VERSION_17
     androidCompileSdk = 34
     androidMinSdk = 26
+    agentVersion = agentProperties["version"]
 }

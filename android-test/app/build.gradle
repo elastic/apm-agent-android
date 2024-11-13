@@ -1,18 +1,8 @@
-buildscript {
-    repositories {
-        mavenLocal()
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath "com.android.tools.build:gradle:$agp_version"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0"
-        classpath "co.elastic.apm:android-plugin:$agent_version"
-    }
+plugins {
+    alias(rootLibs.plugins.androidApp)
+    alias(rootLibs.plugins.kotlin.android)
+    id 'co.elastic.apm.android'
 }
-apply plugin: 'com.android.application'
-apply plugin: 'org.jetbrains.kotlin.android'
-apply plugin: 'co.elastic.apm.android'
 
 android {
     namespace = "co.elastic.apm.android.test"
@@ -20,9 +10,6 @@ android {
     testOptions {
         unitTests {
             includeAndroidResources = true
-            all {
-                systemProperty "agentVersion", agent_version
-            }
         }
         animationsDisabled = true
     }

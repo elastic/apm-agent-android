@@ -9,6 +9,7 @@ byteBuddy = "1.14.18"
 okhttp = "4.12.0"
 kotlin = "1.9.23"
 google-autoService = "1.1.1"
+android = "8.2.0"
 
 [libraries]
 opentelemetry-sdk = { module = "io.opentelemetry:opentelemetry-sdk", version.ref = "opentelemetry" }
@@ -58,5 +59,7 @@ byteBuddy-plugin = { module = "net.bytebuddy:byte-buddy-gradle-plugin", version.
 mocking = ["mockito-core", "mockito-inline"]
 
 [plugins]
+androidApp = { id = "com.android.application", version.ref = "android" }
+androidLib = { id = "com.android.library", version.ref = "android" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

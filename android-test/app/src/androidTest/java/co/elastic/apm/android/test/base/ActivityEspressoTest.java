@@ -5,11 +5,9 @@ import android.app.Activity;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.espresso.IdlingRegistry;
 import androidx.test.espresso.IdlingResource;
-import androidx.test.ext.junit.rules.ActivityScenarioRule;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 
 import co.elastic.apm.android.test.activities.espresso.IdlingResourceProvider;
 

@@ -51,13 +51,13 @@ elasticApm {
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.5.1'
-    implementation libs.espresso.idlingResource
     implementation project(':android-test-common')
-    implementation "androidx.fragment:fragment-testing:1.6.1"
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
-    testImplementation "io.opentelemetry:opentelemetry-exporter-otlp:1.28.0"
-    testImplementation 'org.robolectric:robolectric:4.12.1'
+    implementation libs.appCompat
+    implementation libs.espresso.idlingResource
+    implementation libs.fragmentTesting
+    coreLibraryDesugaring libs.coreLib
+    testImplementation libs.openTelemetry.exporter
+    testImplementation libs.robolectric
     testImplementation libs.mockito
     testImplementation libs.mockWebServer
     androidTestImplementation libs.espresso.core

@@ -203,7 +203,11 @@ public class BaseRobolectricTestApplication extends Application implements Expor
     public List<Configuration> provideConfigurations() {
         List<Configuration> spies = new ArrayList<>();
         for (Configuration configuration : configurations) {
-            spies.add(spy(configuration));
+            try {
+                spies.add(spy(configuration));
+            } catch (IllegalArgumentException ignored) {
+                spies.add(configuration);
+            }
         }
         return spies;
     }

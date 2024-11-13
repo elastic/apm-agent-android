@@ -51,19 +51,17 @@ dependencies {
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.5.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation "androidx.test.espresso:espresso-idling-resource:$espresso_version"
+    implementation libs.espresso.idlingResource
     implementation project(':android-test-common')
     implementation "androidx.fragment:fragment-testing:1.6.1"
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
     testImplementation "io.opentelemetry:opentelemetry-exporter-otlp:1.28.0"
-    testImplementation "org.mockito:mockito-core:$mockito_version"
-    testImplementation "org.mockito:mockito-inline:$mockito_version"
     testImplementation 'org.robolectric:robolectric:4.12.1'
-    testImplementation "com.squareup.okhttp3:mockwebserver:$mockwebserver_version"
+    testImplementation libs.mockWebServer
     androidTestImplementation "androidx.test:core:1.5.0"
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test:runner:1.5.2'
-    androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_version"
-    androidTestImplementation "androidx.test.espresso:espresso-contrib:$espresso_version"
-    androidTestImplementation "com.squareup.okhttp3:mockwebserver:$mockwebserver_version"
+    androidTestImplementation libs.espresso.core
+    androidTestImplementation libs.espresso.contrib
+    androidTestImplementation libs.mockWebServer
 }

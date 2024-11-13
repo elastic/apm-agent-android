@@ -27,6 +27,6 @@ android {
 }
 
 dependencies {
-    api "junit:junit:$junit_version"
+    api libs.junit
     api "co.elastic.apm:android-sdk"
 }

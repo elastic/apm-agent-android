@@ -1,13 +1,5 @@
 ext {
     jvmCompatibility = JavaVersion.VERSION_17
-    junit_version = '4.13.2'
-    espresso_version = '3.5.1'
-    mockito_version = '4.9.0'
-    mockwebserver_version = '4.10.0'
     androidCompileSdk = 34
     androidMinSdk = 26
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
 }

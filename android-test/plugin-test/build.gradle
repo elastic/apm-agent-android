@@ -10,6 +10,6 @@ java {
 dependencies {
     implementation "co.elastic.apm:android-plugin"
     testImplementation "co.elastic.apm:android-common"
-    testImplementation "junit:junit:$junit_version"
+    testImplementation libs.junit
     testImplementation "uk.org.webcompere:system-stubs-junit4:2.1.6"
 }

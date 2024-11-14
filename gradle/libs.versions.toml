@@ -43,6 +43,9 @@ junit5 = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit5" }
 junit5-vintage = { module = "org.junit.vintage:junit-vintage-engine", version.ref = "junit5" }
 mockwebserver = "com.squareup.okhttp3:mockwebserver:4.12.0"
 opentelemetry-testing = { module = "io.opentelemetry:opentelemetry-sdk-testing", version.ref = "opentelemetry" }
+robolectric = "org.robolectric:robolectric:4.13"
+assertj = "org.assertj:assertj-core:3.26.3"
+coreLib = "com.android.tools:desugar_jdk_libs:2.0.4"
 
 #Compilation tools
 apache-commons-text = "org.apache.commons:commons-text:1.10.0"

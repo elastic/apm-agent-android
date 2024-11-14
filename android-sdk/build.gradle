@@ -28,9 +28,15 @@ android {
     compileOptions {
         sourceCompatibility jvmCompatibility
         targetCompatibility jvmCompatibility
+        coreLibraryDesugaringEnabled = true
     }
     kotlinOptions {
         jvmTarget = jvmCompatibility.toString()
+    }
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
     }
 }
 
@@ -69,5 +75,8 @@ dependencies {
     testImplementation libs.bundles.junit
     testImplementation libs.mockwebserver
     testImplementation libs.opentelemetry.testing
+    testImplementation libs.robolectric
+    testImplementation libs.assertj
     testRuntimeOnly libs.junit5.vintage
+    coreLibraryDesugaring(libs.coreLib)
 }

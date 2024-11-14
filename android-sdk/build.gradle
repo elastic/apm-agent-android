@@ -1,5 +1,6 @@
 plugins {
     id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
     id 'co.elastic.apm.dependency.embedder'
 }
 
@@ -28,6 +29,9 @@ android {
         sourceCompatibility jvmCompatibility
         targetCompatibility jvmCompatibility
     }
+    kotlinOptions {
+        jvmTarget = jvmCompatibility.toString()
+    }
 }
 
 licensesConfig {
@@ -36,6 +40,10 @@ licensesConfig {
 
 shadowJar {
     relocate 'com.instacart.library.truetime', 'co.elastic.apm.android.truetime'
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
 }
 
 dependencies {
@@ -58,7 +66,8 @@ dependencies {
     annotationProcessor 'co.elastic.apm.compile:processor'
     compileOnly 'co.elastic.apm.compile:processor'
     testImplementation libs.bundles.mocking
-    testImplementation libs.junit
+    testImplementation libs.bundles.junit
     testImplementation libs.mockwebserver
     testImplementation libs.opentelemetry.testing
+    testRuntimeOnly libs.junit5.vintage
 }

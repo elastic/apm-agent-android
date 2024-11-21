@@ -43,6 +43,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
+import org.robolectric.annotation.Config
 import org.robolectric.util.ReflectionHelpers
 
 @RunWith(RobolectricTestRunner::class)
@@ -57,6 +58,7 @@ class IntegrationTest : SignalConfiguration {
         private const val RUNTIME_VERSION: String = "runtime-version"
         private const val DEVICE_MODEL_NAME: String = "Device model name"
         private const val DEVICE_MANUFACTURER: String = "Device manufacturer"
+        private const val OS_BUILD: String = "OS Build"
     }
 
     @Before
@@ -67,10 +69,12 @@ class IntegrationTest : SignalConfiguration {
         originalConstants = mapOf(
             "MODEL" to Build.MODEL,
             "MANUFACTURER" to Build.MANUFACTURER,
+            "VERSION.INCREMENTAL" to Build.VERSION.INCREMENTAL,
             "java.vm.version" to System.getProperty("java.vm.version")
         )
         ReflectionHelpers.setStaticField(Build::class.java, "MODEL", DEVICE_MODEL_NAME)
         ReflectionHelpers.setStaticField(Build::class.java, "MANUFACTURER", DEVICE_MANUFACTURER)
+        ReflectionHelpers.setStaticField(Build.VERSION::class.java, "INCREMENTAL", OS_BUILD)
         System.setProperty("java.vm.version", RUNTIME_VERSION)
     }
 
@@ -86,6 +90,7 @@ class IntegrationTest : SignalConfiguration {
         System.setProperty("java.vm.version", originalConstants["java.vm.version"])
     }
 
+    @Config(sdk = [24])
     @Test
     fun `Check resources`() {
         val openTelemetry = getOtelInstance()
@@ -101,9 +106,9 @@ class IntegrationTest : SignalConfiguration {
                     .put("device.id", "device-id")
                     .put("device.manufacturer", DEVICE_MANUFACTURER)
                     .put("device.model.identifier", DEVICE_MODEL_NAME)
-                    .put("os.description", "Android 14, API level 34, BUILD unknown")
+                    .put("os.description", "Android 7.0, API level 24, BUILD $OS_BUILD")
                     .put("os.name", "Android")
-                    .put("os.version", "14")
+                    .put("os.version", "7.0")
                     .put("process.runtime.name", "Android Runtime")
                     .put("process.runtime.version", RUNTIME_VERSION)
                     .put("service.build", 0)

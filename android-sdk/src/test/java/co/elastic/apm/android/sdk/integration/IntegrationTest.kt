@@ -20,6 +20,7 @@ package co.elastic.apm.android.sdk.integration
 
 import co.elastic.apm.android.sdk.ElasticApmAgent
 import co.elastic.apm.android.sdk.ElasticApmConfiguration
+import co.elastic.apm.android.sdk.connectivity.Connectivity
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration
 import io.opentelemetry.api.GlobalOpenTelemetry
 import io.opentelemetry.api.OpenTelemetry
@@ -36,6 +37,7 @@ import io.opentelemetry.sdk.trace.SpanProcessor
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor
 import org.assertj.core.api.Assertions
 import org.junit.After
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -47,6 +49,13 @@ class IntegrationTest : SignalConfiguration {
     private lateinit var metricsReader: MetricReader
     private lateinit var metricsExporter: InMemoryMetricExporter
     private lateinit var logsExporter: InMemoryLogRecordExporter
+
+    @Before
+    fun setUp() {
+        spanExporter = InMemorySpanExporter.create()
+        metricsExporter = InMemoryMetricExporter.create()
+        logsExporter = InMemoryLogRecordExporter.create()
+    }
 
     @After
     fun tearDown() {
@@ -68,8 +77,12 @@ class IntegrationTest : SignalConfiguration {
     private fun getOtelInstance(): OpenTelemetry {
         ElasticApmAgent.initialize(
             RuntimeEnvironment.getApplication(), ElasticApmConfiguration.builder()
+                .setServiceName("service-name")
+                .setServiceVersion("0.0.0")
+                .setDeploymentEnvironment("test")
                 .setSignalConfiguration(this)
-                .build()
+                .build(),
+            Connectivity.simple("http://localhost")
         )
         return GlobalOpenTelemetry.get()
     }

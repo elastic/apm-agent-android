@@ -74,7 +74,7 @@ class IntegrationTest : SignalConfiguration {
             .hasResource(
                 Resource.builder()
                     .put("deployment.environment", "test")
-                    .put("device.id", "robolectric")
+                    .put("device.id", "device-id")
                     .put("device.manufacturer", "robolectric")
                     .put("device.model.identifier", "robolectric")
                     .put("os.description", "Android 14, API level 34, BUILD unknown")
@@ -83,7 +83,7 @@ class IntegrationTest : SignalConfiguration {
                     .put("process.runtime.name", "Android Runtime")
                     .put("process.runtime.version", "17.0.8+7-LTS")
                     .put("service.build", 0)
-                    .put("service.name", "my-app")
+                    .put("service.name", "service-name")
                     .put("service.version", "0.0.0")
                     .put("telemetry.sdk.language", "java")
                     .put("telemetry.sdk.name", "android")
@@ -99,6 +99,7 @@ class IntegrationTest : SignalConfiguration {
                 .setServiceVersion("0.0.0")
                 .setDeploymentEnvironment("test")
                 .setSignalConfiguration(this)
+                .setDeviceIdGenerator { "device-id" }
                 .build(),
             Connectivity.simple("http://localhost")
         )

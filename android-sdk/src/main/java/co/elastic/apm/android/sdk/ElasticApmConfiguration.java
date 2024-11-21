@@ -23,6 +23,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
+import java.util.function.Supplier;
 
 import co.elastic.apm.android.sdk.configuration.logging.LogLevel;
 import co.elastic.apm.android.sdk.configuration.logging.LoggingPolicy;
@@ -54,6 +56,7 @@ public final class ElasticApmConfiguration {
     public final List<LogFilter> logFilters;
     public final List<MetricFilter> metricFilters;
     public final LoggingPolicy libraryLoggingPolicy;
+    final Supplier<String> deviceIdGenerator;
 
     public static Builder builder() {
         return new Builder();
@@ -76,6 +79,7 @@ public final class ElasticApmConfiguration {
         exportProtocol = builder.exportProtocol;
         libraryLoggingPolicy = builder.libraryLoggingPolicy;
         resource = builder.resource;
+        deviceIdGenerator = builder.deviceIdGenerator;
         spanFilters = Collections.unmodifiableList(new ArrayList<>(builder.spanFilters));
         logFilters = Collections.unmodifiableList(new ArrayList<>(builder.logFilters));
         metricFilters = Collections.unmodifiableList(new ArrayList<>(builder.metricFilters));
@@ -94,6 +98,7 @@ public final class ElasticApmConfiguration {
         private ExportProtocol exportProtocol = ExportProtocol.GRPC;
         private LoggingPolicy libraryLoggingPolicy = LoggingPolicy.getDefault();
         private Resource resource = Resource.getDefault();
+        private Supplier<String> deviceIdGenerator;
         private final Set<SpanFilter> spanFilters = new HashSet<>();
         private final Set<LogFilter> logFilters = new HashSet<>();
         private final Set<MetricFilter> metricFilters = new HashSet<>();
@@ -217,6 +222,11 @@ public final class ElasticApmConfiguration {
             return this;
         }
 
+        public Builder setDeviceIdGenerator(Supplier<String> deviceIdGenerator) {
+            this.deviceIdGenerator = deviceIdGenerator;
+            return this;
+        }
+
         /**
          * The span filter can be used to control which spans are exported and which shouldn't
          * leave the device. An implementation that always excludes all spans is essentially a way
@@ -259,6 +269,9 @@ public final class ElasticApmConfiguration {
             }
             if (persistenceConfiguration == null) {
                 persistenceConfiguration = PersistenceConfiguration.builder().build();
+            }
+            if (deviceIdGenerator == null) {
+                deviceIdGenerator = () -> UUID.randomUUID().toString();
             }
             return new ElasticApmConfiguration(this);
         }

@@ -16,35 +16,40 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.attributes.resources;
+package co.elastic.apm.android.sdk.attributes.resources
 
-import java.util.UUID;
+import co.elastic.apm.android.sdk.attributes.AttributesVisitor
+import co.elastic.apm.android.sdk.internal.services.Service
+import co.elastic.apm.android.sdk.internal.services.ServiceManager
+import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService
+import io.opentelemetry.api.common.AttributesBuilder
+import io.opentelemetry.semconv.ResourceAttributes
+import java.util.function.Supplier
 
-import co.elastic.apm.android.sdk.attributes.AttributesVisitor;
-import co.elastic.apm.android.sdk.internal.services.Service;
-import co.elastic.apm.android.sdk.internal.services.ServiceManager;
-import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService;
-import io.opentelemetry.api.common.AttributesBuilder;
-import io.opentelemetry.semconv.ResourceAttributes;
+class DeviceIdVisitor(private val deviceIdGenerator: Supplier<String>) : AttributesVisitor {
 
-public class DeviceIdVisitor implements AttributesVisitor {
-
-    private static final String DEVICE_ID_KEY = "device_id";
-
-    @Override
-    public void visit(AttributesBuilder builder) {
-        builder.put(ResourceAttributes.DEVICE_ID, getId());
+    override fun visit(builder: AttributesBuilder) {
+        builder.put(ResourceAttributes.DEVICE_ID, getId())
     }
 
-    private String getId() {
-        PreferencesService preferences = ServiceManager.get().getService(Service.Names.PREFERENCES);
-        String deviceId = preferences.retrieveString(DEVICE_ID_KEY);
+    private fun getId(): String {
+        val preferences =
+            ServiceManager.get()
+                .getService<PreferencesService>(
+                    Service.Names.PREFERENCES
+                )
+        var deviceId =
+            preferences.retrieveString(DEVICE_ID_KEY)
 
         if (deviceId == null) {
-            deviceId = UUID.randomUUID().toString();
-            preferences.store(DEVICE_ID_KEY, deviceId);
+            deviceId = deviceIdGenerator.get()
+            preferences.store(DEVICE_ID_KEY, deviceId)
         }
 
-        return deviceId;
+        return deviceId
+    }
+
+    companion object {
+        private const val DEVICE_ID_KEY = "device_id"
     }
 }

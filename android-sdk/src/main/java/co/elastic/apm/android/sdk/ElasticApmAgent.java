@@ -342,7 +342,7 @@ public final class ElasticApmAgent {
 
     private AttributesVisitor getResourceAttributesVisitor() {
         return AttributesVisitor.compose(
-                new DeviceIdVisitor(),
+                new DeviceIdVisitor(configuration.deviceIdGenerator),
                 new DeviceInfoVisitor(),
                 new OsDescriptorVisitor(),
                 new RuntimeDescriptorVisitor(),

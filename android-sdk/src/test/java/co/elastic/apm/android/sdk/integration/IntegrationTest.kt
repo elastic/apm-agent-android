@@ -18,6 +18,7 @@
  */
 package co.elastic.apm.android.sdk.integration
 
+import android.os.Build
 import co.elastic.apm.android.sdk.ElasticApmAgent
 import co.elastic.apm.android.sdk.ElasticApmConfiguration
 import co.elastic.apm.android.sdk.connectivity.Connectivity
@@ -42,6 +43,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
+import org.robolectric.util.ReflectionHelpers
 
 @RunWith(RobolectricTestRunner::class)
 class IntegrationTest : SignalConfiguration {
@@ -49,17 +51,39 @@ class IntegrationTest : SignalConfiguration {
     private lateinit var metricsReader: MetricReader
     private lateinit var metricsExporter: InMemoryMetricExporter
     private lateinit var logsExporter: InMemoryLogRecordExporter
+    private lateinit var originalConstants: Map<String, String>
+
+    companion object {
+        private const val RUNTIME_VERSION: String = "runtime-version"
+        private const val DEVICE_MODEL_NAME: String = "Device model name"
+        private const val DEVICE_MANUFACTURER: String = "Device manufacturer"
+    }
 
     @Before
     fun setUp() {
         spanExporter = InMemorySpanExporter.create()
         metricsExporter = InMemoryMetricExporter.create()
         logsExporter = InMemoryLogRecordExporter.create()
+        originalConstants = mapOf(
+            "MODEL" to Build.MODEL,
+            "MANUFACTURER" to Build.MANUFACTURER,
+            "java.vm.version" to System.getProperty("java.vm.version")
+        )
+        ReflectionHelpers.setStaticField(Build::class.java, "MODEL", DEVICE_MODEL_NAME)
+        ReflectionHelpers.setStaticField(Build::class.java, "MANUFACTURER", DEVICE_MANUFACTURER)
+        System.setProperty("java.vm.version", RUNTIME_VERSION)
     }
 
     @After
     fun tearDown() {
         GlobalOpenTelemetry.resetForTest()
+        ReflectionHelpers.setStaticField(Build::class.java, "MODEL", originalConstants["MODEL"])
+        ReflectionHelpers.setStaticField(
+            Build::class.java,
+            "MANUFACTURER",
+            originalConstants["MANUFACTURER"]
+        )
+        System.setProperty("java.vm.version", originalConstants["java.vm.version"])
     }
 
     @Test
@@ -75,13 +99,13 @@ class IntegrationTest : SignalConfiguration {
                 Resource.builder()
                     .put("deployment.environment", "test")
                     .put("device.id", "device-id")
-                    .put("device.manufacturer", "robolectric")
-                    .put("device.model.identifier", "robolectric")
+                    .put("device.manufacturer", DEVICE_MANUFACTURER)
+                    .put("device.model.identifier", DEVICE_MODEL_NAME)
                     .put("os.description", "Android 14, API level 34, BUILD unknown")
                     .put("os.name", "Android")
                     .put("os.version", "14")
                     .put("process.runtime.name", "Android Runtime")
-                    .put("process.runtime.version", "17.0.8+7-LTS")
+                    .put("process.runtime.version", RUNTIME_VERSION)
                     .put("service.build", 0)
                     .put("service.name", "service-name")
                     .put("service.version", "0.0.0")

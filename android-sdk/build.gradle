@@ -50,6 +50,7 @@ shadowJar {
 
 tasks.withType(Test).configureEach {
     useJUnitPlatform()
+    systemProperty("agent_version", project.version)
 }
 
 dependencies {

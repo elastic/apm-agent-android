@@ -116,7 +116,7 @@ class IntegrationTest : SignalConfiguration {
                     .put("service.version", "0.0.0")
                     .put("telemetry.sdk.language", "java")
                     .put("telemetry.sdk.name", "android")
-                    .put("telemetry.sdk.version", "0.21.0")
+                    .put("telemetry.sdk.version", System.getProperty("agent_version")!!)
                     .build()
             )
     }

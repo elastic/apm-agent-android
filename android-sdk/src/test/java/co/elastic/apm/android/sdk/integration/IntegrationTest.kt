@@ -71,7 +71,25 @@ class IntegrationTest : SignalConfiguration {
         val spanItems = spanExporter.finishedSpanItems
         Assertions.assertThat(spanItems).hasSize(1)
         OpenTelemetryAssertions.assertThat(spanItems.first())
-            .hasResource(Resource.builder().put("service.name", "my-app").build())
+            .hasResource(
+                Resource.builder()
+                    .put("deployment.environment", "test")
+                    .put("device.id", "robolectric")
+                    .put("device.manufacturer", "robolectric")
+                    .put("device.model.identifier", "robolectric")
+                    .put("os.description", "Android 14, API level 34, BUILD unknown")
+                    .put("os.name", "Android")
+                    .put("os.version", "14")
+                    .put("process.runtime.name", "Android Runtime")
+                    .put("process.runtime.version", "17.0.8+7-LTS")
+                    .put("service.build", 0)
+                    .put("service.name", "my-app")
+                    .put("service.version", "0.0.0")
+                    .put("telemetry.sdk.language", "java")
+                    .put("telemetry.sdk.name", "android")
+                    .put("telemetry.sdk.version", "0.21.0")
+                    .build()
+            )
     }
 
     private fun getOtelInstance(): OpenTelemetry {

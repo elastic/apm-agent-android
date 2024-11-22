@@ -47,7 +47,7 @@ import org.robolectric.annotation.Config
 import org.robolectric.util.ReflectionHelpers
 
 @RunWith(RobolectricTestRunner::class)
-class IntegrationTest : SignalConfiguration {
+class InstrumentationTest : SignalConfiguration {
     private lateinit var spanExporter: InMemorySpanExporter
     private lateinit var metricsReader: MetricReader
     private lateinit var metricsExporter: InMemoryMetricExporter

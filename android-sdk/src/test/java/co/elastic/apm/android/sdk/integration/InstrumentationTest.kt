@@ -67,6 +67,9 @@ class InstrumentationTest : SignalConfiguration {
         private const val RUNTIME_VERSION: String = "runtime-version"
         private const val DEVICE_MODEL_NAME: String = "Device model name"
         private const val DEVICE_MANUFACTURER: String = "Device manufacturer"
+        private const val SIM_OPERATOR: String = "123456"
+        private const val SIM_OPERATOR_NAME: String = "elasticphone"
+        private const val SIM_COUNTRY_ISO: String = "us"
         private const val OS_BUILD: String = "OS Build"
         private const val VERSION_CODE: Long = 10
     }
@@ -188,12 +191,42 @@ class InstrumentationTest : SignalConfiguration {
         openTelemetry.getTracer("SomeTracer").spanBuilder("SomeSpan").startSpan().end()
         openTelemetry.logsBridge.get("LoggerScope").logRecordBuilder().emit()
 
-        val spanItems2 = spanExporter.finishedSpanItems
-        val logItems2 = logsExporter.finishedLogRecordItems
-        assertThat(spanItems2).hasSize(1)
-        assertThat(logItems2).hasSize(1)
-        assertThat(spanItems2.first()).hasAttributes(expectedSpanAttributes)
-        assertThat(logItems2.first()).hasAttributes(expectedLogAttributes)
+        val spanItems = spanExporter.finishedSpanItems
+        val logItems = logsExporter.finishedLogRecordItems
+        assertThat(spanItems).hasSize(1)
+        assertThat(logItems).hasSize(1)
+        assertThat(spanItems.first()).hasAttributes(expectedSpanAttributes)
+        assertThat(logItems.first()).hasAttributes(expectedLogAttributes)
+    }
+
+    @Config(sdk = [24, Config.NEWEST_SDK])
+    @Test
+    fun `Check global attributes with carrier info available`() {
+        val openTelemetry = getOtelInstance()
+        enableCarrierInfoAttrs()
+        val expectedLogAttributes = Attributes.builder()
+            .put("session.id", "session-id")
+            .put("network.connection.type", "unavailable")
+            .build()
+        val expectedSpanAttributes = Attributes.builder()
+            .putAll(expectedLogAttributes)
+            .put("network.carrier.mcc", "123")
+            .put("network.carrier.mnc", "456")
+            .put("network.carrier.name", "elasticphone")
+            .put("network.carrier.icc", "us")
+            .put("type", "mobile")
+            .put("screen.name", "unknown")
+            .build()
+
+        openTelemetry.getTracer("SomeTracer").spanBuilder("SomeSpan").startSpan().end()
+        openTelemetry.logsBridge.get("LoggerScope").logRecordBuilder().emit()
+
+        val spanItems = spanExporter.finishedSpanItems
+        val logItems = logsExporter.finishedLogRecordItems
+        assertThat(spanItems).hasSize(1)
+        assertThat(logItems).hasSize(1)
+        assertThat(spanItems.first()).hasAttributes(expectedSpanAttributes)
+        assertThat(logItems.first()).hasAttributes(expectedLogAttributes)
     }
 
     private fun enableCellularDataAttr() {
@@ -214,6 +247,18 @@ class InstrumentationTest : SignalConfiguration {
         shadowTelephonyManager.setDataNetworkType(TelephonyManager.NETWORK_TYPE_EDGE)
 
         defaultNetworkCallback.onCapabilitiesChanged(mockk<Network>(), capabilities)
+    }
+
+    private fun enableCarrierInfoAttrs() {
+        val shadowTelephonyManager =
+            Shadows.shadowOf(
+                RuntimeEnvironment.getApplication()
+                    .getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager?
+            )
+        shadowTelephonyManager.setSimOperator(SIM_OPERATOR)
+        shadowTelephonyManager.setSimState(TelephonyManager.SIM_STATE_READY)
+        shadowTelephonyManager.setSimOperatorName(SIM_OPERATOR_NAME)
+        shadowTelephonyManager.setSimCountryIso(SIM_COUNTRY_ISO)
     }
 
     private fun getOtelInstance(): OpenTelemetry {

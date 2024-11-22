@@ -8,8 +8,8 @@ java {
 }
 
 dependencies {
-    implementation "co.elastic.apm:android-plugin:$agent_version"
-    testImplementation "co.elastic.apm:android-common:$agent_version"
-    testImplementation "junit:junit:$junit_version"
+    implementation "co.elastic.apm:android-plugin"
+    testImplementation "co.elastic.apm:android-common"
+    testImplementation libs.junit
     testImplementation "uk.org.webcompere:system-stubs-junit4:2.1.6"
 }

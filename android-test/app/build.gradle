@@ -1,18 +1,8 @@
-buildscript {
-    repositories {
-        mavenLocal()
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath "com.android.tools.build:gradle:$agp_version"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0"
-        classpath "co.elastic.apm:android-plugin:$agent_version"
-    }
+plugins {
+    alias(rootLibs.plugins.androidApp)
+    alias(rootLibs.plugins.kotlin.android)
+    id 'co.elastic.apm.android'
 }
-apply plugin: 'com.android.application'
-apply plugin: 'org.jetbrains.kotlin.android'
-apply plugin: 'co.elastic.apm.android'
 
 android {
     namespace = "co.elastic.apm.android.test"
@@ -21,7 +11,7 @@ android {
         unitTests {
             includeAndroidResources = true
             all {
-                systemProperty "agentVersion", agent_version
+                systemProperty "agentVersion", agentVersion
             }
         }
         animationsDisabled = true
@@ -61,22 +51,16 @@ elasticApm {
 }
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.7.0'
-    implementation 'androidx.appcompat:appcompat:1.5.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation "androidx.test.espresso:espresso-idling-resource:$espresso_version"
     implementation project(':android-test-common')
-    implementation "androidx.fragment:fragment-testing:1.6.1"
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
-    testImplementation "io.opentelemetry:opentelemetry-exporter-otlp:1.28.0"
-    testImplementation "org.mockito:mockito-core:$mockito_version"
-    testImplementation "org.mockito:mockito-inline:$mockito_version"
-    testImplementation 'org.robolectric:robolectric:4.12.1'
-    testImplementation "com.squareup.okhttp3:mockwebserver:$mockwebserver_version"
-    androidTestImplementation "androidx.test:core:1.5.0"
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test:runner:1.5.2'
-    androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_version"
-    androidTestImplementation "androidx.test.espresso:espresso-contrib:$espresso_version"
-    androidTestImplementation "com.squareup.okhttp3:mockwebserver:$mockwebserver_version"
+    implementation libs.appCompat
+    implementation libs.espresso.idlingResource
+    implementation libs.fragmentTesting
+    coreLibraryDesugaring libs.coreLib
+    testImplementation libs.openTelemetry.exporter
+    testImplementation libs.robolectric
+    testImplementation libs.mockito
+    testImplementation libs.mockWebServer
+    androidTestImplementation libs.espresso.core
+    androidTestImplementation libs.espresso.contrib
+    androidTestImplementation libs.mockWebServer
 }

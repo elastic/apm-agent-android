@@ -17,7 +17,7 @@ dependencies {
     implementation libs.gradle.publish.plugin
     implementation libs.gradle.shadow.plugin
     implementation "com.android.tools.build:gradle:${properties["androidGradlePlugin_version"]}"
-    testImplementation libs.junit
+    testImplementation libs.junit4
 }
 
 gradlePlugin {

@@ -1,4 +1,4 @@
-package co.elastic.apm.android.test.opentelemetry.common;
+package co.elastic.apm.android.test.centralconfigs.common;
 
 import co.elastic.apm.android.sdk.ElasticApmConfiguration;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTestApplication;

@@ -1,4 +1,4 @@
-package co.elastic.apm.android.test.opentelemetry.metrics;
+package co.elastic.apm.android.test.centralconfigs.metrics;
 
 import static org.mockito.Mockito.doReturn;
 
@@ -8,7 +8,7 @@ import org.robolectric.annotation.Config;
 import co.elastic.apm.android.sdk.internal.configuration.Configurations;
 import co.elastic.apm.android.sdk.internal.configuration.impl.AllInstrumentationConfiguration;
 import co.elastic.apm.android.sdk.metrics.ElasticMeters;
-import co.elastic.apm.android.test.opentelemetry.common.AppUseCases;
+import co.elastic.apm.android.test.centralconfigs.common.AppUseCases;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
 import io.opentelemetry.api.metrics.Meter;
 

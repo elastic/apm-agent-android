@@ -94,7 +94,7 @@ class IntegrationTest : SignalConfiguration {
         setVersionCode(0)
     }
 
-    @Config(sdk = [24])
+    @Config(sdk = [24, Config.NEWEST_SDK])
     @Test
     fun `Check resources`() {
         val openTelemetry = getOtelInstance()
@@ -110,9 +110,12 @@ class IntegrationTest : SignalConfiguration {
                     .put("device.id", "device-id")
                     .put("device.manufacturer", DEVICE_MANUFACTURER)
                     .put("device.model.identifier", DEVICE_MODEL_NAME)
-                    .put("os.description", "Android 7.0, API level 24, BUILD $OS_BUILD")
+                    .put(
+                        "os.description",
+                        "Android ${Build.VERSION.RELEASE}, API level ${Build.VERSION.SDK_INT}, BUILD $OS_BUILD"
+                    )
                     .put("os.name", "Android")
-                    .put("os.version", "7.0")
+                    .put("os.version", Build.VERSION.RELEASE)
                     .put("process.runtime.name", "Android Runtime")
                     .put("process.runtime.version", RUNTIME_VERSION)
                     .put("service.build", VERSION_CODE)

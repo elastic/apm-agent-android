@@ -18,11 +18,19 @@
  */
 package co.elastic.apm.android.sdk.integration
 
+import android.Manifest
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
 import android.os.Build
+import android.telephony.TelephonyManager
 import co.elastic.apm.android.sdk.ElasticApmAgent
 import co.elastic.apm.android.sdk.ElasticApmConfiguration
 import co.elastic.apm.android.sdk.connectivity.Connectivity
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration
+import io.mockk.every
+import io.mockk.mockk
 import io.opentelemetry.api.GlobalOpenTelemetry
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.api.common.Attributes
@@ -159,6 +167,51 @@ class InstrumentationTest : SignalConfiguration {
         assertThat(logItems).hasSize(1)
         assertThat(spanItems.first()).hasAttributes(expectedSpanAttributes)
         assertThat(logItems.first()).hasAttributes(expectedLogAttributes)
+
+        // Enabling cellular data attr
+        spanExporter.reset()
+        logsExporter.reset()
+        enableCellularDataAttr()
+        val expectedLogAttributes2 = Attributes.builder()
+            .put("session.id", "session-id")
+            .put("network.connection.type", "cell")
+            .put("network.connection.subtype", "EDGE")
+            .build()
+        val expectedSpanAttributes2 = Attributes.builder()
+            .putAll(expectedLogAttributes2)
+            .put("type", "mobile")
+            .put("screen.name", "unknown")
+            .build()
+
+        openTelemetry.getTracer("SomeTracer").spanBuilder("SomeSpan").startSpan().end()
+        openTelemetry.logsBridge.get("LoggerScope").logRecordBuilder().emit()
+
+        val spanItems2 = spanExporter.finishedSpanItems
+        val logItems2 = logsExporter.finishedLogRecordItems
+        assertThat(spanItems2).hasSize(1)
+        assertThat(logItems2).hasSize(1)
+        assertThat(spanItems2.first()).hasAttributes(expectedSpanAttributes2)
+        assertThat(logItems2.first()).hasAttributes(expectedLogAttributes2)
+    }
+
+    private fun enableCellularDataAttr() {
+        val application = RuntimeEnvironment.getApplication()
+        Shadows.shadowOf(application)
+            .grantPermissions(Manifest.permission.READ_PHONE_STATE)
+        val shadowConnectivityManager =
+            Shadows.shadowOf(application.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager?)
+        val shadowTelephonyManager =
+            Shadows.shadowOf(application.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager?)
+        val callbacks = ArrayList(shadowConnectivityManager.networkCallbacks)
+        val defaultNetworkCallback = callbacks[0]
+
+        val capabilities = mockk<NetworkCapabilities>()
+        every {
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+        } returns true
+        shadowTelephonyManager.setDataNetworkType(TelephonyManager.NETWORK_TYPE_EDGE)
+
+        defaultNetworkCallback.onCapabilitiesChanged(mockk<Network>(), capabilities)
     }
 
     private fun getOtelInstance(): OpenTelemetry {

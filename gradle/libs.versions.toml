@@ -46,6 +46,7 @@ opentelemetry-testing = { module = "io.opentelemetry:opentelemetry-sdk-testing",
 robolectric = "org.robolectric:robolectric:4.13"
 assertj = "org.assertj:assertj-core:3.26.3"
 coreLib = "com.android.tools:desugar_jdk_libs:2.0.4"
+mockk = "io.mockk:mockk:1.13.13"
 
 #Compilation tools
 apache-commons-text = "org.apache.commons:commons-text:1.10.0"
@@ -61,7 +62,7 @@ google-autoService-annotations = { module = "com.google.auto.service:auto-servic
 byteBuddy-plugin = { module = "net.bytebuddy:byte-buddy-gradle-plugin", version.ref = "byteBuddy" }
 
 [bundles]
-mocking = ["mockito"]
+mocking = ["mockito", "mockk"]
 junit = ["junit4", "junit5"]
 
 [plugins]

@@ -83,6 +83,7 @@ class InstrumentationTest : SignalConfiguration {
 
     @After
     fun tearDown() {
+        ElasticApmAgent.resetForTest()
         GlobalOpenTelemetry.resetForTest()
         ReflectionHelpers.setStaticField(Build::class.java, "MODEL", originalConstants["MODEL"])
         ReflectionHelpers.setStaticField(

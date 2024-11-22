@@ -43,6 +43,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
+import org.robolectric.Shadows
 import org.robolectric.annotation.Config
 import org.robolectric.util.ReflectionHelpers
 
@@ -59,6 +60,7 @@ class IntegrationTest : SignalConfiguration {
         private const val DEVICE_MODEL_NAME: String = "Device model name"
         private const val DEVICE_MANUFACTURER: String = "Device manufacturer"
         private const val OS_BUILD: String = "OS Build"
+        private const val VERSION_CODE: Long = 10
     }
 
     @Before
@@ -76,6 +78,7 @@ class IntegrationTest : SignalConfiguration {
         ReflectionHelpers.setStaticField(Build::class.java, "MANUFACTURER", DEVICE_MANUFACTURER)
         ReflectionHelpers.setStaticField(Build.VERSION::class.java, "INCREMENTAL", OS_BUILD)
         System.setProperty("java.vm.version", RUNTIME_VERSION)
+        setVersionCode(VERSION_CODE)
     }
 
     @After
@@ -88,6 +91,7 @@ class IntegrationTest : SignalConfiguration {
             originalConstants["MANUFACTURER"]
         )
         System.setProperty("java.vm.version", originalConstants["java.vm.version"])
+        setVersionCode(0)
     }
 
     @Config(sdk = [24])
@@ -111,7 +115,7 @@ class IntegrationTest : SignalConfiguration {
                     .put("os.version", "7.0")
                     .put("process.runtime.name", "Android Runtime")
                     .put("process.runtime.version", RUNTIME_VERSION)
-                    .put("service.build", 0)
+                    .put("service.build", VERSION_CODE)
                     .put("service.name", "service-name")
                     .put("service.version", "0.0.0")
                     .put("telemetry.sdk.language", "java")
@@ -146,5 +150,11 @@ class IntegrationTest : SignalConfiguration {
     override fun getMetricReader(): MetricReader {
         metricsReader = PeriodicMetricReader.create(metricsExporter)
         return metricsReader
+    }
+
+    private fun setVersionCode(versionCode: Long) {
+        Shadows.shadowOf(RuntimeEnvironment.getApplication().packageManager)
+            .getInternalMutablePackageInfo(RuntimeEnvironment.getApplication().packageName).versionCode =
+            versionCode.toInt()
     }
 }

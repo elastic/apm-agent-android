@@ -30,13 +30,12 @@ import io.opentelemetry.sdk.logs.export.SimpleLogRecordProcessor
 import io.opentelemetry.sdk.metrics.export.MetricReader
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader
 import io.opentelemetry.sdk.resources.Resource
-import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions
+import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat
 import io.opentelemetry.sdk.testing.exporter.InMemoryLogRecordExporter
 import io.opentelemetry.sdk.testing.exporter.InMemoryMetricExporter
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter
 import io.opentelemetry.sdk.trace.SpanProcessor
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor
-import org.assertj.core.api.Assertions
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -98,34 +97,41 @@ class IntegrationTest : SignalConfiguration {
     @Test
     fun `Check resources`() {
         val openTelemetry = getOtelInstance()
+        val expectedResource = Resource.builder()
+            .put("deployment.environment", "test")
+            .put("device.id", "device-id")
+            .put("device.manufacturer", DEVICE_MANUFACTURER)
+            .put("device.model.identifier", DEVICE_MODEL_NAME)
+            .put(
+                "os.description",
+                "Android ${Build.VERSION.RELEASE}, API level ${Build.VERSION.SDK_INT}, BUILD $OS_BUILD"
+            )
+            .put("os.name", "Android")
+            .put("os.version", Build.VERSION.RELEASE)
+            .put("process.runtime.name", "Android Runtime")
+            .put("process.runtime.version", RUNTIME_VERSION)
+            .put("service.build", VERSION_CODE)
+            .put("service.name", "service-name")
+            .put("service.version", "0.0.0")
+            .put("telemetry.sdk.language", "java")
+            .put("telemetry.sdk.name", "android")
+            .put("telemetry.sdk.version", System.getProperty("agent_version")!!)
+            .build()
 
         openTelemetry.getTracer("SomeTracer").spanBuilder("SomeSpan").startSpan().end()
+        openTelemetry.logsBridge.get("LoggerScope").logRecordBuilder().emit()
+        openTelemetry.getMeter("MeterScope").counterBuilder("Counter").build().add(1)
+        metricsReader.forceFlush()
 
         val spanItems = spanExporter.finishedSpanItems
-        Assertions.assertThat(spanItems).hasSize(1)
-        OpenTelemetryAssertions.assertThat(spanItems.first())
-            .hasResource(
-                Resource.builder()
-                    .put("deployment.environment", "test")
-                    .put("device.id", "device-id")
-                    .put("device.manufacturer", DEVICE_MANUFACTURER)
-                    .put("device.model.identifier", DEVICE_MODEL_NAME)
-                    .put(
-                        "os.description",
-                        "Android ${Build.VERSION.RELEASE}, API level ${Build.VERSION.SDK_INT}, BUILD $OS_BUILD"
-                    )
-                    .put("os.name", "Android")
-                    .put("os.version", Build.VERSION.RELEASE)
-                    .put("process.runtime.name", "Android Runtime")
-                    .put("process.runtime.version", RUNTIME_VERSION)
-                    .put("service.build", VERSION_CODE)
-                    .put("service.name", "service-name")
-                    .put("service.version", "0.0.0")
-                    .put("telemetry.sdk.language", "java")
-                    .put("telemetry.sdk.name", "android")
-                    .put("telemetry.sdk.version", System.getProperty("agent_version")!!)
-                    .build()
-            )
+        val logItems = logsExporter.finishedLogRecordItems
+        val metricItems = metricsExporter.finishedMetricItems
+        assertThat(spanItems).hasSize(1)
+        assertThat(logItems).hasSize(1)
+        assertThat(metricItems).hasSize(1)
+        assertThat(spanItems.first()).hasResource(expectedResource)
+        assertThat(logItems.first()).hasResource(expectedResource)
+        assertThat(metricItems.first()).hasResource(expectedResource)
     }
 
     private fun getOtelInstance(): OpenTelemetry {

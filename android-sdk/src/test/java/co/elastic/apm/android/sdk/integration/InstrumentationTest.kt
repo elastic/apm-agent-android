@@ -167,18 +167,20 @@ class InstrumentationTest : SignalConfiguration {
         assertThat(logItems).hasSize(1)
         assertThat(spanItems.first()).hasAttributes(expectedSpanAttributes)
         assertThat(logItems.first()).hasAttributes(expectedLogAttributes)
+    }
 
-        // Enabling cellular data attr
-        spanExporter.reset()
-        logsExporter.reset()
+    @Config(sdk = [24, Config.NEWEST_SDK])
+    @Test
+    fun `Check global attributes with cellular connectivity available`() {
+        val openTelemetry = getOtelInstance()
         enableCellularDataAttr()
-        val expectedLogAttributes2 = Attributes.builder()
+        val expectedLogAttributes = Attributes.builder()
             .put("session.id", "session-id")
             .put("network.connection.type", "cell")
             .put("network.connection.subtype", "EDGE")
             .build()
-        val expectedSpanAttributes2 = Attributes.builder()
-            .putAll(expectedLogAttributes2)
+        val expectedSpanAttributes = Attributes.builder()
+            .putAll(expectedLogAttributes)
             .put("type", "mobile")
             .put("screen.name", "unknown")
             .build()
@@ -190,8 +192,8 @@ class InstrumentationTest : SignalConfiguration {
         val logItems2 = logsExporter.finishedLogRecordItems
         assertThat(spanItems2).hasSize(1)
         assertThat(logItems2).hasSize(1)
-        assertThat(spanItems2.first()).hasAttributes(expectedSpanAttributes2)
-        assertThat(logItems2.first()).hasAttributes(expectedLogAttributes2)
+        assertThat(spanItems2.first()).hasAttributes(expectedSpanAttributes)
+        assertThat(logItems2.first()).hasAttributes(expectedLogAttributes)
     }
 
     private fun enableCellularDataAttr() {

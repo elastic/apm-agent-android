@@ -25,6 +25,7 @@ import co.elastic.apm.android.sdk.connectivity.Connectivity
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration
 import io.opentelemetry.api.GlobalOpenTelemetry
 import io.opentelemetry.api.OpenTelemetry
+import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.sdk.logs.LogRecordProcessor
 import io.opentelemetry.sdk.logs.export.SimpleLogRecordProcessor
 import io.opentelemetry.sdk.metrics.export.MetricReader
@@ -132,6 +133,28 @@ class InstrumentationTest : SignalConfiguration {
         assertThat(spanItems.first()).hasResource(expectedResource)
         assertThat(logItems.first()).hasResource(expectedResource)
         assertThat(metricItems.first()).hasResource(expectedResource)
+    }
+
+    @Config(sdk = [24, Config.NEWEST_SDK])
+    @Test
+    fun `Check global attributes`() {
+        val openTelemetry = getOtelInstance()
+        val expectedAttributes = Attributes.builder()
+            .put("session.id", "session-id")
+            .put("network.connection.type", "unavailable")
+            .put("type", "mobile")
+            .put("screen.name", "unknown")
+            .build()
+
+        openTelemetry.getTracer("SomeTracer").spanBuilder("SomeSpan").startSpan().end()
+        openTelemetry.logsBridge.get("LoggerScope").logRecordBuilder().emit()
+
+        val spanItems = spanExporter.finishedSpanItems
+        val logItems = logsExporter.finishedLogRecordItems
+        assertThat(spanItems).hasSize(1)
+        assertThat(logItems).hasSize(1)
+        assertThat(spanItems.first()).hasAttributes(expectedAttributes)
+        assertThat(logItems.first()).hasAttributes(expectedAttributes)
     }
 
     private fun getOtelInstance(): OpenTelemetry {

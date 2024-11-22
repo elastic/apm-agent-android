@@ -139,9 +139,12 @@ class InstrumentationTest : SignalConfiguration {
     @Test
     fun `Check global attributes`() {
         val openTelemetry = getOtelInstance()
-        val expectedAttributes = Attributes.builder()
+        val expectedLogAttributes = Attributes.builder()
             .put("session.id", "session-id")
             .put("network.connection.type", "unavailable")
+            .build()
+        val expectedSpanAttributes = Attributes.builder()
+            .putAll(expectedLogAttributes)
             .put("type", "mobile")
             .put("screen.name", "unknown")
             .build()
@@ -153,8 +156,8 @@ class InstrumentationTest : SignalConfiguration {
         val logItems = logsExporter.finishedLogRecordItems
         assertThat(spanItems).hasSize(1)
         assertThat(logItems).hasSize(1)
-        assertThat(spanItems.first()).hasAttributes(expectedAttributes)
-        assertThat(logItems.first()).hasAttributes(expectedAttributes)
+        assertThat(spanItems.first()).hasAttributes(expectedSpanAttributes)
+        assertThat(logItems.first()).hasAttributes(expectedLogAttributes)
     }
 
     private fun getOtelInstance(): OpenTelemetry {
@@ -165,6 +168,7 @@ class InstrumentationTest : SignalConfiguration {
                 .setDeploymentEnvironment("test")
                 .setSignalConfiguration(this)
                 .setDeviceIdGenerator { "device-id" }
+                .setSessionIdGenerator { "session-id" }
                 .build(),
             Connectivity.simple("http://localhost")
         )

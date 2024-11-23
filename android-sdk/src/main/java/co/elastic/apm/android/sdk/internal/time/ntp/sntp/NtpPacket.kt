@@ -62,6 +62,13 @@ data class NtpPacket(
     companion object {
         private const val PACKET_SIZE_IN_BYTES = 48
 
+        fun createForClient(
+            versionNumber: Int = 4,
+            transmitTimestamp: Long = 0
+        ): NtpPacket {
+            return NtpPacket(0, versionNumber, 3, 0, 0, 0, transmitTimestamp)
+        }
+
         fun parse(bytes: ByteArray): NtpPacket {
             if (bytes.size < PACKET_SIZE_IN_BYTES) {
                 throw IllegalArgumentException("The min byte array size allowed is $PACKET_SIZE_IN_BYTES, the provided array size is ${bytes.size}.")

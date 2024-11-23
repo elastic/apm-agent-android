@@ -21,8 +21,7 @@ package co.elastic.apm.android.sdk.internal.time.ntp.sntp
 import java.io.Closeable
 import java.util.concurrent.TimeUnit
 
-class SntpClient : Closeable {
-    private val udpClient = UdpClient("time.android.com", 123, 48)
+internal class SntpClient(private val udpClient: UdpClient) : Closeable {
 
     fun fetchTime() {
         val request = NtpPacket.createForClient(getCurrentNtpTimeSeconds())
@@ -36,6 +35,10 @@ class SntpClient : Closeable {
 
     companion object {
         private const val NTP_EPOCH_DIFF_SECONDS = 2208988800L // According to RFC-868.
+
+        fun create(): SntpClient {
+            return SntpClient(UdpClient("time.android.com", 123, 48))
+        }
 
         private fun getCurrentNtpTimeSeconds(): Long {
             return TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()) + NTP_EPOCH_DIFF_SECONDS

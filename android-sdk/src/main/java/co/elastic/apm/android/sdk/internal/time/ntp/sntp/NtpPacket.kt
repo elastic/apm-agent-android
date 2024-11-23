@@ -20,7 +20,7 @@ package co.elastic.apm.android.sdk.internal.time.ntp.sntp
 
 import java.nio.ByteBuffer
 
-data class NtpPacket(
+internal data class NtpPacket(
     val leapIndicator: Int,
     val versionNumber: Int,
     val mode: Int,

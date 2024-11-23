@@ -132,6 +132,26 @@ class NtpPacketTest {
         }
     }
 
+    @Test
+    fun `Validate params`() {
+        val invalidLeapIndicator = 4
+        val invalidVersionNumber = 8
+        val invalidMode = 8
+        val invalidStratum = 256
+        assertThrows<IllegalArgumentException> {
+            NtpPacket(invalidLeapIndicator, 1, 1, 1, 1, 1, 1)
+        }
+        assertThrows<IllegalArgumentException> {
+            NtpPacket(1, invalidVersionNumber, 1, 1, 1, 1, 1)
+        }
+        assertThrows<IllegalArgumentException> {
+            NtpPacket(1, 1, invalidMode, 1, 1, 1, 1)
+        }
+        assertThrows<IllegalArgumentException> {
+            NtpPacket(1, 1, 1, invalidStratum, 1, 1, 1)
+        }
+    }
+
     @OptIn(ExperimentalUnsignedTypes::class)
     private fun binaryStringToByteArray(binary: String): ByteArray {
         return binary.replace(Regex("[^01]+"), "")

@@ -29,6 +29,36 @@ data class NtpPacket(
     val receiveTimestamp: Long,
     val transmitTimestamp: Long
 ) {
+
+    init {
+        if (leapIndicator > 3) {
+            throw IllegalArgumentException()
+        }
+        if (versionNumber > 7) {
+            throw IllegalArgumentException()
+        }
+        if (mode > 7) {
+            throw IllegalArgumentException()
+        }
+        if (stratum > 255) {
+            throw IllegalArgumentException()
+        }
+    }
+
+    fun toByteArray(): ByteArray {
+        val buffer = ByteBuffer.allocate(PACKET_SIZE_IN_BYTES)
+        val li = leapIndicator shl 6
+        val version = versionNumber shl 3
+        val firstByte = li or version or mode
+        buffer.put(firstByte.toByte())
+        buffer.put(stratum.toByte())
+        buffer.putLong(24, originateTimestamp)
+        buffer.putLong(32, receiveTimestamp)
+        buffer.putLong(40, transmitTimestamp)
+
+        return buffer.array()
+    }
+
     companion object {
         private const val PACKET_SIZE_IN_BYTES = 48
 
@@ -56,19 +86,5 @@ data class NtpPacket(
                 transmitTimestamp
             )
         }
-    }
-
-    fun toByteArray(): ByteArray {
-        val buffer = ByteBuffer.allocate(PACKET_SIZE_IN_BYTES)
-        val li = leapIndicator shl 6
-        val version = versionNumber shl 3
-        val firstByte = li or version or mode
-        buffer.put(firstByte.toByte())
-        buffer.put(stratum.toByte())
-        buffer.putLong(24, originateTimestamp)
-        buffer.putLong(32, receiveTimestamp)
-        buffer.putLong(40, transmitTimestamp)
-
-        return buffer.array()
     }
 }

@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.net.DatagramPacket
 import java.net.DatagramSocket
-import java.net.InetAddress
 import java.net.SocketException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -62,6 +61,26 @@ class UdpClientTest {
         val response = client.send(packet)
 
         assertThat(String(response)).isEqualTo("Server response")
+    }
+
+    @Test
+    fun `Happy path, echo response`() {
+        val message = "Hello World!"
+        val packet = message.toByteArray()
+        server.responseHandler = { clientPacket ->
+            server.socket.send(
+                DatagramPacket(
+                    clientPacket.data,
+                    clientPacket.length,
+                    clientPacket.address,
+                    clientPacket.port
+                )
+            )
+        }
+
+        val response = client.send(packet)
+
+        assertThat(String(response)).isEqualTo(message)
     }
 
     @Test
@@ -108,9 +127,10 @@ class UdpClientTest {
         val socket = DatagramSocket(port)
 
         @Volatile
-        var responseHandler: (ClientInfo) -> Unit = { client ->
+        var responseHandler: (DatagramPacket) -> Unit = { clientPacket ->
             val response = "Server response".toByteArray()
-            val packet = DatagramPacket(response, response.size, client.address, client.port)
+            val packet =
+                DatagramPacket(response, response.size, clientPacket.address, clientPacket.port)
             socket.send(packet)
         }
 
@@ -123,9 +143,7 @@ class UdpClientTest {
                     val packet = DatagramPacket(buf, buf.size)
                     socket.receive(packet)
 
-                    val address = packet.address
-                    val port = packet.port
-                    responseHandler(ClientInfo(address, port))
+                    responseHandler(packet)
                 } catch (e: SocketException) {
                     continue
                 }
@@ -135,7 +153,5 @@ class UdpClientTest {
         fun close() {
             socket.close()
         }
-
-        data class ClientInfo(val address: InetAddress, val port: Int)
     }
 }

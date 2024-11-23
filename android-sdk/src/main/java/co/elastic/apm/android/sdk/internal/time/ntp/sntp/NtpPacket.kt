@@ -31,7 +31,25 @@ data class NtpPacket(
 ) {
     companion object {
         fun parse(bytes: ByteArray): NtpPacket {
-            TODO()
+            val buffer = ByteBuffer.wrap(bytes)
+            val firstByte = buffer.get().toInt()
+            val leapIndicator = firstByte shr 6
+            val versionNumber = (firstByte shr 3) and 3
+            val mode = firstByte and 7
+            val stratum = buffer.get().toInt()
+            val originateTimestamp = buffer.getLong(24)
+            val receiveTimestamp = buffer.getLong(32)
+            val transmitTimestamp = buffer.getLong(40)
+
+            return NtpPacket(
+                leapIndicator,
+                versionNumber,
+                mode,
+                stratum,
+                originateTimestamp,
+                receiveTimestamp,
+                transmitTimestamp
+            )
         }
     }
 

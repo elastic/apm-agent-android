@@ -34,7 +34,7 @@ data class NtpPacket(
 
         fun parse(bytes: ByteArray): NtpPacket {
             if (bytes.size < PACKET_SIZE_IN_BYTES) {
-                throw IllegalArgumentException("The min byte array size allowed is $PACKET_SIZE_IN_BYTES, the provided array size is ${bytes.size}")
+                throw IllegalArgumentException("The min byte array size allowed is $PACKET_SIZE_IN_BYTES, the provided array size is ${bytes.size}.")
             }
             val buffer = ByteBuffer.wrap(bytes)
             val firstByte = buffer.get().toInt()

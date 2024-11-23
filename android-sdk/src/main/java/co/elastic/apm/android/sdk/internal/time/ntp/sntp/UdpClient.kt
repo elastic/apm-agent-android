@@ -1,26 +1,54 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *	http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package co.elastic.apm.android.sdk.internal.time.ntp.sntp
 
 import java.io.Closeable
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
+import java.net.SocketException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
+import java.time.Duration
 
 class UdpClient(
     private val address: InetAddress,
     private val port: Int,
-    private val bufferSize: Int
+    private val responseBufferSize: Int
 ) : Closeable {
-    private lateinit var socket: DatagramSocket
+    private val socket = DatagramSocket()
 
-    fun open() {
-        socket = DatagramSocket()
+    companion object {
+        @Throws(UnknownHostException::class)
+        fun create(host: String, port: Int, responseBufferSize: Int): UdpClient {
+            return UdpClient(InetAddress.getByName(host), port, responseBufferSize)
+        }
     }
 
-    fun sendPacket(bytes: ByteArray): ByteArray {
+    @Throws(SocketTimeoutException::class, SocketException::class)
+    fun send(bytes: ByteArray, timeout: Duration = Duration.ZERO): ByteArray = synchronized(this) {
+        socket.soTimeout = timeout.toMillis().toInt()
+
         val packet = DatagramPacket(bytes, bytes.size, address, port)
         socket.send(packet)
 
-        val responsePacket = DatagramPacket(ByteArray(bufferSize), bufferSize)
+        val responsePacket = DatagramPacket(ByteArray(responseBufferSize), responseBufferSize)
         socket.receive(responsePacket)
         return responsePacket.data.copyOf(responsePacket.length)
     }

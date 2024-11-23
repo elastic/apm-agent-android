@@ -44,7 +44,7 @@ class UdpClientTest {
     fun setUp() {
         server = FlexiServer(SERVER_PORT)
         server.start()
-        client = UdpClient.create(SERVER_HOST, SERVER_PORT, 256)
+        client = UdpClient(SERVER_HOST, SERVER_PORT, 256)
     }
 
     @AfterEach
@@ -99,7 +99,7 @@ class UdpClientTest {
 
     @Test
     fun `Server port is not reachable`() {
-        client = UdpClient.create(SERVER_HOST, SERVER_PORT + 1, 256)
+        client = UdpClient(SERVER_HOST, SERVER_PORT + 1, 256)
 
         assertThrows<SocketTimeoutException> {
             client.send("Example".toByteArray(), Duration.ofSeconds(1))
@@ -117,8 +117,9 @@ class UdpClientTest {
 
     @Test
     fun `Server host not found`() {
+        client = UdpClient("nonexistent", SERVER_PORT, 256)
         assertThrows<UnknownHostException> {
-            client = UdpClient.create("nonexistent", SERVER_PORT, 256)
+            client.send("Example".toByteArray())
         }
     }
 

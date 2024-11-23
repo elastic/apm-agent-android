@@ -28,22 +28,20 @@ import java.net.UnknownHostException
 import java.time.Duration
 
 class UdpClient(
-    private val address: InetAddress,
+    private val host: String,
     private val port: Int,
     private val responseBufferSize: Int
 ) : Closeable {
     private val socket = DatagramSocket()
+    private var address: InetAddress? = null
 
-    companion object {
-        @Throws(UnknownHostException::class)
-        fun create(host: String, port: Int, responseBufferSize: Int): UdpClient {
-            return UdpClient(InetAddress.getByName(host), port, responseBufferSize)
-        }
-    }
-
-    @Throws(SocketTimeoutException::class, SocketException::class)
+    @Throws(UnknownHostException::class, SocketTimeoutException::class, SocketException::class)
     fun send(bytes: ByteArray, timeout: Duration = Duration.ofSeconds(10)): ByteArray =
         synchronized(this) {
+            if (address == null) {
+                address = InetAddress.getByName(host)
+            }
+
             socket.soTimeout = timeout.toMillis().toInt()
 
             val packet = DatagramPacket(bytes, bytes.size, address, port)

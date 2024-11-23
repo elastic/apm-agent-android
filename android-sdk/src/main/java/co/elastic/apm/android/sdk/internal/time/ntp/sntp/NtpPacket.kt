@@ -63,8 +63,8 @@ data class NtpPacket(
         private const val PACKET_SIZE_IN_BYTES = 48
 
         fun createForClient(
-            versionNumber: Int = 4,
-            transmitTimestamp: Long = 0
+            transmitTimestamp: Long,
+            versionNumber: Int = 4
         ): NtpPacket {
             return NtpPacket(0, versionNumber, 3, 0, 0, 0, transmitTimestamp)
         }

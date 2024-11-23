@@ -20,6 +20,7 @@ package co.elastic.apm.android.sdk.internal.time.ntp.sntp
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class NtpPacketTest {
 
@@ -122,6 +123,13 @@ class NtpPacketTest {
                 expectedTransmitTimestamp
             )
         )
+    }
+
+    @Test
+    fun `Parse byte array error if size is less than the min expected (48)`() {
+        assertThrows<IllegalArgumentException> {
+            NtpPacket.parse("00".toByteArray())
+        }
     }
 
     @OptIn(ExperimentalUnsignedTypes::class)

@@ -30,7 +30,12 @@ data class NtpPacket(
     val transmitTimestamp: Long
 ) {
     companion object {
+        private const val PACKET_SIZE_IN_BYTES = 48
+
         fun parse(bytes: ByteArray): NtpPacket {
+            if (bytes.size < PACKET_SIZE_IN_BYTES) {
+                throw IllegalArgumentException("The min byte array size allowed is $PACKET_SIZE_IN_BYTES, the provided array size is ${bytes.size}")
+            }
             val buffer = ByteBuffer.wrap(bytes)
             val firstByte = buffer.get().toInt()
             val leapIndicator = firstByte shr 6
@@ -54,7 +59,7 @@ data class NtpPacket(
     }
 
     fun toByteArray(): ByteArray {
-        val buffer = ByteBuffer.allocate(48)
+        val buffer = ByteBuffer.allocate(PACKET_SIZE_IN_BYTES)
         val li = leapIndicator shl 6
         val version = versionNumber shl 3
         val firstByte = li or version or mode

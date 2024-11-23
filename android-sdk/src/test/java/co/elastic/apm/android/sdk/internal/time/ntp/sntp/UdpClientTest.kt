@@ -29,6 +29,7 @@ import java.net.SocketException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.time.Duration
+import java.util.concurrent.CountDownLatch
 
 
 class UdpClientTest {
@@ -120,6 +121,25 @@ class UdpClientTest {
         client = UdpClient("nonexistent", SERVER_PORT, 256)
         assertThrows<UnknownHostException> {
             client.send("Example".toByteArray())
+        }
+    }
+
+    @Test
+    fun `Connection is close while waiting for message`() {
+        val latch = CountDownLatch(1)
+        server.responseHandler = {
+            Thread.sleep(10_000)
+        }
+
+        Thread {
+            latch.await()
+            Thread.sleep(1000)
+            client.close()
+        }.start()
+
+        assertThrows<SocketException> {
+            latch.countDown()
+            client.send("Example".toByteArray(), Duration.ofSeconds(60))
         }
     }
 

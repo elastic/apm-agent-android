@@ -42,16 +42,17 @@ class UdpClient(
     }
 
     @Throws(SocketTimeoutException::class, SocketException::class)
-    fun send(bytes: ByteArray, timeout: Duration = Duration.ZERO): ByteArray = synchronized(this) {
-        socket.soTimeout = timeout.toMillis().toInt()
+    fun send(bytes: ByteArray, timeout: Duration = Duration.ofSeconds(10)): ByteArray =
+        synchronized(this) {
+            socket.soTimeout = timeout.toMillis().toInt()
 
-        val packet = DatagramPacket(bytes, bytes.size, address, port)
-        socket.send(packet)
+            val packet = DatagramPacket(bytes, bytes.size, address, port)
+            socket.send(packet)
 
-        val responsePacket = DatagramPacket(ByteArray(responseBufferSize), responseBufferSize)
-        socket.receive(responsePacket)
-        return responsePacket.data.copyOf(responsePacket.length)
-    }
+            val responsePacket = DatagramPacket(ByteArray(responseBufferSize), responseBufferSize)
+            socket.receive(responsePacket)
+            return responsePacket.data.copyOf(responsePacket.length)
+        }
 
     override fun close() {
         socket.close()

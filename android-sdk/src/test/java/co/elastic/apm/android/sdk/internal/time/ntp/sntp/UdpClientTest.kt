@@ -28,6 +28,7 @@ import java.net.DatagramSocket
 import java.net.InetAddress
 import java.net.SocketException
 import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 import java.time.Duration
 
 
@@ -74,6 +75,31 @@ class UdpClientTest {
                 "Example".toByteArray(),
                 Duration.ofSeconds(1)
             )
+        }
+    }
+
+    @Test
+    fun `Server port is not reachable`() {
+        client = UdpClient.create(SERVER_HOST, SERVER_PORT + 1, 256)
+
+        assertThrows<SocketTimeoutException> {
+            client.send("Example".toByteArray(), Duration.ofSeconds(1))
+        }
+    }
+
+    @Test
+    fun `Server is not active`() {
+        server.close()
+
+        assertThrows<SocketTimeoutException> {
+            client.send("Example".toByteArray(), Duration.ofSeconds(1))
+        }
+    }
+
+    @Test
+    fun `Server host not found`() {
+        assertThrows<UnknownHostException> {
+            client = UdpClient.create("nonexistent", SERVER_PORT, 256)
         }
     }
 

@@ -22,13 +22,17 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
 import java.net.SocketException
+import java.net.SocketTimeoutException
+import java.time.Duration
 
 
 class UdpClientTest {
+    private lateinit var client: UdpClient
     private lateinit var server: FlexiServer
 
     companion object {
@@ -40,10 +44,12 @@ class UdpClientTest {
     fun setUp() {
         server = FlexiServer(SERVER_PORT)
         server.start()
+        client = UdpClient.create(SERVER_HOST, SERVER_PORT, 256)
     }
 
     @AfterEach
     fun tearDown() {
+        client.close()
         server.close()
     }
 
@@ -51,11 +57,24 @@ class UdpClientTest {
     fun `Happy path`() {
         val message = "Hello World!"
         val packet = message.toByteArray()
-        val client = UdpClient.create(SERVER_HOST, SERVER_PORT, 256)
 
         val response = client.send(packet)
 
         assertThat(String(response)).isEqualTo("Server response")
+    }
+
+    @Test
+    fun `Server takes too long to respond`() {
+        server.responseHandler = {
+            Thread.sleep(Duration.ofSeconds(5).toMillis())
+        }
+
+        assertThrows<SocketTimeoutException> {
+            client.send(
+                "Example".toByteArray(),
+                Duration.ofSeconds(1)
+            )
+        }
     }
 
     private class FlexiServer(port: Int) : Thread() {
@@ -71,6 +90,9 @@ class UdpClientTest {
 
         override fun run() {
             while (true) {
+                if (socket.isClosed) {
+                    continue
+                }
                 try {
                     val packet = DatagramPacket(buf, buf.size)
                     socket.receive(packet)

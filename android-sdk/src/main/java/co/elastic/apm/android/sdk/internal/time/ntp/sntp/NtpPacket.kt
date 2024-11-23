@@ -52,9 +52,9 @@ data class NtpPacket(
         val firstByte = li or version or mode
         buffer.put(firstByte.toByte())
         buffer.put(stratum.toByte())
-        buffer.putLong(24, originateTimestamp)
-        buffer.putLong(32, receiveTimestamp)
-        buffer.putLong(40, transmitTimestamp)
+        buffer.putInt(24, originateTimestamp.toInt())
+        buffer.putInt(32, receiveTimestamp.toInt())
+        buffer.putInt(40, transmitTimestamp.toInt())
 
         return buffer.array()
     }
@@ -73,15 +73,16 @@ data class NtpPacket(
             if (bytes.size < PACKET_SIZE_IN_BYTES) {
                 throw IllegalArgumentException("The min byte array size allowed is $PACKET_SIZE_IN_BYTES, the provided array size is ${bytes.size}.")
             }
-            val buffer = ByteBuffer.wrap(bytes)
-            val firstByte = buffer.get().toInt()
+            val longBuffer = ByteBuffer.allocate(8)
+            val firstByte = bytes.first().toInt()
             val leapIndicator = firstByte shr 6
             val versionNumber = (firstByte shr 3) and 3
             val mode = firstByte and 7
-            val stratum = buffer.get().toInt()
-            val originateTimestamp = buffer.getLong(24)
-            val receiveTimestamp = buffer.getLong(32)
-            val transmitTimestamp = buffer.getLong(40)
+            val stratum = bytes[1].toInt()
+
+            val originateTimestamp = getLong(bytes.sliceArray(24 until 28), longBuffer)
+            val receiveTimestamp = getLong(bytes.sliceArray(32 until 36), longBuffer)
+            val transmitTimestamp = getLong(bytes.sliceArray(40 until 44), longBuffer)
 
             return NtpPacket(
                 leapIndicator,
@@ -92,6 +93,14 @@ data class NtpPacket(
                 receiveTimestamp,
                 transmitTimestamp
             )
+        }
+
+        private fun getLong(bytes: ByteArray, longBuffer: ByteBuffer): Long {
+            longBuffer.position(4)
+            longBuffer.put(bytes)
+            longBuffer.clear()
+            val originateTimestamp = longBuffer.getLong()
+            return originateTimestamp
         }
     }
 }

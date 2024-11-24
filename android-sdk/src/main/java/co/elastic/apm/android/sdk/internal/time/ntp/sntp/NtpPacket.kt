@@ -19,6 +19,7 @@
 package co.elastic.apm.android.sdk.internal.time.ntp.sntp
 
 import java.nio.ByteBuffer
+import kotlin.math.roundToLong
 
 internal data class NtpPacket(
     val leapIndicator: Int,
@@ -52,15 +53,20 @@ internal data class NtpPacket(
         val firstByte = li or version or mode
         buffer.put(firstByte.toByte())
         buffer.put(stratum.toByte())
-        buffer.putInt(24, originateTimestamp.toInt())
-        buffer.putInt(32, receiveTimestamp.toInt())
-        buffer.putInt(40, transmitTimestamp.toInt())
+
+        buffer.putInt(24, (originateTimestamp / MILLIS_FACTOR).toInt())
+        buffer.putInt(28, millisToFraction(originateTimestamp % MILLIS_FACTOR).toInt())
+        buffer.putInt(32, (receiveTimestamp / MILLIS_FACTOR).toInt())
+        buffer.putInt(36, millisToFraction(receiveTimestamp % MILLIS_FACTOR).toInt())
+        buffer.putInt(40, (transmitTimestamp / MILLIS_FACTOR).toInt())
+        buffer.putInt(44, millisToFraction(transmitTimestamp % MILLIS_FACTOR).toInt())
 
         return buffer.array()
     }
 
     companion object {
         private const val PACKET_SIZE_IN_BYTES = 48
+        private const val MILLIS_FACTOR = 1000L
 
         fun createForClient(
             transmitTimestamp: Long,
@@ -80,9 +86,23 @@ internal data class NtpPacket(
             val mode = firstByte and 7
             val stratum = bytes[1].toInt()
 
-            val originateTimestamp = getLong(bytes.sliceArray(24 until 28), longBuffer)
-            val receiveTimestamp = getLong(bytes.sliceArray(32 until 36), longBuffer)
-            val transmitTimestamp = getLong(bytes.sliceArray(40 until 44), longBuffer)
+            val originateTimestamp = getTimestamp(
+                longBuffer,
+                bytes.sliceArray(24 until 28),
+                bytes.sliceArray(28 until 32)
+            )
+            val receiveTimestamp =
+                getTimestamp(
+                    longBuffer,
+                    bytes.sliceArray(32 until 36),
+                    bytes.sliceArray(36 until 40)
+                )
+            val transmitTimestamp =
+                getTimestamp(
+                    longBuffer,
+                    bytes.sliceArray(40 until 44),
+                    bytes.sliceArray(44 until 48)
+                )
 
             return NtpPacket(
                 leapIndicator,
@@ -95,12 +115,29 @@ internal data class NtpPacket(
             )
         }
 
-        private fun getLong(bytes: ByteArray, longBuffer: ByteBuffer): Long {
+        private fun millisToFraction(millis: Long): Long {
+            return (((1L shl 32).toDouble() * millis.toDouble()) / 1000.0).roundToLong()
+        }
+
+        private fun fractionToMillis(fraction: Long): Long {
+            return ((fraction.toDouble() * 1000.0) / (1L shl 32).toDouble()).roundToLong()
+        }
+
+        private fun getTimestamp(
+            longBuffer: ByteBuffer,
+            secondsBytes: ByteArray,
+            fractionBytes: ByteArray
+        ): Long {
+            val seconds = bytesToLong(longBuffer, secondsBytes)
+            val fraction = bytesToLong(longBuffer, fractionBytes)
+            return (seconds * MILLIS_FACTOR) + fractionToMillis(fraction)
+        }
+
+        private fun bytesToLong(longBuffer: ByteBuffer, bytes: ByteArray): Long {
             longBuffer.position(4)
             longBuffer.put(bytes)
             longBuffer.clear()
-            val originateTimestamp = longBuffer.getLong()
-            return originateTimestamp
+            return longBuffer.getLong()
         }
     }
 }

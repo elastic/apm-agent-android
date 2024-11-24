@@ -30,9 +30,9 @@ class NtpPacketTest {
         val versionNumber = 2
         val mode = 4
         val stratum = 14
-        val originateTimestamp = 4_294_967_295L
-        val receiveTimestamp = 3_000_000_000L
-        val transmitTimestamp = 2_000_000_000L
+        val originateTimestamp = 4_294_967_295_123L
+        val receiveTimestamp = 3_000_000_000_200L
+        val transmitTimestamp = 2_000_000_000_300L
         val packet = NtpPacket(
             leapIndicator,
             versionNumber,
@@ -60,15 +60,15 @@ class NtpPacketTest {
             
             Originate Timestamp
             11111111111111111111111111111111
-            ${"0".repeat(32)}
+            00011111011111001110110110010001
             
             Receive Timestamp
             10110010110100000101111000000000
-            ${"0".repeat(32)}
+            00110011001100110011001100110011
             
             Transmit Timestamp
             01110111001101011001010000000000
-            ${"0".repeat(32)}
+            01001100110011001100110011001101
         """.trimIndent()
 
         assertThat(packet.toByteArray()).isEqualTo(binaryStringToByteArray(expected))
@@ -80,9 +80,9 @@ class NtpPacketTest {
         val expectedVersionNumber = 3
         val expectedMode = 4
         val expectedStratum = 10
-        val expectedOriginateTimestamp = 2_000_000_000L
-        val expectedReceiveTimestamp = 4_294_967_295L
-        val expectedTransmitTimestamp = 3_000_000_000L
+        val expectedOriginateTimestamp = 2_000_000_000_300L
+        val expectedReceiveTimestamp = 4_294_967_295_123L
+        val expectedTransmitTimestamp = 3_000_000_000_200L
         val input = """
             LI-VN-Mode-[padding]
             01-011-100-00001010 ${"0".repeat(16)}
@@ -101,15 +101,15 @@ class NtpPacketTest {
             
             Originate Timestamp
             01110111001101011001010000000000
-            ${"0".repeat(32)}
+            01001100110011001100110011001101
             
             Receive Timestamp
             11111111111111111111111111111111
-            ${"0".repeat(32)}
+            00011111011111001110110110010001
             
             Transmit Timestamp
             10110010110100000101111000000000
-            ${"0".repeat(32)}
+            00110011001100110011001100110011
         """.trimIndent()
 
         assertThat(NtpPacket.parse(binaryStringToByteArray(input))).isEqualTo(

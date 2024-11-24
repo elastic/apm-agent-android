@@ -67,6 +67,7 @@ internal data class NtpPacket(
     companion object {
         private const val PACKET_SIZE_IN_BYTES = 48
         private const val MILLIS_FACTOR = 1000L
+        private const val FRACTIONAL = (1L shl 32).toDouble()
 
         fun createForClient(
             transmitTimestamp: Long,
@@ -91,18 +92,16 @@ internal data class NtpPacket(
                 bytes.sliceArray(24 until 28),
                 bytes.sliceArray(28 until 32)
             )
-            val receiveTimestamp =
-                getTimestamp(
-                    longBuffer,
-                    bytes.sliceArray(32 until 36),
-                    bytes.sliceArray(36 until 40)
-                )
-            val transmitTimestamp =
-                getTimestamp(
-                    longBuffer,
-                    bytes.sliceArray(40 until 44),
-                    bytes.sliceArray(44 until 48)
-                )
+            val receiveTimestamp = getTimestamp(
+                longBuffer,
+                bytes.sliceArray(32 until 36),
+                bytes.sliceArray(36 until 40)
+            )
+            val transmitTimestamp = getTimestamp(
+                longBuffer,
+                bytes.sliceArray(40 until 44),
+                bytes.sliceArray(44 until 48)
+            )
 
             return NtpPacket(
                 leapIndicator,
@@ -116,11 +115,11 @@ internal data class NtpPacket(
         }
 
         private fun millisToFraction(millis: Long): Long {
-            return (((1L shl 32).toDouble() * millis.toDouble()) / 1000.0).roundToLong()
+            return ((FRACTIONAL * millis) / MILLIS_FACTOR).roundToLong()
         }
 
         private fun fractionToMillis(fraction: Long): Long {
-            return ((fraction.toDouble() * 1000.0) / (1L shl 32).toDouble()).roundToLong()
+            return ((fraction * MILLIS_FACTOR) / FRACTIONAL).roundToLong()
         }
 
         private fun getTimestamp(

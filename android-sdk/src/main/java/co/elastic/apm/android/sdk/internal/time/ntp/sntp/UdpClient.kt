@@ -36,7 +36,7 @@ internal class UdpClient(
     private var address: InetAddress? = null
 
     @Throws(UnknownHostException::class, SocketTimeoutException::class, SocketException::class)
-    fun send(bytes: ByteArray, timeout: Duration = Duration.ofSeconds(10)): ByteArray =
+    fun send(bytes: ByteArray, timeout: Duration = Duration.ofSeconds(5)): ByteArray =
         synchronized(this) {
             if (address == null) {
                 address = InetAddress.getByName(host)

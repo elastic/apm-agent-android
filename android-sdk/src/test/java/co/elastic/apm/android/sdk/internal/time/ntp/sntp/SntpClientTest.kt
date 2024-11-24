@@ -27,7 +27,7 @@ class SntpClientTest {
 
     @BeforeEach
     fun setUp() {
-        client = SntpClient()
+        client = SntpClient.create()
     }
 
     @AfterEach

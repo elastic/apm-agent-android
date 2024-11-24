@@ -19,14 +19,26 @@
 package co.elastic.apm.android.sdk.internal.time.ntp.sntp
 
 import java.io.Closeable
-import java.util.concurrent.TimeUnit
 
 internal class SntpClient(private val udpClient: UdpClient) : Closeable {
 
     fun fetchTime() {
-        val request = NtpPacket.createForClient(getCurrentNtpTimeSeconds())
-        val response = NtpPacket.parse(udpClient.send(request.toByteArray()))
-        println("The response: $response")
+        val t1 = getCurrentNtpTimeMillis()
+        val request = NtpPacket.createForClient(t1)
+        val responseBytes = udpClient.send(request.toByteArray())
+        val t4 = getCurrentNtpTimeMillis()
+        val response = NtpPacket.parse(responseBytes)
+        val t2 = response.receiveTimestamp
+        val t3 = response.transmitTimestamp
+
+        println("Request bytes: ${request.toByteArray().toList()}")
+        println("Response bytes: ${responseBytes.toList()}")
+
+        println("The response: $response") // todo delete
+
+        val clockOffsetMillis = ((t2 - t1) + (t3 - t4)) / 2
+
+        println("Offset: $clockOffsetMillis")
     }
 
     override fun close() {
@@ -34,14 +46,14 @@ internal class SntpClient(private val udpClient: UdpClient) : Closeable {
     }
 
     companion object {
-        private const val NTP_EPOCH_DIFF_SECONDS = 2208988800L // According to RFC-868.
+        private const val NTP_EPOCH_DIFF_MILLIS = 2208988800000L // According to RFC-868.
 
         fun create(): SntpClient {
             return SntpClient(UdpClient("time.android.com", 123, 48))
         }
 
-        private fun getCurrentNtpTimeSeconds(): Long {
-            return TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()) + NTP_EPOCH_DIFF_SECONDS
+        private fun getCurrentNtpTimeMillis(): Long {
+            return System.currentTimeMillis() + NTP_EPOCH_DIFF_MILLIS
         }
     }
 }

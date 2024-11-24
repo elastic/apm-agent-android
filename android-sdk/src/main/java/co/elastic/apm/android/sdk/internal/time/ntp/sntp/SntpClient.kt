@@ -18,9 +18,13 @@
  */
 package co.elastic.apm.android.sdk.internal.time.ntp.sntp
 
+import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import java.io.Closeable
 
-internal class SntpClient(private val udpClient: UdpClient) : Closeable {
+internal class SntpClient(
+    private val udpClient: UdpClient,
+    private val systemTime: SystemTimeProvider
+) : Closeable {
 
     fun fetchTime() {
         val t1 = getCurrentNtpTimeMillis()
@@ -41,6 +45,10 @@ internal class SntpClient(private val udpClient: UdpClient) : Closeable {
         println("Offset: $clockOffsetMillis")
     }
 
+    private fun getCurrentNtpTimeMillis(): Long {
+        return systemTime.currentTimeMillis + NTP_EPOCH_DIFF_MILLIS
+    }
+
     override fun close() {
         udpClient.close()
     }
@@ -49,11 +57,7 @@ internal class SntpClient(private val udpClient: UdpClient) : Closeable {
         private const val NTP_EPOCH_DIFF_MILLIS = 2208988800000L // According to RFC-868.
 
         fun create(): SntpClient {
-            return SntpClient(UdpClient("time.android.com", 123, 48))
-        }
-
-        private fun getCurrentNtpTimeMillis(): Long {
-            return System.currentTimeMillis() + NTP_EPOCH_DIFF_MILLIS
+            return SntpClient(UdpClient("time.android.com", 123, 48), SystemTimeProvider.get())
         }
     }
 }

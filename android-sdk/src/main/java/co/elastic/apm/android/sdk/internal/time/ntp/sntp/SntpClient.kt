@@ -39,7 +39,7 @@ internal class SntpClient(
         }
 
         val t1 = getCurrentNtpTimeMillis()
-        val request = NtpPacket.createForClient(t1)
+        val request = NtpPacket.createForClient(t1, VERSION)
         val responseBytes = udpClient.send(request.toByteArray())
         val t4 = getCurrentNtpTimeMillis()
         val response = NtpPacket.parse(responseBytes)
@@ -51,6 +51,9 @@ internal class SntpClient(
         }
         if (response.leapIndicator == 3) {
             return Response.Error(ErrorType.TRY_LATER)
+        }
+        if (response.versionNumber != VERSION) {
+            return Response.Error(ErrorType.INVALID_VERSION)
         }
 
         val clockOffsetMillis = ((t2 - t1) + (t3 - t4)) / 2
@@ -73,6 +76,7 @@ internal class SntpClient(
 
     companion object {
         private const val NTP_EPOCH_DIFF_MILLIS = 2208988800000L // According to RFC-868.
+        private const val VERSION = 4
         private val MIN_POLLING_DELAY = TimeUnit.MINUTES.toMillis(1)
 
         fun create(): SntpClient {
@@ -87,7 +91,8 @@ internal class SntpClient(
 
     enum class ErrorType {
         TRY_LATER,
-        ORIGIN_TIME_NOT_MATCHING
+        ORIGIN_TIME_NOT_MATCHING,
+        INVALID_VERSION
     }
 }
 

@@ -108,14 +108,16 @@ class SntpClientTest {
 
     @Test
     fun `Discard response if LI value is 3`() {
-        setUpResponse(100, leapIndicator = 3)
+        setUpResponse(100, responseLeapIndicator = 3)
 
         assertThat(client.fetchTimeOffset()).isEqualTo(SntpClient.Response.Error(SntpClient.ErrorType.TRY_LATER))
     }
 
     @Test
     fun `Verify VN is the same as the one sent from the client`() {
+        setUpResponse(100, requestVersionNumber = 4, responseVersionNumber = 3)
 
+        assertThat(client.fetchTimeOffset()).isEqualTo(SntpClient.Response.Error(SntpClient.ErrorType.INVALID_VERSION))
     }
 
     @Test
@@ -144,18 +146,21 @@ class SntpClientTest {
         transmitServerTime: Long = receiveServerTime + 5,
         receiveClientTime: Long = transmitClientTime + 5,
         originateTimestamp: Long = transmitClientTime,
-        leapIndicator: Int = 0
+        responseLeapIndicator: Int = 0,
+        requestVersionNumber: Int = 4,
+        responseVersionNumber: Int = requestVersionNumber
     ) {
         every { systemTimeProvider.currentTimeMillis }.returns(transmitClientTime)
             .andThen(receiveClientTime)
         every {
             udpClient.send(
-                NtpPacket.createForClient(toNtpTime(transmitClientTime)).toByteArray()
+                NtpPacket.createForClient(toNtpTime(transmitClientTime), requestVersionNumber)
+                    .toByteArray()
             )
         }.returns(
             NtpPacket(
-                leapIndicator,
-                4,
+                responseLeapIndicator,
+                responseVersionNumber,
                 4,
                 1,
                 toNtpTime(originateTimestamp),

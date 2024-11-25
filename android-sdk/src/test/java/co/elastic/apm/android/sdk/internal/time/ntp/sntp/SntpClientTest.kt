@@ -122,7 +122,9 @@ class SntpClientTest {
 
     @Test
     fun `Discard response if mode is not 4`() {
+        setUpResponse(100, responseMode = 3)
 
+        assertThat(client.fetchTimeOffset()).isEqualTo(SntpClient.Response.Error(SntpClient.ErrorType.INVALID_MODE))
     }
 
     @Test
@@ -148,7 +150,9 @@ class SntpClientTest {
         originateTimestamp: Long = transmitClientTime,
         responseLeapIndicator: Int = 0,
         requestVersionNumber: Int = 4,
-        responseVersionNumber: Int = requestVersionNumber
+        responseVersionNumber: Int = requestVersionNumber,
+        responseMode: Int = 4,
+        responseStratum: Int = 1
     ) {
         every { systemTimeProvider.currentTimeMillis }.returns(transmitClientTime)
             .andThen(receiveClientTime)
@@ -161,8 +165,8 @@ class SntpClientTest {
             NtpPacket(
                 responseLeapIndicator,
                 responseVersionNumber,
-                4,
-                1,
+                responseMode,
+                responseStratum,
                 toNtpTime(originateTimestamp),
                 toNtpTime(receiveServerTime),
                 toNtpTime(transmitServerTime)

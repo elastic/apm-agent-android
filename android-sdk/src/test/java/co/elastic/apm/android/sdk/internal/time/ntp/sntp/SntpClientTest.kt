@@ -72,7 +72,7 @@ class SntpClientTest {
             initialTime + TimeUnit.MINUTES.toMillis(1) - 1
         )
 
-        assertThat(client.fetchTimeOffset()).isEqualTo(SntpClient.Response.Error(SntpClient.ErrorCause.TRY_LATER))
+        assertThat(client.fetchTimeOffset()).isEqualTo(SntpClient.Response.Error(SntpClient.ErrorType.TRY_LATER))
 
         // Third try in just after a minute:
         every { systemTimeProvider.elapsedRealTime }.returns(
@@ -103,12 +103,14 @@ class SntpClientTest {
         val timestampSent = DEFAULT_SERVER_RECEIVE_TIME - 100
         setUpResponse(100, transmitClientTime = timestampSent, originateTimestamp = 123)
 
-        assertThat(client.fetchTimeOffset()).isEqualTo(SntpClient.Response.Error(SntpClient.ErrorCause.ORIGIN_TIME_NOT_MATCHING))
+        assertThat(client.fetchTimeOffset()).isEqualTo(SntpClient.Response.Error(SntpClient.ErrorType.ORIGIN_TIME_NOT_MATCHING))
     }
 
     @Test
-    fun `Discard response if LI value is not between 1 and 3`() {
+    fun `Discard response if LI value is 3`() {
+        setUpResponse(100, leapIndicator = 3)
 
+        assertThat(client.fetchTimeOffset()).isEqualTo(SntpClient.Response.Error(SntpClient.ErrorType.TRY_LATER))
     }
 
     @Test
@@ -141,7 +143,8 @@ class SntpClientTest {
         transmitClientTime: Long = receiveServerTime - expectedOffset,
         transmitServerTime: Long = receiveServerTime + 5,
         receiveClientTime: Long = transmitClientTime + 5,
-        originateTimestamp: Long = transmitClientTime
+        originateTimestamp: Long = transmitClientTime,
+        leapIndicator: Int = 0
     ) {
         every { systemTimeProvider.currentTimeMillis }.returns(transmitClientTime)
             .andThen(receiveClientTime)
@@ -151,7 +154,7 @@ class SntpClientTest {
             )
         }.returns(
             NtpPacket(
-                0,
+                leapIndicator,
                 4,
                 4,
                 1,

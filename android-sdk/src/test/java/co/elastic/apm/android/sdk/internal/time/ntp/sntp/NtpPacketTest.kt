@@ -76,7 +76,7 @@ class NtpPacketTest {
 
     @Test
     fun `Parse byte array`() {
-        val expectedLeapIndicator = 1
+        val expectedLeapIndicator = 2
         val expectedVersionNumber = 4
         val expectedMode = 4
         val expectedStratum = 10
@@ -85,7 +85,7 @@ class NtpPacketTest {
         val expectedTransmitTimestamp = 3_000_000_000_200L
         val input = """
             LI-VN-Mode-[padding]
-            01-100-100-00001010 ${"0".repeat(16)}
+            10-100-100-00001010 ${"0".repeat(16)}
            
             Root delay
             ${"0".repeat(32)}

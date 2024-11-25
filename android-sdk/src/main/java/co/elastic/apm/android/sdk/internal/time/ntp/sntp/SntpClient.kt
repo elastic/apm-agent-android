@@ -34,7 +34,7 @@ internal class SntpClient(
     fun fetchTimeOffset(): Response = synchronized(this) {
         lastSuccessfulRequestTime?.let {
             if (it + MIN_POLLING_DELAY > systemTime.elapsedRealTime) {
-                return Response.Error(ErrorCause.TRY_LATER)
+                return Response.Error(ErrorType.TRY_LATER)
             }
         }
 
@@ -47,7 +47,10 @@ internal class SntpClient(
         val t3 = response.transmitTimestamp
 
         if (t1 / 1000 != response.originateTimestamp / 1000) {
-            return Response.Error(ErrorCause.ORIGIN_TIME_NOT_MATCHING)
+            return Response.Error(ErrorType.ORIGIN_TIME_NOT_MATCHING)
+        }
+        if (response.leapIndicator == 3) {
+            return Response.Error(ErrorType.TRY_LATER)
         }
 
         val clockOffsetMillis = ((t2 - t1) + (t3 - t4)) / 2
@@ -79,10 +82,10 @@ internal class SntpClient(
 
     sealed class Response {
         data class Success(val offsetMillis: Long) : Response()
-        data class Error(val cause: ErrorCause) : Response()
+        data class Error(val type: ErrorType) : Response()
     }
 
-    enum class ErrorCause {
+    enum class ErrorType {
         TRY_LATER,
         ORIGIN_TIME_NOT_MATCHING
     }

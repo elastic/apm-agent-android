@@ -59,6 +59,10 @@ internal class SntpClient(
         udpClient.close()
     }
 
+    fun reset() = synchronized(this) {
+        lastSuccessfulRequestTime = null
+    }
+
     companion object {
         private const val NTP_EPOCH_DIFF_MILLIS = 2208988800000L // According to RFC-868.
         private val MIN_POLLING_DELAY = TimeUnit.MINUTES.toMillis(1)

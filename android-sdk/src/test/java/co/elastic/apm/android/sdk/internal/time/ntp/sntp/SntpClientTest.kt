@@ -81,17 +81,24 @@ class SntpClientTest {
     }
 
     @Test
-    fun `Do not limit polling interval after a failed request`() {
-
-    }
-
-    @Test
     fun `Force polling despite interval limit`() {
+        val initialTime = 1_000L
+        every { systemTimeProvider.elapsedRealTime }.returns(initialTime)
+        setUpSuccessfulResponse(-10)
 
+        assertThat(client.fetchTimeOffset()).isEqualTo(SntpClient.Response.Success(-10))
+
+        // Second try in just under a minute after reset:
+        setUpSuccessfulResponse(100)
+        every { systemTimeProvider.elapsedRealTime }.returns(
+            initialTime + TimeUnit.MINUTES.toMillis(1) - 1
+        )
+        client.reset()
+        assertThat(client.fetchTimeOffset()).isEqualTo(SntpClient.Response.Success(100))
     }
 
     @Test
-    fun `Check returned origin timestamp matches the timestamp sent`() {
+    fun `Verify returned origin timestamp matches the timestamp sent`() {
 
     }
 
@@ -118,6 +125,10 @@ class SntpClientTest {
     @Test
     fun `Discard response if stratum is 0`() {
 
+    }
+
+    @Test
+    fun `Do not limit polling interval after a failed request`() {
     }
 
     private fun setUpSuccessfulResponse(expectedOffset: Long) {

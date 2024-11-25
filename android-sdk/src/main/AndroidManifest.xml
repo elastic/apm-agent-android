@@ -7,14 +7,6 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application>
-        <!-- Launch TrueTime's cache clearing process when the device has been rebooted -->
-        <receiver
-            android:name=".internal.time.ntp.TrueTimeBootBroadcastReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
         <provider
             android:name=".internal.features.contentprovider.ElasticInitializer"
             android:authorities="${applicationId}.elasticagentinitializer"

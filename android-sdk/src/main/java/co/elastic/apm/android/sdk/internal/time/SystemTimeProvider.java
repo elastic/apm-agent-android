@@ -18,6 +18,8 @@
  */
 package co.elastic.apm.android.sdk.internal.time;
 
+import android.os.SystemClock;
+
 public class SystemTimeProvider {
 
     private static SystemTimeProvider INSTANCE;
@@ -39,5 +41,9 @@ public class SystemTimeProvider {
 
     public long getNanoTime() {
         return System.nanoTime();
+    }
+
+    public long getElapsedRealTime() {
+        return SystemClock.elapsedRealtime();
     }
 }

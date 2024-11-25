@@ -45,6 +45,11 @@ internal class SntpClient(
         val response = NtpPacket.parse(responseBytes)
         val t2 = response.receiveTimestamp
         val t3 = response.transmitTimestamp
+
+        if (t1 / 1000 != response.originateTimestamp / 1000) {
+            return Response.Error(ErrorCause.ORIGIN_TIME_NOT_MATCHING)
+        }
+
         val clockOffsetMillis = ((t2 - t1) + (t3 - t4)) / 2
 
         lastSuccessfulRequestTime = systemTime.elapsedRealTime
@@ -78,7 +83,8 @@ internal class SntpClient(
     }
 
     enum class ErrorCause {
-        TRY_LATER
+        TRY_LATER,
+        ORIGIN_TIME_NOT_MATCHING
     }
 }
 

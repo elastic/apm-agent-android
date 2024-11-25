@@ -34,6 +34,7 @@ class SntpClientTest {
 
     companion object {
         private const val NTP_EPOCH_DIFF_MILLIS = 2208988800000L // According to RFC-868.
+        private const val DEFAULT_SERVER_RECEIVE_TIME = 1_000_000_000_000L
     }
 
     @BeforeEach
@@ -47,7 +48,7 @@ class SntpClientTest {
     @Test
     fun `Fetch time offset, happy path`() {
         val expectedOffset = 100L
-        setUpSuccessfulResponse(expectedOffset)
+        setUpResponse(expectedOffset)
 
         val response = client.fetchTimeOffset()
 
@@ -61,12 +62,12 @@ class SntpClientTest {
     fun `Ensure min polling interval is one minute`() {
         val initialTime = 1_000L
         every { systemTimeProvider.elapsedRealTime }.returns(initialTime)
-        setUpSuccessfulResponse(-10)
+        setUpResponse(-10)
 
         assertThat(client.fetchTimeOffset()).isEqualTo(SntpClient.Response.Success(-10))
 
         // Second try in just under a minute:
-        setUpSuccessfulResponse(100)
+        setUpResponse(100)
         every { systemTimeProvider.elapsedRealTime }.returns(
             initialTime + TimeUnit.MINUTES.toMillis(1) - 1
         )
@@ -84,12 +85,12 @@ class SntpClientTest {
     fun `Force polling despite interval limit`() {
         val initialTime = 1_000L
         every { systemTimeProvider.elapsedRealTime }.returns(initialTime)
-        setUpSuccessfulResponse(-10)
+        setUpResponse(-10)
 
         assertThat(client.fetchTimeOffset()).isEqualTo(SntpClient.Response.Success(-10))
 
         // Second try in just under a minute after reset:
-        setUpSuccessfulResponse(100)
+        setUpResponse(100)
         every { systemTimeProvider.elapsedRealTime }.returns(
             initialTime + TimeUnit.MINUTES.toMillis(1) - 1
         )
@@ -99,7 +100,10 @@ class SntpClientTest {
 
     @Test
     fun `Verify returned origin timestamp matches the timestamp sent`() {
+        val timestampSent = DEFAULT_SERVER_RECEIVE_TIME - 100
+        setUpResponse(100, transmitClientTime = timestampSent, originateTimestamp = 123)
 
+        assertThat(client.fetchTimeOffset()).isEqualTo(SntpClient.Response.Error(SntpClient.ErrorCause.ORIGIN_TIME_NOT_MATCHING))
     }
 
     @Test
@@ -131,11 +135,14 @@ class SntpClientTest {
     fun `Do not limit polling interval after a failed request`() {
     }
 
-    private fun setUpSuccessfulResponse(expectedOffset: Long) {
-        val receiveServerTime = 1_000_000_000_000L
-        val transmitClientTime = receiveServerTime - expectedOffset
-        val transmitServerTime = receiveServerTime + 5
-        val receiveClientTime = transmitClientTime + 5
+    private fun setUpResponse(
+        expectedOffset: Long,
+        receiveServerTime: Long = DEFAULT_SERVER_RECEIVE_TIME,
+        transmitClientTime: Long = receiveServerTime - expectedOffset,
+        transmitServerTime: Long = receiveServerTime + 5,
+        receiveClientTime: Long = transmitClientTime + 5,
+        originateTimestamp: Long = transmitClientTime
+    ) {
         every { systemTimeProvider.currentTimeMillis }.returns(transmitClientTime)
             .andThen(receiveClientTime)
         every {
@@ -148,7 +155,7 @@ class SntpClientTest {
                 4,
                 4,
                 1,
-                toNtpTime(transmitClientTime),
+                toNtpTime(originateTimestamp),
                 toNtpTime(receiveServerTime),
                 toNtpTime(transmitServerTime)
             ).toByteArray()

@@ -58,6 +58,9 @@ internal class SntpClient(
         if (response.mode != 4) {
             return Response.Error(ErrorType.INVALID_MODE)
         }
+        if (response.transmitTimestamp == 0L) {
+            return Response.Error(ErrorType.INVALID_TRANSMIT_TIMESTAMP)
+        }
 
         val clockOffsetMillis = ((t2 - t1) + (t3 - t4)) / 2
 
@@ -96,7 +99,8 @@ internal class SntpClient(
         TRY_LATER,
         ORIGIN_TIME_NOT_MATCHING,
         INVALID_VERSION,
-        INVALID_MODE
+        INVALID_MODE,
+        INVALID_TRANSMIT_TIMESTAMP
     }
 }
 

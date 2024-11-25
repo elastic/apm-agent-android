@@ -129,7 +129,9 @@ class SntpClientTest {
 
     @Test
     fun `Discard response if transmit timestamp is 0`() {
+        setUpResponse(100, transmitServerTime = 0)
 
+        assertThat(client.fetchTimeOffset()).isEqualTo(SntpClient.Response.Error(SntpClient.ErrorType.INVALID_TRANSMIT_TIMESTAMP))
     }
 
     @Test
@@ -169,7 +171,7 @@ class SntpClientTest {
                 responseStratum,
                 toNtpTime(originateTimestamp),
                 toNtpTime(receiveServerTime),
-                toNtpTime(transmitServerTime)
+                if (transmitServerTime != 0L) toNtpTime(transmitServerTime) else 0
             ).toByteArray()
         )
     }

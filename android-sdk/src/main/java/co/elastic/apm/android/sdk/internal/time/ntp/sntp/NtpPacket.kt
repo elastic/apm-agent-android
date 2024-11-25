@@ -80,10 +80,10 @@ internal data class NtpPacket(
             if (bytes.size < PACKET_SIZE_IN_BYTES) {
                 throw IllegalArgumentException("The min byte array size allowed is $PACKET_SIZE_IN_BYTES, the provided array size is ${bytes.size}.")
             }
-            val longBuffer = ByteBuffer.allocate(8)
+            val longBuffer = ByteBuffer.allocate(Long.SIZE_BYTES)
             val firstByte = bytes.first().toInt()
             val leapIndicator = firstByte shr 6
-            val versionNumber = (firstByte shr 3) and 3
+            val versionNumber = (firstByte shr 3) and 7
             val mode = firstByte and 7
             val stratum = bytes[1].toInt()
 

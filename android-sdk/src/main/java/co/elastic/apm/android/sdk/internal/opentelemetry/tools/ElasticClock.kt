@@ -27,7 +27,7 @@ import io.opentelemetry.sdk.common.Clock
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 
-internal class ElasticClock @VisibleForTesting constructor(
+class ElasticClock @VisibleForTesting constructor(
     private val sntpClient: SntpClient,
     private val systemTimeProvider: SystemTimeProvider
 ) : ManagedPeriodicTask(), Clock {

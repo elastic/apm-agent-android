@@ -2,7 +2,6 @@ package co.elastic.apm.android.test.attributes.logs;
 
 import org.junit.Test;
 
-import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.test.common.logs.Logs;
 import co.elastic.apm.android.test.testutils.TestElasticClock;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
@@ -13,8 +12,7 @@ public class ClockTest extends BaseRobolectricTest {
     @Test
     public void whenALogIsCreated_itHasTimestampSetFromElasticClock() {
         long startTimeFromElasticClock = 123456789;
-        NtpManager ntpManager = getAgentDependenciesInjector().getNtpManager();
-        TestElasticClock clock = (TestElasticClock) ntpManager.getClock();
+        TestElasticClock clock = (TestElasticClock) getAgentDependenciesInjector().getClock();
         clock.setForcedNow(startTimeFromElasticClock);
         LogRecordData log = captureLog();
 
@@ -25,8 +23,7 @@ public class ClockTest extends BaseRobolectricTest {
     @Test
     public void whenAnEventIsCreated_itHasTimestampSetFromElasticClock() {
         long startTimeFromElasticClock = 123456789;
-        NtpManager ntpManager = getAgentDependenciesInjector().getNtpManager();
-        TestElasticClock clock = (TestElasticClock) ntpManager.getClock();
+        TestElasticClock clock = (TestElasticClock) getAgentDependenciesInjector().getClock();
         clock.setForcedNow(startTimeFromElasticClock);
         LogRecordData event = captureEvent();
 

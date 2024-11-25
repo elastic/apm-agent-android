@@ -59,10 +59,10 @@ import co.elastic.apm.android.sdk.internal.injection.DefaultAgentDependenciesInj
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.logs.ElasticLogRecordProcessor;
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.metrics.ElasticMetricReader;
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.spans.ElasticSpanProcessor;
-import co.elastic.apm.android.sdk.internal.opentelemetry.tools.ElasticClock;
 import co.elastic.apm.android.sdk.internal.opentelemetry.tools.Flusher;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
+import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicTask;
 import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicWorkService;
 import co.elastic.apm.android.sdk.internal.utilities.logging.AndroidLoggerFactory;
 import co.elastic.apm.android.sdk.session.SessionManager;
@@ -76,6 +76,7 @@ import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.incubator.events.GlobalEventLoggerProvider;
+import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.logs.LogRecordProcessor;
 import io.opentelemetry.sdk.logs.SdkLoggerProviderBuilder;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
@@ -91,7 +92,7 @@ public final class ElasticApmAgent {
     public final ElasticApmConfiguration configuration;
     private static ElasticApmAgent instance;
     private final Flusher flusher;
-    private ElasticClock clock;
+    private Clock clock;
 
     public static ElasticApmAgent get() {
         verifyInitialization();
@@ -222,7 +223,7 @@ public final class ElasticApmAgent {
     }
 
     private void onInitializationFinished(Application application, AgentDependenciesInjector injector) {
-        initializeClock();
+        initializeClock(injector);
         initializeSessionManager(injector);
         initializeConfigurations(injector);
         initializeOpentelemetry(application, injector);
@@ -238,9 +239,9 @@ public final class ElasticApmAgent {
         ProcessLifecycleOwner.get().getLifecycle().addObserver(new ElasticProcessLifecycleObserver());
     }
 
-    private void initializeClock() {
-        clock = ElasticClock.create();
-        getPeriodicWorkService().addTask(clock);
+    private void initializeClock(AgentDependenciesInjector injector) {
+        clock = injector.getClock();
+        getPeriodicWorkService().addTask((PeriodicTask) clock);
     }
 
     private void initializeConfigurations(AgentDependenciesInjector injector) {

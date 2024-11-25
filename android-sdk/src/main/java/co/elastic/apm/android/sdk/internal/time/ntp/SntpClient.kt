@@ -24,7 +24,7 @@ import java.io.Closeable
 /**
  * According to RFC-4330.
  */
-internal class SntpClient(
+class SntpClient(
     private val udpClient: UdpClient,
     private val systemTime: SystemTimeProvider
 ) : Closeable {

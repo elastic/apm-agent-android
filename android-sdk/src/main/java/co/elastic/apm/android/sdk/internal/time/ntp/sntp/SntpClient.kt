@@ -20,7 +20,6 @@ package co.elastic.apm.android.sdk.internal.time.ntp.sntp
 
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import java.io.Closeable
-import java.util.concurrent.TimeUnit
 
 /**
  * According to RFC-4330.
@@ -29,15 +28,8 @@ internal class SntpClient(
     private val udpClient: UdpClient,
     private val systemTime: SystemTimeProvider
 ) : Closeable {
-    private var lastSuccessfulRequestTime: Long? = null
 
     fun fetchTimeOffset(): Response = synchronized(this) {
-        lastSuccessfulRequestTime?.let {
-            if (it + MIN_POLLING_DELAY > systemTime.elapsedRealTime) {
-                return Response.Error(ErrorType.TRY_LATER)
-            }
-        }
-
         val t1 = getCurrentNtpTimeMillis()
         val request = NtpPacket.createForClient(t1, VERSION)
         val responseBytes = udpClient.send(request.toByteArray())
@@ -64,7 +56,6 @@ internal class SntpClient(
 
         val clockOffsetMillis = ((t2 - t1) + (t3 - t4)) / 2
 
-        lastSuccessfulRequestTime = systemTime.elapsedRealTime
         return Response.Success(clockOffsetMillis)
     }
 
@@ -76,14 +67,9 @@ internal class SntpClient(
         udpClient.close()
     }
 
-    fun reset() = synchronized(this) {
-        lastSuccessfulRequestTime = null
-    }
-
     companion object {
         private const val NTP_EPOCH_DIFF_MILLIS = 2208988800000L // According to RFC-868.
         private const val VERSION = 4
-        private val MIN_POLLING_DELAY = TimeUnit.MINUTES.toMillis(1)
 
         fun create(): SntpClient {
             return SntpClient(UdpClient("time.android.com", 123, 48), SystemTimeProvider.get())

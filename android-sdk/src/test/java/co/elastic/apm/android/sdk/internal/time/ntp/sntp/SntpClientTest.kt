@@ -25,7 +25,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
-import java.util.concurrent.TimeUnit
 
 class SntpClientTest {
     private lateinit var client: SntpClient
@@ -56,46 +55,6 @@ class SntpClientTest {
             fail("Response must be successful.")
         }
         assertThat(response.offsetMillis).isEqualTo(expectedOffset)
-    }
-
-    @Test
-    fun `Ensure min polling interval is one minute`() {
-        val initialTime = 1_000L
-        every { systemTimeProvider.elapsedRealTime }.returns(initialTime)
-        setUpResponse(-10)
-
-        assertThat(client.fetchTimeOffset()).isEqualTo(SntpClient.Response.Success(-10))
-
-        // Second try in just under a minute:
-        setUpResponse(100)
-        every { systemTimeProvider.elapsedRealTime }.returns(
-            initialTime + TimeUnit.MINUTES.toMillis(1) - 1
-        )
-
-        assertThat(client.fetchTimeOffset()).isEqualTo(SntpClient.Response.Error(SntpClient.ErrorType.TRY_LATER))
-
-        // Third try in just after a minute:
-        every { systemTimeProvider.elapsedRealTime }.returns(
-            initialTime + TimeUnit.MINUTES.toMillis(1)
-        )
-        assertThat(client.fetchTimeOffset()).isEqualTo(SntpClient.Response.Success(100))
-    }
-
-    @Test
-    fun `Force polling despite interval limit`() {
-        val initialTime = 1_000L
-        every { systemTimeProvider.elapsedRealTime }.returns(initialTime)
-        setUpResponse(-10)
-
-        assertThat(client.fetchTimeOffset()).isEqualTo(SntpClient.Response.Success(-10))
-
-        // Second try in just under a minute after reset:
-        setUpResponse(100)
-        every { systemTimeProvider.elapsedRealTime }.returns(
-            initialTime + TimeUnit.MINUTES.toMillis(1) - 1
-        )
-        client.reset()
-        assertThat(client.fetchTimeOffset()).isEqualTo(SntpClient.Response.Success(100))
     }
 
     @Test
@@ -139,10 +98,6 @@ class SntpClientTest {
         setUpResponse(100, responseStratum = 0)
 
         assertThat(client.fetchTimeOffset()).isEqualTo(SntpClient.Response.Error(SntpClient.ErrorType.TRY_LATER))
-    }
-
-    @Test
-    fun `Do not limit polling interval after a failed request`() {
     }
 
     private fun setUpResponse(

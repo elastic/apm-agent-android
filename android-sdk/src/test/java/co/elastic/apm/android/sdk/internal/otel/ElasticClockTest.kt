@@ -20,7 +20,7 @@ package co.elastic.apm.android.sdk.internal.otel
 
 import co.elastic.apm.android.sdk.internal.opentelemetry.tools.ElasticClock
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
-import co.elastic.apm.android.sdk.internal.time.ntp.sntp.SntpClient
+import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
 import co.elastic.apm.android.sdk.testutils.BaseTest
 import io.mockk.MockKAnnotations
 import io.mockk.every
@@ -49,7 +49,7 @@ internal class ElasticClockTest : BaseTest() {
         val nanoTime: Long = 123
         every { systemTimeProvider.nanoTime }.returns(nanoTime)
 
-        assertThat(nanoTime).isEqualTo(elasticClock.nanoTime())
+        assertThat(elasticClock.nanoTime()).isEqualTo(nanoTime)
     }
 
     @Test
@@ -58,20 +58,20 @@ internal class ElasticClockTest : BaseTest() {
         val systemTimeNanos = TimeUnit.MILLISECONDS.toNanos(systemTimeMillis)
         every { systemTimeProvider.currentTimeMillis }.returns(systemTimeMillis)
 
-        assertThat(systemTimeNanos).isEqualTo(elasticClock.now())
+        assertThat(elasticClock.now()).isEqualTo(systemTimeNanos)
     }
 
     @Test
     fun `Use network time offset when available`() {
         val systemTimeMillis: Long = 12345
         val offsetTime: Long = 5
-        val systemTimeNanos = TimeUnit.MILLISECONDS.toNanos(systemTimeMillis)
+        val expectedTime = TimeUnit.MILLISECONDS.toNanos(systemTimeMillis + offsetTime)
         every { systemTimeProvider.currentTimeMillis }.returns(systemTimeMillis)
-        every { sntpClient.fetchTimeOffset() }.returns(SntpClient.Response.Success(1))
+        every { sntpClient.fetchTimeOffset() }.returns(SntpClient.Response.Success(offsetTime))
 
         // Fetch time offset
         elasticClock.runTask()
 
-        assertThat(systemTimeNanos + offsetTime).isEqualTo(elasticClock.now())
+        assertThat(elasticClock.now()).isEqualTo(expectedTime)
     }
 }

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.time.ntp.sntp
+package co.elastic.apm.android.sdk.internal.time.ntp
 
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import java.io.Closeable

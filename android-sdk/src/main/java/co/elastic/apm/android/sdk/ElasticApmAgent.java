@@ -59,11 +59,11 @@ import co.elastic.apm.android.sdk.internal.injection.DefaultAgentDependenciesInj
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.logs.ElasticLogRecordProcessor;
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.metrics.ElasticMetricReader;
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.spans.ElasticSpanProcessor;
+import co.elastic.apm.android.sdk.internal.opentelemetry.tools.ElasticClock;
 import co.elastic.apm.android.sdk.internal.opentelemetry.tools.Flusher;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicWorkService;
-import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.sdk.internal.utilities.logging.AndroidLoggerFactory;
 import co.elastic.apm.android.sdk.session.SessionManager;
 import io.opentelemetry.android.OpenTelemetryRum;
@@ -91,7 +91,7 @@ public final class ElasticApmAgent {
     public final ElasticApmConfiguration configuration;
     private static ElasticApmAgent instance;
     private final Flusher flusher;
-    private NtpManager ntpManager;
+    private ElasticClock clock;
 
     public static ElasticApmAgent get() {
         verifyInitialization();
@@ -222,7 +222,7 @@ public final class ElasticApmAgent {
     }
 
     private void onInitializationFinished(Application application, AgentDependenciesInjector injector) {
-        initializeNtpManager(injector);
+        initializeClock();
         initializeSessionManager(injector);
         initializeConfigurations(injector);
         initializeOpentelemetry(application, injector);
@@ -238,10 +238,9 @@ public final class ElasticApmAgent {
         ProcessLifecycleOwner.get().getLifecycle().addObserver(new ElasticProcessLifecycleObserver());
     }
 
-    private void initializeNtpManager(AgentDependenciesInjector injector) {
-        ntpManager = injector.getNtpManager();
-        ntpManager.initialize();
-        getPeriodicWorkService().addTask(ntpManager);
+    private void initializeClock() {
+        clock = ElasticClock.create();
+        getPeriodicWorkService().addTask(clock);
     }
 
     private void initializeConfigurations(AgentDependenciesInjector injector) {
@@ -303,7 +302,7 @@ public final class ElasticApmAgent {
 
         OpenTelemetry openTelemetry = rum.getOpenTelemetry();
         GlobalOpenTelemetry.set(openTelemetry);
-        GlobalEventLoggerProvider.set(SdkEventLoggerProvider.create(openTelemetry.getLogsBridge(), ntpManager.getClock()));
+        GlobalEventLoggerProvider.set(SdkEventLoggerProvider.create(openTelemetry.getLogsBridge(), clock));
 
         if (persistenceInitializer != null) {
             SignalFromDiskExporter.set(persistenceInitializer.createSignalDiskExporter());
@@ -369,7 +368,7 @@ public final class ElasticApmAgent {
         processor.setFilter(filter);
 
         return builder
-                .setClock(ntpManager.getClock())
+                .setClock(clock)
                 .addSpanProcessor(processor)
                 .setResource(resource);
     }
@@ -394,7 +393,7 @@ public final class ElasticApmAgent {
 
         return builder
                 .setResource(resource)
-                .setClock(ntpManager.getClock())
+                .setClock(clock)
                 .addLogRecordProcessor(elasticProcessor);
     }
 
@@ -412,7 +411,7 @@ public final class ElasticApmAgent {
         flusher.setMeterDelegator(elasticMetricReader::forceFlush);
 
         return builder
-                .setClock(ntpManager.getClock())
+                .setClock(clock)
                 .registerMetricReader(elasticMetricReader)
                 .setResource(resource);
     }

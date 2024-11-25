@@ -22,7 +22,7 @@ import androidx.annotation.VisibleForTesting
 import co.elastic.apm.android.common.internal.logging.Elog
 import co.elastic.apm.android.sdk.internal.services.periodicwork.ManagedPeriodicTask
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
-import co.elastic.apm.android.sdk.internal.time.ntp.sntp.SntpClient
+import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
 import io.opentelemetry.sdk.common.Clock
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
@@ -69,6 +69,7 @@ internal class ElasticClock @VisibleForTesting constructor(
     companion object {
         private val POLLING_INTERVAL = TimeUnit.MINUTES.toMillis(1)
 
+        @JvmStatic
         fun create(): ElasticClock {
             return ElasticClock(SntpClient.create(), SystemTimeProvider.get())
         }

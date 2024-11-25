@@ -28,7 +28,6 @@ import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigu
 import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.poll.ConfigurationPollManager;
 import co.elastic.apm.android.sdk.internal.features.persistence.PersistenceInitializer;
-import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.sdk.session.SessionManager;
 
 public class DefaultAgentDependenciesInjector implements AgentDependenciesInjector {
@@ -40,11 +39,6 @@ public class DefaultAgentDependenciesInjector implements AgentDependenciesInject
         this.appContext = appContext;
         this.configuration = configuration;
         this.connectivity = connectivity;
-    }
-
-    @Override
-    public NtpManager getNtpManager() {
-        return new NtpManager(appContext);
     }
 
     @Override

@@ -21,12 +21,9 @@ package co.elastic.apm.android.sdk.internal.injection;
 import co.elastic.apm.android.sdk.internal.configuration.provider.ConfigurationsProvider;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer;
 import co.elastic.apm.android.sdk.internal.features.persistence.PersistenceInitializer;
-import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.sdk.session.SessionManager;
 
 public interface AgentDependenciesInjector {
-
-    NtpManager getNtpManager();
 
     SessionManager getSessionManager();
 

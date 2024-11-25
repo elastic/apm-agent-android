@@ -136,7 +136,9 @@ class SntpClientTest {
 
     @Test
     fun `Discard response if stratum is 0`() {
+        setUpResponse(100, responseStratum = 0)
 
+        assertThat(client.fetchTimeOffset()).isEqualTo(SntpClient.Response.Error(SntpClient.ErrorType.TRY_LATER))
     }
 
     @Test

@@ -49,7 +49,7 @@ internal class SntpClient(
         if (t1 / 1000 != response.originateTimestamp / 1000) {
             return Response.Error(ErrorType.ORIGIN_TIME_NOT_MATCHING)
         }
-        if (response.leapIndicator == 3) {
+        if (response.leapIndicator == 3 || response.stratum == 0) {
             return Response.Error(ErrorType.TRY_LATER)
         }
         if (response.versionNumber != VERSION) {

@@ -16,48 +16,61 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.opentelemetry.tools;
+package co.elastic.apm.android.sdk.internal.opentelemetry.tools
 
-import androidx.annotation.VisibleForTesting;
+import androidx.annotation.VisibleForTesting
+import co.elastic.apm.android.common.internal.logging.Elog
+import co.elastic.apm.android.sdk.internal.services.periodicwork.ManagedPeriodicTask
+import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
+import co.elastic.apm.android.sdk.internal.time.ntp.sntp.SntpClient
+import io.opentelemetry.sdk.common.Clock
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicLong
 
-import java.util.concurrent.TimeUnit;
+internal class ElasticClock @VisibleForTesting constructor(
+    private val sntpClient: SntpClient,
+    private val systemTimeProvider: SystemTimeProvider
+) : ManagedPeriodicTask(), Clock {
+    private val offsetMillis = AtomicLong(0)
 
-import co.elastic.apm.android.common.internal.logging.Elog;
-import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
-import co.elastic.apm.android.sdk.internal.time.ntp.TrueTimeWrapper;
-import io.opentelemetry.sdk.common.Clock;
-
-public final class ElasticClock implements Clock {
-    private final TrueTimeWrapper trueTimeWrapper;
-    private final SystemTimeProvider systemTimeProvider;
-
-    @VisibleForTesting
-    public ElasticClock(TrueTimeWrapper trueTimeWrapper, SystemTimeProvider systemTimeProvider) {
-        this.trueTimeWrapper = trueTimeWrapper;
-        this.systemTimeProvider = systemTimeProvider;
+    override fun now(): Long {
+        return TimeUnit.MILLISECONDS.toNanos(systemTimeProvider.currentTimeMillis + offsetMillis.get())
     }
 
-    public ElasticClock(TrueTimeWrapper trueTimeWrapper) {
-        this(trueTimeWrapper, SystemTimeProvider.get());
+    override fun nanoTime(): Long {
+        return systemTimeProvider.nanoTime
     }
 
-    @Override
-    public long now() {
-        if (trueTimeWrapper.isInitialized()) {
-            Elog.getLogger().debug("Returning true time");
-            try {
-                return TimeUnit.MILLISECONDS.toNanos(trueTimeWrapper.now().getTime());
-            } catch (Throwable t) {
-                trueTimeWrapper.clearCachedInfo();
-                Elog.getLogger().error("Could not get true time", t);
+    override fun onTaskRun() {
+        try {
+            val response = sntpClient.fetchTimeOffset()
+            if (response is SntpClient.Response.Success) {
+                offsetMillis.set(response.offsetMillis)
+                Elog.getLogger().debug(
+                    "ElasticClock successfully fetched time offset: {}",
+                    response.offsetMillis
+                )
+            } else {
+                Elog.getLogger().debug("ElasticClock error: {}", response)
             }
+        } catch (e: Exception) {
+            Elog.getLogger().debug("ElasticClock task exception", e)
         }
-        Elog.getLogger().debug("Returning system time");
-        return TimeUnit.MILLISECONDS.toNanos(systemTimeProvider.getCurrentTimeMillis());
     }
 
-    @Override
-    public long nanoTime() {
-        return systemTimeProvider.getNanoTime();
+    override fun getMinDelayBeforeNextRunInMillis(): Long {
+        return POLLING_INTERVAL
+    }
+
+    override fun isTaskFinished(): Boolean {
+        return false
+    }
+
+    companion object {
+        private val POLLING_INTERVAL = TimeUnit.MINUTES.toMillis(1)
+
+        fun create(): ElasticClock {
+            return ElasticClock(SntpClient.create(), SystemTimeProvider.get())
+        }
     }
 }

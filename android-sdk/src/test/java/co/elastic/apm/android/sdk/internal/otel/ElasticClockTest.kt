@@ -16,80 +16,62 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.otel;
+package co.elastic.apm.android.sdk.internal.otel
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
+import co.elastic.apm.android.sdk.internal.opentelemetry.tools.ElasticClock
+import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
+import co.elastic.apm.android.sdk.internal.time.ntp.sntp.SntpClient
+import co.elastic.apm.android.sdk.testutils.BaseTest
+import io.mockk.MockKAnnotations
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import java.util.concurrent.TimeUnit
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+internal class ElasticClockTest : BaseTest() {
+    @MockK
+    lateinit var sntpClient: SntpClient
 
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
+    @MockK
+    lateinit var systemTimeProvider: SystemTimeProvider
+    private lateinit var elasticClock: ElasticClock
 
-import co.elastic.apm.android.sdk.internal.opentelemetry.tools.ElasticClock;
-import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
-import co.elastic.apm.android.sdk.internal.time.ntp.TrueTimeWrapper;
-import co.elastic.apm.android.sdk.testutils.BaseTest;
-
-@RunWith(MockitoJUnitRunner.class)
-public class ElasticClockTest extends BaseTest {
-
-    @Mock
-    public TrueTimeWrapper trueTimeWrapper;
-
-    @Mock
-    public SystemTimeProvider systemTimeProvider;
-    private ElasticClock elasticClock;
-
-    @Before
-    public void setUp() {
-        elasticClock = new ElasticClock(trueTimeWrapper, systemTimeProvider);
+    @BeforeEach
+    fun setUp() {
+        MockKAnnotations.init(this)
+        elasticClock = ElasticClock(sntpClient, systemTimeProvider)
     }
 
     @Test
-    public void whenProvidingNanoTime_returnSystemNanoTime() {
-        long nanoTime = 123;
-        doReturn(nanoTime).when(systemTimeProvider).getNanoTime();
+    fun `Return system nano time`() {
+        val nanoTime: Long = 123
+        every { systemTimeProvider.nanoTime }.returns(nanoTime)
 
-        assertEquals(nanoTime, elasticClock.nanoTime());
-        verify(systemTimeProvider).getNanoTime();
+        assertThat(nanoTime).isEqualTo(elasticClock.nanoTime())
     }
 
     @Test
-    public void whenProvidingNow_withTrueTimeNotInitialized_returnSystemCurrentTimeInNanos() {
-        long systemTimeMillis = 12345;
-        long systemTimeNanos = TimeUnit.MILLISECONDS.toNanos(systemTimeMillis);
-        doReturn(systemTimeMillis).when(systemTimeProvider).getCurrentTimeMillis();
-        doReturn(false).when(trueTimeWrapper).isInitialized();
+    fun `Return current time plus initial time offset`() {
+        val systemTimeMillis = 12345L
+        val systemTimeNanos = TimeUnit.MILLISECONDS.toNanos(systemTimeMillis)
+        every { systemTimeProvider.currentTimeMillis }.returns(systemTimeMillis)
 
-        assertEquals(systemTimeNanos, elasticClock.now());
+        assertThat(systemTimeNanos).isEqualTo(elasticClock.now())
     }
 
     @Test
-    public void whenProvidingNow_withNoTrueTimeAvailable_returnSystemCurrentTimeInNanos() {
-        long systemTimeMillis = 12345;
-        long systemTimeNanos = TimeUnit.MILLISECONDS.toNanos(systemTimeMillis);
-        doReturn(systemTimeMillis).when(systemTimeProvider).getCurrentTimeMillis();
-        doReturn(true).when(trueTimeWrapper).isInitialized();
-        doThrow(IllegalStateException.class).when(trueTimeWrapper).now();
+    fun `Use network time offset when available`() {
+        val systemTimeMillis: Long = 12345
+        val offsetTime: Long = 5
+        val systemTimeNanos = TimeUnit.MILLISECONDS.toNanos(systemTimeMillis)
+        every { systemTimeProvider.currentTimeMillis }.returns(systemTimeMillis)
+        every { sntpClient.fetchTimeOffset() }.returns(SntpClient.Response.Success(1))
 
-        assertEquals(systemTimeNanos, elasticClock.now());
-    }
+        // Fetch time offset
+        elasticClock.runTask()
 
-    @Test
-    public void whenProvidingNow_withTrueTimeAvailable_returnTrueTimeInNanos() {
-        long trueTimeMillis = 12345;
-        Date trueTimeNow = new Date(trueTimeMillis);
-        long trueTimeNanos = TimeUnit.MILLISECONDS.toNanos(trueTimeMillis);
-        doReturn(true).when(trueTimeWrapper).isInitialized();
-        doReturn(trueTimeNow).when(trueTimeWrapper).now();
-
-        assertEquals(trueTimeNanos, elasticClock.now());
+        assertThat(systemTimeNanos + offsetTime).isEqualTo(elasticClock.now())
     }
 }

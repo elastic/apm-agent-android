@@ -54,9 +54,7 @@ internal class SntpClient(
             return Response.Error(ErrorType.INVALID_TRANSMIT_TIMESTAMP)
         }
 
-        val clockOffsetMillis = ((t2 - t1) + (t3 - t4)) / 2
-
-        return Response.Success(clockOffsetMillis)
+        return Response.Success(((t2 - t1) + (t3 - t4)) / 2)
     }
 
     private fun getCurrentNtpTimeMillis(): Long {

@@ -1,13 +1,11 @@
 package co.elastic.apm.android.test.attributes.traces;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.verify;
 
 import org.junit.Test;
 
 import java.util.List;
 
-import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.sdk.traces.ElasticTracers;
 import co.elastic.apm.android.test.common.spans.Spans;
 import co.elastic.apm.android.test.testutils.TestElasticClock;
@@ -20,8 +18,7 @@ public class ClockTest extends BaseRobolectricTest {
     @Test
     public void whenASpanIsCreated_itHasTimestampSetFromElasticClock() {
         long startTimeFromElasticClock = 123456789;
-        NtpManager ntpManager = getAgentDependenciesInjector().getNtpManager();
-        TestElasticClock clock = (TestElasticClock) ntpManager.getClock();
+        TestElasticClock clock = (TestElasticClock) getAgentDependenciesInjector().getClock();
         clock.setForcedNow(startTimeFromElasticClock);
         SpanData span = getSpanData();
 
@@ -32,8 +29,7 @@ public class ClockTest extends BaseRobolectricTest {
     @Test
     public void whenClockNowChangesInMidSpan_verifyFinalSpanDurationIsNotAffected() {
         long startTimeFromElasticClock = 2_000_000_000;
-        NtpManager ntpManager = getAgentDependenciesInjector().getNtpManager();
-        TestElasticClock clock = (TestElasticClock) ntpManager.getClock();
+        TestElasticClock clock = (TestElasticClock) getAgentDependenciesInjector().getClock();
         clock.setForcedNow(startTimeFromElasticClock);
 
         Span span = ElasticTracers.androidActivity().spanBuilder("TimeChangeSpan").startSpan();
@@ -47,11 +43,6 @@ public class ClockTest extends BaseRobolectricTest {
         Spans.verify(recordedSpan)
                 .startedAt(startTimeFromElasticClock);
         assertTrue(recordedSpan.getEndEpochNanos() > startTimeFromElasticClock);
-    }
-
-    @Test
-    public void whenASpanIsCreated_itHasInitializedTheNtpManager() {
-        verify(getAgentDependenciesInjector().getNtpManager()).initialize();
     }
 
     private SpanData getSpanData() {

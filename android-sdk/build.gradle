@@ -1,7 +1,6 @@
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
-    id 'co.elastic.apm.dependency.embedder'
 }
 
 android {
@@ -44,10 +43,6 @@ licensesConfig {
     manualMappingFile = rootProject.file("manual_licenses_map.txt")
 }
 
-shadowJar {
-    relocate 'com.instacart.library.truetime', 'co.elastic.apm.android.truetime'
-}
-
 tasks.withType(Test).configureEach {
     useJUnitPlatform()
     systemProperty("agent_version", project.version)
@@ -69,7 +64,6 @@ dependencies {
     implementation libs.opentelemetry.diskBuffering
     implementation libs.androidx.annotations
     implementation libs.dsl.json
-    embedded libs.truetime
     annotationProcessor 'co.elastic.apm.compile:processor'
     compileOnly 'co.elastic.apm.compile:processor'
     testImplementation libs.bundles.mocking

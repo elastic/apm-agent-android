@@ -25,7 +25,6 @@ androidx-lifecycle = "androidx.lifecycle:lifecycle-process:2.5.1"
 androidx-annotations = "androidx.annotation:annotation:1.4.0"
 weaklockfree = "com.blogspot.mydailyjava:weak-lock-free:0.18"
 dsl-json = "com.dslplatform:dsl-json-java8:1.10.0"
-truetime = "com.github.instacart.truetime-android:library:3.5"
 slf4j-api = "org.slf4j:slf4j-api:2.0.0"
 androidx-fragment = "androidx.fragment:fragment:1.5.3"
 byteBuddy = { module = "net.bytebuddy:byte-buddy", version.ref = "byteBuddy" }

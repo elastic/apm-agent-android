@@ -9,7 +9,6 @@ This product includes software licensed under the 'Apache License Version 2.0' l
  - Android Support Library Annotations (https://developer.android.com/jetpack/androidx/releases/annotation#1.4.0)
  - Byte Buddy (without dependencies)
  - Byte Buddy Gradle plugin
- - com.github.instacart.truetime-android:library:3.5
  - Kotlin Stdlib (https://kotlinlang.org/)
  - okhttp (https://square.github.io/okhttp/)
  - OpenTelemetry Android (https://github.com/open-telemetry/opentelemetry-android)

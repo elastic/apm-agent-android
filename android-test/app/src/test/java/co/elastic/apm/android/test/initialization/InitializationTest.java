@@ -33,7 +33,6 @@ import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
 import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicWorkService;
-import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.test.testutils.MainApp;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTestApplication;
@@ -43,6 +42,7 @@ import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter;
 import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporter;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
+import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.logs.LogRecordProcessor;
 import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
@@ -85,11 +85,10 @@ public class InitializationTest extends BaseRobolectricTest {
     }
 
     @Test
-    public void verifyNtpManager_isInitialized() {
-        NtpManager ntpManager = getAgentDependenciesInjector().getNtpManager();
+    public void verifyClock_isInitialized() {
+        Clock clock = getAgentDependenciesInjector().getClock();
 
-        verify(ntpManager).initialize();
-        assertTrue(getPeriodicWorkService().getTasks().contains(ntpManager));
+        assertTrue(getPeriodicWorkService().getTasks().contains(clock));
     }
 
     @Test

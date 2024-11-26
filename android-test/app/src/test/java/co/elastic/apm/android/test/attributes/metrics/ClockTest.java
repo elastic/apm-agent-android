@@ -2,7 +2,6 @@ package co.elastic.apm.android.test.attributes.metrics;
 
 import org.junit.Test;
 
-import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.test.common.metrics.Metrics;
 import co.elastic.apm.android.test.testutils.TestElasticClock;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
@@ -13,8 +12,7 @@ public class ClockTest extends BaseRobolectricTest {
     @Test
     public void whenAMetricIsCreated_itHasTimestampSetFromElasticClock() {
         long startTimeFromElasticClock = 123456789;
-        NtpManager ntpManager = getAgentDependenciesInjector().getNtpManager();
-        TestElasticClock clock = (TestElasticClock) ntpManager.getClock();
+        TestElasticClock clock = (TestElasticClock) getAgentDependenciesInjector().getClock();
         clock.setForcedNow(startTimeFromElasticClock);
         MetricData metric = captureMetric();
 

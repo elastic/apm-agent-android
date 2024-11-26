@@ -28,7 +28,6 @@ import co.elastic.apm.android.sdk.internal.features.persistence.PersistenceIniti
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
-import co.elastic.apm.android.sdk.internal.time.ntp.NtpManager;
 import co.elastic.apm.android.sdk.session.SessionManager;
 import co.elastic.apm.android.test.common.agent.AgentInitializer;
 import co.elastic.apm.android.test.common.logs.LogRecordExporterCaptor;
@@ -49,7 +48,7 @@ public class BaseRobolectricTestApplication extends Application implements Expor
     private final LogRecordExporterCaptor logRecordExporter;
     private final MetricExporterCaptor metricExporter;
     private final List<Configuration> configurations = new ArrayList<>();
-    private NtpManager ntpManager;
+    private TestElasticClock clock;
     private SessionManager sessionManager;
     private CentralConfigurationInitializer centralConfigurationInitializer;
     private PersistenceInitializer persistenceInitializer;
@@ -104,7 +103,7 @@ public class BaseRobolectricTestApplication extends Application implements Expor
     }
 
     private void setUpAgentDependencies() {
-        setUpNtpManager();
+        setUpClock();
         setUpCentralConfigurationInitializer();
         persistenceInitializer = mock(PersistenceInitializer.class);
         setUpSessionManager();
@@ -116,10 +115,8 @@ public class BaseRobolectricTestApplication extends Application implements Expor
         doReturn(centralConfigurationManager).when(centralConfigurationInitializer).getManager();
     }
 
-    private void setUpNtpManager() {
-        Clock clock = new TestElasticClock();
-        ntpManager = mock(NtpManager.class);
-        doReturn(clock).when(ntpManager).getClock();
+    private void setUpClock() {
+        clock = new TestElasticClock();
     }
 
     private void setUpSessionManager() {
@@ -169,8 +166,8 @@ public class BaseRobolectricTestApplication extends Application implements Expor
     }
 
     @Override
-    public NtpManager getNtpManager() {
-        return ntpManager;
+    public Clock getClock() {
+        return clock;
     }
 
     @Override

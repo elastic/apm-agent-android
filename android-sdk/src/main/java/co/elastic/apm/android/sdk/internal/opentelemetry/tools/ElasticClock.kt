@@ -43,7 +43,7 @@ class ElasticClock @VisibleForTesting constructor(
 
     override fun onTaskRun() {
         try {
-            val response = sntpClient.fetchTimeOffset()
+            val response = sntpClient.fetchTimeOffset(systemTimeProvider::getCurrentTimeMillis)
             if (response is SntpClient.Response.Success) {
                 offsetMillis.set(response.offsetMillis)
                 Elog.getLogger().debug(

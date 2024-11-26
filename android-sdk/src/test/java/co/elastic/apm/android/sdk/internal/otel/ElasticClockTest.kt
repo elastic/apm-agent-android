@@ -67,7 +67,9 @@ internal class ElasticClockTest : BaseTest() {
         val offsetTime: Long = 5
         val expectedTime = TimeUnit.MILLISECONDS.toNanos(systemTimeMillis + offsetTime)
         every { systemTimeProvider.currentTimeMillis }.returns(systemTimeMillis)
-        every { sntpClient.fetchTimeOffset() }.returns(SntpClient.Response.Success(offsetTime))
+        every { sntpClient.fetchTimeOffset(any()) }.returns(
+            SntpClient.Response.Success(offsetTime)
+        )
 
         // Fetch time offset
         elasticClock.runTask()

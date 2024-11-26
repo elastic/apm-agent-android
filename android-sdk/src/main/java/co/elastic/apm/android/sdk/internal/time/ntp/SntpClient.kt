@@ -18,22 +18,19 @@
  */
 package co.elastic.apm.android.sdk.internal.time.ntp
 
-import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import java.io.Closeable
+import java.util.function.Supplier
 
 /**
  * According to RFC-4330.
  */
-class SntpClient(
-    private val udpClient: UdpClient,
-    private val systemTime: SystemTimeProvider
-) : Closeable {
+class SntpClient(private val udpClient: UdpClient) : Closeable {
 
-    fun fetchTimeOffset(): Response = synchronized(this) {
-        val t1 = getCurrentNtpTimeMillis()
+    fun fetchTimeOffset(currentTimeMillis: Supplier<Long>): Response = synchronized(this) {
+        val t1 = getCurrentNtpTimeMillis(currentTimeMillis.get())
         val request = NtpPacket.createForClient(t1, VERSION)
         val responseBytes = udpClient.send(request.toByteArray())
-        val t4 = getCurrentNtpTimeMillis()
+        val t4 = getCurrentNtpTimeMillis(currentTimeMillis.get())
         val response = NtpPacket.parse(responseBytes)
         val t2 = response.receiveTimestamp
         val t3 = response.transmitTimestamp
@@ -57,8 +54,8 @@ class SntpClient(
         return Response.Success(((t2 - t1) + (t3 - t4)) / 2)
     }
 
-    private fun getCurrentNtpTimeMillis(): Long {
-        return systemTime.currentTimeMillis + NTP_EPOCH_DIFF_MILLIS
+    private fun getCurrentNtpTimeMillis(currentTimeMillis: Long): Long {
+        return currentTimeMillis + NTP_EPOCH_DIFF_MILLIS
     }
 
     override fun close() {
@@ -70,7 +67,7 @@ class SntpClient(
         private const val VERSION = 4
 
         fun create(): SntpClient {
-            return SntpClient(UdpClient("time.android.com", 123, 48), SystemTimeProvider.get())
+            return SntpClient(UdpClient("time.android.com", 123, 48))
         }
     }
 

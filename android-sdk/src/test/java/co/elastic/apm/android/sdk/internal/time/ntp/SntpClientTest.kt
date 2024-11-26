@@ -18,18 +18,18 @@
  */
 package co.elastic.apm.android.sdk.internal.time.ntp
 
-import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
+import java.util.function.Supplier
 
 class SntpClientTest {
     private lateinit var client: SntpClient
     private lateinit var udpClient: UdpClient
-    private lateinit var systemTimeProvider: SystemTimeProvider
+    private lateinit var currentTimeSupplier: Supplier<Long>
 
     companion object {
         private const val NTP_EPOCH_DIFF_MILLIS = 2208988800000L // According to RFC-868.
@@ -39,9 +39,9 @@ class SntpClientTest {
     @BeforeEach
     fun setUp() {
         udpClient = mockk()
-        systemTimeProvider = mockk()
-        client = SntpClient(udpClient, systemTimeProvider)
-        every { systemTimeProvider.elapsedRealTime }.returns(0L)
+        currentTimeSupplier = mockk()
+        client = SntpClient(udpClient)
+        every { currentTimeSupplier.get() }.returns(0L)
     }
 
     @Test
@@ -49,7 +49,7 @@ class SntpClientTest {
         val expectedOffset = 100L
         setUpResponse(expectedOffset)
 
-        val response = client.fetchTimeOffset()
+        val response = client.fetchTimeOffset(currentTimeSupplier)
 
         if (response !is SntpClient.Response.Success) {
             fail("Response must be successful.")
@@ -62,42 +62,66 @@ class SntpClientTest {
         val timestampSent = DEFAULT_SERVER_RECEIVE_TIME - 100
         setUpResponse(100, transmitClientTime = timestampSent, originateTimestamp = 123)
 
-        assertThat(client.fetchTimeOffset()).isEqualTo(SntpClient.Response.Error(SntpClient.ErrorType.ORIGIN_TIME_NOT_MATCHING))
+        assertThat(client.fetchTimeOffset(currentTimeSupplier)).isEqualTo(
+            SntpClient.Response.Error(
+                SntpClient.ErrorType.ORIGIN_TIME_NOT_MATCHING
+            )
+        )
     }
 
     @Test
     fun `Discard response if LI value is 3`() {
         setUpResponse(100, responseLeapIndicator = 3)
 
-        assertThat(client.fetchTimeOffset()).isEqualTo(SntpClient.Response.Error(SntpClient.ErrorType.TRY_LATER))
+        assertThat(client.fetchTimeOffset(currentTimeSupplier)).isEqualTo(
+            SntpClient.Response.Error(
+                SntpClient.ErrorType.TRY_LATER
+            )
+        )
     }
 
     @Test
     fun `Verify VN is the same as the one sent from the client`() {
         setUpResponse(100, requestVersionNumber = 4, responseVersionNumber = 3)
 
-        assertThat(client.fetchTimeOffset()).isEqualTo(SntpClient.Response.Error(SntpClient.ErrorType.INVALID_VERSION))
+        assertThat(client.fetchTimeOffset(currentTimeSupplier)).isEqualTo(
+            SntpClient.Response.Error(
+                SntpClient.ErrorType.INVALID_VERSION
+            )
+        )
     }
 
     @Test
     fun `Discard response if mode is not 4`() {
         setUpResponse(100, responseMode = 3)
 
-        assertThat(client.fetchTimeOffset()).isEqualTo(SntpClient.Response.Error(SntpClient.ErrorType.INVALID_MODE))
+        assertThat(client.fetchTimeOffset(currentTimeSupplier)).isEqualTo(
+            SntpClient.Response.Error(
+                SntpClient.ErrorType.INVALID_MODE
+            )
+        )
     }
 
     @Test
     fun `Discard response if transmit timestamp is 0`() {
         setUpResponse(100, transmitServerTime = 0)
 
-        assertThat(client.fetchTimeOffset()).isEqualTo(SntpClient.Response.Error(SntpClient.ErrorType.INVALID_TRANSMIT_TIMESTAMP))
+        assertThat(client.fetchTimeOffset(currentTimeSupplier)).isEqualTo(
+            SntpClient.Response.Error(
+                SntpClient.ErrorType.INVALID_TRANSMIT_TIMESTAMP
+            )
+        )
     }
 
     @Test
     fun `Discard response if stratum is 0`() {
         setUpResponse(100, responseStratum = 0)
 
-        assertThat(client.fetchTimeOffset()).isEqualTo(SntpClient.Response.Error(SntpClient.ErrorType.TRY_LATER))
+        assertThat(client.fetchTimeOffset(currentTimeSupplier)).isEqualTo(
+            SntpClient.Response.Error(
+                SntpClient.ErrorType.TRY_LATER
+            )
+        )
     }
 
     private fun setUpResponse(
@@ -113,7 +137,7 @@ class SntpClientTest {
         responseMode: Int = 4,
         responseStratum: Int = 1
     ) {
-        every { systemTimeProvider.currentTimeMillis }.returns(transmitClientTime)
+        every { currentTimeSupplier.get() }.returns(transmitClientTime)
             .andThen(receiveClientTime)
         every {
             udpClient.send(

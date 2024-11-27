@@ -94,7 +94,7 @@ class AttributesTest {
     @Config(sdk = [24, Config.NEWEST_SDK])
     @Test
     fun `Check resources`() {
-        val openTelemetry = agentRule.getOtelInstance()
+        agentRule.initialize()
         val expectedResource = Resource.builder()
             .put("deployment.environment", "test")
             .put("device.id", "device-id")
@@ -116,9 +116,9 @@ class AttributesTest {
             .put("telemetry.sdk.version", System.getProperty("agent_version")!!)
             .build()
 
-        agentRule.sendSpan(openTelemetry)
-        agentRule.sendLog(openTelemetry)
-        agentRule.sendMetric(openTelemetry)
+        agentRule.sendSpan()
+        agentRule.sendLog()
+        agentRule.sendMetric()
 
         val spanItems = agentRule.getFinishedSpans()
         val logItems = agentRule.getFinishedLogRecords()
@@ -134,7 +134,7 @@ class AttributesTest {
     @Config(sdk = [24, Config.NEWEST_SDK])
     @Test
     fun `Check global attributes`() {
-        val openTelemetry = agentRule.getOtelInstance()
+        agentRule.initialize()
         val expectedLogAttributes = Attributes.builder()
             .put("session.id", "session-id")
             .put("network.connection.type", "unavailable")
@@ -145,8 +145,8 @@ class AttributesTest {
             .put("screen.name", "unknown")
             .build()
 
-        agentRule.sendSpan(openTelemetry)
-        agentRule.sendLog(openTelemetry)
+        agentRule.sendSpan()
+        agentRule.sendLog()
 
         val spanItems = agentRule.getFinishedSpans()
         val logItems = agentRule.getFinishedLogRecords()
@@ -159,7 +159,7 @@ class AttributesTest {
     @Config(sdk = [24, Config.NEWEST_SDK])
     @Test
     fun `Check global attributes with cellular connectivity available`() {
-        val openTelemetry = agentRule.getOtelInstance()
+        agentRule.initialize()
         enableCellularDataAttr()
         val expectedLogAttributes = Attributes.builder()
             .put("session.id", "session-id")
@@ -172,8 +172,8 @@ class AttributesTest {
             .put("screen.name", "unknown")
             .build()
 
-        agentRule.sendSpan(openTelemetry)
-        agentRule.sendLog(openTelemetry)
+        agentRule.sendSpan()
+        agentRule.sendLog()
 
         val spanItems = agentRule.getFinishedSpans()
         val logItems = agentRule.getFinishedLogRecords()
@@ -186,7 +186,7 @@ class AttributesTest {
     @Config(sdk = [24, Config.NEWEST_SDK])
     @Test
     fun `Check global attributes with carrier info available`() {
-        val openTelemetry = agentRule.getOtelInstance()
+        agentRule.initialize()
         enableCarrierInfoAttrs()
         val expectedLogAttributes = Attributes.builder()
             .put("session.id", "session-id")
@@ -202,8 +202,8 @@ class AttributesTest {
             .put("screen.name", "unknown")
             .build()
 
-        agentRule.sendSpan(openTelemetry)
-        agentRule.sendLog(openTelemetry)
+        agentRule.sendSpan()
+        agentRule.sendLog()
 
         val spanItems = agentRule.getFinishedSpans()
         val logItems = agentRule.getFinishedLogRecords()
@@ -217,15 +217,15 @@ class AttributesTest {
     fun `Check clock usage across all signals`() {
         val nowTime = 12345L
         val clock = createClock(nowTime)
-        val openTelemetry = agentRule.getOtelInstance {
+        agentRule.initialize {
             val dependenciesInjectorSpy = spyk(it)
             every { dependenciesInjectorSpy.elasticClock }.returns(clock)
             dependenciesInjectorSpy
         }
 
-        agentRule.sendSpan(openTelemetry)
-        agentRule.sendLog(openTelemetry)
-        agentRule.sendMetric(openTelemetry)
+        agentRule.sendSpan()
+        agentRule.sendLog()
+        agentRule.sendMetric()
 
         assertThat(agentRule.getFinishedSpans().first().startEpochNanos).isEqualTo(nowTime)
         assertThat(agentRule.getFinishedLogRecords().first().observedTimestampEpochNanos).isEqualTo(
@@ -241,13 +241,14 @@ class AttributesTest {
 
         val startTimeFromElasticClock = 2000000000L
         val clock = createClock(startTimeFromElasticClock)
-        val openTelemetry = agentRule.getOtelInstance {
+        agentRule.initialize {
             val dependenciesInjectorSpy = spyk(it)
             every { dependenciesInjectorSpy.elasticClock }.returns(clock)
             dependenciesInjectorSpy
         }
 
-        val span = openTelemetry.getTracer("SomeTracer").spanBuilder("TimeChangeSpan").startSpan()
+        val span = agentRule.openTelemetry.getTracer("SomeTracer").spanBuilder("TimeChangeSpan")
+            .startSpan()
 
         // Moving now backwards:
         every { clock.now() }.returns(1000000000L)

@@ -47,6 +47,7 @@ class ElasticAgentRule : TestRule, SignalConfiguration {
     private lateinit var metricsReader: MetricReader
     private lateinit var metricsExporter: InMemoryMetricExporter
     private lateinit var logsExporter: InMemoryLogRecordExporter
+    lateinit var openTelemetry: OpenTelemetry
 
     override fun apply(base: Statement, description: Description): Statement {
         spanExporter = InMemorySpanExporter.create()
@@ -65,7 +66,7 @@ class ElasticAgentRule : TestRule, SignalConfiguration {
         }
     }
 
-    fun getOtelInstance(interceptor: Interceptor? = null): OpenTelemetry {
+    fun initialize(interceptor: Interceptor? = null) {
         ElasticApmAgent.initialize(
             RuntimeEnvironment.getApplication(), ElasticApmConfiguration.builder()
                 .setServiceName("service-name")
@@ -78,18 +79,18 @@ class ElasticAgentRule : TestRule, SignalConfiguration {
             Connectivity.simple("http://localhost"),
             interceptor
         )
-        return GlobalOpenTelemetry.get()
+        openTelemetry = GlobalOpenTelemetry.get()
     }
 
-    fun sendLog(openTelemetry: OpenTelemetry) {
+    fun sendLog() {
         openTelemetry.logsBridge.get("LoggerScope").logRecordBuilder().emit()
     }
 
-    fun sendSpan(openTelemetry: OpenTelemetry) {
+    fun sendSpan() {
         openTelemetry.getTracer("SomeTracer").spanBuilder("SomeSpan").startSpan().end()
     }
 
-    fun sendMetric(openTelemetry: OpenTelemetry) {
+    fun sendMetric() {
         openTelemetry.getMeter("MeterScope").counterBuilder("Counter").build().add(1)
     }
 

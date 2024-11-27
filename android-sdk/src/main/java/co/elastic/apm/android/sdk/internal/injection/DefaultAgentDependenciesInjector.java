@@ -28,9 +28,8 @@ import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigu
 import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.poll.ConfigurationPollManager;
 import co.elastic.apm.android.sdk.internal.features.persistence.PersistenceInitializer;
-import co.elastic.apm.android.sdk.internal.opentelemetry.tools.ElasticClock;
+import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElasticClock;
 import co.elastic.apm.android.sdk.session.SessionManager;
-import io.opentelemetry.sdk.common.Clock;
 
 public class DefaultAgentDependenciesInjector implements AgentDependenciesInjector {
     private final Context appContext;
@@ -44,7 +43,7 @@ public class DefaultAgentDependenciesInjector implements AgentDependenciesInject
     }
 
     @Override
-    public Clock getClock() {
+    public ElasticClock getElasticClock() {
         return ElasticClock.create();
     }
 

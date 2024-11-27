@@ -21,12 +21,12 @@ package co.elastic.apm.android.sdk.internal.injection;
 import co.elastic.apm.android.sdk.internal.configuration.provider.ConfigurationsProvider;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer;
 import co.elastic.apm.android.sdk.internal.features.persistence.PersistenceInitializer;
+import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElasticClock;
 import co.elastic.apm.android.sdk.session.SessionManager;
-import io.opentelemetry.sdk.common.Clock;
 
 public interface AgentDependenciesInjector {
 
-    Clock getClock();
+    ElasticClock getElasticClock();
 
     SessionManager getSessionManager();
 

@@ -16,9 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.opentelemetry.tools
+package co.elastic.apm.android.sdk.internal.opentelemetry.clock
 
-import androidx.annotation.VisibleForTesting
 import co.elastic.apm.android.common.internal.logging.Elog
 import co.elastic.apm.android.sdk.internal.services.periodicwork.ManagedPeriodicTask
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
@@ -27,14 +26,26 @@ import io.opentelemetry.sdk.common.Clock
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 
-class ElasticClock @VisibleForTesting constructor(
+class ElasticClock(
     private val sntpClient: SntpClient,
     private val systemTimeProvider: SystemTimeProvider
 ) : ManagedPeriodicTask(), Clock {
-    private val offsetMillis = AtomicLong(0)
+    private val offsetTime =
+        AtomicLong(systemTimeProvider.currentTimeMillis - systemTimeProvider.elapsedRealTime)
+
+    companion object {
+        @JvmStatic
+        fun create(): ElasticClock {
+            return ElasticClock(SntpClient.create(), SystemTimeProvider.get())
+        }
+
+        private val POLLING_INTERVAL = TimeUnit.MINUTES.toMillis(1)
+        private const val TIME_REFERENCE = 1577836800000L
+        private const val MILLIS_TIMES_TO_NANOS = 1_000_000L
+    }
 
     override fun now(): Long {
-        return TimeUnit.MILLISECONDS.toNanos(systemTimeProvider.currentTimeMillis + offsetMillis.get())
+        return (offsetTime.get() + systemTimeProvider.elapsedRealTime) * MILLIS_TIMES_TO_NANOS
     }
 
     override fun nanoTime(): Long {
@@ -43,9 +54,10 @@ class ElasticClock @VisibleForTesting constructor(
 
     override fun onTaskRun() {
         try {
-            val response = sntpClient.fetchTimeOffset()
+            val response =
+                sntpClient.fetchTimeOffset(systemTimeProvider.elapsedRealTime + TIME_REFERENCE)
             if (response is SntpClient.Response.Success) {
-                offsetMillis.set(response.offsetMillis)
+                offsetTime.set(TIME_REFERENCE + response.offsetMillis)
                 Elog.getLogger().debug(
                     "ElasticClock successfully fetched time offset: {}",
                     response.offsetMillis
@@ -64,14 +76,5 @@ class ElasticClock @VisibleForTesting constructor(
 
     override fun isTaskFinished(): Boolean {
         return false
-    }
-
-    companion object {
-        private val POLLING_INTERVAL = TimeUnit.MINUTES.toMillis(1)
-
-        @JvmStatic
-        fun create(): ElasticClock {
-            return ElasticClock(SntpClient.create(), SystemTimeProvider.get())
-        }
     }
 }

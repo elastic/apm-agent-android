@@ -16,9 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.otel
+package co.elastic.apm.android.sdk.internal.opentelemetry.clock
 
-import co.elastic.apm.android.sdk.internal.opentelemetry.tools.ElasticClock
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
 import co.elastic.apm.android.sdk.testutils.BaseTest
@@ -30,17 +29,20 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
 
-internal class ElasticClockTest : BaseTest() {
+class ElasticClockTest : BaseTest() {
     @MockK
     lateinit var sntpClient: SntpClient
 
     @MockK
     lateinit var systemTimeProvider: SystemTimeProvider
+
     private lateinit var elasticClock: ElasticClock
 
     @BeforeEach
     fun setUp() {
         MockKAnnotations.init(this)
+        every { systemTimeProvider.currentTimeMillis }.returns(INITIAL_CURRENT_TIME)
+        every { systemTimeProvider.elapsedRealTime }.returns(INITIAL_ELAPSED_TIME)
         elasticClock = ElasticClock(sntpClient, systemTimeProvider)
     }
 
@@ -53,25 +55,49 @@ internal class ElasticClockTest : BaseTest() {
     }
 
     @Test
-    fun `Return current time plus initial time offset`() {
-        val systemTimeMillis = 12345L
-        val systemTimeNanos = TimeUnit.MILLISECONDS.toNanos(systemTimeMillis)
-        every { systemTimeProvider.currentTimeMillis }.returns(systemTimeMillis)
+    fun `Return current time as now when network one isn't available`() {
+        val delta = 100L
+        val elapsedTime = INITIAL_ELAPSED_TIME + delta
+        val currentTimeMillis = INITIAL_CURRENT_TIME + delta
+        every { systemTimeProvider.elapsedRealTime }.returns(elapsedTime)
 
-        assertThat(elasticClock.now()).isEqualTo(systemTimeNanos)
+        assertThat(elasticClock.now()).isEqualTo(TimeUnit.MILLISECONDS.toNanos(currentTimeMillis))
     }
 
     @Test
-    fun `Use network time offset when available`() {
-        val systemTimeMillis: Long = 12345
-        val offsetTime: Long = 5
-        val expectedTime = TimeUnit.MILLISECONDS.toNanos(systemTimeMillis + offsetTime)
-        every { systemTimeProvider.currentTimeMillis }.returns(systemTimeMillis)
-        every { sntpClient.fetchTimeOffset() }.returns(SntpClient.Response.Success(offsetTime))
+    fun `Use network time offset to calculate now, when available`() {
+        val elapsedTime = 123L
+        val serverOffset = 1_000L
+        val expectedOffset = serverOffset + TIME_REFERENCE
+        val expectedTime = TimeUnit.MILLISECONDS.toNanos(elapsedTime + expectedOffset)
+        every { systemTimeProvider.elapsedRealTime }.returns(elapsedTime)
+        every { sntpClient.fetchTimeOffset(elapsedTime + TIME_REFERENCE) }.returns(
+            SntpClient.Response.Success(serverOffset)
+        )
 
         // Fetch time offset
         elasticClock.runTask()
 
         assertThat(elasticClock.now()).isEqualTo(expectedTime)
+    }
+
+    @Test
+    fun `Verify polling interval`() {
+        assertThat(elasticClock.minDelayBeforeNextRunInMillis).isEqualTo(
+            TimeUnit.MINUTES.toMillis(
+                1
+            )
+        )
+    }
+
+    @Test
+    fun `Verify if task is finished`() {
+        assertThat(elasticClock.isTaskFinished).isFalse()
+    }
+
+    companion object {
+        private const val TIME_REFERENCE = 1577836800000L
+        private const val INITIAL_CURRENT_TIME = 1_000_000_000L
+        private const val INITIAL_ELAPSED_TIME = 1_000L
     }
 }

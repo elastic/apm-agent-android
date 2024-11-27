@@ -26,14 +26,16 @@ import java.io.Closeable
  */
 class SntpClient(
     private val udpClient: UdpClient,
-    private val systemTime: SystemTimeProvider
+    private val systemTimeProvider: SystemTimeProvider
 ) : Closeable {
 
-    fun fetchTimeOffset(): Response = synchronized(this) {
-        val t1 = getCurrentNtpTimeMillis()
+    fun fetchTimeOffset(currentTimeMillis: Long): Response = synchronized(this) {
+        val t1 = getCurrentNtpTimeMillis(currentTimeMillis)
         val request = NtpPacket.createForClient(t1, VERSION)
+        val timeBeforeRequest = systemTimeProvider.elapsedRealTime
         val responseBytes = udpClient.send(request.toByteArray())
-        val t4 = getCurrentNtpTimeMillis()
+        val requestTimeDelta = systemTimeProvider.elapsedRealTime - timeBeforeRequest
+        val t4 = getCurrentNtpTimeMillis(currentTimeMillis + requestTimeDelta)
         val response = NtpPacket.parse(responseBytes)
         val t2 = response.receiveTimestamp
         val t3 = response.transmitTimestamp
@@ -57,8 +59,8 @@ class SntpClient(
         return Response.Success(((t2 - t1) + (t3 - t4)) / 2)
     }
 
-    private fun getCurrentNtpTimeMillis(): Long {
-        return systemTime.currentTimeMillis + NTP_EPOCH_DIFF_MILLIS
+    private fun getCurrentNtpTimeMillis(currentTimeMillis: Long): Long {
+        return currentTimeMillis + NTP_EPOCH_DIFF_MILLIS
     }
 
     override fun close() {

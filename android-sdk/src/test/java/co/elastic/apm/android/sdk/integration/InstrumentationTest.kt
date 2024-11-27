@@ -29,13 +29,18 @@ import co.elastic.apm.android.sdk.ElasticApmAgent
 import co.elastic.apm.android.sdk.ElasticApmConfiguration
 import co.elastic.apm.android.sdk.connectivity.Connectivity
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration
+import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector.Interceptor
+import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElasticClock
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.spyk
 import io.opentelemetry.api.GlobalOpenTelemetry
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.sdk.logs.LogRecordProcessor
 import io.opentelemetry.sdk.logs.export.SimpleLogRecordProcessor
+import io.opentelemetry.sdk.metrics.data.MetricData
+import io.opentelemetry.sdk.metrics.data.PointData
 import io.opentelemetry.sdk.metrics.export.MetricReader
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader
 import io.opentelemetry.sdk.resources.Resource
@@ -131,9 +136,9 @@ class InstrumentationTest : SignalConfiguration {
             .put("telemetry.sdk.version", System.getProperty("agent_version")!!)
             .build()
 
-        openTelemetry.getTracer("SomeTracer").spanBuilder("SomeSpan").startSpan().end()
-        openTelemetry.logsBridge.get("LoggerScope").logRecordBuilder().emit()
-        openTelemetry.getMeter("MeterScope").counterBuilder("Counter").build().add(1)
+        sendSpan(openTelemetry)
+        sendLog(openTelemetry)
+        sendMetric(openTelemetry)
         metricsReader.forceFlush()
 
         val spanItems = spanExporter.finishedSpanItems
@@ -161,8 +166,8 @@ class InstrumentationTest : SignalConfiguration {
             .put("screen.name", "unknown")
             .build()
 
-        openTelemetry.getTracer("SomeTracer").spanBuilder("SomeSpan").startSpan().end()
-        openTelemetry.logsBridge.get("LoggerScope").logRecordBuilder().emit()
+        sendSpan(openTelemetry)
+        sendLog(openTelemetry)
 
         val spanItems = spanExporter.finishedSpanItems
         val logItems = logsExporter.finishedLogRecordItems
@@ -188,8 +193,8 @@ class InstrumentationTest : SignalConfiguration {
             .put("screen.name", "unknown")
             .build()
 
-        openTelemetry.getTracer("SomeTracer").spanBuilder("SomeSpan").startSpan().end()
-        openTelemetry.logsBridge.get("LoggerScope").logRecordBuilder().emit()
+        sendSpan(openTelemetry)
+        sendLog(openTelemetry)
 
         val spanItems = spanExporter.finishedSpanItems
         val logItems = logsExporter.finishedLogRecordItems
@@ -218,8 +223,8 @@ class InstrumentationTest : SignalConfiguration {
             .put("screen.name", "unknown")
             .build()
 
-        openTelemetry.getTracer("SomeTracer").spanBuilder("SomeSpan").startSpan().end()
-        openTelemetry.logsBridge.get("LoggerScope").logRecordBuilder().emit()
+        sendSpan(openTelemetry)
+        sendLog(openTelemetry)
 
         val spanItems = spanExporter.finishedSpanItems
         val logItems = logsExporter.finishedLogRecordItems
@@ -227,6 +232,65 @@ class InstrumentationTest : SignalConfiguration {
         assertThat(logItems).hasSize(1)
         assertThat(spanItems.first()).hasAttributes(expectedSpanAttributes)
         assertThat(logItems.first()).hasAttributes(expectedLogAttributes)
+    }
+
+    @Test
+    fun `Check clock usage across all signals`() {
+        val nowTime = 12345L
+        val clock = createClock(nowTime)
+        val openTelemetry = getOtelInstance {
+            val dependenciesInjectorSpy = spyk(it)
+            every { dependenciesInjectorSpy.elasticClock }.returns(clock)
+            dependenciesInjectorSpy
+        }
+
+        sendSpan(openTelemetry)
+        sendLog(openTelemetry)
+        sendMetric(openTelemetry)
+        metricsReader.forceFlush()
+
+        assertThat(spanExporter.finishedSpanItems.first().startEpochNanos).isEqualTo(nowTime)
+        assertThat(logsExporter.finishedLogRecordItems.first().observedTimestampEpochNanos).isEqualTo(
+            nowTime
+        )
+        assertThat(getStartTime(metricsExporter.finishedMetricItems.first())).isEqualTo(nowTime)
+    }
+
+    @Test
+    fun `When timestamp changes mid-span, the end time shouldn't be affected`() {
+        // This test is to verify that the internals of OTel Java use the system time nano
+        // to track span start and end diff.
+
+        val startTimeFromElasticClock = 2000000000L
+        val clock = createClock(startTimeFromElasticClock)
+        val openTelemetry = getOtelInstance {
+            val dependenciesInjectorSpy = spyk(it)
+            every { dependenciesInjectorSpy.elasticClock }.returns(clock)
+            dependenciesInjectorSpy
+        }
+
+        val span = openTelemetry.getTracer("SomeTracer").spanBuilder("TimeChangeSpan").startSpan()
+
+        // Moving now backwards:
+        every { clock.now() }.returns(1000000000L)
+
+        span.end()
+
+        val spanData = spanExporter.finishedSpanItems.first()
+        assertThat(spanData.startEpochNanos).isEqualTo(startTimeFromElasticClock)
+        assertThat(spanData.endEpochNanos).isGreaterThan(startTimeFromElasticClock)
+    }
+
+    private fun createClock(nowTime: Long): ElasticClock {
+        val clock = mockk<ElasticClock>()
+        every { clock.now() }.returns(nowTime)
+        every { clock.nanoTime() }.answers { System.nanoTime() }
+        return clock
+    }
+
+    fun getStartTime(metric: MetricData): Long {
+        val points: List<PointData> = java.util.ArrayList(metric.data.points)
+        return points[0].epochNanos
     }
 
     private fun enableCellularDataAttr() {
@@ -261,7 +325,7 @@ class InstrumentationTest : SignalConfiguration {
         shadowTelephonyManager.setSimCountryIso(SIM_COUNTRY_ISO)
     }
 
-    private fun getOtelInstance(): OpenTelemetry {
+    private fun getOtelInstance(interceptor: Interceptor? = null): OpenTelemetry {
         ElasticApmAgent.initialize(
             RuntimeEnvironment.getApplication(), ElasticApmConfiguration.builder()
                 .setServiceName("service-name")
@@ -271,9 +335,22 @@ class InstrumentationTest : SignalConfiguration {
                 .setDeviceIdGenerator { "device-id" }
                 .setSessionIdGenerator { "session-id" }
                 .build(),
-            Connectivity.simple("http://localhost")
+            Connectivity.simple("http://localhost"),
+            interceptor
         )
         return GlobalOpenTelemetry.get()
+    }
+
+    private fun sendLog(openTelemetry: OpenTelemetry) {
+        openTelemetry.logsBridge.get("LoggerScope").logRecordBuilder().emit()
+    }
+
+    private fun sendSpan(openTelemetry: OpenTelemetry) {
+        openTelemetry.getTracer("SomeTracer").spanBuilder("SomeSpan").startSpan().end()
+    }
+
+    private fun sendMetric(openTelemetry: OpenTelemetry) {
+        openTelemetry.getMeter("MeterScope").counterBuilder("Counter").build().add(1)
     }
 
     override fun getSpanProcessor(): SpanProcessor {

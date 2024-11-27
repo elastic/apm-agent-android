@@ -49,7 +49,7 @@ public abstract class ManagedPeriodicTask implements PeriodicTask {
      * given that tasks are run from the {@link PeriodicWorkService} class which has its own internal
      * delay between iterations.
      */
-    protected abstract long getMinDelayBeforeNextRunInMillis();
+    public abstract long getMinDelayBeforeNextRunInMillis();
 
     @Override
     public final boolean shouldRunTask() {

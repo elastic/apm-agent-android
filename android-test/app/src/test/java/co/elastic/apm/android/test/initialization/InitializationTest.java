@@ -29,6 +29,7 @@ import co.elastic.apm.android.sdk.features.persistence.PersistenceConfiguration;
 import co.elastic.apm.android.sdk.features.persistence.scheduler.ExportScheduler;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.poll.ConfigurationPollManager;
 import co.elastic.apm.android.sdk.internal.features.persistence.PersistenceInitializer;
+import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElasticClock;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
@@ -42,7 +43,6 @@ import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter;
 import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporter;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
-import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.logs.LogRecordProcessor;
 import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
@@ -85,8 +85,8 @@ public class InitializationTest extends BaseRobolectricTest {
     }
 
     @Test
-    public void verifyClock_isInitialized() {
-        Clock clock = getAgentDependenciesInjector().getClock();
+    public void verifyElapsedTimeClock_isInitialized() {
+        ElasticClock clock = getAgentDependenciesInjector().getElasticClock();
 
         assertTrue(getPeriodicWorkService().getTasks().contains(clock));
     }

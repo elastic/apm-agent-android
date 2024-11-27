@@ -166,7 +166,8 @@ public final class ElasticApmAgent {
         return initialize(application, configuration, connectivity, null);
     }
 
-    private synchronized static ElasticApmAgent initialize(Application application, ElasticApmConfiguration configuration, Connectivity connectivity, AgentDependenciesInjector.Interceptor interceptor) {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    public synchronized static ElasticApmAgent initialize(Application application, ElasticApmConfiguration configuration, Connectivity connectivity, AgentDependenciesInjector.Interceptor interceptor) {
         if (instance != null) {
             throw new IllegalStateException("Already initialized");
         }

@@ -41,6 +41,8 @@ class ElasticClockTest : BaseTest() {
     @BeforeEach
     fun setUp() {
         MockKAnnotations.init(this)
+        every { systemTimeProvider.currentTimeMillis }.returns(INITIAL_CURRENT_TIME)
+        every { systemTimeProvider.elapsedRealTime }.returns(INITIAL_ELAPSED_TIME)
         elasticClock = ElasticClock(sntpClient, systemTimeProvider)
     }
 
@@ -53,7 +55,17 @@ class ElasticClockTest : BaseTest() {
     }
 
     @Test
-    fun `Use network time offset when available`() {
+    fun `Return current time as now when network one isn't available`() {
+        val delta = 100L
+        val elapsedTime = INITIAL_ELAPSED_TIME + delta
+        val currentTimeMillis = INITIAL_CURRENT_TIME + delta
+        every { systemTimeProvider.elapsedRealTime }.returns(elapsedTime)
+
+        assertThat(elasticClock.now()).isEqualTo(TimeUnit.MILLISECONDS.toNanos(currentTimeMillis))
+    }
+
+    @Test
+    fun `Use network time offset to calculate now, when available`() {
         val elapsedTime = 123L
         val serverOffset = 1_000L
         val expectedOffset = serverOffset + TIME_REFERENCE
@@ -85,5 +97,7 @@ class ElasticClockTest : BaseTest() {
 
     companion object {
         private const val TIME_REFERENCE = 1577836800000L
+        private const val INITIAL_CURRENT_TIME = 1_000_000_000L
+        private const val INITIAL_ELAPSED_TIME = 1_000L
     }
 }

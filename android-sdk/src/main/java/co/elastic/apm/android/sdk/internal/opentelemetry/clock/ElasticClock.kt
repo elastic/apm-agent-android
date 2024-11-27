@@ -30,7 +30,8 @@ class ElasticClock(
     private val sntpClient: SntpClient,
     private val systemTimeProvider: SystemTimeProvider
 ) : ManagedPeriodicTask(), Clock {
-    private val offsetTime = AtomicLong(0)
+    private val offsetTime =
+        AtomicLong(systemTimeProvider.currentTimeMillis - systemTimeProvider.elapsedRealTime)
 
     companion object {
         @JvmStatic

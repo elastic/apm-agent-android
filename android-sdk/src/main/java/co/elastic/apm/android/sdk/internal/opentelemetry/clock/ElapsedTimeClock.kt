@@ -39,10 +39,11 @@ class ElapsedTimeClock(
 
         private val POLLING_INTERVAL = TimeUnit.MINUTES.toMillis(1)
         private const val TIME_REFERENCE = 1577836800000L
+        private const val MILLIS_TIMES_TO_NANOS = 1_000_000L
     }
 
     override fun now(): Long {
-        return (offsetTime.get() + systemTimeProvider.elapsedRealTime) * 1_000_000L
+        return (offsetTime.get() + systemTimeProvider.elapsedRealTime) * MILLIS_TIMES_TO_NANOS
     }
 
     override fun nanoTime(): Long {

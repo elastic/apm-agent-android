@@ -16,9 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.otel
+package co.elastic.apm.android.sdk.internal.opentelemetry.clock
 
-import co.elastic.apm.android.sdk.internal.opentelemetry.tools.ElasticClock
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
 import co.elastic.apm.android.sdk.testutils.BaseTest

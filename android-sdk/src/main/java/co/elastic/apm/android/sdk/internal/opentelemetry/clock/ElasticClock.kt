@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.opentelemetry.tools
+package co.elastic.apm.android.sdk.internal.opentelemetry.clock
 
 import androidx.annotation.VisibleForTesting
 import co.elastic.apm.android.common.internal.logging.Elog
@@ -43,7 +43,7 @@ class ElasticClock @VisibleForTesting constructor(
 
     override fun onTaskRun() {
         try {
-            val response = sntpClient.fetchTimeOffset(systemTimeProvider::getCurrentTimeMillis)
+            val response = sntpClient.fetchTimeOffset(systemTimeProvider.currentTimeMillis)
             if (response is SntpClient.Response.Success) {
                 offsetMillis.set(response.offsetMillis)
                 Elog.getLogger().debug(

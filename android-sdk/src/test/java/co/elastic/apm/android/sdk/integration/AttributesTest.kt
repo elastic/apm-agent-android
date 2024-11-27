@@ -61,7 +61,7 @@ import org.robolectric.annotation.Config
 import org.robolectric.util.ReflectionHelpers
 
 @RunWith(RobolectricTestRunner::class)
-class InstrumentationTest : SignalConfiguration {
+class AttributesTest : SignalConfiguration {
     private lateinit var spanExporter: InMemorySpanExporter
     private lateinit var metricsReader: MetricReader
     private lateinit var metricsExporter: InMemoryMetricExporter
@@ -288,7 +288,7 @@ class InstrumentationTest : SignalConfiguration {
         return clock
     }
 
-    fun getStartTime(metric: MetricData): Long {
+    private fun getStartTime(metric: MetricData): Long {
         val points: List<PointData> = java.util.ArrayList(metric.data.points)
         return points[0].epochNanos
     }

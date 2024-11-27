@@ -39,7 +39,7 @@ class IntegrationTest {
 
         agentRule.sendSpan()
         agentRule.sendLog()
-        agentRule.sendMetric()
+        agentRule.sendMetricCounter()
 
         assertThat(agentRule.getFinishedSpans()).hasSize(1)
         assertThat(agentRule.getFinishedLogRecords()).hasSize(1)
@@ -55,7 +55,7 @@ class IntegrationTest {
 
         agentRule.sendSpan()
         agentRule.sendLog()
-        agentRule.sendMetric()
+        agentRule.sendMetricCounter()
 
         assertThat(agentRule.getFinishedSpans()).hasSize(0)
         assertThat(agentRule.getFinishedLogRecords()).hasSize(0)
@@ -68,7 +68,7 @@ class IntegrationTest {
 
         agentRule.sendSpan()
         agentRule.sendLog()
-        agentRule.sendMetric()
+        agentRule.sendMetricCounter()
 
         assertThat(agentRule.getFinishedSpans()).hasSize(0)
         assertThat(agentRule.getFinishedLogRecords()).hasSize(0)

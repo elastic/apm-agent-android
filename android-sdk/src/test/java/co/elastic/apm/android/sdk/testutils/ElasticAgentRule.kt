@@ -33,6 +33,8 @@ import co.elastic.apm.android.sdk.session.SessionManager
 import io.mockk.spyk
 import io.opentelemetry.api.GlobalOpenTelemetry
 import io.opentelemetry.api.OpenTelemetry
+import io.opentelemetry.api.logs.LogRecordBuilder
+import io.opentelemetry.api.trace.SpanBuilder
 import io.opentelemetry.sdk.logs.LogRecordProcessor
 import io.opentelemetry.sdk.logs.data.LogRecordData
 import io.opentelemetry.sdk.logs.export.SimpleLogRecordProcessor
@@ -85,13 +87,17 @@ class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjecto
     }
 
     fun initialize(
+        serviceName: String = "service-name",
+        serviceVersion: String = "0.0.0",
+        deploymentEnvironment: String = "test",
         configurationInterceptor: (ElasticApmConfiguration.Builder) -> Unit = {},
+        connectivityInterceptor: (Connectivity) -> Connectivity = { it },
         interceptor: Interceptor? = null
     ) {
         val configBuilder = ElasticApmConfiguration.builder()
-            .setServiceName("service-name")
-            .setServiceVersion("0.0.0")
-            .setDeploymentEnvironment("test")
+            .setServiceName(serviceName)
+            .setServiceVersion(serviceVersion)
+            .setDeploymentEnvironment(deploymentEnvironment)
             .setSignalConfiguration(this)
             .setDeviceIdGenerator { "device-id" }
             .setSessionIdGenerator { "session-id" }
@@ -101,7 +107,7 @@ class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjecto
         ElasticApmAgent.initialize(
             RuntimeEnvironment.getApplication(),
             configBuilder.build(),
-            Connectivity.simple("http://localhost")
+            connectivityInterceptor(Connectivity.simple("http://localhost"))
         ) {
             agentDependenciesInjector = interceptor?.intercept(it) ?: it
             configurations.addAll(agentDependenciesInjector!!.configurationsProvider.provideConfigurations())
@@ -110,16 +116,20 @@ class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjecto
         _openTelemetry = GlobalOpenTelemetry.get()
     }
 
-    fun sendLog() {
-        openTelemetry.logsBridge.get("LoggerScope").logRecordBuilder().emit()
+    fun sendLog(body: String = "", builderVisitor: LogRecordBuilder.() -> Unit = {}) {
+        val logRecordBuilder = openTelemetry.logsBridge.get("LoggerScope").logRecordBuilder()
+        builderVisitor(logRecordBuilder)
+        logRecordBuilder.setBody(body).emit()
     }
 
-    fun sendSpan() {
-        openTelemetry.getTracer("SomeTracer").spanBuilder("SomeSpan").startSpan().end()
+    fun sendSpan(name: String = "SomeSpan", builderVisitor: SpanBuilder.() -> Unit = {}) {
+        val spanBuilder = openTelemetry.getTracer("SomeTracer").spanBuilder(name)
+        builderVisitor(spanBuilder)
+        spanBuilder.startSpan().end()
     }
 
-    fun sendMetric() {
-        openTelemetry.getMeter("MeterScope").counterBuilder("Counter").build().add(1)
+    fun sendMetricCounter(name: String = "Counter") {
+        openTelemetry.getMeter("MeterScope").counterBuilder(name).build().add(1)
     }
 
     override fun getSpanProcessor(): SpanProcessor {

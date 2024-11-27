@@ -118,7 +118,7 @@ class AttributesTest {
 
         agentRule.sendSpan()
         agentRule.sendLog()
-        agentRule.sendMetric()
+        agentRule.sendMetricCounter()
 
         val spanItems = agentRule.getFinishedSpans()
         val logItems = agentRule.getFinishedLogRecords()
@@ -225,7 +225,7 @@ class AttributesTest {
 
         agentRule.sendSpan()
         agentRule.sendLog()
-        agentRule.sendMetric()
+        agentRule.sendMetricCounter()
 
         assertThat(agentRule.getFinishedSpans().first().startEpochNanos).isEqualTo(nowTime)
         assertThat(agentRule.getFinishedLogRecords().first().observedTimestampEpochNanos).isEqualTo(

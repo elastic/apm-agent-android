@@ -20,7 +20,7 @@ package co.elastic.apm.android.sdk.internal.opentelemetry.clock
 
 import io.opentelemetry.sdk.common.Clock
 
-class ElasticClock(elapsedTimeClock: ElapsedTimeClock) : Clock {
+class ElasticClock(val elapsedTimeClock: ElapsedTimeClock) : Clock {
     @Volatile
     private var delegate: Clock = elapsedTimeClock
 
@@ -30,5 +30,12 @@ class ElasticClock(elapsedTimeClock: ElapsedTimeClock) : Clock {
 
     override fun nanoTime(): Long {
         return delegate.nanoTime()
+    }
+
+    companion object {
+        @JvmStatic
+        fun create(): ElasticClock {
+            return ElasticClock(ElapsedTimeClock.create())
+        }
     }
 }

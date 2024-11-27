@@ -1,14 +1,17 @@
 package co.elastic.apm.android.test.attributes.traces;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.util.List;
 
 import co.elastic.apm.android.sdk.traces.ElasticTracers;
 import co.elastic.apm.android.test.common.spans.Spans;
-import co.elastic.apm.android.test.testutils.TestElasticClock;
 import co.elastic.apm.android.test.testutils.base.BaseRobolectricTest;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.sdk.trace.data.SpanData;
@@ -18,8 +21,7 @@ public class ClockTest extends BaseRobolectricTest {
     @Test
     public void whenASpanIsCreated_itHasTimestampSetFromElasticClock() {
         long startTimeFromElasticClock = 123456789;
-        TestElasticClock clock = (TestElasticClock) getAgentDependenciesInjector().getClock();
-        clock.setForcedNow(startTimeFromElasticClock);
+        setNow(startTimeFromElasticClock);
         SpanData span = getSpanData();
 
         Spans.verify(span)
@@ -29,13 +31,13 @@ public class ClockTest extends BaseRobolectricTest {
     @Test
     public void whenClockNowChangesInMidSpan_verifyFinalSpanDurationIsNotAffected() {
         long startTimeFromElasticClock = 2_000_000_000;
-        TestElasticClock clock = (TestElasticClock) getAgentDependenciesInjector().getClock();
-        clock.setForcedNow(startTimeFromElasticClock);
+        doAnswer(invocation -> System.nanoTime()).when(getAgentDependenciesInjector().getElasticClock()).nanoTime();
+        setNow(startTimeFromElasticClock);
 
         Span span = ElasticTracers.androidActivity().spanBuilder("TimeChangeSpan").startSpan();
 
         // Moving now backwards:
-        clock.setForcedNow(1_000_000_000L);
+        setNow(1_000_000_000L);
 
         span.end();
 
@@ -43,6 +45,10 @@ public class ClockTest extends BaseRobolectricTest {
         Spans.verify(recordedSpan)
                 .startedAt(startTimeFromElasticClock);
         assertTrue(recordedSpan.getEndEpochNanos() > startTimeFromElasticClock);
+    }
+
+    private void setNow(long now) {
+        doReturn(now).when(getAgentDependenciesInjector().getElasticClock()).now();
     }
 
     private SpanData getSpanData() {

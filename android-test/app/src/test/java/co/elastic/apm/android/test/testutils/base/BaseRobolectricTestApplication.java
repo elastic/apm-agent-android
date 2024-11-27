@@ -26,6 +26,8 @@ import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigu
 import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer;
 import co.elastic.apm.android.sdk.internal.features.persistence.PersistenceInitializer;
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
+import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElapsedTimeClock;
+import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElasticClock;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.session.SessionManager;
@@ -35,8 +37,6 @@ import co.elastic.apm.android.test.common.metrics.MetricExporterCaptor;
 import co.elastic.apm.android.test.common.metrics.MetricsFlusher;
 import co.elastic.apm.android.test.common.spans.SpanExporterCaptor;
 import co.elastic.apm.android.test.providers.ExportersProvider;
-import co.elastic.apm.android.test.testutils.TestElasticClock;
-import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.logs.export.SimpleLogRecordProcessor;
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
@@ -48,7 +48,7 @@ public class BaseRobolectricTestApplication extends Application implements Expor
     private final LogRecordExporterCaptor logRecordExporter;
     private final MetricExporterCaptor metricExporter;
     private final List<Configuration> configurations = new ArrayList<>();
-    private TestElasticClock clock;
+    private ElasticClock clock;
     private SessionManager sessionManager;
     private CentralConfigurationInitializer centralConfigurationInitializer;
     private PersistenceInitializer persistenceInitializer;
@@ -116,7 +116,8 @@ public class BaseRobolectricTestApplication extends Application implements Expor
     }
 
     private void setUpClock() {
-        clock = new TestElasticClock();
+        clock = mock();
+        doReturn(mock(ElapsedTimeClock.class)).when(clock).getElapsedTimeClock();
     }
 
     private void setUpSessionManager() {
@@ -166,7 +167,7 @@ public class BaseRobolectricTestApplication extends Application implements Expor
     }
 
     @Override
-    public Clock getClock() {
+    public ElasticClock getElasticClock() {
         return clock;
     }
 

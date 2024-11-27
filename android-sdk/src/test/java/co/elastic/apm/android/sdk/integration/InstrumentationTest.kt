@@ -256,6 +256,31 @@ class InstrumentationTest : SignalConfiguration {
         assertThat(getStartTime(metricsExporter.finishedMetricItems.first())).isEqualTo(nowTime)
     }
 
+    @Test
+    fun `When timestamp changes mid-span, the end time shouldn't be affected`() {
+        // This test is to verify that the internals of OTel Java use the system time nano
+        // to track span start and end diff.
+
+        val startTimeFromElasticClock = 2000000000L
+        val clock = createClock(startTimeFromElasticClock)
+        val openTelemetry = getOtelInstance {
+            val dependenciesInjectorSpy = spyk(it)
+            every { dependenciesInjectorSpy.elasticClock }.returns(clock)
+            dependenciesInjectorSpy
+        }
+
+        val span = openTelemetry.getTracer("SomeTracer").spanBuilder("TimeChangeSpan").startSpan()
+
+        // Moving now backwards:
+        every { clock.now() }.returns(1000000000L)
+
+        span.end()
+
+        val spanData = spanExporter.finishedSpanItems.first()
+        assertThat(spanData.startEpochNanos).isEqualTo(startTimeFromElasticClock)
+        assertThat(spanData.endEpochNanos).isGreaterThan(startTimeFromElasticClock)
+    }
+
     private fun createClock(nowTime: Long): ElasticClock {
         val clock = mockk<ElasticClock>()
         every { clock.now() }.returns(nowTime)

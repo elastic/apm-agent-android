@@ -22,7 +22,15 @@ import co.elastic.apm.android.sdk.ElasticApmAgent
 import co.elastic.apm.android.sdk.ElasticApmConfiguration
 import co.elastic.apm.android.sdk.connectivity.Connectivity
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration
+import co.elastic.apm.android.sdk.internal.configuration.Configuration
+import co.elastic.apm.android.sdk.internal.configuration.provider.ConfigurationsProvider
+import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer
+import co.elastic.apm.android.sdk.internal.features.persistence.PersistenceInitializer
+import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector.Interceptor
+import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElasticClock
+import co.elastic.apm.android.sdk.session.SessionManager
+import io.mockk.spyk
 import io.opentelemetry.api.GlobalOpenTelemetry
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.sdk.logs.LogRecordProcessor
@@ -42,12 +50,19 @@ import org.junit.runner.Description
 import org.junit.runners.model.Statement
 import org.robolectric.RuntimeEnvironment
 
-class ElasticAgentRule : TestRule, SignalConfiguration {
+class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjector,
+    ConfigurationsProvider {
     private lateinit var spanExporter: InMemorySpanExporter
     private lateinit var metricsReader: MetricReader
     private lateinit var metricsExporter: InMemoryMetricExporter
     private lateinit var logsExporter: InMemoryLogRecordExporter
-    lateinit var openTelemetry: OpenTelemetry
+    private var agentDependenciesInjector: AgentDependenciesInjector? = null
+    private val configurations = mutableListOf<Configuration>()
+    private var _openTelemetry: OpenTelemetry? = null
+    val openTelemetry: OpenTelemetry
+        get() {
+            return _openTelemetry!!
+        }
 
     override fun apply(base: Statement, description: Description): Statement {
         spanExporter = InMemorySpanExporter.create()
@@ -63,23 +78,36 @@ class ElasticAgentRule : TestRule, SignalConfiguration {
         } finally {
             ElasticApmAgent.resetForTest()
             GlobalOpenTelemetry.resetForTest()
+            _openTelemetry = null
+            agentDependenciesInjector = null
+            configurations.clear()
         }
     }
 
-    fun initialize(interceptor: Interceptor? = null) {
+    fun initialize(
+        configurationInterceptor: (ElasticApmConfiguration.Builder) -> Unit = {},
+        interceptor: Interceptor? = null
+    ) {
+        val configBuilder = ElasticApmConfiguration.builder()
+            .setServiceName("service-name")
+            .setServiceVersion("0.0.0")
+            .setDeploymentEnvironment("test")
+            .setSignalConfiguration(this)
+            .setDeviceIdGenerator { "device-id" }
+            .setSessionIdGenerator { "session-id" }
+
+        configurationInterceptor(configBuilder)
+
         ElasticApmAgent.initialize(
-            RuntimeEnvironment.getApplication(), ElasticApmConfiguration.builder()
-                .setServiceName("service-name")
-                .setServiceVersion("0.0.0")
-                .setDeploymentEnvironment("test")
-                .setSignalConfiguration(this)
-                .setDeviceIdGenerator { "device-id" }
-                .setSessionIdGenerator { "session-id" }
-                .build(),
-            Connectivity.simple("http://localhost"),
-            interceptor
-        )
-        openTelemetry = GlobalOpenTelemetry.get()
+            RuntimeEnvironment.getApplication(),
+            configBuilder.build(),
+            Connectivity.simple("http://localhost")
+        ) {
+            agentDependenciesInjector = interceptor?.intercept(it) ?: it
+            configurations.addAll(agentDependenciesInjector!!.configurationsProvider.provideConfigurations())
+            this
+        }
+        _openTelemetry = GlobalOpenTelemetry.get()
     }
 
     fun sendLog() {
@@ -118,5 +146,37 @@ class ElasticAgentRule : TestRule, SignalConfiguration {
     fun getFinishedMetrics(): List<MetricData> {
         metricsReader.forceFlush()
         return metricsExporter.finishedMetricItems
+    }
+
+    override fun getElasticClock(): ElasticClock {
+        return agentDependenciesInjector!!.elasticClock
+    }
+
+    override fun getSessionManager(): SessionManager {
+        return agentDependenciesInjector!!.sessionManager
+    }
+
+    override fun getCentralConfigurationInitializer(): CentralConfigurationInitializer {
+        return agentDependenciesInjector!!.centralConfigurationInitializer
+    }
+
+    override fun getConfigurationsProvider(): ConfigurationsProvider {
+        return this
+    }
+
+    override fun getPersistenceInitializer(): PersistenceInitializer {
+        return agentDependenciesInjector!!.persistenceInitializer
+    }
+
+    override fun provideConfigurations(): MutableList<Configuration> {
+        val spies = mutableListOf<Configuration>()
+        for (configuration in configurations) {
+            try {
+                spies.add(spyk(configuration))
+            } catch (ignored: IllegalArgumentException) {
+                spies.add(configuration)
+            }
+        }
+        return spies
     }
 }

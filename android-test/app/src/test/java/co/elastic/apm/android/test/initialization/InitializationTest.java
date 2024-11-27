@@ -29,7 +29,7 @@ import co.elastic.apm.android.sdk.features.persistence.PersistenceConfiguration;
 import co.elastic.apm.android.sdk.features.persistence.scheduler.ExportScheduler;
 import co.elastic.apm.android.sdk.internal.features.centralconfig.poll.ConfigurationPollManager;
 import co.elastic.apm.android.sdk.internal.features.persistence.PersistenceInitializer;
-import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElapsedTimeClock;
+import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElasticClock;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
 import co.elastic.apm.android.sdk.internal.services.metadata.ApmMetadataService;
@@ -86,7 +86,7 @@ public class InitializationTest extends BaseRobolectricTest {
 
     @Test
     public void verifyElapsedTimeClock_isInitialized() {
-        ElapsedTimeClock clock = getAgentDependenciesInjector().getElasticClock().getElapsedTimeClock();
+        ElasticClock clock = getAgentDependenciesInjector().getElasticClock();
 
         assertTrue(getPeriodicWorkService().getTasks().contains(clock));
     }

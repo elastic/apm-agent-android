@@ -285,7 +285,6 @@ class InstrumentationTest : SignalConfiguration {
         val clock = mockk<ElasticClock>()
         every { clock.now() }.returns(nowTime)
         every { clock.nanoTime() }.answers { System.nanoTime() }
-        every { clock.elapsedTimeClock }.returns(mockk())
         return clock
     }
 

@@ -18,7 +18,72 @@
  */
 package co.elastic.apm.android.sdk.internal.opentelemetry.clock
 
+import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
+import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
 import co.elastic.apm.android.sdk.testutils.BaseTest
+import io.mockk.MockKAnnotations
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import java.util.concurrent.TimeUnit
 
 class ElasticClockTest : BaseTest() {
+    @MockK
+    lateinit var sntpClient: SntpClient
+
+    @MockK
+    lateinit var systemTimeProvider: SystemTimeProvider
+
+    private lateinit var elasticClock: ElasticClock
+
+    @BeforeEach
+    fun setUp() {
+        MockKAnnotations.init(this)
+        elasticClock = ElasticClock(sntpClient, systemTimeProvider)
+    }
+
+    @Test
+    fun `Return system nano time`() {
+        val nanoTime: Long = 123
+        every { systemTimeProvider.nanoTime }.returns(nanoTime)
+
+        assertThat(elasticClock.nanoTime()).isEqualTo(nanoTime)
+    }
+
+    @Test
+    fun `Use network time offset when available`() {
+        val elapsedTime = 123L
+        val serverOffset = 1_000L
+        val expectedOffset = serverOffset + TIME_REFERENCE
+        val expectedTime = TimeUnit.MILLISECONDS.toNanos(elapsedTime + expectedOffset)
+        every { systemTimeProvider.elapsedRealTime }.returns(elapsedTime)
+        every { sntpClient.fetchTimeOffset(elapsedTime + TIME_REFERENCE) }.returns(
+            SntpClient.Response.Success(serverOffset)
+        )
+
+        // Fetch time offset
+        elasticClock.runTask()
+
+        assertThat(elasticClock.now()).isEqualTo(expectedTime)
+    }
+
+    @Test
+    fun `Verify polling interval`() {
+        assertThat(elasticClock.minDelayBeforeNextRunInMillis).isEqualTo(
+            TimeUnit.MINUTES.toMillis(
+                1
+            )
+        )
+    }
+
+    @Test
+    fun `Verify if task is finished`() {
+        assertThat(elasticClock.isTaskFinished).isFalse()
+    }
+
+    companion object {
+        private const val TIME_REFERENCE = 1577836800000L
+    }
 }

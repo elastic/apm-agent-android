@@ -26,7 +26,6 @@ import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigu
 import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer;
 import co.elastic.apm.android.sdk.internal.features.persistence.PersistenceInitializer;
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector;
-import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElapsedTimeClock;
 import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElasticClock;
 import co.elastic.apm.android.sdk.internal.services.Service;
 import co.elastic.apm.android.sdk.internal.services.ServiceManager;
@@ -117,7 +116,6 @@ public class BaseRobolectricTestApplication extends Application implements Expor
 
     private void setUpClock() {
         clock = mock();
-        doReturn(mock(ElapsedTimeClock.class)).when(clock).getElapsedTimeClock();
     }
 
     private void setUpSessionManager() {

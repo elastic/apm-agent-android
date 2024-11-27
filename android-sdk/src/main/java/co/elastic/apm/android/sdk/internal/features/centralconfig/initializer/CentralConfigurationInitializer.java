@@ -73,7 +73,7 @@ public final class CentralConfigurationInitializer extends ManagedPeriodicTask {
     }
 
     @Override
-    protected long getMinDelayBeforeNextRunInMillis() {
+    public long getMinDelayBeforeNextRunInMillis() {
         // Doesn't need to delay its execution further than the Periodic work service internal delays.
         return 0;
     }

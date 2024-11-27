@@ -69,6 +69,20 @@ class ElapsedTimeClockTest {
         assertThat(elapsedTimeClock.now()).isEqualTo(expectedTime)
     }
 
+    @Test
+    fun `Verify polling interval`() {
+        assertThat(elapsedTimeClock.minDelayBeforeNextRunInMillis).isEqualTo(
+            TimeUnit.MINUTES.toMillis(
+                1
+            )
+        )
+    }
+
+    @Test
+    fun `Verify if task is finished`() {
+        assertThat(elapsedTimeClock.isTaskFinished).isFalse()
+    }
+
     companion object {
         private const val TIME_REFERENCE = 1577836800000L
     }

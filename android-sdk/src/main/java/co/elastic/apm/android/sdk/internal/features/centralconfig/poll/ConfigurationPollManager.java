@@ -78,7 +78,7 @@ public final class ConfigurationPollManager extends ManagedPeriodicTask {
     }
 
     @Override
-    protected long getMinDelayBeforeNextRunInMillis() {
+    public long getMinDelayBeforeNextRunInMillis() {
         return delayForNextRunInMillis;
     }
 

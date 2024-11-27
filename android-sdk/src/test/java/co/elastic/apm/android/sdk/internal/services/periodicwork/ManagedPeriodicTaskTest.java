@@ -89,7 +89,7 @@ public class ManagedPeriodicTaskTest {
         }
 
         @Override
-        protected long getMinDelayBeforeNextRunInMillis() {
+        public long getMinDelayBeforeNextRunInMillis() {
             return millisToWaitBeforeNextRun;
         }
 

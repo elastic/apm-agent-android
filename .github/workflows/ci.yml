@@ -73,7 +73,7 @@ jobs:
     steps:
       - id: buildkite-run
         name: Run Release dry-run
-        uses: elastic/oblt-actions/buildkite/run@v1.5.0
+        uses: elastic/oblt-actions/buildkite/run@v1
         with:
           branch: ${{ github.ref_name }}
           pipeline: "apm-agent-android-release"
@@ -85,7 +85,7 @@ jobs:
             dry_run=true
             TARBALL_FILE=${{ env.TARBALL_FILE }}
 
-      - uses: elastic/oblt-actions/buildkite/download-artifact@v1.5.0
+      - uses: elastic/oblt-actions/buildkite/download-artifact@v1
         with:
           build-number: ${{ steps.buildkite-run.outputs.number }}
           path: ${{ env.TARBALL_FILE }}

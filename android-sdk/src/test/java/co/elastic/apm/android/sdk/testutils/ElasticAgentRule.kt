@@ -42,6 +42,7 @@ import io.mockk.mockk
 import io.mockk.spyk
 import io.opentelemetry.api.GlobalOpenTelemetry
 import io.opentelemetry.api.OpenTelemetry
+import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.api.logs.LogRecordBuilder
 import io.opentelemetry.api.trace.SpanBuilder
 import io.opentelemetry.sdk.logs.LogRecordProcessor
@@ -71,13 +72,27 @@ class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjecto
     private var centralConfigurationInitializer: CentralConfigurationInitializer? = null
     private val configurations = mutableListOf<Configuration>()
     private var centralConfigurationManager: CentralConfigurationManager? = null
+    private var exceptionHandler: Thread.UncaughtExceptionHandler? = null
     private var _openTelemetry: OpenTelemetry? = null
     val openTelemetry: OpenTelemetry
         get() {
             return _openTelemetry!!
         }
 
+    companion object {
+        val LOG_DEFAULT_ATTRS: Attributes = Attributes.builder()
+            .put("session.id", "session-id")
+            .put("network.connection.type", "unavailable")
+            .build()
+        val SPAN_DEFAULT_ATTRS: Attributes = Attributes.builder()
+            .putAll(LOG_DEFAULT_ATTRS)
+            .put("type", "mobile")
+            .put("screen.name", "unknown")
+            .build()
+    }
+
     override fun apply(base: Statement, description: Description): Statement {
+        exceptionHandler = Thread.getDefaultUncaughtExceptionHandler()
         spanExporter = InMemorySpanExporter.create()
         metricsExporter = InMemoryMetricExporter.create()
         logsExporter = InMemoryLogRecordExporter.create()
@@ -97,6 +112,7 @@ class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjecto
             centralConfigurationManager = null
             centralConfigurationInitializer = null
             configurations.clear()
+            Thread.setDefaultUncaughtExceptionHandler(exceptionHandler)
         }
     }
 
@@ -177,16 +193,22 @@ class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjecto
     }
 
     fun getFinishedSpans(): List<SpanData> {
-        return spanExporter.finishedSpanItems
+        val list = ArrayList(spanExporter.finishedSpanItems)
+        spanExporter.reset()
+        return list
     }
 
     fun getFinishedLogRecords(): List<LogRecordData> {
-        return logsExporter.finishedLogRecordItems
+        val list = ArrayList(logsExporter.finishedLogRecordItems)
+        logsExporter.reset()
+        return list
     }
 
     fun getFinishedMetrics(): List<MetricData> {
         metricsReader.forceFlush()
-        return metricsExporter.finishedMetricItems
+        val list = ArrayList(metricsExporter.finishedMetricItems)
+        metricsExporter.reset()
+        return list
     }
 
     override fun getElasticClock(): ElasticClock {

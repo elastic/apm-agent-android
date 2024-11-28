@@ -27,6 +27,8 @@ import android.os.Build
 import android.telephony.TelephonyManager
 import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElasticClock
 import co.elastic.apm.android.sdk.testutils.ElasticAgentRule
+import co.elastic.apm.android.sdk.testutils.ElasticAgentRule.Companion.LOG_DEFAULT_ATTRS
+import co.elastic.apm.android.sdk.testutils.ElasticAgentRule.Companion.SPAN_DEFAULT_ATTRS
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
@@ -135,15 +137,6 @@ class AttributesTest {
     @Test
     fun `Check global attributes`() {
         agentRule.initialize()
-        val expectedLogAttributes = Attributes.builder()
-            .put("session.id", "session-id")
-            .put("network.connection.type", "unavailable")
-            .build()
-        val expectedSpanAttributes = Attributes.builder()
-            .putAll(expectedLogAttributes)
-            .put("type", "mobile")
-            .put("screen.name", "unknown")
-            .build()
 
         agentRule.sendSpan()
         agentRule.sendLog()
@@ -152,8 +145,8 @@ class AttributesTest {
         val logItems = agentRule.getFinishedLogRecords()
         assertThat(spanItems).hasSize(1)
         assertThat(logItems).hasSize(1)
-        assertThat(spanItems.first()).hasAttributes(expectedSpanAttributes)
-        assertThat(logItems.first()).hasAttributes(expectedLogAttributes)
+        assertThat(spanItems.first()).hasAttributes(SPAN_DEFAULT_ATTRS)
+        assertThat(logItems.first()).hasAttributes(LOG_DEFAULT_ATTRS)
     }
 
     @Config(sdk = [24, Config.NEWEST_SDK])

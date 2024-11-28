@@ -57,9 +57,6 @@ class CentralConfigurationManagerTest {
     private lateinit var manager: CentralConfigurationManager
     private lateinit var configurationsSpy: Configurations
 
-    @get:Rule
-    val agentRule = ElasticAgentRule()
-
     @MockK
     lateinit var context: Context
 
@@ -72,6 +69,9 @@ class CentralConfigurationManagerTest {
     companion object {
         private const val PREFERENCE_REFRESH_TIMEOUT_NAME = "central_configuration_refresh_timeout"
     }
+
+    @get:Rule
+    val agentRule = ElasticAgentRule()
 
     @get:Rule
     val temporaryFolder: TemporaryFolder = TemporaryFolder()

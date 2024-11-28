@@ -48,5 +48,5 @@ class ConnectivityConfigurationTest {
     }
 
     private val configuration: ConnectivityConfiguration
-        get() = Configurations.get(ConnectivityConfiguration::class.java)
+        get() = Configurations.get(ConnectivityConfiguration::class.java)!!
 }

@@ -46,5 +46,5 @@ class GeneralConfigurationTest {
     }
 
     private val configuration: GeneralConfiguration
-        get() = Configurations.get(GeneralConfiguration::class.java)
+        get() = Configurations.get(GeneralConfiguration::class.java)!!
 }

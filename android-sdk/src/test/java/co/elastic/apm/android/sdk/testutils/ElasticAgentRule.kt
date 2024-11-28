@@ -24,12 +24,21 @@ import co.elastic.apm.android.sdk.connectivity.Connectivity
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration
 import co.elastic.apm.android.sdk.internal.configuration.Configuration
 import co.elastic.apm.android.sdk.internal.configuration.provider.ConfigurationsProvider
+import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigurationManager
 import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer
 import co.elastic.apm.android.sdk.internal.features.persistence.PersistenceInitializer
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector.Interceptor
 import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElasticClock
+import co.elastic.apm.android.sdk.internal.services.Service
+import co.elastic.apm.android.sdk.internal.services.ServiceManager
+import co.elastic.apm.android.sdk.internal.services.ServiceManager.InitializationCallback
+import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicWorkService
 import co.elastic.apm.android.sdk.session.SessionManager
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
 import io.mockk.spyk
 import io.opentelemetry.api.GlobalOpenTelemetry
 import io.opentelemetry.api.OpenTelemetry
@@ -53,13 +62,15 @@ import org.junit.runners.model.Statement
 import org.robolectric.RuntimeEnvironment
 
 class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjector,
-    ConfigurationsProvider {
+    ConfigurationsProvider, InitializationCallback {
     private lateinit var spanExporter: InMemorySpanExporter
     private lateinit var metricsReader: MetricReader
     private lateinit var metricsExporter: InMemoryMetricExporter
     private lateinit var logsExporter: InMemoryLogRecordExporter
     private var agentDependenciesInjector: AgentDependenciesInjector? = null
+    private var centralConfigurationInitializer: CentralConfigurationInitializer? = null
     private val configurations = mutableListOf<Configuration>()
+    private var centralConfigurationManager: CentralConfigurationManager? = null
     private var _openTelemetry: OpenTelemetry? = null
     val openTelemetry: OpenTelemetry
         get() {
@@ -70,6 +81,7 @@ class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjecto
         spanExporter = InMemorySpanExporter.create()
         metricsExporter = InMemoryMetricExporter.create()
         logsExporter = InMemoryLogRecordExporter.create()
+        ServiceManager.setInitializationCallback(this)
 
         try {
             return object : Statement() {
@@ -82,6 +94,8 @@ class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjecto
             GlobalOpenTelemetry.resetForTest()
             _openTelemetry = null
             agentDependenciesInjector = null
+            centralConfigurationManager = null
+            centralConfigurationInitializer = null
             configurations.clear()
         }
     }
@@ -111,9 +125,26 @@ class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjecto
         ) {
             agentDependenciesInjector = interceptor?.intercept(it) ?: it
             configurations.addAll(agentDependenciesInjector!!.configurationsProvider.provideConfigurations())
+            centralConfigurationInitializer =
+                spyk(agentDependenciesInjector!!.centralConfigurationInitializer)
+            if (centralConfigurationManager != null) {
+                every { centralConfigurationInitializer!!.manager }.returns(
+                    centralConfigurationManager
+                )
+            }
             this
         }
         _openTelemetry = GlobalOpenTelemetry.get()
+    }
+
+    fun addConfiguration(configuration: Configuration) {
+        validateNotInit()
+        configurations.add(configuration)
+    }
+
+    fun setCentralConfigurationManager(manager: CentralConfigurationManager) {
+        validateNotInit()
+        centralConfigurationManager = manager
     }
 
     fun sendLog(body: String = "", builderVisitor: LogRecordBuilder.() -> Unit = {}) {
@@ -167,7 +198,7 @@ class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjecto
     }
 
     override fun getCentralConfigurationInitializer(): CentralConfigurationInitializer {
-        return agentDependenciesInjector!!.centralConfigurationInitializer
+        return centralConfigurationInitializer!!
     }
 
     override fun getConfigurationsProvider(): ConfigurationsProvider {
@@ -188,5 +219,45 @@ class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjecto
             }
         }
         return spies
+    }
+
+    private fun validateNotInit() {
+        if (_openTelemetry != null) {
+            throw IllegalStateException("Cannot change after initialization.")
+        }
+    }
+
+    override fun onServicesInitializationFinished() {
+        interceptServices {
+            if (it is PeriodicWorkService) {
+                val periodicWorkService = mockk<PeriodicWorkService>()
+                every { periodicWorkService.start() } just Runs
+                every { periodicWorkService.stop() } just Runs
+                every { periodicWorkService.addTask(any()) } just Runs
+                every { periodicWorkService.initialize() } just Runs
+                periodicWorkService
+            } else {
+                spyk(it)
+            }
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun interceptServices(serviceInterceptor: (Service) -> (Service)) {
+        try {
+            val instance = ServiceManager.get()
+            val field = ServiceManager::class.java.getDeclaredField("services")
+            field.isAccessible = true
+            val services = field[instance] as Map<String, Service>
+            val spies = mutableMapOf<String, Service>()
+            services.forEach { (key: String, service: Service) ->
+                spies[key] = serviceInterceptor(service)
+            }
+            field[instance] = spies
+        } catch (e: NoSuchFieldException) {
+            throw RuntimeException(e)
+        } catch (e: IllegalAccessException) {
+            throw RuntimeException(e)
+        }
     }
 }

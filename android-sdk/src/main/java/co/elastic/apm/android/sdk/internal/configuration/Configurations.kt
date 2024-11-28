@@ -16,79 +16,76 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.configuration;
+package co.elastic.apm.android.sdk.internal.configuration
 
-import org.stagemonitor.configuration.ConfigurationRegistry;
-import org.stagemonitor.configuration.source.ConfigurationSource;
+import org.stagemonitor.configuration.ConfigurationRegistry
+import org.stagemonitor.configuration.source.ConfigurationSource
 
-import java.util.Collection;
+class Configurations private constructor(private val configurationRegistry: ConfigurationRegistry) {
 
-public final class Configurations {
-    private static Configurations INSTANCE;
-    private final ConfigurationRegistry configurationRegistry;
-
-    static Configurations get() {
-        return INSTANCE;
+    fun <T : Configuration> getConfiguration(configurationClass: Class<T>): T? {
+        return configurationRegistry.getConfig(configurationClass)
     }
 
-    public static boolean isInitialized() {
-        return INSTANCE != null;
+    fun doReload() {
+        configurationRegistry.reloadDynamicConfigurationOptions()
     }
 
-    public static Configurations.Builder builder() {
-        return new Configurations.Builder();
-    }
+    class Builder {
+        private val registryBuilder: ConfigurationRegistry.Builder = ConfigurationRegistry.builder()
 
-    private Configurations(ConfigurationRegistry configurationRegistry) {
-        this.configurationRegistry = configurationRegistry;
-    }
-
-    public static <T extends Configuration> T get(Class<T> configurationClass) {
-        return get().getConfiguration(configurationClass);
-    }
-
-    public static void reload() {
-        get().doReload();
-    }
-
-    public <T extends Configuration> T getConfiguration(Class<T> configurationClass) {
-        return (T) configurationRegistry.getConfig(configurationClass);
-    }
-
-    public void doReload() {
-        configurationRegistry.reloadDynamicConfigurationOptions();
-    }
-
-    public static void resetForTest() {
-        INSTANCE = null;
-    }
-
-    public static class Builder {
-        private final ConfigurationRegistry.Builder registryBuilder = ConfigurationRegistry.builder();
-
-        private Builder() {
+        fun addSource(source: ConfigurationSource): Builder {
+            registryBuilder.addConfigSource(source)
+            return this
         }
 
-        public Builder addSource(ConfigurationSource source) {
-            registryBuilder.addConfigSource(source);
-            return this;
+        fun register(configuration: Configuration): Builder {
+            registryBuilder.addOptionProvider(configuration)
+            return this
         }
 
-        public Builder register(Configuration configuration) {
-            registryBuilder.addOptionProvider(configuration);
-            return this;
-        }
-
-        public Builder registerAll(Collection<? extends Configuration> configurations) {
-            for (Configuration configuration : configurations) {
-                registryBuilder.addOptionProvider(configuration);
+        fun registerAll(configurations: Collection<Configuration>): Builder {
+            for (configuration in configurations) {
+                registryBuilder.addOptionProvider(configuration)
             }
-            return this;
+            return this
         }
 
-        public Configurations buildAndRegisterGlobal() {
-            INSTANCE = new Configurations(registryBuilder.build());
-            return INSTANCE;
+        fun buildAndRegisterGlobal(): Configurations {
+            INSTANCE = Configurations(registryBuilder.build())
+            return get()
+        }
+    }
+
+    companion object {
+        internal var INSTANCE: Configurations? = null
+
+        @JvmStatic
+        fun get(): Configurations {
+            return INSTANCE!!
+        }
+
+        @JvmStatic
+        fun isInitialized(): Boolean = INSTANCE != null
+
+        @JvmStatic
+        fun builder(): Builder {
+            return Builder()
+        }
+
+        @JvmStatic
+        fun <T : Configuration> get(configurationClass: Class<T>): T? {
+            return get().getConfiguration(configurationClass)
+        }
+
+        @JvmStatic
+        fun reload() {
+            get().doReload()
+        }
+
+        @JvmStatic
+        fun resetForTest() {
+            INSTANCE = null
         }
     }
 }

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.features
+package co.elastic.apm.android.sdk.integration
 
 import co.elastic.apm.android.sdk.instrumentation.InstrumentationConfiguration
 import co.elastic.apm.android.sdk.testutils.ElasticAgentRule

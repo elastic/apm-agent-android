@@ -203,10 +203,14 @@ class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjecto
     }
 
     fun getFinishedMetrics(): List<MetricData> {
-        metricsReader.forceFlush()
+        flushMetrics()
         val list = ArrayList(metricsExporter.finishedMetricItems)
         metricsExporter.reset()
         return list
+    }
+
+    fun flushMetrics() {
+        metricsReader.forceFlush()
     }
 
     override fun getElasticClock(): ElasticClock {

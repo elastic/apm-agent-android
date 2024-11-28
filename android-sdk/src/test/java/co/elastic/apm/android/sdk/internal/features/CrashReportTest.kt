@@ -76,7 +76,7 @@ class CrashReportTest {
     }
 
     @Test
-    fun whenInstrumentationIsDisabled_doNotSendCrashReport() {
+    fun `Drop crash report when the feature is disabled`() {
         agentRule.initialize(configurationInterceptor = {
             it.setInstrumentationConfiguration(
                 InstrumentationConfiguration.builder().enableCrashReporting(false).build()

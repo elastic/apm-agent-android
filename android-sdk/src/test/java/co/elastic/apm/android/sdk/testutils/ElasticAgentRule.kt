@@ -72,7 +72,6 @@ class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjecto
     private var centralConfigurationInitializer: CentralConfigurationInitializer? = null
     private val configurations = mutableListOf<Configuration>()
     private var centralConfigurationManager: CentralConfigurationManager? = null
-    private var exceptionHandler: Thread.UncaughtExceptionHandler? = null
     private var _openTelemetry: OpenTelemetry? = null
     val openTelemetry: OpenTelemetry
         get() {
@@ -92,7 +91,6 @@ class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjecto
     }
 
     override fun apply(base: Statement, description: Description): Statement {
-        exceptionHandler = Thread.getDefaultUncaughtExceptionHandler()
         spanExporter = InMemorySpanExporter.create()
         metricsExporter = InMemoryMetricExporter.create()
         logsExporter = InMemoryLogRecordExporter.create()
@@ -112,7 +110,7 @@ class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjecto
             centralConfigurationManager = null
             centralConfigurationInitializer = null
             configurations.clear()
-            Thread.setDefaultUncaughtExceptionHandler(exceptionHandler)
+            Thread.setDefaultUncaughtExceptionHandler(null)
         }
     }
 

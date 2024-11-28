@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.features.centralconfig
+package co.elastic.apm.android.sdk.integration
 
 import co.elastic.apm.android.sdk.internal.configuration.Configurations
 import co.elastic.apm.android.sdk.internal.configuration.impl.AllInstrumentationConfiguration
@@ -29,7 +29,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class IntegrationTest {
+class CentralConfigurationTest {
     @get:Rule
     val agentRule = ElasticAgentRule()
 

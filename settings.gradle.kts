@@ -23,11 +23,12 @@ include(":android-common")
 include(":android-sdk-ktx")
 
 val instrumentationDir = File(rootDir, "instrumentation")
+val separator = Regex("[/\\\\]")
 instrumentationDir.walk().maxDepth(3).forEach {
     if (it.name.equals("build.gradle.kts")) {
         include(
             ":instrumentation:${
-                it.parentFile.toRelativeString(instrumentationDir).replace("/", ":")
+                it.parentFile.toRelativeString(instrumentationDir).replace(separator, ":")
             }"
         )
     }

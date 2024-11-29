@@ -70,7 +70,7 @@ dependencies being mapped to their licenses are defined. The way to reference th
 as shown below:
 
 ```groovy
-// build.gradle containing the dependencies that need manual mapping.
+// build.gradle.kts containing the dependencies that need manual mapping.
 licensesConfig {
     manualMappingFile = "path/to/the/mappings/file.txt"
 }

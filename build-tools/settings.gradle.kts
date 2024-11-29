@@ -1,5 +1,3 @@
-import org.gradle.api.initialization.resolve.RepositoriesMode
-
 pluginManagement {
     repositories {
         mavenCentral()
@@ -20,4 +18,4 @@ dependencyResolutionManagement {
         gradlePluginPortal()
     }
 }
-include ':processor'
+include(":processor")

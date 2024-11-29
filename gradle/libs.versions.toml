@@ -59,6 +59,7 @@ squareup-javaPoet = "com.squareup:javapoet:1.13.0"
 google-autoService = { module = "com.google.auto.service:auto-service", version.ref = "google-autoService" }
 google-autoService-annotations = { module = "com.google.auto.service:auto-service-annotations", version.ref = "google-autoService" }
 byteBuddy-plugin = { module = "net.bytebuddy:byte-buddy-gradle-plugin", version.ref = "byteBuddy" }
+kotlin-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 
 [bundles]
 mocking = ["mockito", "mockk"]

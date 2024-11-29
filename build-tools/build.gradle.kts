@@ -19,6 +19,7 @@ dependencies {
     implementation(libs.nexus.publish.plugin)
     implementation(libs.gradle.publish.plugin)
     implementation(libs.gradle.shadow.plugin)
+    implementation(libs.kotlin.plugin)
     implementation("com.android.tools.build:gradle:${properties.getProperty("androidGradlePlugin_version")}")
     testImplementation(libs.junit4)
 }

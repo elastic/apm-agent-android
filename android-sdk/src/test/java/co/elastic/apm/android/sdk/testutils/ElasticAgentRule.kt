@@ -82,6 +82,7 @@ class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjecto
     private lateinit var persistenceInitializerInterceptor: (PersistenceInitializer) -> Unit
     private var sessionManager: SessionManager? = null
     private var elasticClock: ElasticClock? = null
+    private lateinit var elasticClockInterceptor: (ElasticClock) -> Unit
 
     companion object {
         val LOG_DEFAULT_ATTRS: Attributes = Attributes.builder()
@@ -101,6 +102,7 @@ class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjecto
         logsExporter = InMemoryLogRecordExporter.create()
         centralConfigurationInitializerInterceptor = { }
         persistenceInitializerInterceptor = {}
+        elasticClockInterceptor = {}
         ServiceManager.setInitializationCallback(this)
 
         try {
@@ -154,7 +156,8 @@ class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjecto
             persistenceInitializer = mockk()
             persistenceInitializerInterceptor(persistenceInitializer!!)
             sessionManager = spyk(agentDependenciesInjector!!.sessionManager)
-            elasticClock = spyk(agentDependenciesInjector!!.elasticClock)
+            elasticClock = mockk(relaxed = true)
+            elasticClockInterceptor(elasticClock!!)
             this
         }
         _openTelemetry = GlobalOpenTelemetry.get()
@@ -173,6 +176,11 @@ class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjecto
     fun setPersistenceInitializerInterceptor(interceptor: (PersistenceInitializer) -> Unit) {
         validateNotInit()
         persistenceInitializerInterceptor = interceptor
+    }
+
+    fun setElasticClockInterceptor(interceptor: (ElasticClock) -> Unit) {
+        validateNotInit()
+        elasticClockInterceptor = interceptor
     }
 
     fun sendLog(body: String = "", builderVisitor: LogRecordBuilder.() -> Unit = {}) {

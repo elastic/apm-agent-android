@@ -31,7 +31,6 @@ import co.elastic.apm.android.sdk.testutils.ElasticAgentRule.Companion.LOG_DEFAU
 import co.elastic.apm.android.sdk.testutils.ElasticAgentRule.Companion.SPAN_DEFAULT_ATTRS
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.spyk
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.sdk.metrics.data.MetricData
 import io.opentelemetry.sdk.metrics.data.PointData
@@ -209,12 +208,11 @@ class AttributesTest {
     @Test
     fun `Check clock usage across all signals`() {
         val nowTime = 12345L
-        val clock = createClock(nowTime)
-        agentRule.initialize {
-            val dependenciesInjectorSpy = spyk(it)
-            every { dependenciesInjectorSpy.elasticClock }.returns(clock)
-            dependenciesInjectorSpy
+        agentRule.setElasticClockInterceptor {
+            every { it.now() }.returns(nowTime)
+            every { it.nanoTime() }.answers { System.nanoTime() }
         }
+        agentRule.initialize()
 
         agentRule.sendSpan()
         agentRule.sendLog()
@@ -233,31 +231,25 @@ class AttributesTest {
         // to track span start and end diff.
 
         val startTimeFromElasticClock = 2000000000L
-        val clock = createClock(startTimeFromElasticClock)
-        agentRule.initialize {
-            val dependenciesInjectorSpy = spyk(it)
-            every { dependenciesInjectorSpy.elasticClock }.returns(clock)
-            dependenciesInjectorSpy
+        var clock: ElasticClock? = null
+        agentRule.setElasticClockInterceptor {
+            every { it.now() }.returns(startTimeFromElasticClock)
+            every { it.nanoTime() }.answers { System.nanoTime() }
+            clock = it
         }
+        agentRule.initialize()
 
         val span = agentRule.openTelemetry.getTracer("SomeTracer").spanBuilder("TimeChangeSpan")
             .startSpan()
 
         // Moving now backwards:
-        every { clock.now() }.returns(1000000000L)
+        every { clock?.now() }.returns(1000000000L)
 
         span.end()
 
         val spanData = agentRule.getFinishedSpans().first()
         assertThat(spanData.startEpochNanos).isEqualTo(startTimeFromElasticClock)
         assertThat(spanData.endEpochNanos).isGreaterThan(startTimeFromElasticClock)
-    }
-
-    private fun createClock(nowTime: Long): ElasticClock {
-        val clock = mockk<ElasticClock>()
-        every { clock.now() }.returns(nowTime)
-        every { clock.nanoTime() }.answers { System.nanoTime() }
-        return clock
     }
 
     private fun getStartTime(metric: MetricData): Long {

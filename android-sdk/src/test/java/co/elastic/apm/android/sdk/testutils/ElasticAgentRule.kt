@@ -24,7 +24,6 @@ import co.elastic.apm.android.sdk.connectivity.Connectivity
 import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration
 import co.elastic.apm.android.sdk.internal.configuration.Configuration
 import co.elastic.apm.android.sdk.internal.configuration.provider.ConfigurationsProvider
-import co.elastic.apm.android.sdk.internal.features.centralconfig.CentralConfigurationManager
 import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer
 import co.elastic.apm.android.sdk.internal.features.persistence.PersistenceInitializer
 import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector
@@ -68,15 +67,21 @@ class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjecto
     private lateinit var metricsReader: MetricReader
     private lateinit var metricsExporter: InMemoryMetricExporter
     private lateinit var logsExporter: InMemoryLogRecordExporter
-    private var agentDependenciesInjector: AgentDependenciesInjector? = null
-    private var centralConfigurationInitializer: CentralConfigurationInitializer? = null
     private val configurations = mutableListOf<Configuration>()
-    private var centralConfigurationManager: CentralConfigurationManager? = null
     private var _openTelemetry: OpenTelemetry? = null
     val openTelemetry: OpenTelemetry
         get() {
             return _openTelemetry!!
         }
+
+    // Dependencies
+    private var agentDependenciesInjector: AgentDependenciesInjector? = null
+    private var centralConfigurationInitializer: CentralConfigurationInitializer? = null
+    private lateinit var centralConfigurationInitializerInterceptor: (CentralConfigurationInitializer) -> Unit
+    private var persistenceInitializer: PersistenceInitializer? = null
+    private lateinit var persistenceInitializerInterceptor: (PersistenceInitializer) -> Unit
+    private var sessionManager: SessionManager? = null
+    private var elasticClock: ElasticClock? = null
 
     companion object {
         val LOG_DEFAULT_ATTRS: Attributes = Attributes.builder()
@@ -94,6 +99,8 @@ class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjecto
         spanExporter = InMemorySpanExporter.create()
         metricsExporter = InMemoryMetricExporter.create()
         logsExporter = InMemoryLogRecordExporter.create()
+        centralConfigurationInitializerInterceptor = { }
+        persistenceInitializerInterceptor = {}
         ServiceManager.setInitializationCallback(this)
 
         try {
@@ -107,8 +114,10 @@ class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjecto
             GlobalOpenTelemetry.resetForTest()
             _openTelemetry = null
             agentDependenciesInjector = null
-            centralConfigurationManager = null
             centralConfigurationInitializer = null
+            persistenceInitializer = null
+            sessionManager = null
+            elasticClock = null
             configurations.clear()
             Thread.setDefaultUncaughtExceptionHandler(null)
         }
@@ -141,11 +150,11 @@ class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjecto
             configurations.addAll(agentDependenciesInjector!!.configurationsProvider.provideConfigurations())
             centralConfigurationInitializer =
                 spyk(agentDependenciesInjector!!.centralConfigurationInitializer)
-            if (centralConfigurationManager != null) {
-                every { centralConfigurationInitializer!!.manager }.returns(
-                    centralConfigurationManager
-                )
-            }
+            centralConfigurationInitializerInterceptor(centralConfigurationInitializer!!)
+            persistenceInitializer = mockk()
+            persistenceInitializerInterceptor(persistenceInitializer!!)
+            sessionManager = spyk(agentDependenciesInjector!!.sessionManager)
+            elasticClock = spyk(agentDependenciesInjector!!.elasticClock)
             this
         }
         _openTelemetry = GlobalOpenTelemetry.get()
@@ -156,9 +165,14 @@ class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjecto
         configurations.add(configuration)
     }
 
-    fun setCentralConfigurationManager(manager: CentralConfigurationManager) {
+    fun setCentralConfigurationInitializerInterceptor(interceptor: (CentralConfigurationInitializer) -> Unit) {
         validateNotInit()
-        centralConfigurationManager = manager
+        centralConfigurationInitializerInterceptor = interceptor
+    }
+
+    fun setPersistenceInitializerInterceptor(interceptor: (PersistenceInitializer) -> Unit) {
+        validateNotInit()
+        persistenceInitializerInterceptor = interceptor
     }
 
     fun sendLog(body: String = "", builderVisitor: LogRecordBuilder.() -> Unit = {}) {
@@ -214,11 +228,11 @@ class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjecto
     }
 
     override fun getElasticClock(): ElasticClock {
-        return agentDependenciesInjector!!.elasticClock
+        return elasticClock!!
     }
 
     override fun getSessionManager(): SessionManager {
-        return agentDependenciesInjector!!.sessionManager
+        return sessionManager!!
     }
 
     override fun getCentralConfigurationInitializer(): CentralConfigurationInitializer {
@@ -230,7 +244,7 @@ class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjecto
     }
 
     override fun getPersistenceInitializer(): PersistenceInitializer {
-        return agentDependenciesInjector!!.persistenceInitializer
+        return persistenceInitializer!!
     }
 
     override fun provideConfigurations(): MutableList<Configuration> {

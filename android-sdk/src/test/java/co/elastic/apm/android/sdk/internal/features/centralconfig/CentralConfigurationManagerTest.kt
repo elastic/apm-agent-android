@@ -94,7 +94,10 @@ class CentralConfigurationManagerTest {
         val filesDir = temporaryFolder.newFolder("filesDir")
         every { context.filesDir }.returns(filesDir)
         configFile = File(filesDir, "elastic_agent_configuration.json")
-        agentRule.setCentralConfigurationManager(manager)
+        agentRule.setCentralConfigurationInitializerInterceptor {
+            every { it.manager }.returns(manager)
+            it
+        }
         agentRule.addConfiguration(DummyConfiguration("someKey", false))
         agentRule.initialize()
         setUpConfigurationRegistrySpy()

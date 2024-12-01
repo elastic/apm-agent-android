@@ -8,4 +8,5 @@ android {
 
 dependencies {
     api(libs.opentelemetry.api)
+    api(libs.opentelemetry.common)
 }

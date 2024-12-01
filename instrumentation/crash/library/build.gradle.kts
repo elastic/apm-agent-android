@@ -8,4 +8,5 @@ android {
 
 dependencies {
     implementation(project(":instrumentation:api"))
+    implementation(libs.opentelemetry.semconv)
 }

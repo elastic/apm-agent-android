@@ -4,14 +4,14 @@ plugins {
 }
 
 android {
-    compileSdk = (project.property("android.compileSdk") as String).toInt()
+    compileSdk = (project.property("elastic.android.compileSdk") as String).toInt()
 
     defaultConfig {
-        minSdk = (project.property("android.minSdk") as String).toInt()
+        minSdk = (project.property("elastic.android.minSdk") as String).toInt()
         consumerProguardFiles.add(rootProject.file("shared-rules.pro"))
     }
 
-    val javaVersionStr = project.property("javaCompatibility") as String
+    val javaVersionStr = project.property("elastic.java.compatibility") as String
     val javaVersion = JavaVersion.toVersion(javaVersionStr)
     compileOptions {
         sourceCompatibility = javaVersion

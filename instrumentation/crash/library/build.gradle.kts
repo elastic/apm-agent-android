@@ -1,5 +1,5 @@
 plugins {
-    id("android-library-conventions")
+    id("elastic.android-library")
 }
 
 android {

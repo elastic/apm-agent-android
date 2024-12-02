@@ -1,5 +1,5 @@
 plugins {
-    id("java-library-conventions")
+    id("elastic.java-library")
     id("java-gradle-plugin")
     id("com.github.gmazzo.buildconfig") version "3.1.0"
 }

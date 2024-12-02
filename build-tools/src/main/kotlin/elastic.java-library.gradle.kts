@@ -5,7 +5,7 @@ plugins {
     id("org.jetbrains.kotlin.jvm")
 }
 
-val javaVersionStr = project.property("javaCompatibility") as String
+val javaVersionStr = project.property("elastic.java.compatibility") as String
 val javaVersion = JavaVersion.toVersion(javaVersionStr)
 java {
     sourceCompatibility = javaVersion

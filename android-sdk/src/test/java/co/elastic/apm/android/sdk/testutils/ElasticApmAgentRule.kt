@@ -61,7 +61,7 @@ import org.junit.runner.Description
 import org.junit.runners.model.Statement
 import org.robolectric.RuntimeEnvironment
 
-class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjector,
+class ElasticApmAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjector,
     ConfigurationsProvider, InitializationCallback {
     private lateinit var spanExporter: InMemorySpanExporter
     private lateinit var metricsReader: MetricReader

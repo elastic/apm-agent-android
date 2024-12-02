@@ -19,7 +19,7 @@
 package co.elastic.apm.android.sdk.internal.configuration
 
 import co.elastic.apm.android.sdk.internal.configuration.impl.GeneralConfiguration
-import co.elastic.apm.android.sdk.testutils.ElasticAgentRule
+import co.elastic.apm.android.sdk.testutils.ElasticApmAgentRule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -30,7 +30,7 @@ import org.robolectric.RobolectricTestRunner
 class GeneralConfigurationTest {
 
     @get:Rule
-    val agentRule = ElasticAgentRule()
+    val agentRule = ElasticApmAgentRule()
 
     @Test
     fun `Provide general configuration params`() {

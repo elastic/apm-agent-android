@@ -21,7 +21,7 @@ package co.elastic.apm.android.sdk.integration
 import android.app.Activity
 import co.elastic.apm.android.sdk.instrumentation.InstrumentationConfiguration
 import co.elastic.apm.android.sdk.internal.features.launchtime.LaunchTimeTracker
-import co.elastic.apm.android.sdk.testutils.ElasticAgentRule
+import co.elastic.apm.android.sdk.testutils.ElasticApmAgentRule
 import org.assertj.core.api.AbstractStringAssert
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
@@ -35,7 +35,7 @@ import org.robolectric.RobolectricTestRunner
 class AppLaunchTimeTest {
 
     @get:Rule
-    val agentRule = ElasticAgentRule()
+    val agentRule = ElasticApmAgentRule()
 
     @After
     fun tearDown() {

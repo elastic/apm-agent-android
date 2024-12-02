@@ -26,9 +26,9 @@ import android.net.NetworkCapabilities
 import android.os.Build
 import android.telephony.TelephonyManager
 import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElasticClock
-import co.elastic.apm.android.sdk.testutils.ElasticAgentRule
-import co.elastic.apm.android.sdk.testutils.ElasticAgentRule.Companion.LOG_DEFAULT_ATTRS
-import co.elastic.apm.android.sdk.testutils.ElasticAgentRule.Companion.SPAN_DEFAULT_ATTRS
+import co.elastic.apm.android.sdk.testutils.ElasticApmAgentRule
+import co.elastic.apm.android.sdk.testutils.ElasticApmAgentRule.Companion.LOG_DEFAULT_ATTRS
+import co.elastic.apm.android.sdk.testutils.ElasticApmAgentRule.Companion.SPAN_DEFAULT_ATTRS
 import io.mockk.every
 import io.mockk.mockk
 import io.opentelemetry.api.common.Attributes
@@ -52,7 +52,7 @@ class AttributesTest {
     private lateinit var originalConstants: Map<String, String>
 
     @get:Rule
-    val agentRule = ElasticAgentRule()
+    val agentRule = ElasticApmAgentRule()
 
     companion object {
         private const val RUNTIME_VERSION: String = "runtime-version"

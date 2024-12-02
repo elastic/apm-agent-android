@@ -21,7 +21,7 @@ package co.elastic.apm.android.sdk.internal.features.centralconfig.fetcher
 import co.elastic.apm.android.sdk.connectivity.auth.AuthConfiguration
 import co.elastic.apm.android.sdk.internal.configuration.impl.ConnectivityConfiguration
 import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService
-import co.elastic.apm.android.sdk.testutils.ElasticAgentRule
+import co.elastic.apm.android.sdk.testutils.ElasticApmAgentRule
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -49,7 +49,7 @@ class CentralConfigurationFetcherTest : ConfigurationFileProvider {
     private lateinit var webServer: MockWebServer
 
     @get:Rule
-    val agentRule = ElasticAgentRule()
+    val agentRule = ElasticApmAgentRule()
 
     @get:Rule
     val temporaryFolder: TemporaryFolder = TemporaryFolder()

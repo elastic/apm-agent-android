@@ -8,7 +8,7 @@ dependencies {
     implementation(libs.byteBuddy)
     implementation(libs.byteBuddy.plugin)
     implementation(project(":android-common"))
-    compileOnly("com.android.tools.build:gradle:$androidGradlePlugin_version")
+    compileOnly("com.android.tools.build:gradle:${project.property("androidGradlePlugin_version")}")
 }
 
 buildConfig {

@@ -12,16 +12,16 @@ propertiesFile.inputStream().use {
 }
 
 dependencies {
-    implementation(libs.apache.commons.text)
-    implementation(libs.commons.io)
-    implementation(libs.spotless.plugin)
-    implementation(libs.dokka)
-    implementation(libs.nexus.publish.plugin)
-    implementation(libs.gradle.publish.plugin)
-    implementation(libs.gradle.shadow.plugin)
-    implementation(libs.kotlin.plugin)
+    implementation(rootLibs.apache.commons.text)
+    implementation(rootLibs.commons.io)
+    implementation(rootLibs.spotless.plugin)
+    implementation(rootLibs.dokka)
+    implementation(rootLibs.nexus.publish.plugin)
+    implementation(rootLibs.gradle.publish.plugin)
+    implementation(rootLibs.gradle.shadow.plugin)
+    implementation(rootLibs.kotlin.plugin)
     implementation("com.android.tools.build:gradle:${properties.getProperty("androidGradlePlugin_version")}")
-    testImplementation(libs.junit4)
+    testImplementation(rootLibs.junit4)
 }
 
 gradlePlugin {

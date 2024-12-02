@@ -3,9 +3,9 @@ plugins {
 }
 
 dependencies {
-    implementation libs.squareup.javaPoet
-    compileOnly libs.google.autoService.annotations
-    annotationProcessor libs.google.autoService
+    implementation rootLibs.squareup.javaPoet
+    compileOnly rootLibs.google.autoService.annotations
+    annotationProcessor rootLibs.google.autoService
 }
 
 java {

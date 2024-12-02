@@ -3,9 +3,3 @@ plugins {
     alias(libs.plugins.kotlin.jvm) apply false
     id 'co.elastic.apm.publishing'
 }
-
-ext {
-    jvmCompatibility = JavaVersion.VERSION_11
-    androidMinSdk = 24
-    androidCompileSdk = 34
-}

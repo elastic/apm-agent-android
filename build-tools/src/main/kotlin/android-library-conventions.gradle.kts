@@ -8,6 +8,7 @@ android {
 
     defaultConfig {
         minSdk = (project.property("android.minSdk") as String).toInt()
+        consumerProguardFiles.add(rootProject.file("shared-rules.pro"))
     }
 
     val javaVersionStr = project.property("javaCompatibility") as String

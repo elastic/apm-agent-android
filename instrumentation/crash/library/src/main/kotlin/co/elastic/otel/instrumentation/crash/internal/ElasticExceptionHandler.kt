@@ -23,7 +23,6 @@ import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.semconv.SemanticAttributes
 import java.io.PrintWriter
 import java.io.StringWriter
-import java.util.concurrent.TimeUnit
 
 class ElasticExceptionHandler internal constructor(
     private val agent: ElasticAgent,
@@ -32,7 +31,6 @@ class ElasticExceptionHandler internal constructor(
 
     override fun uncaughtException(t: Thread, e: Throwable) {
         emitCrashEvent(e)
-        agent.flushLogRecords().join(5, TimeUnit.SECONDS)
 
         wrapped?.uncaughtException(t, e)
     }

@@ -25,33 +25,20 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.telephony.TelephonyManager
-import co.elastic.apm.android.sdk.ElasticApmAgent
-import co.elastic.apm.android.sdk.ElasticApmConfiguration
-import co.elastic.apm.android.sdk.connectivity.Connectivity
-import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration
-import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector.Interceptor
 import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElasticClock
+import co.elastic.apm.android.sdk.testutils.ElasticAgentRule
+import co.elastic.apm.android.sdk.testutils.ElasticAgentRule.Companion.LOG_DEFAULT_ATTRS
+import co.elastic.apm.android.sdk.testutils.ElasticAgentRule.Companion.SPAN_DEFAULT_ATTRS
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.spyk
-import io.opentelemetry.api.GlobalOpenTelemetry
-import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.api.common.Attributes
-import io.opentelemetry.sdk.logs.LogRecordProcessor
-import io.opentelemetry.sdk.logs.export.SimpleLogRecordProcessor
 import io.opentelemetry.sdk.metrics.data.MetricData
 import io.opentelemetry.sdk.metrics.data.PointData
-import io.opentelemetry.sdk.metrics.export.MetricReader
-import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader
 import io.opentelemetry.sdk.resources.Resource
 import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat
-import io.opentelemetry.sdk.testing.exporter.InMemoryLogRecordExporter
-import io.opentelemetry.sdk.testing.exporter.InMemoryMetricExporter
-import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter
-import io.opentelemetry.sdk.trace.SpanProcessor
-import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -61,12 +48,11 @@ import org.robolectric.annotation.Config
 import org.robolectric.util.ReflectionHelpers
 
 @RunWith(RobolectricTestRunner::class)
-class InstrumentationTest : SignalConfiguration {
-    private lateinit var spanExporter: InMemorySpanExporter
-    private lateinit var metricsReader: MetricReader
-    private lateinit var metricsExporter: InMemoryMetricExporter
-    private lateinit var logsExporter: InMemoryLogRecordExporter
+class AttributesTest {
     private lateinit var originalConstants: Map<String, String>
+
+    @get:Rule
+    val agentRule = ElasticAgentRule()
 
     companion object {
         private const val RUNTIME_VERSION: String = "runtime-version"
@@ -81,9 +67,6 @@ class InstrumentationTest : SignalConfiguration {
 
     @Before
     fun setUp() {
-        spanExporter = InMemorySpanExporter.create()
-        metricsExporter = InMemoryMetricExporter.create()
-        logsExporter = InMemoryLogRecordExporter.create()
         originalConstants = mapOf(
             "MODEL" to Build.MODEL,
             "MANUFACTURER" to Build.MANUFACTURER,
@@ -99,8 +82,6 @@ class InstrumentationTest : SignalConfiguration {
 
     @After
     fun tearDown() {
-        ElasticApmAgent.resetForTest()
-        GlobalOpenTelemetry.resetForTest()
         ReflectionHelpers.setStaticField(Build::class.java, "MODEL", originalConstants["MODEL"])
         ReflectionHelpers.setStaticField(
             Build::class.java,
@@ -114,7 +95,7 @@ class InstrumentationTest : SignalConfiguration {
     @Config(sdk = [24, Config.NEWEST_SDK])
     @Test
     fun `Check resources`() {
-        val openTelemetry = getOtelInstance()
+        agentRule.initialize()
         val expectedResource = Resource.builder()
             .put("deployment.environment", "test")
             .put("device.id", "device-id")
@@ -136,14 +117,13 @@ class InstrumentationTest : SignalConfiguration {
             .put("telemetry.sdk.version", System.getProperty("agent_version")!!)
             .build()
 
-        sendSpan(openTelemetry)
-        sendLog(openTelemetry)
-        sendMetric(openTelemetry)
-        metricsReader.forceFlush()
+        agentRule.sendSpan()
+        agentRule.sendLog()
+        agentRule.sendMetricCounter()
 
-        val spanItems = spanExporter.finishedSpanItems
-        val logItems = logsExporter.finishedLogRecordItems
-        val metricItems = metricsExporter.finishedMetricItems
+        val spanItems = agentRule.getFinishedSpans()
+        val logItems = agentRule.getFinishedLogRecords()
+        val metricItems = agentRule.getFinishedMetrics()
         assertThat(spanItems).hasSize(1)
         assertThat(logItems).hasSize(1)
         assertThat(metricItems).hasSize(1)
@@ -155,32 +135,23 @@ class InstrumentationTest : SignalConfiguration {
     @Config(sdk = [24, Config.NEWEST_SDK])
     @Test
     fun `Check global attributes`() {
-        val openTelemetry = getOtelInstance()
-        val expectedLogAttributes = Attributes.builder()
-            .put("session.id", "session-id")
-            .put("network.connection.type", "unavailable")
-            .build()
-        val expectedSpanAttributes = Attributes.builder()
-            .putAll(expectedLogAttributes)
-            .put("type", "mobile")
-            .put("screen.name", "unknown")
-            .build()
+        agentRule.initialize()
 
-        sendSpan(openTelemetry)
-        sendLog(openTelemetry)
+        agentRule.sendSpan()
+        agentRule.sendLog()
 
-        val spanItems = spanExporter.finishedSpanItems
-        val logItems = logsExporter.finishedLogRecordItems
+        val spanItems = agentRule.getFinishedSpans()
+        val logItems = agentRule.getFinishedLogRecords()
         assertThat(spanItems).hasSize(1)
         assertThat(logItems).hasSize(1)
-        assertThat(spanItems.first()).hasAttributes(expectedSpanAttributes)
-        assertThat(logItems.first()).hasAttributes(expectedLogAttributes)
+        assertThat(spanItems.first()).hasAttributes(SPAN_DEFAULT_ATTRS)
+        assertThat(logItems.first()).hasAttributes(LOG_DEFAULT_ATTRS)
     }
 
     @Config(sdk = [24, Config.NEWEST_SDK])
     @Test
     fun `Check global attributes with cellular connectivity available`() {
-        val openTelemetry = getOtelInstance()
+        agentRule.initialize()
         enableCellularDataAttr()
         val expectedLogAttributes = Attributes.builder()
             .put("session.id", "session-id")
@@ -193,11 +164,11 @@ class InstrumentationTest : SignalConfiguration {
             .put("screen.name", "unknown")
             .build()
 
-        sendSpan(openTelemetry)
-        sendLog(openTelemetry)
+        agentRule.sendSpan()
+        agentRule.sendLog()
 
-        val spanItems = spanExporter.finishedSpanItems
-        val logItems = logsExporter.finishedLogRecordItems
+        val spanItems = agentRule.getFinishedSpans()
+        val logItems = agentRule.getFinishedLogRecords()
         assertThat(spanItems).hasSize(1)
         assertThat(logItems).hasSize(1)
         assertThat(spanItems.first()).hasAttributes(expectedSpanAttributes)
@@ -207,7 +178,7 @@ class InstrumentationTest : SignalConfiguration {
     @Config(sdk = [24, Config.NEWEST_SDK])
     @Test
     fun `Check global attributes with carrier info available`() {
-        val openTelemetry = getOtelInstance()
+        agentRule.initialize()
         enableCarrierInfoAttrs()
         val expectedLogAttributes = Attributes.builder()
             .put("session.id", "session-id")
@@ -223,11 +194,11 @@ class InstrumentationTest : SignalConfiguration {
             .put("screen.name", "unknown")
             .build()
 
-        sendSpan(openTelemetry)
-        sendLog(openTelemetry)
+        agentRule.sendSpan()
+        agentRule.sendLog()
 
-        val spanItems = spanExporter.finishedSpanItems
-        val logItems = logsExporter.finishedLogRecordItems
+        val spanItems = agentRule.getFinishedSpans()
+        val logItems = agentRule.getFinishedLogRecords()
         assertThat(spanItems).hasSize(1)
         assertThat(logItems).hasSize(1)
         assertThat(spanItems.first()).hasAttributes(expectedSpanAttributes)
@@ -237,23 +208,21 @@ class InstrumentationTest : SignalConfiguration {
     @Test
     fun `Check clock usage across all signals`() {
         val nowTime = 12345L
-        val clock = createClock(nowTime)
-        val openTelemetry = getOtelInstance {
-            val dependenciesInjectorSpy = spyk(it)
-            every { dependenciesInjectorSpy.elasticClock }.returns(clock)
-            dependenciesInjectorSpy
+        agentRule.setElasticClockInterceptor {
+            every { it.now() }.returns(nowTime)
+            every { it.nanoTime() }.answers { System.nanoTime() }
         }
+        agentRule.initialize()
 
-        sendSpan(openTelemetry)
-        sendLog(openTelemetry)
-        sendMetric(openTelemetry)
-        metricsReader.forceFlush()
+        agentRule.sendSpan()
+        agentRule.sendLog()
+        agentRule.sendMetricCounter()
 
-        assertThat(spanExporter.finishedSpanItems.first().startEpochNanos).isEqualTo(nowTime)
-        assertThat(logsExporter.finishedLogRecordItems.first().observedTimestampEpochNanos).isEqualTo(
+        assertThat(agentRule.getFinishedSpans().first().startEpochNanos).isEqualTo(nowTime)
+        assertThat(agentRule.getFinishedLogRecords().first().observedTimestampEpochNanos).isEqualTo(
             nowTime
         )
-        assertThat(getStartTime(metricsExporter.finishedMetricItems.first())).isEqualTo(nowTime)
+        assertThat(getStartTime(agentRule.getFinishedMetrics().first())).isEqualTo(nowTime)
     }
 
     @Test
@@ -262,33 +231,28 @@ class InstrumentationTest : SignalConfiguration {
         // to track span start and end diff.
 
         val startTimeFromElasticClock = 2000000000L
-        val clock = createClock(startTimeFromElasticClock)
-        val openTelemetry = getOtelInstance {
-            val dependenciesInjectorSpy = spyk(it)
-            every { dependenciesInjectorSpy.elasticClock }.returns(clock)
-            dependenciesInjectorSpy
+        var clock: ElasticClock? = null
+        agentRule.setElasticClockInterceptor {
+            every { it.now() }.returns(startTimeFromElasticClock)
+            every { it.nanoTime() }.answers { System.nanoTime() }
+            clock = it
         }
+        agentRule.initialize()
 
-        val span = openTelemetry.getTracer("SomeTracer").spanBuilder("TimeChangeSpan").startSpan()
+        val span = agentRule.openTelemetry.getTracer("SomeTracer").spanBuilder("TimeChangeSpan")
+            .startSpan()
 
         // Moving now backwards:
-        every { clock.now() }.returns(1000000000L)
+        every { clock?.now() }.returns(1000000000L)
 
         span.end()
 
-        val spanData = spanExporter.finishedSpanItems.first()
+        val spanData = agentRule.getFinishedSpans().first()
         assertThat(spanData.startEpochNanos).isEqualTo(startTimeFromElasticClock)
         assertThat(spanData.endEpochNanos).isGreaterThan(startTimeFromElasticClock)
     }
 
-    private fun createClock(nowTime: Long): ElasticClock {
-        val clock = mockk<ElasticClock>()
-        every { clock.now() }.returns(nowTime)
-        every { clock.nanoTime() }.answers { System.nanoTime() }
-        return clock
-    }
-
-    fun getStartTime(metric: MetricData): Long {
+    private fun getStartTime(metric: MetricData): Long {
         val points: List<PointData> = java.util.ArrayList(metric.data.points)
         return points[0].epochNanos
     }
@@ -323,47 +287,6 @@ class InstrumentationTest : SignalConfiguration {
         shadowTelephonyManager.setSimState(TelephonyManager.SIM_STATE_READY)
         shadowTelephonyManager.setSimOperatorName(SIM_OPERATOR_NAME)
         shadowTelephonyManager.setSimCountryIso(SIM_COUNTRY_ISO)
-    }
-
-    private fun getOtelInstance(interceptor: Interceptor? = null): OpenTelemetry {
-        ElasticApmAgent.initialize(
-            RuntimeEnvironment.getApplication(), ElasticApmConfiguration.builder()
-                .setServiceName("service-name")
-                .setServiceVersion("0.0.0")
-                .setDeploymentEnvironment("test")
-                .setSignalConfiguration(this)
-                .setDeviceIdGenerator { "device-id" }
-                .setSessionIdGenerator { "session-id" }
-                .build(),
-            Connectivity.simple("http://localhost"),
-            interceptor
-        )
-        return GlobalOpenTelemetry.get()
-    }
-
-    private fun sendLog(openTelemetry: OpenTelemetry) {
-        openTelemetry.logsBridge.get("LoggerScope").logRecordBuilder().emit()
-    }
-
-    private fun sendSpan(openTelemetry: OpenTelemetry) {
-        openTelemetry.getTracer("SomeTracer").spanBuilder("SomeSpan").startSpan().end()
-    }
-
-    private fun sendMetric(openTelemetry: OpenTelemetry) {
-        openTelemetry.getMeter("MeterScope").counterBuilder("Counter").build().add(1)
-    }
-
-    override fun getSpanProcessor(): SpanProcessor {
-        return SimpleSpanProcessor.create(spanExporter)
-    }
-
-    override fun getLogProcessor(): LogRecordProcessor {
-        return SimpleLogRecordProcessor.create(logsExporter)
-    }
-
-    override fun getMetricReader(): MetricReader {
-        metricsReader = PeriodicMetricReader.create(metricsExporter)
-        return metricsReader
     }
 
     private fun setVersionCode(versionCode: Long) {

@@ -34,6 +34,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -55,8 +56,8 @@ public final class CentralConfigurationManager extends AbstractConfigurationSour
     private final Logger logger = Elog.getLogger();
     private final PreferencesService preferences;
     private final SystemTimeProvider systemTimeProvider;
+    private final Map<String, String> configs = new HashMap<>();
     private File configFile;
-    private Map<String, String> configs;
 
     public CentralConfigurationManager(Context context) {
         this(context, SystemTimeProvider.get(), ServiceManager.get().getService(Service.Names.PREFERENCES));
@@ -94,12 +95,12 @@ public final class CentralConfigurationManager extends AbstractConfigurationSour
 
     private void notifyListeners() throws IOException {
         try {
-            configs = readConfigs(getConfigurationFile());
+            configs.putAll(readConfigs(getConfigurationFile()));
             logger.info("Notifying central config change");
             logger.debug("Central config params: {}", configs);
             Configurations.reload();
         } finally {
-            configs = null;
+            configs.clear();
         }
     }
 
@@ -126,7 +127,7 @@ public final class CentralConfigurationManager extends AbstractConfigurationSour
     }
 
     @Override
-    public File getConfigurationFile() {
+    public synchronized File getConfigurationFile() {
         if (configFile == null) {
             configFile = new File(context.getFilesDir(), "elastic_agent_configuration.json");
         }
@@ -148,10 +149,6 @@ public final class CentralConfigurationManager extends AbstractConfigurationSour
 
     @Override
     public String getValue(String key) {
-        if (configs == null) {
-            logger.debug("Central config map is null");
-            return null;
-        }
         return configs.get(key);
     }
 

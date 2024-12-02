@@ -58,7 +58,7 @@ public final class ServiceManager implements Lifecycle {
 
     private static void notifyInitializationFinished() {
         if (initializationCallback != null) {
-            initializationCallback.onInitializationFinished();
+            initializationCallback.onServicesInitializationFinished();
         }
     }
 
@@ -125,6 +125,6 @@ public final class ServiceManager implements Lifecycle {
     }
 
     public interface InitializationCallback {
-        void onInitializationFinished();
+        void onServicesInitializationFinished();
     }
 }

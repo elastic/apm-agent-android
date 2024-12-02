@@ -1,9 +1,9 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
-        plugins {
-            id("java-library")
-            id("org.jetbrains.kotlin.jvm")
-        }
+plugins {
+    id("java-library")
+    id("org.jetbrains.kotlin.jvm")
+}
 
 val javaVersionStr = project.property("javaCompatibility") as String
 val javaVersion = JavaVersion.toVersion(javaVersionStr)

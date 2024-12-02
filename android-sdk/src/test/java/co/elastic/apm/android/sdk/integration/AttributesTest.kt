@@ -25,13 +25,13 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.telephony.TelephonyManager
-import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElasticClock
-import co.elastic.apm.android.sdk.testutils.ElasticApmAgentRule
+import co.elastic.apm.android.sdk.testutils.ElasticAgentRule
 import co.elastic.apm.android.sdk.testutils.ElasticApmAgentRule.Companion.LOG_DEFAULT_ATTRS
 import co.elastic.apm.android.sdk.testutils.ElasticApmAgentRule.Companion.SPAN_DEFAULT_ATTRS
 import io.mockk.every
 import io.mockk.mockk
 import io.opentelemetry.api.common.Attributes
+import io.opentelemetry.sdk.common.Clock
 import io.opentelemetry.sdk.metrics.data.MetricData
 import io.opentelemetry.sdk.metrics.data.PointData
 import io.opentelemetry.sdk.resources.Resource
@@ -52,7 +52,7 @@ class AttributesTest {
     private lateinit var originalConstants: Map<String, String>
 
     @get:Rule
-    val agentRule = ElasticApmAgentRule()
+    val agentRule = ElasticAgentRule()
 
     companion object {
         private const val RUNTIME_VERSION: String = "runtime-version"
@@ -208,11 +208,10 @@ class AttributesTest {
     @Test
     fun `Check clock usage across all signals`() {
         val nowTime = 12345L
-        agentRule.setElasticClockInterceptor {
-            every { it.now() }.returns(nowTime)
-            every { it.nanoTime() }.answers { System.nanoTime() }
-        }
-        agentRule.initialize()
+        val clock = mockk<Clock>()
+        every { clock.now() }.returns(nowTime)
+        every { clock.nanoTime() }.answers { System.nanoTime() }
+        agentRule.initialize(clock = clock)
 
         agentRule.sendSpan()
         agentRule.sendLog()
@@ -231,13 +230,10 @@ class AttributesTest {
         // to track span start and end diff.
 
         val startTimeFromElasticClock = 2000000000L
-        var clock: ElasticClock? = null
-        agentRule.setElasticClockInterceptor {
-            every { it.now() }.returns(startTimeFromElasticClock)
-            every { it.nanoTime() }.answers { System.nanoTime() }
-            clock = it
-        }
-        agentRule.initialize()
+        val clock = mockk<Clock>()
+        every { clock.now() }.returns(startTimeFromElasticClock)
+        every { clock.nanoTime() }.answers { System.nanoTime() }
+        agentRule.initialize(clock = clock)
 
         val span = agentRule.openTelemetry.getTracer("SomeTracer").spanBuilder("TimeChangeSpan")
             .startSpan()

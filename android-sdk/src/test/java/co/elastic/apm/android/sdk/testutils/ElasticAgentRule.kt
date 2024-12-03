@@ -37,6 +37,7 @@ import java.util.concurrent.TimeUnit
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
+import org.robolectric.RuntimeEnvironment
 
 class ElasticAgentRule : TestRule {
     private lateinit var spanExporter: InMemorySpanExporter
@@ -72,11 +73,10 @@ class ElasticAgentRule : TestRule {
         clock: Clock = Clock.getDefault()
     ) {
         metricReader = PeriodicMetricReader.create(metricsExporter)
-        agent = ElasticAgent.builder()
+        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
             .setServiceName(serviceName)
             .setServiceVersion(serviceVersion)
             .setDeploymentEnvironment(deploymentEnvironment)
-            .setServiceBuild(10)
             .setDeviceIdProvider { "device-id" }
             .setClock(clock)
             .setSpanProcessor(SimpleSpanProcessor.create(spanExporter))

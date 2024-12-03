@@ -18,7 +18,10 @@
  */
 package co.elastic.apm.android.sdk
 
+import android.app.Application
+import android.content.pm.PackageManager
 import android.os.Build
+import co.elastic.apm.android.common.internal.logging.Elog
 import co.elastic.apm.android.sdk.tools.PreferencesCachedStringProvider
 import co.elastic.apm.android.sdk.tools.StringProvider
 import io.opentelemetry.api.OpenTelemetry
@@ -39,20 +42,20 @@ class ElasticAgent private constructor(val openTelemetry: OpenTelemetry) {
 
     companion object {
         @JvmStatic
-        fun builder(): Builder {
-            return Builder()
+        fun builder(application: Application): Builder {
+            return Builder(application)
         }
 
         @JvmStatic
-        fun create(openTelemetry: OpenTelemetry): ElasticAgent {
+        fun create(application: Application, openTelemetry: OpenTelemetry): ElasticAgent {
             return ElasticAgent(openTelemetry)
         }
     }
 
-    class Builder internal constructor() {
+    class Builder internal constructor(private val application: Application) {
         private var serviceName: String = ""
         private var serviceVersion: String = ""
-        private var serviceBuild: Int = 0
+        private var serviceBuild: Int? = null
         private var deploymentEnvironment: String = ""
         private var deviceIdProvider: StringProvider =
             PreferencesCachedStringProvider("device_id") { UUID.randomUUID().toString() }
@@ -101,7 +104,7 @@ class ElasticAgent private constructor(val openTelemetry: OpenTelemetry) {
             val resource = Resource.builder()
                 .put(ResourceAttributes.SERVICE_NAME, serviceName)
                 .put(ResourceAttributes.SERVICE_VERSION, serviceVersion)
-                .put(AttributeKey.longKey("service.build"), serviceBuild)
+                .put(AttributeKey.longKey("service.build"), serviceBuild ?: getVersionCode())
                 .put(ResourceAttributes.DEPLOYMENT_ENVIRONMENT, deploymentEnvironment)
                 .put(ResourceAttributes.DEVICE_ID, deviceIdProvider.get())
                 .put(ResourceAttributes.DEVICE_MODEL_IDENTIFIER, Build.MODEL)
@@ -146,7 +149,17 @@ class ElasticAgent private constructor(val openTelemetry: OpenTelemetry) {
                         .build()
                 )
             }
-            return create(openTelemetryBuilder.build())
+            return create(application, openTelemetryBuilder.build())
+        }
+
+        private fun getVersionCode(): Int {
+            try {
+                val info = application.packageManager.getPackageInfo(application.packageName, 0)
+                return info.versionCode
+            } catch (e: PackageManager.NameNotFoundException) {
+                Elog.getLogger().error("Getting version code", e)
+                return 0
+            }
         }
 
         private fun getOsDescription(): String {

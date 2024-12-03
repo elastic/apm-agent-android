@@ -238,7 +238,7 @@ class AttributesTest {
             .startSpan()
 
         // Moving now backwards:
-        every { clock?.now() }.returns(1000000000L)
+        every { clock.now() }.returns(1000000000L)
 
         span.end()
 

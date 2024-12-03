@@ -22,10 +22,14 @@ import android.app.Application
 import android.content.pm.PackageManager
 import android.os.Build
 import co.elastic.apm.android.common.internal.logging.Elog
+import co.elastic.apm.android.sdk.internal.opentelemetry.processors.logs.LogRecordAttributesProcessor
+import co.elastic.apm.android.sdk.internal.opentelemetry.processors.spans.SpanAttributesProcessor
+import co.elastic.apm.android.sdk.tools.Interceptor
 import co.elastic.apm.android.sdk.tools.PreferencesCachedStringProvider
 import co.elastic.apm.android.sdk.tools.StringProvider
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.api.common.AttributeKey
+import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.sdk.OpenTelemetrySdk
 import io.opentelemetry.sdk.common.Clock
 import io.opentelemetry.sdk.logs.LogRecordProcessor
@@ -63,6 +67,8 @@ class ElasticAgent private constructor(val openTelemetry: OpenTelemetry) {
         private var spanProcessor: SpanProcessor? = null
         private var logRecordProcessor: LogRecordProcessor? = null
         private var metricReader: MetricReader? = null
+        private var spanAttributesInterceptors = mutableListOf<Interceptor<Attributes>>()
+        private var logRecordAttributesInterceptors = mutableListOf<Interceptor<Attributes>>()
 
         fun setServiceName(value: String) = apply {
             serviceName = value
@@ -100,6 +106,14 @@ class ElasticAgent private constructor(val openTelemetry: OpenTelemetry) {
             metricReader = value
         }
 
+        fun addSpanAttributesInterceptor(value: Interceptor<Attributes>) = apply {
+            spanAttributesInterceptors.add(value)
+        }
+
+        fun addLogRecordAttributesInterceptor(value: Interceptor<Attributes>) = apply {
+            logRecordAttributesInterceptors.add(value)
+        }
+
         fun build(): ElasticAgent {
             val resource = Resource.builder()
                 .put(ResourceAttributes.SERVICE_NAME, serviceName)
@@ -127,6 +141,13 @@ class ElasticAgent private constructor(val openTelemetry: OpenTelemetry) {
                     SdkTracerProvider.builder()
                         .setClock(clock)
                         .setResource(resource)
+                        .addSpanProcessor(
+                            SpanAttributesProcessor(
+                                Interceptor.composite(
+                                    spanAttributesInterceptors
+                                )
+                            )
+                        )
                         .addSpanProcessor(spanProcessor)
                         .build()
                 )
@@ -136,6 +157,13 @@ class ElasticAgent private constructor(val openTelemetry: OpenTelemetry) {
                     SdkLoggerProvider.builder()
                         .setClock(clock)
                         .setResource(resource)
+                        .addLogRecordProcessor(
+                            LogRecordAttributesProcessor(
+                                Interceptor.composite(
+                                    logRecordAttributesInterceptors
+                                )
+                            )
+                        )
                         .addLogRecordProcessor(logRecordProcessor)
                         .build()
                 )

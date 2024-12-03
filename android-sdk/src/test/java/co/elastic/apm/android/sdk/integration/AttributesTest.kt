@@ -36,6 +36,7 @@ import io.opentelemetry.sdk.metrics.data.MetricData
 import io.opentelemetry.sdk.metrics.data.PointData
 import io.opentelemetry.sdk.resources.Resource
 import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat
+import io.opentelemetry.sdk.trace.data.StatusData
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -134,7 +135,7 @@ class AttributesTest {
 
     @Config(sdk = [24, Config.NEWEST_SDK])
     @Test
-    fun `Check global attributes`() {
+    fun `Check global attributes and span status`() {
         agentRule.initialize()
 
         agentRule.sendSpan()
@@ -144,7 +145,7 @@ class AttributesTest {
         val logItems = agentRule.getFinishedLogRecords()
         assertThat(spanItems).hasSize(1)
         assertThat(logItems).hasSize(1)
-        assertThat(spanItems.first()).hasAttributes(SPAN_DEFAULT_ATTRS)
+        assertThat(spanItems.first()).hasAttributes(SPAN_DEFAULT_ATTRS).hasStatus(StatusData.ok())
         assertThat(logItems.first()).hasAttributes(LOG_DEFAULT_ATTRS)
     }
 

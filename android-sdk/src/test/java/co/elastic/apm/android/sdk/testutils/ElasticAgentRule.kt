@@ -19,6 +19,7 @@
 package co.elastic.apm.android.sdk.testutils
 
 import co.elastic.apm.android.sdk.ElasticAgent
+import co.elastic.apm.android.sdk.internal.services.ServiceManager
 import co.elastic.apm.android.sdk.session.Session
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.api.common.Attributes
@@ -75,7 +76,7 @@ class ElasticAgentRule : TestRule {
                 }
             }
         } finally {
-            // Clean up
+            ServiceManager.resetForTest()
         }
     }
 

@@ -18,47 +18,20 @@
  */
 package co.elastic.apm.android.sdk.attributes.common
 
-import co.elastic.apm.android.sdk.internal.services.Service
-import co.elastic.apm.android.sdk.internal.services.ServiceManager
-import co.elastic.apm.android.sdk.internal.services.network.NetworkService
-import co.elastic.apm.android.sdk.session.SessionProvider
 import co.elastic.apm.android.sdk.tools.Interceptor
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
-import io.opentelemetry.semconv.SemanticAttributes
 
-internal class SpanAttributesInterceptor(private val sessionProvider: SessionProvider) :
-    Interceptor<Attributes> {
-    private val networkService: NetworkService by lazy {
-        ServiceManager.get().getService(Service.Names.NETWORK)
-    }
+internal class SpanAttributesInterceptor : Interceptor<Attributes> {
 
     override fun intercept(item: Attributes): Attributes {
         val builder = Attributes.builder().putAll(item)
-        val carrierInfo = networkService.getCarrierInfo()
-        val networkType = networkService.type
 
-        builder.put(SemanticAttributes.NETWORK_CONNECTION_TYPE, networkType.name)
-        builder.put(SESSION_ID_ATTRIBUTE_KEY, sessionProvider.getSession().id)
         builder.put(TRANSACTION_TYPE_ATTRIBUTE_KEY, TRANSACTION_TYPE_VALUE)
-
-        if (carrierInfo != null) {
-            builder.put(SemanticAttributes.NETWORK_CARRIER_NAME, carrierInfo.name)
-            builder.put(SemanticAttributes.NETWORK_CARRIER_MCC, carrierInfo.mcc)
-            builder.put(SemanticAttributes.NETWORK_CARRIER_MNC, carrierInfo.mnc)
-            builder.put(SemanticAttributes.NETWORK_CARRIER_ICC, carrierInfo.icc)
-        }
-
-        if (networkType.subTypeName != null) {
-            builder.put(SemanticAttributes.NETWORK_CONNECTION_SUBTYPE, networkType.subTypeName)
-        }
         return builder.build()
     }
 
     companion object {
-        private val SESSION_ID_ATTRIBUTE_KEY: AttributeKey<String> =
-            AttributeKey.stringKey("session.id")
-
         private val TRANSACTION_TYPE_ATTRIBUTE_KEY: AttributeKey<String> =
             AttributeKey.stringKey("type")
 

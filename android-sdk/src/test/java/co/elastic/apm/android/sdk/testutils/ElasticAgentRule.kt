@@ -19,6 +19,7 @@
 package co.elastic.apm.android.sdk.testutils
 
 import co.elastic.apm.android.sdk.ElasticAgent
+import co.elastic.apm.android.sdk.session.Session
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.api.logs.LogRecordBuilder
 import io.opentelemetry.api.trace.SpanBuilder
@@ -78,6 +79,7 @@ class ElasticAgentRule : TestRule {
             .setServiceVersion(serviceVersion)
             .setDeploymentEnvironment(deploymentEnvironment)
             .setDeviceIdProvider { "device-id" }
+            .setSessionProvider { Session("session-pd") }
             .setClock(clock)
             .setSpanProcessor(SimpleSpanProcessor.create(spanExporter))
             .setLogRecordProcessor(SimpleLogRecordProcessor.create(logsExporter))

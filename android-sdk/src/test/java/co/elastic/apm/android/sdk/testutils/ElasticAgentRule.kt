@@ -76,6 +76,8 @@ class ElasticAgentRule : TestRule {
             .setServiceName(serviceName)
             .setServiceVersion(serviceVersion)
             .setDeploymentEnvironment(deploymentEnvironment)
+            .setServiceBuild(10)
+            .setDeviceIdProvider { "device-id" }
             .setClock(clock)
             .setSpanProcessor(SimpleSpanProcessor.create(spanExporter))
             .setLogRecordProcessor(SimpleLogRecordProcessor.create(logsExporter))

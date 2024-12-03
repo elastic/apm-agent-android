@@ -18,9 +18,11 @@
  */
 package co.elastic.apm.android.sdk
 
+import android.os.Build
 import co.elastic.apm.android.sdk.tools.PreferencesCachedStringProvider
 import co.elastic.apm.android.sdk.tools.StringProvider
 import io.opentelemetry.api.OpenTelemetry
+import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.sdk.OpenTelemetrySdk
 import io.opentelemetry.sdk.common.Clock
 import io.opentelemetry.sdk.logs.LogRecordProcessor
@@ -50,6 +52,7 @@ class ElasticAgent private constructor(val openTelemetry: OpenTelemetry) {
     class Builder internal constructor() {
         private var serviceName: String = ""
         private var serviceVersion: String = ""
+        private var serviceBuild: Int = 0
         private var deploymentEnvironment: String = ""
         private var deviceIdProvider: StringProvider =
             PreferencesCachedStringProvider("device_id") { UUID.randomUUID().toString() }
@@ -64,6 +67,10 @@ class ElasticAgent private constructor(val openTelemetry: OpenTelemetry) {
 
         fun setServiceVersion(value: String) = apply {
             serviceVersion = value
+        }
+
+        fun setServiceBuild(value: Int) = apply {
+            serviceBuild = value
         }
 
         fun setDeploymentEnvironment(value: String) = apply {
@@ -94,8 +101,22 @@ class ElasticAgent private constructor(val openTelemetry: OpenTelemetry) {
             val resource = Resource.builder()
                 .put(ResourceAttributes.SERVICE_NAME, serviceName)
                 .put(ResourceAttributes.SERVICE_VERSION, serviceVersion)
+                .put(AttributeKey.longKey("service.build"), serviceBuild)
                 .put(ResourceAttributes.DEPLOYMENT_ENVIRONMENT, deploymentEnvironment)
                 .put(ResourceAttributes.DEVICE_ID, deviceIdProvider.get())
+                .put(ResourceAttributes.DEVICE_MODEL_IDENTIFIER, Build.MODEL)
+                .put(ResourceAttributes.DEVICE_MANUFACTURER, Build.MANUFACTURER)
+                .put(ResourceAttributes.OS_DESCRIPTION, getOsDescription())
+                .put(ResourceAttributes.OS_VERSION, Build.VERSION.RELEASE)
+                .put(ResourceAttributes.OS_NAME, "Android")
+                .put(ResourceAttributes.PROCESS_RUNTIME_NAME, "Android Runtime")
+                .put(
+                    ResourceAttributes.PROCESS_RUNTIME_VERSION,
+                    System.getProperty("java.vm.version")
+                )
+                .put(ResourceAttributes.TELEMETRY_SDK_NAME, "android")
+                .put(ResourceAttributes.TELEMETRY_SDK_VERSION, BuildConfig.APM_AGENT_VERSION)
+                .put(ResourceAttributes.TELEMETRY_SDK_LANGUAGE, "java")
                 .build()
             val openTelemetryBuilder = OpenTelemetrySdk.builder()
             if (spanProcessor != null) {
@@ -126,6 +147,17 @@ class ElasticAgent private constructor(val openTelemetry: OpenTelemetry) {
                 )
             }
             return create(openTelemetryBuilder.build())
+        }
+
+        private fun getOsDescription(): String {
+            val descriptionBuilder = StringBuilder()
+            descriptionBuilder.append("Android ")
+            descriptionBuilder.append(Build.VERSION.RELEASE)
+            descriptionBuilder.append(", API level ")
+            descriptionBuilder.append(Build.VERSION.SDK_INT)
+            descriptionBuilder.append(", BUILD ")
+            descriptionBuilder.append(Build.VERSION.INCREMENTAL)
+            return descriptionBuilder.toString()
         }
     }
 }

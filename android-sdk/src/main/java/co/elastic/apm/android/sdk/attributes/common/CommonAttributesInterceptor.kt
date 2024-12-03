@@ -35,18 +35,10 @@ internal class CommonAttributesInterceptor(private val sessionProvider: SessionP
 
     override fun intercept(item: Attributes): Attributes {
         val builder = Attributes.builder().putAll(item)
-        val carrierInfo = networkService.getCarrierInfo()
         val networkType = networkService.type
 
         builder.put(SemanticAttributes.NETWORK_CONNECTION_TYPE, networkType.name)
         builder.put(SESSION_ID_ATTRIBUTE_KEY, sessionProvider.getSession().id)
-
-        if (carrierInfo != null) {
-            builder.put(SemanticAttributes.NETWORK_CARRIER_NAME, carrierInfo.name)
-            builder.put(SemanticAttributes.NETWORK_CARRIER_MCC, carrierInfo.mcc)
-            builder.put(SemanticAttributes.NETWORK_CARRIER_MNC, carrierInfo.mnc)
-            builder.put(SemanticAttributes.NETWORK_CARRIER_ICC, carrierInfo.icc)
-        }
 
         if (networkType.subTypeName != null) {
             builder.put(SemanticAttributes.NETWORK_CONNECTION_SUBTYPE, networkType.subTypeName)

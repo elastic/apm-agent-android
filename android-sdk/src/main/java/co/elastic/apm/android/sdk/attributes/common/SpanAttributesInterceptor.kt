@@ -18,16 +18,32 @@
  */
 package co.elastic.apm.android.sdk.attributes.common
 
+import co.elastic.apm.android.sdk.internal.services.Service
+import co.elastic.apm.android.sdk.internal.services.ServiceManager
+import co.elastic.apm.android.sdk.internal.services.network.NetworkService
 import co.elastic.apm.android.sdk.tools.Interceptor
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
+import io.opentelemetry.semconv.SemanticAttributes
 
 internal class SpanAttributesInterceptor : Interceptor<Attributes> {
+    private val networkService: NetworkService by lazy {
+        ServiceManager.get().getService(Service.Names.NETWORK)
+    }
 
     override fun intercept(item: Attributes): Attributes {
         val builder = Attributes.builder().putAll(item)
+        val carrierInfo = networkService.getCarrierInfo()
 
         builder.put(TRANSACTION_TYPE_ATTRIBUTE_KEY, TRANSACTION_TYPE_VALUE)
+
+        if (carrierInfo != null) {
+            builder.put(SemanticAttributes.NETWORK_CARRIER_NAME, carrierInfo.name)
+            builder.put(SemanticAttributes.NETWORK_CARRIER_MCC, carrierInfo.mcc)
+            builder.put(SemanticAttributes.NETWORK_CARRIER_MNC, carrierInfo.mnc)
+            builder.put(SemanticAttributes.NETWORK_CARRIER_ICC, carrierInfo.icc)
+        }
+
         return builder.build()
     }
 

@@ -191,7 +191,6 @@ class AttributesTest {
             .put("network.carrier.name", "elasticphone")
             .put("network.carrier.icc", "us")
             .put("type", "mobile")
-            .put("screen.name", "unknown")
             .build()
 
         agentRule.sendSpan()

@@ -58,6 +58,7 @@ class ElasticAgent private constructor(val openTelemetry: OpenTelemetry) {
         @JvmStatic
         fun create(application: Application, openTelemetry: OpenTelemetry): ElasticAgent {
             ServiceManager.initialize(application)
+            ServiceManager.get().start()
             return ElasticAgent(openTelemetry)
         }
     }

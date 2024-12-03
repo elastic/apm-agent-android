@@ -40,6 +40,7 @@ internal class SpanAttributesInterceptor(private val sessionProvider: SessionPro
 
         builder.put(SemanticAttributes.NETWORK_CONNECTION_TYPE, networkType.name)
         builder.put(SESSION_ID_ATTRIBUTE_KEY, sessionProvider.getSession().id)
+        builder.put(TRANSACTION_TYPE_ATTRIBUTE_KEY, TRANSACTION_TYPE_VALUE)
 
         if (carrierInfo != null) {
             builder.put(SemanticAttributes.NETWORK_CARRIER_NAME, carrierInfo.name)
@@ -57,5 +58,10 @@ internal class SpanAttributesInterceptor(private val sessionProvider: SessionPro
     companion object {
         private val SESSION_ID_ATTRIBUTE_KEY: AttributeKey<String> =
             AttributeKey.stringKey("session.id")
+
+        private val TRANSACTION_TYPE_ATTRIBUTE_KEY: AttributeKey<String> =
+            AttributeKey.stringKey("type")
+
+        private const val TRANSACTION_TYPE_VALUE: String = "mobile"
     }
 }

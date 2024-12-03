@@ -21,6 +21,7 @@ package co.elastic.apm.android.sdk.testutils
 import co.elastic.apm.android.sdk.ElasticAgent
 import co.elastic.apm.android.sdk.session.Session
 import io.opentelemetry.api.OpenTelemetry
+import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.api.logs.LogRecordBuilder
 import io.opentelemetry.api.trace.SpanBuilder
 import io.opentelemetry.sdk.common.Clock
@@ -51,6 +52,17 @@ class ElasticAgentRule : TestRule {
             return agent.openTelemetry
         }
 
+    companion object {
+        val LOG_DEFAULT_ATTRS: Attributes = Attributes.builder()
+            .put("session.id", "session-id")
+            .put("network.connection.type", "unavailable")
+            .build()
+        val SPAN_DEFAULT_ATTRS: Attributes = Attributes.builder()
+            .putAll(LOG_DEFAULT_ATTRS)
+            .put("type", "mobile")
+            .build()
+    }
+
     override fun apply(base: Statement, description: Description): Statement {
         spanExporter = InMemorySpanExporter.create()
         metricsExporter = InMemoryMetricExporter.create()
@@ -79,7 +91,7 @@ class ElasticAgentRule : TestRule {
             .setServiceVersion(serviceVersion)
             .setDeploymentEnvironment(deploymentEnvironment)
             .setDeviceIdProvider { "device-id" }
-            .setSessionProvider { Session("session-pd") }
+            .setSessionProvider { Session("session-id") }
             .setClock(clock)
             .setSpanProcessor(SimpleSpanProcessor.create(spanExporter))
             .setLogRecordProcessor(SimpleLogRecordProcessor.create(logsExporter))

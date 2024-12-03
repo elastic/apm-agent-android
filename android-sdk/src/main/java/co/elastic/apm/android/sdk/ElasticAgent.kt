@@ -25,6 +25,8 @@ import co.elastic.apm.android.common.internal.logging.Elog
 import co.elastic.apm.android.sdk.attributes.common.SpanAttributesInterceptor
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.logs.LogRecordAttributesProcessor
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.spans.SpanAttributesProcessor
+import co.elastic.apm.android.sdk.internal.opentelemetry.processors.spans.SpanInterceptorProcessor
+import co.elastic.apm.android.sdk.internal.services.ServiceManager
 import co.elastic.apm.android.sdk.session.SessionProvider
 import co.elastic.apm.android.sdk.tools.Interceptor
 import co.elastic.apm.android.sdk.tools.PreferencesCachedStringProvider
@@ -54,6 +56,7 @@ class ElasticAgent private constructor(val openTelemetry: OpenTelemetry) {
 
         @JvmStatic
         fun create(application: Application, openTelemetry: OpenTelemetry): ElasticAgent {
+            ServiceManager.initialize(application)
             return ElasticAgent(openTelemetry)
         }
     }
@@ -156,6 +159,7 @@ class ElasticAgent private constructor(val openTelemetry: OpenTelemetry) {
                                 )
                             )
                         )
+                        .addSpanProcessor(SpanInterceptorProcessor())
                         .addSpanProcessor(spanProcessor)
                         .build()
                 )

@@ -18,6 +18,8 @@
  */
 package co.elastic.apm.android.sdk
 
+import co.elastic.apm.android.sdk.tools.PreferencesCachedStringProvider
+import co.elastic.apm.android.sdk.tools.StringProvider
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.sdk.OpenTelemetrySdk
 import io.opentelemetry.sdk.common.Clock
@@ -29,6 +31,7 @@ import io.opentelemetry.sdk.resources.Resource
 import io.opentelemetry.sdk.trace.SdkTracerProvider
 import io.opentelemetry.sdk.trace.SpanProcessor
 import io.opentelemetry.semconv.ResourceAttributes
+import java.util.UUID
 
 class ElasticAgent private constructor(val openTelemetry: OpenTelemetry) {
 
@@ -48,6 +51,8 @@ class ElasticAgent private constructor(val openTelemetry: OpenTelemetry) {
         private var serviceName: String = ""
         private var serviceVersion: String = ""
         private var deploymentEnvironment: String = ""
+        private var deviceIdProvider: StringProvider =
+            PreferencesCachedStringProvider("device_id") { UUID.randomUUID().toString() }
         private var clock: Clock = Clock.getDefault()
         private var spanProcessor: SpanProcessor? = null
         private var logRecordProcessor: LogRecordProcessor? = null
@@ -63,6 +68,10 @@ class ElasticAgent private constructor(val openTelemetry: OpenTelemetry) {
 
         fun setDeploymentEnvironment(value: String) = apply {
             deploymentEnvironment = value
+        }
+
+        fun setDeviceIdProvider(value: StringProvider) = apply {
+            deviceIdProvider = value
         }
 
         fun setClock(value: Clock) = apply {
@@ -86,6 +95,7 @@ class ElasticAgent private constructor(val openTelemetry: OpenTelemetry) {
                 .put(ResourceAttributes.SERVICE_NAME, serviceName)
                 .put(ResourceAttributes.SERVICE_VERSION, serviceVersion)
                 .put(ResourceAttributes.DEPLOYMENT_ENVIRONMENT, deploymentEnvironment)
+                .put(ResourceAttributes.DEVICE_ID, deviceIdProvider.get())
                 .build()
             val openTelemetryBuilder = OpenTelemetrySdk.builder()
             if (spanProcessor != null) {

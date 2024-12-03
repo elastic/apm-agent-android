@@ -24,6 +24,7 @@ import android.os.Build
 import co.elastic.apm.android.common.internal.logging.Elog
 import co.elastic.apm.android.sdk.attributes.common.CommonAttributesInterceptor
 import co.elastic.apm.android.sdk.attributes.common.SpanAttributesInterceptor
+import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElasticClock
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.logs.LogRecordAttributesProcessor
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.spans.SpanAttributesProcessor
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.spans.SpanInterceptorProcessor
@@ -71,7 +72,7 @@ class ElasticAgent private constructor(val openTelemetry: OpenTelemetry) {
         private var deviceIdProvider: StringProvider =
             PreferencesCachedStringProvider("device_id") { UUID.randomUUID().toString() }
         private var sessionProvider: SessionProvider = SessionProvider.getDefault()
-        private var clock: Clock = Clock.getDefault()
+        private var clock: Clock = ElasticClock.create()
         private var spanProcessor: SpanProcessor? = null
         private var logRecordProcessor: LogRecordProcessor? = null
         private var metricReader: MetricReader? = null

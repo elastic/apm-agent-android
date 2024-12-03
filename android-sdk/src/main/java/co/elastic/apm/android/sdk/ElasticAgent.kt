@@ -21,56 +21,37 @@ package co.elastic.apm.android.sdk
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.sdk.OpenTelemetrySdk
 import io.opentelemetry.sdk.common.Clock
-import io.opentelemetry.sdk.common.CompletableResultCode
 import io.opentelemetry.sdk.logs.LogRecordProcessor
 import io.opentelemetry.sdk.logs.SdkLoggerProvider
-import io.opentelemetry.sdk.logs.export.BatchLogRecordProcessor
-import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.metrics.SdkMeterProvider
-import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.metrics.export.MetricReader
-import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader
 import io.opentelemetry.sdk.resources.Resource
 import io.opentelemetry.sdk.trace.SdkTracerProvider
 import io.opentelemetry.sdk.trace.SpanProcessor
-import io.opentelemetry.sdk.trace.export.BatchSpanProcessor
-import io.opentelemetry.sdk.trace.export.SpanExporter
 import io.opentelemetry.semconv.ResourceAttributes
 
-class ElasticAgent internal constructor(
-    val openTelemetry: OpenTelemetry,
-    private val spanProcessor: SpanProcessor,
-    private val logRecordProcessor: LogRecordProcessor,
-    private val metricReader: MetricReader
-) {
+class ElasticAgent private constructor(val openTelemetry: OpenTelemetry) {
 
     companion object {
         @JvmStatic
         fun builder(): Builder {
             return Builder()
         }
-    }
 
-    internal fun flushSpans(): CompletableResultCode {
-        return spanProcessor.forceFlush()
-    }
-
-    internal fun flushMetrics(): CompletableResultCode {
-        return metricReader.forceFlush()
-    }
-
-    internal fun flushLogRecords(): CompletableResultCode {
-        return logRecordProcessor.forceFlush()
+        @JvmStatic
+        fun create(openTelemetry: OpenTelemetry): ElasticAgent {
+            return ElasticAgent(openTelemetry)
+        }
     }
 
     class Builder internal constructor() {
         private var serviceName: String = ""
         private var serviceVersion: String = ""
         private var deploymentEnvironment: String = ""
-        private var spanExporter: SpanExporter? = null
-        private var metricExporter: MetricExporter? = null
-        private var logRecordExporter: LogRecordExporter? = null
         private var clock: Clock = Clock.getDefault()
+        private var spanProcessor: SpanProcessor? = null
+        private var logRecordProcessor: LogRecordProcessor? = null
+        private var metricReader: MetricReader? = null
 
         fun setServiceName(value: String) = apply {
             serviceName = value
@@ -88,16 +69,16 @@ class ElasticAgent internal constructor(
             clock = value
         }
 
-        fun setSpanExporter(value: SpanExporter) = apply {
-            spanExporter = value
+        fun setSpanProcessor(value: SpanProcessor) = apply {
+            spanProcessor = value
         }
 
-        fun setMetricExporter(value: MetricExporter) = apply {
-            metricExporter = value
+        fun setLogRecordProcessor(value: LogRecordProcessor) = apply {
+            logRecordProcessor = value
         }
 
-        fun setLogRecordExporter(value: LogRecordExporter) = apply {
-            logRecordExporter = value
+        fun setMetricReader(value: MetricReader) = apply {
+            metricReader = value
         }
 
         fun build(): ElasticAgent {
@@ -106,33 +87,35 @@ class ElasticAgent internal constructor(
                 .put(ResourceAttributes.SERVICE_VERSION, serviceVersion)
                 .put(ResourceAttributes.DEPLOYMENT_ENVIRONMENT, deploymentEnvironment)
                 .build()
-            val spanProcessor = BatchSpanProcessor.builder(spanExporter!!).build()
-            val logRecordProcessor = BatchLogRecordProcessor.builder(logRecordExporter!!).build()
-            val metricReader = PeriodicMetricReader.create(metricExporter!!)
-            val openTelemetry = OpenTelemetrySdk.builder()
-                .setTracerProvider(
+            val openTelemetryBuilder = OpenTelemetrySdk.builder()
+            if (spanProcessor != null) {
+                openTelemetryBuilder.setTracerProvider(
                     SdkTracerProvider.builder()
                         .setClock(clock)
                         .setResource(resource)
                         .addSpanProcessor(spanProcessor)
                         .build()
-                ).setLoggerProvider(
+                )
+            }
+            if (logRecordProcessor != null) {
+                openTelemetryBuilder.setLoggerProvider(
                     SdkLoggerProvider.builder()
                         .setClock(clock)
                         .setResource(resource)
-                        .addLogRecordProcessor(
-                            logRecordProcessor
-                        )
+                        .addLogRecordProcessor(logRecordProcessor)
                         .build()
-                ).setMeterProvider(
+                )
+            }
+            if (metricReader != null) {
+                openTelemetryBuilder.setMeterProvider(
                     SdkMeterProvider.builder()
                         .setClock(clock)
                         .setResource(resource)
                         .registerMetricReader(metricReader)
                         .build()
                 )
-                .build()
-            return ElasticAgent(openTelemetry, spanProcessor, logRecordProcessor, metricReader)
+            }
+            return create(openTelemetryBuilder.build())
         }
     }
 }

@@ -24,17 +24,23 @@ import io.opentelemetry.api.logs.LogRecordBuilder
 import io.opentelemetry.api.trace.SpanBuilder
 import io.opentelemetry.sdk.common.Clock
 import io.opentelemetry.sdk.logs.data.LogRecordData
+import io.opentelemetry.sdk.logs.export.SimpleLogRecordProcessor
 import io.opentelemetry.sdk.metrics.data.MetricData
+import io.opentelemetry.sdk.metrics.export.MetricReader
+import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader
 import io.opentelemetry.sdk.testing.exporter.InMemoryLogRecordExporter
 import io.opentelemetry.sdk.testing.exporter.InMemoryMetricExporter
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter
 import io.opentelemetry.sdk.trace.data.SpanData
+import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor
+import java.util.concurrent.TimeUnit
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
 
 class ElasticAgentRule : TestRule {
     private lateinit var spanExporter: InMemorySpanExporter
+    private lateinit var metricReader: MetricReader
     private lateinit var metricsExporter: InMemoryMetricExporter
     private lateinit var logsExporter: InMemoryLogRecordExporter
     private lateinit var agent: ElasticAgent
@@ -65,14 +71,15 @@ class ElasticAgentRule : TestRule {
         deploymentEnvironment: String = "test",
         clock: Clock = Clock.getDefault()
     ) {
+        metricReader = PeriodicMetricReader.create(metricsExporter)
         agent = ElasticAgent.builder()
             .setServiceName(serviceName)
             .setServiceVersion(serviceVersion)
             .setDeploymentEnvironment(deploymentEnvironment)
             .setClock(clock)
-            .setSpanExporter(spanExporter)
-            .setLogRecordExporter(logsExporter)
-            .setMetricExporter(metricsExporter)
+            .setSpanProcessor(SimpleSpanProcessor.create(spanExporter))
+            .setLogRecordProcessor(SimpleLogRecordProcessor.create(logsExporter))
+            .setMetricReader(metricReader)
             .build()
     }
 
@@ -94,21 +101,19 @@ class ElasticAgentRule : TestRule {
     }
 
     fun getFinishedSpans(): List<SpanData> {
-        agent.flushSpans()
         val list = ArrayList(spanExporter.finishedSpanItems)
         spanExporter.reset()
         return list
     }
 
     fun getFinishedLogRecords(): List<LogRecordData> {
-        agent.flushLogRecords()
         val list = ArrayList(logsExporter.finishedLogRecordItems)
         logsExporter.reset()
         return list
     }
 
     fun getFinishedMetrics(): List<MetricData> {
-        agent.flushMetrics()
+        metricReader.forceFlush().join(1, TimeUnit.SECONDS)
         val list = ArrayList(metricsExporter.finishedMetricItems)
         metricsExporter.reset()
         return list

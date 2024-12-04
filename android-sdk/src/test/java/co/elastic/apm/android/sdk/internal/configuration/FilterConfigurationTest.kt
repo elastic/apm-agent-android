@@ -18,7 +18,7 @@
  */
 package co.elastic.apm.android.sdk.internal.configuration
 
-import co.elastic.apm.android.sdk.testutils.ElasticAgentRule
+import co.elastic.apm.android.sdk.testutils.ElasticApmAgentRule
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.sdk.logs.data.LogRecordData
 import io.opentelemetry.sdk.metrics.data.MetricData
@@ -33,7 +33,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class FilterConfigurationTest {
     @get:Rule
-    val agentRule = ElasticAgentRule()
+    val agentRule = ElasticApmAgentRule()
 
     @Test
     fun `Verify signal filters`() {

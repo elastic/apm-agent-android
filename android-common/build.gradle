@@ -1,9 +1,6 @@
 plugins {
-    id 'java-library'
+    id 'elastic.java-library'
 }
-
-targetCompatibility = jvmCompatibility
-sourceCompatibility = jvmCompatibility
 
 licensesConfig {
     manualMappingFile = rootProject.file("manual_licenses_map.txt")

@@ -1,37 +1,15 @@
 plugins {
-    id 'com.android.library'
-    id 'org.jetbrains.kotlin.android'
+    id 'elastic.android-library'
 }
 
 android {
     namespace = "co.elastic.apm.android.sdk"
-    compileSdk androidCompileSdk
     buildFeatures.buildConfig true
 
     defaultConfig {
-        minSdk androidMinSdk
-        targetSdk androidCompileSdk
-
         buildConfigField("String", "APM_AGENT_VERSION", "\"${project.version}\"")
-
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles "../shared-rules.pro"
     }
 
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
-    compileOptions {
-        sourceCompatibility jvmCompatibility
-        targetCompatibility jvmCompatibility
-        coreLibraryDesugaringEnabled = true
-    }
-    kotlinOptions {
-        jvmTarget = jvmCompatibility.toString()
-    }
     testOptions {
         unitTests {
             includeAndroidResources = true
@@ -44,7 +22,6 @@ licensesConfig {
 }
 
 tasks.withType(Test).configureEach {
-    useJUnitPlatform()
     systemProperty("agent_version", project.version)
 }
 
@@ -66,12 +43,7 @@ dependencies {
     implementation libs.dsl.json
     annotationProcessor 'co.elastic.apm.compile:processor'
     compileOnly 'co.elastic.apm.compile:processor'
-    testImplementation libs.bundles.mocking
-    testImplementation libs.bundles.junit
     testImplementation libs.mockwebserver
     testImplementation libs.opentelemetry.testing
     testImplementation libs.robolectric
-    testImplementation libs.assertj
-    testRuntimeOnly libs.junit5.vintage
-    coreLibraryDesugaring(libs.coreLib)
 }

@@ -19,8 +19,8 @@
 package co.elastic.apm.android.sdk.integration
 
 import co.elastic.apm.android.sdk.instrumentation.InstrumentationConfiguration
-import co.elastic.apm.android.sdk.testutils.ElasticAgentRule
-import co.elastic.apm.android.sdk.testutils.ElasticAgentRule.Companion.LOG_DEFAULT_ATTRS
+import co.elastic.apm.android.sdk.testutils.ElasticApmAgentRule
+import co.elastic.apm.android.sdk.testutils.ElasticApmAgentRule.Companion.LOG_DEFAULT_ATTRS
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -39,7 +39,7 @@ import org.robolectric.RobolectricTestRunner
 class CrashReportTest {
 
     @get:Rule
-    val agentRule = ElasticAgentRule()
+    val agentRule = ElasticApmAgentRule()
 
     @Test
     fun `Capture log event with crash`() {

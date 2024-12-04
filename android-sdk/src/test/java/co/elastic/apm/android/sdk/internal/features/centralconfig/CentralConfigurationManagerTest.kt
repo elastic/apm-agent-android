@@ -27,7 +27,7 @@ import co.elastic.apm.android.sdk.internal.configuration.OptionsRegistry
 import co.elastic.apm.android.sdk.internal.configuration.impl.ConnectivityConfiguration
 import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
-import co.elastic.apm.android.sdk.testutils.ElasticAgentRule
+import co.elastic.apm.android.sdk.testutils.ElasticApmAgentRule
 import io.mockk.MockKAnnotations
 import io.mockk.Runs
 import io.mockk.every
@@ -71,7 +71,7 @@ class CentralConfigurationManagerTest {
     }
 
     @get:Rule
-    val agentRule = ElasticAgentRule()
+    val agentRule = ElasticApmAgentRule()
 
     @get:Rule
     val temporaryFolder: TemporaryFolder = TemporaryFolder()

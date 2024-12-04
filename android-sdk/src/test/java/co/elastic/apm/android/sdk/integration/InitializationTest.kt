@@ -28,7 +28,7 @@ import co.elastic.apm.android.sdk.internal.features.centralconfig.poll.Configura
 import co.elastic.apm.android.sdk.internal.services.Service
 import co.elastic.apm.android.sdk.internal.services.ServiceManager
 import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicWorkService
-import co.elastic.apm.android.sdk.testutils.ElasticAgentRule
+import co.elastic.apm.android.sdk.testutils.ElasticApmAgentRule
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -56,7 +56,7 @@ import org.robolectric.RobolectricTestRunner
 class InitializationTest {
 
     @get:Rule
-    val agentRule = ElasticAgentRule()
+    val agentRule = ElasticApmAgentRule()
 
     @Test
     fun `Verify defaults`() {

@@ -25,17 +25,18 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.telephony.TelephonyManager
-import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElasticClock
 import co.elastic.apm.android.sdk.testutils.ElasticAgentRule
 import co.elastic.apm.android.sdk.testutils.ElasticAgentRule.Companion.LOG_DEFAULT_ATTRS
 import co.elastic.apm.android.sdk.testutils.ElasticAgentRule.Companion.SPAN_DEFAULT_ATTRS
 import io.mockk.every
 import io.mockk.mockk
 import io.opentelemetry.api.common.Attributes
+import io.opentelemetry.sdk.common.Clock
 import io.opentelemetry.sdk.metrics.data.MetricData
 import io.opentelemetry.sdk.metrics.data.PointData
 import io.opentelemetry.sdk.resources.Resource
 import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat
+import io.opentelemetry.sdk.trace.data.StatusData
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -134,7 +135,7 @@ class AttributesTest {
 
     @Config(sdk = [24, Config.NEWEST_SDK])
     @Test
-    fun `Check global attributes`() {
+    fun `Check global attributes and span status`() {
         agentRule.initialize()
 
         agentRule.sendSpan()
@@ -144,7 +145,7 @@ class AttributesTest {
         val logItems = agentRule.getFinishedLogRecords()
         assertThat(spanItems).hasSize(1)
         assertThat(logItems).hasSize(1)
-        assertThat(spanItems.first()).hasAttributes(SPAN_DEFAULT_ATTRS)
+        assertThat(spanItems.first()).hasAttributes(SPAN_DEFAULT_ATTRS).hasStatus(StatusData.ok())
         assertThat(logItems.first()).hasAttributes(LOG_DEFAULT_ATTRS)
     }
 
@@ -161,7 +162,6 @@ class AttributesTest {
         val expectedSpanAttributes = Attributes.builder()
             .putAll(expectedLogAttributes)
             .put("type", "mobile")
-            .put("screen.name", "unknown")
             .build()
 
         agentRule.sendSpan()
@@ -191,7 +191,6 @@ class AttributesTest {
             .put("network.carrier.name", "elasticphone")
             .put("network.carrier.icc", "us")
             .put("type", "mobile")
-            .put("screen.name", "unknown")
             .build()
 
         agentRule.sendSpan()
@@ -208,11 +207,10 @@ class AttributesTest {
     @Test
     fun `Check clock usage across all signals`() {
         val nowTime = 12345L
-        agentRule.setElasticClockInterceptor {
-            every { it.now() }.returns(nowTime)
-            every { it.nanoTime() }.answers { System.nanoTime() }
-        }
-        agentRule.initialize()
+        val clock = mockk<Clock>()
+        every { clock.now() }.returns(nowTime)
+        every { clock.nanoTime() }.answers { System.nanoTime() }
+        agentRule.initialize(clock = clock)
 
         agentRule.sendSpan()
         agentRule.sendLog()
@@ -231,19 +229,16 @@ class AttributesTest {
         // to track span start and end diff.
 
         val startTimeFromElasticClock = 2000000000L
-        var clock: ElasticClock? = null
-        agentRule.setElasticClockInterceptor {
-            every { it.now() }.returns(startTimeFromElasticClock)
-            every { it.nanoTime() }.answers { System.nanoTime() }
-            clock = it
-        }
-        agentRule.initialize()
+        val clock = mockk<Clock>()
+        every { clock.now() }.returns(startTimeFromElasticClock)
+        every { clock.nanoTime() }.answers { System.nanoTime() }
+        agentRule.initialize(clock = clock)
 
         val span = agentRule.openTelemetry.getTracer("SomeTracer").spanBuilder("TimeChangeSpan")
             .startSpan()
 
         // Moving now backwards:
-        every { clock?.now() }.returns(1000000000L)
+        every { clock.now() }.returns(1000000000L)
 
         span.end()
 

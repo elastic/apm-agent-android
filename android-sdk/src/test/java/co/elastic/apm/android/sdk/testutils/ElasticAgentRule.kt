@@ -18,33 +18,14 @@
  */
 package co.elastic.apm.android.sdk.testutils
 
-import co.elastic.apm.android.sdk.ElasticApmAgent
-import co.elastic.apm.android.sdk.ElasticApmConfiguration
-import co.elastic.apm.android.sdk.connectivity.Connectivity
-import co.elastic.apm.android.sdk.connectivity.opentelemetry.SignalConfiguration
-import co.elastic.apm.android.sdk.internal.configuration.Configuration
-import co.elastic.apm.android.sdk.internal.configuration.provider.ConfigurationsProvider
-import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.CentralConfigurationInitializer
-import co.elastic.apm.android.sdk.internal.features.persistence.PersistenceInitializer
-import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector
-import co.elastic.apm.android.sdk.internal.injection.AgentDependenciesInjector.Interceptor
-import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElasticClock
-import co.elastic.apm.android.sdk.internal.services.Service
+import co.elastic.apm.android.sdk.ElasticAgent
 import co.elastic.apm.android.sdk.internal.services.ServiceManager
-import co.elastic.apm.android.sdk.internal.services.ServiceManager.InitializationCallback
-import co.elastic.apm.android.sdk.internal.services.periodicwork.PeriodicWorkService
-import co.elastic.apm.android.sdk.session.SessionManager
-import io.mockk.Runs
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockk
-import io.mockk.spyk
-import io.opentelemetry.api.GlobalOpenTelemetry
+import co.elastic.apm.android.sdk.session.Session
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.api.logs.LogRecordBuilder
 import io.opentelemetry.api.trace.SpanBuilder
-import io.opentelemetry.sdk.logs.LogRecordProcessor
+import io.opentelemetry.sdk.common.Clock
 import io.opentelemetry.sdk.logs.data.LogRecordData
 import io.opentelemetry.sdk.logs.export.SimpleLogRecordProcessor
 import io.opentelemetry.sdk.metrics.data.MetricData
@@ -53,36 +34,24 @@ import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader
 import io.opentelemetry.sdk.testing.exporter.InMemoryLogRecordExporter
 import io.opentelemetry.sdk.testing.exporter.InMemoryMetricExporter
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter
-import io.opentelemetry.sdk.trace.SpanProcessor
 import io.opentelemetry.sdk.trace.data.SpanData
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor
+import java.util.concurrent.TimeUnit
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
 import org.robolectric.RuntimeEnvironment
 
-class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjector,
-    ConfigurationsProvider, InitializationCallback {
+class ElasticAgentRule : TestRule {
     private lateinit var spanExporter: InMemorySpanExporter
-    private lateinit var metricsReader: MetricReader
+    private lateinit var metricReader: MetricReader
     private lateinit var metricsExporter: InMemoryMetricExporter
     private lateinit var logsExporter: InMemoryLogRecordExporter
-    private val configurations = mutableListOf<Configuration>()
-    private var _openTelemetry: OpenTelemetry? = null
+    private lateinit var agent: ElasticAgent
     val openTelemetry: OpenTelemetry
         get() {
-            return _openTelemetry!!
+            return agent.openTelemetry
         }
-
-    // Dependencies
-    private var agentDependenciesInjector: AgentDependenciesInjector? = null
-    private var centralConfigurationInitializer: CentralConfigurationInitializer? = null
-    private lateinit var centralConfigurationInitializerInterceptor: (CentralConfigurationInitializer) -> Unit
-    private var persistenceInitializer: PersistenceInitializer? = null
-    private lateinit var persistenceInitializerInterceptor: (PersistenceInitializer) -> Unit
-    private var sessionManager: SessionManager? = null
-    private var elasticClock: ElasticClock? = null
-    private lateinit var elasticClockInterceptor: (ElasticClock) -> Unit
 
     companion object {
         val LOG_DEFAULT_ATTRS: Attributes = Attributes.builder()
@@ -92,7 +61,6 @@ class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjecto
         val SPAN_DEFAULT_ATTRS: Attributes = Attributes.builder()
             .putAll(LOG_DEFAULT_ATTRS)
             .put("type", "mobile")
-            .put("screen.name", "unknown")
             .build()
     }
 
@@ -100,10 +68,6 @@ class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjecto
         spanExporter = InMemorySpanExporter.create()
         metricsExporter = InMemoryMetricExporter.create()
         logsExporter = InMemoryLogRecordExporter.create()
-        centralConfigurationInitializerInterceptor = { }
-        persistenceInitializerInterceptor = {}
-        elasticClockInterceptor = {}
-        ServiceManager.setInitializationCallback(this)
 
         try {
             return object : Statement() {
@@ -112,16 +76,7 @@ class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjecto
                 }
             }
         } finally {
-            ElasticApmAgent.resetForTest()
-            GlobalOpenTelemetry.resetForTest()
-            _openTelemetry = null
-            agentDependenciesInjector = null
-            centralConfigurationInitializer = null
-            persistenceInitializer = null
-            sessionManager = null
-            elasticClock = null
-            configurations.clear()
-            Thread.setDefaultUncaughtExceptionHandler(null)
+            ServiceManager.resetForTest()
         }
     }
 
@@ -129,87 +84,37 @@ class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjecto
         serviceName: String = "service-name",
         serviceVersion: String = "0.0.0",
         deploymentEnvironment: String = "test",
-        configurationInterceptor: (ElasticApmConfiguration.Builder) -> Unit = {},
-        connectivityInterceptor: (Connectivity) -> Connectivity = { it },
-        interceptor: Interceptor? = null
+        clock: Clock = Clock.getDefault()
     ) {
-        val configBuilder = ElasticApmConfiguration.builder()
+        metricReader = PeriodicMetricReader.create(metricsExporter)
+        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
             .setServiceName(serviceName)
             .setServiceVersion(serviceVersion)
             .setDeploymentEnvironment(deploymentEnvironment)
-            .setSignalConfiguration(this)
-            .setDeviceIdGenerator { "device-id" }
-            .setSessionIdGenerator { "session-id" }
-
-        configurationInterceptor(configBuilder)
-
-        ElasticApmAgent.initialize(
-            RuntimeEnvironment.getApplication(),
-            configBuilder.build(),
-            connectivityInterceptor(Connectivity.simple("http://localhost"))
-        ) {
-            agentDependenciesInjector = interceptor?.intercept(it) ?: it
-            configurations.addAll(agentDependenciesInjector!!.configurationsProvider.provideConfigurations())
-            centralConfigurationInitializer =
-                spyk(agentDependenciesInjector!!.centralConfigurationInitializer)
-            centralConfigurationInitializerInterceptor(centralConfigurationInitializer!!)
-            persistenceInitializer = mockk()
-            persistenceInitializerInterceptor(persistenceInitializer!!)
-            sessionManager = spyk(agentDependenciesInjector!!.sessionManager)
-            elasticClock = mockk(relaxed = true)
-            elasticClockInterceptor(elasticClock!!)
-            this
-        }
-        _openTelemetry = GlobalOpenTelemetry.get()
-    }
-
-    fun addConfiguration(configuration: Configuration) {
-        validateNotInit()
-        configurations.add(configuration)
-    }
-
-    fun setCentralConfigurationInitializerInterceptor(interceptor: (CentralConfigurationInitializer) -> Unit) {
-        validateNotInit()
-        centralConfigurationInitializerInterceptor = interceptor
-    }
-
-    fun setPersistenceInitializerInterceptor(interceptor: (PersistenceInitializer) -> Unit) {
-        validateNotInit()
-        persistenceInitializerInterceptor = interceptor
-    }
-
-    fun setElasticClockInterceptor(interceptor: (ElasticClock) -> Unit) {
-        validateNotInit()
-        elasticClockInterceptor = interceptor
+            .setDeviceIdProvider { "device-id" }
+            .setSessionProvider { Session("session-id") }
+            .setClock(clock)
+            .setSpanProcessor(SimpleSpanProcessor.create(spanExporter))
+            .setLogRecordProcessor(SimpleLogRecordProcessor.create(logsExporter))
+            .setMetricReader(metricReader)
+            .build()
     }
 
     fun sendLog(body: String = "", builderVisitor: LogRecordBuilder.() -> Unit = {}) {
-        val logRecordBuilder = openTelemetry.logsBridge.get("LoggerScope").logRecordBuilder()
+        val logRecordBuilder =
+            agent.openTelemetry.logsBridge.get("LoggerScope").logRecordBuilder()
         builderVisitor(logRecordBuilder)
         logRecordBuilder.setBody(body).emit()
     }
 
     fun sendSpan(name: String = "SomeSpan", builderVisitor: SpanBuilder.() -> Unit = {}) {
-        val spanBuilder = openTelemetry.getTracer("SomeTracer").spanBuilder(name)
+        val spanBuilder = agent.openTelemetry.getTracer("SomeTracer").spanBuilder(name)
         builderVisitor(spanBuilder)
         spanBuilder.startSpan().end()
     }
 
     fun sendMetricCounter(name: String = "Counter") {
-        openTelemetry.getMeter("MeterScope").counterBuilder(name).build().add(1)
-    }
-
-    override fun getSpanProcessor(): SpanProcessor {
-        return SimpleSpanProcessor.create(spanExporter)
-    }
-
-    override fun getLogProcessor(): LogRecordProcessor {
-        return SimpleLogRecordProcessor.create(logsExporter)
-    }
-
-    override fun getMetricReader(): MetricReader {
-        metricsReader = PeriodicMetricReader.create(metricsExporter)
-        return metricsReader
+        agent.openTelemetry.getMeter("MeterScope").counterBuilder(name).build().add(1)
     }
 
     fun getFinishedSpans(): List<SpanData> {
@@ -225,85 +130,10 @@ class ElasticAgentRule : TestRule, SignalConfiguration, AgentDependenciesInjecto
     }
 
     fun getFinishedMetrics(): List<MetricData> {
-        flushMetrics()
+        metricReader.forceFlush().join(1, TimeUnit.SECONDS)
         val list = ArrayList(metricsExporter.finishedMetricItems)
         metricsExporter.reset()
         return list
     }
 
-    fun flushMetrics() {
-        metricsReader.forceFlush()
-    }
-
-    override fun getElasticClock(): ElasticClock {
-        return elasticClock!!
-    }
-
-    override fun getSessionManager(): SessionManager {
-        return sessionManager!!
-    }
-
-    override fun getCentralConfigurationInitializer(): CentralConfigurationInitializer {
-        return centralConfigurationInitializer!!
-    }
-
-    override fun getConfigurationsProvider(): ConfigurationsProvider {
-        return this
-    }
-
-    override fun getPersistenceInitializer(): PersistenceInitializer {
-        return persistenceInitializer!!
-    }
-
-    override fun provideConfigurations(): MutableList<Configuration> {
-        val spies = mutableListOf<Configuration>()
-        for (configuration in configurations) {
-            try {
-                spies.add(spyk(configuration))
-            } catch (ignored: IllegalArgumentException) {
-                spies.add(configuration)
-            }
-        }
-        return spies
-    }
-
-    private fun validateNotInit() {
-        if (_openTelemetry != null) {
-            throw IllegalStateException("Cannot change after initialization.")
-        }
-    }
-
-    override fun onServicesInitializationFinished() {
-        interceptServices {
-            if (it is PeriodicWorkService) {
-                val periodicWorkService = mockk<PeriodicWorkService>()
-                every { periodicWorkService.start() } just Runs
-                every { periodicWorkService.stop() } just Runs
-                every { periodicWorkService.addTask(any()) } just Runs
-                every { periodicWorkService.initialize() } just Runs
-                periodicWorkService
-            } else {
-                spyk(it)
-            }
-        }
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    private fun interceptServices(serviceInterceptor: (Service) -> (Service)) {
-        try {
-            val instance = ServiceManager.get()
-            val field = ServiceManager::class.java.getDeclaredField("services")
-            field.isAccessible = true
-            val services = field[instance] as Map<String, Service>
-            val spies = mutableMapOf<String, Service>()
-            services.forEach { (key: String, service: Service) ->
-                spies[key] = serviceInterceptor(service)
-            }
-            field[instance] = spies
-        } catch (e: NoSuchFieldException) {
-            throw RuntimeException(e)
-        } catch (e: IllegalAccessException) {
-            throw RuntimeException(e)
-        }
-    }
 }

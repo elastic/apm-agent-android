@@ -1,33 +1,9 @@
 plugins {
-    id 'com.android.library'
-    id 'org.jetbrains.kotlin.android'
+    id 'elastic.android-library'
 }
 
 android {
     namespace = "co.elastic.apm.android.sdk.kotlin"
-    compileSdk androidCompileSdk
-
-    defaultConfig {
-        minSdk androidMinSdk
-        targetSdk androidCompileSdk
-
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles "../shared-rules.pro"
-    }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
-    compileOptions {
-        sourceCompatibility jvmCompatibility
-        targetCompatibility jvmCompatibility
-    }
-    kotlinOptions {
-        jvmTarget = jvmCompatibility.toString()
-    }
 }
 
 licensesConfig {

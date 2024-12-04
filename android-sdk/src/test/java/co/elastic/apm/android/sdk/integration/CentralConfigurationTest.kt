@@ -20,7 +20,7 @@ package co.elastic.apm.android.sdk.integration
 
 import co.elastic.apm.android.sdk.internal.configuration.Configurations
 import co.elastic.apm.android.sdk.internal.configuration.impl.AllInstrumentationConfiguration
-import co.elastic.apm.android.sdk.testutils.ElasticAgentRule
+import co.elastic.apm.android.sdk.testutils.ElasticApmAgentRule
 import io.mockk.every
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Rule
@@ -31,7 +31,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class CentralConfigurationTest {
     @get:Rule
-    val agentRule = ElasticAgentRule()
+    val agentRule = ElasticApmAgentRule()
 
     @Test
     fun `When recording is enabled, export all signals`() {

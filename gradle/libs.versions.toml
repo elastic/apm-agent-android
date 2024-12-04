@@ -13,6 +13,8 @@ android = "8.2.0"
 junit5 = "5.11.3"
 
 [libraries]
+opentelemetry-api = { module = "io.opentelemetry:opentelemetry-api", version.ref = "opentelemetry" }
+opentelemetry-common = { module = "io.opentelemetry:opentelemetry-sdk-common", version.ref = "opentelemetry" }
 opentelemetry-sdk = { module = "io.opentelemetry:opentelemetry-sdk", version.ref = "opentelemetry" }
 opentelemetry-api-incubator = { module = "io.opentelemetry:opentelemetry-api-incubator", version.ref = "opentelemetry-alpha" }
 opentelemetry-android = { module = "io.opentelemetry.android:android-agent", version.ref = "opentelemetry-android" }
@@ -59,6 +61,7 @@ squareup-javaPoet = "com.squareup:javapoet:1.13.0"
 google-autoService = { module = "com.google.auto.service:auto-service", version.ref = "google-autoService" }
 google-autoService-annotations = { module = "com.google.auto.service:auto-service-annotations", version.ref = "google-autoService" }
 byteBuddy-plugin = { module = "net.bytebuddy:byte-buddy-gradle-plugin", version.ref = "byteBuddy" }
+kotlin-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 
 [bundles]
 mocking = ["mockito", "mockk"]

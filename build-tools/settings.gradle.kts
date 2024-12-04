@@ -1,8 +1,8 @@
 pluginManagement {
     repositories {
-        gradlePluginPortal()
         mavenCentral()
         google()
+        gradlePluginPortal()
     }
 }
 dependencyResolutionManagement {
@@ -15,9 +15,7 @@ dependencyResolutionManagement {
     repositories {
         mavenCentral()
         google()
+        gradlePluginPortal()
     }
 }
-includeBuild '..'
-include ':app'
-include ':android-test-common'
-include ':plugin-test'
+include(":processor")

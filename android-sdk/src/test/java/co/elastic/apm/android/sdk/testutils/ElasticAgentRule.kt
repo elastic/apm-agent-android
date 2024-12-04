@@ -20,12 +20,14 @@ package co.elastic.apm.android.sdk.testutils
 
 import co.elastic.apm.android.sdk.ElasticAgent
 import co.elastic.apm.android.sdk.internal.services.ServiceManager
+import co.elastic.apm.android.sdk.processors.ProcessorsProvider
 import co.elastic.apm.android.sdk.session.Session
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.api.logs.LogRecordBuilder
 import io.opentelemetry.api.trace.SpanBuilder
 import io.opentelemetry.sdk.common.Clock
+import io.opentelemetry.sdk.logs.LogRecordProcessor
 import io.opentelemetry.sdk.logs.data.LogRecordData
 import io.opentelemetry.sdk.logs.export.SimpleLogRecordProcessor
 import io.opentelemetry.sdk.metrics.data.MetricData
@@ -34,6 +36,7 @@ import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader
 import io.opentelemetry.sdk.testing.exporter.InMemoryLogRecordExporter
 import io.opentelemetry.sdk.testing.exporter.InMemoryMetricExporter
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter
+import io.opentelemetry.sdk.trace.SpanProcessor
 import io.opentelemetry.sdk.trace.data.SpanData
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor
 import java.util.concurrent.TimeUnit
@@ -42,7 +45,7 @@ import org.junit.runner.Description
 import org.junit.runners.model.Statement
 import org.robolectric.RuntimeEnvironment
 
-class ElasticAgentRule : TestRule {
+class ElasticAgentRule : TestRule, ProcessorsProvider {
     private lateinit var spanExporter: InMemorySpanExporter
     private lateinit var metricReader: MetricReader
     private lateinit var metricsExporter: InMemoryMetricExporter
@@ -86,7 +89,6 @@ class ElasticAgentRule : TestRule {
         deploymentEnvironment: String = "test",
         clock: Clock = Clock.getDefault()
     ) {
-        metricReader = PeriodicMetricReader.create(metricsExporter)
         agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
             .setServiceName(serviceName)
             .setServiceVersion(serviceVersion)
@@ -94,9 +96,7 @@ class ElasticAgentRule : TestRule {
             .setDeviceIdProvider { "device-id" }
             .setSessionProvider { Session("session-id") }
             .setClock(clock)
-            .setSpanProcessor(SimpleSpanProcessor.create(spanExporter))
-            .setLogRecordProcessor(SimpleLogRecordProcessor.create(logsExporter))
-            .setMetricReader(metricReader)
+            .setProcessorsProvider(this)
             .build()
     }
 
@@ -136,4 +136,16 @@ class ElasticAgentRule : TestRule {
         return list
     }
 
+    override fun getSpanProcessor(): SpanProcessor? {
+        return SimpleSpanProcessor.create(spanExporter)
+    }
+
+    override fun getLogRecordProcessor(): LogRecordProcessor? {
+        return SimpleLogRecordProcessor.create(logsExporter)
+    }
+
+    override fun getMetricReader(): MetricReader? {
+        metricReader = PeriodicMetricReader.create(metricsExporter)
+        return metricReader
+    }
 }

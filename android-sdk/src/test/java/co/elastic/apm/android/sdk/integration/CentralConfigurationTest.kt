@@ -47,7 +47,7 @@ class CentralConfigurationTest {
     }
 
     @Test
-    fun `When recording is not enables, do not export any signal`() {
+    fun `When recording is not enabled, do not export any signal`() {
         initializeAgent()
         every { Configurations.get(AllInstrumentationConfiguration::class.java)?.isEnabled }.returns(
             false

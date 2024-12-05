@@ -106,12 +106,12 @@ class ApmServerExporterProvider internal constructor(
             val spansNewConfig =
                 spansOldConfig.copy(
                     url = getTracesUrl(configuration.url, spansOldConfig.protocol),
-                    headers = headers
+                    headers = spansOldConfig.headers + headers
                 )
             val logsNewConfig =
                 logsOldConfig.copy(
                     url = getLogsUrl(configuration.url, logsOldConfig.protocol),
-                    headers = headers
+                    headers = logsOldConfig.headers + headers
                 )
             val metricsNewConfig =
                 metricsOldConfig.copy(
@@ -119,7 +119,7 @@ class ApmServerExporterProvider internal constructor(
                         configuration.url,
                         metricsOldConfig.protocol
                     ),
-                    headers = headers
+                    headers = metricsOldConfig.headers + headers
                 )
 
             // Setting new configs

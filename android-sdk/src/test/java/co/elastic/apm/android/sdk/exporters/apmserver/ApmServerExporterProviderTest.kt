@@ -229,6 +229,58 @@ class ApmServerExporterProviderTest {
     }
 
     @Test
+    fun `Verify configuration change url trailing slash handling`() {
+        val url = "http://my.server.url"
+
+        val instance = ApmServerExporterProvider.builder()
+            .setUrl(url)
+            .build()
+
+        assertThat(instance.getApmServerConfiguration()).isEqualTo(
+            ApmServerConfiguration(url, ApmServerConfiguration.Auth.None)
+        )
+        val configurableProvider = instance.exporterProvider
+        assertThat(configurableProvider.getSpanExporterConfiguration()).isEqualTo(
+            ExporterConfiguration.Span("$url/v1/traces", emptyMap(), ExportProtocol.HTTP)
+        )
+        assertThat(configurableProvider.getLogRecordExporterConfiguration()).isEqualTo(
+            ExporterConfiguration.LogRecord("$url/v1/logs", emptyMap(), ExportProtocol.HTTP)
+        )
+        assertThat(configurableProvider.getMetricExporterConfiguration()).isEqualTo(
+            ExporterConfiguration.Metric(
+                "$url/v1/metrics",
+                emptyMap(),
+                ExportProtocol.HTTP
+            )
+        )
+
+        // Config change
+        val newUrl = "http://my.new.url"
+        val providedNewUrl = "http://my.new.url/"
+        val apiKey = "the-key"
+        val newAuth = ApmServerConfiguration.Auth.ApiKey(apiKey)
+        instance.setApmServerConfiguration(ApmServerConfiguration(providedNewUrl, newAuth))
+
+        val headers = mapOf("Authorization" to "ApiKey $apiKey")
+        assertThat(instance.getApmServerConfiguration()).isEqualTo(
+            ApmServerConfiguration(providedNewUrl, newAuth)
+        )
+        assertThat(configurableProvider.getSpanExporterConfiguration()).isEqualTo(
+            ExporterConfiguration.Span("$newUrl/v1/traces", headers, ExportProtocol.HTTP)
+        )
+        assertThat(configurableProvider.getLogRecordExporterConfiguration()).isEqualTo(
+            ExporterConfiguration.LogRecord("$newUrl/v1/logs", headers, ExportProtocol.HTTP)
+        )
+        assertThat(configurableProvider.getMetricExporterConfiguration()).isEqualTo(
+            ExporterConfiguration.Metric(
+                "$newUrl/v1/metrics",
+                headers,
+                ExportProtocol.HTTP
+            )
+        )
+    }
+
+    @Test
     fun `Verify configuration change for auth types`() {
         val url = "http://my.server.url"
         val token = "the-token"

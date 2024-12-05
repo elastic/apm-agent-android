@@ -102,21 +102,22 @@ class ApmServerExporterProvider internal constructor(
             val logsOldConfig = exporterProvider.getLogRecordExporterConfiguration()!!
             val metricsOldConfig = exporterProvider.getMetricExporterConfiguration()!!
 
+            val baseUrl = configuration.url.trimEnd('/')
             val headers = authAsHeaders(configuration.auth)
             val spansNewConfig =
                 spansOldConfig.copy(
-                    url = getTracesUrl(configuration.url, spansOldConfig.protocol),
+                    url = getTracesUrl(baseUrl, spansOldConfig.protocol),
                     headers = spansOldConfig.headers + headers
                 )
             val logsNewConfig =
                 logsOldConfig.copy(
-                    url = getLogsUrl(configuration.url, logsOldConfig.protocol),
+                    url = getLogsUrl(baseUrl, logsOldConfig.protocol),
                     headers = logsOldConfig.headers + headers
                 )
             val metricsNewConfig =
                 metricsOldConfig.copy(
                     url = getMetricsUrl(
-                        configuration.url,
+                        baseUrl,
                         metricsOldConfig.protocol
                     ),
                     headers = metricsOldConfig.headers + headers

@@ -21,6 +21,7 @@ package co.elastic.apm.android.sdk.tools
 import co.elastic.apm.android.sdk.internal.services.Service
 import co.elastic.apm.android.sdk.internal.services.ServiceManager
 import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService
+import co.elastic.apm.android.sdk.tools.provider.StringProvider
 
 class PreferencesCachedStringProvider(
     private val key: String,

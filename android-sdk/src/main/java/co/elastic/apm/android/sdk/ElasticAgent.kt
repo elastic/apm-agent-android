@@ -24,16 +24,17 @@ import android.os.Build
 import co.elastic.apm.android.common.internal.logging.Elog
 import co.elastic.apm.android.sdk.attributes.common.CommonAttributesInterceptor
 import co.elastic.apm.android.sdk.attributes.common.SpanAttributesInterceptor
+import co.elastic.apm.android.sdk.exporters.ExporterProvider
 import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElasticClock
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.logs.LogRecordAttributesProcessor
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.spans.SpanAttributesProcessor
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.spans.SpanInterceptorProcessor
 import co.elastic.apm.android.sdk.internal.services.ServiceManager
-import co.elastic.apm.android.sdk.processors.ProcessorsProvider
+import co.elastic.apm.android.sdk.processors.ProcessorFactory
 import co.elastic.apm.android.sdk.session.SessionProvider
 import co.elastic.apm.android.sdk.tools.Interceptor
 import co.elastic.apm.android.sdk.tools.PreferencesCachedStringProvider
-import co.elastic.apm.android.sdk.tools.StringProvider
+import co.elastic.apm.android.sdk.tools.provider.StringProvider
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
@@ -71,7 +72,8 @@ class ElasticAgent private constructor(val openTelemetry: OpenTelemetry) {
             PreferencesCachedStringProvider("device_id") { UUID.randomUUID().toString() }
         private var sessionProvider: SessionProvider = SessionProvider.getDefault()
         private var clock: Clock = ElasticClock.create()
-        private var processorsProvider: ProcessorsProvider = ProcessorsProvider.noop()
+        private var exporterProvider: ExporterProvider = ExporterProvider.noop()
+        private var processorFactory: ProcessorFactory = ProcessorFactory.getDefault()
         private var spanAttributesInterceptors = mutableListOf<Interceptor<Attributes>>()
         private var logRecordAttributesInterceptors = mutableListOf<Interceptor<Attributes>>()
 
@@ -103,8 +105,12 @@ class ElasticAgent private constructor(val openTelemetry: OpenTelemetry) {
             clock = value
         }
 
-        fun setProcessorsProvider(value: ProcessorsProvider) = apply {
-            processorsProvider = value
+        fun setExporterProvider(value: ExporterProvider) = apply {
+            exporterProvider = value
+        }
+
+        fun setProcessorFactory(value: ProcessorFactory) = apply {
+            processorFactory = value
         }
 
         fun addSpanAttributesInterceptor(value: Interceptor<Attributes>) = apply {
@@ -141,7 +147,7 @@ class ElasticAgent private constructor(val openTelemetry: OpenTelemetry) {
                 .put(ResourceAttributes.TELEMETRY_SDK_LANGUAGE, "java")
                 .build()
             val openTelemetryBuilder = OpenTelemetrySdk.builder()
-            processorsProvider.getSpanProcessor()?.let {
+            processorFactory.createSpanProcessor(exporterProvider.getSpanExporter())?.let {
                 openTelemetryBuilder.setTracerProvider(
                     SdkTracerProvider.builder()
                         .setClock(clock)
@@ -158,23 +164,24 @@ class ElasticAgent private constructor(val openTelemetry: OpenTelemetry) {
                         .build()
                 )
             }
-            processorsProvider.getLogRecordProcessor()?.let {
-                openTelemetryBuilder.setLoggerProvider(
-                    SdkLoggerProvider.builder()
-                        .setClock(clock)
-                        .setResource(resource)
-                        .addLogRecordProcessor(
-                            LogRecordAttributesProcessor(
-                                Interceptor.composite(
-                                    logRecordAttributesInterceptors
+            processorFactory.createLogRecordProcessor(exporterProvider.getLogRecordExporter())
+                ?.let {
+                    openTelemetryBuilder.setLoggerProvider(
+                        SdkLoggerProvider.builder()
+                            .setClock(clock)
+                            .setResource(resource)
+                            .addLogRecordProcessor(
+                                LogRecordAttributesProcessor(
+                                    Interceptor.composite(
+                                        logRecordAttributesInterceptors
+                                    )
                                 )
                             )
-                        )
-                        .addLogRecordProcessor(it)
-                        .build()
-                )
-            }
-            processorsProvider.getMetricReader()?.let {
+                            .addLogRecordProcessor(it)
+                            .build()
+                    )
+                }
+            processorFactory.createMetricReader(exporterProvider.getMetricExporter())?.let {
                 openTelemetryBuilder.setMeterProvider(
                     SdkMeterProvider.builder()
                         .setClock(clock)

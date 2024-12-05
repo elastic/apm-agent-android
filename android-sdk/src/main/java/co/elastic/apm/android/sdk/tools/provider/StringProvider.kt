@@ -16,6 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.tools
+package co.elastic.apm.android.sdk.tools.provider
 
 fun interface StringProvider : Provider<String>

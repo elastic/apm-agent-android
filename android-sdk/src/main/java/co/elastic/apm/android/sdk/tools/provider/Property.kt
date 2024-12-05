@@ -16,22 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.processors
+package co.elastic.apm.android.sdk.tools.provider
 
-import io.opentelemetry.sdk.logs.LogRecordProcessor
-import io.opentelemetry.sdk.metrics.export.MetricReader
-import io.opentelemetry.sdk.trace.SpanProcessor
-
-interface ProcessorsProvider {
-    companion object {
-        fun noop(): ProcessorsProvider {
-            return NoopProcessorsProvider()
-        }
-    }
-
-    fun getSpanProcessor(): SpanProcessor?
-
-    fun getLogRecordProcessor(): LogRecordProcessor?
-
-    fun getMetricReader(): MetricReader?
+interface Property<T> : Provider<T> {
+    fun set(value: T)
 }

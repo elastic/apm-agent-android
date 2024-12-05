@@ -19,19 +19,23 @@
 package co.elastic.apm.android.sdk.processors
 
 import io.opentelemetry.sdk.logs.LogRecordProcessor
+import io.opentelemetry.sdk.logs.export.LogRecordExporter
+import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.metrics.export.MetricReader
 import io.opentelemetry.sdk.trace.SpanProcessor
+import io.opentelemetry.sdk.trace.export.SpanExporter
 
-internal class NoopProcessorsProvider : ProcessorsProvider {
-    override fun getSpanProcessor(): SpanProcessor? {
-        return null
+interface ProcessorFactory {
+    companion object {
+        @JvmStatic
+        fun getDefault(): ProcessorFactory {
+            return DefaultProcessorFactory()
+        }
     }
 
-    override fun getLogRecordProcessor(): LogRecordProcessor? {
-        return null
-    }
+    fun createSpanProcessor(exporter: SpanExporter?): SpanProcessor?
 
-    override fun getMetricReader(): MetricReader? {
-        return null
-    }
+    fun createLogRecordProcessor(exporter: LogRecordExporter?): LogRecordProcessor?
+
+    fun createMetricReader(exporter: MetricExporter?): MetricReader?
 }

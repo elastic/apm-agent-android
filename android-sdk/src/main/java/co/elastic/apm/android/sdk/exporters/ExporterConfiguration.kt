@@ -16,10 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.processors
+package co.elastic.apm.android.sdk.exporters
 
-interface Endpoint {
-    fun getUrl(): String
-
-    fun getHeaders(): Map<String, String>
-}
+data class ExporterConfiguration @JvmOverloads constructor(
+    val url: String,
+    val headers: Map<String, String> = emptyMap()
+)

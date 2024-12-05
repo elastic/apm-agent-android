@@ -16,8 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.tools.provider
+package co.elastic.apm.android.sdk.exporters.configurable
 
-interface Property<T> : Provider<T> {
-    fun set(value: T)
+enum class ExportProtocol {
+    HTTP,
+    GRPC
 }

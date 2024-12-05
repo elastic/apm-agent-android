@@ -111,11 +111,13 @@ internal class ConfigurableExporterProvider(
 
     private fun createSpanExporter(configuration: ExporterConfiguration.Span): SpanExporter {
         return when (configuration.protocol) {
-            ExportProtocol.HTTP -> OtlpHttpSpanExporter.builder().setEndpoint(configuration.url)
+            ExportProtocol.HTTP -> OtlpHttpSpanExporter.builder()
+                .setEndpoint(configuration.url)
                 .setHeaders { configuration.headers }
                 .build()
 
-            ExportProtocol.GRPC -> OtlpGrpcSpanExporter.builder().setEndpoint(configuration.url)
+            ExportProtocol.GRPC -> OtlpGrpcSpanExporter.builder()
+                .setEndpoint(configuration.url)
                 .setHeaders { configuration.headers }
                 .build()
         }

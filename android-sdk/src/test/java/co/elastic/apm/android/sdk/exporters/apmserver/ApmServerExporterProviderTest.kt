@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test
 class ApmServerExporterProviderTest {
 
     @Test
-    fun `Verify default configuration`() {
+    fun `Verify initialization's default configuration`() {
         val url = "http://my.server.url"
 
         val instance = ApmServerExporterProvider.builder()
@@ -55,7 +55,7 @@ class ApmServerExporterProviderTest {
     }
 
     @Test
-    fun `Verify handling of trailing slash`() {
+    fun `Verify initialization's handling of trailing slash`() {
         val url = "http://my.server.url"
         val providedUrl = "http://my.server.url/"
 
@@ -77,6 +77,97 @@ class ApmServerExporterProviderTest {
             ExporterConfiguration.Metric(
                 "$url/v1/metrics",
                 emptyMap(),
+                ExportProtocol.HTTP,
+                AggregationTemporality.CUMULATIVE
+            )
+        )
+    }
+
+    @Test
+    fun `Verify initialization with custom protocol`() {
+        val url = "http://my.server.url"
+
+        val instance = ApmServerExporterProvider.builder()
+            .setUrl(url)
+            .setExportProtocol(ExportProtocol.GRPC)
+            .build()
+
+        assertThat(instance.getApmServerConfiguration()).isEqualTo(
+            ApmServerConfiguration(url, ApmServerConfiguration.Auth.None)
+        )
+        val configurableProvider = instance.exporterProvider
+        assertThat(configurableProvider.getSpanExporterConfiguration()).isEqualTo(
+            ExporterConfiguration.Span(url, emptyMap(), ExportProtocol.GRPC)
+        )
+        assertThat(configurableProvider.getLogRecordExporterConfiguration()).isEqualTo(
+            ExporterConfiguration.LogRecord(url, emptyMap(), ExportProtocol.GRPC)
+        )
+        assertThat(configurableProvider.getMetricExporterConfiguration()).isEqualTo(
+            ExporterConfiguration.Metric(
+                url,
+                emptyMap(),
+                ExportProtocol.GRPC,
+                AggregationTemporality.CUMULATIVE
+            )
+        )
+    }
+
+    @Test
+    fun `Verify initialization with secret token`() {
+        val url = "http://my.server.url"
+        val token = "the-token"
+
+        val instance = ApmServerExporterProvider.builder()
+            .setUrl(url)
+            .setAuthentication(ApmServerConfiguration.Auth.SecretToken(token))
+            .build()
+
+        assertThat(instance.getApmServerConfiguration()).isEqualTo(
+            ApmServerConfiguration(url, ApmServerConfiguration.Auth.SecretToken(token))
+        )
+        val configurableProvider = instance.exporterProvider
+        val headers = mapOf("Authorization" to "Bearer $token")
+        assertThat(configurableProvider.getSpanExporterConfiguration()).isEqualTo(
+            ExporterConfiguration.Span("$url/v1/traces", headers, ExportProtocol.HTTP)
+        )
+        assertThat(configurableProvider.getLogRecordExporterConfiguration()).isEqualTo(
+            ExporterConfiguration.LogRecord("$url/v1/logs", headers, ExportProtocol.HTTP)
+        )
+        assertThat(configurableProvider.getMetricExporterConfiguration()).isEqualTo(
+            ExporterConfiguration.Metric(
+                "$url/v1/metrics",
+                headers,
+                ExportProtocol.HTTP,
+                AggregationTemporality.CUMULATIVE
+            )
+        )
+    }
+
+    @Test
+    fun `Verify initialization with api key`() {
+        val url = "http://my.server.url"
+        val key = "the-key"
+
+        val instance = ApmServerExporterProvider.builder()
+            .setUrl(url)
+            .setAuthentication(ApmServerConfiguration.Auth.ApiKey(key))
+            .build()
+
+        assertThat(instance.getApmServerConfiguration()).isEqualTo(
+            ApmServerConfiguration(url, ApmServerConfiguration.Auth.ApiKey(key))
+        )
+        val configurableProvider = instance.exporterProvider
+        val headers = mapOf("Authorization" to "ApiKey $key")
+        assertThat(configurableProvider.getSpanExporterConfiguration()).isEqualTo(
+            ExporterConfiguration.Span("$url/v1/traces", headers, ExportProtocol.HTTP)
+        )
+        assertThat(configurableProvider.getLogRecordExporterConfiguration()).isEqualTo(
+            ExporterConfiguration.LogRecord("$url/v1/logs", headers, ExportProtocol.HTTP)
+        )
+        assertThat(configurableProvider.getMetricExporterConfiguration()).isEqualTo(
+            ExporterConfiguration.Metric(
+                "$url/v1/metrics",
+                headers,
                 ExportProtocol.HTTP,
                 AggregationTemporality.CUMULATIVE
             )

@@ -40,6 +40,40 @@ class ApmServerExporterProvider internal constructor(
             return Builder()
         }
 
+        private fun authAsHeaders(auth: ApmServerConfiguration.Auth): Map<String, String> {
+            val authHeaderValue: String? = when (auth) {
+                is ApmServerConfiguration.Auth.ApiKey -> "ApiKey ${auth.key}"
+                is ApmServerConfiguration.Auth.SecretToken -> "Bearer ${auth.token}"
+                else -> null
+            }
+            val headers: Map<String, String> =
+                authHeaderValue?.let { mutableMapOf("Authorization" to it) } ?: emptyMap()
+            return headers
+        }
+
+        private fun getTracesUrl(baseUrl: String, exportProtocol: ExportProtocol): String {
+            return getSignalUrl(baseUrl, "traces", exportProtocol)
+        }
+
+        private fun getLogsUrl(baseUrl: String, exportProtocol: ExportProtocol): String {
+            return getSignalUrl(baseUrl, "logs", exportProtocol)
+        }
+
+        private fun getMetricsUrl(baseUrl: String, exportProtocol: ExportProtocol): String {
+            return getSignalUrl(baseUrl, "metrics", exportProtocol)
+        }
+
+        private fun getSignalUrl(
+            baseUrl: String,
+            signalId: String,
+            exportProtocol: ExportProtocol
+        ): String {
+            return when (exportProtocol) {
+                ExportProtocol.GRPC -> baseUrl
+                ExportProtocol.HTTP -> getHttpUrl(baseUrl, signalId)
+            }
+        }
+
         private fun getHttpUrl(url: String, signalId: String): String {
             return String.format("%s/v1/%s", url, signalId)
         }
@@ -63,7 +97,35 @@ class ApmServerExporterProvider internal constructor(
 
     fun setApmServerConfiguration(configuration: ApmServerConfiguration): Unit =
         synchronized(configurationLock) {
-            TODO()
+            this.configuration = configuration
+            val spansOldConfig = exporterProvider.getSpanExporterConfiguration()!!
+            val logsOldConfig = exporterProvider.getLogRecordExporterConfiguration()!!
+            val metricsOldConfig = exporterProvider.getMetricExporterConfiguration()!!
+
+            val headers = authAsHeaders(configuration.auth)
+            val spansNewConfig =
+                spansOldConfig.copy(
+                    url = getTracesUrl(configuration.url, spansOldConfig.protocol),
+                    headers = headers
+                )
+            val logsNewConfig =
+                logsOldConfig.copy(
+                    url = getLogsUrl(configuration.url, logsOldConfig.protocol),
+                    headers = headers
+                )
+            val metricsNewConfig =
+                metricsOldConfig.copy(
+                    url = getMetricsUrl(
+                        configuration.url,
+                        metricsOldConfig.protocol
+                    ),
+                    headers = headers
+                )
+
+            // Setting new configs
+            exporterProvider.setSpanExporterConfiguration(spansNewConfig)
+            exporterProvider.setLogRecordExporterConfiguration(logsNewConfig)
+            exporterProvider.setMetricExporterConfiguration(metricsNewConfig)
         }
 
     class Builder internal constructor() {
@@ -85,26 +147,12 @@ class ApmServerExporterProvider internal constructor(
 
         fun build(): ApmServerExporterProvider {
             return url?.let { finalUrl ->
-                val configuration = ApmServerConfiguration(finalUrl.trimEnd('/'), authentication)
-                val spansUrl = when (exportProtocol) {
-                    ExportProtocol.GRPC -> configuration.url
-                    ExportProtocol.HTTP -> getHttpUrl(configuration.url, "traces")
-                }
-                val logRecordsUrl = when (exportProtocol) {
-                    ExportProtocol.GRPC -> configuration.url
-                    ExportProtocol.HTTP -> getHttpUrl(configuration.url, "logs")
-                }
-                val metricsUrl = when (exportProtocol) {
-                    ExportProtocol.GRPC -> configuration.url
-                    ExportProtocol.HTTP -> getHttpUrl(configuration.url, "metrics")
-                }
-                val authHeaderValue: String? = when (configuration.auth) {
-                    is ApmServerConfiguration.Auth.ApiKey -> "ApiKey ${configuration.auth.key}"
-                    is ApmServerConfiguration.Auth.SecretToken -> "Bearer ${configuration.auth.token}"
-                    else -> null
-                }
-                val headers: Map<String, String> =
-                    authHeaderValue?.let { mutableMapOf("Authorization" to it) } ?: emptyMap()
+                val configuration = ApmServerConfiguration(finalUrl, authentication)
+                val baseUrl = configuration.url.trimEnd('/')
+                val spansUrl = getTracesUrl(baseUrl, exportProtocol)
+                val logRecordsUrl = getLogsUrl(baseUrl, exportProtocol)
+                val metricsUrl = getMetricsUrl(baseUrl, exportProtocol)
+                val headers: Map<String, String> = authAsHeaders(configuration.auth)
                 val provider =
                     ConfigurableExporterProvider.create(
                         ExporterConfiguration.Span(spansUrl, headers, exportProtocol),

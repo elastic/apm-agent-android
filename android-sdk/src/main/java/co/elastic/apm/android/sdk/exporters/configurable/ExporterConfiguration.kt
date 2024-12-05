@@ -18,8 +18,6 @@
  */
 package co.elastic.apm.android.sdk.exporters.configurable
 
-import io.opentelemetry.sdk.metrics.data.AggregationTemporality
-
 sealed class ExporterConfiguration(
     open val url: String,
     open val headers: Map<String, String>,
@@ -40,7 +38,6 @@ sealed class ExporterConfiguration(
     data class Metric(
         override val url: String,
         override val headers: Map<String, String> = emptyMap(),
-        override val protocol: ExportProtocol = ExportProtocol.HTTP,
-        val temporality: AggregationTemporality = AggregationTemporality.CUMULATIVE
+        override val protocol: ExportProtocol = ExportProtocol.HTTP
     ) : ExporterConfiguration(url, headers, protocol)
 }

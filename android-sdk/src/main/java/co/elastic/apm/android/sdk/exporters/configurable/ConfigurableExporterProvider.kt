@@ -27,6 +27,7 @@ import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporter
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
+import io.opentelemetry.sdk.metrics.export.AggregationTemporalitySelector
 import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.trace.export.SpanExporter
 
@@ -157,11 +158,13 @@ internal class ConfigurableExporterProvider(
             ExportProtocol.HTTP -> OtlpHttpMetricExporter.builder()
                 .setEndpoint(configuration.url)
                 .setHeaders { configuration.headers }
+                .setAggregationTemporalitySelector(AggregationTemporalitySelector.deltaPreferred())
                 .build()
 
             ExportProtocol.GRPC -> OtlpGrpcMetricExporter.builder()
                 .setEndpoint(configuration.url)
                 .setHeaders { configuration.headers }
+                .setAggregationTemporalitySelector(AggregationTemporalitySelector.deltaPreferred())
                 .build()
         }
     }

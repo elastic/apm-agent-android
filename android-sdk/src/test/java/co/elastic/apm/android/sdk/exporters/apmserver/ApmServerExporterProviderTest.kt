@@ -20,9 +20,9 @@ package co.elastic.apm.android.sdk.exporters.apmserver
 
 import co.elastic.apm.android.sdk.exporters.configurable.ExportProtocol
 import co.elastic.apm.android.sdk.exporters.configurable.ExporterConfiguration
-import io.opentelemetry.sdk.metrics.data.AggregationTemporality
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class ApmServerExporterProviderTest {
 
@@ -48,8 +48,7 @@ class ApmServerExporterProviderTest {
             ExporterConfiguration.Metric(
                 "$url/v1/metrics",
                 emptyMap(),
-                ExportProtocol.HTTP,
-                AggregationTemporality.CUMULATIVE
+                ExportProtocol.HTTP
             )
         )
     }
@@ -64,7 +63,7 @@ class ApmServerExporterProviderTest {
             .build()
 
         assertThat(instance.getApmServerConfiguration()).isEqualTo(
-            ApmServerConfiguration(url, ApmServerConfiguration.Auth.None)
+            ApmServerConfiguration(providedUrl, ApmServerConfiguration.Auth.None)
         )
         val configurableProvider = instance.exporterProvider
         assertThat(configurableProvider.getSpanExporterConfiguration()).isEqualTo(
@@ -77,8 +76,7 @@ class ApmServerExporterProviderTest {
             ExporterConfiguration.Metric(
                 "$url/v1/metrics",
                 emptyMap(),
-                ExportProtocol.HTTP,
-                AggregationTemporality.CUMULATIVE
+                ExportProtocol.HTTP
             )
         )
     }
@@ -106,8 +104,7 @@ class ApmServerExporterProviderTest {
             ExporterConfiguration.Metric(
                 url,
                 emptyMap(),
-                ExportProtocol.GRPC,
-                AggregationTemporality.CUMULATIVE
+                ExportProtocol.GRPC
             )
         )
     }
@@ -137,8 +134,7 @@ class ApmServerExporterProviderTest {
             ExporterConfiguration.Metric(
                 "$url/v1/metrics",
                 headers,
-                ExportProtocol.HTTP,
-                AggregationTemporality.CUMULATIVE
+                ExportProtocol.HTTP
             )
         )
     }
@@ -168,8 +164,66 @@ class ApmServerExporterProviderTest {
             ExporterConfiguration.Metric(
                 "$url/v1/metrics",
                 headers,
-                ExportProtocol.HTTP,
-                AggregationTemporality.CUMULATIVE
+                ExportProtocol.HTTP
+            )
+        )
+    }
+
+
+    @Test
+    fun `Asser url is set during initialization`() {
+        assertThrows<IllegalArgumentException> {
+            ApmServerExporterProvider.builder().build()
+        }
+    }
+
+    @Test
+    fun `Verify configuration change`() {
+        val url = "http://my.server.url"
+
+        val instance = ApmServerExporterProvider.builder()
+            .setUrl(url)
+            .build()
+
+        assertThat(instance.getApmServerConfiguration()).isEqualTo(
+            ApmServerConfiguration(url, ApmServerConfiguration.Auth.None)
+        )
+        val configurableProvider = instance.exporterProvider
+        assertThat(configurableProvider.getSpanExporterConfiguration()).isEqualTo(
+            ExporterConfiguration.Span("$url/v1/traces", emptyMap(), ExportProtocol.HTTP)
+        )
+        assertThat(configurableProvider.getLogRecordExporterConfiguration()).isEqualTo(
+            ExporterConfiguration.LogRecord("$url/v1/logs", emptyMap(), ExportProtocol.HTTP)
+        )
+        assertThat(configurableProvider.getMetricExporterConfiguration()).isEqualTo(
+            ExporterConfiguration.Metric(
+                "$url/v1/metrics",
+                emptyMap(),
+                ExportProtocol.HTTP
+            )
+        )
+
+        // Config change
+        val newUrl = "http://my.new.url"
+        val apiKey = "the-key"
+        val newAuth = ApmServerConfiguration.Auth.ApiKey(apiKey)
+        instance.setApmServerConfiguration(ApmServerConfiguration(newUrl, newAuth))
+
+        val headers = mapOf("Authorization" to "ApiKey $apiKey")
+        assertThat(instance.getApmServerConfiguration()).isEqualTo(
+            ApmServerConfiguration(newUrl, newAuth)
+        )
+        assertThat(configurableProvider.getSpanExporterConfiguration()).isEqualTo(
+            ExporterConfiguration.Span("$newUrl/v1/traces", headers, ExportProtocol.HTTP)
+        )
+        assertThat(configurableProvider.getLogRecordExporterConfiguration()).isEqualTo(
+            ExporterConfiguration.LogRecord("$newUrl/v1/logs", headers, ExportProtocol.HTTP)
+        )
+        assertThat(configurableProvider.getMetricExporterConfiguration()).isEqualTo(
+            ExporterConfiguration.Metric(
+                "$newUrl/v1/metrics",
+                headers,
+                ExportProtocol.HTTP
             )
         )
     }

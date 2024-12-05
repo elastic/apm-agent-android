@@ -77,6 +77,21 @@ internal class ConfigurableExporterProvider(
         return metricExporter
     }
 
+    fun getSpanExporterConfiguration(): ExporterConfiguration.Span? =
+        synchronized(spanConfigurationLock) {
+            spanExporterConfiguration
+        }
+
+    fun getLogRecordExporterConfiguration(): ExporterConfiguration.LogRecord? =
+        synchronized(logRecordConfigurationLock) {
+            logRecordExporterConfiguration
+        }
+
+    fun getMetricExporterConfiguration(): ExporterConfiguration.Metric? =
+        synchronized(metricConfigurationLock) {
+            metricExporterConfiguration
+        }
+
     fun setSpanExporterConfiguration(configuration: ExporterConfiguration.Span?): Unit =
         synchronized(spanConfigurationLock) {
             if (spanExporterConfiguration != configuration) {

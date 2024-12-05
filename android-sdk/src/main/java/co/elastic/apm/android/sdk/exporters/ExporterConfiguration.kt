@@ -20,5 +20,6 @@ package co.elastic.apm.android.sdk.exporters
 
 data class ExporterConfiguration @JvmOverloads constructor(
     val url: String,
-    val headers: Map<String, String> = emptyMap()
+    val headers: Map<String, String> = emptyMap(),
+    val protocol: ExportProtocol = ExportProtocol.HTTP
 )

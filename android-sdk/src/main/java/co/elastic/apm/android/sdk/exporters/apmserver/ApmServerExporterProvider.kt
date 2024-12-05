@@ -47,7 +47,7 @@ class ApmServerExporterProvider internal constructor(
                 else -> null
             }
             val headers: Map<String, String> =
-                authHeaderValue?.let { mutableMapOf("Authorization" to it) } ?: emptyMap()
+                authHeaderValue?.let { mapOf("Authorization" to it) } ?: emptyMap()
             return headers
         }
 

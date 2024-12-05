@@ -40,6 +40,8 @@ class ApmServerExporterProvider internal constructor(
             return Builder()
         }
 
+        private const val AUTHORIZATION_HEADER_KEY = "Authorization"
+
         private fun authAsHeaders(auth: ApmServerConfiguration.Auth): Map<String, String> {
             val authHeaderValue: String? = when (auth) {
                 is ApmServerConfiguration.Auth.ApiKey -> "ApiKey ${auth.key}"
@@ -47,7 +49,7 @@ class ApmServerExporterProvider internal constructor(
                 else -> null
             }
             val headers: Map<String, String> =
-                authHeaderValue?.let { mapOf("Authorization" to it) } ?: emptyMap()
+                authHeaderValue?.let { mapOf(AUTHORIZATION_HEADER_KEY to it) } ?: emptyMap()
             return headers
         }
 
@@ -103,16 +105,22 @@ class ApmServerExporterProvider internal constructor(
             val metricsOldConfig = exporterProvider.getMetricExporterConfiguration()!!
 
             val baseUrl = configuration.url.trimEnd('/')
-            val headers = authAsHeaders(configuration.auth)
+            val newHeaders = authAsHeaders(configuration.auth)
+            val oldSpanHeaders = spansOldConfig.headers.toMutableMap()
+            val oldLogsHeaders = logsOldConfig.headers.toMutableMap()
+            val oldMetricsHeaders = metricsOldConfig.headers.toMutableMap()
+            oldSpanHeaders.remove(AUTHORIZATION_HEADER_KEY)
+            oldLogsHeaders.remove(AUTHORIZATION_HEADER_KEY)
+            oldMetricsHeaders.remove(AUTHORIZATION_HEADER_KEY)
             val spansNewConfig =
                 spansOldConfig.copy(
                     url = getTracesUrl(baseUrl, spansOldConfig.protocol),
-                    headers = spansOldConfig.headers + headers
+                    headers = oldSpanHeaders + newHeaders
                 )
             val logsNewConfig =
                 logsOldConfig.copy(
                     url = getLogsUrl(baseUrl, logsOldConfig.protocol),
-                    headers = logsOldConfig.headers + headers
+                    headers = oldLogsHeaders + newHeaders
                 )
             val metricsNewConfig =
                 metricsOldConfig.copy(
@@ -120,7 +128,7 @@ class ApmServerExporterProvider internal constructor(
                         baseUrl,
                         metricsOldConfig.protocol
                     ),
-                    headers = metricsOldConfig.headers + headers
+                    headers = oldMetricsHeaders + newHeaders
                 )
 
             // Setting new configs

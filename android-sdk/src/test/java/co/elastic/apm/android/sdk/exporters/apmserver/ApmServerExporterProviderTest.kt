@@ -281,7 +281,7 @@ class ApmServerExporterProviderTest {
     }
 
     @Test
-    fun `Verify configuration change for auth types`() {
+    fun `Verify configuration removes old auth headers`() {
         val url = "http://my.server.url"
         val token = "the-token"
 
@@ -309,13 +309,12 @@ class ApmServerExporterProviderTest {
             )
         )
 
-        // Config change
+        // Config change to remove the auth mode.
         val newUrl = "http://my.new.url"
-        val apiKey = "the-key"
-        val newAuth = ApmServerConfiguration.Auth.ApiKey(apiKey)
+        val newAuth = ApmServerConfiguration.Auth.None
         instance.setApmServerConfiguration(ApmServerConfiguration(newUrl, newAuth))
 
-        val newHeaders = mapOf("Authorization" to "ApiKey $apiKey")
+        val newHeaders = emptyMap<String, String>()
         assertThat(instance.getApmServerConfiguration()).isEqualTo(
             ApmServerConfiguration(newUrl, newAuth)
         )
@@ -378,6 +377,60 @@ class ApmServerExporterProviderTest {
 
         val newHeaders =
             mapOf("Authorization" to "ApiKey $apiKey", "Something" to "Something value")
+        assertThat(instance.getApmServerConfiguration()).isEqualTo(
+            ApmServerConfiguration(newUrl, newAuth)
+        )
+        assertThat(configurableProvider.getSpanExporterConfiguration()).isEqualTo(
+            ExporterConfiguration.Span("$newUrl/v1/traces", newHeaders, ExportProtocol.HTTP)
+        )
+        assertThat(configurableProvider.getLogRecordExporterConfiguration()).isEqualTo(
+            ExporterConfiguration.LogRecord("$newUrl/v1/logs", newHeaders, ExportProtocol.HTTP)
+        )
+        assertThat(configurableProvider.getMetricExporterConfiguration()).isEqualTo(
+            ExporterConfiguration.Metric(
+                "$newUrl/v1/metrics",
+                newHeaders,
+                ExportProtocol.HTTP
+            )
+        )
+    }
+
+    @Test
+    fun `Verify configuration auth change when removing it`() {
+        val url = "http://my.server.url"
+        val token = "the-token"
+
+        val instance = ApmServerExporterProvider.builder()
+            .setUrl(url)
+            .setAuthentication(ApmServerConfiguration.Auth.SecretToken(token))
+            .build()
+
+        assertThat(instance.getApmServerConfiguration()).isEqualTo(
+            ApmServerConfiguration(url, ApmServerConfiguration.Auth.SecretToken(token))
+        )
+        val configurableProvider = instance.exporterProvider
+        val headers = mapOf("Authorization" to "Bearer $token")
+        assertThat(configurableProvider.getSpanExporterConfiguration()).isEqualTo(
+            ExporterConfiguration.Span("$url/v1/traces", headers, ExportProtocol.HTTP)
+        )
+        assertThat(configurableProvider.getLogRecordExporterConfiguration()).isEqualTo(
+            ExporterConfiguration.LogRecord("$url/v1/logs", headers, ExportProtocol.HTTP)
+        )
+        assertThat(configurableProvider.getMetricExporterConfiguration()).isEqualTo(
+            ExporterConfiguration.Metric(
+                "$url/v1/metrics",
+                headers,
+                ExportProtocol.HTTP
+            )
+        )
+
+        // Config change
+        val newUrl = "http://my.new.url"
+        val apiKey = "the-key"
+        val newAuth = ApmServerConfiguration.Auth.ApiKey(apiKey)
+        instance.setApmServerConfiguration(ApmServerConfiguration(newUrl, newAuth))
+
+        val newHeaders = mapOf("Authorization" to "ApiKey $apiKey")
         assertThat(instance.getApmServerConfiguration()).isEqualTo(
             ApmServerConfiguration(newUrl, newAuth)
         )

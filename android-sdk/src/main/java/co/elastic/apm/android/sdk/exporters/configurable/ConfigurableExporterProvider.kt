@@ -20,6 +20,8 @@ package co.elastic.apm.android.sdk.exporters.configurable
 
 import androidx.annotation.GuardedBy
 import co.elastic.apm.android.sdk.exporters.ExporterProvider
+import co.elastic.apm.android.sdk.exporters.configuration.ExportProtocol
+import co.elastic.apm.android.sdk.exporters.configuration.ExporterConfiguration
 import io.opentelemetry.exporter.otlp.http.logs.OtlpHttpLogRecordExporter
 import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter
 import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter

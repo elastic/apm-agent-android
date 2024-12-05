@@ -18,8 +18,8 @@
  */
 package co.elastic.apm.android.sdk.exporters.apmserver
 
-import co.elastic.apm.android.sdk.exporters.configurable.ExportProtocol
-import co.elastic.apm.android.sdk.exporters.configurable.ExporterConfiguration
+import co.elastic.apm.android.sdk.exporters.configuration.ExportProtocol
+import co.elastic.apm.android.sdk.exporters.configuration.ExporterConfiguration
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows

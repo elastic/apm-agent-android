@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.exporters.configurable
+package co.elastic.apm.android.sdk.exporters.configuration
 
 sealed class ExporterConfiguration(
     open val url: String,

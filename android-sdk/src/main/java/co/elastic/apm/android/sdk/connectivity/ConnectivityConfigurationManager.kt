@@ -14,7 +14,7 @@ open class ConnectivityConfigurationManager(initialValue: ConnectivityConfigurat
         return value.get()
     }
 
-    protected fun set(value: ConnectivityConfiguration) = synchronized(setLock) {
+    fun set(value: ConnectivityConfiguration) = synchronized(setLock) {
         if (this.value.get() != value) {
             this.value.set(value)
             notifyChange()

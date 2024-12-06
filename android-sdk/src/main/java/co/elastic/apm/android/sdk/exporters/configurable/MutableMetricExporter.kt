@@ -30,7 +30,7 @@ internal class MutableMetricExporter : MetricExporter {
 
     override fun getAggregationTemporality(instrumentType: InstrumentType): AggregationTemporality {
         return delegate.get()?.getAggregationTemporality(instrumentType)
-            ?: AggregationTemporality.CUMULATIVE
+            ?: AggregationTemporality.DELTA
     }
 
     override fun export(metrics: MutableCollection<MetricData>): CompletableResultCode {
@@ -43,6 +43,10 @@ internal class MutableMetricExporter : MetricExporter {
 
     override fun shutdown(): CompletableResultCode {
         return delegate.get()?.shutdown() ?: CompletableResultCode.ofSuccess()
+    }
+
+    fun getDelegate(): MetricExporter? {
+        return delegate.get()
     }
 
     fun setDelegate(value: MetricExporter?) {

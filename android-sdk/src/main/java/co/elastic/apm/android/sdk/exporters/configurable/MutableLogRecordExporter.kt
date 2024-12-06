@@ -38,6 +38,10 @@ internal class MutableLogRecordExporter : LogRecordExporter {
         return delegate.get()?.shutdown() ?: CompletableResultCode.ofSuccess()
     }
 
+    fun getDelegate(): LogRecordExporter? {
+        return delegate.get()
+    }
+
     fun setDelegate(value: LogRecordExporter?) {
         val old = delegate.get()
         delegate.set(value)

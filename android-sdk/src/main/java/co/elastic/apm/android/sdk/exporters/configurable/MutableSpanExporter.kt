@@ -38,6 +38,10 @@ internal class MutableSpanExporter : SpanExporter {
         return delegate.get()?.shutdown() ?: CompletableResultCode.ofSuccess()
     }
 
+    fun getDelegate(): SpanExporter? {
+        return delegate.get()
+    }
+
     fun setDelegate(value: SpanExporter?) {
         val old = delegate.get()
         delegate.set(value)

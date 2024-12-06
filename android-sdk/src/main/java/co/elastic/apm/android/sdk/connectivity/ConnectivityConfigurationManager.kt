@@ -4,7 +4,7 @@ import co.elastic.apm.android.sdk.tools.provider.Provider
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicReference
 
-class ConnectivityConfigurationManager(initialValue: ConnectivityConfiguration) :
+open class ConnectivityConfigurationManager(initialValue: ConnectivityConfiguration) :
     Provider<ConnectivityConfiguration> {
     private val value = AtomicReference(initialValue)
     private val listeners = CopyOnWriteArrayList<Listener>()
@@ -14,7 +14,7 @@ class ConnectivityConfigurationManager(initialValue: ConnectivityConfiguration) 
         return value.get()
     }
 
-    fun set(value: ConnectivityConfiguration) = synchronized(setLock) {
+    protected fun set(value: ConnectivityConfiguration) = synchronized(setLock) {
         if (this.value.get() != value) {
             this.value.set(value)
             notifyChange()

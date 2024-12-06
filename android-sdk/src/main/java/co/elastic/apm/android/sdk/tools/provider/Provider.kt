@@ -18,6 +18,6 @@
  */
 package co.elastic.apm.android.sdk.tools.provider
 
-interface Provider<T> {
+fun interface Provider<T> {
     fun get(): T
 }

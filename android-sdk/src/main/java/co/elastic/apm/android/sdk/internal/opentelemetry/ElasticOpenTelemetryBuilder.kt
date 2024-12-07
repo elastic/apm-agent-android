@@ -164,8 +164,9 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
             .put(ResourceAttributes.TELEMETRY_SDK_LANGUAGE, "java")
             .build()
         val openTelemetryBuilder = OpenTelemetrySdk.builder()
-        val spanExporter = exporterProvider.getSpanExporter()
-            ?.also { Interceptor.composite(spanExporterInterceptors).intercept(it) }
+        val spanExporter = exporterProvider.getSpanExporter()?.also {
+            Interceptor.composite(spanExporterInterceptors).intercept(it)
+        }
         val logRecordExporter = exporterProvider.getLogRecordExporter()?.also {
             Interceptor.composite(logRecordExporterInterceptors).intercept(it)
         }

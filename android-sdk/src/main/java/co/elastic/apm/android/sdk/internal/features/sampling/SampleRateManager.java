@@ -39,7 +39,7 @@ public final class SampleRateManager implements SessionObserver, SamplingPolicy 
     private final SampleRateConfiguration sampleRateConfiguration;
     private final NumberTools numberTools;
     private final PreferencesService preferencesService;
-    private boolean allowSignalExporting = false;
+    private volatile boolean allowSignalExporting = false;
     private static final String ENABLE_SIGNAL_EXPORTING_KEY = "sampling_exporting_enabled";
 
     public SampleRateManager() {

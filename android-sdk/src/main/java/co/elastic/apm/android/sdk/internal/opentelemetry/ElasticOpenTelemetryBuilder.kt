@@ -26,6 +26,8 @@ import co.elastic.apm.android.sdk.BuildConfig
 import co.elastic.apm.android.sdk.attributes.common.CommonAttributesInterceptor
 import co.elastic.apm.android.sdk.attributes.common.SpanAttributesInterceptor
 import co.elastic.apm.android.sdk.exporters.ExporterProvider
+import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingConfiguration
+import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingManager
 import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElasticClock
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.logs.LogRecordAttributesProcessor
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.spans.SpanAttributesProcessor
@@ -65,6 +67,7 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
     private var spanExporterInterceptors = mutableListOf<Interceptor<SpanExporter>>()
     private var logRecordExporterInterceptors = mutableListOf<Interceptor<LogRecordExporter>>()
     private var metricExporterInterceptors = mutableListOf<Interceptor<MetricExporter>>()
+    private var diskBufferingConfiguration = DiskBufferingConfiguration(true)
     private var exporterProvider: ExporterProvider = ExporterProvider.noop()
 
     fun setServiceName(value: String): B {
@@ -132,12 +135,17 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
         return this as B
     }
 
+    fun setDiskBufferingConfiguration(value: DiskBufferingConfiguration): B {
+        diskBufferingConfiguration = value
+        return this as B
+    }
+
     protected open fun setExporterProvider(value: ExporterProvider): B {
         exporterProvider = value
         return this as B
     }
 
-    protected fun buildOpenTelemetry(): OpenTelemetrySdk {
+    protected fun buildOpenTelemetry(): ElasticOpenTelemetryConfiguration {
         val commonAttributesInterceptor = CommonAttributesInterceptor(sessionProvider)
         addSpanAttributesInterceptor(commonAttributesInterceptor)
         addSpanAttributesInterceptor(SpanAttributesInterceptor())
@@ -163,6 +171,10 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
             .put(ResourceAttributes.TELEMETRY_SDK_LANGUAGE, "java")
             .build()
         val openTelemetryBuilder = OpenTelemetrySdk.builder()
+        val diskBufferingManager = DiskBufferingManager(diskBufferingConfiguration)
+        addSpanExporterInterceptor(diskBufferingManager::interceptSpanExporter)
+        addLogRecordExporterInterceptor(diskBufferingManager::interceptLogRecordExporter)
+        addMetricExporterInterceptor(diskBufferingManager::interceptMetricExporter)
         val spanExporter = exporterProvider.getSpanExporter()?.also {
             Interceptor.composite(spanExporterInterceptors).intercept(it)
         }
@@ -172,6 +184,7 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
         val metricExporter = exporterProvider.getMetricExporter()?.also {
             Interceptor.composite(metricExporterInterceptors).intercept(it)
         }
+        diskBufferingManager.finishedIntercepting()
         processorFactory.createSpanProcessor(spanExporter)?.let {
             openTelemetryBuilder.setTracerProvider(
                 SdkTracerProvider.builder()
@@ -215,7 +228,7 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
                     .build()
             )
         }
-        return openTelemetryBuilder.build()
+        return ElasticOpenTelemetryConfiguration(openTelemetryBuilder.build(), diskBufferingManager)
     }
 
     private fun getVersionCode(): Int {
@@ -238,4 +251,9 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
         descriptionBuilder.append(Build.VERSION.INCREMENTAL)
         return descriptionBuilder.toString()
     }
+
+    data class ElasticOpenTelemetryConfiguration(
+        val openTelemetrySdk: OpenTelemetrySdk,
+        val diskBufferingManager: DiskBufferingManager
+    )
 }

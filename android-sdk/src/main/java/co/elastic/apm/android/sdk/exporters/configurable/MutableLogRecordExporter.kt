@@ -23,7 +23,7 @@ import io.opentelemetry.sdk.logs.data.LogRecordData
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import java.util.concurrent.atomic.AtomicReference
 
-internal class MutableLogRecordExporter : LogRecordExporter {
+class MutableLogRecordExporter : LogRecordExporter {
     private val delegate = AtomicReference<LogRecordExporter?>()
 
     override fun export(logs: MutableCollection<LogRecordData>): CompletableResultCode {

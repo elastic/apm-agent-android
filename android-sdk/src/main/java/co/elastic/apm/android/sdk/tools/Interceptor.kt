@@ -18,7 +18,7 @@
  */
 package co.elastic.apm.android.sdk.tools
 
-interface Interceptor<T> {
+fun interface Interceptor<T> {
 
     companion object {
         @JvmStatic

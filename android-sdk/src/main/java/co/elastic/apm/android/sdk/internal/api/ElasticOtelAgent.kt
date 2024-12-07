@@ -19,11 +19,15 @@
 package co.elastic.apm.android.sdk.internal.api
 
 import android.app.Application
+import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.apm.android.sdk.internal.services.ServiceManager
 import io.opentelemetry.api.OpenTelemetry
 import java.io.Closeable
 
-abstract class ElasticOtelAgent(application: Application) : Closeable {
+abstract class ElasticOtelAgent(
+    application: Application,
+    private val diskBufferingConfiguration: DiskBufferingConfiguration
+) : Closeable {
 
     init {
         ServiceManager.initialize(application)

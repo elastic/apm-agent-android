@@ -25,7 +25,7 @@ import io.opentelemetry.sdk.metrics.data.MetricData
 import io.opentelemetry.sdk.metrics.export.MetricExporter
 import java.util.concurrent.atomic.AtomicReference
 
-internal class MutableMetricExporter : MetricExporter {
+class MutableMetricExporter : MetricExporter {
     private val delegate = AtomicReference<MetricExporter?>()
 
     override fun getAggregationTemporality(instrumentType: InstrumentType): AggregationTemporality {

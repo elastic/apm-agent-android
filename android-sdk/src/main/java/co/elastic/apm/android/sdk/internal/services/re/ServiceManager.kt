@@ -1,6 +1,7 @@
 package co.elastic.apm.android.sdk.internal.services.re
 
 import android.app.Application
+import co.elastic.apm.android.sdk.internal.services.re.appinfo.AppInfoService
 import co.elastic.apm.android.sdk.internal.services.re.preferences.PreferencesService
 import java.io.Closeable
 
@@ -16,6 +17,10 @@ class ServiceManager(
         return getService(PreferencesService::class.java)
     }
 
+    fun getAppInfoService(): AppInfoService {
+        return getService(AppInfoService::class.java)
+    }
+
     override fun close() {
         services.values.forEach { it.stop() }
     }
@@ -27,8 +32,9 @@ class ServiceManager(
 
     companion object {
         fun create(application: Application): ServiceManager {
-            val services = listOf<Service>(
-                PreferencesService(application)
+            val services = listOf(
+                PreferencesService(application),
+                AppInfoService(application)
             )
             return ServiceManager(services.associateBy { it.javaClass })
         }

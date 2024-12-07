@@ -3,6 +3,7 @@ package co.elastic.apm.android.sdk.features.diskbuffering
 import co.elastic.apm.android.sdk.exporters.configurable.MutableLogRecordExporter
 import co.elastic.apm.android.sdk.exporters.configurable.MutableMetricExporter
 import co.elastic.apm.android.sdk.exporters.configurable.MutableSpanExporter
+import co.elastic.apm.android.sdk.internal.services.re.ServiceManager
 import io.opentelemetry.contrib.disk.buffering.SpanFromDiskExporter
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.metrics.export.MetricExporter
@@ -35,7 +36,7 @@ class DiskBufferingManager(private val configuration: DiskBufferingConfiguration
         return metricExporter!!
     }
 
-    internal fun finishedIntercepting() {
+    internal fun initialize(serviceManager: ServiceManager) {
         val builder = SignalFromDiskExporter.builder()
 
         TODO()

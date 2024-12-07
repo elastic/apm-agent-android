@@ -50,7 +50,7 @@ class TestElasticOtelAgent(application: Application, private val openTelemetry: 
         }
 
         fun build(): TestElasticOtelAgent {
-            return TestElasticOtelAgent(application, buildOpenTelemetry())
+            return TestElasticOtelAgent(application, buildConfiguration())
         }
     }
 }

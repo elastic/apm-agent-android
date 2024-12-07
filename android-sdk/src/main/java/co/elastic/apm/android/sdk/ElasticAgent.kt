@@ -48,7 +48,7 @@ class ElasticAgent private constructor(
         ElasticOpenTelemetryBuilder<Builder>(application) {
 
         fun build(): ElasticAgent {
-            return ElasticAgent(application, buildOpenTelemetry())
+            return ElasticAgent(application, buildConfiguration())
         }
     }
 }

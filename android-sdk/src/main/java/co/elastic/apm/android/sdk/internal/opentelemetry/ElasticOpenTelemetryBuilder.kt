@@ -57,10 +57,10 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
         PreferencesCachedStringProvider("device_id") { UUID.randomUUID().toString() }
     private var sessionProvider: SessionProvider = SessionProvider.getDefault()
     private var clock: Clock = ElasticClock.create()
-    private var exporterProvider: ExporterProvider = ExporterProvider.noop()
     private var processorFactory: ProcessorFactory = ProcessorFactory.getDefault()
     private var spanAttributesInterceptors = mutableListOf<Interceptor<Attributes>>()
     private var logRecordAttributesInterceptors = mutableListOf<Interceptor<Attributes>>()
+    private var exporterProvider: ExporterProvider = ExporterProvider.noop()
 
     fun setServiceName(value: String): B {
         serviceName = value

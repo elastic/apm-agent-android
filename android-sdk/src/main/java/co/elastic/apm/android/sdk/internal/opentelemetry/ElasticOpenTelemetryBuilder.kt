@@ -35,7 +35,6 @@ import co.elastic.apm.android.sdk.session.SessionProvider
 import co.elastic.apm.android.sdk.tools.Interceptor
 import co.elastic.apm.android.sdk.tools.PreferencesCachedStringProvider
 import co.elastic.apm.android.sdk.tools.provider.StringProvider
-import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.sdk.OpenTelemetrySdk
@@ -138,7 +137,7 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
         return this as B
     }
 
-    protected fun buildOpenTelemetry(): OpenTelemetry {
+    protected fun buildOpenTelemetry(): OpenTelemetrySdk {
         val commonAttributesInterceptor = CommonAttributesInterceptor(sessionProvider)
         addSpanAttributesInterceptor(commonAttributesInterceptor)
         addSpanAttributesInterceptor(SpanAttributesInterceptor())

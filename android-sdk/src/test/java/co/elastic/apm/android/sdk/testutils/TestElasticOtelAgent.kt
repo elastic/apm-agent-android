@@ -23,12 +23,17 @@ import co.elastic.apm.android.sdk.exporters.ExporterProvider
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
 import co.elastic.apm.android.sdk.internal.opentelemetry.ElasticOpenTelemetryBuilder
 import io.opentelemetry.api.OpenTelemetry
+import io.opentelemetry.sdk.OpenTelemetrySdk
 
-class TestElasticOtelAgent(application: Application, private val openTelemetry: OpenTelemetry) :
+class TestElasticOtelAgent(application: Application, private val openTelemetry: OpenTelemetrySdk) :
     ElasticOtelAgent(application) {
 
     override fun getOpenTelemetry(): OpenTelemetry {
         return openTelemetry
+    }
+
+    override fun onClose() {
+        openTelemetry.close()
     }
 
     companion object {

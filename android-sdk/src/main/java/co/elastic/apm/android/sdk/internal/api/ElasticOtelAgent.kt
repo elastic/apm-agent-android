@@ -21,8 +21,9 @@ package co.elastic.apm.android.sdk.internal.api
 import android.app.Application
 import co.elastic.apm.android.sdk.internal.services.ServiceManager
 import io.opentelemetry.api.OpenTelemetry
+import java.io.Closeable
 
-abstract class ElasticOtelAgent(application: Application) {
+abstract class ElasticOtelAgent(application: Application) : Closeable {
 
     init {
         ServiceManager.initialize(application)
@@ -30,4 +31,11 @@ abstract class ElasticOtelAgent(application: Application) {
     }
 
     abstract fun getOpenTelemetry(): OpenTelemetry
+
+    protected abstract fun onClose()
+
+    final override fun close() {
+        ServiceManager.get().stop()
+        onClose()
+    }
 }

@@ -83,6 +83,7 @@ class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory {
                 }
             }
         } finally {
+            agent.close()
             ServiceManager.resetForTest()
         }
     }

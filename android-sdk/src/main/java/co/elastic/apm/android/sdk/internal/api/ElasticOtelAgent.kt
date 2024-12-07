@@ -16,34 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk
+package co.elastic.apm.android.sdk.internal.api
 
 import android.app.Application
-import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
-import co.elastic.apm.android.sdk.internal.opentelemetry.ElasticOpenTelemetryBuilder
+import co.elastic.apm.android.sdk.internal.services.ServiceManager
 import io.opentelemetry.api.OpenTelemetry
 
-class ElasticAgent private constructor(
-    application: Application,
-    private val openTelemetry: OpenTelemetry
-) : ElasticOtelAgent(application) {
+abstract class ElasticOtelAgent(application: Application) {
 
-    override fun getOpenTelemetry(): OpenTelemetry {
-        return openTelemetry
+    init {
+        ServiceManager.initialize(application)
+        ServiceManager.get().start()
     }
 
-    companion object {
-        @JvmStatic
-        fun builder(application: Application): Builder {
-            return Builder(application)
-        }
-    }
-
-    class Builder internal constructor(private val application: Application) :
-        ElasticOpenTelemetryBuilder<Builder>(application) {
-
-        fun build(): ElasticAgent {
-            return ElasticAgent(application, buildOpenTelemetry())
-        }
-    }
+    abstract fun getOpenTelemetry(): OpenTelemetry
 }

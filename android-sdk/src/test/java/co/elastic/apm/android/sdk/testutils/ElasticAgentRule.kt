@@ -18,8 +18,8 @@
  */
 package co.elastic.apm.android.sdk.testutils
 
-import co.elastic.apm.android.sdk.ElasticAgent
 import co.elastic.apm.android.sdk.exporters.ExporterProvider
+import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
 import co.elastic.apm.android.sdk.internal.services.ServiceManager
 import co.elastic.apm.android.sdk.processors.ProcessorFactory
 import co.elastic.apm.android.sdk.session.Session
@@ -54,10 +54,10 @@ class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory {
     private lateinit var metricReader: MetricReader
     private lateinit var metricsExporter: InMemoryMetricExporter
     private lateinit var logsExporter: InMemoryLogRecordExporter
-    private lateinit var agent: ElasticAgent
+    private lateinit var agent: ElasticOtelAgent
     val openTelemetry: OpenTelemetry
         get() {
-            return agent.openTelemetry
+            return agent.getOpenTelemetry()
         }
 
     companion object {
@@ -93,7 +93,7 @@ class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory {
         deploymentEnvironment: String = "test",
         clock: Clock = Clock.getDefault()
     ) {
-        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
+        agent = TestElasticOtelAgent.builder(RuntimeEnvironment.getApplication())
             .setServiceName(serviceName)
             .setServiceVersion(serviceVersion)
             .setDeploymentEnvironment(deploymentEnvironment)
@@ -107,19 +107,19 @@ class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory {
 
     fun sendLog(body: String = "", builderVisitor: LogRecordBuilder.() -> Unit = {}) {
         val logRecordBuilder =
-            agent.openTelemetry.logsBridge.get("LoggerScope").logRecordBuilder()
+            agent.getOpenTelemetry().logsBridge.get("LoggerScope").logRecordBuilder()
         builderVisitor(logRecordBuilder)
         logRecordBuilder.setBody(body).emit()
     }
 
     fun sendSpan(name: String = "SomeSpan", builderVisitor: SpanBuilder.() -> Unit = {}) {
-        val spanBuilder = agent.openTelemetry.getTracer("SomeTracer").spanBuilder(name)
+        val spanBuilder = agent.getOpenTelemetry().getTracer("SomeTracer").spanBuilder(name)
         builderVisitor(spanBuilder)
         spanBuilder.startSpan().end()
     }
 
     fun sendMetricCounter(name: String = "Counter") {
-        agent.openTelemetry.getMeter("MeterScope").counterBuilder(name).build().add(1)
+        agent.getOpenTelemetry().getMeter("MeterScope").counterBuilder(name).build().add(1)
     }
 
     fun getFinishedSpans(): List<SpanData> {

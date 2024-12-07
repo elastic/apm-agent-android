@@ -16,34 +16,36 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk
+package co.elastic.apm.android.sdk.testutils
 
 import android.app.Application
+import co.elastic.apm.android.sdk.exporters.ExporterProvider
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
 import co.elastic.apm.android.sdk.internal.opentelemetry.ElasticOpenTelemetryBuilder
 import io.opentelemetry.api.OpenTelemetry
 
-class ElasticAgent private constructor(
-    application: Application,
-    private val openTelemetry: OpenTelemetry
-) : ElasticOtelAgent(application) {
+class TestElasticOtelAgent(application: Application, private val openTelemetry: OpenTelemetry) :
+    ElasticOtelAgent(application) {
 
     override fun getOpenTelemetry(): OpenTelemetry {
         return openTelemetry
     }
 
     companion object {
-        @JvmStatic
         fun builder(application: Application): Builder {
             return Builder(application)
         }
     }
 
-    class Builder internal constructor(private val application: Application) :
+    class Builder(private val application: Application) :
         ElasticOpenTelemetryBuilder<Builder>(application) {
 
-        fun build(): ElasticAgent {
-            return ElasticAgent(application, buildOpenTelemetry())
+        public override fun setExporterProvider(value: ExporterProvider): Builder {
+            return super.setExporterProvider(value)
+        }
+
+        fun build(): TestElasticOtelAgent {
+            return TestElasticOtelAgent(application, buildOpenTelemetry())
         }
     }
 }

@@ -164,7 +164,15 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
             .put(ResourceAttributes.TELEMETRY_SDK_LANGUAGE, "java")
             .build()
         val openTelemetryBuilder = OpenTelemetrySdk.builder()
-        processorFactory.createSpanProcessor(exporterProvider.getSpanExporter())?.let {
+        val spanExporter = exporterProvider.getSpanExporter()
+            ?.also { Interceptor.composite(spanExporterInterceptors).intercept(it) }
+        val logRecordExporter = exporterProvider.getLogRecordExporter()?.also {
+            Interceptor.composite(logRecordExporterInterceptors).intercept(it)
+        }
+        val metricExporter = exporterProvider.getMetricExporter()?.also {
+            Interceptor.composite(metricExporterInterceptors).intercept(it)
+        }
+        processorFactory.createSpanProcessor(spanExporter)?.let {
             openTelemetryBuilder.setTracerProvider(
                 SdkTracerProvider.builder()
                     .setClock(clock)
@@ -181,7 +189,7 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
                     .build()
             )
         }
-        processorFactory.createLogRecordProcessor(exporterProvider.getLogRecordExporter())
+        processorFactory.createLogRecordProcessor(logRecordExporter)
             ?.let {
                 openTelemetryBuilder.setLoggerProvider(
                     SdkLoggerProvider.builder()
@@ -198,7 +206,7 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
                         .build()
                 )
             }
-        processorFactory.createMetricReader(exporterProvider.getMetricExporter())?.let {
+        processorFactory.createMetricReader(metricExporter)?.let {
             openTelemetryBuilder.setMeterProvider(
                 SdkMeterProvider.builder()
                     .setClock(clock)

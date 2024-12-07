@@ -41,9 +41,12 @@ import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.sdk.OpenTelemetrySdk
 import io.opentelemetry.sdk.common.Clock
 import io.opentelemetry.sdk.logs.SdkLoggerProvider
+import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.metrics.SdkMeterProvider
+import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.resources.Resource
 import io.opentelemetry.sdk.trace.SdkTracerProvider
+import io.opentelemetry.sdk.trace.export.SpanExporter
 import io.opentelemetry.semconv.ResourceAttributes
 import java.util.UUID
 
@@ -60,6 +63,9 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
     private var processorFactory: ProcessorFactory = ProcessorFactory.getDefault()
     private var spanAttributesInterceptors = mutableListOf<Interceptor<Attributes>>()
     private var logRecordAttributesInterceptors = mutableListOf<Interceptor<Attributes>>()
+    private var spanExporterInterceptors = mutableListOf<Interceptor<SpanExporter>>()
+    private var logRecordExporterInterceptors = mutableListOf<Interceptor<LogRecordExporter>>()
+    private var metricExporterInterceptors = mutableListOf<Interceptor<MetricExporter>>()
     private var exporterProvider: ExporterProvider = ExporterProvider.noop()
 
     fun setServiceName(value: String): B {
@@ -109,6 +115,21 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
 
     fun addLogRecordAttributesInterceptor(value: Interceptor<Attributes>): B {
         logRecordAttributesInterceptors.add(value)
+        return this as B
+    }
+
+    fun addSpanExporterInterceptor(value: Interceptor<SpanExporter>): B {
+        spanExporterInterceptors.add(value)
+        return this as B
+    }
+
+    fun addLogRecordExporterInterceptor(value: Interceptor<LogRecordExporter>): B {
+        logRecordExporterInterceptors.add(value)
+        return this as B
+    }
+
+    fun addMetricExporterInterceptor(value: Interceptor<MetricExporter>): B {
+        metricExporterInterceptors.add(value)
         return this as B
     }
 

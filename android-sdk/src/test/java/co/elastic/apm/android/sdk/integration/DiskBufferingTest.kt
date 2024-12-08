@@ -20,12 +20,12 @@ package co.elastic.apm.android.sdk.integration
 
 import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
-import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import co.elastic.apm.android.sdk.internal.services.kotlin.appinfo.AppInfoService
-import co.elastic.apm.android.sdk.internal.services.kotlin.preferences.PreferencesService
 import co.elastic.apm.android.sdk.testutils.ElasticAgentRule
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.spyk
+import java.io.IOException
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -40,11 +40,6 @@ class DiskBufferingTest {
 
     @Test
     fun `Disk buffering enabled, happy path`() {
-        val preferencesService = mockk<PreferencesService>()
-        val appInfoService = mockk<AppInfoService>()
-        val serviceManager = mockk<ServiceManager>()
-        every { serviceManager.getPreferencesService() }.returns(preferencesService)
-        every { serviceManager.getAppInfoService() }.returns(appInfoService)
         val configuration = DiskBufferingConfiguration(true)
         configuration.maxFileAgeForWrite = 500
         configuration.minFileAgeForRead = 501
@@ -72,6 +67,47 @@ class DiskBufferingTest {
         config!!.diskBufferingManager.exportFromDisk()
 
         // Now we should see the previously-stored signals exported.
+        assertThat(agentRule.getFinishedSpans()).hasSize(1)
+        assertThat(agentRule.getFinishedLogRecords()).hasSize(1)
+        assertThat(agentRule.getFinishedMetrics()).hasSize(1)
+    }
+
+    @Test
+    fun `Disk buffering enabled with io exception`() {
+        val appInfoService = mockk<AppInfoService>()
+        every {
+            appInfoService.getCacheDir()
+            appInfoService.getAvailableCacheSpace(any())
+        }.throws(IOException())
+        val configuration = DiskBufferingConfiguration(true)
+        agentRule.initialize(diskBufferingConfiguration = configuration) {
+            val spy = spyk(it)
+            val serviceManagerSpy = spyk(it.serviceManager)
+            every { spy.serviceManager }.returns(serviceManagerSpy)
+            every { serviceManagerSpy.getAppInfoService() }.returns(appInfoService)
+            spy
+        }
+
+        agentRule.sendSpan()
+        agentRule.sendLog()
+        agentRule.sendMetricCounter()
+
+        // The signals should have gotten exported right away.
+        assertThat(agentRule.getFinishedSpans()).hasSize(1)
+        assertThat(agentRule.getFinishedLogRecords()).hasSize(1)
+        assertThat(agentRule.getFinishedMetrics()).hasSize(1)
+    }
+
+    @Test
+    fun `Disk buffering disabled`() {
+        val configuration = DiskBufferingConfiguration(false)
+        agentRule.initialize(diskBufferingConfiguration = configuration) { it }
+
+        agentRule.sendSpan()
+        agentRule.sendLog()
+        agentRule.sendMetricCounter()
+
+        // The signals should have gotten exported right away.
         assertThat(agentRule.getFinishedSpans()).hasSize(1)
         assertThat(agentRule.getFinishedLogRecords()).hasSize(1)
         assertThat(agentRule.getFinishedMetrics()).hasSize(1)

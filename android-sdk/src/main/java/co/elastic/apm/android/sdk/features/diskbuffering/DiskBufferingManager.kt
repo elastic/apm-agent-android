@@ -154,11 +154,19 @@ class DiskBufferingManager(private val configuration: DiskBufferingConfiguration
 
     private fun createStorageConfiguration(serviceManager: ServiceManager): StorageConfiguration {
         val diskManager = DiskManager.create(serviceManager, configuration)
-        return StorageConfiguration.builder()
+        val builder = StorageConfiguration.builder()
             .setMaxFileSize(diskManager.getMaxCacheFileSize())
             .setMaxFolderSize(diskManager.getMaxFolderSize())
             .setTemporaryFileProvider(SimpleTemporaryFileProvider(diskManager.getTemporaryDir()))
             .setRootDir(diskManager.getSignalsCacheDir())
-            .build()
+
+        configuration.maxFileAgeForWrite?.let {
+            builder.setMaxFileAgeForWriteMillis(it)
+        }
+        configuration.minFileAgeForRead?.let {
+            builder.setMinFileAgeForReadMillis(it)
+        }
+
+        return builder.build()
     }
 }

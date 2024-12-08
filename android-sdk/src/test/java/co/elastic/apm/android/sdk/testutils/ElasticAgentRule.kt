@@ -19,6 +19,7 @@
 package co.elastic.apm.android.sdk.testutils
 
 import co.elastic.apm.android.sdk.exporters.ExporterProvider
+import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
 import co.elastic.apm.android.sdk.processors.ProcessorFactory
 import co.elastic.apm.android.sdk.session.Session
@@ -92,6 +93,7 @@ class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory,
         serviceVersion: String = "0.0.0",
         deploymentEnvironment: String = "test",
         clock: Clock = Clock.getDefault(),
+        diskBufferingConfiguration: DiskBufferingConfiguration = DiskBufferingConfiguration(true),
         configurationInterceptor: Interceptor<ElasticOtelAgent.Configuration> = this
     ) {
         spanExporter = InMemorySpanExporter.create()
@@ -107,6 +109,7 @@ class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory,
             .setClock(clock)
             .setExporterProvider(this)
             .setProcessorFactory(this)
+            .setDiskBufferingConfiguration(diskBufferingConfiguration)
             .apply { configurationInterceptors.add(configurationInterceptor) }
             .build()
     }

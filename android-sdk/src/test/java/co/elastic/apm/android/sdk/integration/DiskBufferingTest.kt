@@ -18,6 +18,7 @@
  */
 package co.elastic.apm.android.sdk.integration
 
+import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import co.elastic.apm.android.sdk.internal.services.kotlin.appinfo.AppInfoService
@@ -27,10 +28,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
@@ -40,14 +39,6 @@ class DiskBufferingTest {
     @get:Rule
     val agentRule = ElasticAgentRule()
 
-    @get:Rule
-    val tempFolder = TemporaryFolder()
-
-    @Before
-    fun setUp() {
-
-    }
-
     @Test
     fun `Disk buffering enabled, happy path`() {
         val preferencesService = mockk<PreferencesService>()
@@ -55,7 +46,10 @@ class DiskBufferingTest {
         val serviceManager = mockk<ServiceManager>()
         every { serviceManager.getPreferencesService() }.returns(preferencesService)
         every { serviceManager.getAppInfoService() }.returns(appInfoService)
-        agentRule.initialize {
+        val configuration = DiskBufferingConfiguration(true)
+        configuration.maxFileAgeForWrite = 500
+        configuration.minFileAgeForRead = 501
+        agentRule.initialize(diskBufferingConfiguration = configuration) {
             val spy = spyk(it)
             every { spy.serviceManager }.returns(serviceManager)
             it
@@ -73,9 +67,9 @@ class DiskBufferingTest {
         agentRule.close()
 
         // Re-init
-        Thread.sleep(2000)
+        Thread.sleep(1000)
         var config: ElasticOtelAgent.Configuration? = null
-        agentRule.initialize {
+        agentRule.initialize(diskBufferingConfiguration = configuration) {
             val spy = spyk(it)
             every { spy.serviceManager }.returns(serviceManager)
             config = it

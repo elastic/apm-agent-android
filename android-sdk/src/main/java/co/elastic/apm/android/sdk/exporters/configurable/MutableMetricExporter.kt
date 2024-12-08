@@ -50,10 +50,6 @@ class MutableMetricExporter : MetricExporter {
     }
 
     fun setDelegate(value: MetricExporter?) {
-        val old = delegate.get()
         delegate.set(value)
-        if (value != old) {
-            old?.shutdown()
-        }
     }
 }

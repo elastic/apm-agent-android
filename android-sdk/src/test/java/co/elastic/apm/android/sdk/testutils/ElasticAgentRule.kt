@@ -54,10 +54,10 @@ import org.robolectric.RuntimeEnvironment
 
 class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory,
     Interceptor<ElasticOtelAgent.Configuration> {
-    private lateinit var spanExporter: InMemorySpanExporter
-    private lateinit var metricReader: MetricReader
-    private lateinit var metricsExporter: InMemoryMetricExporter
-    private lateinit var logsExporter: InMemoryLogRecordExporter
+    private var spanExporter: InMemorySpanExporter? = null
+    private var metricReader: MetricReader? = null
+    private var metricsExporter: InMemoryMetricExporter? = null
+    private var logsExporter: InMemoryLogRecordExporter? = null
     var agent: ElasticOtelAgent? = null
     val openTelemetry: OpenTelemetry
         get() {
@@ -76,10 +76,6 @@ class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory,
     }
 
     override fun apply(base: Statement, description: Description): Statement {
-        spanExporter = InMemorySpanExporter.create()
-        metricsExporter = InMemoryMetricExporter.create()
-        logsExporter = InMemoryLogRecordExporter.create()
-
         try {
             return object : Statement() {
                 override fun evaluate() {
@@ -87,7 +83,7 @@ class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory,
                 }
             }
         } finally {
-            agent?.close()
+            close()
         }
     }
 
@@ -98,6 +94,10 @@ class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory,
         clock: Clock = Clock.getDefault(),
         configurationInterceptor: Interceptor<ElasticOtelAgent.Configuration> = this
     ) {
+        spanExporter = InMemorySpanExporter.create()
+        metricsExporter = InMemoryMetricExporter.create()
+        logsExporter = InMemoryLogRecordExporter.create()
+
         agent = TestElasticOtelAgent.builder(RuntimeEnvironment.getApplication())
             .setServiceName(serviceName)
             .setServiceVersion(serviceVersion)
@@ -129,21 +129,21 @@ class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory,
     }
 
     fun getFinishedSpans(): List<SpanData> {
-        val list = ArrayList(spanExporter.finishedSpanItems)
-        spanExporter.reset()
+        val list = ArrayList(spanExporter!!.finishedSpanItems)
+        spanExporter!!.reset()
         return list
     }
 
     fun getFinishedLogRecords(): List<LogRecordData> {
-        val list = ArrayList(logsExporter.finishedLogRecordItems)
-        logsExporter.reset()
+        val list = ArrayList(logsExporter!!.finishedLogRecordItems)
+        logsExporter!!.reset()
         return list
     }
 
     fun getFinishedMetrics(): List<MetricData> {
-        metricReader.forceFlush().join(1, TimeUnit.SECONDS)
-        val list = ArrayList(metricsExporter.finishedMetricItems)
-        metricsExporter.reset()
+        metricReader!!.forceFlush().join(1, TimeUnit.SECONDS)
+        val list = ArrayList(metricsExporter!!.finishedMetricItems)
+        metricsExporter!!.reset()
         return list
     }
 
@@ -176,5 +176,13 @@ class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory,
         val spy = spyk(item)
         every { spy.diskBufferingManager }.returns(mockk(relaxed = true))
         return spy
+    }
+
+    fun close() {
+        agent?.close()
+        spanExporter = null
+        logsExporter = null
+        metricReader = null
+        metricsExporter = null
     }
 }

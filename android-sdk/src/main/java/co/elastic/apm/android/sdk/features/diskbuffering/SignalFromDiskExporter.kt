@@ -22,6 +22,7 @@ import androidx.annotation.WorkerThread
 import io.opentelemetry.contrib.disk.buffering.LogRecordFromDiskExporter
 import io.opentelemetry.contrib.disk.buffering.MetricFromDiskExporter
 import io.opentelemetry.contrib.disk.buffering.SpanFromDiskExporter
+import java.io.Closeable
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
@@ -29,11 +30,11 @@ import java.util.concurrent.TimeUnit
  * Entrypoint to read and export previously cached signals.
  */
 class SignalFromDiskExporter internal constructor(
-    val spanDiskExporter: SpanFromDiskExporter?,
-    val metricDiskExporter: MetricFromDiskExporter?,
-    val logRecordDiskExporter: LogRecordFromDiskExporter?,
+    private val spanDiskExporter: SpanFromDiskExporter?,
+    private val metricDiskExporter: MetricFromDiskExporter?,
+    private val logRecordDiskExporter: LogRecordFromDiskExporter?,
     private val exportTimeoutInMillis: Long
-) {
+) : Closeable {
     @Throws(IOException::class)
     @WorkerThread
     fun exportBatchOfSpans(): Boolean {
@@ -68,6 +69,12 @@ class SignalFromDiskExporter internal constructor(
             atLeastOneWorked = true
         }
         return atLeastOneWorked
+    }
+
+    override fun close() {
+        spanDiskExporter?.shutdown()
+        logRecordDiskExporter?.shutdown()
+        metricDiskExporter?.shutdown()
     }
 
     class Builder {

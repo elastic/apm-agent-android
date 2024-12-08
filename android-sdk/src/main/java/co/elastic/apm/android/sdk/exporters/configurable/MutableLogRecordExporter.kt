@@ -43,10 +43,6 @@ class MutableLogRecordExporter : LogRecordExporter {
     }
 
     fun setDelegate(value: LogRecordExporter?) {
-        val old = delegate.get()
         delegate.set(value)
-        if (value != old) {
-            old?.shutdown()
-        }
     }
 }

@@ -99,9 +99,11 @@ internal class ConfigurableExporterProvider(
         synchronized(spanConfigurationLock) {
             if (spanExporterConfiguration != configuration) {
                 spanExporterConfiguration = configuration
+                val old = spanExporter.getDelegate()
                 spanExporter.setDelegate(spanExporterConfiguration?.let {
                     createSpanExporter(it)
                 })
+                old?.shutdown()
             }
         }
 
@@ -109,11 +111,11 @@ internal class ConfigurableExporterProvider(
         synchronized(logRecordConfigurationLock) {
             if (logRecordExporterConfiguration != configuration) {
                 logRecordExporterConfiguration = configuration
+                val old = logRecordExporter.getDelegate()
                 logRecordExporter.setDelegate(logRecordExporterConfiguration?.let {
-                    createLogRecordExporter(
-                        it
-                    )
+                    createLogRecordExporter(it)
                 })
+                old?.shutdown()
             }
         }
 
@@ -121,9 +123,11 @@ internal class ConfigurableExporterProvider(
         synchronized(metricConfigurationLock) {
             if (metricExporterConfiguration != configuration) {
                 metricExporterConfiguration = configuration
+                val old = metricExporter.getDelegate()
                 metricExporter.setDelegate(metricExporterConfiguration?.let {
                     createMetricExporter(it)
                 })
+                old?.shutdown()
             }
         }
 

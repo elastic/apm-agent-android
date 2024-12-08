@@ -65,14 +65,15 @@ class DiskBufferingTest {
         agentRule.sendLog()
         agentRule.sendMetricCounter()
 
-        agentRule.agent!!.close()
-
         // Nothing should have gotten exported because it was stored in disk.
         assertThat(agentRule.getFinishedSpans()).isEmpty()
         assertThat(agentRule.getFinishedLogRecords()).isEmpty()
         assertThat(agentRule.getFinishedMetrics()).isEmpty()
 
+        agentRule.close()
+
         // Re-init
+        Thread.sleep(2000)
         var config: ElasticOtelAgent.Configuration? = null
         agentRule.initialize {
             val spy = spyk(it)

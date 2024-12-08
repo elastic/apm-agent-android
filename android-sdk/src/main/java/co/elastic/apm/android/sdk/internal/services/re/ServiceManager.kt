@@ -20,14 +20,12 @@ package co.elastic.apm.android.sdk.internal.services.re
 
 import android.app.Application
 import co.elastic.apm.android.sdk.internal.services.re.appinfo.AppInfoService
+import co.elastic.apm.android.sdk.internal.services.re.network.NetworkService
 import co.elastic.apm.android.sdk.internal.services.re.preferences.PreferencesService
 import java.io.Closeable
 
-class ServiceManager(private val services: Map<Class<out Service>, Service>) : Closeable {
-
-    init {
-        services.values.forEach { it.start() }
-    }
+class ServiceManager : Closeable {
+    private val services = mutableMapOf<Class<out Service>, Service>()
 
     fun getPreferencesService(): PreferencesService {
         return getService(PreferencesService::class.java)
@@ -37,8 +35,16 @@ class ServiceManager(private val services: Map<Class<out Service>, Service>) : C
         return getService(AppInfoService::class.java)
     }
 
+    fun getNetworkService(): NetworkService {
+        return getService(NetworkService::class.java)
+    }
+
     override fun close() {
         services.values.forEach { it.stop() }
+    }
+
+    private fun start() {
+        services.values.forEach { it.start() }
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -48,11 +54,14 @@ class ServiceManager(private val services: Map<Class<out Service>, Service>) : C
 
     companion object {
         fun create(application: Application): ServiceManager {
-            val services = listOf(
-                PreferencesService(application),
-                AppInfoService(application)
-            )
-            return ServiceManager(services.associateBy { it.javaClass })
+            val manager = ServiceManager()
+            manager.services[PreferencesService::class.java] = PreferencesService(application)
+            manager.services[AppInfoService::class.java] = AppInfoService(application)
+            manager.services[NetworkService::class.java] =
+                NetworkService.create(application, manager)
+
+            manager.start()
+            return manager
         }
     }
 }

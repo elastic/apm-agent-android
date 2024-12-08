@@ -20,10 +20,12 @@ package co.elastic.apm.android.sdk.testutils
 
 import co.elastic.apm.android.sdk.exporters.ExporterProvider
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
-import co.elastic.apm.android.sdk.internal.services.ServiceManager
 import co.elastic.apm.android.sdk.processors.ProcessorFactory
 import co.elastic.apm.android.sdk.session.Session
 import co.elastic.apm.android.sdk.tools.Interceptor
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.spyk
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.api.logs.LogRecordBuilder
@@ -50,7 +52,8 @@ import org.junit.runner.Description
 import org.junit.runners.model.Statement
 import org.robolectric.RuntimeEnvironment
 
-class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory {
+class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory,
+    Interceptor<ElasticOtelAgent.Configuration> {
     private lateinit var spanExporter: InMemorySpanExporter
     private lateinit var metricReader: MetricReader
     private lateinit var metricsExporter: InMemoryMetricExporter
@@ -85,7 +88,6 @@ class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory {
             }
         } finally {
             agent?.close()
-            ServiceManager.resetForTest()
         }
     }
 
@@ -94,7 +96,7 @@ class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory {
         serviceVersion: String = "0.0.0",
         deploymentEnvironment: String = "test",
         clock: Clock = Clock.getDefault(),
-        configurationInterceptor: Interceptor<ElasticOtelAgent.Configuration> = Interceptor { it }
+        configurationInterceptor: Interceptor<ElasticOtelAgent.Configuration> = this
     ) {
         agent = TestElasticOtelAgent.builder(RuntimeEnvironment.getApplication())
             .setServiceName(serviceName)
@@ -168,5 +170,11 @@ class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory {
     override fun createMetricReader(exporter: MetricExporter?): MetricReader? {
         metricReader = PeriodicMetricReader.create(exporter)
         return metricReader
+    }
+
+    override fun intercept(item: ElasticOtelAgent.Configuration): ElasticOtelAgent.Configuration {
+        val spy = spyk(item)
+        every { spy.diskBufferingManager }.returns(mockk(relaxed = true))
+        return spy
     }
 }

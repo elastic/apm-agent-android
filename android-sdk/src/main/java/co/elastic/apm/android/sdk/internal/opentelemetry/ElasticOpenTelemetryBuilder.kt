@@ -148,9 +148,11 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
     }
 
     protected fun buildConfiguration(): ElasticOtelAgent.Configuration {
-        val commonAttributesInterceptor = CommonAttributesInterceptor(sessionProvider)
+        val serviceManager = ServiceManager.create(application)
+        val commonAttributesInterceptor =
+            CommonAttributesInterceptor(serviceManager, sessionProvider)
         addSpanAttributesInterceptor(commonAttributesInterceptor)
-        addSpanAttributesInterceptor(SpanAttributesInterceptor())
+        addSpanAttributesInterceptor(SpanAttributesInterceptor(serviceManager))
         addLogRecordAttributesInterceptor(commonAttributesInterceptor)
         val resource = Resource.builder()
             .put(ResourceAttributes.SERVICE_NAME, serviceName)
@@ -231,7 +233,7 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
         }
         return ElasticOtelAgent.Configuration(
             openTelemetryBuilder.build(),
-            ServiceManager.create(application),
+            serviceManager,
             diskBufferingManager
         )
     }

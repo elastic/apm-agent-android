@@ -18,17 +18,16 @@
  */
 package co.elastic.apm.android.sdk.attributes.common
 
-import co.elastic.apm.android.sdk.internal.services.Service
-import co.elastic.apm.android.sdk.internal.services.ServiceManager
-import co.elastic.apm.android.sdk.internal.services.network.NetworkService
+import co.elastic.apm.android.sdk.internal.services.re.ServiceManager
+import co.elastic.apm.android.sdk.internal.services.re.network.NetworkService
 import co.elastic.apm.android.sdk.tools.Interceptor
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.semconv.SemanticAttributes
 
-internal class SpanAttributesInterceptor : Interceptor<Attributes> {
+internal class SpanAttributesInterceptor(serviceManager: ServiceManager) : Interceptor<Attributes> {
     private val networkService: NetworkService by lazy {
-        ServiceManager.get().getService(Service.Names.NETWORK)
+        serviceManager.getNetworkService()
     }
 
     override fun intercept(item: Attributes): Attributes {

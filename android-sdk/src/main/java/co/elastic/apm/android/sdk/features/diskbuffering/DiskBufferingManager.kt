@@ -24,7 +24,7 @@ import co.elastic.apm.android.sdk.exporters.configurable.MutableMetricExporter
 import co.elastic.apm.android.sdk.exporters.configurable.MutableSpanExporter
 import co.elastic.apm.android.sdk.features.diskbuffering.tools.DiskManager
 import co.elastic.apm.android.sdk.features.persistence.SimpleTemporaryFileProvider
-import co.elastic.apm.android.sdk.internal.services.re.ServiceManager
+import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import io.opentelemetry.contrib.disk.buffering.LogRecordFromDiskExporter
 import io.opentelemetry.contrib.disk.buffering.LogRecordToDiskExporter
 import io.opentelemetry.contrib.disk.buffering.MetricFromDiskExporter

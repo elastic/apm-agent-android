@@ -19,9 +19,9 @@
 package co.elastic.apm.android.sdk.integration
 
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
-import co.elastic.apm.android.sdk.internal.services.re.ServiceManager
-import co.elastic.apm.android.sdk.internal.services.re.appinfo.AppInfoService
-import co.elastic.apm.android.sdk.internal.services.re.preferences.PreferencesService
+import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
+import co.elastic.apm.android.sdk.internal.services.kotlin.appinfo.AppInfoService
+import co.elastic.apm.android.sdk.internal.services.kotlin.preferences.PreferencesService
 import co.elastic.apm.android.sdk.testutils.ElasticAgentRule
 import io.mockk.every
 import io.mockk.mockk

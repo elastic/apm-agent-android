@@ -19,7 +19,7 @@
 package co.elastic.apm.android.sdk.internal.api
 
 import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingManager
-import co.elastic.apm.android.sdk.internal.services.re.ServiceManager
+import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.sdk.OpenTelemetrySdk
 import java.io.Closeable

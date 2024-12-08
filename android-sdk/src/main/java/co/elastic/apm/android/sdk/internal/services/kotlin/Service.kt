@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.services.re
+package co.elastic.apm.android.sdk.internal.services.kotlin
 
 interface Service {
     fun start() {}

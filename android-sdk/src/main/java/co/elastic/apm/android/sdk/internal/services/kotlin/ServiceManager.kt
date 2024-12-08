@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.services.re
+package co.elastic.apm.android.sdk.internal.services.kotlin
 
 import android.app.Application
-import co.elastic.apm.android.sdk.internal.services.re.appinfo.AppInfoService
-import co.elastic.apm.android.sdk.internal.services.re.network.NetworkService
-import co.elastic.apm.android.sdk.internal.services.re.preferences.PreferencesService
+import co.elastic.apm.android.sdk.internal.services.kotlin.appinfo.AppInfoService
+import co.elastic.apm.android.sdk.internal.services.kotlin.network.NetworkService
+import co.elastic.apm.android.sdk.internal.services.kotlin.preferences.PreferencesService
 import java.io.Closeable
 
 class ServiceManager : Closeable {

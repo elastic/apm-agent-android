@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.services.re.network.data
+package co.elastic.apm.android.sdk.internal.services.kotlin.network.data
 
 sealed class NetworkType(val name: String) {
     data class Cell(val subTypeName: String?) : NetworkType("cell")

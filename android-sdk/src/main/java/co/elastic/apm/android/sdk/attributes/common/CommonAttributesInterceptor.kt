@@ -18,9 +18,9 @@
  */
 package co.elastic.apm.android.sdk.attributes.common
 
-import co.elastic.apm.android.sdk.internal.services.re.ServiceManager
-import co.elastic.apm.android.sdk.internal.services.re.network.NetworkService
-import co.elastic.apm.android.sdk.internal.services.re.network.data.NetworkType
+import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
+import co.elastic.apm.android.sdk.internal.services.kotlin.network.NetworkService
+import co.elastic.apm.android.sdk.internal.services.kotlin.network.data.NetworkType
 import co.elastic.apm.android.sdk.session.SessionProvider
 import co.elastic.apm.android.sdk.tools.Interceptor
 import io.opentelemetry.api.common.AttributeKey

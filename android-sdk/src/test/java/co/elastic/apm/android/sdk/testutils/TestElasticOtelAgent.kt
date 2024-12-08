@@ -42,8 +42,7 @@ class TestElasticOtelAgent(configuration: Configuration) : ElasticOtelAgent(conf
         }
     }
 
-    class Builder(private val application: Application) :
-        ElasticOpenTelemetryBuilder<Builder>(application) {
+    class Builder(application: Application) : ElasticOpenTelemetryBuilder<Builder>(application) {
 
         public override fun setExporterProvider(value: ExporterProvider): Builder {
             return super.setExporterProvider(value)

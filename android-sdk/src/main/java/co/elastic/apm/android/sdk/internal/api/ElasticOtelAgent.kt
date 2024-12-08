@@ -33,8 +33,9 @@ abstract class ElasticOtelAgent(private val configuration: Configuration) : Clos
     abstract fun getOpenTelemetry(): OpenTelemetry
 
     final override fun close() {
-        configuration.serviceManager.close()
         onClose()
+        configuration.serviceManager.close()
+        configuration.openTelemetrySdk.close()
     }
 
     protected abstract fun onClose()

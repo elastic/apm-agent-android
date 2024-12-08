@@ -33,7 +33,7 @@ class ElasticAgent private constructor(
     }
 
     override fun onClose() {
-        openTelemetry.close()
+
     }
 
     companion object {

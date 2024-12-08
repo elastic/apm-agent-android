@@ -33,7 +33,6 @@ class TestElasticOtelAgent(configuration: Configuration) : ElasticOtelAgent(conf
     }
 
     override fun onClose() {
-        openTelemetry.close()
     }
 
     companion object {

@@ -22,6 +22,7 @@ import android.app.Application
 import co.elastic.apm.android.sdk.exporters.ExporterProvider
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
 import co.elastic.apm.android.sdk.internal.opentelemetry.ElasticOpenTelemetryBuilder
+import co.elastic.apm.android.sdk.tools.Interceptor
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.sdk.OpenTelemetrySdk
 
@@ -42,13 +43,16 @@ class TestElasticOtelAgent(configuration: Configuration) : ElasticOtelAgent(conf
     }
 
     class Builder(application: Application) : ElasticOpenTelemetryBuilder<Builder>(application) {
+        val configurationInterceptors = mutableListOf<Interceptor<Configuration>>()
 
         public override fun setExporterProvider(value: ExporterProvider): Builder {
             return super.setExporterProvider(value)
         }
 
         fun build(): TestElasticOtelAgent {
-            return TestElasticOtelAgent(buildConfiguration())
+            return TestElasticOtelAgent(
+                Interceptor.composite(configurationInterceptors).intercept(buildConfiguration())
+            )
         }
     }
 }

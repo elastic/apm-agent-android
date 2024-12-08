@@ -23,6 +23,7 @@ import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
 import co.elastic.apm.android.sdk.internal.services.ServiceManager
 import co.elastic.apm.android.sdk.processors.ProcessorFactory
 import co.elastic.apm.android.sdk.session.Session
+import co.elastic.apm.android.sdk.tools.Interceptor
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.api.logs.LogRecordBuilder
@@ -54,10 +55,10 @@ class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory {
     private lateinit var metricReader: MetricReader
     private lateinit var metricsExporter: InMemoryMetricExporter
     private lateinit var logsExporter: InMemoryLogRecordExporter
-    private lateinit var agent: ElasticOtelAgent
+    var agent: ElasticOtelAgent? = null
     val openTelemetry: OpenTelemetry
         get() {
-            return agent.getOpenTelemetry()
+            return agent!!.getOpenTelemetry()
         }
 
     companion object {
@@ -83,7 +84,7 @@ class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory {
                 }
             }
         } finally {
-            agent.close()
+            agent?.close()
             ServiceManager.resetForTest()
         }
     }
@@ -92,7 +93,8 @@ class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory {
         serviceName: String = "service-name",
         serviceVersion: String = "0.0.0",
         deploymentEnvironment: String = "test",
-        clock: Clock = Clock.getDefault()
+        clock: Clock = Clock.getDefault(),
+        configurationInterceptor: Interceptor<ElasticOtelAgent.Configuration> = Interceptor { it }
     ) {
         agent = TestElasticOtelAgent.builder(RuntimeEnvironment.getApplication())
             .setServiceName(serviceName)
@@ -103,24 +105,25 @@ class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory {
             .setClock(clock)
             .setExporterProvider(this)
             .setProcessorFactory(this)
+            .apply { configurationInterceptors.add(configurationInterceptor) }
             .build()
     }
 
     fun sendLog(body: String = "", builderVisitor: LogRecordBuilder.() -> Unit = {}) {
         val logRecordBuilder =
-            agent.getOpenTelemetry().logsBridge.get("LoggerScope").logRecordBuilder()
+            agent!!.getOpenTelemetry().logsBridge.get("LoggerScope").logRecordBuilder()
         builderVisitor(logRecordBuilder)
         logRecordBuilder.setBody(body).emit()
     }
 
     fun sendSpan(name: String = "SomeSpan", builderVisitor: SpanBuilder.() -> Unit = {}) {
-        val spanBuilder = agent.getOpenTelemetry().getTracer("SomeTracer").spanBuilder(name)
+        val spanBuilder = agent!!.getOpenTelemetry().getTracer("SomeTracer").spanBuilder(name)
         builderVisitor(spanBuilder)
         spanBuilder.startSpan().end()
     }
 
     fun sendMetricCounter(name: String = "Counter") {
-        agent.getOpenTelemetry().getMeter("MeterScope").counterBuilder(name).build().add(1)
+        agent!!.getOpenTelemetry().getMeter("MeterScope").counterBuilder(name).build().add(1)
     }
 
     fun getFinishedSpans(): List<SpanData> {

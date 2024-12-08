@@ -1,13 +1,20 @@
 package co.elastic.apm.android.sdk.features.diskbuffering
 
+import co.elastic.apm.android.common.internal.logging.Elog
 import co.elastic.apm.android.sdk.exporters.configurable.MutableLogRecordExporter
 import co.elastic.apm.android.sdk.exporters.configurable.MutableMetricExporter
 import co.elastic.apm.android.sdk.exporters.configurable.MutableSpanExporter
+import co.elastic.apm.android.sdk.features.diskbuffering.tools.DiskManager
+import co.elastic.apm.android.sdk.features.persistence.SimpleTemporaryFileProvider
 import co.elastic.apm.android.sdk.internal.services.re.ServiceManager
+import io.opentelemetry.contrib.disk.buffering.LogRecordFromDiskExporter
+import io.opentelemetry.contrib.disk.buffering.MetricFromDiskExporter
 import io.opentelemetry.contrib.disk.buffering.SpanFromDiskExporter
+import io.opentelemetry.contrib.disk.buffering.StorageConfiguration
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.trace.export.SpanExporter
+import java.io.IOException
 
 class DiskBufferingManager(private val configuration: DiskBufferingConfiguration) {
     private var spanExporter: MutableSpanExporter? = null
@@ -17,6 +24,10 @@ class DiskBufferingManager(private val configuration: DiskBufferingConfiguration
     private var interceptedLogRecordExporter: LogRecordExporter? = null
     private var interceptedMetricExporter: MetricExporter? = null
     private var signalFromDiskExporter: SignalFromDiskExporter? = null
+
+    fun exportFromDisk() {
+        signalFromDiskExporter?.exportBatchOfEach()
+    }
 
     internal fun interceptSpanExporter(interceptedSpanExporter: SpanExporter): SpanExporter {
         this.interceptedSpanExporter = interceptedSpanExporter
@@ -37,15 +48,37 @@ class DiskBufferingManager(private val configuration: DiskBufferingConfiguration
     }
 
     internal fun initialize(serviceManager: ServiceManager) {
-        val builder = SignalFromDiskExporter.builder()
-
-        TODO()
-        spanExporter?.let {
-            builder.setSpanFromDiskExporter(SpanFromDiskExporter.create(interceptedSpanExporter!!))
+        try {
+            signalFromDiskExporter = createFromDiskExporter(serviceManager)
+        } catch (e: IOException) {
+            Elog.getLogger().error("Could not initialize disk buffering", e)
         }
     }
 
-    fun exportFromDisk() {
-        signalFromDiskExporter.exportBatchOfEach()
+    private fun createFromDiskExporter(serviceManager: ServiceManager): SignalFromDiskExporter {
+        val diskManager = DiskManager.create(serviceManager, configuration)
+        val storageConfiguration = StorageConfiguration.builder()
+            .setMaxFileSize(diskManager.getMaxCacheFileSize())
+            .setMaxFolderSize(diskManager.getMaxFolderSize())
+            .setTemporaryFileProvider(SimpleTemporaryFileProvider(diskManager.getTemporaryDir()))
+            .setRootDir(diskManager.getSignalsCacheDir())
+            .build()
+
+        val builder = SignalFromDiskExporter.builder()
+        interceptedSpanExporter?.let {
+            builder.setSpanFromDiskExporter(SpanFromDiskExporter.create(it, storageConfiguration))
+        }
+        interceptedLogRecordExporter?.let {
+            builder.setLogRecordFromDiskExporter(
+                LogRecordFromDiskExporter.create(it, storageConfiguration)
+            )
+        }
+        interceptedMetricExporter?.let {
+            builder.setMetricFromDiskExporter(
+                MetricFromDiskExporter.create(it, storageConfiguration)
+            )
+        }
+
+        return builder.build()
     }
 }

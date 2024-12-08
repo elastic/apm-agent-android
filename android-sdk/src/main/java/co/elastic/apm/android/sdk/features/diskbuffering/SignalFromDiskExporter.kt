@@ -22,6 +22,7 @@ import androidx.annotation.WorkerThread
 import io.opentelemetry.contrib.disk.buffering.LogRecordFromDiskExporter
 import io.opentelemetry.contrib.disk.buffering.MetricFromDiskExporter
 import io.opentelemetry.contrib.disk.buffering.SpanFromDiskExporter
+import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 /**
@@ -33,18 +34,21 @@ class SignalFromDiskExporter internal constructor(
     val logRecordDiskExporter: LogRecordFromDiskExporter?,
     private val exportTimeoutInMillis: Long
 ) {
+    @Throws(IOException::class)
     @WorkerThread
     fun exportBatchOfSpans(): Boolean {
         return spanDiskExporter?.exportStoredBatch(exportTimeoutInMillis, TimeUnit.MILLISECONDS)
             ?: false
     }
 
+    @Throws(IOException::class)
     @WorkerThread
     fun exportBatchOfMetrics(): Boolean {
         return metricDiskExporter?.exportStoredBatch(exportTimeoutInMillis, TimeUnit.MILLISECONDS)
             ?: false
     }
 
+    @Throws(IOException::class)
     @WorkerThread
     fun exportBatchOfLogs(): Boolean {
         return logRecordDiskExporter?.exportStoredBatch(
@@ -53,6 +57,7 @@ class SignalFromDiskExporter internal constructor(
         ) ?: false
     }
 
+    @Throws(IOException::class)
     @WorkerThread
     fun exportBatchOfEach(): Boolean {
         var atLeastOneWorked = exportBatchOfSpans()

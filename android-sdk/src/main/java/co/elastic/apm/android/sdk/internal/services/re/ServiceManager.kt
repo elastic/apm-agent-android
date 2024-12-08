@@ -5,9 +5,7 @@ import co.elastic.apm.android.sdk.internal.services.re.appinfo.AppInfoService
 import co.elastic.apm.android.sdk.internal.services.re.preferences.PreferencesService
 import java.io.Closeable
 
-class ServiceManager(
-    private val services: Map<Class<out Service>, Service>
-) : Closeable {
+class ServiceManager(private val services: Map<Class<out Service>, Service>) : Closeable {
 
     init {
         services.values.forEach { it.start() }

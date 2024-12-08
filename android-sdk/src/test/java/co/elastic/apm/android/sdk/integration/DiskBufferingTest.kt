@@ -26,7 +26,6 @@ import co.elastic.apm.android.sdk.internal.services.kotlin.preferences.Preferenc
 import co.elastic.apm.android.sdk.testutils.ElasticAgentRule
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.spyk
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -49,11 +48,7 @@ class DiskBufferingTest {
         val configuration = DiskBufferingConfiguration(true)
         configuration.maxFileAgeForWrite = 500
         configuration.minFileAgeForRead = 501
-        agentRule.initialize(diskBufferingConfiguration = configuration) {
-            val spy = spyk(it)
-            every { spy.serviceManager }.returns(serviceManager)
-            it
-        }
+        agentRule.initialize(diskBufferingConfiguration = configuration) { it }
 
         agentRule.sendSpan()
         agentRule.sendLog()
@@ -70,8 +65,6 @@ class DiskBufferingTest {
         Thread.sleep(1000)
         var config: ElasticOtelAgent.Configuration? = null
         agentRule.initialize(diskBufferingConfiguration = configuration) {
-            val spy = spyk(it)
-            every { spy.serviceManager }.returns(serviceManager)
             config = it
             it
         }

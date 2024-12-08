@@ -20,11 +20,14 @@ package co.elastic.apm.android.sdk.testutils
 
 import co.elastic.apm.android.sdk.exporters.ExporterProvider
 import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingConfiguration
+import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingManager
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
 import co.elastic.apm.android.sdk.processors.ProcessorFactory
 import co.elastic.apm.android.sdk.session.Session
 import co.elastic.apm.android.sdk.tools.Interceptor
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.spyk
 import io.opentelemetry.api.OpenTelemetry
@@ -177,7 +180,9 @@ class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory,
 
     override fun intercept(item: ElasticOtelAgent.Configuration): ElasticOtelAgent.Configuration {
         val spy = spyk(item)
-        every { spy.diskBufferingManager }.returns(mockk(relaxed = true))
+        val diskBufferingManager = mockk<DiskBufferingManager>()
+        every { diskBufferingManager.initialize(item.serviceManager) } just Runs
+        every { spy.diskBufferingManager }.returns(diskBufferingManager)
         return spy
     }
 

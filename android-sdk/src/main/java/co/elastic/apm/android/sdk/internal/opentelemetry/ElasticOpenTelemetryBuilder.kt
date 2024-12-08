@@ -179,13 +179,13 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
         addSpanExporterInterceptor(diskBufferingManager::interceptSpanExporter)
         addLogRecordExporterInterceptor(diskBufferingManager::interceptLogRecordExporter)
         addMetricExporterInterceptor(diskBufferingManager::interceptMetricExporter)
-        val spanExporter = exporterProvider.getSpanExporter()?.also {
+        val spanExporter = exporterProvider.getSpanExporter()?.let {
             Interceptor.composite(spanExporterInterceptors).intercept(it)
         }
-        val logRecordExporter = exporterProvider.getLogRecordExporter()?.also {
+        val logRecordExporter = exporterProvider.getLogRecordExporter()?.let {
             Interceptor.composite(logRecordExporterInterceptors).intercept(it)
         }
-        val metricExporter = exporterProvider.getMetricExporter()?.also {
+        val metricExporter = exporterProvider.getMetricExporter()?.let {
             Interceptor.composite(metricExporterInterceptors).intercept(it)
         }
         processorFactory.createSpanProcessor(spanExporter)?.let {

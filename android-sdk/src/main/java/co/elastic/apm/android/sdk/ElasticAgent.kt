@@ -22,12 +22,11 @@ import android.app.Application
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
 import co.elastic.apm.android.sdk.internal.opentelemetry.ElasticOpenTelemetryBuilder
 import io.opentelemetry.api.OpenTelemetry
-import io.opentelemetry.sdk.OpenTelemetrySdk
 
 class ElasticAgent private constructor(
-    application: Application,
-    private val openTelemetry: OpenTelemetrySdk
-) : ElasticOtelAgent(application) {
+    configuration: Configuration
+) : ElasticOtelAgent(configuration) {
+    private val openTelemetry = configuration.openTelemetrySdk
 
     override fun getOpenTelemetry(): OpenTelemetry {
         return openTelemetry
@@ -44,11 +43,11 @@ class ElasticAgent private constructor(
         }
     }
 
-    class Builder internal constructor(private val application: Application) :
+    class Builder internal constructor(application: Application) :
         ElasticOpenTelemetryBuilder<Builder>(application) {
 
         fun build(): ElasticAgent {
-            return ElasticAgent(application, buildConfiguration())
+            return ElasticAgent(buildConfiguration())
         }
     }
 }

@@ -25,8 +25,8 @@ import co.elastic.apm.android.sdk.internal.opentelemetry.ElasticOpenTelemetryBui
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.sdk.OpenTelemetrySdk
 
-class TestElasticOtelAgent(application: Application, private val openTelemetry: OpenTelemetrySdk) :
-    ElasticOtelAgent(application) {
+class TestElasticOtelAgent(configuration: Configuration) : ElasticOtelAgent(configuration) {
+    private val openTelemetry: OpenTelemetrySdk = configuration.openTelemetrySdk
 
     override fun getOpenTelemetry(): OpenTelemetry {
         return openTelemetry
@@ -50,7 +50,7 @@ class TestElasticOtelAgent(application: Application, private val openTelemetry: 
         }
 
         fun build(): TestElasticOtelAgent {
-            return TestElasticOtelAgent(application, buildConfiguration())
+            return TestElasticOtelAgent(buildConfiguration())
         }
     }
 }

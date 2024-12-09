@@ -19,12 +19,18 @@
 package co.elastic.apm.android.sdk
 
 import android.app.Application
+import co.elastic.apm.android.sdk.exporters.apmserver.ApmServerConnectivityConfiguration
+import co.elastic.apm.android.sdk.exporters.apmserver.ApmServerConnectivityConfigurationManager
+import co.elastic.apm.android.sdk.exporters.apmserver.ApmServerConnectivityManager
+import co.elastic.apm.android.sdk.exporters.apmserver.ApmServerExporterProvider
+import co.elastic.apm.android.sdk.exporters.configuration.ExportProtocol
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
 import co.elastic.apm.android.sdk.internal.opentelemetry.ElasticOpenTelemetryBuilder
 import io.opentelemetry.api.OpenTelemetry
 
 class ElasticAgent private constructor(
-    configuration: Configuration
+    configuration: Configuration,
+    val apmServerConnectivityManager: ApmServerConnectivityManager
 ) : ElasticOtelAgent(configuration) {
     private val openTelemetry = configuration.openTelemetrySdk
 
@@ -45,9 +51,44 @@ class ElasticAgent private constructor(
 
     class Builder internal constructor(application: Application) :
         ElasticOpenTelemetryBuilder<Builder>(application) {
+        private var url: String? = null
+        private var authentication: ApmServerConnectivityConfiguration.Auth =
+            ApmServerConnectivityConfiguration.Auth.None
+        private var exportProtocol: ExportProtocol = ExportProtocol.HTTP
+        private val extraHeaders = mutableMapOf<String, String>()
+
+        fun setUrl(value: String) = apply {
+            url = value
+        }
+
+        fun setAuthentication(value: ApmServerConnectivityConfiguration.Auth) = apply {
+            authentication = value
+        }
+
+        fun setExportProtocol(value: ExportProtocol) = apply {
+            exportProtocol = value
+        }
+
+        fun addExtraRequestHeader(value: Pair<String, String>) = apply {
+            extraHeaders.plus(value)
+        }
 
         fun build(): ElasticAgent {
-            return ElasticAgent(buildConfiguration())
+            url?.let { finalUrl ->
+                val configuration =
+                    ApmServerConnectivityConfiguration(
+                        finalUrl,
+                        authentication,
+                        extraHeaders,
+                        exportProtocol
+                    )
+                val configurationManager = ApmServerConnectivityConfigurationManager(configuration)
+                val apmServerConnectivityManager =
+                    ApmServerConnectivityManager(configurationManager)
+                val exporterProvider = ApmServerExporterProvider.create(configurationManager)
+                setExporterProvider(exporterProvider)
+                return ElasticAgent(buildConfiguration(), apmServerConnectivityManager)
+            } ?: throw NullPointerException("The url must be set.")
         }
     }
 }

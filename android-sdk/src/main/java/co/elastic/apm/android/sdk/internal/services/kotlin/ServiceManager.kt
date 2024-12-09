@@ -20,6 +20,7 @@ package co.elastic.apm.android.sdk.internal.services.kotlin
 
 import android.app.Application
 import co.elastic.apm.android.sdk.internal.services.kotlin.appinfo.AppInfoService
+import co.elastic.apm.android.sdk.internal.services.kotlin.backgroundwork.BackgroundWorkService
 import co.elastic.apm.android.sdk.internal.services.kotlin.network.NetworkService
 import co.elastic.apm.android.sdk.internal.services.kotlin.preferences.PreferencesService
 import java.io.Closeable
@@ -37,6 +38,10 @@ class ServiceManager : Closeable {
 
     fun getNetworkService(): NetworkService {
         return getService(NetworkService::class.java)
+    }
+
+    fun getBackgroundWorkService(): BackgroundWorkService {
+        return getService(BackgroundWorkService::class.java)
     }
 
     override fun close() {
@@ -59,6 +64,7 @@ class ServiceManager : Closeable {
             manager.services[AppInfoService::class.java] = AppInfoService(application)
             manager.services[NetworkService::class.java] =
                 NetworkService.create(application, manager)
+            manager.services[BackgroundWorkService::class.java] = BackgroundWorkService.create()
 
             manager.start()
             return manager

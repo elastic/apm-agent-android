@@ -33,7 +33,7 @@ class ApmServerConnectivityConfigurationTest {
         assertThat(instance).isEqualTo(
             ApmServerConnectivityConfiguration(
                 url,
-                ApmServerConnectivityConfiguration.Auth.None,
+                ApmServerAuthentication.None,
                 emptyMap(), ExportProtocol.HTTP
             )
         )
@@ -78,7 +78,7 @@ class ApmServerConnectivityConfigurationTest {
 
         val instance = ApmServerConnectivityConfiguration(
             url,
-            ApmServerConnectivityConfiguration.Auth.SecretToken(token)
+            ApmServerAuthentication.SecretToken(token)
         )
 
         assertThat(instance.getUrl()).isEqualTo(url)
@@ -95,7 +95,7 @@ class ApmServerConnectivityConfigurationTest {
 
         val instance = ApmServerConnectivityConfiguration(
             url,
-            ApmServerConnectivityConfiguration.Auth.ApiKey(key)
+            ApmServerAuthentication.ApiKey(key)
         )
 
         assertThat(instance.getUrl()).isEqualTo(url)

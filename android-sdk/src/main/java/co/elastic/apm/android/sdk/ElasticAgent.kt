@@ -19,6 +19,7 @@
 package co.elastic.apm.android.sdk
 
 import android.app.Application
+import co.elastic.apm.android.sdk.exporters.apmserver.ApmServerAuthentication
 import co.elastic.apm.android.sdk.exporters.apmserver.ApmServerConnectivityConfiguration
 import co.elastic.apm.android.sdk.exporters.apmserver.ApmServerConnectivityConfigurationManager
 import co.elastic.apm.android.sdk.exporters.apmserver.ApmServerConnectivityManager
@@ -56,8 +57,7 @@ class ElasticAgent private constructor(
     class Builder internal constructor(application: Application) :
         ElasticOpenTelemetryBuilder<Builder>(application) {
         private var url: String? = null
-        private var authentication: ApmServerConnectivityConfiguration.Auth =
-            ApmServerConnectivityConfiguration.Auth.None
+        private var authentication: ApmServerAuthentication = ApmServerAuthentication.None
         private var exportProtocol: ExportProtocol = ExportProtocol.HTTP
         private val extraHeaders = mutableMapOf<String, String>()
 
@@ -65,7 +65,7 @@ class ElasticAgent private constructor(
             url = value
         }
 
-        fun setAuthentication(value: ApmServerConnectivityConfiguration.Auth) = apply {
+        fun setAuthentication(value: ApmServerAuthentication) = apply {
             authentication = value
         }
 

@@ -19,6 +19,7 @@
 package co.elastic.apm.android.sdk.integration
 
 import co.elastic.apm.android.sdk.ElasticAgent
+import co.elastic.apm.android.sdk.exporters.apmserver.ApmServerAuthentication
 import co.elastic.apm.android.sdk.exporters.apmserver.ApmServerConnectivityConfiguration
 import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.apm.android.sdk.processors.ProcessorFactory
@@ -96,7 +97,7 @@ class ElasticAgentTest {
         val secretToken = "secret-token"
         agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
             .setUrl(webServer.url("/first/").toString())
-            .setAuthentication(ApmServerConnectivityConfiguration.Auth.SecretToken(secretToken))
+            .setAuthentication(ApmServerAuthentication.SecretToken(secretToken))
             .setServiceName("my-app")
             .setDiskBufferingConfiguration(DiskBufferingConfiguration.disabled())
             .setProcessorFactory(simpleProcessorFactory)
@@ -126,7 +127,7 @@ class ElasticAgentTest {
         agent.getApmServerConnectivityManager().setConnectivityConfiguration(
             ApmServerConnectivityConfiguration(
                 webServer.url("/second/").toString(),
-                ApmServerConnectivityConfiguration.Auth.ApiKey(apiKey),
+                ApmServerAuthentication.ApiKey(apiKey),
                 mapOf("Custom-Header" to "custom value")
             )
         )

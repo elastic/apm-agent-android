@@ -23,7 +23,7 @@ import co.elastic.apm.android.sdk.exporters.configuration.ExportProtocol
 
 data class ApmServerConnectivityConfiguration(
     private val url: String,
-    val auth: Auth = Auth.None,
+    val auth: ApmServerAuthentication = ApmServerAuthentication.None,
     val extraHeaders: Map<String, String> = emptyMap(),
     val exportProtocol: ExportProtocol = ExportProtocol.HTTP
 ) : ConnectivityConfiguration {
@@ -34,9 +34,9 @@ data class ApmServerConnectivityConfiguration(
     override fun getHeaders(): Map<String, String> {
         val headers = mutableMapOf<String, String>()
         headers.putAll(extraHeaders)
-        if (auth is Auth.SecretToken) {
+        if (auth is ApmServerAuthentication.SecretToken) {
             headers[AUTHORIZATION_HEADER_KEY] = "Bearer ${auth.token}"
-        } else if (auth is Auth.ApiKey) {
+        } else if (auth is ApmServerAuthentication.ApiKey) {
             headers[AUTHORIZATION_HEADER_KEY] = "ApiKey ${auth.key}"
         }
         return headers
@@ -69,13 +69,13 @@ data class ApmServerConnectivityConfiguration(
         return String.format("%s/v1/%s", url, signalId)
     }
 
-    sealed class Auth {
-        data class ApiKey(val key: String) : Auth()
-        data class SecretToken(val token: String) : Auth()
-        data object None : Auth()
-    }
-
     companion object {
         private const val AUTHORIZATION_HEADER_KEY = "Authorization"
     }
+}
+
+sealed class ApmServerAuthentication {
+    data class ApiKey(val key: String) : ApmServerAuthentication()
+    data class SecretToken(val token: String) : ApmServerAuthentication()
+    data object None : ApmServerAuthentication()
 }

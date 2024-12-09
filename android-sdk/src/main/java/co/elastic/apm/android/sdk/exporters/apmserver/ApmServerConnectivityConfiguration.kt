@@ -73,9 +73,3 @@ data class ApmServerConnectivityConfiguration(
         private const val AUTHORIZATION_HEADER_KEY = "Authorization"
     }
 }
-
-sealed class ApmServerAuthentication {
-    data class ApiKey(val key: String) : ApmServerAuthentication()
-    data class SecretToken(val token: String) : ApmServerAuthentication()
-    data object None : ApmServerAuthentication()
-}

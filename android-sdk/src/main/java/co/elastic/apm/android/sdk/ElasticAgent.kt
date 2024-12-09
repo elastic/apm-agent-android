@@ -59,7 +59,7 @@ class ElasticAgent private constructor(
         private var url: String? = null
         private var authentication: ApmServerAuthentication = ApmServerAuthentication.None
         private var exportProtocol: ExportProtocol = ExportProtocol.HTTP
-        private val extraHeaders = mutableMapOf<String, String>()
+        private var extraRequestHeaders: Map<String, String> = emptyMap()
 
         fun setUrl(value: String) = apply {
             url = value
@@ -73,8 +73,8 @@ class ElasticAgent private constructor(
             exportProtocol = value
         }
 
-        fun addExtraRequestHeader(value: Pair<String, String>) = apply {
-            extraHeaders.plus(value)
+        fun setExtraRequestHeaders(value: Map<String, String>) = apply {
+            extraRequestHeaders = value
         }
 
         fun build(): ElasticAgent {
@@ -83,7 +83,7 @@ class ElasticAgent private constructor(
                     ApmServerConnectivityConfiguration(
                         finalUrl,
                         authentication,
-                        extraHeaders,
+                        extraRequestHeaders,
                         exportProtocol
                     )
                 val configurationManager = ApmServerConnectivityConfigurationManager(configuration)

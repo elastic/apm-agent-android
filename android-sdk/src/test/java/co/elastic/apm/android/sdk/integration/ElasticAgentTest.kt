@@ -68,6 +68,7 @@ class ElasticAgentTest {
             .setServiceName("my-app")
             .setDiskBufferingConfiguration(DiskBufferingConfiguration.disabled())
             .setProcessorFactory(simpleProcessorFactory)
+            .setExtraRequestHeaders(mapOf("Extra-header" to "extra value"))
             .build()
 
         webServer.enqueue(MockResponse().setResponseCode(500))
@@ -78,16 +79,19 @@ class ElasticAgentTest {
         val tracesRequest = takeRequest()
         assertThat(tracesRequest.path).isEqualTo("/v1/traces")
         assertThat(tracesRequest.headers["User-Agent"]).startsWith("OTel-OTLP-Exporter-Java/")
+        assertThat(tracesRequest.headers["Extra-header"]).isEqualTo("extra value")
 
         sendLog()
         val logsRequest = takeRequest()
         assertThat(logsRequest.path).isEqualTo("/v1/logs")
         assertThat(logsRequest.headers["User-Agent"]).startsWith("OTel-OTLP-Exporter-Java/")
+        assertThat(logsRequest.headers["Extra-header"]).isEqualTo("extra value")
 
         sendMetric()
         val metricsRequest = takeRequest()
         assertThat(metricsRequest.path).isEqualTo("/v1/metrics")
         assertThat(metricsRequest.headers["User-Agent"]).startsWith("OTel-OTLP-Exporter-Java/")
+        assertThat(metricsRequest.headers["Extra-header"]).isEqualTo("extra value")
 
         agent.close()
     }

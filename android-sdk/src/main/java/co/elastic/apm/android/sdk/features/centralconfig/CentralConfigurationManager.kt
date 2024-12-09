@@ -1,7 +1,9 @@
 package co.elastic.apm.android.sdk.features.centralconfig
 
+import androidx.annotation.WorkerThread
 import co.elastic.apm.android.common.internal.logging.Elog
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
+import java.io.IOException
 import org.slf4j.Logger
 
 class CentralConfigurationManager internal constructor(
@@ -19,14 +21,9 @@ class CentralConfigurationManager internal constructor(
         backgroundWorkService.submit {
             try {
                 centralConfiguration.publishCachedConfig()
-                val delayForNextPollInSeconds = centralConfiguration.sync()
-                if (delayForNextPollInSeconds != null) {
-                    scheduleInSeconds(delayForNextPollInSeconds)
-                } else {
-                    scheduleDefault()
-                }
+                doPoll()
             } catch (t: Throwable) {
-                Elog.getLogger().error("CentralConfigurationInitializer error", t)
+                logger.error("CentralConfiguration initialization error", t)
                 scheduleDefault()
             }
         }
@@ -40,16 +37,22 @@ class CentralConfigurationManager internal constructor(
         backgroundWorkService.schedule(ConfigurationPoll(), seconds)
     }
 
+    @WorkerThread
+    @Throws(IOException::class)
+    private fun doPoll() {
+        val delayForNextPollInSeconds = centralConfiguration.sync()
+        if (delayForNextPollInSeconds != null) {
+            logger.info("Central config returned max age is null")
+            scheduleInSeconds(delayForNextPollInSeconds)
+        } else {
+            scheduleDefault()
+        }
+    }
+
     private inner class ConfigurationPoll : Runnable {
         override fun run() {
             try {
-                val maxAgeInSeconds = centralConfiguration.sync()
-                if (maxAgeInSeconds == null) {
-                    logger.info("Central config returned max age is null")
-                    scheduleDefault()
-                } else {
-                    scheduleInSeconds(maxAgeInSeconds)
-                }
+                doPoll()
             } catch (t: Throwable) {
                 logger.error("Central config poll error", t)
                 scheduleDefault()

@@ -40,7 +40,7 @@ class DiskBufferingTest {
 
     @Test
     fun `Disk buffering enabled, happy path`() {
-        val configuration = DiskBufferingConfiguration(true)
+        val configuration = DiskBufferingConfiguration.enabled()
         configuration.maxFileAgeForWrite = 500
         configuration.minFileAgeForRead = 501
         agentRule.initialize(diskBufferingConfiguration = configuration) { it }
@@ -79,7 +79,7 @@ class DiskBufferingTest {
             appInfoService.getCacheDir()
             appInfoService.getAvailableCacheSpace(any())
         }.throws(IOException())
-        val configuration = DiskBufferingConfiguration(true)
+        val configuration = DiskBufferingConfiguration.enabled()
         agentRule.initialize(diskBufferingConfiguration = configuration) {
             val spy = spyk(it)
             val serviceManagerSpy = spyk(it.serviceManager)
@@ -100,7 +100,7 @@ class DiskBufferingTest {
 
     @Test
     fun `Disk buffering disabled`() {
-        val configuration = DiskBufferingConfiguration(false)
+        val configuration = DiskBufferingConfiguration.disabled()
         agentRule.initialize(diskBufferingConfiguration = configuration) { it }
 
         agentRule.sendSpan()

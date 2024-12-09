@@ -59,8 +59,7 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
     private var serviceVersion: String = "unknown"
     private var serviceBuild: Int? = null
     private var deploymentEnvironment: String = "unknown"
-    private var deviceIdProvider: StringProvider =
-        PreferencesCachedStringProvider("device_id") { UUID.randomUUID().toString() }
+    private var deviceIdProvider: StringProvider? = null
     private var sessionProvider: SessionProvider = SessionProvider.getDefault()
     private var clock: Clock = ElasticClock.create()
     private var processorFactory: ProcessorFactory = ProcessorFactory.getDefault()
@@ -69,7 +68,7 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
     private var spanExporterInterceptors = mutableListOf<Interceptor<SpanExporter>>()
     private var logRecordExporterInterceptors = mutableListOf<Interceptor<LogRecordExporter>>()
     private var metricExporterInterceptors = mutableListOf<Interceptor<MetricExporter>>()
-    private var diskBufferingConfiguration = DiskBufferingConfiguration(true)
+    private var diskBufferingConfiguration = DiskBufferingConfiguration.enabled()
     private var exporterProvider: ExporterProvider = ExporterProvider.noop()
 
     fun setServiceName(value: String): B {
@@ -154,12 +153,18 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
         addSpanAttributesInterceptor(commonAttributesInterceptor)
         addSpanAttributesInterceptor(SpanAttributesInterceptor(serviceManager))
         addLogRecordAttributesInterceptor(commonAttributesInterceptor)
+        if (deviceIdProvider == null) {
+            deviceIdProvider = PreferencesCachedStringProvider(
+                serviceManager,
+                "device_id"
+            ) { UUID.randomUUID().toString() }
+        }
         val resource = Resource.builder()
             .put(ResourceAttributes.SERVICE_NAME, serviceName)
             .put(ResourceAttributes.SERVICE_VERSION, serviceVersion)
             .put(AttributeKey.longKey("service.build"), serviceBuild ?: getVersionCode())
             .put(ResourceAttributes.DEPLOYMENT_ENVIRONMENT, deploymentEnvironment)
-            .put(ResourceAttributes.DEVICE_ID, deviceIdProvider.get())
+            .put(ResourceAttributes.DEVICE_ID, deviceIdProvider!!.get())
             .put(ResourceAttributes.DEVICE_MODEL_IDENTIFIER, Build.MODEL)
             .put(ResourceAttributes.DEVICE_MANUFACTURER, Build.MANUFACTURER)
             .put(ResourceAttributes.OS_DESCRIPTION, getOsDescription())

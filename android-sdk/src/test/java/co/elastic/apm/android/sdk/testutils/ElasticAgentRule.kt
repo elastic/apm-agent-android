@@ -96,7 +96,7 @@ class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory,
         serviceVersion: String = "0.0.0",
         deploymentEnvironment: String = "test",
         clock: Clock = Clock.getDefault(),
-        diskBufferingConfiguration: DiskBufferingConfiguration = DiskBufferingConfiguration(true),
+        diskBufferingConfiguration: DiskBufferingConfiguration = DiskBufferingConfiguration.enabled(),
         configurationInterceptor: Interceptor<ElasticOtelAgent.Configuration> = this
     ) {
         spanExporter = InMemorySpanExporter.create()

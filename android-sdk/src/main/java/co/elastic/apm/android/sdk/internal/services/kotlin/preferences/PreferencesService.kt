@@ -55,4 +55,8 @@ class PreferencesService(application: Application) : Service {
     fun retrieveLong(key: String, defaultValue: Long): Long {
         return preferences.getLong(key, defaultValue)
     }
+
+    fun remove(key: String) {
+        preferences.edit().remove(key).apply()
+    }
 }

@@ -19,6 +19,18 @@
 package co.elastic.apm.android.sdk.integration
 
 import co.elastic.apm.android.sdk.ElasticAgent
+import co.elastic.apm.android.sdk.exporters.apmserver.ApmServerConnectivityConfiguration
+import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingConfiguration
+import co.elastic.apm.android.sdk.processors.ProcessorFactory
+import io.opentelemetry.sdk.logs.LogRecordProcessor
+import io.opentelemetry.sdk.logs.export.LogRecordExporter
+import io.opentelemetry.sdk.logs.export.SimpleLogRecordProcessor
+import io.opentelemetry.sdk.metrics.export.MetricExporter
+import io.opentelemetry.sdk.metrics.export.MetricReader
+import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader
+import io.opentelemetry.sdk.trace.SpanProcessor
+import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor
+import io.opentelemetry.sdk.trace.export.SpanExporter
 import java.util.concurrent.TimeUnit
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -33,12 +45,14 @@ import org.robolectric.RuntimeEnvironment
 @RunWith(RobolectricTestRunner::class)
 class ElasticAgentTest {
     private lateinit var webServer: MockWebServer
+    private lateinit var simpleProcessorFactory: SimpleProcessorFactory
     private lateinit var agent: ElasticAgent
 
     @Before
     fun setUp() {
         webServer = MockWebServer()
         webServer.start()
+        simpleProcessorFactory = SimpleProcessorFactory()
     }
 
     @After
@@ -51,22 +65,134 @@ class ElasticAgentTest {
         agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
             .setUrl(webServer.url("/").toString())
             .setServiceName("my-app")
+            .setDiskBufferingConfiguration(DiskBufferingConfiguration.disabled())
+            .setProcessorFactory(simpleProcessorFactory)
             .build()
 
-        webServer.enqueue(MockResponse())
+        webServer.enqueue(MockResponse().setResponseCode(500))
+        webServer.enqueue(MockResponse().setResponseCode(500))
+        webServer.enqueue(MockResponse().setResponseCode(500))
 
         sendSpan()
+        val tracesRequest = takeRequest()
+        assertThat(tracesRequest.path).isEqualTo("/v1/traces")
+        assertThat(tracesRequest.headers["User-Agent"]).startsWith("OTel-OTLP-Exporter-Java/")
+
+        sendLog()
+        val logsRequest = takeRequest()
+        assertThat(logsRequest.path).isEqualTo("/v1/logs")
+        assertThat(logsRequest.headers["User-Agent"]).startsWith("OTel-OTLP-Exporter-Java/")
+
+        sendMetric()
+        val metricsRequest = takeRequest()
+        assertThat(metricsRequest.path).isEqualTo("/v1/metrics")
+        assertThat(metricsRequest.headers["User-Agent"]).startsWith("OTel-OTLP-Exporter-Java/")
+
         agent.close()
-
-        val request = webServer.takeRequest(1, TimeUnit.SECONDS)!!
-
-        assertThat(request.path).isEqualTo("v1/traces")
     }
+
+    @Test
+    fun `Validate changing endpoint config`() {
+        val secretToken = "secret-token"
+        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
+            .setUrl(webServer.url("/first/").toString())
+            .setAuthentication(ApmServerConnectivityConfiguration.Auth.SecretToken(secretToken))
+            .setServiceName("my-app")
+            .setDiskBufferingConfiguration(DiskBufferingConfiguration.disabled())
+            .setProcessorFactory(simpleProcessorFactory)
+            .build()
+
+        webServer.enqueue(MockResponse().setResponseCode(500))
+        webServer.enqueue(MockResponse().setResponseCode(500))
+        webServer.enqueue(MockResponse().setResponseCode(500))
+
+        sendSpan()
+        val tracesRequest = takeRequest()
+        assertThat(tracesRequest.path).isEqualTo("/first/v1/traces")
+        assertThat(tracesRequest.headers["Authorization"]).isEqualTo("Bearer $secretToken")
+
+        sendLog()
+        val logsRequest = takeRequest()
+        assertThat(logsRequest.path).isEqualTo("/first/v1/logs")
+        assertThat(logsRequest.headers["Authorization"]).isEqualTo("Bearer $secretToken")
+
+        sendMetric()
+        val metricsRequest = takeRequest()
+        assertThat(metricsRequest.path).isEqualTo("/first/v1/metrics")
+        assertThat(metricsRequest.headers["Authorization"]).isEqualTo("Bearer $secretToken")
+
+        // Changing config
+        val apiKey = "api-key"
+        agent.apmServerConnectivityManager.setConnectivityConfiguration(
+            ApmServerConnectivityConfiguration(
+                webServer.url("/second/").toString(),
+                ApmServerConnectivityConfiguration.Auth.ApiKey(apiKey),
+                mapOf("Custom-Header" to "custom value")
+            )
+        )
+
+        webServer.enqueue(MockResponse().setResponseCode(500))
+        webServer.enqueue(MockResponse().setResponseCode(500))
+        webServer.enqueue(MockResponse().setResponseCode(500))
+
+        sendSpan()
+        val tracesRequest2 = takeRequest()
+        assertThat(tracesRequest2.path).isEqualTo("/second/v1/traces")
+        assertThat(tracesRequest2.headers["Authorization"]).isEqualTo("ApiKey $apiKey")
+
+        sendLog()
+        val logsRequest2 = takeRequest()
+        assertThat(logsRequest2.path).isEqualTo("/second/v1/logs")
+        assertThat(logsRequest2.headers["Authorization"]).isEqualTo("ApiKey $apiKey")
+
+        sendMetric()
+        val metricsRequest2 = takeRequest()
+        assertThat(metricsRequest2.path).isEqualTo("/second/v1/metrics")
+        assertThat(metricsRequest2.headers["Authorization"]).isEqualTo("ApiKey $apiKey")
+
+        agent.close()
+    }
+
+    private fun takeRequest() = webServer.takeRequest(1, TimeUnit.SECONDS)!!
 
     private fun sendSpan() {
         agent.getOpenTelemetry().getTracer("TestTracer")
             .spanBuilder("span-name")
             .startSpan()
             .end()
+    }
+
+    private fun sendLog() {
+        agent.getOpenTelemetry().logsBridge.get("LoggerScope").logRecordBuilder()
+            .setBody("Log body").emit()
+    }
+
+    private fun sendMetric() {
+        agent.getOpenTelemetry().getMeter("MeterScope")
+            .counterBuilder("counter")
+            .build()
+            .add(1)
+        simpleProcessorFactory.flush()
+    }
+
+    private class SimpleProcessorFactory : ProcessorFactory {
+        private lateinit var metricReader: PeriodicMetricReader
+
+        override fun createSpanProcessor(exporter: SpanExporter?): SpanProcessor? {
+            return SimpleSpanProcessor.create(exporter)
+        }
+
+        override fun createLogRecordProcessor(exporter: LogRecordExporter?): LogRecordProcessor? {
+            return SimpleLogRecordProcessor.create(exporter)
+        }
+
+        override fun createMetricReader(exporter: MetricExporter?): MetricReader? {
+            metricReader = PeriodicMetricReader.create(exporter)
+            return metricReader
+        }
+
+        fun flush() {
+            metricReader.forceFlush()
+        }
     }
 }

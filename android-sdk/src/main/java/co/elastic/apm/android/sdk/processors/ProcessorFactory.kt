@@ -16,29 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.tools
+package co.elastic.apm.android.sdk.processors
 
-fun interface Interceptor<T> {
+import io.opentelemetry.sdk.logs.LogRecordProcessor
+import io.opentelemetry.sdk.logs.export.LogRecordExporter
+import io.opentelemetry.sdk.metrics.export.MetricExporter
+import io.opentelemetry.sdk.metrics.export.MetricReader
+import io.opentelemetry.sdk.trace.SpanProcessor
+import io.opentelemetry.sdk.trace.export.SpanExporter
 
+interface ProcessorFactory {
     companion object {
         @JvmStatic
-        fun <T> composite(interceptors: List<Interceptor<T>>): Interceptor<T> {
-            if (interceptors.isEmpty()) {
-                return noop()
-            }
-
-            if (interceptors.size == 1) {
-                return interceptors.first()
-            }
-
-            return MultiInterceptor(interceptors)
-        }
-
-        @JvmStatic
-        fun <T> noop(): Interceptor<T> {
-            return NoopInterceptor()
+        fun getDefault(): ProcessorFactory {
+            return DefaultProcessorFactory()
         }
     }
 
-    fun intercept(item: T): T
+    fun createSpanProcessor(exporter: SpanExporter?): SpanProcessor?
+
+    fun createLogRecordProcessor(exporter: LogRecordExporter?): LogRecordProcessor?
+
+    fun createMetricReader(exporter: MetricExporter?): MetricReader?
 }

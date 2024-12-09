@@ -18,39 +18,54 @@
  */
 package co.elastic.apm.android.sdk.testutils
 
-import co.elastic.apm.android.sdk.ElasticAgent
-import co.elastic.apm.android.sdk.internal.services.ServiceManager
+import co.elastic.apm.android.sdk.exporters.ExporterProvider
+import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingConfiguration
+import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingManager
+import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
+import co.elastic.apm.android.sdk.processors.ProcessorFactory
 import co.elastic.apm.android.sdk.session.Session
+import co.elastic.apm.android.sdk.tools.Interceptor
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.spyk
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.api.logs.LogRecordBuilder
 import io.opentelemetry.api.trace.SpanBuilder
 import io.opentelemetry.sdk.common.Clock
+import io.opentelemetry.sdk.logs.LogRecordProcessor
 import io.opentelemetry.sdk.logs.data.LogRecordData
+import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.logs.export.SimpleLogRecordProcessor
 import io.opentelemetry.sdk.metrics.data.MetricData
+import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.metrics.export.MetricReader
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader
 import io.opentelemetry.sdk.testing.exporter.InMemoryLogRecordExporter
 import io.opentelemetry.sdk.testing.exporter.InMemoryMetricExporter
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter
+import io.opentelemetry.sdk.trace.SpanProcessor
 import io.opentelemetry.sdk.trace.data.SpanData
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor
+import io.opentelemetry.sdk.trace.export.SpanExporter
 import java.util.concurrent.TimeUnit
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
 import org.robolectric.RuntimeEnvironment
 
-class ElasticAgentRule : TestRule {
-    private lateinit var spanExporter: InMemorySpanExporter
-    private lateinit var metricReader: MetricReader
-    private lateinit var metricsExporter: InMemoryMetricExporter
-    private lateinit var logsExporter: InMemoryLogRecordExporter
-    private lateinit var agent: ElasticAgent
+class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory,
+    Interceptor<ElasticOtelAgent.Configuration> {
+    private var spanExporter: InMemorySpanExporter? = null
+    private var metricReader: MetricReader? = null
+    private var metricsExporter: InMemoryMetricExporter? = null
+    private var logsExporter: InMemoryLogRecordExporter? = null
+    var agent: ElasticOtelAgent? = null
     val openTelemetry: OpenTelemetry
         get() {
-            return agent.openTelemetry
+            return agent!!.getOpenTelemetry()
         }
 
     companion object {
@@ -65,10 +80,6 @@ class ElasticAgentRule : TestRule {
     }
 
     override fun apply(base: Statement, description: Description): Statement {
-        spanExporter = InMemorySpanExporter.create()
-        metricsExporter = InMemoryMetricExporter.create()
-        logsExporter = InMemoryLogRecordExporter.create()
-
         try {
             return object : Statement() {
                 override fun evaluate() {
@@ -76,7 +87,7 @@ class ElasticAgentRule : TestRule {
                 }
             }
         } finally {
-            ServiceManager.resetForTest()
+            close()
         }
     }
 
@@ -84,56 +95,102 @@ class ElasticAgentRule : TestRule {
         serviceName: String = "service-name",
         serviceVersion: String = "0.0.0",
         deploymentEnvironment: String = "test",
-        clock: Clock = Clock.getDefault()
+        clock: Clock = Clock.getDefault(),
+        diskBufferingConfiguration: DiskBufferingConfiguration = DiskBufferingConfiguration(true),
+        configurationInterceptor: Interceptor<ElasticOtelAgent.Configuration> = this
     ) {
-        metricReader = PeriodicMetricReader.create(metricsExporter)
-        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
+        spanExporter = InMemorySpanExporter.create()
+        metricsExporter = InMemoryMetricExporter.create()
+        logsExporter = InMemoryLogRecordExporter.create()
+
+        agent = TestElasticOtelAgent.builder(RuntimeEnvironment.getApplication())
             .setServiceName(serviceName)
             .setServiceVersion(serviceVersion)
             .setDeploymentEnvironment(deploymentEnvironment)
             .setDeviceIdProvider { "device-id" }
             .setSessionProvider { Session("session-id") }
             .setClock(clock)
-            .setSpanProcessor(SimpleSpanProcessor.create(spanExporter))
-            .setLogRecordProcessor(SimpleLogRecordProcessor.create(logsExporter))
-            .setMetricReader(metricReader)
+            .setExporterProvider(this)
+            .setProcessorFactory(this)
+            .setDiskBufferingConfiguration(diskBufferingConfiguration)
+            .apply { configurationInterceptors.add(configurationInterceptor) }
             .build()
     }
 
     fun sendLog(body: String = "", builderVisitor: LogRecordBuilder.() -> Unit = {}) {
         val logRecordBuilder =
-            agent.openTelemetry.logsBridge.get("LoggerScope").logRecordBuilder()
+            agent!!.getOpenTelemetry().logsBridge.get("LoggerScope").logRecordBuilder()
         builderVisitor(logRecordBuilder)
         logRecordBuilder.setBody(body).emit()
     }
 
     fun sendSpan(name: String = "SomeSpan", builderVisitor: SpanBuilder.() -> Unit = {}) {
-        val spanBuilder = agent.openTelemetry.getTracer("SomeTracer").spanBuilder(name)
+        val spanBuilder = agent!!.getOpenTelemetry().getTracer("SomeTracer").spanBuilder(name)
         builderVisitor(spanBuilder)
         spanBuilder.startSpan().end()
     }
 
     fun sendMetricCounter(name: String = "Counter") {
-        agent.openTelemetry.getMeter("MeterScope").counterBuilder(name).build().add(1)
+        agent!!.getOpenTelemetry().getMeter("MeterScope").counterBuilder(name).build().add(1)
     }
 
     fun getFinishedSpans(): List<SpanData> {
-        val list = ArrayList(spanExporter.finishedSpanItems)
-        spanExporter.reset()
+        val list = ArrayList(spanExporter!!.finishedSpanItems)
+        spanExporter!!.reset()
         return list
     }
 
     fun getFinishedLogRecords(): List<LogRecordData> {
-        val list = ArrayList(logsExporter.finishedLogRecordItems)
-        logsExporter.reset()
+        val list = ArrayList(logsExporter!!.finishedLogRecordItems)
+        logsExporter!!.reset()
         return list
     }
 
     fun getFinishedMetrics(): List<MetricData> {
-        metricReader.forceFlush().join(1, TimeUnit.SECONDS)
-        val list = ArrayList(metricsExporter.finishedMetricItems)
-        metricsExporter.reset()
+        metricReader!!.forceFlush().join(1, TimeUnit.SECONDS)
+        val list = ArrayList(metricsExporter!!.finishedMetricItems)
+        metricsExporter!!.reset()
         return list
     }
 
+    override fun getSpanExporter(): SpanExporter? {
+        return spanExporter
+    }
+
+    override fun getLogRecordExporter(): LogRecordExporter? {
+        return logsExporter
+    }
+
+    override fun getMetricExporter(): MetricExporter? {
+        return metricsExporter
+    }
+
+    override fun createSpanProcessor(exporter: SpanExporter?): SpanProcessor? {
+        return SimpleSpanProcessor.create(exporter)
+    }
+
+    override fun createLogRecordProcessor(exporter: LogRecordExporter?): LogRecordProcessor? {
+        return SimpleLogRecordProcessor.create(exporter)
+    }
+
+    override fun createMetricReader(exporter: MetricExporter?): MetricReader? {
+        metricReader = PeriodicMetricReader.create(exporter)
+        return metricReader
+    }
+
+    override fun intercept(item: ElasticOtelAgent.Configuration): ElasticOtelAgent.Configuration {
+        val spy = spyk(item)
+        val diskBufferingManager = mockk<DiskBufferingManager>()
+        every { diskBufferingManager.initialize(item.serviceManager) } just Runs
+        every { spy.diskBufferingManager }.returns(diskBufferingManager)
+        return spy
+    }
+
+    fun close() {
+        agent?.close()
+        spanExporter = null
+        logsExporter = null
+        metricReader = null
+        metricsExporter = null
+    }
 }

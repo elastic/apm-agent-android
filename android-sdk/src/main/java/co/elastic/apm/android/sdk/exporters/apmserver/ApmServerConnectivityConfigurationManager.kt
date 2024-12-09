@@ -16,29 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.tools
+package co.elastic.apm.android.sdk.exporters.apmserver
 
-fun interface Interceptor<T> {
+import co.elastic.apm.android.sdk.connectivity.ConnectivityConfigurationManager
 
-    companion object {
-        @JvmStatic
-        fun <T> composite(interceptors: List<Interceptor<T>>): Interceptor<T> {
-            if (interceptors.isEmpty()) {
-                return noop()
-            }
+internal class ApmServerConnectivityConfigurationManager(initialValue: ApmServerConnectivityConfiguration) :
+    ConnectivityConfigurationManager(initialValue) {
 
-            if (interceptors.size == 1) {
-                return interceptors.first()
-            }
-
-            return MultiInterceptor(interceptors)
-        }
-
-        @JvmStatic
-        fun <T> noop(): Interceptor<T> {
-            return NoopInterceptor()
-        }
+    fun setConnectivityConfiguration(value: ApmServerConnectivityConfiguration) {
+        set(value)
     }
 
-    fun intercept(item: T): T
+    fun getConnectivityConfiguration(): ApmServerConnectivityConfiguration {
+        return get() as ApmServerConnectivityConfiguration
+    }
 }

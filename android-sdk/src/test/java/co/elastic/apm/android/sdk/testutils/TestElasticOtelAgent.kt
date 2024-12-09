@@ -16,38 +16,43 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk
+package co.elastic.apm.android.sdk.testutils
 
 import android.app.Application
+import co.elastic.apm.android.sdk.exporters.ExporterProvider
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
 import co.elastic.apm.android.sdk.internal.opentelemetry.ElasticOpenTelemetryBuilder
+import co.elastic.apm.android.sdk.tools.Interceptor
 import io.opentelemetry.api.OpenTelemetry
+import io.opentelemetry.sdk.OpenTelemetrySdk
 
-class ElasticAgent private constructor(
-    configuration: Configuration
-) : ElasticOtelAgent(configuration) {
-    private val openTelemetry = configuration.openTelemetrySdk
+class TestElasticOtelAgent(configuration: Configuration) : ElasticOtelAgent(configuration) {
+    private val openTelemetry: OpenTelemetrySdk = configuration.openTelemetrySdk
 
     override fun getOpenTelemetry(): OpenTelemetry {
         return openTelemetry
     }
 
     override fun onClose() {
-
     }
 
     companion object {
-        @JvmStatic
         fun builder(application: Application): Builder {
             return Builder(application)
         }
     }
 
-    class Builder internal constructor(application: Application) :
-        ElasticOpenTelemetryBuilder<Builder>(application) {
+    class Builder(application: Application) : ElasticOpenTelemetryBuilder<Builder>(application) {
+        val configurationInterceptors = mutableListOf<Interceptor<Configuration>>()
 
-        fun build(): ElasticAgent {
-            return ElasticAgent(buildConfiguration())
+        public override fun setExporterProvider(value: ExporterProvider): Builder {
+            return super.setExporterProvider(value)
+        }
+
+        fun build(): TestElasticOtelAgent {
+            return TestElasticOtelAgent(
+                Interceptor.composite(configurationInterceptors).intercept(buildConfiguration())
+            )
         }
     }
 }

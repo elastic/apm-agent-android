@@ -16,8 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.tools
+package co.elastic.apm.android.sdk.exporters
 
-interface Provider<T> {
-    fun get(): T
+import io.opentelemetry.sdk.logs.export.LogRecordExporter
+import io.opentelemetry.sdk.metrics.export.MetricExporter
+import io.opentelemetry.sdk.trace.export.SpanExporter
+
+internal class NoopExporterProvider : ExporterProvider {
+    override fun getSpanExporter(): SpanExporter? {
+        return null
+    }
+
+    override fun getLogRecordExporter(): LogRecordExporter? {
+        return null
+    }
+
+    override fun getMetricExporter(): MetricExporter? {
+        return null
+    }
 }

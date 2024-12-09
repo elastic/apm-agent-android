@@ -16,6 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.tools
+package co.elastic.apm.android.sdk.features.diskbuffering
 
-fun interface StringProvider : Provider<String>
+data class DiskBufferingConfiguration(val enabled: Boolean) {
+    internal val maxCacheFileSize = 1024 * 1024
+    internal val maxCacheSize = 30 * 1024 * 1024 // 30 MB
+    internal var maxFileAgeForWrite: Long? = null
+    internal var minFileAgeForRead: Long? = null
+}

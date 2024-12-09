@@ -16,29 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.tools
+package co.elastic.apm.android.sdk.internal.services.kotlin.network.data
 
-fun interface Interceptor<T> {
-
-    companion object {
-        @JvmStatic
-        fun <T> composite(interceptors: List<Interceptor<T>>): Interceptor<T> {
-            if (interceptors.isEmpty()) {
-                return noop()
-            }
-
-            if (interceptors.size == 1) {
-                return interceptors.first()
-            }
-
-            return MultiInterceptor(interceptors)
-        }
-
-        @JvmStatic
-        fun <T> noop(): Interceptor<T> {
-            return NoopInterceptor()
-        }
-    }
-
-    fun intercept(item: T): T
+sealed class NetworkType(val name: String) {
+    data class Cell(val subTypeName: String?) : NetworkType("cell")
+    data object Wifi : NetworkType("wifi")
+    data object Unknown : NetworkType("unknown")
+    data object None : NetworkType("unavailable")
 }

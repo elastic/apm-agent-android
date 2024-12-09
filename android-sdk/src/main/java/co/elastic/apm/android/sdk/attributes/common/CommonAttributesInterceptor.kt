@@ -18,30 +18,37 @@
  */
 package co.elastic.apm.android.sdk.attributes.common
 
-import co.elastic.apm.android.sdk.internal.services.Service
-import co.elastic.apm.android.sdk.internal.services.ServiceManager
-import co.elastic.apm.android.sdk.internal.services.network.NetworkService
+import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
+import co.elastic.apm.android.sdk.internal.services.kotlin.network.NetworkService
+import co.elastic.apm.android.sdk.internal.services.kotlin.network.data.NetworkType
 import co.elastic.apm.android.sdk.session.SessionProvider
 import co.elastic.apm.android.sdk.tools.Interceptor
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.semconv.SemanticAttributes
 
-internal class CommonAttributesInterceptor(private val sessionProvider: SessionProvider) :
-    Interceptor<Attributes> {
+internal class CommonAttributesInterceptor(
+    private val serviceManager: ServiceManager,
+    private val sessionProvider: SessionProvider
+) : Interceptor<Attributes> {
     private val networkService: NetworkService by lazy {
-        ServiceManager.get().getService(Service.Names.NETWORK)
+        serviceManager.getNetworkService()
     }
 
     override fun intercept(item: Attributes): Attributes {
         val builder = Attributes.builder().putAll(item)
-        val networkType = networkService.type
+        val networkType = networkService.getType()
 
         builder.put(SemanticAttributes.NETWORK_CONNECTION_TYPE, networkType.name)
         builder.put(SESSION_ID_ATTRIBUTE_KEY, sessionProvider.getSession().id)
 
-        if (networkType.subTypeName != null) {
-            builder.put(SemanticAttributes.NETWORK_CONNECTION_SUBTYPE, networkType.subTypeName)
+        if (networkType is NetworkType.Cell) {
+            networkType.subTypeName?.let {
+                builder.put(
+                    SemanticAttributes.NETWORK_CONNECTION_SUBTYPE,
+                    it
+                )
+            }
         }
         return builder.build()
     }

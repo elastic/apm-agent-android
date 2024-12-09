@@ -140,16 +140,19 @@ class ElasticAgentTest {
         val tracesRequest2 = takeRequest()
         assertThat(tracesRequest2.path).isEqualTo("/second/v1/traces")
         assertThat(tracesRequest2.headers["Authorization"]).isEqualTo("ApiKey $apiKey")
+        assertThat(tracesRequest2.headers["Custom-Header"]).isEqualTo("custom value")
 
         sendLog()
         val logsRequest2 = takeRequest()
         assertThat(logsRequest2.path).isEqualTo("/second/v1/logs")
         assertThat(logsRequest2.headers["Authorization"]).isEqualTo("ApiKey $apiKey")
+        assertThat(logsRequest2.headers["Custom-Header"]).isEqualTo("custom value")
 
         sendMetric()
         val metricsRequest2 = takeRequest()
         assertThat(metricsRequest2.path).isEqualTo("/second/v1/metrics")
         assertThat(metricsRequest2.headers["Authorization"]).isEqualTo("ApiKey $apiKey")
+        assertThat(metricsRequest2.headers["Custom-Header"]).isEqualTo("custom value")
 
         agent.close()
     }

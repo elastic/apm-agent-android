@@ -19,7 +19,7 @@
 package co.elastic.apm.android.sdk.exporters.apmserver
 
 class ApmServerConnectivityManager internal constructor(
-    internal val connectivityConfigurationManager: ApmServerConnectivityConfigurationManager
+    private val connectivityConfigurationManager: ApmServerConnectivityConfigurationManager
 ) {
     fun setConnectivityConfiguration(configuration: ApmServerConnectivityConfiguration) {
         connectivityConfigurationManager.setConnectivityConfiguration(configuration)

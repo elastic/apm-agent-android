@@ -55,10 +55,10 @@ import java.util.UUID
 
 @Suppress("UNCHECKED_CAST")
 open class ElasticOpenTelemetryBuilder<B>(private val application: Application) {
-    private var serviceName: String = ""
-    private var serviceVersion: String = ""
+    private var serviceName: String = "unknown"
+    private var serviceVersion: String = "unknown"
     private var serviceBuild: Int? = null
-    private var deploymentEnvironment: String = ""
+    private var deploymentEnvironment: String = "unknown"
     private var deviceIdProvider: StringProvider =
         PreferencesCachedStringProvider("device_id") { UUID.randomUUID().toString() }
     private var sessionProvider: SessionProvider = SessionProvider.getDefault()

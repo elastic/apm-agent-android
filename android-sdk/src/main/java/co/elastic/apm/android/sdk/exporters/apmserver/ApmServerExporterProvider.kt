@@ -28,7 +28,7 @@ import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.trace.export.SpanExporter
 
 class ApmServerExporterProvider internal constructor(
-    private val connectivityConfigurationProvider: Provider<ApmServerConnectivityConfiguration>,
+    private val connectivityConfigurationProvider: Provider<ApmServerConnectivity>,
     private val exporterProvider: ConfigurableExporterProvider
 ) : ExporterProvider, ConnectivityConfigurationManager.Listener {
 
@@ -74,7 +74,7 @@ class ApmServerExporterProvider internal constructor(
         return exporterProvider.getMetricExporter()
     }
 
-    private fun setApmServerConfiguration(configuration: ApmServerConnectivityConfiguration) {
+    private fun setApmServerConfiguration(configuration: ApmServerConnectivity) {
         val spanConfiguration = ExporterConfiguration.Span(
             configuration.getTracesUrl(),
             configuration.getHeaders(),

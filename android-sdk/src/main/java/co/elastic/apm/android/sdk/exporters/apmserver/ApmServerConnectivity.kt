@@ -21,7 +21,7 @@ package co.elastic.apm.android.sdk.exporters.apmserver
 import co.elastic.apm.android.sdk.connectivity.ConnectivityConfiguration
 import co.elastic.apm.android.sdk.exporters.configuration.ExportProtocol
 
-data class ApmServerConnectivityConfiguration(
+data class ApmServerConnectivity(
     private val url: String,
     val auth: ApmServerAuthentication = ApmServerAuthentication.None,
     val extraHeaders: Map<String, String> = emptyMap(),

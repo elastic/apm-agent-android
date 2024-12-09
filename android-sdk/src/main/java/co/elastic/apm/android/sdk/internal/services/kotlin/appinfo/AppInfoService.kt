@@ -54,6 +54,8 @@ class AppInfoService(private val application: Application) : Service {
 
     fun getCacheDir(): File = application.cacheDir
 
+    fun getFilesDir(): File = application.filesDir
+
     @WorkerThread
     fun getAvailableCacheSpace(maxSpaceNeeded: Long): Long {
         val cacheDir = getCacheDir()

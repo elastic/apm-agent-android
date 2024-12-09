@@ -51,7 +51,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class CentralConfigurationManagerTest {
+class CentralConfigurationTest {
     private lateinit var configFile: File
     private lateinit var webServer: MockWebServer
     private lateinit var manager: CentralConfigurationManager

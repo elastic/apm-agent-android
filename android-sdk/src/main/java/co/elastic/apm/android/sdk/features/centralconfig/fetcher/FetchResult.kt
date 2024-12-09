@@ -16,16 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.exporters.apmserver
+package co.elastic.apm.android.sdk.features.centralconfig.fetcher
 
-class ApmServerConnectivityManager internal constructor(
-    private val connectivityConfigurationManager: ApmServerConnectivityConfigurationManager
-) {
-    fun setConnectivityConfiguration(configuration: ApmServerConnectivity) {
-        connectivityConfigurationManager.setConnectivityConfiguration(configuration)
-    }
-
-    fun getConnectivityConfiguration(): ApmServerConnectivity {
-        return connectivityConfigurationManager.getConnectivityConfiguration()
-    }
-}
+internal data class FetchResult(val maxAgeInSeconds: Int?, val configurationHasChanged: Boolean)

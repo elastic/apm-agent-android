@@ -20,7 +20,7 @@ package co.elastic.apm.android.sdk
 
 import android.app.Application
 import co.elastic.apm.android.sdk.exporters.apmserver.ApmServerAuthentication
-import co.elastic.apm.android.sdk.exporters.apmserver.ApmServerConnectivityConfiguration
+import co.elastic.apm.android.sdk.exporters.apmserver.ApmServerConnectivity
 import co.elastic.apm.android.sdk.exporters.apmserver.ApmServerConnectivityConfigurationManager
 import co.elastic.apm.android.sdk.exporters.apmserver.ApmServerConnectivityManager
 import co.elastic.apm.android.sdk.exporters.apmserver.ApmServerExporterProvider
@@ -80,7 +80,7 @@ class ElasticAgent private constructor(
         fun build(): ElasticAgent {
             url?.let { finalUrl ->
                 val configuration =
-                    ApmServerConnectivityConfiguration(
+                    ApmServerConnectivity(
                         finalUrl,
                         authentication,
                         extraRequestHeaders,

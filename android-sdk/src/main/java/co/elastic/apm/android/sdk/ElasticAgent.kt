@@ -30,12 +30,16 @@ import io.opentelemetry.api.OpenTelemetry
 
 class ElasticAgent private constructor(
     configuration: Configuration,
-    val apmServerConnectivityManager: ApmServerConnectivityManager
+    private val apmServerConnectivityManager: ApmServerConnectivityManager
 ) : ElasticOtelAgent(configuration) {
     private val openTelemetry = configuration.openTelemetrySdk
 
     override fun getOpenTelemetry(): OpenTelemetry {
         return openTelemetry
+    }
+
+    fun getApmServerConnectivityManager(): ApmServerConnectivityManager {
+        return apmServerConnectivityManager
     }
 
     override fun onClose() {

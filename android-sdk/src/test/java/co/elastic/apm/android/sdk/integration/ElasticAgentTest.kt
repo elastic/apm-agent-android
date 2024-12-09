@@ -123,7 +123,7 @@ class ElasticAgentTest {
 
         // Changing config
         val apiKey = "api-key"
-        agent.apmServerConnectivityManager.setConnectivityConfiguration(
+        agent.getApmServerConnectivityManager().setConnectivityConfiguration(
             ApmServerConnectivityConfiguration(
                 webServer.url("/second/").toString(),
                 ApmServerConnectivityConfiguration.Auth.ApiKey(apiKey),

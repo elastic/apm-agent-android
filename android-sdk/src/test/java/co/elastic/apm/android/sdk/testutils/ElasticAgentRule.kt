@@ -93,7 +93,7 @@ class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory,
 
     fun initialize(
         serviceName: String = "service-name",
-        serviceVersion: String = "0.0.0",
+        serviceVersion: String? = "0.0.0",
         deploymentEnvironment: String = "test",
         clock: Clock = Clock.getDefault(),
         diskBufferingConfiguration: DiskBufferingConfiguration = DiskBufferingConfiguration.enabled(),
@@ -103,9 +103,8 @@ class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory,
         metricsExporter = InMemoryMetricExporter.create()
         logsExporter = InMemoryLogRecordExporter.create()
 
-        agent = TestElasticOtelAgent.builder(RuntimeEnvironment.getApplication())
+        val builder = TestElasticOtelAgent.builder(RuntimeEnvironment.getApplication())
             .setServiceName(serviceName)
-            .setServiceVersion(serviceVersion)
             .setDeploymentEnvironment(deploymentEnvironment)
             .setDeviceIdProvider { "device-id" }
             .setSessionProvider { Session("session-id") }
@@ -114,7 +113,12 @@ class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory,
             .setProcessorFactory(this)
             .setDiskBufferingConfiguration(diskBufferingConfiguration)
             .apply { configurationInterceptors.add(configurationInterceptor) }
-            .build()
+
+        if (serviceVersion != null) {
+            builder.setServiceVersion(serviceVersion)
+        }
+
+        agent = builder.build()
     }
 
     fun sendLog(body: String = "", builderVisitor: LogRecordBuilder.() -> Unit = {}) {

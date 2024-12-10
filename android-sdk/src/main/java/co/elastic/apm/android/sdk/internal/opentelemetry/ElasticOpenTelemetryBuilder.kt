@@ -19,6 +19,7 @@
 package co.elastic.apm.android.sdk.internal.opentelemetry
 
 import android.app.Application
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import co.elastic.apm.android.common.internal.logging.Elog
@@ -56,7 +57,7 @@ import java.util.UUID
 @Suppress("UNCHECKED_CAST")
 open class ElasticOpenTelemetryBuilder<B>(private val application: Application) {
     protected var serviceName: String = "unknown"
-    protected var serviceVersion: String = "unknown"
+    protected var serviceVersion: String? = null
     protected var serviceBuild: Int? = null
     protected var deploymentEnvironment: String? = null
     private var deviceIdProvider: StringProvider? = null
@@ -70,6 +71,14 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
     private var metricExporterInterceptors = mutableListOf<Interceptor<MetricExporter>>()
     private var diskBufferingConfiguration = DiskBufferingConfiguration.enabled()
     private var exporterProvider: ExporterProvider = ExporterProvider.noop()
+    private val packageInfo: PackageInfo? by lazy {
+        try {
+            application.packageManager.getPackageInfo(application.packageName, 0)
+        } catch (e: PackageManager.NameNotFoundException) {
+            Elog.getLogger().error("Package info not found", e)
+            null
+        }
+    }
 
     fun setServiceName(value: String): B {
         serviceName = value
@@ -161,7 +170,7 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
         }
         val resource = Resource.builder()
             .put(ResourceAttributes.SERVICE_NAME, serviceName)
-            .put(ResourceAttributes.SERVICE_VERSION, serviceVersion)
+            .put(ResourceAttributes.SERVICE_VERSION, serviceVersion ?: getVersionName())
             .put(AttributeKey.longKey("service.build"), serviceBuild ?: getVersionCode())
             .put(ResourceAttributes.DEPLOYMENT_ENVIRONMENT, deploymentEnvironment)
             .put(ResourceAttributes.DEVICE_ID, deviceIdProvider!!.get())
@@ -243,14 +252,12 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
         )
     }
 
+    private fun getVersionName(): String {
+        return packageInfo?.versionName ?: "unknown"
+    }
+
     private fun getVersionCode(): Int {
-        try {
-            val info = application.packageManager.getPackageInfo(application.packageName, 0)
-            return info.versionCode
-        } catch (e: PackageManager.NameNotFoundException) {
-            Elog.getLogger().error("Getting version code", e)
-            return 0
-        }
+        return packageInfo?.versionCode ?: 0
     }
 
     private fun getOsDescription(): String {

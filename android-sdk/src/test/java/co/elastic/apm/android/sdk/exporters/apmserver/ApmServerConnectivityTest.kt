@@ -19,6 +19,8 @@
 package co.elastic.apm.android.sdk.exporters.apmserver
 
 import co.elastic.apm.android.sdk.exporters.configuration.ExportProtocol
+import co.elastic.apm.android.sdk.features.apmserver.ApmServerAuthentication
+import co.elastic.apm.android.sdk.features.apmserver.ApmServerConnectivity
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

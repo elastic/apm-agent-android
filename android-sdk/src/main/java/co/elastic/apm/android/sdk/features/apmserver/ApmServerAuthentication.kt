@@ -16,16 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.exporters.apmserver
+package co.elastic.apm.android.sdk.features.apmserver
 
-class ApmServerConnectivityManager internal constructor(
-    private val connectivityConfigurationManager: ApmServerConnectivityConfigurationManager
-) {
-    fun setConnectivityConfiguration(configuration: ApmServerConnectivity) {
-        connectivityConfigurationManager.setConnectivityConfiguration(configuration)
-    }
-
-    fun getConnectivityConfiguration(): ApmServerConnectivity {
-        return connectivityConfigurationManager.getConnectivityConfiguration()
-    }
+sealed class ApmServerAuthentication {
+    data class ApiKey(val key: String) : ApmServerAuthentication()
+    data class SecretToken(val token: String) : ApmServerAuthentication()
+    data object None : ApmServerAuthentication()
 }

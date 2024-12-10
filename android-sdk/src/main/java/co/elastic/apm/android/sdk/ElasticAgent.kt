@@ -19,19 +19,20 @@
 package co.elastic.apm.android.sdk
 
 import android.app.Application
-import co.elastic.apm.android.sdk.exporters.apmserver.ApmServerAuthentication
-import co.elastic.apm.android.sdk.exporters.apmserver.ApmServerConnectivity
-import co.elastic.apm.android.sdk.exporters.apmserver.ApmServerConnectivityConfigurationManager
-import co.elastic.apm.android.sdk.exporters.apmserver.ApmServerConnectivityManager
-import co.elastic.apm.android.sdk.exporters.apmserver.ApmServerExporterProvider
 import co.elastic.apm.android.sdk.exporters.configuration.ExportProtocol
+import co.elastic.apm.android.sdk.features.apmserver.ApmServerAuthentication
+import co.elastic.apm.android.sdk.features.apmserver.ApmServerConnectivity
+import co.elastic.apm.android.sdk.features.apmserver.ApmServerConnectivityManager
+import co.elastic.apm.android.sdk.features.apmserver.ApmServerExporterProvider
+import co.elastic.apm.android.sdk.features.centralconfig.CentralConfigurationManager
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
 import co.elastic.apm.android.sdk.internal.opentelemetry.ElasticOpenTelemetryBuilder
 import io.opentelemetry.api.OpenTelemetry
 
 class ElasticAgent private constructor(
     configuration: Configuration,
-    private val apmServerConnectivityManager: ApmServerConnectivityManager
+    private val apmServerConnectivityManager: ApmServerConnectivityManager,
+    private val centralConfigurationManager: CentralConfigurationManager
 ) : ElasticOtelAgent(configuration) {
     private val openTelemetry = configuration.openTelemetrySdk
 

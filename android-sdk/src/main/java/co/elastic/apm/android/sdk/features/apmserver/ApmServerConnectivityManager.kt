@@ -16,18 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.exporters.apmserver
+package co.elastic.apm.android.sdk.features.apmserver
 
 import co.elastic.apm.android.sdk.connectivity.ConnectivityConfigurationManager
 
-internal class ApmServerConnectivityConfigurationManager(initialValue: ApmServerConnectivity) :
-    ConnectivityConfigurationManager(initialValue) {
-
-    fun setConnectivityConfiguration(value: ApmServerConnectivity) {
-        set(value)
+class ApmServerConnectivityManager internal constructor(
+    private val connectivityConfigurationManager: ConfigurationManager
+) {
+    fun setConnectivityConfiguration(configuration: ApmServerConnectivity) {
+        connectivityConfigurationManager.setConnectivityConfiguration(configuration)
     }
 
     fun getConnectivityConfiguration(): ApmServerConnectivity {
-        return get() as ApmServerConnectivity
+        return connectivityConfigurationManager.getConnectivityConfiguration()
+    }
+
+    internal class ConfigurationManager(initialValue: ApmServerConnectivity) :
+        ConnectivityConfigurationManager(initialValue) {
+
+        fun setConnectivityConfiguration(value: ApmServerConnectivity) {
+            set(value)
+        }
+
+        fun getConnectivityConfiguration(): ApmServerConnectivity {
+            return get() as ApmServerConnectivity
+        }
     }
 }

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.exporters.apmserver
+package co.elastic.apm.android.sdk.features.apmserver
 
 import co.elastic.apm.android.sdk.connectivity.ConnectivityConfiguration
 import co.elastic.apm.android.sdk.exporters.configuration.ExportProtocol

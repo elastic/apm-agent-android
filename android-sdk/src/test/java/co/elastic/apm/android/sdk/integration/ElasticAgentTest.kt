@@ -19,8 +19,8 @@
 package co.elastic.apm.android.sdk.integration
 
 import co.elastic.apm.android.sdk.ElasticAgent
-import co.elastic.apm.android.sdk.exporters.apmserver.ApmServerAuthentication
-import co.elastic.apm.android.sdk.exporters.apmserver.ApmServerConnectivity
+import co.elastic.apm.android.sdk.features.apmserver.ApmServerAuthentication
+import co.elastic.apm.android.sdk.features.apmserver.ApmServerConnectivity
 import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.apm.android.sdk.processors.ProcessorFactory
 import io.opentelemetry.sdk.logs.LogRecordProcessor

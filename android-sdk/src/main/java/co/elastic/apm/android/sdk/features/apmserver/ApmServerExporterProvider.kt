@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.exporters.apmserver
+package co.elastic.apm.android.sdk.features.apmserver
 
 import co.elastic.apm.android.sdk.connectivity.ConnectivityConfigurationManager
 import co.elastic.apm.android.sdk.exporters.ExporterProvider
@@ -33,9 +33,9 @@ class ApmServerExporterProvider internal constructor(
 ) : ExporterProvider, ConnectivityConfigurationManager.Listener {
 
     companion object {
-        internal fun create(connectivityConfigurationProviderManager: ApmServerConnectivityConfigurationManager): ApmServerExporterProvider {
+        internal fun create(connectivityConfigurationManager: ApmServerConnectivityManager.ConfigurationManager): ApmServerExporterProvider {
             val configuration =
-                connectivityConfigurationProviderManager.getConnectivityConfiguration()
+                connectivityConfigurationManager.getConnectivityConfiguration()
             val exporterProvider = ConfigurableExporterProvider.create(
                 ExporterConfiguration.Span(
                     configuration.getTracesUrl(),
@@ -54,10 +54,10 @@ class ApmServerExporterProvider internal constructor(
                 )
             )
             val apmServerExporterProvider = ApmServerExporterProvider(
-                connectivityConfigurationProviderManager::getConnectivityConfiguration,
+                connectivityConfigurationManager::getConnectivityConfiguration,
                 exporterProvider
             )
-            connectivityConfigurationProviderManager.addListener(apmServerExporterProvider)
+            connectivityConfigurationManager.addListener(apmServerExporterProvider)
             return apmServerExporterProvider
         }
     }

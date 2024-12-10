@@ -48,6 +48,10 @@ class ElasticAgent private constructor(
         return apmServerConnectivityManager
     }
 
+    fun getCentralConfigurationManager(): CentralConfigurationManager {
+        return centralConfigurationManager
+    }
+
     override fun onClose() {
 
     }

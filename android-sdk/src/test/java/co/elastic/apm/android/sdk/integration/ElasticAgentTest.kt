@@ -21,6 +21,7 @@ package co.elastic.apm.android.sdk.integration
 import co.elastic.apm.android.sdk.ElasticAgent
 import co.elastic.apm.android.sdk.features.apmserver.ApmServerAuthentication
 import co.elastic.apm.android.sdk.features.apmserver.ApmServerConnectivity
+import co.elastic.apm.android.sdk.features.centralconfig.CentralConfigurationConnectivity
 import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.apm.android.sdk.processors.ProcessorFactory
 import io.opentelemetry.sdk.logs.LogRecordProcessor
@@ -154,9 +155,103 @@ class ElasticAgentTest {
             )
         )
 
-        val centralConfigRequest2 = webServer.takeRequest()
+        val centralConfigRequest2 = takeRequest()
         assertThat(centralConfigRequest2.path).isEqualTo("/second/config/v1/agents?service.name=my-app&service.deployment=debug")
         assertThat(centralConfigRequest2.headers["Authorization"]).isEqualTo("ApiKey $apiKey")
+
+        // OTel requests
+        webServer.enqueue(MockResponse().setResponseCode(500))
+        webServer.enqueue(MockResponse().setResponseCode(500))
+        webServer.enqueue(MockResponse().setResponseCode(500))
+
+        sendSpan()
+        val tracesRequest2 = takeRequest()
+        assertThat(tracesRequest2.path).isEqualTo("/second/v1/traces")
+        assertThat(tracesRequest2.headers["Authorization"]).isEqualTo("ApiKey $apiKey")
+        assertThat(tracesRequest2.headers["Custom-Header"]).isEqualTo("custom value")
+
+        sendLog()
+        val logsRequest2 = takeRequest()
+        assertThat(logsRequest2.path).isEqualTo("/second/v1/logs")
+        assertThat(logsRequest2.headers["Authorization"]).isEqualTo("ApiKey $apiKey")
+        assertThat(logsRequest2.headers["Custom-Header"]).isEqualTo("custom value")
+
+        sendMetric()
+        val metricsRequest2 = takeRequest()
+        assertThat(metricsRequest2.path).isEqualTo("/second/v1/metrics")
+        assertThat(metricsRequest2.headers["Authorization"]).isEqualTo("ApiKey $apiKey")
+        assertThat(metricsRequest2.headers["Custom-Header"]).isEqualTo("custom value")
+
+        agent.close()
+    }
+
+    @Test
+    fun `Validate changing endpoint config after manually setting central config endpoint`() {
+        webServer.enqueue(
+            MockResponse()
+                .setResponseCode(404)
+                .addHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
+        )// Central config poll
+        val secretToken = "secret-token"
+        val initialUrl = webServer.url("/first/").toString()
+        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
+            .setUrl(initialUrl)
+            .setAuthentication(ApmServerAuthentication.SecretToken(secretToken))
+            .setServiceName("my-app")
+            .setDeploymentEnvironment("debug")
+            .setDiskBufferingConfiguration(DiskBufferingConfiguration.disabled())
+            .setProcessorFactory(simpleProcessorFactory)
+            .build()
+
+        val centralConfigRequest = takeRequest()
+        assertThat(centralConfigRequest.path).isEqualTo("/first/config/v1/agents?service.name=my-app&service.deployment=debug")
+        assertThat(centralConfigRequest.headers["Authorization"]).isEqualTo("Bearer $secretToken")
+
+        // Setting central config value manually
+        agent.getCentralConfigurationManager().setConnectivityConfiguration(
+            CentralConfigurationConnectivity(
+                initialUrl,
+                "other-name",
+                null,
+                mapOf("Custom-Header" to "Example")
+            )
+        )
+
+        // OTel requests
+        webServer.enqueue(MockResponse().setResponseCode(500))
+        webServer.enqueue(MockResponse().setResponseCode(500))
+        webServer.enqueue(MockResponse().setResponseCode(500))
+
+        sendSpan()
+        val tracesRequest = takeRequest()
+        assertThat(tracesRequest.path).isEqualTo("/first/v1/traces")
+        assertThat(tracesRequest.headers["Authorization"]).isEqualTo("Bearer $secretToken")
+
+        sendLog()
+        val logsRequest = takeRequest()
+        assertThat(logsRequest.path).isEqualTo("/first/v1/logs")
+        assertThat(logsRequest.headers["Authorization"]).isEqualTo("Bearer $secretToken")
+
+        sendMetric()
+        val metricsRequest = takeRequest()
+        assertThat(metricsRequest.path).isEqualTo("/first/v1/metrics")
+        assertThat(metricsRequest.headers["Authorization"]).isEqualTo("Bearer $secretToken")
+
+        // Changing config
+        val apiKey = "api-key"
+        webServer.enqueue(MockResponse().setResponseCode(500))// Central config poll
+        agent.getApmServerConnectivityManager().setConnectivityConfiguration(
+            ApmServerConnectivity(
+                webServer.url("/second/").toString(),
+                ApmServerAuthentication.ApiKey(apiKey),
+                mapOf("Custom-Header" to "custom value")
+            )
+        )
+
+        val centralConfigRequest2 = takeRequest()
+        assertThat(centralConfigRequest2.path).isEqualTo("/first/config/v1/agents?service.name=other-name")
+        assertThat(centralConfigRequest2.headers["Authorization"]).isNull()
+        assertThat(centralConfigRequest2.headers["Custom-Header"]).isEqualTo("Example")
 
         // OTel requests
         webServer.enqueue(MockResponse().setResponseCode(500))

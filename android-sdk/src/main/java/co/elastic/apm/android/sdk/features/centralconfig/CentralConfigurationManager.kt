@@ -34,30 +34,6 @@ class CentralConfigurationManager private constructor(
     private val backgroundWorkService by lazy { serviceManager.getBackgroundWorkService() }
     private val logger: Logger = Elog.getLogger()
 
-    companion object {
-        private const val DEFAULT_POLLING_INTERVAL_IN_SECONDS = 60
-
-        internal fun create(
-            serviceManager: ServiceManager,
-            serviceName: String,
-            serviceDeployment: String?,
-            apmServerConfigurationManager: ApmServerConnectivityManager.ConfigurationManager
-        ): CentralConfigurationManager {
-            val centralConfigurationConfigurationManager = ConfigurationManager.fromApmServerConfig(
-                serviceName, serviceDeployment, apmServerConfigurationManager
-            )
-            val centralConfiguration = CentralConfiguration.create(
-                serviceManager,
-                centralConfigurationConfigurationManager
-            )
-            return CentralConfigurationManager(
-                serviceManager,
-                centralConfiguration,
-                centralConfigurationConfigurationManager
-            )
-        }
-    }
-
     fun getConnectivityConfiguration(): CentralConfigurationConnectivity {
         return configurationManager.get() as CentralConfigurationConnectivity
     }
@@ -96,6 +72,30 @@ class CentralConfigurationManager private constructor(
             scheduleInSeconds(delayForNextPollInSeconds)
         } else {
             scheduleDefault()
+        }
+    }
+
+    companion object {
+        private const val DEFAULT_POLLING_INTERVAL_IN_SECONDS = 60
+
+        internal fun create(
+            serviceManager: ServiceManager,
+            serviceName: String,
+            serviceDeployment: String?,
+            apmServerConfigurationManager: ApmServerConnectivityManager.ConfigurationManager
+        ): CentralConfigurationManager {
+            val centralConfigurationConfigurationManager = ConfigurationManager.fromApmServerConfig(
+                serviceName, serviceDeployment, apmServerConfigurationManager
+            )
+            val centralConfiguration = CentralConfiguration.create(
+                serviceManager,
+                centralConfigurationConfigurationManager
+            )
+            return CentralConfigurationManager(
+                serviceManager,
+                centralConfiguration,
+                centralConfigurationConfigurationManager
+            )
         }
     }
 

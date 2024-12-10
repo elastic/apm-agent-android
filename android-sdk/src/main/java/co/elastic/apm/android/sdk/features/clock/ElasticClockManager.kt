@@ -32,6 +32,10 @@ internal class ElasticClockManager internal constructor(
         backgroundWorkService.schedulePeriodicTask(SyncHandler(), 1, TimeUnit.MINUTES)
     }
 
+    internal fun close() {
+        clock.close()
+    }
+
     private inner class SyncHandler : Runnable {
         override fun run() {
             clock.sync()

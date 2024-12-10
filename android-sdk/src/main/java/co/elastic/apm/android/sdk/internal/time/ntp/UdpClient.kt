@@ -28,9 +28,9 @@ import java.net.UnknownHostException
 import java.time.Duration
 
 class UdpClient(
-    private val host: String,
-    private val port: Int,
-    private val responseBufferSize: Int
+    internal val host: String,
+    internal val port: Int,
+    internal val responseBufferSize: Int
 ) : Closeable {
     private val socket = DatagramSocket()
     private var address: InetAddress? = null

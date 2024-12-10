@@ -21,6 +21,8 @@ package co.elastic.apm.android.sdk.internal.opentelemetry.clock
 import co.elastic.apm.android.common.internal.logging.Elog
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
+import co.elastic.apm.android.sdk.internal.time.ntp.UdpClient
+import co.elastic.apm.android.sdk.tools.Interceptor
 import io.opentelemetry.sdk.common.Clock
 import java.util.concurrent.atomic.AtomicLong
 
@@ -34,8 +36,9 @@ class ElasticClock(
 
     companion object {
         @JvmStatic
-        fun create(): ElasticClock {
-            return ElasticClock(SntpClient.create(), SystemTimeProvider.get())
+        @JvmOverloads
+        fun create(udpClientInterceptor: Interceptor<UdpClient> = Interceptor { it }): ElasticClock {
+            return ElasticClock(SntpClient.create(udpClientInterceptor), SystemTimeProvider.get())
         }
 
         private const val TIME_REFERENCE = 1577836800000L
@@ -48,6 +51,10 @@ class ElasticClock(
 
     override fun nanoTime(): Long {
         return systemTimeProvider.nanoTime
+    }
+
+    internal fun close() {
+        sntpClient.close()
     }
 
     internal fun sync() {

@@ -19,6 +19,7 @@
 package co.elastic.apm.android.sdk.internal.time.ntp
 
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
+import co.elastic.apm.android.sdk.tools.Interceptor
 import java.io.Closeable
 
 /**
@@ -71,8 +72,9 @@ class SntpClient(
         private const val NTP_EPOCH_DIFF_MILLIS = 2208988800000L // According to RFC-868.
         private const val VERSION = 4
 
-        fun create(): SntpClient {
-            return SntpClient(UdpClient("time.android.com", 123, 48), SystemTimeProvider.get())
+        fun create(udpClientInterceptor: Interceptor<UdpClient>): SntpClient {
+            val udpClient = UdpClient("time.android.com", 123, 48)
+            return SntpClient(udpClientInterceptor.intercept(udpClient), SystemTimeProvider.get())
         }
     }
 

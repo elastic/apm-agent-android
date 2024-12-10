@@ -29,12 +29,14 @@ import co.elastic.apm.android.sdk.features.clock.ElasticClockManager
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
 import co.elastic.apm.android.sdk.internal.opentelemetry.ElasticOpenTelemetryBuilder
 import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElasticClock
+import co.elastic.apm.android.sdk.internal.time.ntp.UdpClient
+import co.elastic.apm.android.sdk.tools.Interceptor
 import io.opentelemetry.api.OpenTelemetry
 
 class ElasticAgent private constructor(
     configuration: Configuration,
-    elasticClockManager: ElasticClockManager,
     private val apmServerConnectivityManager: ApmServerConnectivityManager,
+    private val elasticClockManager: ElasticClockManager,
     private val centralConfigurationManager: CentralConfigurationManager
 ) : ElasticOtelAgent(configuration) {
     private val openTelemetry = configuration.openTelemetrySdk
@@ -57,7 +59,7 @@ class ElasticAgent private constructor(
     }
 
     override fun onClose() {
-
+        elasticClockManager.close()
     }
 
     companion object {
@@ -73,6 +75,7 @@ class ElasticAgent private constructor(
         private var authentication: ApmServerAuthentication = ApmServerAuthentication.None
         private var exportProtocol: ExportProtocol = ExportProtocol.HTTP
         private var extraRequestHeaders: Map<String, String> = emptyMap()
+        private var udpClientInterceptor: Interceptor<UdpClient> = Interceptor { it }
 
         fun setUrl(value: String) = apply {
             url = value
@@ -90,6 +93,10 @@ class ElasticAgent private constructor(
             extraRequestHeaders = value
         }
 
+        internal fun setUdpClientInterceptor(value: Interceptor<UdpClient>) {
+            udpClientInterceptor = value
+        }
+
         fun build(): ElasticAgent {
             url?.let { finalUrl ->
                 val configuration = ApmServerConnectivity(
@@ -103,7 +110,7 @@ class ElasticAgent private constructor(
                 val apmServerConnectivityManager =
                     ApmServerConnectivityManager(configurationManager)
                 val exporterProvider = ApmServerExporterProvider.create(configurationManager)
-                val clock = ElasticClock.create()
+                val clock = ElasticClock.create(udpClientInterceptor)
                 setClock(clock)
                 setExporterProvider(exporterProvider)
 
@@ -120,8 +127,8 @@ class ElasticAgent private constructor(
                 )
                 return ElasticAgent(
                     elasticOtelConfig,
-                    elasticClockManager,
                     apmServerConnectivityManager,
+                    elasticClockManager,
                     centralConfigurationManager
                 )
             } ?: throw NullPointerException("The url must be set.")

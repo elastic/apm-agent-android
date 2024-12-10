@@ -42,6 +42,14 @@ class BackgroundWorkService private constructor(private val executorService: Sch
         return executorService.schedule(task, seconds.toLong(), TimeUnit.SECONDS)
     }
 
+    internal fun schedulePeriodicTask(
+        task: Runnable,
+        delayBetweenExecutions: Long,
+        timeUnit: TimeUnit
+    ): ScheduledFuture<*>? {
+        return executorService.scheduleWithFixedDelay(task, 0, delayBetweenExecutions, timeUnit)
+    }
+
     override fun stop() {
         executorService.shutdownNow()
     }

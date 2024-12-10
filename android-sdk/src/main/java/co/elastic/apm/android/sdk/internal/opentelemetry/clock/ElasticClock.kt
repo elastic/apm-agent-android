@@ -19,19 +19,18 @@
 package co.elastic.apm.android.sdk.internal.opentelemetry.clock
 
 import co.elastic.apm.android.common.internal.logging.Elog
-import co.elastic.apm.android.sdk.internal.services.periodicwork.ManagedPeriodicTask
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
 import io.opentelemetry.sdk.common.Clock
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 
 class ElasticClock(
     private val sntpClient: SntpClient,
     private val systemTimeProvider: SystemTimeProvider
-) : ManagedPeriodicTask(), Clock {
+) : Clock {
     private val offsetTime =
         AtomicLong(systemTimeProvider.currentTimeMillis - systemTimeProvider.elapsedRealTime)
+    private val logger = Elog.getLogger()
 
     companion object {
         @JvmStatic
@@ -39,7 +38,6 @@ class ElasticClock(
             return ElasticClock(SntpClient.create(), SystemTimeProvider.get())
         }
 
-        private val POLLING_INTERVAL = TimeUnit.MINUTES.toMillis(1)
         private const val TIME_REFERENCE = 1577836800000L
         private const val MILLIS_TIMES_TO_NANOS = 1_000_000L
     }
@@ -52,29 +50,22 @@ class ElasticClock(
         return systemTimeProvider.nanoTime
     }
 
-    override fun onTaskRun() {
+    internal fun sync() {
+        logger.debug("Starting clock sync.")
         try {
             val response =
                 sntpClient.fetchTimeOffset(systemTimeProvider.elapsedRealTime + TIME_REFERENCE)
             if (response is SntpClient.Response.Success) {
                 offsetTime.set(TIME_REFERENCE + response.offsetMillis)
-                Elog.getLogger().debug(
+                logger.debug(
                     "ElasticClock successfully fetched time offset: {}",
                     response.offsetMillis
                 )
             } else {
-                Elog.getLogger().debug("ElasticClock error: {}", response)
+                logger.debug("ElasticClock error: {}", response)
             }
         } catch (e: Exception) {
-            Elog.getLogger().debug("ElasticClock task exception", e)
+            logger.debug("ElasticClock exception", e)
         }
-    }
-
-    override fun getMinDelayBeforeNextRunInMillis(): Long {
-        return POLLING_INTERVAL
-    }
-
-    override fun isTaskFinished(): Boolean {
-        return false
     }
 }

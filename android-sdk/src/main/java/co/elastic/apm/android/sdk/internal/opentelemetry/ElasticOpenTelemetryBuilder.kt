@@ -30,7 +30,6 @@ import co.elastic.apm.android.sdk.exporters.ExporterProvider
 import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingManager
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
-import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElasticClock
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.logs.LogRecordAttributesProcessor
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.spans.SpanAttributesProcessor
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.spans.SpanInterceptorProcessor
@@ -62,7 +61,6 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
     protected var deploymentEnvironment: String? = null
     private var deviceIdProvider: StringProvider? = null
     private var sessionProvider: SessionProvider = SessionProvider.getDefault()
-    private var clock: Clock = ElasticClock.create()
     private var processorFactory: ProcessorFactory = ProcessorFactory.getDefault()
     private var spanAttributesInterceptors = mutableListOf<Interceptor<Attributes>>()
     private var logRecordAttributesInterceptors = mutableListOf<Interceptor<Attributes>>()
@@ -71,6 +69,7 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
     private var metricExporterInterceptors = mutableListOf<Interceptor<MetricExporter>>()
     private var diskBufferingConfiguration = DiskBufferingConfiguration.enabled()
     private var exporterProvider: ExporterProvider = ExporterProvider.noop()
+    private var clock: Clock = Clock.getDefault()
     private val packageInfo: PackageInfo? by lazy {
         try {
             application.packageManager.getPackageInfo(application.packageName, 0)
@@ -107,11 +106,6 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
 
     fun setSessionProvider(value: SessionProvider): B {
         sessionProvider = value
-        return this as B
-    }
-
-    fun setClock(value: Clock): B {
-        clock = value
         return this as B
     }
 
@@ -152,6 +146,11 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
 
     protected open fun setExporterProvider(value: ExporterProvider): B {
         exporterProvider = value
+        return this as B
+    }
+
+    protected open fun setClock(value: Clock): B {
+        clock = value
         return this as B
     }
 

@@ -25,6 +25,7 @@ import co.elastic.apm.android.sdk.internal.opentelemetry.ElasticOpenTelemetryBui
 import co.elastic.apm.android.sdk.tools.Interceptor
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.sdk.OpenTelemetrySdk
+import io.opentelemetry.sdk.common.Clock
 
 class TestElasticOtelAgent(configuration: Configuration) : ElasticOtelAgent(configuration) {
     private val openTelemetry: OpenTelemetrySdk = configuration.openTelemetrySdk
@@ -47,6 +48,10 @@ class TestElasticOtelAgent(configuration: Configuration) : ElasticOtelAgent(conf
 
         public override fun setExporterProvider(value: ExporterProvider): Builder {
             return super.setExporterProvider(value)
+        }
+
+        public override fun setClock(value: Clock): Builder {
+            return super.setClock(value)
         }
 
         fun build(): TestElasticOtelAgent {

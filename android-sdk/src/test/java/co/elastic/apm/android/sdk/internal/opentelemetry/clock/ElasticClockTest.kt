@@ -24,10 +24,10 @@ import co.elastic.apm.android.sdk.testutils.BaseTest
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import java.util.concurrent.TimeUnit
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.concurrent.TimeUnit
 
 class ElasticClockTest : BaseTest() {
     @MockK
@@ -76,23 +76,9 @@ class ElasticClockTest : BaseTest() {
         )
 
         // Fetch time offset
-        elasticClock.runTask()
+        elasticClock.sync()
 
         assertThat(elasticClock.now()).isEqualTo(expectedTime)
-    }
-
-    @Test
-    fun `Verify polling interval`() {
-        assertThat(elasticClock.minDelayBeforeNextRunInMillis).isEqualTo(
-            TimeUnit.MINUTES.toMillis(
-                1
-            )
-        )
-    }
-
-    @Test
-    fun `Verify if task is finished`() {
-        assertThat(elasticClock.isTaskFinished).isFalse()
     }
 
     companion object {

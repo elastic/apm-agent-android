@@ -172,7 +172,6 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
     }
 
     protected fun buildConfiguration(): ElasticOtelAgent.Configuration {
-        buildCalled.set(true)
         val serviceManager = ServiceManager.create(application)
         val commonAttributesInterceptor =
             CommonAttributesInterceptor(serviceManager, sessionProvider)
@@ -262,6 +261,7 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
                     .build()
             )
         }
+        buildCalled.set(true)
         return ElasticOtelAgent.Configuration(
             openTelemetryBuilder.build(),
             serviceManager,

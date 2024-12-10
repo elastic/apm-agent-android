@@ -241,7 +241,6 @@ public final class ElasticApmAgent {
 
     private void initializeClock(AgentDependenciesInjector injector) {
         clock = injector.getElasticClock();
-        getPeriodicWorkService().addTask(clock);
     }
 
     private void initializeConfigurations(AgentDependenciesInjector injector) {

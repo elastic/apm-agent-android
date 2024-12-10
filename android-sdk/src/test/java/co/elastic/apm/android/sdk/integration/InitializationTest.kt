@@ -82,14 +82,6 @@ class InitializationTest {
     }
 
     @Test
-    fun `Clock initialization`() {
-        agentRule.initialize()
-        val clock = agentRule.elasticClock
-
-        verify { periodicWorkService.addTask(clock) }
-    }
-
-    @Test
     fun `Persistence initialization`() {
         val exportScheduler = mockk<ExportScheduler>(relaxUnitFun = true)
         val visitableExporters = mockk<MockSignalConfiguration>()

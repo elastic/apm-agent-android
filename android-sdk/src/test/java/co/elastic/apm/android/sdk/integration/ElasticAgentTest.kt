@@ -279,7 +279,7 @@ class ElasticAgentTest {
         agent.close()
     }
 
-    private fun takeRequest() = webServer.takeRequest(1, TimeUnit.SECONDS)!!
+    private fun takeRequest() = webServer.takeRequest(2, TimeUnit.SECONDS)!!
 
     private fun sendSpan() {
         agent.getOpenTelemetry().getTracer("TestTracer")

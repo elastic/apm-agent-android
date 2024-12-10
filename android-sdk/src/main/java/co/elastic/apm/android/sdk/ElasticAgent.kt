@@ -87,12 +87,24 @@ class ElasticAgent private constructor(
                         extraRequestHeaders,
                         exportProtocol
                     )
-                val configurationManager = ApmServerConnectivityConfigurationManager(configuration)
+                val configurationManager =
+                    ApmServerConnectivityManager.ConfigurationManager(configuration)
                 val apmServerConnectivityManager =
                     ApmServerConnectivityManager(configurationManager)
                 val exporterProvider = ApmServerExporterProvider.create(configurationManager)
                 setExporterProvider(exporterProvider)
-                return ElasticAgent(buildConfiguration(), apmServerConnectivityManager)
+                val elasticOtelConfig = buildConfiguration()
+                val centralConfigurationManager = CentralConfigurationManager.create(
+                    elasticOtelConfig.serviceManager,
+                    serviceName,
+                    deploymentEnvironment,
+                    configurationManager
+                )
+                return ElasticAgent(
+                    elasticOtelConfig,
+                    apmServerConnectivityManager,
+                    centralConfigurationManager
+                )
             } ?: throw NullPointerException("The url must be set.")
         }
     }

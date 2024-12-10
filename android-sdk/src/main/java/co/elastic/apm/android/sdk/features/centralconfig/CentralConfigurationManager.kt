@@ -26,7 +26,7 @@ import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import java.io.IOException
 import org.slf4j.Logger
 
-class CentralConfigurationManager internal constructor(
+class CentralConfigurationManager private constructor(
     serviceManager: ServiceManager,
     private val centralConfiguration: CentralConfiguration,
     private val configurationManager: ConfigurationManager
@@ -36,6 +36,26 @@ class CentralConfigurationManager internal constructor(
 
     companion object {
         private const val DEFAULT_POLLING_INTERVAL_IN_SECONDS = 60
+
+        internal fun create(
+            serviceManager: ServiceManager,
+            serviceName: String,
+            serviceDeployment: String?,
+            apmServerConfigurationManager: ApmServerConnectivityManager.ConfigurationManager
+        ): CentralConfigurationManager {
+            val centralConfigurationConfigurationManager = ConfigurationManager.fromApmServerConfig(
+                serviceName, serviceDeployment, apmServerConfigurationManager
+            )
+            val centralConfiguration = CentralConfiguration.create(
+                serviceManager,
+                centralConfigurationConfigurationManager
+            )
+            return CentralConfigurationManager(
+                serviceManager,
+                centralConfiguration,
+                centralConfigurationConfigurationManager
+            )
+        }
     }
 
     fun getConnectivityConfiguration(): CentralConfigurationConnectivity {
@@ -102,7 +122,7 @@ class CentralConfigurationManager internal constructor(
                 serviceName: String,
                 serviceDeployment: String?,
                 apmServerConfigurationManager: ApmServerConnectivityManager.ConfigurationManager
-            ) {
+            ): ConfigurationManager {
                 val instance = ConfigurationManager(
                     CentralConfigurationConnectivity.fromApmServerConfig(
                         serviceName,
@@ -111,6 +131,7 @@ class CentralConfigurationManager internal constructor(
                     ), apmServerConfigurationManager, serviceName, serviceDeployment
                 )
                 apmServerConfigurationManager.addListener(instance)
+                return instance
             }
         }
 

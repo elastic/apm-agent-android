@@ -55,10 +55,10 @@ import java.util.UUID
 
 @Suppress("UNCHECKED_CAST")
 open class ElasticOpenTelemetryBuilder<B>(private val application: Application) {
-    private var serviceName: String = "unknown"
-    private var serviceVersion: String = "unknown"
-    private var serviceBuild: Int? = null
-    private var deploymentEnvironment: String = "unknown"
+    protected var serviceName: String = "unknown"
+    protected var serviceVersion: String = "unknown"
+    protected var serviceBuild: Int? = null
+    protected var deploymentEnvironment: String = "unknown"
     private var deviceIdProvider: StringProvider? = null
     private var sessionProvider: SessionProvider = SessionProvider.getDefault()
     private var clock: Clock = ElasticClock.create()

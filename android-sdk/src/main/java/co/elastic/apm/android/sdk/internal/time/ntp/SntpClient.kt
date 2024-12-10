@@ -18,6 +18,7 @@
  */
 package co.elastic.apm.android.sdk.internal.time.ntp
 
+import co.elastic.apm.android.common.internal.logging.Elog
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import java.io.Closeable
 import java.util.concurrent.atomic.AtomicReference
@@ -75,6 +76,7 @@ class SntpClient(
         private val udpConfigProvider = AtomicReference(UDP_CONFIG)
 
         internal fun setUdpConfigForTest(config: UdpClient.Configuration) {
+            Elog.getLogger().warn("Changing udp config to: {}", config)
             udpConfigProvider.set(config)
         }
 

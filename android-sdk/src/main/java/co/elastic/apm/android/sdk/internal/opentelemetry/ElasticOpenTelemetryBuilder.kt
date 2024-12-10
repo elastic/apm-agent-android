@@ -52,6 +52,7 @@ import io.opentelemetry.sdk.trace.SdkTracerProvider
 import io.opentelemetry.sdk.trace.export.SpanExporter
 import io.opentelemetry.semconv.ResourceAttributes
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicBoolean
 
 @Suppress("UNCHECKED_CAST")
 open class ElasticOpenTelemetryBuilder<B>(private val application: Application) {
@@ -70,6 +71,7 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
     private var diskBufferingConfiguration = DiskBufferingConfiguration.enabled()
     private var exporterProvider: ExporterProvider = ExporterProvider.noop()
     private var clock: Clock = Clock.getDefault()
+    private val buildCalled = AtomicBoolean(false)
     private val packageInfo: PackageInfo? by lazy {
         try {
             application.packageManager.getPackageInfo(application.packageName, 0)
@@ -80,81 +82,97 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
     }
 
     fun setServiceName(value: String): B {
+        checkNotBuilt()
         serviceName = value
         return this as B
     }
 
     fun setServiceVersion(value: String): B {
+        checkNotBuilt()
         serviceVersion = value
         return this as B
     }
 
     fun setServiceBuild(value: Int): B {
+        checkNotBuilt()
         serviceBuild = value
         return this as B
     }
 
     fun setDeploymentEnvironment(value: String): B {
+        checkNotBuilt()
         deploymentEnvironment = value
         return this as B
     }
 
     fun setDeviceIdProvider(value: StringProvider): B {
+        checkNotBuilt()
         deviceIdProvider = value
         return this as B
     }
 
     fun setSessionProvider(value: SessionProvider): B {
+        checkNotBuilt()
         sessionProvider = value
         return this as B
     }
 
     fun setProcessorFactory(value: ProcessorFactory): B {
+        checkNotBuilt()
         processorFactory = value
         return this as B
     }
 
     fun addSpanAttributesInterceptor(value: Interceptor<Attributes>): B {
+        checkNotBuilt()
         spanAttributesInterceptors.add(value)
         return this as B
     }
 
     fun addLogRecordAttributesInterceptor(value: Interceptor<Attributes>): B {
+        checkNotBuilt()
         logRecordAttributesInterceptors.add(value)
         return this as B
     }
 
     fun addSpanExporterInterceptor(value: Interceptor<SpanExporter>): B {
+        checkNotBuilt()
         spanExporterInterceptors.add(value)
         return this as B
     }
 
     fun addLogRecordExporterInterceptor(value: Interceptor<LogRecordExporter>): B {
+        checkNotBuilt()
         logRecordExporterInterceptors.add(value)
         return this as B
     }
 
     fun addMetricExporterInterceptor(value: Interceptor<MetricExporter>): B {
+        checkNotBuilt()
         metricExporterInterceptors.add(value)
         return this as B
     }
 
     fun setDiskBufferingConfiguration(value: DiskBufferingConfiguration): B {
+        checkNotBuilt()
         diskBufferingConfiguration = value
         return this as B
     }
 
     protected open fun setExporterProvider(value: ExporterProvider): B {
+        checkNotBuilt()
         exporterProvider = value
         return this as B
     }
 
     protected open fun setClock(value: Clock): B {
+        checkNotBuilt()
         clock = value
         return this as B
     }
 
     protected fun buildConfiguration(): ElasticOtelAgent.Configuration {
+        buildCalled.set(true)
         val serviceManager = ServiceManager.create(application)
         val commonAttributesInterceptor =
             CommonAttributesInterceptor(serviceManager, sessionProvider)
@@ -268,5 +286,11 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
         descriptionBuilder.append(", BUILD ")
         descriptionBuilder.append(Build.VERSION.INCREMENTAL)
         return descriptionBuilder.toString()
+    }
+
+    private fun checkNotBuilt() {
+        if (buildCalled.get()) {
+            throw IllegalStateException()
+        }
     }
 }

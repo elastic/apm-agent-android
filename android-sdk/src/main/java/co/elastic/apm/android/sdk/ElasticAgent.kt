@@ -25,18 +25,22 @@ import co.elastic.apm.android.sdk.features.apmserver.ApmServerConnectivity
 import co.elastic.apm.android.sdk.features.apmserver.ApmServerConnectivityManager
 import co.elastic.apm.android.sdk.features.apmserver.ApmServerExporterProvider
 import co.elastic.apm.android.sdk.features.centralconfig.CentralConfigurationManager
+import co.elastic.apm.android.sdk.features.clock.ElasticClockManager
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
 import co.elastic.apm.android.sdk.internal.opentelemetry.ElasticOpenTelemetryBuilder
+import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElasticClock
 import io.opentelemetry.api.OpenTelemetry
 
 class ElasticAgent private constructor(
     configuration: Configuration,
+    elasticClockManager: ElasticClockManager,
     private val apmServerConnectivityManager: ApmServerConnectivityManager,
     private val centralConfigurationManager: CentralConfigurationManager
 ) : ElasticOtelAgent(configuration) {
     private val openTelemetry = configuration.openTelemetrySdk
 
     init {
+        elasticClockManager.initialize()
         centralConfigurationManager.initialize()
     }
 
@@ -88,20 +92,26 @@ class ElasticAgent private constructor(
 
         fun build(): ElasticAgent {
             url?.let { finalUrl ->
-                val configuration =
-                    ApmServerConnectivity(
-                        finalUrl,
-                        authentication,
-                        extraRequestHeaders,
-                        exportProtocol
-                    )
+                val configuration = ApmServerConnectivity(
+                    finalUrl,
+                    authentication,
+                    extraRequestHeaders,
+                    exportProtocol
+                )
                 val configurationManager =
                     ApmServerConnectivityManager.ConfigurationManager(configuration)
                 val apmServerConnectivityManager =
                     ApmServerConnectivityManager(configurationManager)
                 val exporterProvider = ApmServerExporterProvider.create(configurationManager)
+                val clock = ElasticClock.create()
+                setClock(clock)
                 setExporterProvider(exporterProvider)
+
                 val elasticOtelConfig = buildConfiguration()
+                val elasticClockManager = ElasticClockManager(
+                    elasticOtelConfig.serviceManager,
+                    clock
+                )
                 val centralConfigurationManager = CentralConfigurationManager.create(
                     elasticOtelConfig.serviceManager,
                     serviceName,
@@ -110,6 +120,7 @@ class ElasticAgent private constructor(
                 )
                 return ElasticAgent(
                     elasticOtelConfig,
+                    elasticClockManager,
                     apmServerConnectivityManager,
                     centralConfigurationManager
                 )

@@ -23,9 +23,8 @@ import co.elastic.apm.android.sdk.internal.services.kotlin.appinfo.AppInfoServic
 import co.elastic.apm.android.sdk.internal.services.kotlin.backgroundwork.BackgroundWorkService
 import co.elastic.apm.android.sdk.internal.services.kotlin.network.NetworkService
 import co.elastic.apm.android.sdk.internal.services.kotlin.preferences.PreferencesService
-import java.io.Closeable
 
-class ServiceManager : Closeable {
+class ServiceManager {
     private val services = mutableMapOf<Class<out Service>, Service>()
 
     fun getPreferencesService(): PreferencesService {
@@ -44,7 +43,7 @@ class ServiceManager : Closeable {
         return getService(BackgroundWorkService::class.java)
     }
 
-    override fun close() {
+    internal fun close() {
         services.values.forEach { it.stop() }
     }
 

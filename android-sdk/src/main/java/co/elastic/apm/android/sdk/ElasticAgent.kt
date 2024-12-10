@@ -48,7 +48,7 @@ class ElasticAgent private constructor(
         return apmServerConnectivityManager
     }
 
-    fun getCentralConfigurationManager(): CentralConfigurationManager {
+    internal fun getCentralConfigurationManager(): CentralConfigurationManager {
         return centralConfigurationManager
     }
 

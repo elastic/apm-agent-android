@@ -35,10 +35,9 @@ import io.opentelemetry.contrib.disk.buffering.StorageConfiguration
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.trace.export.SpanExporter
-import java.io.Closeable
 import java.io.IOException
 
-class DiskBufferingManager(private val configuration: DiskBufferingConfiguration) : Closeable {
+class DiskBufferingManager(private val configuration: DiskBufferingConfiguration) {
     private var spanExporter: MutableSpanExporter? = null
     private var logRecordExporter: MutableLogRecordExporter? = null
     private var metricExporter: MutableMetricExporter? = null
@@ -54,7 +53,7 @@ class DiskBufferingManager(private val configuration: DiskBufferingConfiguration
         signalFromDiskExporter?.exportBatchOfEach()
     }
 
-    override fun close() {
+    internal fun close() {
         signalFromDiskExporter?.close()
         signalFromDiskExporter = null
         interceptedSpanExporter?.shutdown()

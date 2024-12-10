@@ -19,8 +19,8 @@
 package co.elastic.apm.android.sdk.internal.time.ntp
 
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
-import co.elastic.apm.android.sdk.tools.Interceptor
 import java.io.Closeable
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * According to RFC-4330.
@@ -71,10 +71,19 @@ class SntpClient(
     companion object {
         private const val NTP_EPOCH_DIFF_MILLIS = 2208988800000L // According to RFC-868.
         private const val VERSION = 4
+        private val UDP_CONFIG = UdpClient.Configuration("time.android.com", 123, 48)
+        private val udpConfigProvider = AtomicReference(UDP_CONFIG)
 
-        fun create(udpClientInterceptor: Interceptor<UdpClient>): SntpClient {
-            val udpClient = UdpClient("time.android.com", 123, 48)
-            return SntpClient(udpClientInterceptor.intercept(udpClient), SystemTimeProvider.get())
+        internal fun setUdpConfigForTest(config: UdpClient.Configuration) {
+            udpConfigProvider.set(config)
+        }
+
+        internal fun resetUdpConfigForTest() {
+            udpConfigProvider.set(UDP_CONFIG)
+        }
+
+        fun create(): SntpClient {
+            return SntpClient(UdpClient(udpConfigProvider.get()), SystemTimeProvider.get())
         }
     }
 

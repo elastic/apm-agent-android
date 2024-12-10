@@ -29,8 +29,6 @@ import co.elastic.apm.android.sdk.features.clock.ElasticClockManager
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
 import co.elastic.apm.android.sdk.internal.opentelemetry.ElasticOpenTelemetryBuilder
 import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElasticClock
-import co.elastic.apm.android.sdk.internal.time.ntp.UdpClient
-import co.elastic.apm.android.sdk.tools.Interceptor
 import io.opentelemetry.api.OpenTelemetry
 
 class ElasticAgent private constructor(
@@ -75,7 +73,6 @@ class ElasticAgent private constructor(
         private var authentication: ApmServerAuthentication = ApmServerAuthentication.None
         private var exportProtocol: ExportProtocol = ExportProtocol.HTTP
         private var extraRequestHeaders: Map<String, String> = emptyMap()
-        private var udpClientInterceptor: Interceptor<UdpClient> = Interceptor { it }
 
         fun setUrl(value: String) = apply {
             url = value
@@ -93,10 +90,6 @@ class ElasticAgent private constructor(
             extraRequestHeaders = value
         }
 
-        internal fun setUdpClientInterceptor(value: Interceptor<UdpClient>) {
-            udpClientInterceptor = value
-        }
-
         fun build(): ElasticAgent {
             url?.let { finalUrl ->
                 val configuration = ApmServerConnectivity(
@@ -110,7 +103,7 @@ class ElasticAgent private constructor(
                 val apmServerConnectivityManager =
                     ApmServerConnectivityManager(configurationManager)
                 val exporterProvider = ApmServerExporterProvider.create(configurationManager)
-                val clock = ElasticClock.create(udpClientInterceptor)
+                val clock = ElasticClock.create()
                 setClock(clock)
                 setExporterProvider(exporterProvider)
 

@@ -18,11 +18,6 @@
  */
 package co.elastic.apm.android.sdk.internal.time.ntp
 
-import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.SocketException
@@ -30,6 +25,11 @@ import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.time.Duration
 import java.util.concurrent.CountDownLatch
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 
 class UdpClientTest {
@@ -45,7 +45,7 @@ class UdpClientTest {
     fun setUp() {
         server = FlexiServer(SERVER_PORT)
         server.start()
-        client = UdpClient(SERVER_HOST, SERVER_PORT, 256)
+        client = UdpClient(UdpClient.Configuration(SERVER_HOST, SERVER_PORT, 256))
     }
 
     @AfterEach
@@ -100,7 +100,7 @@ class UdpClientTest {
 
     @Test
     fun `Server port is not reachable`() {
-        client = UdpClient(SERVER_HOST, SERVER_PORT + 1, 256)
+        client = UdpClient(UdpClient.Configuration(SERVER_HOST, SERVER_PORT + 1, 256))
 
         assertThrows<SocketTimeoutException> {
             client.send("Example".toByteArray(), Duration.ofSeconds(1))
@@ -118,7 +118,7 @@ class UdpClientTest {
 
     @Test
     fun `Server host not found`() {
-        client = UdpClient("nonexistent", SERVER_PORT, 256)
+        client = UdpClient(UdpClient.Configuration("nonexistent", SERVER_PORT, 256))
         assertThrows<UnknownHostException> {
             client.send("Example".toByteArray())
         }

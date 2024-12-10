@@ -27,10 +27,8 @@ import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.time.Duration
 
-class UdpClient(
-    internal val host: String,
-    internal val port: Int,
-    internal val responseBufferSize: Int
+class UdpClient internal constructor(
+    internal val configuration: Configuration
 ) : Closeable {
     private val socket = DatagramSocket()
     private var address: InetAddress? = null
@@ -39,15 +37,18 @@ class UdpClient(
     fun send(bytes: ByteArray, timeout: Duration = Duration.ofSeconds(5)): ByteArray =
         synchronized(this) {
             if (address == null) {
-                address = InetAddress.getByName(host)
+                address = InetAddress.getByName(configuration.host)
             }
 
             socket.soTimeout = timeout.toMillis().toInt()
 
-            val packet = DatagramPacket(bytes, bytes.size, address, port)
+            val packet = DatagramPacket(bytes, bytes.size, address, configuration.port)
             socket.send(packet)
 
-            val responsePacket = DatagramPacket(ByteArray(responseBufferSize), responseBufferSize)
+            val responsePacket = DatagramPacket(
+                ByteArray(configuration.responseBufferSize),
+                configuration.responseBufferSize
+            )
             socket.receive(responsePacket)
             return responsePacket.data.copyOf(responsePacket.length)
         }
@@ -55,4 +56,6 @@ class UdpClient(
     override fun close() {
         socket.close()
     }
+
+    internal data class Configuration(val host: String, val port: Int, val responseBufferSize: Int)
 }

@@ -58,7 +58,7 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
     protected var serviceName: String = "unknown"
     protected var serviceVersion: String = "unknown"
     protected var serviceBuild: Int? = null
-    protected var deploymentEnvironment: String = "unknown"
+    protected var deploymentEnvironment: String? = null
     private var deviceIdProvider: StringProvider? = null
     private var sessionProvider: SessionProvider = SessionProvider.getDefault()
     private var clock: Clock = ElasticClock.create()

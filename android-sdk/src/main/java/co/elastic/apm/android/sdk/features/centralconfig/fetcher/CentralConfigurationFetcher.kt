@@ -97,9 +97,11 @@ class CentralConfigurationFetcher(
         }
     }
 
-    private fun storeETag(eTag: String) {
+    private fun storeETag(eTag: String?) {
         logger.debug("Storing central config ETag {}", eTag)
-        preferences.store(ETAG_PREFERENCE_NAME, eTag)
+        eTag?.let {
+            preferences.store(ETAG_PREFERENCE_NAME, it)
+        } ?: preferences.remove(ETAG_PREFERENCE_NAME)
     }
 
     private fun getETag(): String? {

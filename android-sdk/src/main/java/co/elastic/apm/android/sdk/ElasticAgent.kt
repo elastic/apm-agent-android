@@ -36,6 +36,10 @@ class ElasticAgent private constructor(
 ) : ElasticOtelAgent(configuration) {
     private val openTelemetry = configuration.openTelemetrySdk
 
+    init {
+        centralConfigurationManager.initialize()
+    }
+
     override fun getOpenTelemetry(): OpenTelemetry {
         return openTelemetry
     }

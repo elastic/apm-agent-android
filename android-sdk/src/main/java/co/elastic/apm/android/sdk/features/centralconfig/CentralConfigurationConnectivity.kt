@@ -25,7 +25,7 @@ data class CentralConfigurationConnectivity(
     val apmServerUrl: String,
     val serviceName: String,
     val serviceDeployment: String?,
-    val headers: Map<String, String>
+    private val headers: Map<String, String>
 ) : ConnectivityConfiguration {
     private val baseUrl by lazy { apmServerUrl.trimEnd('/') + "/config/v1/agents?service.name=$serviceName" }
 

@@ -63,6 +63,7 @@ class ElasticAgentTest {
 
     @Test
     fun `Validate initial apm server params`() {
+        webServer.enqueue(MockResponse().setResponseCode(500))// Central config poll
         agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
             .setUrl(webServer.url("/").toString())
             .setServiceName("my-app")
@@ -71,6 +72,11 @@ class ElasticAgentTest {
             .setExtraRequestHeaders(mapOf("Extra-header" to "extra value"))
             .build()
 
+        val centralConfigRequest = takeRequest()
+        assertThat(centralConfigRequest.path).isEqualTo("/config/v1/agents?service.name=my-app")
+        assertThat(centralConfigRequest.headers["Extra-header"]).isEqualTo("extra value")
+
+        // OTel requests
         webServer.enqueue(MockResponse().setResponseCode(500))
         webServer.enqueue(MockResponse().setResponseCode(500))
         webServer.enqueue(MockResponse().setResponseCode(500))
@@ -98,15 +104,26 @@ class ElasticAgentTest {
 
     @Test
     fun `Validate changing endpoint config`() {
+        webServer.enqueue(
+            MockResponse()
+                .setResponseCode(404)
+                .addHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
+        )// Central config poll
         val secretToken = "secret-token"
         agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
             .setUrl(webServer.url("/first/").toString())
             .setAuthentication(ApmServerAuthentication.SecretToken(secretToken))
             .setServiceName("my-app")
+            .setDeploymentEnvironment("debug")
             .setDiskBufferingConfiguration(DiskBufferingConfiguration.disabled())
             .setProcessorFactory(simpleProcessorFactory)
             .build()
 
+        val centralConfigRequest = takeRequest()
+        assertThat(centralConfigRequest.path).isEqualTo("/first/config/v1/agents?service.name=my-app&service.deployment=debug")
+        assertThat(centralConfigRequest.headers["Authorization"]).isEqualTo("Bearer $secretToken")
+
+        // OTel requests
         webServer.enqueue(MockResponse().setResponseCode(500))
         webServer.enqueue(MockResponse().setResponseCode(500))
         webServer.enqueue(MockResponse().setResponseCode(500))
@@ -128,6 +145,7 @@ class ElasticAgentTest {
 
         // Changing config
         val apiKey = "api-key"
+        webServer.enqueue(MockResponse().setResponseCode(500))// Central config poll
         agent.getApmServerConnectivityManager().setConnectivityConfiguration(
             ApmServerConnectivity(
                 webServer.url("/second/").toString(),
@@ -136,6 +154,11 @@ class ElasticAgentTest {
             )
         )
 
+        val centralConfigRequest2 = webServer.takeRequest()
+        assertThat(centralConfigRequest2.path).isEqualTo("/second/config/v1/agents?service.name=my-app&service.deployment=debug")
+        assertThat(centralConfigRequest2.headers["Authorization"]).isEqualTo("ApiKey $apiKey")
+
+        // OTel requests
         webServer.enqueue(MockResponse().setResponseCode(500))
         webServer.enqueue(MockResponse().setResponseCode(500))
         webServer.enqueue(MockResponse().setResponseCode(500))

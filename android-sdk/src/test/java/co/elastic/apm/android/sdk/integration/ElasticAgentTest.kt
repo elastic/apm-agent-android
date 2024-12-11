@@ -45,6 +45,7 @@ import io.opentelemetry.sdk.trace.export.SpanExporter
 import java.net.DatagramPacket
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import junit.framework.TestCase.fail
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.assertj.core.api.Assertions.assertThat
@@ -66,11 +67,13 @@ class ElasticAgentTest {
         webServer = MockWebServer()
         webServer.start()
         simpleProcessorFactory = SimpleProcessorFactory()
+        SntpClient.setUdpConfigForTest(UdpClient.Configuration("localhost", 0, 48))
     }
 
     @After
     fun tearDown() {
         webServer.close()
+        SntpClient.resetUdpConfigForTest()
     }
 
     @Test
@@ -324,7 +327,9 @@ class ElasticAgentTest {
             .setProcessorFactory(simpleProcessorFactory)
             .build()
 
-        responseLatch.await(1, TimeUnit.SECONDS)
+        if (!responseLatch.await(5, TimeUnit.SECONDS)) {
+            fail("Clock sync took too long.")
+        }
 
         sendSpan()
 

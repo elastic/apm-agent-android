@@ -41,7 +41,7 @@ class SystemTimeProvider internal constructor() {
             return INSTANCE!!
         }
 
-        internal fun resetForTest() = synchronized(this) {
+        internal fun resetForTest() {
             setForTest(null)
         }
 

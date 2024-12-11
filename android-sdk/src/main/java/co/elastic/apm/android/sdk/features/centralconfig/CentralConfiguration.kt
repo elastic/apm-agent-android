@@ -80,7 +80,7 @@ class CentralConfiguration internal constructor(
 
     @Throws(IOException::class)
     internal fun sync(): Int? {
-        if (refreshTimeoutMillis > systemTimeProvider.currentTimeMillis) {
+        if (refreshTimeoutMillis > systemTimeProvider.getCurrentTimeMillis()) {
             logger.debug("Ignoring central config sync request")
             return null
         }
@@ -125,7 +125,7 @@ class CentralConfiguration internal constructor(
     private fun storeRefreshTimeoutTime(maxAgeInSeconds: Int) {
         logger.debug("Storing central config max age seconds {}", maxAgeInSeconds)
         refreshTimeoutMillis =
-            systemTimeProvider.currentTimeMillis + TimeUnit.SECONDS.toMillis(maxAgeInSeconds.toLong())
+            systemTimeProvider.getCurrentTimeMillis() + TimeUnit.SECONDS.toMillis(maxAgeInSeconds.toLong())
     }
 
     private var refreshTimeoutMillis: Long

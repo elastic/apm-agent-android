@@ -18,6 +18,7 @@
  */
 package co.elastic.apm.android.sdk.internal.time.ntp
 
+import co.elastic.apm.android.sdk.testutils.binaryToByteArray
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -71,7 +72,7 @@ class NtpPacketTest {
             01001100110011001100110011001101
         """.trimIndent()
 
-        assertThat(packet.toByteArray()).isEqualTo(binaryStringToByteArray(expected))
+        assertThat(packet.toByteArray()).isEqualTo(expected.binaryToByteArray())
     }
 
     @Test
@@ -112,7 +113,7 @@ class NtpPacketTest {
             00110011001100110011001100110011
         """.trimIndent()
 
-        assertThat(NtpPacket.parse(binaryStringToByteArray(input))).isEqualTo(
+        assertThat(NtpPacket.parse(input.binaryToByteArray())).isEqualTo(
             NtpPacket(
                 expectedLeapIndicator,
                 expectedVersionNumber,
@@ -150,14 +151,5 @@ class NtpPacketTest {
         assertThrows<IllegalArgumentException> {
             NtpPacket(1, 1, 1, invalidStratum, 1, 1, 1)
         }
-    }
-
-    @OptIn(ExperimentalUnsignedTypes::class)
-    private fun binaryStringToByteArray(binary: String): ByteArray {
-        return binary.replace(Regex("[^01]+"), "")
-            .chunked(8)
-            .map { it.toUByte(2) }
-            .toUByteArray()
-            .toByteArray()
     }
 }

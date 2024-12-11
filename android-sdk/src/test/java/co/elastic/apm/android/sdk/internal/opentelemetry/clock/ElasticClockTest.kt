@@ -41,15 +41,15 @@ class ElasticClockTest : BaseTest() {
     @BeforeEach
     fun setUp() {
         MockKAnnotations.init(this)
-        every { systemTimeProvider.currentTimeMillis }.returns(INITIAL_CURRENT_TIME)
-        every { systemTimeProvider.elapsedRealTime }.returns(INITIAL_ELAPSED_TIME)
+        every { systemTimeProvider.getCurrentTimeMillis() }.returns(INITIAL_CURRENT_TIME)
+        every { systemTimeProvider.getElapsedRealTime() }.returns(INITIAL_ELAPSED_TIME)
         elasticClock = ElasticClock(sntpClient, systemTimeProvider)
     }
 
     @Test
     fun `Return system nano time`() {
         val nanoTime: Long = 123
-        every { systemTimeProvider.nanoTime }.returns(nanoTime)
+        every { systemTimeProvider.getNanoTime() }.returns(nanoTime)
 
         assertThat(elasticClock.nanoTime()).isEqualTo(nanoTime)
     }
@@ -59,7 +59,7 @@ class ElasticClockTest : BaseTest() {
         val delta = 100L
         val elapsedTime = INITIAL_ELAPSED_TIME + delta
         val currentTimeMillis = INITIAL_CURRENT_TIME + delta
-        every { systemTimeProvider.elapsedRealTime }.returns(elapsedTime)
+        every { systemTimeProvider.getElapsedRealTime() }.returns(elapsedTime)
 
         assertThat(elasticClock.now()).isEqualTo(TimeUnit.MILLISECONDS.toNanos(currentTimeMillis))
     }
@@ -70,7 +70,7 @@ class ElasticClockTest : BaseTest() {
         val serverOffset = 1_000L
         val expectedOffset = serverOffset + TIME_REFERENCE
         val expectedTime = TimeUnit.MILLISECONDS.toNanos(elapsedTime + expectedOffset)
-        every { systemTimeProvider.elapsedRealTime }.returns(elapsedTime)
+        every { systemTimeProvider.getElapsedRealTime() }.returns(elapsedTime)
         every { sntpClient.fetchTimeOffset(elapsedTime + TIME_REFERENCE) }.returns(
             SntpClient.Response.Success(serverOffset)
         )

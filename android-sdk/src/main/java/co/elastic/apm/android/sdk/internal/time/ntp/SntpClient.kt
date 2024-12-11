@@ -34,9 +34,9 @@ class SntpClient(
     fun fetchTimeOffset(currentTimeMillis: Long): Response = synchronized(this) {
         val t1 = getCurrentNtpTimeMillis(currentTimeMillis)
         val request = NtpPacket.createForClient(t1, VERSION)
-        val timeBeforeRequest = systemTimeProvider.elapsedRealTime
+        val timeBeforeRequest = systemTimeProvider.getElapsedRealTime()
         val responseBytes = udpClient.send(request.toByteArray())
-        val requestTimeDelta = systemTimeProvider.elapsedRealTime - timeBeforeRequest
+        val requestTimeDelta = systemTimeProvider.getElapsedRealTime() - timeBeforeRequest
         val t4 = getCurrentNtpTimeMillis(currentTimeMillis + requestTimeDelta)
         val response = NtpPacket.parse(responseBytes)
         val t2 = response.receiveTimestamp

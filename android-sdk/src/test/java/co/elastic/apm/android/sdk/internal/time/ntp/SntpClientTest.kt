@@ -40,7 +40,7 @@ class SntpClientTest {
         udpClient = mockk()
         systemTimeProvider = mockk()
         client = SntpClient(udpClient, systemTimeProvider)
-        every { systemTimeProvider.elapsedRealTime }.returns(0L)
+        every { systemTimeProvider.getElapsedRealTime() }.returns(0L)
     }
 
     @Test
@@ -152,7 +152,7 @@ class SntpClientTest {
         responseMode: Int = 4,
         responseStratum: Int = 1
     ) {
-        every { systemTimeProvider.elapsedRealTime }.returns(0)
+        every { systemTimeProvider.getElapsedRealTime() }.returns(0)
             .andThen(receiveClientTimeOffset)
         every {
             udpClient.send(

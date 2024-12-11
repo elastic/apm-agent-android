@@ -206,7 +206,7 @@ class CentralConfigurationTest {
     }
 
     private fun setCurrentMillis(currentTimeMillis: Long) {
-        every { systemTimeProvider.currentTimeMillis }.returns(currentTimeMillis)
+        every { systemTimeProvider.getCurrentTimeMillis() }.returns(currentTimeMillis)
     }
 
     private fun getDummyConfiguration(): DummyConfiguration {

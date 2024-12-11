@@ -16,28 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.time
+package co.elastic.apm.android.sdk.testutils
 
-import android.os.SystemClock
-
-class SystemTimeProvider private constructor() {
-
-    fun getCurrentTimeMillis(): Long = System.currentTimeMillis()
-
-    fun getNanoTime(): Long = System.nanoTime()
-
-    fun getElapsedRealTime(): Long = SystemClock.elapsedRealtime()
-
-    companion object {
-        internal var INSTANCE: SystemTimeProvider? = null
-
-        @JvmStatic
-        fun get(): SystemTimeProvider = synchronized(this) {
-            if (INSTANCE == null) {
-                INSTANCE = SystemTimeProvider()
-            }
-
-            return INSTANCE!!
-        }
-    }
+@OptIn(ExperimentalUnsignedTypes::class)
+fun String.binaryToByteArray(): ByteArray {
+    return replace(Regex("[^01]+"), "")
+        .chunked(8)
+        .map { it.toUByte(2) }
+        .toUByteArray()
+        .toByteArray()
 }

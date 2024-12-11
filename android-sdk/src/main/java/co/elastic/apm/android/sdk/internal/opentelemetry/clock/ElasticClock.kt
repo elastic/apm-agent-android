@@ -29,7 +29,7 @@ class ElasticClock(
     private val systemTimeProvider: SystemTimeProvider
 ) : Clock {
     private val offsetTime =
-        AtomicLong(systemTimeProvider.currentTimeMillis - systemTimeProvider.elapsedRealTime)
+        AtomicLong(systemTimeProvider.getCurrentTimeMillis() - systemTimeProvider.getElapsedRealTime())
     private val logger = Elog.getLogger()
 
     companion object {
@@ -43,11 +43,11 @@ class ElasticClock(
     }
 
     override fun now(): Long {
-        return (offsetTime.get() + systemTimeProvider.elapsedRealTime) * MILLIS_TIMES_TO_NANOS
+        return (offsetTime.get() + systemTimeProvider.getElapsedRealTime()) * MILLIS_TIMES_TO_NANOS
     }
 
     override fun nanoTime(): Long {
-        return systemTimeProvider.nanoTime
+        return systemTimeProvider.getNanoTime()
     }
 
     internal fun close() {
@@ -58,7 +58,7 @@ class ElasticClock(
         logger.debug("Starting clock sync.")
         try {
             val response =
-                sntpClient.fetchTimeOffset(systemTimeProvider.elapsedRealTime + TIME_REFERENCE)
+                sntpClient.fetchTimeOffset(systemTimeProvider.getElapsedRealTime() + TIME_REFERENCE)
             if (response is SntpClient.Response.Success) {
                 offsetTime.set(TIME_REFERENCE + response.offsetMillis)
                 logger.debug(

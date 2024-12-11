@@ -19,30 +19,40 @@
 package co.elastic.apm.android.sdk.internal.time.ntp
 
 import java.io.Closeable
+import java.net.DatagramPacket
+import java.net.DatagramSocket
+import java.net.InetAddress
+import java.net.SocketException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 import java.time.Duration
 
-interface UdpClient : Closeable {
-    fun send(bytes: ByteArray, timeout: Duration = Duration.ofSeconds(5)): ByteArray
+class UdpClient internal constructor(
+    private val host: String,
+    private val port: Int,
+    private val responseBufferSize: Int
+) : Closeable {
+    private val socket = DatagramSocket()
+    private var address: InetAddress? = null
 
-    data class Configuration(val host: String, val port: Int, val responseBufferSize: Int)
-
-    private object Noop : UdpClient {
-        override fun send(bytes: ByteArray, timeout: Duration): ByteArray {
-            return ByteArray(0)
-        }
-
-        override fun close() {
-
-        }
-    }
-
-    companion object {
-        fun create(configuration: Configuration): UdpClient {
-            return when {
-                configuration.host == "localhost" -> UdpClientImpl(configuration)
-                System.getProperty("elastic.test") != null -> Noop
-                else -> UdpClientImpl(configuration)
+    @Throws(UnknownHostException::class, SocketTimeoutException::class, SocketException::class)
+    fun send(bytes: ByteArray, timeout: Duration = Duration.ofSeconds(5)): ByteArray =
+        synchronized(this) {
+            if (address == null) {
+                address = InetAddress.getByName(host)
             }
+
+            socket.soTimeout = timeout.toMillis().toInt()
+
+            val packet = DatagramPacket(bytes, bytes.size, address, port)
+            socket.send(packet)
+
+            val responsePacket = DatagramPacket(ByteArray(responseBufferSize), responseBufferSize)
+            socket.receive(responsePacket)
+            return responsePacket.data.copyOf(responsePacket.length)
         }
+
+    override fun close() {
+        socket.close()
     }
 }

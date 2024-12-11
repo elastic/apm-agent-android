@@ -31,8 +31,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-class UdpClientImplTest {
-    private lateinit var client: UdpClientImpl
+class UdpClientTest {
+    private lateinit var client: UdpClient
     private lateinit var server: TestUdpServer
 
     companion object {
@@ -44,7 +44,7 @@ class UdpClientImplTest {
     fun setUp() {
         server = TestUdpServer(SERVER_PORT)
         server.start()
-        client = UdpClientImpl(UdpClient.Configuration(SERVER_HOST, SERVER_PORT, 256))
+        client = UdpClient(UdpClient.Configuration(SERVER_HOST, SERVER_PORT, 256))
     }
 
     @AfterEach
@@ -99,7 +99,7 @@ class UdpClientImplTest {
 
     @Test
     fun `Server port is not reachable`() {
-        client = UdpClientImpl(UdpClient.Configuration(SERVER_HOST, SERVER_PORT + 1, 256))
+        client = UdpClient(UdpClient.Configuration(SERVER_HOST, SERVER_PORT + 1, 256))
 
         assertThrows<SocketTimeoutException> {
             client.send("Example".toByteArray(), Duration.ofSeconds(1))
@@ -117,7 +117,7 @@ class UdpClientImplTest {
 
     @Test
     fun `Server host not found`() {
-        client = UdpClientImpl(UdpClient.Configuration("nonexistent", SERVER_PORT, 256))
+        client = UdpClient(UdpClient.Configuration("nonexistent", SERVER_PORT, 256))
         assertThrows<UnknownHostException> {
             client.send("Example".toByteArray())
         }

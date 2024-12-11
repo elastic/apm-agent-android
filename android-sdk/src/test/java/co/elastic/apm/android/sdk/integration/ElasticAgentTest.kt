@@ -304,6 +304,7 @@ class ElasticAgentTest {
             .andThen(0)
             .andThen(0)
             .andThen(0)
+            .andThen(0)
             .andThen(receiveTimeOffset)
             .andThen(0)
         SystemTimeProvider.setForTest(systemTimeProvider)

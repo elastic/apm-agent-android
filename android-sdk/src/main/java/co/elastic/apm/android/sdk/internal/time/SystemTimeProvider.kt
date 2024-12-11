@@ -20,7 +20,7 @@ package co.elastic.apm.android.sdk.internal.time
 
 import android.os.SystemClock
 
-class SystemTimeProvider internal constructor() {
+class SystemTimeProvider private constructor() {
 
     fun getCurrentTimeMillis(): Long = System.currentTimeMillis()
 

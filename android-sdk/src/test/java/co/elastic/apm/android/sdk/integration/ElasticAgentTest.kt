@@ -25,12 +25,12 @@ import co.elastic.apm.android.sdk.features.centralconfig.CentralConfigurationCon
 import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
-import co.elastic.apm.android.sdk.internal.time.ntp.UdpClient
 import co.elastic.apm.android.sdk.processors.ProcessorFactory
-import co.elastic.apm.android.sdk.testutils.NtpUtils.createNtpPacket
-import co.elastic.apm.android.sdk.testutils.TestUdpServer
 import co.elastic.apm.android.sdk.tools.Interceptor
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
 import io.mockk.spyk
 import io.opentelemetry.sdk.logs.LogRecordProcessor
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
@@ -42,10 +42,8 @@ import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter
 import io.opentelemetry.sdk.trace.SpanProcessor
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor
 import io.opentelemetry.sdk.trace.export.SpanExporter
-import java.net.DatagramPacket
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import junit.framework.TestCase.fail
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.assertj.core.api.Assertions.assertThat
@@ -293,53 +291,39 @@ class ElasticAgentTest {
 
     @Test
     fun `Verify clock initialization`() {
-        val serverPort = 4448
         val localTime = 1577836800000L
         val timeOffset = 500L
-        val receiveTimeOffset = 5L
         val expectedCurrentTime = localTime + timeOffset
-        val systemTimeProvider = spyk(SystemTimeProvider())
-        val responseLatch = CountDownLatch(1)
-        every { systemTimeProvider.getElapsedRealTime() }.returns(0)
-            .andThen(0)
-            .andThen(0)
-            .andThen(0)
-            .andThen(0)
-            .andThen(receiveTimeOffset)
-            .andThen(0)
-        SystemTimeProvider.setForTest(systemTimeProvider)
-        SntpClient.setUdpConfigForTest(UdpClient.Configuration("localhost", serverPort, 48))
-        val server = TestUdpServer(serverPort)
-        server.responseHandler = {
-            val ntpPacket = createNtpPacket(localTime, timeOffset).toByteArray()
-            val packet = DatagramPacket(ntpPacket, ntpPacket.size, it.address, it.port)
-            server.socket.send(packet)
-            responseLatch.countDown()
-        }
-        server.start()
+        val sntpClient = mockk<SntpClient>()
+        val systemTimeProvider = spyk(SystemTimeProvider.get())
         val spanExporter = InMemorySpanExporter.create()
+        val fetchTimeLatch = CountDownLatch(1)
+        every { systemTimeProvider.getElapsedRealTime() }.returns(0)
+        every { sntpClient.fetchTimeOffset(localTime) }.answers {
+            fetchTimeLatch.countDown()
+            SntpClient.Response.Success(timeOffset)
+        }
+        every { sntpClient.close() } just Runs
         simpleProcessorFactory.spanExporterInterceptor = Interceptor {
             spanExporter
         }
         agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
             .setUrl("http://none")
             .setProcessorFactory(simpleProcessorFactory)
+            .apply {
+                internalSntpClient = sntpClient
+                internalSystemTimeProvider = systemTimeProvider
+            }
             .build()
 
-        if (!responseLatch.await(5, TimeUnit.SECONDS)) {
-            fail("Clock sync took too long.")
-        }
+        fetchTimeLatch.await()
 
-        sendSpan("clock-test")
+        sendSpan()
 
-        val spanData = spanExporter.finishedSpanItems.first { it.name == "clock-test" }
-        assertThat(spanData.startEpochNanos).isEqualTo(
+        assertThat(spanExporter.finishedSpanItems.first().startEpochNanos).isEqualTo(
             expectedCurrentTime * 1_000_000
         )
 
-        SystemTimeProvider.resetForTest()
-        SntpClient.resetUdpConfigForTest()
-        server.close()
         agent.close()
     }
 

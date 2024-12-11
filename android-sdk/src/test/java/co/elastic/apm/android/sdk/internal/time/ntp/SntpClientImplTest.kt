@@ -27,7 +27,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 
-class SntpClientTest {
+class SntpClientImplTest {
     private lateinit var client: SntpClient
     private lateinit var udpClient: UdpClient
     private lateinit var systemTimeProvider: SystemTimeProvider
@@ -36,7 +36,7 @@ class SntpClientTest {
     fun setUp() {
         udpClient = mockk()
         systemTimeProvider = mockk()
-        client = SntpClient(udpClient, systemTimeProvider)
+        client = SntpClientImpl(udpClient, systemTimeProvider)
         every { systemTimeProvider.getElapsedRealTime() }.returns(0L)
     }
 

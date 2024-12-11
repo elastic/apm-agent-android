@@ -29,6 +29,8 @@ import co.elastic.apm.android.sdk.features.clock.ElasticClockManager
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
 import co.elastic.apm.android.sdk.internal.opentelemetry.ElasticOpenTelemetryBuilder
 import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElasticClock
+import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
+import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
 import io.opentelemetry.api.OpenTelemetry
 
 class ElasticAgent private constructor(
@@ -73,6 +75,8 @@ class ElasticAgent private constructor(
         private var authentication: ApmServerAuthentication = ApmServerAuthentication.None
         private var exportProtocol: ExportProtocol = ExportProtocol.HTTP
         private var extraRequestHeaders: Map<String, String> = emptyMap()
+        internal var internalSntpClient: SntpClient? = null
+        internal var internalSystemTimeProvider: SystemTimeProvider? = null
 
         fun setUrl(value: String) = apply {
             url = value
@@ -103,7 +107,10 @@ class ElasticAgent private constructor(
                 val apmServerConnectivityManager =
                     ApmServerConnectivityManager(configurationManager)
                 val exporterProvider = ApmServerExporterProvider.create(configurationManager)
-                val clock = ElasticClock.create()
+                val clock = ElasticClock(
+                    internalSntpClient ?: SntpClient.create(),
+                    internalSystemTimeProvider ?: SystemTimeProvider.get()
+                )
                 setClock(clock)
                 setExporterProvider(exporterProvider)
 

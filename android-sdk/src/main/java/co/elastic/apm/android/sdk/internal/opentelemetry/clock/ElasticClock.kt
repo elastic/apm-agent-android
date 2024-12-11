@@ -24,7 +24,7 @@ import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
 import io.opentelemetry.sdk.common.Clock
 import java.util.concurrent.atomic.AtomicLong
 
-class ElasticClock(
+class ElasticClock internal constructor(
     private val sntpClient: SntpClient,
     private val systemTimeProvider: SystemTimeProvider
 ) : Clock {
@@ -47,6 +47,7 @@ class ElasticClock(
     }
 
     override fun now(): Long {
+        println("ElasticClock now offset: ${offsetTime.get()}, elapsed: ${systemTimeProvider.getElapsedRealTime()}")
         return (offsetTime.get() + systemTimeProvider.getElapsedRealTime()) * MILLIS_TIMES_TO_NANOS
     }
 
@@ -69,6 +70,7 @@ class ElasticClock(
                     "ElasticClock successfully fetched time offset: {}",
                     response.offsetMillis
                 )
+                println("ElasticClock succeeded, offset:${offsetTime.get()} - response: $response")
             } else {
                 logger.debug("ElasticClock error: {}", response)
             }

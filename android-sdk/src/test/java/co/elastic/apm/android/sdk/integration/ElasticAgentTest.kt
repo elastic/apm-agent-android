@@ -23,16 +23,27 @@ import co.elastic.apm.android.sdk.features.apmserver.ApmServerAuthentication
 import co.elastic.apm.android.sdk.features.apmserver.ApmServerConnectivity
 import co.elastic.apm.android.sdk.features.centralconfig.CentralConfigurationConnectivity
 import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingConfiguration
+import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
+import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
+import co.elastic.apm.android.sdk.internal.time.ntp.UdpClient
 import co.elastic.apm.android.sdk.processors.ProcessorFactory
+import co.elastic.apm.android.sdk.testutils.NtpUtils.createNtpPacket
+import co.elastic.apm.android.sdk.testutils.TestUdpServer
+import co.elastic.apm.android.sdk.tools.Interceptor
+import io.mockk.every
+import io.mockk.spyk
 import io.opentelemetry.sdk.logs.LogRecordProcessor
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.logs.export.SimpleLogRecordProcessor
 import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.metrics.export.MetricReader
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader
+import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter
 import io.opentelemetry.sdk.trace.SpanProcessor
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor
 import io.opentelemetry.sdk.trace.export.SpanExporter
+import java.net.DatagramPacket
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -279,6 +290,54 @@ class ElasticAgentTest {
         agent.close()
     }
 
+    @Test
+    fun `Verify clock initialization`() {
+        val serverPort = 4448
+        val localTime = 1577836800000L
+        val timeOffset = 500L
+        val receiveTimeOffset = 5L
+        val expectedCurrentTime = localTime + timeOffset
+        val systemTimeProvider = spyk(SystemTimeProvider())
+        val responseLatch = CountDownLatch(1)
+        every { systemTimeProvider.getElapsedRealTime() }.returns(0)
+            .andThen(0)
+            .andThen(0)
+            .andThen(0)
+            .andThen(receiveTimeOffset)
+            .andThen(0)
+        SystemTimeProvider.setForTest(systemTimeProvider)
+        SntpClient.setUdpConfigForTest(UdpClient.Configuration("localhost", serverPort, 48))
+        val server = TestUdpServer(serverPort)
+        server.responseHandler = {
+            val ntpPacket = createNtpPacket(localTime, timeOffset).toByteArray()
+            val packet = DatagramPacket(ntpPacket, ntpPacket.size, it.address, it.port)
+            server.socket.send(packet)
+            responseLatch.countDown()
+        }
+        server.start()
+        val spanExporter = InMemorySpanExporter.create()
+        simpleProcessorFactory.spanExporterInterceptor = Interceptor {
+            spanExporter
+        }
+        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
+            .setUrl("http://none")
+            .setProcessorFactory(simpleProcessorFactory)
+            .build()
+
+        responseLatch.await(1, TimeUnit.SECONDS)
+
+        sendSpan()
+
+        assertThat(spanExporter.finishedSpanItems.first().startEpochNanos).isEqualTo(
+            expectedCurrentTime * 1_000_000
+        )
+
+        SystemTimeProvider.resetForTest()
+        SntpClient.resetUdpConfigForTest()
+        server.close()
+        agent.close()
+    }
+
     private fun takeRequest() = webServer.takeRequest(2, TimeUnit.SECONDS)!!
 
     private fun sendSpan() {
@@ -303,9 +362,12 @@ class ElasticAgentTest {
 
     private class SimpleProcessorFactory : ProcessorFactory {
         private lateinit var metricReader: PeriodicMetricReader
+        var spanExporterInterceptor: Interceptor<SpanExporter>? = null
 
         override fun createSpanProcessor(exporter: SpanExporter?): SpanProcessor? {
-            return SimpleSpanProcessor.create(exporter)
+            return SimpleSpanProcessor.create(
+                spanExporterInterceptor?.intercept(exporter!!) ?: exporter
+            )
         }
 
         override fun createLogRecordProcessor(exporter: LogRecordExporter?): LogRecordProcessor? {

@@ -19,8 +19,9 @@
 package co.elastic.apm.android.sdk.internal.time
 
 import android.os.SystemClock
+import co.elastic.apm.android.common.internal.logging.Elog
 
-class SystemTimeProvider private constructor() {
+class SystemTimeProvider internal constructor() {
 
     fun getCurrentTimeMillis(): Long = System.currentTimeMillis()
 
@@ -38,6 +39,15 @@ class SystemTimeProvider private constructor() {
             }
 
             return INSTANCE!!
+        }
+
+        internal fun resetForTest() = synchronized(this) {
+            setForTest(null)
+        }
+
+        internal fun setForTest(systemTimeProvider: SystemTimeProvider?) = synchronized(this) {
+            Elog.getLogger().warn("Setting system time for test.")
+            INSTANCE = systemTimeProvider
         }
     }
 }

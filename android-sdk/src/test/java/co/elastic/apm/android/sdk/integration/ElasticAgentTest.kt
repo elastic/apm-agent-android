@@ -67,13 +67,11 @@ class ElasticAgentTest {
         webServer = MockWebServer()
         webServer.start()
         simpleProcessorFactory = SimpleProcessorFactory()
-        SntpClient.setUdpConfigForTest(UdpClient.Configuration("localhost", 0, 48))
     }
 
     @After
     fun tearDown() {
         webServer.close()
-        SntpClient.resetUdpConfigForTest()
     }
 
     @Test
@@ -331,9 +329,10 @@ class ElasticAgentTest {
             fail("Clock sync took too long.")
         }
 
-        sendSpan()
+        sendSpan("clock-test")
 
-        assertThat(spanExporter.finishedSpanItems.first().startEpochNanos).isEqualTo(
+        val spanData = spanExporter.finishedSpanItems.first { it.name == "clock-test" }
+        assertThat(spanData.startEpochNanos).isEqualTo(
             expectedCurrentTime * 1_000_000
         )
 
@@ -345,9 +344,9 @@ class ElasticAgentTest {
 
     private fun takeRequest() = webServer.takeRequest(2, TimeUnit.SECONDS)!!
 
-    private fun sendSpan() {
+    private fun sendSpan(name: String = "span-name") {
         agent.getOpenTelemetry().getTracer("TestTracer")
-            .spanBuilder("span-name")
+            .spanBuilder(name)
             .startSpan()
             .end()
     }

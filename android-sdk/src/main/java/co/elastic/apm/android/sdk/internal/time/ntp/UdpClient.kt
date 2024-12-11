@@ -19,43 +19,30 @@
 package co.elastic.apm.android.sdk.internal.time.ntp
 
 import java.io.Closeable
-import java.net.DatagramPacket
-import java.net.DatagramSocket
-import java.net.InetAddress
-import java.net.SocketException
-import java.net.SocketTimeoutException
-import java.net.UnknownHostException
 import java.time.Duration
 
-class UdpClient internal constructor(
-    internal val configuration: Configuration
-) : Closeable {
-    private val socket = DatagramSocket()
-    private var address: InetAddress? = null
+interface UdpClient : Closeable {
+    fun send(bytes: ByteArray, timeout: Duration = Duration.ofSeconds(5)): ByteArray
 
-    @Throws(UnknownHostException::class, SocketTimeoutException::class, SocketException::class)
-    fun send(bytes: ByteArray, timeout: Duration = Duration.ofSeconds(5)): ByteArray =
-        synchronized(this) {
-            if (address == null) {
-                address = InetAddress.getByName(configuration.host)
-            }
+    data class Configuration(val host: String, val port: Int, val responseBufferSize: Int)
 
-            socket.soTimeout = timeout.toMillis().toInt()
-
-            val packet = DatagramPacket(bytes, bytes.size, address, configuration.port)
-            socket.send(packet)
-
-            val responsePacket = DatagramPacket(
-                ByteArray(configuration.responseBufferSize),
-                configuration.responseBufferSize
-            )
-            socket.receive(responsePacket)
-            return responsePacket.data.copyOf(responsePacket.length)
+    private object Noop : UdpClient {
+        override fun send(bytes: ByteArray, timeout: Duration): ByteArray {
+            return ByteArray(0)
         }
 
-    override fun close() {
-        socket.close()
+        override fun close() {
+
+        }
     }
 
-    internal data class Configuration(val host: String, val port: Int, val responseBufferSize: Int)
+    companion object {
+        fun create(configuration: Configuration): UdpClient {
+            return when {
+                configuration.host == "localhost" -> UdpClientImpl(configuration)
+                System.getProperty("elastic.test") != null -> Noop
+                else -> UdpClientImpl(configuration)
+            }
+        }
+    }
 }

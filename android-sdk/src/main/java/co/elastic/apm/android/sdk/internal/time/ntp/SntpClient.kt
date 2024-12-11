@@ -85,7 +85,7 @@ class SntpClient(
         }
 
         fun create(): SntpClient {
-            return SntpClient(UdpClient(udpConfigProvider.get()), SystemTimeProvider.get())
+            return SntpClient(UdpClient.create(udpConfigProvider.get()), SystemTimeProvider.get())
         }
     }
 

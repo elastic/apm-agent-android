@@ -23,6 +23,7 @@ licensesConfig {
 
 tasks.withType(Test).configureEach {
     systemProperty("agent_version", project.version)
+    systemProperty("elastic.test", "")
 }
 
 dependencies {

@@ -50,6 +50,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.junit.jupiter.api.fail
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
@@ -316,7 +317,9 @@ class ElasticAgentTest {
             }
             .build()
 
-        fetchTimeLatch.await()
+        if (!fetchTimeLatch.await(5, TimeUnit.SECONDS)) {
+            fail("Clock sync wait took too long.")
+        }
 
         sendSpan()
 

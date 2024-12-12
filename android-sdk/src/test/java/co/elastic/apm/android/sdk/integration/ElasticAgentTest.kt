@@ -330,6 +330,12 @@ class ElasticAgentTest {
         agent.close()
     }
 
+    fun `Verify session manager behavior`() {
+        val agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
+            .setProcessorFactory(simpleProcessorFactory)
+            .build()
+    }
+
     private fun takeRequest() = webServer.takeRequest(2, TimeUnit.SECONDS)!!
 
     private fun sendSpan(name: String = "span-name") {

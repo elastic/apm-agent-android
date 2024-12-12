@@ -26,19 +26,22 @@ import co.elastic.apm.android.sdk.features.apmserver.ApmServerConnectivityManage
 import co.elastic.apm.android.sdk.features.apmserver.ApmServerExporterProvider
 import co.elastic.apm.android.sdk.features.centralconfig.CentralConfigurationManager
 import co.elastic.apm.android.sdk.features.clock.ElasticClockManager
+import co.elastic.apm.android.sdk.features.sessionmanager.SessionIdGenerator
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
 import co.elastic.apm.android.sdk.internal.opentelemetry.ElasticOpenTelemetryBuilder
 import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElasticClock
+import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
 import io.opentelemetry.api.OpenTelemetry
 
 class ElasticAgent private constructor(
+    serviceManager: ServiceManager,
     configuration: Configuration,
     private val apmServerConnectivityManager: ApmServerConnectivityManager,
     private val elasticClockManager: ElasticClockManager,
     private val centralConfigurationManager: CentralConfigurationManager
-) : ElasticOtelAgent(configuration) {
+) : ElasticOtelAgent(serviceManager, configuration) {
     private val openTelemetry = configuration.openTelemetrySdk
 
     init {
@@ -69,12 +72,13 @@ class ElasticAgent private constructor(
         }
     }
 
-    class Builder internal constructor(application: Application) :
-        ElasticOpenTelemetryBuilder<Builder>(application) {
+    class Builder internal constructor(private val application: Application) :
+        ElasticOpenTelemetryBuilder<Builder>() {
         private var url: String? = null
         private var authentication: ApmServerAuthentication = ApmServerAuthentication.None
         private var exportProtocol: ExportProtocol = ExportProtocol.HTTP
         private var extraRequestHeaders: Map<String, String> = emptyMap()
+        private var sessionIdGenerator: SessionIdGenerator? = null
         internal var internalSntpClient: SntpClient? = null
         internal var internalSystemTimeProvider: SystemTimeProvider? = null
 
@@ -96,6 +100,7 @@ class ElasticAgent private constructor(
 
         fun build(): ElasticAgent {
             url?.let { finalUrl ->
+                val serviceManager = ServiceManager.create(application)
                 val configuration = ApmServerConnectivity(
                     finalUrl,
                     authentication,
@@ -111,22 +116,23 @@ class ElasticAgent private constructor(
                     internalSntpClient ?: SntpClient.create(),
                     internalSystemTimeProvider ?: SystemTimeProvider.get()
                 )
-                setClock(clock)
-                setExporterProvider(exporterProvider)
-
-                val elasticOtelConfig = buildConfiguration()
                 val elasticClockManager = ElasticClockManager(
-                    elasticOtelConfig.serviceManager,
+                    serviceManager,
                     clock
                 )
                 val centralConfigurationManager = CentralConfigurationManager.create(
-                    elasticOtelConfig.serviceManager,
+                    serviceManager,
                     serviceName,
                     deploymentEnvironment,
                     configurationManager
                 )
+
+                setClock(clock)
+                setExporterProvider(exporterProvider)
+
                 return ElasticAgent(
-                    elasticOtelConfig,
+                    serviceManager,
+                    buildConfiguration(serviceManager),
                     apmServerConnectivityManager,
                     elasticClockManager,
                     centralConfigurationManager

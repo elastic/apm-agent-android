@@ -18,11 +18,7 @@
  */
 package co.elastic.apm.android.sdk.internal.opentelemetry
 
-import android.app.Application
-import android.content.pm.PackageInfo
-import android.content.pm.PackageManager
 import android.os.Build
-import co.elastic.apm.android.common.internal.logging.Elog
 import co.elastic.apm.android.sdk.BuildConfig
 import co.elastic.apm.android.sdk.attributes.common.CommonAttributesInterceptor
 import co.elastic.apm.android.sdk.attributes.common.SpanAttributesInterceptor
@@ -55,7 +51,7 @@ import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 
 @Suppress("UNCHECKED_CAST")
-open class ElasticOpenTelemetryBuilder<B>(private val application: Application) {
+open class ElasticOpenTelemetryBuilder<B> {
     protected var serviceName: String = "unknown"
     protected var serviceVersion: String? = null
     protected var serviceBuild: Int? = null
@@ -72,14 +68,6 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
     private var exporterProvider: ExporterProvider = ExporterProvider.noop()
     private var clock: Clock = Clock.getDefault()
     private val buildCalled = AtomicBoolean(false)
-    private val packageInfo: PackageInfo? by lazy {
-        try {
-            application.packageManager.getPackageInfo(application.packageName, 0)
-        } catch (e: PackageManager.NameNotFoundException) {
-            Elog.getLogger().error("Package info not found", e)
-            null
-        }
-    }
 
     fun setServiceName(value: String): B {
         checkNotBuilt()
@@ -171,8 +159,7 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
         return this as B
     }
 
-    protected fun buildConfiguration(): ElasticOtelAgent.Configuration {
-        val serviceManager = ServiceManager.create(application)
+    protected fun buildConfiguration(serviceManager: ServiceManager): ElasticOtelAgent.Configuration {
         val commonAttributesInterceptor =
             CommonAttributesInterceptor(serviceManager, sessionProvider)
         addSpanAttributesInterceptor(commonAttributesInterceptor)
@@ -186,8 +173,14 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
         }
         val resource = Resource.builder()
             .put(ResourceAttributes.SERVICE_NAME, serviceName)
-            .put(ResourceAttributes.SERVICE_VERSION, serviceVersion ?: getVersionName())
-            .put(AttributeKey.longKey("service.build"), serviceBuild ?: getVersionCode())
+            .put(
+                ResourceAttributes.SERVICE_VERSION,
+                serviceVersion ?: serviceManager.getAppInfoService().getVersionName() ?: "unknown"
+            )
+            .put(
+                AttributeKey.longKey("service.build"),
+                serviceBuild ?: serviceManager.getAppInfoService().getVersionCode()
+            )
             .put(ResourceAttributes.DEPLOYMENT_ENVIRONMENT, deploymentEnvironment)
             .put(ResourceAttributes.DEVICE_ID, deviceIdProvider!!.get())
             .put(ResourceAttributes.DEVICE_MODEL_IDENTIFIER, Build.MODEL)
@@ -205,7 +198,7 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
             .put(ResourceAttributes.TELEMETRY_SDK_LANGUAGE, "java")
             .build()
         val openTelemetryBuilder = OpenTelemetrySdk.builder()
-        val diskBufferingManager = DiskBufferingManager(diskBufferingConfiguration)
+        val diskBufferingManager = DiskBufferingManager(serviceManager, diskBufferingConfiguration)
         addSpanExporterInterceptor(diskBufferingManager::interceptSpanExporter)
         addLogRecordExporterInterceptor(diskBufferingManager::interceptLogRecordExporter)
         addMetricExporterInterceptor(diskBufferingManager::interceptMetricExporter)
@@ -262,19 +255,7 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
             )
         }
         buildCalled.set(true)
-        return ElasticOtelAgent.Configuration(
-            openTelemetryBuilder.build(),
-            serviceManager,
-            diskBufferingManager
-        )
-    }
-
-    private fun getVersionName(): String {
-        return packageInfo?.versionName ?: "unknown"
-    }
-
-    private fun getVersionCode(): Int {
-        return packageInfo?.versionCode ?: 0
+        return ElasticOtelAgent.Configuration(openTelemetryBuilder.build(), diskBufferingManager)
     }
 
     private fun getOsDescription(): String {

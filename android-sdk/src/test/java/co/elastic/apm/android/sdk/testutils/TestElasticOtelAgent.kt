@@ -22,12 +22,14 @@ import android.app.Application
 import co.elastic.apm.android.sdk.exporters.ExporterProvider
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
 import co.elastic.apm.android.sdk.internal.opentelemetry.ElasticOpenTelemetryBuilder
+import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import co.elastic.apm.android.sdk.tools.Interceptor
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.sdk.OpenTelemetrySdk
 import io.opentelemetry.sdk.common.Clock
 
-class TestElasticOtelAgent(configuration: Configuration) : ElasticOtelAgent(configuration) {
+class TestElasticOtelAgent(serviceManager: ServiceManager, configuration: Configuration) :
+    ElasticOtelAgent(serviceManager, configuration) {
     private val openTelemetry: OpenTelemetrySdk = configuration.openTelemetrySdk
 
     override fun getOpenTelemetry(): OpenTelemetry {
@@ -43,8 +45,9 @@ class TestElasticOtelAgent(configuration: Configuration) : ElasticOtelAgent(conf
         }
     }
 
-    class Builder(application: Application) : ElasticOpenTelemetryBuilder<Builder>(application) {
+    class Builder(private val application: Application) : ElasticOpenTelemetryBuilder<Builder>() {
         val configurationInterceptors = mutableListOf<Interceptor<Configuration>>()
+        val serviceManagerInterceptors = mutableListOf<Interceptor<ServiceManager>>()
 
         public override fun setExporterProvider(value: ExporterProvider): Builder {
             return super.setExporterProvider(value)
@@ -55,8 +58,12 @@ class TestElasticOtelAgent(configuration: Configuration) : ElasticOtelAgent(conf
         }
 
         fun build(): TestElasticOtelAgent {
+            val serviceManager = Interceptor.composite(serviceManagerInterceptors)
+                .intercept(ServiceManager.create(application))
             return TestElasticOtelAgent(
-                Interceptor.composite(configurationInterceptors).intercept(buildConfiguration())
+                serviceManager,
+                Interceptor.composite(configurationInterceptors)
+                    .intercept(buildConfiguration(serviceManager))
             )
         }
     }

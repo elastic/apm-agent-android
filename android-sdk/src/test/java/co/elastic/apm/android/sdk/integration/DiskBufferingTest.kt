@@ -19,7 +19,6 @@
 package co.elastic.apm.android.sdk.integration
 
 import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingConfiguration
-import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
 import co.elastic.apm.android.sdk.internal.services.kotlin.appinfo.AppInfoService
 import co.elastic.apm.android.sdk.testutils.ElasticAgentRule
 import io.mockk.every
@@ -43,7 +42,9 @@ class DiskBufferingTest {
         val configuration = DiskBufferingConfiguration.enabled()
         configuration.maxFileAgeForWrite = 500
         configuration.minFileAgeForRead = 501
-        agentRule.initialize(diskBufferingConfiguration = configuration) { it }
+        agentRule.initialize(
+            diskBufferingConfiguration = configuration,
+            configurationInterceptor = { it })
 
         agentRule.sendSpan()
         agentRule.sendLog()
@@ -58,13 +59,11 @@ class DiskBufferingTest {
 
         // Re-init
         Thread.sleep(1000)
-        var config: ElasticOtelAgent.Configuration? = null
-        agentRule.initialize(diskBufferingConfiguration = configuration) {
-            config = it
-            it
-        }
+        agentRule.initialize(
+            diskBufferingConfiguration = configuration,
+            configurationInterceptor = { it })
 
-        config!!.diskBufferingManager.exportFromDisk()
+        agentRule.agent!!.getDiskBufferingManager().exportFromDisk()
 
         // Now we should see the previously-stored signals exported.
         assertThat(agentRule.getFinishedSpans()).hasSize(1)
@@ -74,18 +73,16 @@ class DiskBufferingTest {
 
     @Test
     fun `Disk buffering enabled with io exception`() {
-        val appInfoService = mockk<AppInfoService>()
+        val appInfoService = mockk<AppInfoService>(relaxed = true)
         every {
             appInfoService.getCacheDir()
             appInfoService.getAvailableCacheSpace(any())
         }.throws(IOException())
         val configuration = DiskBufferingConfiguration.enabled()
         agentRule.initialize(diskBufferingConfiguration = configuration) {
-            val spy = spyk(it)
-            val serviceManagerSpy = spyk(it.serviceManager)
-            every { spy.serviceManager }.returns(serviceManagerSpy)
+            val serviceManagerSpy = spyk(it)
             every { serviceManagerSpy.getAppInfoService() }.returns(appInfoService)
-            spy
+            serviceManagerSpy
         }
 
         agentRule.sendSpan()

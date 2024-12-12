@@ -329,6 +329,8 @@ class ElasticAgentTest {
             fail("Clock sync wait took too long.")
         }
 
+        Thread.sleep(500) // Give some time for the clock new time to be set.
+
         sendSpan()
 
         assertThat(spanExporter.finishedSpanItems.first().startEpochNanos).isEqualTo(

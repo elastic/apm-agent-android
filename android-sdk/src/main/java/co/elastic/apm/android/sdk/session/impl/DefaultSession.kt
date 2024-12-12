@@ -16,17 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.session
+package co.elastic.apm.android.sdk.session.impl
 
-import co.elastic.apm.android.sdk.session.impl.DefaultSession
+import co.elastic.apm.android.sdk.session.Session
 
-interface Session {
-    fun getId(): String
+data class DefaultSession(private val id: String) : Session {
 
-    companion object {
-        @JvmStatic
-        fun create(id: String): Session {
-            return DefaultSession(id)
-        }
+    override fun getId(): String {
+        return id
     }
 }

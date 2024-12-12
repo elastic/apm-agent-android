@@ -107,7 +107,7 @@ class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory,
             .setServiceName(serviceName)
             .setDeploymentEnvironment(deploymentEnvironment)
             .setDeviceIdProvider { "device-id" }
-            .setSessionProvider { Session("session-id") }
+            .setSessionProvider { Session.create("session-id") }
             .setClock(clock)
             .setExporterProvider(this)
             .setProcessorFactory(this)

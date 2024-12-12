@@ -27,13 +27,17 @@ import co.elastic.apm.android.sdk.features.apmserver.ApmServerExporterProvider
 import co.elastic.apm.android.sdk.features.centralconfig.CentralConfigurationManager
 import co.elastic.apm.android.sdk.features.clock.ElasticClockManager
 import co.elastic.apm.android.sdk.features.sessionmanager.SessionIdGenerator
+import co.elastic.apm.android.sdk.features.sessionmanager.SessionManager
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
 import co.elastic.apm.android.sdk.internal.opentelemetry.ElasticOpenTelemetryBuilder
 import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElasticClock
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
+import co.elastic.apm.android.sdk.tools.PreferencesLongCacheHandler
+import co.elastic.apm.android.sdk.tools.PreferencesStringCacheHandler
 import io.opentelemetry.api.OpenTelemetry
+import java.util.UUID
 
 class ElasticAgent private constructor(
     serviceManager: ServiceManager,
@@ -98,23 +102,28 @@ class ElasticAgent private constructor(
             extraRequestHeaders = value
         }
 
+        internal fun setSessionIdGenerator(value: SessionIdGenerator) = apply {
+            sessionIdGenerator = value
+        }
+
         fun build(): ElasticAgent {
             url?.let { finalUrl ->
                 val serviceManager = ServiceManager.create(application)
-                val configuration = ApmServerConnectivity(
+                val apmServerConfiguration = ApmServerConnectivity(
                     finalUrl,
                     authentication,
                     extraRequestHeaders,
                     exportProtocol
                 )
+                val systemTimeProvider = internalSystemTimeProvider ?: SystemTimeProvider.get()
                 val configurationManager =
-                    ApmServerConnectivityManager.ConfigurationManager(configuration)
+                    ApmServerConnectivityManager.ConfigurationManager(apmServerConfiguration)
                 val apmServerConnectivityManager =
                     ApmServerConnectivityManager(configurationManager)
                 val exporterProvider = ApmServerExporterProvider.create(configurationManager)
                 val clock = ElasticClock(
                     internalSntpClient ?: SntpClient.create(),
-                    internalSystemTimeProvider ?: SystemTimeProvider.get()
+                    systemTimeProvider
                 )
                 val elasticClockManager = ElasticClockManager(
                     serviceManager,
@@ -126,9 +135,26 @@ class ElasticAgent private constructor(
                     deploymentEnvironment,
                     configurationManager
                 )
+                val sessionManager = SessionManager(
+                    PreferencesStringCacheHandler(
+                        "session_id",
+                        serviceManager.getPreferencesService()
+                    ),
+                    PreferencesLongCacheHandler(
+                        "session_id_expire_time",
+                        serviceManager.getPreferencesService()
+                    ),
+                    PreferencesLongCacheHandler(
+                        "session_id_next_time_for_update",
+                        serviceManager.getPreferencesService()
+                    ),
+                    sessionIdGenerator ?: SessionIdGenerator { UUID.randomUUID().toString() },
+                    systemTimeProvider
+                )
 
                 setClock(clock)
                 setExporterProvider(exporterProvider)
+                setSessionProvider(sessionManager)
 
                 return ElasticAgent(
                     serviceManager,

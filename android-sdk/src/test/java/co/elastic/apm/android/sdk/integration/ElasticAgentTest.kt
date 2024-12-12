@@ -23,27 +23,35 @@ import co.elastic.apm.android.sdk.features.apmserver.ApmServerAuthentication
 import co.elastic.apm.android.sdk.features.apmserver.ApmServerConnectivity
 import co.elastic.apm.android.sdk.features.centralconfig.CentralConfigurationConnectivity
 import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingConfiguration
+import co.elastic.apm.android.sdk.features.sessionmanager.SessionIdGenerator
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
 import co.elastic.apm.android.sdk.processors.ProcessorFactory
 import co.elastic.apm.android.sdk.tools.Interceptor
 import io.mockk.Runs
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.spyk
+import io.mockk.verify
+import io.opentelemetry.api.common.AttributeKey
+import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.sdk.logs.LogRecordProcessor
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.logs.export.SimpleLogRecordProcessor
 import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.metrics.export.MetricReader
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader
+import io.opentelemetry.sdk.testing.exporter.InMemoryLogRecordExporter
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter
 import io.opentelemetry.sdk.trace.SpanProcessor
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor
 import io.opentelemetry.sdk.trace.export.SpanExporter
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.atomic.AtomicReference
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.assertj.core.api.Assertions.assertThat
@@ -330,10 +338,114 @@ class ElasticAgentTest {
         agent.close()
     }
 
+    @Test
     fun `Verify session manager behavior`() {
-        val agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
+        val timeLimitMillis = TimeUnit.MINUTES.toMillis(30)
+        val currentTimeMillis = AtomicLong(timeLimitMillis)
+        val systemTimeProvider = spyk(SystemTimeProvider.get())
+        every { systemTimeProvider.getCurrentTimeMillis() }.answers { currentTimeMillis.get() }
+        val sessionIdGenerator = mockk<SessionIdGenerator>()
+        val spanExporter = AtomicReference(InMemorySpanExporter.create())
+        val logRecordExporter = AtomicReference(InMemoryLogRecordExporter.create())
+        every { sessionIdGenerator.generate() }.returns("first-id")
+        simpleProcessorFactory.spanExporterInterceptor = Interceptor { spanExporter.get() }
+        simpleProcessorFactory.logRecordExporterInterceptor =
+            Interceptor { logRecordExporter.get() }
+        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
+            .setUrl("http://none")
             .setProcessorFactory(simpleProcessorFactory)
+            .setSessionIdGenerator { sessionIdGenerator.generate() }
+            .apply {
+                internalSystemTimeProvider = systemTimeProvider
+            }
             .build()
+
+        sendSpan()
+        sendLog()
+
+        verifySessionId(spanExporter.get().finishedSpanItems.first().attributes, "first-id")
+        verifySessionId(
+            logRecordExporter.get().finishedLogRecordItems.first().attributes,
+            "first-id"
+        )
+        verify(exactly = 1) { sessionIdGenerator.generate() }
+
+        // Reset and verify that the id has been cached for just under the time limit.
+        clearMocks(sessionIdGenerator)
+        spanExporter.set(InMemorySpanExporter.create())
+        logRecordExporter.set(InMemoryLogRecordExporter.create())
+        currentTimeMillis.set(currentTimeMillis.get() + timeLimitMillis - 1)
+        agent.close()
+        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
+            .setUrl("http://none")
+            .setProcessorFactory(simpleProcessorFactory)
+            .setSessionIdGenerator { sessionIdGenerator.generate() }
+            .apply {
+                internalSystemTimeProvider = systemTimeProvider
+            }
+            .build()
+
+        sendSpan()
+        sendLog()
+
+        verifySessionId(spanExporter.get().finishedSpanItems.first().attributes, "first-id")
+        verifySessionId(
+            logRecordExporter.get().finishedLogRecordItems.first().attributes,
+            "first-id"
+        )
+        verify(exactly = 0) { sessionIdGenerator.generate() } // Was retrieved from cache.
+
+        // Reset and verify that the id expires after an idle period of time
+        clearMocks(sessionIdGenerator)
+        every { sessionIdGenerator.generate() }.returns("second-id")
+        spanExporter.get().reset()
+        logRecordExporter.get().reset()
+        currentTimeMillis.set(currentTimeMillis.get() + timeLimitMillis - 1)
+
+        sendSpan()
+        sendLog()
+
+        // Idle time passes
+        currentTimeMillis.set(currentTimeMillis.get() + timeLimitMillis)
+
+        sendSpan()
+        sendLog()
+
+        verifySessionId(spanExporter.get().finishedSpanItems.first().attributes, "first-id")
+        verifySessionId(spanExporter.get().finishedSpanItems[1].attributes, "second-id")
+        verifySessionId(
+            logRecordExporter.get().finishedLogRecordItems.first().attributes,
+            "first-id"
+        )
+        verifySessionId(
+            logRecordExporter.get().finishedLogRecordItems[1].attributes,
+            "second-id"
+        )
+        verify(exactly = 1) { sessionIdGenerator.generate() } // Was regenerated after idle time.
+
+        // Reset and verify that the id expires 4 hours regardless of not enough idle time.
+        clearMocks(sessionIdGenerator)
+        every { sessionIdGenerator.generate() }.returns("third-id")
+        spanExporter.get().reset()
+        logRecordExporter.get().reset()
+
+        repeat(10) { // each idle time 30 min
+            currentTimeMillis.set(currentTimeMillis.get() + timeLimitMillis - 1)
+            sendSpan()
+        }
+
+        val spanItems = spanExporter.get().finishedSpanItems
+        var position = 0
+        repeat(8) {
+            verifySessionId(spanItems[position].attributes, "second-id")
+            position++
+        }
+        verifySessionId(spanItems[8].attributes, "third-id")
+        verifySessionId(spanItems[9].attributes, "third-id")
+    }
+
+    private fun verifySessionId(attributes: Attributes, value: String) {
+        assertThat(attributes.get(AttributeKey.stringKey("session.id"))).isEqualTo(value)
     }
 
     private fun takeRequest() = webServer.takeRequest(2, TimeUnit.SECONDS)!!
@@ -361,6 +473,7 @@ class ElasticAgentTest {
     private class SimpleProcessorFactory : ProcessorFactory {
         private lateinit var metricReader: PeriodicMetricReader
         var spanExporterInterceptor: Interceptor<SpanExporter>? = null
+        var logRecordExporterInterceptor: Interceptor<LogRecordExporter>? = null
 
         override fun createSpanProcessor(exporter: SpanExporter?): SpanProcessor? {
             return SimpleSpanProcessor.create(
@@ -369,7 +482,9 @@ class ElasticAgentTest {
         }
 
         override fun createLogRecordProcessor(exporter: LogRecordExporter?): LogRecordProcessor? {
-            return SimpleLogRecordProcessor.create(exporter)
+            return SimpleLogRecordProcessor.create(
+                logRecordExporterInterceptor?.intercept(exporter!!) ?: exporter
+            )
         }
 
         override fun createMetricReader(exporter: MetricExporter?): MetricReader? {

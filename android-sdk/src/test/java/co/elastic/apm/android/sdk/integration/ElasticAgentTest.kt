@@ -426,10 +426,11 @@ class ElasticAgentTest {
         // Reset and verify that the id expires 4 hours regardless of not enough idle time.
         clearMocks(sessionIdGenerator)
         every { sessionIdGenerator.generate() }.returns("third-id")
+            .andThen("fourth-id")
         spanExporter.get().reset()
         logRecordExporter.get().reset()
 
-        repeat(10) { // each idle time 30 min
+        repeat(18) { // each idle time 30 min
             currentTimeMillis.set(currentTimeMillis.get() + timeLimitMillis - 1)
             sendSpan()
         }
@@ -440,8 +441,12 @@ class ElasticAgentTest {
             verifySessionId(spanItems[position].attributes, "second-id")
             position++
         }
-        verifySessionId(spanItems[8].attributes, "third-id")
-        verifySessionId(spanItems[9].attributes, "third-id")
+        repeat(8) {
+            verifySessionId(spanItems[position].attributes, "third-id")
+            position++
+        }
+        verifySessionId(spanItems[16].attributes, "third-id")
+        verifySessionId(spanItems[17].attributes, "fourth-id")
     }
 
     private fun verifySessionId(attributes: Attributes, value: String) {

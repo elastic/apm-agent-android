@@ -301,9 +301,9 @@ class ElasticAgentTest {
 
     @Test
     fun `Verify clock behavior`() {
-        val localTime = 1577836800000L
+        val localTimeReference = 1577836800000L
         val timeOffset = 500L
-        val expectedCurrentTime = localTime + timeOffset
+        val expectedCurrentTime = localTimeReference + timeOffset
         val sntpClient = mockk<SntpClient>()
         val currentTime = AtomicLong(0)
         val systemTimeProvider = spyk(SystemTimeProvider.get())
@@ -312,7 +312,7 @@ class ElasticAgentTest {
             currentTime.get()
         }
         every { systemTimeProvider.getElapsedRealTime() }.returns(0)
-        every { sntpClient.fetchTimeOffset(localTime) }.returns(
+        every { sntpClient.fetchTimeOffset(localTimeReference) }.returns(
             SntpClient.Response.Success(timeOffset)
         )
         every { sntpClient.close() } just Runs
@@ -340,9 +340,8 @@ class ElasticAgentTest {
             expectedCurrentTime * 1_000_000
         )
 
-        agent.close()
-
         // Reset after almost 24h with unavailable ntp server.
+        agent.close()
         spanExporter.set(InMemorySpanExporter.create())
         every { sntpClient.fetchTimeOffset(any()) }.returns(
             SntpClient.Response.Error(SntpClient.ErrorType.TRY_LATER)
@@ -374,6 +373,41 @@ class ElasticAgentTest {
 
         assertThat(spanExporter.get().finishedSpanItems.first().startEpochNanos).isEqualTo(
             currentTime.get() * 1_000_000
+        )
+
+        // Ensuring cache was cleared.
+        agent.close()
+        spanExporter.set(InMemorySpanExporter.create())
+        every { sntpClient.fetchTimeOffset(any()) }.returns(
+            SntpClient.Response.Error(SntpClient.ErrorType.TRY_LATER)
+        )
+        currentTime.set(currentTime.get() + 1000)
+        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
+            .setUrl("http://none")
+            .setProcessorFactory(simpleProcessorFactory)
+            .apply {
+                internalSntpClient = sntpClient
+                internalSystemTimeProvider = systemTimeProvider
+            }
+            .build()
+
+        sendSpan()
+
+        assertThat(spanExporter.get().finishedSpanItems.first().startEpochNanos).isEqualTo(
+            currentTime.get() * 1_000_000
+        )
+
+        // Picking up new time when available
+        spanExporter.get().reset()
+        every { sntpClient.fetchTimeOffset(localTimeReference + elapsedTime) }.returns(
+            SntpClient.Response.Success(timeOffset)
+        )
+        agent.getElasticClockManager().getTimeOffsetManager().sync()
+
+        sendSpan()
+
+        assertThat(spanExporter.get().finishedSpanItems.first().startEpochNanos).isEqualTo(
+            (timeOffset + localTimeReference + elapsedTime) * 1_000_000
         )
 
         agent.close()

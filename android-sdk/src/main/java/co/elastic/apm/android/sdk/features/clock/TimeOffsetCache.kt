@@ -20,6 +20,7 @@ package co.elastic.apm.android.sdk.features.clock
 
 import co.elastic.apm.android.sdk.internal.services.kotlin.preferences.PreferencesService
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 
 internal class TimeOffsetCache(
@@ -27,33 +28,44 @@ internal class TimeOffsetCache(
     private val systemTimeProvider: SystemTimeProvider
 ) {
     private val timeOffset = AtomicLong(NO_VALUE)
-    private val lastUpdateTime = AtomicLong(NO_VALUE)
+    private val offsetExpireTime = AtomicLong(NO_VALUE)
 
     init {
         timeOffset.set(preferencesService.retrieveLong(TIME_OFFSET_KEY, NO_VALUE))
-        lastUpdateTime.set(preferencesService.retrieveLong(LAST_UPDATE_KEY, NO_VALUE))
+        offsetExpireTime.set(preferencesService.retrieveLong(EXPIRE_TIME_KEY, NO_VALUE))
     }
 
     fun getTimeOffset(): Long? {
         return checkNoValue(timeOffset.get())
     }
 
-    fun getLastUpdateTimeMillis(): Long? {
-        return checkNoValue(lastUpdateTime.get())
+    fun isCurrentOffsetValid(): Boolean {
+        return checkNoValue(offsetExpireTime.get())?.let {
+            systemTimeProvider.getCurrentTimeMillis() < it
+        } ?: false
     }
 
-    fun storeTimeOffset(timeOffset: Long) {
-        preferencesService.store(LAST_UPDATE_KEY, systemTimeProvider.getCurrentTimeMillis())
-        preferencesService.store(TIME_OFFSET_KEY, timeOffset)
+    fun storeTimeOffset(value: Long) {
+        val expireTime = systemTimeProvider.getCurrentTimeMillis() + CACHE_MAX_VALID_TIME
+        timeOffset.set(value)
+        offsetExpireTime.set(expireTime)
+        preferencesService.store(EXPIRE_TIME_KEY, expireTime)
+        preferencesService.store(TIME_OFFSET_KEY, value)
     }
 
     private fun checkNoValue(value: Long): Long? {
         return if (value == NO_VALUE) null else value
     }
 
+    fun clear() {
+        preferencesService.remove(TIME_OFFSET_KEY)
+        preferencesService.remove(EXPIRE_TIME_KEY)
+    }
+
     companion object {
         private const val TIME_OFFSET_KEY = "time_offset"
-        private const val LAST_UPDATE_KEY = "time_offset_last_update"
+        private const val EXPIRE_TIME_KEY = "time_offset_expire_time"
         private const val NO_VALUE = -1L
+        private val CACHE_MAX_VALID_TIME = TimeUnit.HOURS.toMillis(24)
     }
 }

@@ -362,6 +362,21 @@ class ElasticAgentTest {
         assertThat(spanExporter.get().finishedSpanItems.first().startEpochNanos).isEqualTo(
             expectedCurrentTime * 1_000_000
         )
+
+        // Forward time past 24h and trigger time sync
+        currentTime.set(currentTime.get() + 1)
+        spanExporter.get().reset()
+        val elapsedTime = 1000L
+        every { systemTimeProvider.getElapsedRealTime() }.returns(elapsedTime)
+        agent.getElasticClockManager().getTimeOffsetManager().sync()
+
+        sendSpan()
+
+        assertThat(spanExporter.get().finishedSpanItems.first().startEpochNanos).isEqualTo(
+            currentTime.get() * 1_000_000
+        )
+
+        agent.close()
     }
 
     @Test

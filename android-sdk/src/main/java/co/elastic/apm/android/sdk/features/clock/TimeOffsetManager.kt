@@ -60,12 +60,13 @@ internal class TimeOffsetManager private constructor(
             val response =
                 sntpClient.fetchTimeOffset(systemTimeProvider.getElapsedRealTime() + TIME_REFERENCE)
             if (response is SntpClient.Response.Success) {
-                setTimeOffset(TIME_REFERENCE + response.offsetMillis)
+                setAndStoreTimeOffset(TIME_REFERENCE + response.offsetMillis)
                 logger.debug(
                     "ElasticClockManager successfully fetched time offset: {}",
                     response.offsetMillis
                 )
             } else {
+                checkCacheValidity()
                 logger.debug("ElasticClockManager error: {}", response)
             }
         } catch (e: Exception) {
@@ -73,10 +74,30 @@ internal class TimeOffsetManager private constructor(
         }
     }
 
+    private fun checkCacheValidity() {
+        if (!timeOffsetCache.isCurrentOffsetValid()) {
+            setTimeOffset(systemTimeProvider.getCurrentTimeMillis() - systemTimeProvider.getElapsedRealTime())
+            notifyChange()
+            timeOffsetCache.clear()
+        }
+    }
+
+    private fun setAndStoreTimeOffset(offset: Long) {
+        setTimeOffset(offset)
+        storeTimeOffset(offset)
+    }
+
     private fun setTimeOffset(offset: Long) {
         timeOffset.set(offset)
-        timeOffsetCache.storeTimeOffset(offset)
+        notifyChange()
+    }
+
+    private fun notifyChange() {
         listener.onTimeOffsetChanged()
+    }
+
+    private fun storeTimeOffset(offset: Long) {
+        timeOffsetCache.storeTimeOffset(offset)
     }
 
     internal fun close() {

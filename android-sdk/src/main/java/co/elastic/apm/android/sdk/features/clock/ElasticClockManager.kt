@@ -39,7 +39,7 @@ internal class ElasticClockManager internal constructor(
 
     init {
         logger.debug(
-            "Initializing clock manager with sntpClient: {} and systemTimeProvider: {}",
+            "Initializing ElasticClockManager with sntpClient: {} and systemTimeProvider: {}",
             sntpClient,
             systemTimeProvider
         )
@@ -65,14 +65,14 @@ internal class ElasticClockManager internal constructor(
             if (response is SntpClient.Response.Success) {
                 clock.setOffset(TIME_REFERENCE + response.offsetMillis)
                 logger.debug(
-                    "ElasticClock successfully fetched time offset: {}",
+                    "ElasticClockManager successfully fetched time offset: {}",
                     response.offsetMillis
                 )
             } else {
-                logger.debug("ElasticClock error: {}", response)
+                logger.debug("ElasticClockManager error: {}", response)
             }
         } catch (e: Exception) {
-            logger.debug("ElasticClock exception", e)
+            logger.debug("ElasticClockManager exception", e)
         }
     }
 

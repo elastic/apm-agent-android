@@ -47,4 +47,5 @@ dependencies {
     testImplementation libs.mockwebserver
     testImplementation libs.opentelemetry.testing
     testImplementation libs.robolectric
+    testImplementation libs.awaitility
 }

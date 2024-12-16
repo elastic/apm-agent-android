@@ -48,17 +48,18 @@ import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter
 import io.opentelemetry.sdk.trace.SpanProcessor
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor
 import io.opentelemetry.sdk.trace.export.SpanExporter
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.assertj.core.api.Assertions.assertThat
+import org.awaitility.kotlin.await
+import org.awaitility.kotlin.matches
+import org.awaitility.kotlin.untilCallTo
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.junit.jupiter.api.fail
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
@@ -299,22 +300,24 @@ class ElasticAgentTest {
     }
 
     @Test
-    fun `Verify clock initialization`() {
+    fun `Verify clock behavior`() {
         val localTime = 1577836800000L
         val timeOffset = 500L
         val expectedCurrentTime = localTime + timeOffset
         val sntpClient = mockk<SntpClient>()
+        val currentTime = AtomicLong(0)
         val systemTimeProvider = spyk(SystemTimeProvider.get())
-        val spanExporter = InMemorySpanExporter.create()
-        val fetchTimeLatch = CountDownLatch(1)
-        every { systemTimeProvider.getElapsedRealTime() }.returns(0)
-        every { sntpClient.fetchTimeOffset(localTime) }.answers {
-            fetchTimeLatch.countDown()
-            SntpClient.Response.Success(timeOffset)
+        val spanExporter = AtomicReference(InMemorySpanExporter.create())
+        every { systemTimeProvider.getCurrentTimeMillis() }.answers {
+            currentTime.get()
         }
+        every { systemTimeProvider.getElapsedRealTime() }.returns(0)
+        every { sntpClient.fetchTimeOffset(localTime) }.returns(
+            SntpClient.Response.Success(timeOffset)
+        )
         every { sntpClient.close() } just Runs
         simpleProcessorFactory.spanExporterInterceptor = Interceptor {
-            spanExporter
+            spanExporter.get()
         }
         agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
             .setUrl("http://none")
@@ -325,19 +328,40 @@ class ElasticAgentTest {
             }
             .build()
 
-        if (!fetchTimeLatch.await(5, TimeUnit.SECONDS)) {
-            fail("Clock sync wait took too long.")
+        await untilCallTo {
+            agent.getElasticClockManager().getTimeOffsetManager().getTimeOffset()
+        } matches {
+            it == expectedCurrentTime
         }
-
-        Thread.sleep(500) // Give some time for the clock new time to be set.
 
         sendSpan()
 
-        assertThat(spanExporter.finishedSpanItems.first().startEpochNanos).isEqualTo(
+        assertThat(spanExporter.get().finishedSpanItems.first().startEpochNanos).isEqualTo(
             expectedCurrentTime * 1_000_000
         )
 
         agent.close()
+
+        // Reset after almost 24h with unavailable ntp server.
+        spanExporter.set(InMemorySpanExporter.create())
+        every { sntpClient.fetchTimeOffset(any()) }.returns(
+            SntpClient.Response.Error(SntpClient.ErrorType.TRY_LATER)
+        )
+        currentTime.set(currentTime.get() + TimeUnit.HOURS.toMillis(24) - 1)
+        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
+            .setUrl("http://none")
+            .setProcessorFactory(simpleProcessorFactory)
+            .apply {
+                internalSntpClient = sntpClient
+                internalSystemTimeProvider = systemTimeProvider
+            }
+            .build()
+
+        sendSpan()
+
+        assertThat(spanExporter.get().finishedSpanItems.first().startEpochNanos).isEqualTo(
+            expectedCurrentTime * 1_000_000
+        )
     }
 
     @Test

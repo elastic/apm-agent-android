@@ -48,6 +48,7 @@ robolectric = "org.robolectric:robolectric:4.13"
 assertj = "org.assertj:assertj-core:3.26.3"
 coreLib = "com.android.tools:desugar_jdk_libs:2.0.4"
 mockk = "io.mockk:mockk:1.13.13"
+awaitility = "org.awaitility:awaitility-kotlin:4.2.2"
 
 #Compilation tools
 apache-commons-text = "org.apache.commons:commons-text:1.10.0"

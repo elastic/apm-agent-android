@@ -64,6 +64,10 @@ class ElasticAgent private constructor(
         return centralConfigurationManager
     }
 
+    internal fun getElasticClockManager(): ElasticClockManager {
+        return elasticClockManager
+    }
+
     override fun onClose() {
         elasticClockManager.close()
     }

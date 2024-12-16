@@ -58,6 +58,10 @@ internal class ElasticClockManager private constructor(
         return clock
     }
 
+    internal fun getTimeOffsetManager(): TimeOffsetManager {
+        return timeOffsetManager
+    }
+
     override fun onTimeOffsetChanged() {
         clock.setOffset(timeOffsetManager.getTimeOffset())
     }

@@ -28,13 +28,13 @@ import java.util.concurrent.atomic.AtomicLong
 internal class TimeOffsetManager private constructor(
     serviceManager: ServiceManager,
     private val systemTimeProvider: SystemTimeProvider,
-    private val sntpClient: SntpClient
+    private val sntpClient: SntpClient,
+    private val timeOffsetCache: TimeOffsetCache
 ) {
     private val backgroundWorkService by lazy { serviceManager.getBackgroundWorkService() }
     private val timeOffset =
         AtomicLong(systemTimeProvider.getCurrentTimeMillis() - systemTimeProvider.getElapsedRealTime())
     private lateinit var listener: Listener
-    private val lastTimeUpdated = AtomicLong(0)
     private val logger = Elog.getLogger()
 
     init {
@@ -46,6 +46,7 @@ internal class TimeOffsetManager private constructor(
     }
 
     internal fun initialize() {
+        timeOffsetCache.getTimeOffset()?.let { setTimeOffset(it) }
         backgroundWorkService.schedulePeriodicTask(SyncHandler(), 1, TimeUnit.MINUTES)
     }
 
@@ -74,6 +75,7 @@ internal class TimeOffsetManager private constructor(
 
     private fun setTimeOffset(offset: Long) {
         timeOffset.set(offset)
+        timeOffsetCache.storeTimeOffset(offset)
         listener.onTimeOffsetChanged()
     }
 
@@ -93,7 +95,10 @@ internal class TimeOffsetManager private constructor(
             systemTimeProvider: SystemTimeProvider,
             sntpClient: SntpClient
         ): TimeOffsetManager {
-            return TimeOffsetManager(serviceManager, systemTimeProvider, sntpClient)
+            return TimeOffsetManager(
+                serviceManager, systemTimeProvider, sntpClient,
+                TimeOffsetCache(serviceManager.getPreferencesService(), systemTimeProvider)
+            )
         }
     }
 

@@ -38,17 +38,15 @@ internal class ElasticClockManager private constructor(
             systemTimeProvider: SystemTimeProvider,
             sntpClient: SntpClient
         ): ElasticClockManager {
-            return ElasticClockManager(
-                systemTimeProvider,
-                TimeOffsetManager.create(
-                    serviceManager, systemTimeProvider, sntpClient
-                )
-            )
+            val timeOffsetManager =
+                TimeOffsetManager.create(serviceManager, systemTimeProvider, sntpClient)
+            val clockManager = ElasticClockManager(systemTimeProvider, timeOffsetManager)
+            timeOffsetManager.setListener(clockManager)
+            return clockManager
         }
     }
 
     internal fun initialize() {
-        timeOffsetManager.addListener(this)
         timeOffsetManager.initialize()
     }
 

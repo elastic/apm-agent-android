@@ -22,7 +22,6 @@ import co.elastic.apm.android.common.internal.logging.Elog
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
-import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 
@@ -34,9 +33,9 @@ internal class TimeOffsetManager private constructor(
     private val backgroundWorkService by lazy { serviceManager.getBackgroundWorkService() }
     private val timeOffset =
         AtomicLong(systemTimeProvider.getCurrentTimeMillis() - systemTimeProvider.getElapsedRealTime())
+    private lateinit var listener: Listener
     private val lastTimeUpdated = AtomicLong(0)
     private val logger = Elog.getLogger()
-    private val listeners = CopyOnWriteArrayList<Listener>()
 
     init {
         logger.debug(
@@ -75,17 +74,15 @@ internal class TimeOffsetManager private constructor(
 
     private fun setTimeOffset(offset: Long) {
         timeOffset.set(offset)
-        listeners.forEach {
-            it.onTimeOffsetChanged()
-        }
+        listener.onTimeOffsetChanged()
     }
 
     internal fun close() {
         sntpClient.close()
     }
 
-    internal fun addListener(listener: Listener) {
-        listeners.addIfAbsent(listener)
+    internal fun setListener(listener: Listener) {
+        this.listener = listener
     }
 
     companion object {

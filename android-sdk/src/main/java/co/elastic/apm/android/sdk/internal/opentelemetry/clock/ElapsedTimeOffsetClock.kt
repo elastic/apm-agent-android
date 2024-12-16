@@ -24,10 +24,10 @@ import io.opentelemetry.sdk.common.Clock
 import java.util.concurrent.atomic.AtomicLong
 
 internal class ElapsedTimeOffsetClock(
-    initialTimeOffset: Long,
     private val systemTimeProvider: SystemTimeProvider
 ) : Clock {
-    private val offsetTime = AtomicLong(initialTimeOffset)
+    private val offsetTime =
+        AtomicLong(systemTimeProvider.getCurrentTimeMillis() - systemTimeProvider.getElapsedRealTime())
     private val logger = Elog.getLogger()
 
     override fun now(): Long {

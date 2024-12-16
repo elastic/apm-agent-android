@@ -23,6 +23,7 @@ import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 
 internal class TimeOffsetManager private constructor(
@@ -32,8 +33,8 @@ internal class TimeOffsetManager private constructor(
     private val timeOffsetCache: TimeOffsetCache
 ) {
     private val backgroundWorkService by lazy { serviceManager.getBackgroundWorkService() }
-    private val timeOffset =
-        AtomicLong(systemTimeProvider.getCurrentTimeMillis() - systemTimeProvider.getElapsedRealTime())
+    private val usingRemoteTime = AtomicBoolean(false)
+    private lateinit var timeOffset: AtomicLong
     private lateinit var listener: Listener
     private val logger = Elog.getLogger()
 
@@ -46,7 +47,10 @@ internal class TimeOffsetManager private constructor(
     }
 
     internal fun initialize() {
-        timeOffsetCache.getTimeOffset()?.let { setTimeOffset(it) }
+        timeOffset = AtomicLong()
+        timeOffsetCache.getTimeOffset()?.let {
+            setRemoteTimeOffset(it)
+        } ?: setLocalTimeOffset()
         backgroundWorkService.schedulePeriodicTask(SyncHandler(), 1, TimeUnit.MINUTES)
     }
 
@@ -60,13 +64,18 @@ internal class TimeOffsetManager private constructor(
             val response =
                 sntpClient.fetchTimeOffset(systemTimeProvider.getElapsedRealTime() + TIME_REFERENCE)
             if (response is SntpClient.Response.Success) {
-                setAndStoreTimeOffset(TIME_REFERENCE + response.offsetMillis)
+                val offset = TIME_REFERENCE + response.offsetMillis
+                setRemoteTimeOffset(offset)
+                timeOffsetCache.storeTimeOffset(offset)
                 logger.debug(
                     "ElasticClockManager successfully fetched time offset: {}",
                     response.offsetMillis
                 )
             } else {
-                checkCacheValidity()
+                if (usingRemoteTime.get() && !timeOffsetCache.isCurrentOffsetValid()) {
+                    setLocalTimeOffset()
+                    timeOffsetCache.clear()
+                }
                 logger.debug("ElasticClockManager error: {}", response)
             }
         } catch (e: Exception) {
@@ -74,17 +83,14 @@ internal class TimeOffsetManager private constructor(
         }
     }
 
-    private fun checkCacheValidity() {
-        if (!timeOffsetCache.isCurrentOffsetValid()) {
-            setTimeOffset(systemTimeProvider.getCurrentTimeMillis() - systemTimeProvider.getElapsedRealTime())
-            notifyChange()
-            timeOffsetCache.clear()
-        }
+    private fun setLocalTimeOffset() {
+        usingRemoteTime.set(false)
+        setTimeOffset(systemTimeProvider.getCurrentTimeMillis() - systemTimeProvider.getElapsedRealTime())
     }
 
-    private fun setAndStoreTimeOffset(offset: Long) {
+    private fun setRemoteTimeOffset(offset: Long) {
+        usingRemoteTime.set(true)
         setTimeOffset(offset)
-        storeTimeOffset(offset)
     }
 
     private fun setTimeOffset(offset: Long) {
@@ -94,10 +100,6 @@ internal class TimeOffsetManager private constructor(
 
     private fun notifyChange() {
         listener.onTimeOffsetChanged()
-    }
-
-    private fun storeTimeOffset(offset: Long) {
-        timeOffsetCache.storeTimeOffset(offset)
     }
 
     internal fun close() {

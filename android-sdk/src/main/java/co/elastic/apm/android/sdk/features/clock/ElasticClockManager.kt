@@ -29,7 +29,7 @@ internal class ElasticClockManager private constructor(
     private val timeOffsetManager: TimeOffsetManager
 ) : TimeOffsetManager.Listener {
     private val clock: ElapsedTimeOffsetClock by lazy {
-        ElapsedTimeOffsetClock(timeOffsetManager.getTimeOffset(), systemTimeProvider)
+        ElapsedTimeOffsetClock(systemTimeProvider)
     }
 
     companion object {

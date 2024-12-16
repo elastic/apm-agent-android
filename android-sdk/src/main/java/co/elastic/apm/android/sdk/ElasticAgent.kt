@@ -120,10 +120,10 @@ class ElasticAgent private constructor(
                 val apmServerConnectivityManager =
                     ApmServerConnectivityManager(configurationManager)
                 val exporterProvider = ApmServerExporterProvider.create(configurationManager)
-                val elasticClockManager = ElasticClockManager(
+                val elasticClockManager = ElasticClockManager.create(
                     serviceManager,
-                    internalSntpClient ?: SntpClient.create(),
-                    systemTimeProvider
+                    systemTimeProvider,
+                    internalSntpClient ?: SntpClient.create()
                 )
                 val centralConfigurationManager = CentralConfigurationManager.create(
                     serviceManager,

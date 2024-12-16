@@ -18,71 +18,49 @@
  */
 package co.elastic.apm.android.sdk.features.clock
 
-import co.elastic.apm.android.common.internal.logging.Elog
 import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElapsedTimeOffsetClock
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
 import io.opentelemetry.sdk.common.Clock
-import java.util.concurrent.TimeUnit
 
-internal class ElasticClockManager internal constructor(
-    serviceManager: ServiceManager,
-    private val sntpClient: SntpClient,
-    private val systemTimeProvider: SystemTimeProvider
-) {
-    private val backgroundWorkService by lazy { serviceManager.getBackgroundWorkService() }
+internal class ElasticClockManager private constructor(
+    private val systemTimeProvider: SystemTimeProvider,
+    private val timeOffsetManager: TimeOffsetManager
+) : TimeOffsetManager.Listener {
     private val clock: ElapsedTimeOffsetClock by lazy {
-        ElapsedTimeOffsetClock(systemTimeProvider)
+        ElapsedTimeOffsetClock(timeOffsetManager.getTimeOffset(), systemTimeProvider)
     }
-    private val logger = Elog.getLogger()
 
-    init {
-        logger.debug(
-            "Initializing ElasticClockManager with sntpClient: {} and systemTimeProvider: {}",
-            sntpClient,
-            systemTimeProvider
-        )
+    companion object {
+        internal fun create(
+            serviceManager: ServiceManager,
+            systemTimeProvider: SystemTimeProvider,
+            sntpClient: SntpClient
+        ): ElasticClockManager {
+            return ElasticClockManager(
+                systemTimeProvider,
+                TimeOffsetManager.create(
+                    serviceManager, systemTimeProvider, sntpClient
+                )
+            )
+        }
     }
 
     internal fun initialize() {
-        backgroundWorkService.schedulePeriodicTask(SyncHandler(), 1, TimeUnit.MINUTES)
+        timeOffsetManager.addListener(this)
+        timeOffsetManager.initialize()
     }
 
     internal fun close() {
-        sntpClient.close()
+        timeOffsetManager.close()
     }
 
     internal fun getClock(): Clock {
         return clock
     }
 
-    private fun syncClock() {
-        logger.debug("Starting clock sync.")
-        try {
-            val response =
-                sntpClient.fetchTimeOffset(systemTimeProvider.getElapsedRealTime() + TIME_REFERENCE)
-            if (response is SntpClient.Response.Success) {
-                clock.setOffset(TIME_REFERENCE + response.offsetMillis)
-                logger.debug(
-                    "ElasticClockManager successfully fetched time offset: {}",
-                    response.offsetMillis
-                )
-            } else {
-                logger.debug("ElasticClockManager error: {}", response)
-            }
-        } catch (e: Exception) {
-            logger.debug("ElasticClockManager exception", e)
-        }
-    }
-
-    companion object {
-        private const val TIME_REFERENCE = 1577836800000L
-    }
-
-    private inner class SyncHandler : Runnable {
-        override fun run() {
-            syncClock()
-        }
+    override fun onTimeOffsetChanged() {
+        clock.setOffset(timeOffsetManager.getTimeOffset())
     }
 }

@@ -18,27 +18,71 @@
  */
 package co.elastic.apm.android.sdk.features.clock
 
-import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElasticClock
+import co.elastic.apm.android.common.internal.logging.Elog
+import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElapsedTimeOffsetClock
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
+import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
+import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
+import io.opentelemetry.sdk.common.Clock
 import java.util.concurrent.TimeUnit
 
 internal class ElasticClockManager internal constructor(
     serviceManager: ServiceManager,
-    private val clock: ElasticClock
+    private val sntpClient: SntpClient,
+    private val systemTimeProvider: SystemTimeProvider
 ) {
     private val backgroundWorkService by lazy { serviceManager.getBackgroundWorkService() }
+    private val clock: ElapsedTimeOffsetClock by lazy {
+        ElapsedTimeOffsetClock(systemTimeProvider)
+    }
+    private val logger = Elog.getLogger()
+
+    init {
+        logger.debug(
+            "Initializing clock manager with sntpClient: {} and systemTimeProvider: {}",
+            sntpClient,
+            systemTimeProvider
+        )
+    }
 
     internal fun initialize() {
         backgroundWorkService.schedulePeriodicTask(SyncHandler(), 1, TimeUnit.MINUTES)
     }
 
     internal fun close() {
-        clock.close()
+        sntpClient.close()
+    }
+
+    internal fun getClock(): Clock {
+        return clock
+    }
+
+    private fun syncClock() {
+        logger.debug("Starting clock sync.")
+        try {
+            val response =
+                sntpClient.fetchTimeOffset(systemTimeProvider.getElapsedRealTime() + TIME_REFERENCE)
+            if (response is SntpClient.Response.Success) {
+                clock.setOffset(TIME_REFERENCE + response.offsetMillis)
+                logger.debug(
+                    "ElasticClock successfully fetched time offset: {}",
+                    response.offsetMillis
+                )
+            } else {
+                logger.debug("ElasticClock error: {}", response)
+            }
+        } catch (e: Exception) {
+            logger.debug("ElasticClock exception", e)
+        }
+    }
+
+    companion object {
+        private const val TIME_REFERENCE = 1577836800000L
     }
 
     private inner class SyncHandler : Runnable {
         override fun run() {
-            clock.sync()
+            syncClock()
         }
     }
 }

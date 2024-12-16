@@ -20,23 +20,15 @@ package co.elastic.apm.android.sdk.internal.opentelemetry.clock
 
 import co.elastic.apm.android.common.internal.logging.Elog
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
-import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
 import io.opentelemetry.sdk.common.Clock
 import java.util.concurrent.atomic.AtomicLong
 
-class ElasticClock(
-    private val sntpClient: SntpClient,
+internal class ElapsedTimeOffsetClock(
     private val systemTimeProvider: SystemTimeProvider
 ) : Clock {
-    private val logger = Elog.getLogger()
-
     private val offsetTime =
         AtomicLong(systemTimeProvider.getCurrentTimeMillis() - systemTimeProvider.getElapsedRealTime())
-
-    companion object {
-        private const val TIME_REFERENCE = 1577836800000L
-        private const val MILLIS_TIMES_TO_NANOS = 1_000_000L
-    }
+    private val logger = Elog.getLogger()
 
     override fun now(): Long {
         return (offsetTime.get() + systemTimeProvider.getElapsedRealTime()) * MILLIS_TIMES_TO_NANOS
@@ -46,26 +38,12 @@ class ElasticClock(
         return systemTimeProvider.getNanoTime()
     }
 
-    internal fun close() {
-        sntpClient.close()
+    internal fun setOffset(value: Long) {
+        logger.debug("Setting time offset: {}", value)
+        offsetTime.set(value)
     }
 
-    internal fun sync() {
-        logger.debug("Starting clock sync.")
-        try {
-            val response =
-                sntpClient.fetchTimeOffset(systemTimeProvider.getElapsedRealTime() + TIME_REFERENCE)
-            if (response is SntpClient.Response.Success) {
-                offsetTime.set(TIME_REFERENCE + response.offsetMillis)
-                logger.debug(
-                    "ElasticClock successfully fetched time offset: {}",
-                    response.offsetMillis
-                )
-            } else {
-                logger.debug("ElasticClock error: {}", response)
-            }
-        } catch (e: Exception) {
-            logger.debug("ElasticClock exception", e)
-        }
+    companion object {
+        private const val MILLIS_TIMES_TO_NANOS = 1_000_000L
     }
 }

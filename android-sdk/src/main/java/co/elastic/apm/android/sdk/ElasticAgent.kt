@@ -30,7 +30,6 @@ import co.elastic.apm.android.sdk.features.sessionmanager.SessionIdGenerator
 import co.elastic.apm.android.sdk.features.sessionmanager.SessionManager
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
 import co.elastic.apm.android.sdk.internal.opentelemetry.ElasticOpenTelemetryBuilder
-import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElasticClock
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
@@ -121,13 +120,10 @@ class ElasticAgent private constructor(
                 val apmServerConnectivityManager =
                     ApmServerConnectivityManager(configurationManager)
                 val exporterProvider = ApmServerExporterProvider.create(configurationManager)
-                val clock = ElasticClock(
-                    internalSntpClient ?: SntpClient.create(),
-                    systemTimeProvider
-                )
                 val elasticClockManager = ElasticClockManager(
                     serviceManager,
-                    clock
+                    internalSntpClient ?: SntpClient.create(),
+                    systemTimeProvider
                 )
                 val centralConfigurationManager = CentralConfigurationManager.create(
                     serviceManager,
@@ -152,7 +148,7 @@ class ElasticAgent private constructor(
                     systemTimeProvider
                 )
 
-                setClock(clock)
+                setClock(elasticClockManager.getClock())
                 setExporterProvider(exporterProvider)
                 setSessionProvider(sessionManager)
 

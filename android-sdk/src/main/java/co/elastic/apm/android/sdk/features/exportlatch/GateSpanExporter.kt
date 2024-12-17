@@ -16,7 +16,7 @@ internal class GateSpanExporter(
 ) : SpanExporter {
     private val queue by lazy { LinkedBlockingQueue<SpanData>(capacity) }
     private val pendingLatches = AtomicInteger(0)
-private val open = AtomicBoolean(true)
+    private val open = AtomicBoolean(true)
     private val configurationFinished = AtomicBoolean(false)
     private var queuedInterceptor: Interceptor<SpanData>? = null
 

@@ -436,6 +436,50 @@ class ElasticAgentTest {
     }
 
     @Test
+    fun `Verify clock initialization behavior`() {
+        val localTimeReference = 1577836800000L
+        val timeOffset = 500L
+        val expectedCurrentTime = localTimeReference + timeOffset
+        val sntpClient = mockk<SntpClient>()
+        val currentTime = AtomicLong(0)
+        val systemTimeProvider = spyk(SystemTimeProvider.get())
+        val spanExporter = AtomicReference(InMemorySpanExporter.create())
+        every { systemTimeProvider.getCurrentTimeMillis() }.answers {
+            currentTime.get()
+        }
+        every { systemTimeProvider.getElapsedRealTime() }.returns(0)
+        every { sntpClient.fetchTimeOffset(localTimeReference) }.returns(
+            SntpClient.Response.Error(SntpClient.ErrorType.TRY_LATER)
+        ).andThen(
+            SntpClient.Response.Success(timeOffset)
+        )
+        every { sntpClient.close() } just Runs
+        simpleProcessorFactory.spanExporterInterceptor = Interceptor {
+            spanExporter.get()
+        }
+        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
+            .setUrl("http://none")
+            .setProcessorFactory(simpleProcessorFactory)
+            .apply {
+                internalSntpClient = sntpClient
+                internalSystemTimeProvider = systemTimeProvider
+            }
+            .build()
+
+        sendSpan()
+
+        // Nothing is exported yet.
+        assertThat(spanExporter.get().finishedSpanItems).isEmpty()
+
+        // Time gets eventually set.
+        agent.getElasticClockManager().getTimeOffsetManager().sync()
+
+        assertThat(spanExporter.get().finishedSpanItems.first().startEpochNanos).isEqualTo(
+            expectedCurrentTime * 1_000_000
+        )
+    }
+
+    @Test
     fun `Verify session manager behavior`() {
         val timeLimitMillis = TimeUnit.MINUTES.toMillis(30)
         val currentTimeMillis = AtomicLong(timeLimitMillis)

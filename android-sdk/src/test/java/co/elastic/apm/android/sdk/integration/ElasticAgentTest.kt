@@ -27,6 +27,7 @@ import co.elastic.apm.android.sdk.features.sessionmanager.SessionIdGenerator
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
 import co.elastic.apm.android.sdk.processors.ProcessorFactory
+import co.elastic.apm.android.sdk.testutils.ElasticAgentRule
 import co.elastic.apm.android.sdk.tools.Interceptor
 import io.mockk.Runs
 import io.mockk.clearMocks
@@ -43,6 +44,7 @@ import io.opentelemetry.sdk.logs.export.SimpleLogRecordProcessor
 import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.metrics.export.MetricReader
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader
+import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat
 import io.opentelemetry.sdk.testing.exporter.InMemoryLogRecordExporter
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter
 import io.opentelemetry.sdk.trace.SpanProcessor
@@ -53,7 +55,6 @@ import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
@@ -474,9 +475,10 @@ class ElasticAgentTest {
         // Time gets eventually set.
         agent.getElasticClockManager().getTimeOffsetManager().sync()
 
-        assertThat(spanExporter.get().finishedSpanItems.first().startEpochNanos).isEqualTo(
+        val spanData = spanExporter.get().finishedSpanItems.first()
+        assertThat(spanData).startsAt(
             expectedCurrentTime * 1_000_000
-        )
+        ).hasAttributes(ElasticAgentRule.SPAN_DEFAULT_ATTRS)
     }
 
     @Test

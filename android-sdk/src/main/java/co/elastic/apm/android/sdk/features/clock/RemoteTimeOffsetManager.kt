@@ -157,10 +157,7 @@ internal class RemoteTimeOffsetManager private constructor(
     ) {
         fun retrieveTimeOffset(): TimeOffset? {
             return checkNoValue(
-                preferencesService.retrieveLong(
-                    KEY_TIME_OFFSET,
-                    NO_VALUE
-                )
+                preferencesService.retrieveLong(KEY_TIME_OFFSET, NO_VALUE)
             )?.let { offset ->
                 val expireTime =
                     checkNoValue(preferencesService.retrieveLong(KEY_EXPIRE_TIME, NO_VALUE))

@@ -410,6 +410,28 @@ class ElasticAgentTest {
             (timeOffset + localTimeReference + elapsedTime) * 1_000_000
         )
 
+        // Reset after 24h with unavailable ntp server.
+        agent.close()
+        spanExporter.set(InMemorySpanExporter.create())
+        every { sntpClient.fetchTimeOffset(any()) }.returns(
+            SntpClient.Response.Error(SntpClient.ErrorType.TRY_LATER)
+        )
+        currentTime.set(currentTime.get() + TimeUnit.HOURS.toMillis(24))
+        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
+            .setUrl("http://none")
+            .setProcessorFactory(simpleProcessorFactory)
+            .apply {
+                internalSntpClient = sntpClient
+                internalSystemTimeProvider = systemTimeProvider
+            }
+            .build()
+
+        sendSpan()
+
+        assertThat(spanExporter.get().finishedSpanItems.first().startEpochNanos).isEqualTo(
+            currentTime.get() * 1_000_000
+        )
+
         agent.close()
     }
 

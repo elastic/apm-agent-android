@@ -51,7 +51,9 @@ internal class RemoteTimeOffsetManager private constructor(
 
     internal fun initialize() {
         timeOffsetCache.retrieveTimeOffset()?.let {
-            setTimeOffset(it)
+            if (!checkIfHasExpired(it)) {
+                setTimeOffset(it)
+            }
         }
         backgroundWorkService.schedulePeriodicTask(SyncHandler(), 1, TimeUnit.MINUTES)
     }
@@ -75,17 +77,22 @@ internal class RemoteTimeOffsetManager private constructor(
                     response.offsetMillis
                 )
             } else {
-                synchronized(writeLock) {
-                    val currentOffset = timeOffset.get()
-                    if (currentOffset != null && hasExpired(currentOffset.expireTimeMillis)) {
-                        clearTimeOffset()
-                    }
-                }
+                checkIfHasExpired(timeOffset.get())
                 logger.debug("ElasticClockManager error: {}", response)
             }
         } catch (e: Exception) {
             logger.debug("ElasticClockManager exception", e)
         }
+    }
+
+    private fun checkIfHasExpired(timeOffset: TimeOffset?): Boolean {
+        synchronized(writeLock) {
+            if (timeOffset != null && hasExpired(timeOffset.expireTimeMillis)) {
+                clearTimeOffset()
+                return true
+            }
+        }
+        return false
     }
 
     private fun hasExpired(expireTimeMillis: Long): Boolean {

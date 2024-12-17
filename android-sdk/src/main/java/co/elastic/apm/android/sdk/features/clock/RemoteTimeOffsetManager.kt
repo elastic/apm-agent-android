@@ -51,7 +51,7 @@ internal class RemoteTimeOffsetManager private constructor(
 
     internal fun initialize() {
         timeOffsetCache.retrieveTimeOffset()?.let {
-            if (!checkIfHasExpired(it)) {
+            if (!checkIfExpired(it)) {
                 setTimeOffset(it)
             }
         }
@@ -77,7 +77,7 @@ internal class RemoteTimeOffsetManager private constructor(
                     response.offsetMillis
                 )
             } else {
-                checkIfHasExpired(timeOffset.get())
+                checkIfExpired(timeOffset.get())
                 logger.debug("ElasticClockManager error: {}", response)
             }
         } catch (e: Exception) {
@@ -85,7 +85,7 @@ internal class RemoteTimeOffsetManager private constructor(
         }
     }
 
-    private fun checkIfHasExpired(timeOffset: TimeOffset?): Boolean {
+    private fun checkIfExpired(timeOffset: TimeOffset?): Boolean {
         synchronized(writeLock) {
             if (timeOffset != null && hasExpired(timeOffset.expireTimeMillis)) {
                 clearTimeOffset()

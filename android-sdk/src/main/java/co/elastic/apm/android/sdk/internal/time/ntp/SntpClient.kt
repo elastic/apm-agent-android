@@ -24,55 +24,25 @@ import java.io.Closeable
 /**
  * According to RFC-4330.
  */
-class SntpClient(
-    private val udpClient: UdpClient,
-    private val systemTimeProvider: SystemTimeProvider
-) : Closeable {
+interface SntpClient : Closeable {
 
-    fun fetchTimeOffset(currentTimeMillis: Long): Response = synchronized(this) {
-        val t1 = getCurrentNtpTimeMillis(currentTimeMillis)
-        val request = NtpPacket.createForClient(t1, VERSION)
-        val timeBeforeRequest = systemTimeProvider.elapsedRealTime
-        val responseBytes = udpClient.send(request.toByteArray())
-        val requestTimeDelta = systemTimeProvider.elapsedRealTime - timeBeforeRequest
-        val t4 = getCurrentNtpTimeMillis(currentTimeMillis + requestTimeDelta)
-        val response = NtpPacket.parse(responseBytes)
-        val t2 = response.receiveTimestamp
-        val t3 = response.transmitTimestamp
-
-        if (t1 / 1000 != response.originateTimestamp / 1000) {
-            return Response.Error(ErrorType.ORIGIN_TIME_NOT_MATCHING)
-        }
-        if (response.leapIndicator == 3 || response.stratum == 0) {
-            return Response.Error(ErrorType.TRY_LATER)
-        }
-        if (response.versionNumber != VERSION) {
-            return Response.Error(ErrorType.INVALID_VERSION)
-        }
-        if (response.mode != 4) {
-            return Response.Error(ErrorType.INVALID_MODE)
-        }
-        if (response.transmitTimestamp == 0L) {
-            return Response.Error(ErrorType.INVALID_TRANSMIT_TIMESTAMP)
-        }
-
-        return Response.Success(((t2 - t1) + (t3 - t4)) / 2)
-    }
-
-    private fun getCurrentNtpTimeMillis(currentTimeMillis: Long): Long {
-        return currentTimeMillis + NTP_EPOCH_DIFF_MILLIS
-    }
-
-    override fun close() {
-        udpClient.close()
-    }
+    fun fetchTimeOffset(currentTimeMillis: Long): Response
 
     companion object {
-        private const val NTP_EPOCH_DIFF_MILLIS = 2208988800000L // According to RFC-868.
-        private const val VERSION = 4
+        private val noop = object : SntpClient {
+            override fun fetchTimeOffset(currentTimeMillis: Long): Response {
+                return Response.Error(ErrorType.TRY_LATER)
+            }
 
+            override fun close() {}
+        }
+
+        @JvmStatic
         fun create(): SntpClient {
-            return SntpClient(UdpClient("time.android.com", 123, 48), SystemTimeProvider.get())
+            if (System.getProperty("elastic.test")?.equals("true") == true) {
+                return noop
+            }
+            return SntpClientImpl(UdpClient("time.android.com", 123, 48), SystemTimeProvider.get())
         }
     }
 

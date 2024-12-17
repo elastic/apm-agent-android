@@ -18,25 +18,22 @@
  */
 package co.elastic.apm.android.sdk.tools
 
-import co.elastic.apm.android.sdk.internal.services.Service
-import co.elastic.apm.android.sdk.internal.services.ServiceManager
-import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService
+import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import co.elastic.apm.android.sdk.tools.provider.StringProvider
 
 class PreferencesCachedStringProvider(
+    private val serviceManager: ServiceManager,
     private val key: String,
     private val provider: StringProvider
 ) : CacheHandler<String>, StringProvider {
-    private val preferences: PreferencesService by lazy {
-        ServiceManager.get().getService(Service.Names.PREFERENCES)
-    }
+    private val preferences by lazy { serviceManager.getPreferencesService() }
 
     override fun retrieve(): String? {
         return preferences.retrieveString(key)
     }
 
     override fun clear() {
-        preferences.store(key, null)
+        preferences.remove(key)
     }
 
     override fun store(value: String) {

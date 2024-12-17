@@ -27,7 +27,7 @@ import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.time.Duration
 
-class UdpClient(
+class UdpClient internal constructor(
     private val host: String,
     private val port: Int,
     private val responseBufferSize: Int

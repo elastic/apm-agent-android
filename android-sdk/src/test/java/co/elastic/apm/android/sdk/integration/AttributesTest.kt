@@ -135,6 +135,47 @@ class AttributesTest {
 
     @Config(sdk = [24, Config.NEWEST_SDK])
     @Test
+    fun `Check resources with not provided service version`() {
+        setVersionName("1.2.3")
+        agentRule.initialize(serviceVersion = null)
+        val expectedResource = Resource.builder()
+            .put("deployment.environment", "test")
+            .put("device.id", "device-id")
+            .put("device.manufacturer", DEVICE_MANUFACTURER)
+            .put("device.model.identifier", DEVICE_MODEL_NAME)
+            .put(
+                "os.description",
+                "Android ${Build.VERSION.RELEASE}, API level ${Build.VERSION.SDK_INT}, BUILD $OS_BUILD"
+            )
+            .put("os.name", "Android")
+            .put("os.version", Build.VERSION.RELEASE)
+            .put("process.runtime.name", "Android Runtime")
+            .put("process.runtime.version", RUNTIME_VERSION)
+            .put("service.build", VERSION_CODE)
+            .put("service.name", "service-name")
+            .put("service.version", "1.2.3")
+            .put("telemetry.sdk.language", "java")
+            .put("telemetry.sdk.name", "android")
+            .put("telemetry.sdk.version", System.getProperty("agent_version")!!)
+            .build()
+
+        agentRule.sendSpan()
+        agentRule.sendLog()
+        agentRule.sendMetricCounter()
+
+        val spanItems = agentRule.getFinishedSpans()
+        val logItems = agentRule.getFinishedLogRecords()
+        val metricItems = agentRule.getFinishedMetrics()
+        assertThat(spanItems).hasSize(1)
+        assertThat(logItems).hasSize(1)
+        assertThat(metricItems).hasSize(1)
+        assertThat(spanItems.first()).hasResource(expectedResource)
+        assertThat(logItems.first()).hasResource(expectedResource)
+        assertThat(metricItems.first()).hasResource(expectedResource)
+    }
+
+    @Config(sdk = [24, Config.NEWEST_SDK])
+    @Test
     fun `Check global attributes and span status`() {
         agentRule.initialize()
 
@@ -288,5 +329,11 @@ class AttributesTest {
         Shadows.shadowOf(RuntimeEnvironment.getApplication().packageManager)
             .getInternalMutablePackageInfo(RuntimeEnvironment.getApplication().packageName).versionCode =
             versionCode.toInt()
+    }
+
+    private fun setVersionName(versionName: String) {
+        Shadows.shadowOf(RuntimeEnvironment.getApplication().packageManager)
+            .getInternalMutablePackageInfo(RuntimeEnvironment.getApplication().packageName).versionName =
+            versionName
     }
 }

@@ -40,7 +40,7 @@ internal class CommonAttributesInterceptor(
         val networkType = networkService.getType()
 
         builder.put(SemanticAttributes.NETWORK_CONNECTION_TYPE, networkType.name)
-        builder.put(SESSION_ID_ATTRIBUTE_KEY, sessionProvider.getSession().id)
+        sessionProvider.getSession()?.getId()?.let { builder.put(SESSION_ID_ATTRIBUTE_KEY, it) }
 
         if (networkType is NetworkType.Cell) {
             networkType.subTypeName?.let {

@@ -20,6 +20,7 @@ package co.elastic.apm.android.sdk.internal.services.kotlin.appinfo
 
 import android.app.Application
 import android.content.pm.ApplicationInfo
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.storage.StorageManager
@@ -42,17 +43,16 @@ class AppInfoService(private val application: Application) : Service {
     }
 
     fun getVersionCode(): Int {
-        try {
-            val packageInfo =
-                application.packageManager.getPackageInfo(application.packageName, 0)
-            return packageInfo.versionCode
-        } catch (e: PackageManager.NameNotFoundException) {
-            Elog.getLogger().error("Error providing versionCode", e)
-            return 0
-        }
+        return getPackageInfo()?.versionCode ?: 0
+    }
+
+    fun getVersionName(): String? {
+        return getPackageInfo()?.versionName
     }
 
     fun getCacheDir(): File = application.cacheDir
+
+    fun getFilesDir(): File = application.filesDir
 
     @WorkerThread
     fun getAvailableCacheSpace(maxSpaceNeeded: Long): Long {
@@ -93,5 +93,14 @@ class AppInfoService(private val application: Application) : Service {
             maxSpaceNeeded
         )
         return min(directory.usableSpace.toDouble(), maxSpaceNeeded.toDouble()).toLong()
+    }
+
+    private fun getPackageInfo(): PackageInfo? {
+        return try {
+            application.packageManager.getPackageInfo(application.packageName, 0)
+        } catch (e: PackageManager.NameNotFoundException) {
+            Elog.getLogger().error("Package info not found", e)
+            null
+        }
     }
 }

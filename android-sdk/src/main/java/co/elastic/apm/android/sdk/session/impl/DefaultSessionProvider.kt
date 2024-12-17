@@ -23,7 +23,9 @@ import co.elastic.apm.android.sdk.session.SessionProvider
 import java.util.UUID
 
 class DefaultSessionProvider : SessionProvider {
-    private val providedSession by lazy { Session(UUID.randomUUID().toString()) }
+    private val providedSession by lazy {
+        Session.create(UUID.randomUUID().toString())
+    }
 
     override fun getSession(): Session {
         return providedSession

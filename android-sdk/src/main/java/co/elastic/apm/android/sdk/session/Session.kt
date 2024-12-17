@@ -18,4 +18,15 @@
  */
 package co.elastic.apm.android.sdk.session
 
-data class Session(val id: String)
+import co.elastic.apm.android.sdk.session.impl.DefaultSession
+
+interface Session {
+    fun getId(): String
+
+    companion object {
+        @JvmStatic
+        fun create(id: String): Session {
+            return DefaultSession(id)
+        }
+    }
+}

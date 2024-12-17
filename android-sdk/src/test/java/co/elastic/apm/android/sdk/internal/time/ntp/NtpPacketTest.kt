@@ -71,7 +71,7 @@ class NtpPacketTest {
             01001100110011001100110011001101
         """.trimIndent()
 
-        assertThat(packet.toByteArray()).isEqualTo(binaryStringToByteArray(expected))
+        assertThat(packet.toByteArray()).isEqualTo(binaryToByteArray(expected))
     }
 
     @Test
@@ -112,7 +112,7 @@ class NtpPacketTest {
             00110011001100110011001100110011
         """.trimIndent()
 
-        assertThat(NtpPacket.parse(binaryStringToByteArray(input))).isEqualTo(
+        assertThat(NtpPacket.parse(binaryToByteArray(input))).isEqualTo(
             NtpPacket(
                 expectedLeapIndicator,
                 expectedVersionNumber,
@@ -153,8 +153,8 @@ class NtpPacketTest {
     }
 
     @OptIn(ExperimentalUnsignedTypes::class)
-    private fun binaryStringToByteArray(binary: String): ByteArray {
-        return binary.replace(Regex("[^01]+"), "")
+    fun binaryToByteArray(value: String): ByteArray {
+        return value.replace(Regex("[^01]+"), "")
             .chunked(8)
             .map { it.toUByte(2) }
             .toUByteArray()

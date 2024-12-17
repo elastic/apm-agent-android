@@ -16,17 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.session
+package co.elastic.apm.android.sdk.features.centralconfig.fetcher
 
-import co.elastic.apm.android.sdk.session.impl.DefaultSessionProvider
-
-fun interface SessionProvider {
-    fun getSession(): Session?
-
-    companion object {
-        @JvmStatic
-        fun getDefault(): SessionProvider {
-            return DefaultSessionProvider()
-        }
-    }
-}
+internal data class FetchResult(val maxAgeInSeconds: Int?, val configurationHasChanged: Boolean)

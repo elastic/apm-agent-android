@@ -18,23 +18,22 @@
  */
 package co.elastic.apm.android.sdk.internal.time.ntp
 
-import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
+import co.elastic.apm.android.sdk.testutils.TestUdpServer
 import java.net.DatagramPacket
-import java.net.DatagramSocket
 import java.net.SocketException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.time.Duration
 import java.util.concurrent.CountDownLatch
-
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class UdpClientTest {
     private lateinit var client: UdpClient
-    private lateinit var server: FlexiServer
+    private lateinit var server: TestUdpServer
 
     companion object {
         private const val SERVER_HOST = "localhost"
@@ -43,7 +42,7 @@ class UdpClientTest {
 
     @BeforeEach
     fun setUp() {
-        server = FlexiServer(SERVER_PORT)
+        server = TestUdpServer(SERVER_PORT)
         server.start()
         client = UdpClient(SERVER_HOST, SERVER_PORT, 256)
     }
@@ -140,39 +139,6 @@ class UdpClientTest {
         assertThrows<SocketException> {
             latch.countDown()
             client.send("Example".toByteArray(), Duration.ofSeconds(60))
-        }
-    }
-
-    private class FlexiServer(port: Int) : Thread() {
-        private val buf = ByteArray(256)
-        val socket = DatagramSocket(port)
-
-        @Volatile
-        var responseHandler: (DatagramPacket) -> Unit = { clientPacket ->
-            val response = "Server response".toByteArray()
-            val packet =
-                DatagramPacket(response, response.size, clientPacket.address, clientPacket.port)
-            socket.send(packet)
-        }
-
-        override fun run() {
-            while (true) {
-                if (socket.isClosed) {
-                    continue
-                }
-                try {
-                    val packet = DatagramPacket(buf, buf.size)
-                    socket.receive(packet)
-
-                    responseHandler(packet)
-                } catch (e: SocketException) {
-                    continue
-                }
-            }
-        }
-
-        fun close() {
-            socket.close()
         }
     }
 }

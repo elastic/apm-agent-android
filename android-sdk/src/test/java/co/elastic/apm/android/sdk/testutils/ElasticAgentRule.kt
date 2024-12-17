@@ -22,8 +22,10 @@ import co.elastic.apm.android.sdk.exporters.ExporterProvider
 import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingManager
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
+import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import co.elastic.apm.android.sdk.processors.ProcessorFactory
 import co.elastic.apm.android.sdk.session.Session
+import co.elastic.apm.android.sdk.session.SessionProvider
 import co.elastic.apm.android.sdk.tools.Interceptor
 import io.mockk.Runs
 import io.mockk.every
@@ -93,28 +95,39 @@ class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory,
 
     fun initialize(
         serviceName: String = "service-name",
-        serviceVersion: String = "0.0.0",
+        serviceVersion: String? = "0.0.0",
         deploymentEnvironment: String = "test",
         clock: Clock = Clock.getDefault(),
-        diskBufferingConfiguration: DiskBufferingConfiguration = DiskBufferingConfiguration(true),
-        configurationInterceptor: Interceptor<ElasticOtelAgent.Configuration> = this
+        diskBufferingConfiguration: DiskBufferingConfiguration = DiskBufferingConfiguration.enabled(),
+        sessionProvider: SessionProvider = SessionProvider { Session.create("session-id") },
+        configurationInterceptor: Interceptor<ElasticOtelAgent.Configuration> = this,
+        serviceManagerInterceptor: Interceptor<ServiceManager>? = null
     ) {
         spanExporter = InMemorySpanExporter.create()
         metricsExporter = InMemoryMetricExporter.create()
         logsExporter = InMemoryLogRecordExporter.create()
 
-        agent = TestElasticOtelAgent.builder(RuntimeEnvironment.getApplication())
+        val builder = TestElasticOtelAgent.builder(RuntimeEnvironment.getApplication())
             .setServiceName(serviceName)
-            .setServiceVersion(serviceVersion)
             .setDeploymentEnvironment(deploymentEnvironment)
             .setDeviceIdProvider { "device-id" }
-            .setSessionProvider { Session("session-id") }
+            .setSessionProvider(sessionProvider)
             .setClock(clock)
             .setExporterProvider(this)
             .setProcessorFactory(this)
             .setDiskBufferingConfiguration(diskBufferingConfiguration)
-            .apply { configurationInterceptors.add(configurationInterceptor) }
-            .build()
+            .apply {
+                configurationInterceptors.add(configurationInterceptor)
+                serviceManagerInterceptor?.let { interceptor ->
+                    serviceManagerInterceptors.add(interceptor)
+                }
+            }
+
+        if (serviceVersion != null) {
+            builder.setServiceVersion(serviceVersion)
+        }
+
+        agent = builder.build()
     }
 
     fun sendLog(body: String = "", builderVisitor: LogRecordBuilder.() -> Unit = {}) {
@@ -181,7 +194,7 @@ class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory,
     override fun intercept(item: ElasticOtelAgent.Configuration): ElasticOtelAgent.Configuration {
         val spy = spyk(item)
         val diskBufferingManager = mockk<DiskBufferingManager>()
-        every { diskBufferingManager.initialize(item.serviceManager) } just Runs
+        every { diskBufferingManager.initialize() } just Runs
         every { spy.diskBufferingManager }.returns(diskBufferingManager)
         return spy
     }

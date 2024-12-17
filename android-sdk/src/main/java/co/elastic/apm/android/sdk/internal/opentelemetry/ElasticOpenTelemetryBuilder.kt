@@ -18,10 +18,7 @@
  */
 package co.elastic.apm.android.sdk.internal.opentelemetry
 
-import android.app.Application
-import android.content.pm.PackageManager
 import android.os.Build
-import co.elastic.apm.android.common.internal.logging.Elog
 import co.elastic.apm.android.sdk.BuildConfig
 import co.elastic.apm.android.sdk.attributes.common.CommonAttributesInterceptor
 import co.elastic.apm.android.sdk.attributes.common.SpanAttributesInterceptor
@@ -29,7 +26,6 @@ import co.elastic.apm.android.sdk.exporters.ExporterProvider
 import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingManager
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
-import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElasticClock
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.logs.LogRecordAttributesProcessor
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.spans.SpanAttributesProcessor
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.spans.SpanInterceptorProcessor
@@ -52,114 +48,141 @@ import io.opentelemetry.sdk.trace.SdkTracerProvider
 import io.opentelemetry.sdk.trace.export.SpanExporter
 import io.opentelemetry.semconv.ResourceAttributes
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicBoolean
 
 @Suppress("UNCHECKED_CAST")
-open class ElasticOpenTelemetryBuilder<B>(private val application: Application) {
-    private var serviceName: String = ""
-    private var serviceVersion: String = ""
-    private var serviceBuild: Int? = null
-    private var deploymentEnvironment: String = ""
-    private var deviceIdProvider: StringProvider =
-        PreferencesCachedStringProvider("device_id") { UUID.randomUUID().toString() }
+open class ElasticOpenTelemetryBuilder<B> {
+    protected var serviceName: String = "unknown"
+    protected var serviceVersion: String? = null
+    protected var serviceBuild: Int? = null
+    protected var deploymentEnvironment: String? = null
+    private var deviceIdProvider: StringProvider? = null
     private var sessionProvider: SessionProvider = SessionProvider.getDefault()
-    private var clock: Clock = ElasticClock.create()
     private var processorFactory: ProcessorFactory = ProcessorFactory.getDefault()
     private var spanAttributesInterceptors = mutableListOf<Interceptor<Attributes>>()
     private var logRecordAttributesInterceptors = mutableListOf<Interceptor<Attributes>>()
     private var spanExporterInterceptors = mutableListOf<Interceptor<SpanExporter>>()
     private var logRecordExporterInterceptors = mutableListOf<Interceptor<LogRecordExporter>>()
     private var metricExporterInterceptors = mutableListOf<Interceptor<MetricExporter>>()
-    private var diskBufferingConfiguration = DiskBufferingConfiguration(true)
+    private var diskBufferingConfiguration = DiskBufferingConfiguration.enabled()
     private var exporterProvider: ExporterProvider = ExporterProvider.noop()
+    private var clock: Clock = Clock.getDefault()
+    private val buildCalled = AtomicBoolean(false)
 
     fun setServiceName(value: String): B {
+        checkNotBuilt()
         serviceName = value
         return this as B
     }
 
     fun setServiceVersion(value: String): B {
+        checkNotBuilt()
         serviceVersion = value
         return this as B
     }
 
     fun setServiceBuild(value: Int): B {
+        checkNotBuilt()
         serviceBuild = value
         return this as B
     }
 
     fun setDeploymentEnvironment(value: String): B {
+        checkNotBuilt()
         deploymentEnvironment = value
         return this as B
     }
 
     fun setDeviceIdProvider(value: StringProvider): B {
+        checkNotBuilt()
         deviceIdProvider = value
         return this as B
     }
 
     fun setSessionProvider(value: SessionProvider): B {
+        checkNotBuilt()
         sessionProvider = value
         return this as B
     }
 
-    fun setClock(value: Clock): B {
-        clock = value
-        return this as B
-    }
-
     fun setProcessorFactory(value: ProcessorFactory): B {
+        checkNotBuilt()
         processorFactory = value
         return this as B
     }
 
     fun addSpanAttributesInterceptor(value: Interceptor<Attributes>): B {
+        checkNotBuilt()
         spanAttributesInterceptors.add(value)
         return this as B
     }
 
     fun addLogRecordAttributesInterceptor(value: Interceptor<Attributes>): B {
+        checkNotBuilt()
         logRecordAttributesInterceptors.add(value)
         return this as B
     }
 
     fun addSpanExporterInterceptor(value: Interceptor<SpanExporter>): B {
+        checkNotBuilt()
         spanExporterInterceptors.add(value)
         return this as B
     }
 
     fun addLogRecordExporterInterceptor(value: Interceptor<LogRecordExporter>): B {
+        checkNotBuilt()
         logRecordExporterInterceptors.add(value)
         return this as B
     }
 
     fun addMetricExporterInterceptor(value: Interceptor<MetricExporter>): B {
+        checkNotBuilt()
         metricExporterInterceptors.add(value)
         return this as B
     }
 
     fun setDiskBufferingConfiguration(value: DiskBufferingConfiguration): B {
+        checkNotBuilt()
         diskBufferingConfiguration = value
         return this as B
     }
 
     protected open fun setExporterProvider(value: ExporterProvider): B {
+        checkNotBuilt()
         exporterProvider = value
         return this as B
     }
 
-    protected fun buildConfiguration(): ElasticOtelAgent.Configuration {
-        val serviceManager = ServiceManager.create(application)
+    protected open fun setClock(value: Clock): B {
+        checkNotBuilt()
+        clock = value
+        return this as B
+    }
+
+    protected fun buildConfiguration(serviceManager: ServiceManager): ElasticOtelAgent.Configuration {
         val commonAttributesInterceptor =
             CommonAttributesInterceptor(serviceManager, sessionProvider)
         addSpanAttributesInterceptor(commonAttributesInterceptor)
         addSpanAttributesInterceptor(SpanAttributesInterceptor(serviceManager))
         addLogRecordAttributesInterceptor(commonAttributesInterceptor)
+        if (deviceIdProvider == null) {
+            deviceIdProvider = PreferencesCachedStringProvider(
+                serviceManager,
+                "device_id"
+            ) { UUID.randomUUID().toString() }
+        }
         val resource = Resource.builder()
             .put(ResourceAttributes.SERVICE_NAME, serviceName)
-            .put(ResourceAttributes.SERVICE_VERSION, serviceVersion)
-            .put(AttributeKey.longKey("service.build"), serviceBuild ?: getVersionCode())
+            .put(
+                ResourceAttributes.SERVICE_VERSION,
+                serviceVersion ?: serviceManager.getAppInfoService().getVersionName() ?: "unknown"
+            )
+            .put(
+                AttributeKey.longKey("service.build"),
+                serviceBuild ?: serviceManager.getAppInfoService().getVersionCode()
+            )
             .put(ResourceAttributes.DEPLOYMENT_ENVIRONMENT, deploymentEnvironment)
-            .put(ResourceAttributes.DEVICE_ID, deviceIdProvider.get())
+            .put(ResourceAttributes.DEVICE_ID, deviceIdProvider!!.get())
             .put(ResourceAttributes.DEVICE_MODEL_IDENTIFIER, Build.MODEL)
             .put(ResourceAttributes.DEVICE_MANUFACTURER, Build.MANUFACTURER)
             .put(ResourceAttributes.OS_DESCRIPTION, getOsDescription())
@@ -175,7 +198,7 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
             .put(ResourceAttributes.TELEMETRY_SDK_LANGUAGE, "java")
             .build()
         val openTelemetryBuilder = OpenTelemetrySdk.builder()
-        val diskBufferingManager = DiskBufferingManager(diskBufferingConfiguration)
+        val diskBufferingManager = DiskBufferingManager(serviceManager, diskBufferingConfiguration)
         addSpanExporterInterceptor(diskBufferingManager::interceptSpanExporter)
         addLogRecordExporterInterceptor(diskBufferingManager::interceptLogRecordExporter)
         addMetricExporterInterceptor(diskBufferingManager::interceptMetricExporter)
@@ -231,21 +254,8 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
                     .build()
             )
         }
-        return ElasticOtelAgent.Configuration(
-            openTelemetryBuilder.build(),
-            serviceManager,
-            diskBufferingManager
-        )
-    }
-
-    private fun getVersionCode(): Int {
-        try {
-            val info = application.packageManager.getPackageInfo(application.packageName, 0)
-            return info.versionCode
-        } catch (e: PackageManager.NameNotFoundException) {
-            Elog.getLogger().error("Getting version code", e)
-            return 0
-        }
+        buildCalled.set(true)
+        return ElasticOtelAgent.Configuration(openTelemetryBuilder.build(), diskBufferingManager)
     }
 
     private fun getOsDescription(): String {
@@ -257,5 +267,11 @@ open class ElasticOpenTelemetryBuilder<B>(private val application: Application) 
         descriptionBuilder.append(", BUILD ")
         descriptionBuilder.append(Build.VERSION.INCREMENTAL)
         return descriptionBuilder.toString()
+    }
+
+    private fun checkNotBuilt() {
+        if (buildCalled.get()) {
+            throw IllegalStateException()
+        }
     }
 }

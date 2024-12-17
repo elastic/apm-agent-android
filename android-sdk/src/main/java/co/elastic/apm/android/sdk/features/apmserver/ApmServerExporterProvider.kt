@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.exporters.apmserver
+package co.elastic.apm.android.sdk.features.apmserver
 
 import co.elastic.apm.android.sdk.connectivity.ConnectivityConfigurationManager
 import co.elastic.apm.android.sdk.exporters.ExporterProvider
@@ -28,14 +28,14 @@ import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.trace.export.SpanExporter
 
 class ApmServerExporterProvider internal constructor(
-    private val connectivityConfigurationProvider: Provider<ApmServerConnectivityConfiguration>,
+    private val connectivityConfigurationProvider: Provider<ApmServerConnectivity>,
     private val exporterProvider: ConfigurableExporterProvider
 ) : ExporterProvider, ConnectivityConfigurationManager.Listener {
 
     companion object {
-        internal fun create(connectivityConfigurationProviderManager: ApmServerConnectivityConfigurationManager): ApmServerExporterProvider {
+        internal fun create(connectivityConfigurationManager: ApmServerConnectivityManager.ConfigurationManager): ApmServerExporterProvider {
             val configuration =
-                connectivityConfigurationProviderManager.getConnectivityConfiguration()
+                connectivityConfigurationManager.getConnectivityConfiguration()
             val exporterProvider = ConfigurableExporterProvider.create(
                 ExporterConfiguration.Span(
                     configuration.getTracesUrl(),
@@ -54,10 +54,10 @@ class ApmServerExporterProvider internal constructor(
                 )
             )
             val apmServerExporterProvider = ApmServerExporterProvider(
-                connectivityConfigurationProviderManager::getConnectivityConfiguration,
+                connectivityConfigurationManager::getConnectivityConfiguration,
                 exporterProvider
             )
-            connectivityConfigurationProviderManager.addListener(apmServerExporterProvider)
+            connectivityConfigurationManager.addListener(apmServerExporterProvider)
             return apmServerExporterProvider
         }
     }
@@ -74,7 +74,7 @@ class ApmServerExporterProvider internal constructor(
         return exporterProvider.getMetricExporter()
     }
 
-    private fun setApmServerConfiguration(configuration: ApmServerConnectivityConfiguration) {
+    private fun setApmServerConfiguration(configuration: ApmServerConnectivity) {
         val spanConfiguration = ExporterConfiguration.Span(
             configuration.getTracesUrl(),
             configuration.getHeaders(),

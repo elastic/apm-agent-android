@@ -16,17 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.session
+package co.elastic.apm.android.sdk.features.clock
 
-import co.elastic.apm.android.sdk.session.impl.DefaultSessionProvider
+import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElasticClock
+import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
+import java.util.concurrent.TimeUnit
 
-fun interface SessionProvider {
-    fun getSession(): Session?
+internal class ElasticClockManager internal constructor(
+    serviceManager: ServiceManager,
+    private val clock: ElasticClock
+) {
+    private val backgroundWorkService by lazy { serviceManager.getBackgroundWorkService() }
 
-    companion object {
-        @JvmStatic
-        fun getDefault(): SessionProvider {
-            return DefaultSessionProvider()
+    internal fun initialize() {
+        backgroundWorkService.schedulePeriodicTask(SyncHandler(), 1, TimeUnit.MINUTES)
+    }
+
+    internal fun close() {
+        clock.close()
+    }
+
+    private inner class SyncHandler : Runnable {
+        override fun run() {
+            clock.sync()
         }
     }
 }

@@ -16,17 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.session
+package co.elastic.apm.android.sdk.tools
 
-import co.elastic.apm.android.sdk.session.impl.DefaultSessionProvider
+import co.elastic.apm.android.sdk.internal.services.kotlin.preferences.PreferencesService
 
-fun interface SessionProvider {
-    fun getSession(): Session?
+class PreferencesLongCacheHandler(
+    private val key: String,
+    private val preferencesService: PreferencesService
+) : CacheHandler<Long> {
 
-    companion object {
-        @JvmStatic
-        fun getDefault(): SessionProvider {
-            return DefaultSessionProvider()
-        }
+    override fun retrieve(): Long {
+        return preferencesService.retrieveLong(key, 0)
+    }
+
+    override fun clear() {
+        preferencesService.remove(key)
+    }
+
+    override fun store(value: Long) {
+        preferencesService.store(key, value)
     }
 }

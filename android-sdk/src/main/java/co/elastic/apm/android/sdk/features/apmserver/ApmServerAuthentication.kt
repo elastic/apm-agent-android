@@ -16,34 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.time;
+package co.elastic.apm.android.sdk.features.apmserver
 
-import android.os.SystemClock;
-
-public class SystemTimeProvider {
-
-    private static SystemTimeProvider INSTANCE;
-
-    public static SystemTimeProvider get() {
-        if (INSTANCE == null) {
-            INSTANCE = new SystemTimeProvider();
-        }
-
-        return INSTANCE;
-    }
-
-    private SystemTimeProvider() {
-    }
-
-    public long getCurrentTimeMillis() {
-        return System.currentTimeMillis();
-    }
-
-    public long getNanoTime() {
-        return System.nanoTime();
-    }
-
-    public long getElapsedRealTime() {
-        return SystemClock.elapsedRealtime();
-    }
+sealed class ApmServerAuthentication {
+    data class ApiKey(val key: String) : ApmServerAuthentication()
+    data class SecretToken(val token: String) : ApmServerAuthentication()
+    data object None : ApmServerAuthentication()
 }

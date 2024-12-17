@@ -16,18 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.exporters.apmserver
+package co.elastic.apm.android.sdk.internal.time
 
-import co.elastic.apm.android.sdk.connectivity.ConnectivityConfigurationManager
+import android.os.SystemClock
 
-internal class ApmServerConnectivityConfigurationManager(initialValue: ApmServerConnectivityConfiguration) :
-    ConnectivityConfigurationManager(initialValue) {
+class SystemTimeProvider private constructor() {
 
-    fun setConnectivityConfiguration(value: ApmServerConnectivityConfiguration) {
-        set(value)
-    }
+    fun getCurrentTimeMillis(): Long = System.currentTimeMillis()
 
-    fun getConnectivityConfiguration(): ApmServerConnectivityConfiguration {
-        return get() as ApmServerConnectivityConfiguration
+    fun getNanoTime(): Long = System.nanoTime()
+
+    fun getElapsedRealTime(): Long = SystemClock.elapsedRealtime()
+
+    companion object {
+        private var INSTANCE: SystemTimeProvider? = null
+
+        @JvmStatic
+        fun get(): SystemTimeProvider = synchronized(this) {
+            if (INSTANCE == null) {
+                INSTANCE = SystemTimeProvider()
+            }
+
+            return INSTANCE!!
+        }
     }
 }

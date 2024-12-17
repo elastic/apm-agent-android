@@ -24,26 +24,32 @@ import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.sdk.OpenTelemetrySdk
 import java.io.Closeable
 
-abstract class ElasticOtelAgent(private val configuration: Configuration) : Closeable {
+abstract class ElasticOtelAgent(
+    private val serviceManager: ServiceManager,
+    private val configuration: Configuration
+) : Closeable {
 
     init {
-        configuration.diskBufferingManager.initialize(configuration.serviceManager)
+        configuration.diskBufferingManager.initialize()
     }
 
     abstract fun getOpenTelemetry(): OpenTelemetry
+
+    internal fun getDiskBufferingManager(): DiskBufferingManager {
+        return configuration.diskBufferingManager
+    }
 
     final override fun close() {
         onClose()
         configuration.diskBufferingManager.close()
         configuration.openTelemetrySdk.close()
-        configuration.serviceManager.close()
+        serviceManager.close()
     }
 
     protected abstract fun onClose()
 
     data class Configuration(
         val openTelemetrySdk: OpenTelemetrySdk,
-        val serviceManager: ServiceManager,
         val diskBufferingManager: DiskBufferingManager
     )
 }

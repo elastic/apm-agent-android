@@ -35,10 +35,12 @@ import io.opentelemetry.contrib.disk.buffering.StorageConfiguration
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.trace.export.SpanExporter
-import java.io.Closeable
 import java.io.IOException
 
-class DiskBufferingManager(private val configuration: DiskBufferingConfiguration) : Closeable {
+class DiskBufferingManager internal constructor(
+    private val serviceManager: ServiceManager,
+    private val configuration: DiskBufferingConfiguration
+) {
     private var spanExporter: MutableSpanExporter? = null
     private var logRecordExporter: MutableLogRecordExporter? = null
     private var metricExporter: MutableMetricExporter? = null
@@ -54,7 +56,7 @@ class DiskBufferingManager(private val configuration: DiskBufferingConfiguration
         signalFromDiskExporter?.exportBatchOfEach()
     }
 
-    override fun close() {
+    internal fun close() {
         signalFromDiskExporter?.close()
         signalFromDiskExporter = null
         interceptedSpanExporter?.shutdown()
@@ -90,9 +92,9 @@ class DiskBufferingManager(private val configuration: DiskBufferingConfiguration
         return metricExporter!!
     }
 
-    internal fun initialize(serviceManager: ServiceManager) {
+    internal fun initialize() {
         try {
-            val storageConfiguration = createStorageConfiguration(serviceManager)
+            val storageConfiguration = createStorageConfiguration()
             signalFromDiskExporter = createFromDiskExporter(storageConfiguration)
             toDiskSpanExporter = interceptedSpanExporter?.let {
                 SpanToDiskExporter.create(it, storageConfiguration)
@@ -152,7 +154,7 @@ class DiskBufferingManager(private val configuration: DiskBufferingConfiguration
         return builder.build()
     }
 
-    private fun createStorageConfiguration(serviceManager: ServiceManager): StorageConfiguration {
+    private fun createStorageConfiguration(): StorageConfiguration {
         val diskManager = DiskManager.create(serviceManager, configuration)
         val builder = StorageConfiguration.builder()
             .setMaxFileSize(diskManager.getMaxCacheFileSize())

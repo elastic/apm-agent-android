@@ -19,6 +19,7 @@
 package co.elastic.apm.android.sdk.internal.time.ntp
 
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
+import co.elastic.apm.android.sdk.testutils.NtpUtils.toNtpTime
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
@@ -26,21 +27,17 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 
-class SntpClientTest {
+class SntpClientImplTest {
     private lateinit var client: SntpClient
     private lateinit var udpClient: UdpClient
     private lateinit var systemTimeProvider: SystemTimeProvider
-
-    companion object {
-        private const val NTP_EPOCH_DIFF_MILLIS = 2208988800000L // According to RFC-868.
-    }
 
     @BeforeEach
     fun setUp() {
         udpClient = mockk()
         systemTimeProvider = mockk()
-        client = SntpClient(udpClient, systemTimeProvider)
-        every { systemTimeProvider.elapsedRealTime }.returns(0L)
+        client = SntpClientImpl(udpClient, systemTimeProvider)
+        every { systemTimeProvider.getElapsedRealTime() }.returns(0L)
     }
 
     @Test
@@ -152,7 +149,7 @@ class SntpClientTest {
         responseMode: Int = 4,
         responseStratum: Int = 1
     ) {
-        every { systemTimeProvider.elapsedRealTime }.returns(0)
+        every { systemTimeProvider.getElapsedRealTime() }.returns(0)
             .andThen(receiveClientTimeOffset)
         every {
             udpClient.send(
@@ -170,9 +167,5 @@ class SntpClientTest {
                 if (transmitServerTime != 0L) toNtpTime(transmitServerTime) else 0
             ).toByteArray()
         )
-    }
-
-    private fun toNtpTime(time: Long): Long {
-        return time + NTP_EPOCH_DIFF_MILLIS
     }
 }

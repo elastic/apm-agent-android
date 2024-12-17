@@ -29,6 +29,8 @@ import co.elastic.apm.android.sdk.internal.features.centralconfig.initializer.Ce
 import co.elastic.apm.android.sdk.internal.features.centralconfig.poll.ConfigurationPollManager;
 import co.elastic.apm.android.sdk.internal.features.persistence.PersistenceInitializer;
 import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElasticClock;
+import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
+import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient;
 import co.elastic.apm.android.sdk.session.SessionManager;
 
 public class DefaultAgentDependenciesInjector implements AgentDependenciesInjector {
@@ -44,7 +46,7 @@ public class DefaultAgentDependenciesInjector implements AgentDependenciesInject
 
     @Override
     public ElasticClock getElasticClock() {
-        return ElasticClock.create();
+        return new ElasticClock(SntpClient.create(), SystemTimeProvider.get());
     }
 
     @Override

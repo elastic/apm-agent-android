@@ -22,15 +22,17 @@ import io.opentelemetry.sdk.common.CompletableResultCode
 import io.opentelemetry.sdk.metrics.InstrumentType
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality
 import io.opentelemetry.sdk.metrics.data.MetricData
+import io.opentelemetry.sdk.metrics.export.AggregationTemporalitySelector
 import io.opentelemetry.sdk.metrics.export.MetricExporter
 import java.util.concurrent.atomic.AtomicReference
 
 class MutableMetricExporter : MetricExporter {
     private val delegate = AtomicReference<MetricExporter?>()
+    private val defaultAggregationSelector = AggregationTemporalitySelector.deltaPreferred()
 
     override fun getAggregationTemporality(instrumentType: InstrumentType): AggregationTemporality {
         return delegate.get()?.getAggregationTemporality(instrumentType)
-            ?: AggregationTemporality.DELTA
+            ?: defaultAggregationSelector.getAggregationTemporality(instrumentType)
     }
 
     override fun export(metrics: MutableCollection<MetricData>): CompletableResultCode {

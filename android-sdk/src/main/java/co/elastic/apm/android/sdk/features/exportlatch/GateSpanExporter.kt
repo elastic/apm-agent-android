@@ -1,0 +1,91 @@
+package co.elastic.apm.android.sdk.features.exportlatch
+
+import co.elastic.apm.android.sdk.internal.services.kotlin.backgroundwork.BackgroundWorkService
+import co.elastic.apm.android.sdk.tools.Interceptor
+import io.opentelemetry.sdk.common.CompletableResultCode
+import io.opentelemetry.sdk.trace.data.SpanData
+import io.opentelemetry.sdk.trace.export.SpanExporter
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
+
+internal class GateSpanExporter(
+    capacity: Int,
+    private val delegate: SpanExporter,
+    private val backgroundWorkService: BackgroundWorkService
+) : SpanExporter {
+    private val queue by lazy { LinkedBlockingQueue<SpanData>(capacity) }
+    private val pendingLatches = AtomicInteger(0)
+private val open = AtomicBoolean(true)
+    private val configurationFinished = AtomicBoolean(false)
+    private var queuedInterceptor: Interceptor<SpanData>? = null
+
+    fun createLatch(): Latch {
+        validateConfigurationFinished()
+        open.compareAndSet(true, false)
+        pendingLatches.incrementAndGet()
+        return object : Latch {
+            private val opened = AtomicBoolean(false)
+
+            override fun open() {
+                if (opened.compareAndSet(false, true)) {
+                    val size = pendingLatches.decrementAndGet()
+                    if (size == 0) {
+                        open.set(true)
+                        delegateQueued()
+                    }
+                }
+            }
+        }
+    }
+
+    fun setQueuedInterceptor(interceptor: Interceptor<SpanData>) {
+        validateConfigurationFinished()
+        queuedInterceptor = interceptor
+    }
+
+    private fun validateConfigurationFinished() {
+        if (configurationFinished.get()) {
+            throw IllegalStateException("The config process has already finished.")
+        }
+    }
+
+    private fun delegateQueued() {
+        if (queue.size == 0) {
+            return
+        }
+        backgroundWorkService.submit {
+            val items = mutableListOf<SpanData>()
+            var item = queue.poll()
+            while (item != null) {
+                items.add(queuedInterceptor?.intercept(item) ?: item)
+                item = queue.poll()
+            }
+            delegate.export(items)
+        }
+    }
+
+    override fun export(spans: MutableCollection<SpanData>): CompletableResultCode {
+        configurationFinished.compareAndSet(false, true)
+        return if (open.get()) {
+            delegate.export(spans)
+        } else {
+            spans.forEach {
+                queue.offer(it)
+            }
+            CompletableResultCode.ofSuccess()
+        }
+    }
+
+    override fun flush(): CompletableResultCode {
+        return delegate.flush()
+    }
+
+    override fun shutdown(): CompletableResultCode {
+        return delegate.shutdown()
+    }
+
+    interface Latch {
+        fun open()
+    }
+}

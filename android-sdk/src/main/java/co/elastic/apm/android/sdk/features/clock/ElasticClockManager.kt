@@ -23,14 +23,16 @@ import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
 import io.opentelemetry.sdk.common.Clock
+import java.util.concurrent.atomic.AtomicBoolean
 
 internal class ElasticClockManager private constructor(
-    private val systemTimeProvider: SystemTimeProvider,
-    private val timeOffsetManager: TimeOffsetManager
-) : TimeOffsetManager.Listener {
-    private val clock: ElapsedTimeOffsetClock by lazy {
-        ElapsedTimeOffsetClock(systemTimeProvider)
-    }
+    systemTimeProvider: SystemTimeProvider,
+    private val timeOffsetManager: RemoteTimeOffsetManager
+) : RemoteTimeOffsetManager.Listener {
+    private val elapsedTimeOffsetClock = ElapsedTimeOffsetClock(systemTimeProvider)
+    private val systemTimeClock = SystemTimeClock(systemTimeProvider)
+    private val clock = MutableClock(systemTimeClock)
+    private val usingRemoteTime = AtomicBoolean(false)
 
     companion object {
         internal fun create(
@@ -39,7 +41,7 @@ internal class ElasticClockManager private constructor(
             sntpClient: SntpClient
         ): ElasticClockManager {
             val timeOffsetManager =
-                TimeOffsetManager.create(serviceManager, systemTimeProvider, sntpClient)
+                RemoteTimeOffsetManager.create(serviceManager, systemTimeProvider, sntpClient)
             val clockManager = ElasticClockManager(systemTimeProvider, timeOffsetManager)
             timeOffsetManager.setListener(clockManager)
             return clockManager
@@ -58,11 +60,19 @@ internal class ElasticClockManager private constructor(
         return clock
     }
 
-    internal fun getTimeOffsetManager(): TimeOffsetManager {
+    internal fun getTimeOffsetManager(): RemoteTimeOffsetManager {
         return timeOffsetManager
     }
 
     override fun onTimeOffsetChanged() {
-        clock.setOffset(timeOffsetManager.getTimeOffset())
+        val timeOffset = timeOffsetManager.getTimeOffset()
+        if (timeOffset != null) {
+            elapsedTimeOffsetClock.setOffset(timeOffset)
+            if (usingRemoteTime.compareAndSet(false, true)) {
+                clock.setDelegate(elapsedTimeOffsetClock)
+            }
+        } else if (usingRemoteTime.compareAndSet(true, false)) {
+            clock.setDelegate(systemTimeClock)
+        }
     }
 }

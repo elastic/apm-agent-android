@@ -8,6 +8,11 @@ It has a default configuration that suits most common use cases and built-in sup
 The agent is built on top of https://opentelemetry.io/[OpenTelemetry], enabling you to add custom instrumentation with the
 https://opentelemetry.io/docs/instrumentation/java/manual/[OpenTelemetry Java API].
 
+[NOTE]
+====
+The Elastic APM Android Agent is not compatible with {serverless-docs}[{serverless-full}].
+====
+
 [float]
 [[how-it-works]]
 === How does the Agent work?

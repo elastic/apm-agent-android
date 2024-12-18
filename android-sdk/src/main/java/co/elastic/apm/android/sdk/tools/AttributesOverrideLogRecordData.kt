@@ -16,10 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.features.exportergate.latch
+package co.elastic.apm.android.sdk.tools
 
-internal class MultiLatch(private val latches: List<Latch>) : Latch {
-    override fun open() {
-        latches.forEach { it.open() }
+import io.opentelemetry.api.common.Attributes
+import io.opentelemetry.sdk.logs.data.LogRecordData
+
+internal open class AttributesOverrideLogRecordData(
+    delegate: LogRecordData,
+    private val attributes: Attributes,
+    private val totalAttributeCount: Int
+) : DelegateLogRecordData(delegate) {
+
+    override fun getAttributes(): Attributes {
+        return attributes
+    }
+
+    override fun getTotalAttributeCount(): Int {
+        return totalAttributeCount
     }
 }

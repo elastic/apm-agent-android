@@ -32,7 +32,6 @@ internal class ExporterGateQueue<DATA>(
     private val queue by lazy { LinkedBlockingQueue<DATA>(capacity) }
     private val pendingLatches = AtomicInteger(0)
     private val open = AtomicBoolean(true)
-    private val configurationFinished = AtomicBoolean(false)
     private var queuedInterceptor: Interceptor<DATA> = Interceptor.noop()
 
     fun createLatch(): Latch {
@@ -56,10 +55,12 @@ internal class ExporterGateQueue<DATA>(
         queuedInterceptor = interceptor
     }
 
-    fun enqueue(data: MutableCollection<DATA>): CompletableResultCode {
-        configurationFinished.compareAndSet(false, true)
-        data.forEach {
-            queue.offer(it)
+    fun enqueue(data: Collection<DATA>): CompletableResultCode {
+        for (item in data) {
+            if (!queue.offer(item)) {
+                queue.removeAll(data.toSet())
+                return CompletableResultCode.ofFailure()
+            }
         }
         return CompletableResultCode.ofSuccess()
     }

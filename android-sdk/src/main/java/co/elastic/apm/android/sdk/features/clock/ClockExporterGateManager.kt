@@ -20,12 +20,14 @@ package co.elastic.apm.android.sdk.features.clock
 
 import co.elastic.apm.android.sdk.features.exportergate.latch.Latch
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
+import co.elastic.apm.android.sdk.tools.AttributesOverrideLogRecordData
 import co.elastic.apm.android.sdk.tools.AttributesOverrideSpanData
 import co.elastic.apm.android.sdk.tools.interceptor.Interceptor
 import co.elastic.apm.android.sdk.tools.interceptor.MutableInterceptor
 import co.elastic.apm.android.sdk.tools.provider.Provider
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
+import io.opentelemetry.sdk.logs.data.LogRecordData
 import io.opentelemetry.sdk.trace.data.SpanData
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -38,6 +40,8 @@ class ClockExporterGateManager private constructor(
         MutableInterceptor(ElapsedTimeAttributeInterceptor(systemTimeProvider))
     private var spanGateProcessingInterceptor: SpanGateProcessingInterceptor? =
         SpanGateProcessingInterceptor()
+    private var logRecordGateProcessingInterceptor: LogRecordGateProcessingInterceptor? =
+        LogRecordGateProcessingInterceptor()
     private var latch: Latch? = null
 
     internal fun getAttributesInterceptor(): Interceptor<Attributes> {
@@ -48,11 +52,16 @@ class ClockExporterGateManager private constructor(
         return spanGateProcessingInterceptor!!
     }
 
+    internal fun getLogRecordGateProcessingInterceptor(): LogRecordGateProcessingInterceptor {
+        return logRecordGateProcessingInterceptor!!
+    }
+
     internal fun onRemoteClockSet() {
         if (gateOpened.compareAndSet(false, true)) {
             latch?.open().also { latch = null }
             globalAttributesInterceptor.setDelegate(Interceptor.noop())
             spanGateProcessingInterceptor = null
+            logRecordGateProcessingInterceptor = null
         }
     }
 
@@ -67,17 +76,30 @@ class ClockExporterGateManager private constructor(
             return manager
         }
 
-        private val ATTRIBUTE_KEY_ELAPSED_START_TIME =
-            AttributeKey.longKey("internal.elastic.elapsed_start_time")
+        private val ATTRIBUTE_KEY_CREATION_ELAPSED_TIME =
+            AttributeKey.longKey("internal.elastic.creation_elapsed_time")
     }
 
     inner class SpanGateProcessingInterceptor : Interceptor<SpanData> {
 
         override fun intercept(item: SpanData): SpanData {
-            val elapsedStartTime = item.attributes.get(ATTRIBUTE_KEY_ELAPSED_START_TIME)
+            val elapsedStartTime = item.attributes.get(ATTRIBUTE_KEY_CREATION_ELAPSED_TIME)
             if (elapsedStartTime != null) {
                 timeOffsetNanosProvider.get()?.let {
                     return TimeUpdatedSpanData.create(item, elapsedStartTime, it)
+                }
+            }
+            return item
+        }
+    }
+
+    inner class LogRecordGateProcessingInterceptor : Interceptor<LogRecordData> {
+
+        override fun intercept(item: LogRecordData): LogRecordData {
+            val creationElapsedTime = item.attributes.get(ATTRIBUTE_KEY_CREATION_ELAPSED_TIME)
+            if (creationElapsedTime != null) {
+                timeOffsetNanosProvider.get()?.let {
+                    return TimeUpdatedLogRecordData.create(item, creationElapsedTime, it)
                 }
             }
             return item
@@ -89,12 +111,43 @@ class ClockExporterGateManager private constructor(
 
         override fun intercept(item: Attributes): Attributes {
             return Attributes.builder().putAll(item)
-                .put(ATTRIBUTE_KEY_ELAPSED_START_TIME, systemTimeProvider.getElapsedRealTime())
+                .put(ATTRIBUTE_KEY_CREATION_ELAPSED_TIME, systemTimeProvider.getElapsedRealTime())
                 .build()
         }
     }
 
-    private class TimeUpdatedSpanData(
+    private class TimeUpdatedLogRecordData private constructor(
+        delegate: LogRecordData,
+        attributes: Attributes,
+        totalAttributeCount: Int,
+        private val timestamp: Long
+    ) : AttributesOverrideLogRecordData(delegate, attributes, totalAttributeCount) {
+
+        companion object {
+            fun create(
+                original: LogRecordData,
+                creationElapsedTime: Long,
+                timeOffsetNanos: Long
+            ): TimeUpdatedLogRecordData {
+                val attributes = Attributes.builder().putAll(original.attributes)
+                    .remove(ATTRIBUTE_KEY_CREATION_ELAPSED_TIME)
+                    .build()
+                val realTimestamp = timeOffsetNanos + creationElapsedTime
+                return TimeUpdatedLogRecordData(
+                    original,
+                    attributes,
+                    original.totalAttributeCount - 1,
+                    realTimestamp
+                )
+            }
+        }
+
+        override fun getTimestampEpochNanos(): Long {
+            return timestamp
+        }
+    }
+
+    private class TimeUpdatedSpanData private constructor(
         delegate: SpanData,
         attributes: Attributes,
         totalAttributeCount: Int,
@@ -112,7 +165,7 @@ class ClockExporterGateManager private constructor(
                 val realEndTime =
                     (original.endEpochNanos - original.startEpochNanos) + realStartTime
                 val attributes = Attributes.builder().putAll(original.attributes)
-                    .remove(ATTRIBUTE_KEY_ELAPSED_START_TIME)
+                    .remove(ATTRIBUTE_KEY_CREATION_ELAPSED_TIME)
                     .build()
                 return TimeUpdatedSpanData(
                     original,

@@ -24,6 +24,7 @@ import co.elastic.apm.android.sdk.connectivity.ConnectivityConfigurationManager
 import co.elastic.apm.android.sdk.features.apmserver.ApmServerConnectivityManager
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import java.io.IOException
+import java.util.concurrent.TimeUnit
 import org.slf4j.Logger
 
 class CentralConfigurationManager private constructor(
@@ -60,7 +61,10 @@ class CentralConfigurationManager private constructor(
     }
 
     private fun scheduleInSeconds(seconds: Int) {
-        backgroundWorkService.schedule(ConfigurationPoll(), seconds)
+        backgroundWorkService.schedule(
+            ConfigurationPoll(),
+            TimeUnit.SECONDS.toMillis(seconds.toLong())
+        )
     }
 
     @WorkerThread

@@ -27,11 +27,13 @@ import java.util.concurrent.atomic.AtomicInteger
 
 internal class ExporterGateQueue<DATA>(
     capacity: Int,
-    private val listener: Listener
+    private val listener: Listener,
+    private val id: Int
 ) {
     private val queue by lazy { LinkedBlockingQueue<DATA>(capacity) }
     private val pendingLatches = AtomicInteger(0)
     private val open = AtomicBoolean(true)
+    private val started = AtomicBoolean(false)
     private var queuedInterceptor: Interceptor<DATA> = Interceptor.noop()
 
     fun createLatch(): Latch {
@@ -56,6 +58,9 @@ internal class ExporterGateQueue<DATA>(
     }
 
     fun enqueue(data: Collection<DATA>): CompletableResultCode {
+        if (started.compareAndSet(false, true)) {
+            listener.onStartEnqueuing(id)
+        }
         for (item in data) {
             if (!queue.offer(item)) {
                 queue.removeAll(data.toSet())
@@ -79,13 +84,14 @@ internal class ExporterGateQueue<DATA>(
         return items
     }
 
-    private fun openGate() {
+    internal fun openGate() {
         if (open.compareAndSet(false, true)) {
-            listener.onOpen()
+            listener.onOpen(id)
         }
     }
 
-    fun interface Listener {
-        fun onOpen()
+    interface Listener {
+        fun onOpen(id: Int)
+        fun onStartEnqueuing(id: Int)
     }
 }

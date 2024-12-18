@@ -27,22 +27,28 @@ import io.opentelemetry.sdk.logs.data.LogRecordData
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.trace.data.SpanData
 import io.opentelemetry.sdk.trace.export.SpanExporter
+import java.util.concurrent.TimeUnit
 
-internal class ExporterGateManager(serviceManager: ServiceManager) {
+internal class ExporterGateManager(
+    serviceManager: ServiceManager,
+    private val gateLatchTimeout: Long = TimeUnit.SECONDS.toMillis(2)
+) : ExporterGateQueue.Listener {
     private val spanExporter by lazy { MutableSpanExporter() }
-    private val spanGateQueue by lazy { ExporterGateQueue<SpanData>(1000, ::onSpanGateOpen) }
+    private val spanGateQueue by lazy { ExporterGateQueue<SpanData>(1000, this, SPAN_QUEUE_ID) }
     private lateinit var delegateSpanExporter: SpanExporter
     private var gateSpanExporter: GateSpanExporter? = null
     private val logRecordExporter by lazy { MutableLogRecordExporter() }
     private val logRecordGateQueue by lazy {
-        ExporterGateQueue<LogRecordData>(
-            1000,
-            ::onLogRecordGateOpen
-        )
+        ExporterGateQueue<LogRecordData>(1000, this, LOG_RECORD_QUEUE_ID)
     }
     private lateinit var delegateLogRecordExporter: LogRecordExporter
     private var gateLogRecordExporter: GateLogRecordExporter? = null
     private val backgroundWorkService by lazy { serviceManager.getBackgroundWorkService() }
+
+    companion object {
+        private const val SPAN_QUEUE_ID = 1
+        private const val LOG_RECORD_QUEUE_ID = 2
+    }
 
     internal fun createSpanExporterGate(delegate: SpanExporter): SpanExporter {
         delegateSpanExporter = delegate
@@ -91,6 +97,34 @@ internal class ExporterGateManager(serviceManager: ServiceManager) {
                 delegateLogRecordExporter.export(logRecordGateQueue.getProcessedItems())
                 gateLogRecordExporter = null
             }
+        }
+    }
+
+    private fun onSpanQueueStarted() {
+        backgroundWorkService.schedule({
+            spanGateQueue.openGate()
+        }, gateLatchTimeout)
+    }
+
+    private fun onLogRecordQueueStarted() {
+        backgroundWorkService.schedule({
+            logRecordGateQueue.openGate()
+        }, gateLatchTimeout)
+    }
+
+    override fun onOpen(id: Int) {
+        when (id) {
+            SPAN_QUEUE_ID -> onSpanGateOpen()
+            LOG_RECORD_QUEUE_ID -> onLogRecordGateOpen()
+            else -> throw IllegalArgumentException()
+        }
+    }
+
+    override fun onStartEnqueuing(id: Int) {
+        when (id) {
+            SPAN_QUEUE_ID -> onSpanQueueStarted()
+            LOG_RECORD_QUEUE_ID -> onLogRecordQueueStarted()
+            else -> throw IllegalArgumentException()
         }
     }
 }

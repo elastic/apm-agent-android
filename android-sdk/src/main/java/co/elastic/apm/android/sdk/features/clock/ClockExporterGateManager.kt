@@ -69,7 +69,7 @@ class ClockExporterGateManager private constructor(
         internal fun create(
             systemTimeProvider: SystemTimeProvider,
             timeOffsetNanosProvider: Provider<Long?>,
-            exporterGateLatch: Latch
+            exporterGateLatch: Latch?
         ): ClockExporterGateManager {
             val manager = ClockExporterGateManager(systemTimeProvider, timeOffsetNanosProvider)
             manager.latch = exporterGateLatch

@@ -41,7 +41,7 @@ internal class ElasticClockManager private constructor(
             serviceManager: ServiceManager,
             systemTimeProvider: SystemTimeProvider,
             sntpClient: SntpClient,
-            exporterGateLatch: Latch
+            exporterGateLatch: Latch?
         ): ElasticClockManager {
             val timeOffsetManager =
                 RemoteTimeOffsetManager.create(serviceManager, systemTimeProvider, sntpClient)

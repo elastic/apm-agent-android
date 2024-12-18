@@ -107,6 +107,7 @@ class ElasticAgent private constructor(
         internal var internalServiceManagerInterceptor: Interceptor<ServiceManager> =
             Interceptor.noop()
         internal var internalSignalBufferSize = 1000
+        internal var internalDisableGateLatch = false
 
         fun setUrl(value: String) = apply {
             url = value
@@ -159,10 +160,12 @@ class ElasticAgent private constructor(
                     serviceManager,
                     systemTimeProvider,
                     internalSntpClient ?: SntpClient.create(),
-                    Latch.composite(
-                        exporterGateManager.createSpanGateLatch(),
-                        exporterGateManager.createLogRecordLatch()
-                    )
+                    if (!internalDisableGateLatch) {
+                        Latch.composite(
+                            exporterGateManager.createSpanGateLatch(),
+                            exporterGateManager.createLogRecordLatch()
+                        )
+                    } else null
                 )
                 val centralConfigurationManager = CentralConfigurationManager.create(
                     serviceManager,
@@ -187,24 +190,27 @@ class ElasticAgent private constructor(
                     systemTimeProvider
                 )
 
-                addSpanAttributesInterceptor(
-                    elasticClockManager.getExportGateManager().getAttributesInterceptor()
-                )
-                addLogRecordAttributesInterceptor(
-                    elasticClockManager.getExportGateManager().getAttributesInterceptor()
-                )
-                exporterGateManager.setSpanQueueProcessingInterceptor(
-                    elasticClockManager.getExportGateManager().getSpanGateProcessingInterceptor()
-                )
-                exporterGateManager.setLogRecordQueueProcessingInterceptor(
-                    elasticClockManager.getExportGateManager()
-                        .getLogRecordGateProcessingInterceptor()
-                )
-                addSpanExporterInterceptor {
-                    exporterGateManager.createSpanExporterGate(it)
-                }
-                addLogRecordExporterInterceptor {
-                    exporterGateManager.createLogRecordExporterGate(it)
+                if (!internalDisableGateLatch) {
+                    addSpanAttributesInterceptor(
+                        elasticClockManager.getExportGateManager().getAttributesInterceptor()
+                    )
+                    addLogRecordAttributesInterceptor(
+                        elasticClockManager.getExportGateManager().getAttributesInterceptor()
+                    )
+                    exporterGateManager.setSpanQueueProcessingInterceptor(
+                        elasticClockManager.getExportGateManager()
+                            .getSpanGateProcessingInterceptor()
+                    )
+                    exporterGateManager.setLogRecordQueueProcessingInterceptor(
+                        elasticClockManager.getExportGateManager()
+                            .getLogRecordGateProcessingInterceptor()
+                    )
+                    addSpanExporterInterceptor {
+                        exporterGateManager.createSpanExporterGate(it)
+                    }
+                    addLogRecordExporterInterceptor {
+                        exporterGateManager.createLogRecordExporterGate(it)
+                    }
                 }
                 setClock(elasticClockManager.getClock())
                 setExporterProvider(internalExporterProviderInterceptor.intercept(exporterProvider))

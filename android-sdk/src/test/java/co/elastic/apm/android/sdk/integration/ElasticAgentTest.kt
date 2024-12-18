@@ -500,6 +500,46 @@ class ElasticAgentTest {
             currentTime.get() * 1_000_000
         )
 
+        // Restarting with remote time available.
+        agent.close()
+        inMemoryExporters.reset()
+        every { sntpClient.fetchTimeOffset(localTimeReference + elapsedTime) }.returns(
+            SntpClient.Response.Success(timeOffset)
+        )
+        agent = inMemoryAgentBuilder()
+            .apply {
+                internalSntpClient = sntpClient
+                internalSystemTimeProvider = systemTimeProvider
+            }
+            .build()
+        agent.getElasticClockManager().getTimeOffsetManager().sync()
+
+        sendSpan()
+
+        assertThat(inMemoryExporters.getFinishedSpans().first()).startsAt(
+            (timeOffset + localTimeReference + elapsedTime) * 1_000_000
+        )
+
+        // Ensuring cache is cleared on reboot.
+        agent.close()
+        inMemoryExporters.reset()
+        every { sntpClient.fetchTimeOffset(any()) }.returns(
+            SntpClient.Response.Error(SntpClient.ErrorType.TRY_LATER)
+        )
+        currentTime.set(currentTime.get() + 1000)
+        agent = inMemoryAgentBuilder()
+            .apply {
+                internalSntpClient = sntpClient
+                internalSystemTimeProvider = systemTimeProvider
+            }
+            .build()
+
+        sendSpan()
+
+        assertThat(inMemoryExporters.getFinishedSpans().first()).startsAt(
+            currentTime.get() * 1_000_000
+        )
+
         agent.close()
     }
 
@@ -526,6 +566,7 @@ class ElasticAgentTest {
             .apply {
                 internalSntpClient = sntpClient
                 internalSystemTimeProvider = systemTimeProvider
+                internalDisableGateLatch = false
             }
             .build()
 
@@ -602,6 +643,7 @@ class ElasticAgentTest {
             .apply {
                 internalSntpClient = sntpClient
                 internalSystemTimeProvider = systemTimeProvider
+                internalDisableGateLatch = false
             }
             .build()
 
@@ -648,6 +690,7 @@ class ElasticAgentTest {
             .apply {
                 internalSntpClient = sntpClient
                 internalSystemTimeProvider = systemTimeProvider
+                internalDisableGateLatch = false
             }
             .build()
 
@@ -705,6 +748,7 @@ class ElasticAgentTest {
                 internalSntpClient = sntpClient
                 internalSystemTimeProvider = systemTimeProvider
                 internalSignalBufferSize = bufferSize
+                internalDisableGateLatch = false
             }
             .build()
 
@@ -851,6 +895,9 @@ class ElasticAgentTest {
             .setProcessorFactory(simpleProcessorFactory)
             .setDiskBufferingConfiguration(diskBufferingConfiguration)
             .setUrl(url)
+            .apply {
+                internalDisableGateLatch = true
+            }
     }
 
     private fun inMemoryAgentBuilder(

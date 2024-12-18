@@ -85,9 +85,11 @@ class ClockExporterGateManager private constructor(
         override fun intercept(item: SpanData): SpanData {
             val elapsedStartTime = item.attributes.get(ATTRIBUTE_KEY_CREATION_ELAPSED_TIME)
             if (elapsedStartTime != null) {
-                timeOffsetNanosProvider.get()?.let {
-                    return TimeUpdatedSpanData.create(item, elapsedStartTime, it)
-                }
+                return TimeUpdatedSpanData.create(
+                    item,
+                    elapsedStartTime,
+                    timeOffsetNanosProvider.get()
+                )
             }
             return item
         }
@@ -98,9 +100,11 @@ class ClockExporterGateManager private constructor(
         override fun intercept(item: LogRecordData): LogRecordData {
             val creationElapsedTime = item.attributes.get(ATTRIBUTE_KEY_CREATION_ELAPSED_TIME)
             if (creationElapsedTime != null) {
-                timeOffsetNanosProvider.get()?.let {
-                    return TimeUpdatedLogRecordData.create(item, creationElapsedTime, it)
-                }
+                return TimeUpdatedLogRecordData.create(
+                    item,
+                    creationElapsedTime,
+                    timeOffsetNanosProvider.get()
+                )
             }
             return item
         }
@@ -127,17 +131,18 @@ class ClockExporterGateManager private constructor(
             fun create(
                 original: LogRecordData,
                 creationElapsedTime: Long,
-                timeOffsetNanos: Long
+                timeOffsetNanos: Long?
             ): TimeUpdatedLogRecordData {
                 val attributes = Attributes.builder().putAll(original.attributes)
                     .remove(ATTRIBUTE_KEY_CREATION_ELAPSED_TIME)
                     .build()
-                val realTimestamp = timeOffsetNanos + creationElapsedTime
+                val timestamp = timeOffsetNanos?.let { it + creationElapsedTime }
+                    ?: original.timestampEpochNanos
                 return TimeUpdatedLogRecordData(
                     original,
                     attributes,
                     original.totalAttributeCount - 1,
-                    realTimestamp
+                    timestamp
                 )
             }
         }
@@ -159,11 +164,13 @@ class ClockExporterGateManager private constructor(
             fun create(
                 original: SpanData,
                 elapsedStartTime: Long,
-                timeOffsetNanos: Long
+                timeOffsetNanos: Long?
             ): TimeUpdatedSpanData {
-                val realStartTime = timeOffsetNanos + elapsedStartTime
-                val realEndTime =
-                    (original.endEpochNanos - original.startEpochNanos) + realStartTime
+                val startTime =
+                    timeOffsetNanos?.let { it + elapsedStartTime } ?: original.startEpochNanos
+                val endTime =
+                    timeOffsetNanos?.let { (original.endEpochNanos - original.startEpochNanos) + startTime }
+                        ?: original.endEpochNanos
                 val attributes = Attributes.builder().putAll(original.attributes)
                     .remove(ATTRIBUTE_KEY_CREATION_ELAPSED_TIME)
                     .build()
@@ -171,8 +178,8 @@ class ClockExporterGateManager private constructor(
                     original,
                     attributes,
                     original.totalAttributeCount - 1,
-                    realStartTime,
-                    realEndTime
+                    startTime,
+                    endTime
                 )
             }
         }

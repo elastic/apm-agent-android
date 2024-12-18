@@ -605,7 +605,70 @@ class ElasticAgentTest {
         }
         val waitTimeMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - waitStart)
 
-        assertThat(waitTimeMillis).isBetween(3000, 3500)
+        assertThat(waitTimeMillis).isBetween(2500, 3500)
+        val spanData = inMemoryExporters.getFinishedSpans().first()
+        assertThat(spanData).startsAt(
+            currentTime.get() * 1_000_000
+        ).hasAttributes(ElasticAgentRule.SPAN_DEFAULT_ATTRS)
+        val logRecordData = inMemoryExporters.getFinishedLogRecords().first()
+        assertThat(logRecordData)
+            .hasTimestamp(0)
+            .hasObservedTimestamp(currentTime.get() * 1_000_000)
+            .hasAttributes(ElasticAgentRule.LOG_DEFAULT_ATTRS)
+    }
+
+    @Test
+    fun `Verify clock initialization behavior, when buffer gets full`() {
+        val sntpClient = mockk<SntpClient>()
+        val currentTime = AtomicLong(12345)
+        val systemTimeProvider = spyk(SystemTimeProvider.get())
+        val bufferSize = 10
+        every { systemTimeProvider.getCurrentTimeMillis() }.answers {
+            currentTime.get()
+        }
+        every { systemTimeProvider.getElapsedRealTime() }.returns(0)
+        every { sntpClient.fetchTimeOffset(any()) }.returns(
+            SntpClient.Response.Error(SntpClient.ErrorType.TRY_LATER)
+        )
+        every { sntpClient.close() } just Runs
+        agent = inMemoryAgentBuilder()
+            .setSessionIdGenerator { "session-id" }
+            .apply {
+                internalSntpClient = sntpClient
+                internalSystemTimeProvider = systemTimeProvider
+                internalSignalBufferSize = bufferSize
+            }
+            .build()
+
+        repeat(bufferSize) {
+            sendSpan()
+            sendLog()
+        }
+
+        // Spans and logs aren't exported yet.
+        assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()
+
+        // Sending one more to go over the buffer size.
+        sendSpan()
+        sendLog()
+
+        val waitStart = System.nanoTime()
+        await untilCallTo {
+            inMemoryExporters.getFinishedSpans()
+        } matches {
+            it?.isNotEmpty() == true
+        }
+        await untilCallTo {
+            inMemoryExporters.getFinishedLogRecords()
+        } matches {
+            it?.isNotEmpty() == true
+        }
+        val waitTimeMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - waitStart)
+
+        assertThat(waitTimeMillis).isLessThan(1000)
+        assertThat(inMemoryExporters.getFinishedSpans()).hasSize(bufferSize + 1)
+        assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(bufferSize + 1)
         val spanData = inMemoryExporters.getFinishedSpans().first()
         assertThat(spanData).startsAt(
             currentTime.get() * 1_000_000

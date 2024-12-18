@@ -31,6 +31,7 @@ internal class ExporterGateQueue<DATA>(
     private val id: Int
 ) {
     private val queue by lazy { LinkedBlockingQueue<DATA>(capacity) }
+    private val overflow by lazy { mutableListOf<DATA>() }
     private val pendingLatches = AtomicInteger(0)
     private val open = AtomicBoolean(true)
     private val started = AtomicBoolean(false)
@@ -61,17 +62,21 @@ internal class ExporterGateQueue<DATA>(
         if (started.compareAndSet(false, true)) {
             listener.onStartEnqueuing(id)
         }
+        var surpassedQueueSize = false
         for (item in data) {
             if (!queue.offer(item)) {
-                queue.removeAll(data.toSet())
-                return CompletableResultCode.ofFailure()
+                surpassedQueueSize = true
+                overflow.add(item)
             }
+        }
+        if (surpassedQueueSize) {
+            openGate()
         }
         return CompletableResultCode.ofSuccess()
     }
 
     internal fun hasAvailableItems(): Boolean {
-        return queue.size > 0
+        return queue.size > 0 || overflow.isNotEmpty()
     }
 
     internal fun getProcessedItems(): Collection<DATA> {
@@ -81,6 +86,8 @@ internal class ExporterGateQueue<DATA>(
             items.add(queuedInterceptor.intercept(item))
             item = queue.poll()
         }
+        items.addAll(overflow)
+        overflow.clear()
         return items
     }
 

@@ -106,6 +106,7 @@ class ElasticAgent private constructor(
             Interceptor.noop()
         internal var internalServiceManagerInterceptor: Interceptor<ServiceManager> =
             Interceptor.noop()
+        internal var internalSignalBufferSize = 1000
 
         fun setUrl(value: String) = apply {
             url = value
@@ -152,7 +153,8 @@ class ElasticAgent private constructor(
                 addSpanExporterInterceptor(diskBufferingManager::interceptSpanExporter)
                 addLogRecordExporterInterceptor(diskBufferingManager::interceptLogRecordExporter)
                 addMetricExporterInterceptor(diskBufferingManager::interceptMetricExporter)
-                val exporterGateManager = ExporterGateManager(serviceManager)
+                val exporterGateManager =
+                    ExporterGateManager(serviceManager, signalBufferSize = internalSignalBufferSize)
                 val elasticClockManager = ElasticClockManager.create(
                     serviceManager,
                     systemTimeProvider,

@@ -31,15 +31,18 @@ import java.util.concurrent.TimeUnit
 
 internal class ExporterGateManager(
     serviceManager: ServiceManager,
+    signalBufferSize: Int = 1000,
     private val gateLatchTimeout: Long = TimeUnit.SECONDS.toMillis(3)
 ) : ExporterGateQueue.Listener {
     private val spanExporter by lazy { MutableSpanExporter() }
-    private val spanGateQueue by lazy { ExporterGateQueue<SpanData>(1000, this, SPAN_QUEUE_ID) }
+    private val spanGateQueue by lazy {
+        ExporterGateQueue<SpanData>(signalBufferSize, this, SPAN_QUEUE_ID)
+    }
     private lateinit var delegateSpanExporter: SpanExporter
     private var gateSpanExporter: GateSpanExporter? = null
     private val logRecordExporter by lazy { MutableLogRecordExporter() }
     private val logRecordGateQueue by lazy {
-        ExporterGateQueue<LogRecordData>(1000, this, LOG_RECORD_QUEUE_ID)
+        ExporterGateQueue<LogRecordData>(signalBufferSize, this, LOG_RECORD_QUEUE_ID)
     }
     private lateinit var delegateLogRecordExporter: LogRecordExporter
     private var gateLogRecordExporter: GateLogRecordExporter? = null

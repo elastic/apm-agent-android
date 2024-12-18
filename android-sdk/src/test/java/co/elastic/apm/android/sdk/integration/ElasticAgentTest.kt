@@ -592,7 +592,7 @@ class ElasticAgentTest {
         assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()
         assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
 
-        var waitStart = System.nanoTime()
+        val waitStart = System.nanoTime()
         await untilCallTo {
             inMemoryExporters.getFinishedSpans()
         } matches {
@@ -605,7 +605,7 @@ class ElasticAgentTest {
         }
         val waitTimeMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - waitStart)
 
-        assertThat(waitTimeMillis).isBetween(2000, 3000)
+        assertThat(waitTimeMillis).isBetween(3000, 3500)
         val spanData = inMemoryExporters.getFinishedSpans().first()
         assertThat(spanData).startsAt(
             currentTime.get() * 1_000_000

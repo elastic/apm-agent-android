@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit
 
 internal class ExporterGateManager(
     serviceManager: ServiceManager,
-    private val gateLatchTimeout: Long = TimeUnit.SECONDS.toMillis(2)
+    private val gateLatchTimeout: Long = TimeUnit.SECONDS.toMillis(3)
 ) : ExporterGateQueue.Listener {
     private val spanExporter by lazy { MutableSpanExporter() }
     private val spanGateQueue by lazy { ExporterGateQueue<SpanData>(1000, this, SPAN_QUEUE_ID) }

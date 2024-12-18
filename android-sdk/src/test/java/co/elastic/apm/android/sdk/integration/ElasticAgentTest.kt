@@ -522,6 +522,7 @@ class ElasticAgentTest {
         )
         every { sntpClient.close() } just Runs
         agent = inMemoryAgentBuilder()
+            .setSessionIdGenerator { "session-id" }
             .apply {
                 internalSntpClient = sntpClient
                 internalSystemTimeProvider = systemTimeProvider
@@ -535,6 +536,12 @@ class ElasticAgentTest {
 
         // Time gets eventually set.
         agent.getElasticClockManager().getTimeOffsetManager().sync()
+
+        await untilCallTo {
+            inMemoryExporters.getFinishedSpans()
+        } matches {
+            it?.isNotEmpty() == true
+        }
 
         val spanData = inMemoryExporters.getFinishedSpans().first()
         assertThat(spanData).startsAt(

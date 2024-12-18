@@ -182,6 +182,12 @@ class ElasticAgent private constructor(
                     systemTimeProvider
                 )
 
+                addSpanAttributesInterceptor(
+                    elasticClockManager.getExportGateManager().getAttributesInterceptor()
+                )
+                gateSpanExporter.setQueuedDispatchingInterceptor(
+                    elasticClockManager.getExportGateManager().getGateDelegatingInterceptor()
+                )
                 addSpanExporterInterceptor {
                     gateSpanExporter.setDelegate(it)
                     gateSpanExporter

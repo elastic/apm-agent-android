@@ -27,22 +27,32 @@ import co.elastic.apm.android.sdk.tools.provider.Provider
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.sdk.trace.data.SpanData
+import java.util.concurrent.atomic.AtomicBoolean
 
 class ExportGateManager private constructor(
     systemTimeProvider: SystemTimeProvider,
     private val timeOffsetNanosProvider: Provider<Long?>
 ) {
-    private var latch: GateSpanExporter.Latch? = null
+    private val gateOpened = AtomicBoolean(false)
     private val globalAttributesInterceptor =
         MutableInterceptor(ElapsedTimeAttributeInterceptor(systemTimeProvider))
+    private var delegatingInterceptor: GateDelegatingInterceptor? = GateDelegatingInterceptor()
+    private var latch: GateSpanExporter.Latch? = null
 
     internal fun getAttributesInterceptor(): Interceptor<Attributes> {
         return globalAttributesInterceptor
     }
 
+    internal fun getGateDelegatingInterceptor(): GateDelegatingInterceptor {
+        return delegatingInterceptor!!
+    }
+
     internal fun onRemoteClockSet() {
-        latch?.open()
-        latch = null
+        if (gateOpened.compareAndSet(false, true)) {
+            latch?.open().also { latch = null }
+            globalAttributesInterceptor.setDelegate(Interceptor.noop())
+            delegatingInterceptor = null
+        }
     }
 
     companion object {

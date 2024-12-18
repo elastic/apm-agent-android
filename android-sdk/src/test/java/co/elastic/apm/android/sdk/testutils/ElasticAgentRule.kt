@@ -19,19 +19,12 @@
 package co.elastic.apm.android.sdk.testutils
 
 import co.elastic.apm.android.sdk.exporters.ExporterProvider
-import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingConfiguration
-import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingManager
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import co.elastic.apm.android.sdk.processors.ProcessorFactory
 import co.elastic.apm.android.sdk.session.Session
 import co.elastic.apm.android.sdk.session.SessionProvider
 import co.elastic.apm.android.sdk.tools.Interceptor
-import io.mockk.Runs
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockk
-import io.mockk.spyk
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.api.logs.LogRecordBuilder
@@ -98,7 +91,6 @@ class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory,
         serviceVersion: String? = "0.0.0",
         deploymentEnvironment: String = "test",
         clock: Clock = Clock.getDefault(),
-        diskBufferingConfiguration: DiskBufferingConfiguration = DiskBufferingConfiguration.enabled(),
         sessionProvider: SessionProvider = SessionProvider { Session.create("session-id") },
         configurationInterceptor: Interceptor<ElasticOtelAgent.Configuration> = this,
         serviceManagerInterceptor: Interceptor<ServiceManager>? = null
@@ -115,7 +107,6 @@ class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory,
             .setClock(clock)
             .setExporterProvider(this)
             .setProcessorFactory(this)
-            .setDiskBufferingConfiguration(diskBufferingConfiguration)
             .apply {
                 configurationInterceptors.add(configurationInterceptor)
                 serviceManagerInterceptor?.let { interceptor ->
@@ -192,11 +183,7 @@ class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory,
     }
 
     override fun intercept(item: ElasticOtelAgent.Configuration): ElasticOtelAgent.Configuration {
-        val spy = spyk(item)
-        val diskBufferingManager = mockk<DiskBufferingManager>()
-        every { diskBufferingManager.initialize() } just Runs
-        every { spy.diskBufferingManager }.returns(diskBufferingManager)
-        return spy
+        return item
     }
 
     fun close() {

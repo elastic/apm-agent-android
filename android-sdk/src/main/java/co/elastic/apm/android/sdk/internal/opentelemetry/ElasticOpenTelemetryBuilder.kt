@@ -23,8 +23,6 @@ import co.elastic.apm.android.sdk.BuildConfig
 import co.elastic.apm.android.sdk.attributes.common.CommonAttributesInterceptor
 import co.elastic.apm.android.sdk.attributes.common.SpanAttributesInterceptor
 import co.elastic.apm.android.sdk.exporters.ExporterProvider
-import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingConfiguration
-import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingManager
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.logs.LogRecordAttributesProcessor
 import co.elastic.apm.android.sdk.internal.opentelemetry.processors.spans.SpanAttributesProcessor
@@ -64,9 +62,8 @@ open class ElasticOpenTelemetryBuilder<B> {
     private var spanExporterInterceptors = mutableListOf<Interceptor<SpanExporter>>()
     private var logRecordExporterInterceptors = mutableListOf<Interceptor<LogRecordExporter>>()
     private var metricExporterInterceptors = mutableListOf<Interceptor<MetricExporter>>()
-    private var diskBufferingConfiguration = DiskBufferingConfiguration.enabled()
-    private var exporterProvider: ExporterProvider = ExporterProvider.noop()
     private var clock: Clock = Clock.getDefault()
+    private var exporterProvider: ExporterProvider = ExporterProvider.noop()
     private val buildCalled = AtomicBoolean(false)
 
     fun setServiceName(value: String): B {
@@ -141,21 +138,15 @@ open class ElasticOpenTelemetryBuilder<B> {
         return this as B
     }
 
-    fun setDiskBufferingConfiguration(value: DiskBufferingConfiguration): B {
+    protected open fun setClock(value: Clock): B {
         checkNotBuilt()
-        diskBufferingConfiguration = value
+        clock = value
         return this as B
     }
 
     protected open fun setExporterProvider(value: ExporterProvider): B {
         checkNotBuilt()
         exporterProvider = value
-        return this as B
-    }
-
-    protected open fun setClock(value: Clock): B {
-        checkNotBuilt()
-        clock = value
         return this as B
     }
 
@@ -198,10 +189,6 @@ open class ElasticOpenTelemetryBuilder<B> {
             .put(ResourceAttributes.TELEMETRY_SDK_LANGUAGE, "java")
             .build()
         val openTelemetryBuilder = OpenTelemetrySdk.builder()
-        val diskBufferingManager = DiskBufferingManager(serviceManager, diskBufferingConfiguration)
-        addSpanExporterInterceptor(diskBufferingManager::interceptSpanExporter)
-        addLogRecordExporterInterceptor(diskBufferingManager::interceptLogRecordExporter)
-        addMetricExporterInterceptor(diskBufferingManager::interceptMetricExporter)
         val spanExporter = exporterProvider.getSpanExporter()?.let {
             Interceptor.composite(spanExporterInterceptors).intercept(it)
         }
@@ -255,7 +242,7 @@ open class ElasticOpenTelemetryBuilder<B> {
             )
         }
         buildCalled.set(true)
-        return ElasticOtelAgent.Configuration(openTelemetryBuilder.build(), diskBufferingManager)
+        return ElasticOtelAgent.Configuration(openTelemetryBuilder.build())
     }
 
     private fun getOsDescription(): String {

@@ -19,6 +19,7 @@
 package co.elastic.apm.android.sdk
 
 import android.app.Application
+import co.elastic.apm.android.sdk.exporters.ExporterProvider
 import co.elastic.apm.android.sdk.exporters.configuration.ExportProtocol
 import co.elastic.apm.android.sdk.features.apmserver.ApmServerAuthentication
 import co.elastic.apm.android.sdk.features.apmserver.ApmServerConnectivity
@@ -26,6 +27,8 @@ import co.elastic.apm.android.sdk.features.apmserver.ApmServerConnectivityManage
 import co.elastic.apm.android.sdk.features.apmserver.ApmServerExporterProvider
 import co.elastic.apm.android.sdk.features.centralconfig.CentralConfigurationManager
 import co.elastic.apm.android.sdk.features.clock.ElasticClockManager
+import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingConfiguration
+import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingManager
 import co.elastic.apm.android.sdk.features.sessionmanager.SessionIdGenerator
 import co.elastic.apm.android.sdk.features.sessionmanager.SessionManager
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
@@ -33,6 +36,7 @@ import co.elastic.apm.android.sdk.internal.opentelemetry.ElasticOpenTelemetryBui
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
+import co.elastic.apm.android.sdk.tools.Interceptor
 import co.elastic.apm.android.sdk.tools.PreferencesLongCacheHandler
 import co.elastic.apm.android.sdk.tools.PreferencesStringCacheHandler
 import io.opentelemetry.api.OpenTelemetry
@@ -41,6 +45,7 @@ import java.util.UUID
 class ElasticAgent private constructor(
     serviceManager: ServiceManager,
     configuration: Configuration,
+    private val diskBufferingManager: DiskBufferingManager,
     private val apmServerConnectivityManager: ApmServerConnectivityManager,
     private val elasticClockManager: ElasticClockManager,
     private val centralConfigurationManager: CentralConfigurationManager
@@ -49,6 +54,7 @@ class ElasticAgent private constructor(
 
     init {
         elasticClockManager.initialize()
+        diskBufferingManager.initialize()
         centralConfigurationManager.initialize()
     }
 
@@ -60,6 +66,10 @@ class ElasticAgent private constructor(
         return apmServerConnectivityManager
     }
 
+    internal fun getDiskBufferingManager(): DiskBufferingManager {
+        return diskBufferingManager
+    }
+
     internal fun getCentralConfigurationManager(): CentralConfigurationManager {
         return centralConfigurationManager
     }
@@ -69,6 +79,7 @@ class ElasticAgent private constructor(
     }
 
     override fun onClose() {
+        diskBufferingManager.close()
         elasticClockManager.close()
     }
 
@@ -86,8 +97,13 @@ class ElasticAgent private constructor(
         private var exportProtocol: ExportProtocol = ExportProtocol.HTTP
         private var extraRequestHeaders: Map<String, String> = emptyMap()
         private var sessionIdGenerator: SessionIdGenerator? = null
+        private var diskBufferingConfiguration = DiskBufferingConfiguration.enabled()
         internal var internalSntpClient: SntpClient? = null
         internal var internalSystemTimeProvider: SystemTimeProvider? = null
+        internal var internalExporterProviderInterceptor: Interceptor<ExporterProvider> =
+            Interceptor.noop()
+        internal var internalServiceManagerInterceptor: Interceptor<ServiceManager> =
+            Interceptor.noop()
 
         fun setUrl(value: String) = apply {
             url = value
@@ -109,9 +125,14 @@ class ElasticAgent private constructor(
             sessionIdGenerator = value
         }
 
+        internal fun setDiskBufferingConfiguration(value: DiskBufferingConfiguration) = apply {
+            diskBufferingConfiguration = value
+        }
+
         fun build(): ElasticAgent {
             url?.let { finalUrl ->
-                val serviceManager = ServiceManager.create(application)
+                val serviceManager =
+                    internalServiceManagerInterceptor.intercept(ServiceManager.create(application))
                 val apmServerConfiguration = ApmServerConnectivity(
                     finalUrl,
                     authentication,
@@ -124,6 +145,11 @@ class ElasticAgent private constructor(
                 val apmServerConnectivityManager =
                     ApmServerConnectivityManager(configurationManager)
                 val exporterProvider = ApmServerExporterProvider.create(configurationManager)
+                val diskBufferingManager =
+                    DiskBufferingManager(serviceManager, diskBufferingConfiguration)
+                addSpanExporterInterceptor(diskBufferingManager::interceptSpanExporter)
+                addLogRecordExporterInterceptor(diskBufferingManager::interceptLogRecordExporter)
+                addMetricExporterInterceptor(diskBufferingManager::interceptMetricExporter)
                 val elasticClockManager = ElasticClockManager.create(
                     serviceManager,
                     systemTimeProvider,
@@ -153,12 +179,13 @@ class ElasticAgent private constructor(
                 )
 
                 setClock(elasticClockManager.getClock())
-                setExporterProvider(exporterProvider)
+                setExporterProvider(internalExporterProviderInterceptor.intercept(exporterProvider))
                 setSessionProvider(sessionManager)
 
                 return ElasticAgent(
                     serviceManager,
                     buildConfiguration(serviceManager),
+                    diskBufferingManager,
                     apmServerConnectivityManager,
                     elasticClockManager,
                     centralConfigurationManager

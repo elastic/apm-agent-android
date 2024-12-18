@@ -19,11 +19,13 @@
 package co.elastic.apm.android.sdk.integration
 
 import co.elastic.apm.android.sdk.ElasticAgent
+import co.elastic.apm.android.sdk.exporters.ExporterProvider
 import co.elastic.apm.android.sdk.features.apmserver.ApmServerAuthentication
 import co.elastic.apm.android.sdk.features.apmserver.ApmServerConnectivity
 import co.elastic.apm.android.sdk.features.centralconfig.CentralConfigurationConnectivity
 import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.apm.android.sdk.features.sessionmanager.SessionIdGenerator
+import co.elastic.apm.android.sdk.internal.services.kotlin.appinfo.AppInfoService
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
 import co.elastic.apm.android.sdk.processors.ProcessorFactory
@@ -39,17 +41,22 @@ import io.mockk.verify
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.sdk.logs.LogRecordProcessor
+import io.opentelemetry.sdk.logs.data.LogRecordData
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.logs.export.SimpleLogRecordProcessor
+import io.opentelemetry.sdk.metrics.data.MetricData
 import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.metrics.export.MetricReader
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader
 import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat
 import io.opentelemetry.sdk.testing.exporter.InMemoryLogRecordExporter
+import io.opentelemetry.sdk.testing.exporter.InMemoryMetricExporter
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter
 import io.opentelemetry.sdk.trace.SpanProcessor
+import io.opentelemetry.sdk.trace.data.SpanData
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor
 import io.opentelemetry.sdk.trace.export.SpanExporter
+import java.io.IOException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
@@ -68,19 +75,22 @@ import org.robolectric.RuntimeEnvironment
 @RunWith(RobolectricTestRunner::class)
 class ElasticAgentTest {
     private lateinit var webServer: MockWebServer
-    private lateinit var simpleProcessorFactory: SimpleProcessorFactory
     private lateinit var agent: ElasticAgent
+    private lateinit var processorFactory: SimpleProcessorFactory
+    private val inMemoryExporters = InMemoryExporterProvider()
+    private val inMemoryExportersInterceptor = Interceptor<ExporterProvider> { inMemoryExporters }
 
     @Before
     fun setUp() {
+        processorFactory = SimpleProcessorFactory()
         webServer = MockWebServer()
         webServer.start()
-        simpleProcessorFactory = SimpleProcessorFactory()
     }
 
     @After
     fun tearDown() {
         webServer.close()
+        inMemoryExporters.reset()
     }
 
     @Test
@@ -90,7 +100,7 @@ class ElasticAgentTest {
             .setUrl(webServer.url("/").toString())
             .setServiceName("my-app")
             .setDiskBufferingConfiguration(DiskBufferingConfiguration.disabled())
-            .setProcessorFactory(simpleProcessorFactory)
+            .setProcessorFactory(processorFactory)
             .setExtraRequestHeaders(mapOf("Extra-header" to "extra value"))
             .build()
 
@@ -138,7 +148,7 @@ class ElasticAgentTest {
             .setServiceName("my-app")
             .setDeploymentEnvironment("debug")
             .setDiskBufferingConfiguration(DiskBufferingConfiguration.disabled())
-            .setProcessorFactory(simpleProcessorFactory)
+            .setProcessorFactory(processorFactory)
             .build()
 
         val centralConfigRequest = takeRequest()
@@ -221,7 +231,7 @@ class ElasticAgentTest {
             .setServiceName("my-app")
             .setDeploymentEnvironment("debug")
             .setDiskBufferingConfiguration(DiskBufferingConfiguration.disabled())
-            .setProcessorFactory(simpleProcessorFactory)
+            .setProcessorFactory(processorFactory)
             .build()
 
         val centralConfigRequest = takeRequest()
@@ -301,6 +311,102 @@ class ElasticAgentTest {
     }
 
     @Test
+    fun `Disk buffering enabled, happy path`() {
+        val configuration = DiskBufferingConfiguration.enabled()
+        configuration.maxFileAgeForWrite = 500
+        configuration.minFileAgeForRead = 501
+        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
+            .setUrl("http://none")
+            .setDiskBufferingConfiguration(configuration)
+            .setProcessorFactory(processorFactory)
+            .apply {
+                internalExporterProviderInterceptor = inMemoryExportersInterceptor
+            }
+            .build()
+
+        sendSpan()
+        sendLog()
+        sendMetric()
+
+        // Nothing should have gotten exported because it was stored in disk.
+        assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
+
+        agent.close()
+
+        // Re-init
+        Thread.sleep(1000)
+        inMemoryExporters.reset()
+        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
+            .setUrl("http://none")
+            .setDiskBufferingConfiguration(configuration)
+            .setProcessorFactory(processorFactory)
+            .apply {
+                internalExporterProviderInterceptor = inMemoryExportersInterceptor
+            }
+            .build()
+
+        agent.getDiskBufferingManager().exportFromDisk()
+
+        // Now we should see the previously-stored signals exported.
+        assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
+    }
+
+    @Test
+    fun `Disk buffering enabled with io exception`() {
+        val appInfoService = mockk<AppInfoService>(relaxed = true)
+        every {
+            appInfoService.getCacheDir()
+            appInfoService.getAvailableCacheSpace(any())
+        }.throws(IOException())
+        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
+            .setUrl("http://none")
+            .setProcessorFactory(processorFactory)
+            .apply {
+                internalExporterProviderInterceptor = inMemoryExportersInterceptor
+                internalServiceManagerInterceptor = Interceptor {
+                    val spy = spyk(it)
+                    every { spy.getAppInfoService() }.returns(appInfoService)
+                    spy
+                }
+            }
+            .build()
+
+        sendSpan()
+        sendLog()
+        sendMetric()
+
+        // The signals should have gotten exported right away.
+        assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
+    }
+
+    @Test
+    fun `Disk buffering disabled`() {
+        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
+            .setUrl("http://none")
+            .setProcessorFactory(processorFactory)
+            .setDiskBufferingConfiguration(DiskBufferingConfiguration.disabled())
+            .apply {
+                internalExporterProviderInterceptor = inMemoryExportersInterceptor
+            }
+            .build()
+
+        sendSpan()
+        sendLog()
+        sendMetric()
+
+        // The signals should have gotten exported right away.
+        assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
+    }
+
+    @Test
     fun `Verify clock behavior`() {
         val localTimeReference = 1577836800000L
         val timeOffset = 500L
@@ -308,7 +414,6 @@ class ElasticAgentTest {
         val sntpClient = mockk<SntpClient>()
         val currentTime = AtomicLong(0)
         val systemTimeProvider = spyk(SystemTimeProvider.get())
-        val spanExporter = AtomicReference(InMemorySpanExporter.create())
         every { systemTimeProvider.getCurrentTimeMillis() }.answers {
             currentTime.get()
         }
@@ -317,13 +422,11 @@ class ElasticAgentTest {
             SntpClient.Response.Success(timeOffset)
         )
         every { sntpClient.close() } just Runs
-        simpleProcessorFactory.spanExporterInterceptor = Interceptor {
-            spanExporter.get()
-        }
         agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
             .setUrl("http://none")
-            .setProcessorFactory(simpleProcessorFactory)
+            .setProcessorFactory(processorFactory)
             .apply {
+                internalExporterProviderInterceptor = inMemoryExportersInterceptor
                 internalSntpClient = sntpClient
                 internalSystemTimeProvider = systemTimeProvider
             }
@@ -337,21 +440,22 @@ class ElasticAgentTest {
 
         sendSpan()
 
-        assertThat(spanExporter.get().finishedSpanItems.first().startEpochNanos).isEqualTo(
+        assertThat(inMemoryExporters.getFinishedSpans().first()).startsAt(
             expectedCurrentTime * 1_000_000
         )
 
         // Reset after almost 24h with unavailable ntp server.
         agent.close()
-        spanExporter.set(InMemorySpanExporter.create())
+        inMemoryExporters.reset()
         every { sntpClient.fetchTimeOffset(any()) }.returns(
             SntpClient.Response.Error(SntpClient.ErrorType.TRY_LATER)
         )
         currentTime.set(currentTime.get() + TimeUnit.HOURS.toMillis(24) - 1)
         agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
             .setUrl("http://none")
-            .setProcessorFactory(simpleProcessorFactory)
+            .setProcessorFactory(processorFactory)
             .apply {
+                internalExporterProviderInterceptor = inMemoryExportersInterceptor
                 internalSntpClient = sntpClient
                 internalSystemTimeProvider = systemTimeProvider
             }
@@ -359,34 +463,35 @@ class ElasticAgentTest {
 
         sendSpan()
 
-        assertThat(spanExporter.get().finishedSpanItems.first().startEpochNanos).isEqualTo(
+        assertThat(inMemoryExporters.getFinishedSpans().first()).startsAt(
             expectedCurrentTime * 1_000_000
         )
 
         // Forward time past 24h and trigger time sync
         currentTime.set(currentTime.get() + 1)
-        spanExporter.get().reset()
+        inMemoryExporters.resetExporters()
         val elapsedTime = 1000L
         every { systemTimeProvider.getElapsedRealTime() }.returns(elapsedTime)
         agent.getElasticClockManager().getTimeOffsetManager().sync()
 
         sendSpan()
 
-        assertThat(spanExporter.get().finishedSpanItems.first().startEpochNanos).isEqualTo(
+        assertThat(inMemoryExporters.getFinishedSpans().first()).startsAt(
             currentTime.get() * 1_000_000
         )
 
         // Ensuring cache was cleared.
         agent.close()
-        spanExporter.set(InMemorySpanExporter.create())
+        inMemoryExporters.reset()
         every { sntpClient.fetchTimeOffset(any()) }.returns(
             SntpClient.Response.Error(SntpClient.ErrorType.TRY_LATER)
         )
         currentTime.set(currentTime.get() + 1000)
         agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
             .setUrl("http://none")
-            .setProcessorFactory(simpleProcessorFactory)
+            .setProcessorFactory(processorFactory)
             .apply {
+                internalExporterProviderInterceptor = inMemoryExportersInterceptor
                 internalSntpClient = sntpClient
                 internalSystemTimeProvider = systemTimeProvider
             }
@@ -394,12 +499,12 @@ class ElasticAgentTest {
 
         sendSpan()
 
-        assertThat(spanExporter.get().finishedSpanItems.first().startEpochNanos).isEqualTo(
+        assertThat(inMemoryExporters.getFinishedSpans().first()).startsAt(
             currentTime.get() * 1_000_000
         )
 
         // Picking up new time when available
-        spanExporter.get().reset()
+        inMemoryExporters.resetExporters()
         every { sntpClient.fetchTimeOffset(localTimeReference + elapsedTime) }.returns(
             SntpClient.Response.Success(timeOffset)
         )
@@ -407,21 +512,22 @@ class ElasticAgentTest {
 
         sendSpan()
 
-        assertThat(spanExporter.get().finishedSpanItems.first().startEpochNanos).isEqualTo(
+        assertThat(inMemoryExporters.getFinishedSpans().first()).startsAt(
             (timeOffset + localTimeReference + elapsedTime) * 1_000_000
         )
 
         // Reset after 24h with unavailable ntp server.
         agent.close()
-        spanExporter.set(InMemorySpanExporter.create())
+        inMemoryExporters.reset()
         every { sntpClient.fetchTimeOffset(any()) }.returns(
             SntpClient.Response.Error(SntpClient.ErrorType.TRY_LATER)
         )
         currentTime.set(currentTime.get() + TimeUnit.HOURS.toMillis(24))
         agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
             .setUrl("http://none")
-            .setProcessorFactory(simpleProcessorFactory)
+            .setProcessorFactory(processorFactory)
             .apply {
+                internalExporterProviderInterceptor = inMemoryExportersInterceptor
                 internalSntpClient = sntpClient
                 internalSystemTimeProvider = systemTimeProvider
             }
@@ -429,7 +535,7 @@ class ElasticAgentTest {
 
         sendSpan()
 
-        assertThat(spanExporter.get().finishedSpanItems.first().startEpochNanos).isEqualTo(
+        assertThat(inMemoryExporters.getFinishedSpans().first()).startsAt(
             currentTime.get() * 1_000_000
         )
 
@@ -444,7 +550,6 @@ class ElasticAgentTest {
         val sntpClient = mockk<SntpClient>()
         val currentTime = AtomicLong(0)
         val systemTimeProvider = spyk(SystemTimeProvider.get())
-        val spanExporter = AtomicReference(InMemorySpanExporter.create())
         every { systemTimeProvider.getCurrentTimeMillis() }.answers {
             currentTime.get()
         }
@@ -455,13 +560,11 @@ class ElasticAgentTest {
             SntpClient.Response.Success(timeOffset)
         )
         every { sntpClient.close() } just Runs
-        simpleProcessorFactory.spanExporterInterceptor = Interceptor {
-            spanExporter.get()
-        }
         agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
             .setUrl("http://none")
-            .setProcessorFactory(simpleProcessorFactory)
+            .setProcessorFactory(processorFactory)
             .apply {
+                internalExporterProviderInterceptor = inMemoryExportersInterceptor
                 internalSntpClient = sntpClient
                 internalSystemTimeProvider = systemTimeProvider
             }
@@ -470,12 +573,12 @@ class ElasticAgentTest {
         sendSpan()
 
         // Nothing is exported yet.
-        assertThat(spanExporter.get().finishedSpanItems).isEmpty()
+        assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
 
         // Time gets eventually set.
         agent.getElasticClockManager().getTimeOffsetManager().sync()
 
-        val spanData = spanExporter.get().finishedSpanItems.first()
+        val spanData = inMemoryExporters.getFinishedSpans().first()
         assertThat(spanData).startsAt(
             expectedCurrentTime * 1_000_000
         ).hasAttributes(ElasticAgentRule.SPAN_DEFAULT_ATTRS)
@@ -488,17 +591,13 @@ class ElasticAgentTest {
         val systemTimeProvider = spyk(SystemTimeProvider.get())
         every { systemTimeProvider.getCurrentTimeMillis() }.answers { currentTimeMillis.get() }
         val sessionIdGenerator = mockk<SessionIdGenerator>()
-        val spanExporter = AtomicReference(InMemorySpanExporter.create())
-        val logRecordExporter = AtomicReference(InMemoryLogRecordExporter.create())
         every { sessionIdGenerator.generate() }.returns("first-id")
-        simpleProcessorFactory.spanExporterInterceptor = Interceptor { spanExporter.get() }
-        simpleProcessorFactory.logRecordExporterInterceptor =
-            Interceptor { logRecordExporter.get() }
         agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
             .setUrl("http://none")
-            .setProcessorFactory(simpleProcessorFactory)
+            .setProcessorFactory(processorFactory)
             .setSessionIdGenerator { sessionIdGenerator.generate() }
             .apply {
+                internalExporterProviderInterceptor = inMemoryExportersInterceptor
                 internalSystemTimeProvider = systemTimeProvider
             }
             .build()
@@ -506,24 +605,24 @@ class ElasticAgentTest {
         sendSpan()
         sendLog()
 
-        verifySessionId(spanExporter.get().finishedSpanItems.first().attributes, "first-id")
+        verifySessionId(inMemoryExporters.getFinishedSpans().first().attributes, "first-id")
         verifySessionId(
-            logRecordExporter.get().finishedLogRecordItems.first().attributes,
+            inMemoryExporters.getFinishedLogRecords().first().attributes,
             "first-id"
         )
         verify(exactly = 1) { sessionIdGenerator.generate() }
 
         // Reset and verify that the id has been cached for just under the time limit.
         clearMocks(sessionIdGenerator)
-        spanExporter.set(InMemorySpanExporter.create())
-        logRecordExporter.set(InMemoryLogRecordExporter.create())
+        inMemoryExporters.reset()
         currentTimeMillis.set(currentTimeMillis.get() + timeLimitMillis - 1)
         agent.close()
         agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
             .setUrl("http://none")
-            .setProcessorFactory(simpleProcessorFactory)
+            .setProcessorFactory(processorFactory)
             .setSessionIdGenerator { sessionIdGenerator.generate() }
             .apply {
+                internalExporterProviderInterceptor = inMemoryExportersInterceptor
                 internalSystemTimeProvider = systemTimeProvider
             }
             .build()
@@ -531,9 +630,9 @@ class ElasticAgentTest {
         sendSpan()
         sendLog()
 
-        verifySessionId(spanExporter.get().finishedSpanItems.first().attributes, "first-id")
+        verifySessionId(inMemoryExporters.getFinishedSpans().first().attributes, "first-id")
         verifySessionId(
-            logRecordExporter.get().finishedLogRecordItems.first().attributes,
+            inMemoryExporters.getFinishedLogRecords().first().attributes,
             "first-id"
         )
         verify(exactly = 0) { sessionIdGenerator.generate() } // Was retrieved from cache.
@@ -541,8 +640,7 @@ class ElasticAgentTest {
         // Reset and verify that the id expires after an idle period of time
         clearMocks(sessionIdGenerator)
         every { sessionIdGenerator.generate() }.returns("second-id")
-        spanExporter.get().reset()
-        logRecordExporter.get().reset()
+        inMemoryExporters.resetExporters()
         currentTimeMillis.set(currentTimeMillis.get() + timeLimitMillis - 1)
 
         sendSpan()
@@ -554,31 +652,26 @@ class ElasticAgentTest {
         sendSpan()
         sendLog()
 
-        verifySessionId(spanExporter.get().finishedSpanItems.first().attributes, "first-id")
-        verifySessionId(spanExporter.get().finishedSpanItems[1].attributes, "second-id")
-        verifySessionId(
-            logRecordExporter.get().finishedLogRecordItems.first().attributes,
-            "first-id"
-        )
-        verifySessionId(
-            logRecordExporter.get().finishedLogRecordItems[1].attributes,
-            "second-id"
-        )
+        val finishedSpanItems = inMemoryExporters.getFinishedSpans()
+        val finishedLogRecordItems = inMemoryExporters.getFinishedLogRecords()
+        verifySessionId(finishedSpanItems.first().attributes, "first-id")
+        verifySessionId(finishedSpanItems[1].attributes, "second-id")
+        verifySessionId(finishedLogRecordItems.first().attributes, "first-id")
+        verifySessionId(finishedLogRecordItems[1].attributes, "second-id")
         verify(exactly = 1) { sessionIdGenerator.generate() } // Was regenerated after idle time.
 
         // Reset and verify that the id expires 4 hours regardless of not enough idle time.
         clearMocks(sessionIdGenerator)
         every { sessionIdGenerator.generate() }.returns("third-id")
             .andThen("fourth-id")
-        spanExporter.get().reset()
-        logRecordExporter.get().reset()
+        inMemoryExporters.resetExporters()
 
         repeat(18) { // each idle time 30 min
             currentTimeMillis.set(currentTimeMillis.get() + timeLimitMillis - 1)
             sendSpan()
         }
 
-        val spanItems = spanExporter.get().finishedSpanItems
+        val spanItems = inMemoryExporters.getFinishedSpans()
         var position = 0
         repeat(8) {
             verifySessionId(spanItems[position].attributes, "second-id")
@@ -615,24 +708,22 @@ class ElasticAgentTest {
             .counterBuilder("counter")
             .build()
             .add(1)
-        simpleProcessorFactory.flush()
+        processorFactory.flush()
     }
 
-    private class SimpleProcessorFactory : ProcessorFactory {
+    private interface FlushableProcessorFactory : ProcessorFactory {
+        fun flush()
+    }
+
+    private class SimpleProcessorFactory : FlushableProcessorFactory {
         private lateinit var metricReader: PeriodicMetricReader
-        var spanExporterInterceptor: Interceptor<SpanExporter>? = null
-        var logRecordExporterInterceptor: Interceptor<LogRecordExporter>? = null
 
         override fun createSpanProcessor(exporter: SpanExporter?): SpanProcessor? {
-            return SimpleSpanProcessor.create(
-                spanExporterInterceptor?.intercept(exporter!!) ?: exporter
-            )
+            return SimpleSpanProcessor.create(exporter)
         }
 
         override fun createLogRecordProcessor(exporter: LogRecordExporter?): LogRecordProcessor? {
-            return SimpleLogRecordProcessor.create(
-                logRecordExporterInterceptor?.intercept(exporter!!) ?: exporter
-            )
+            return SimpleLogRecordProcessor.create(exporter)
         }
 
         override fun createMetricReader(exporter: MetricExporter?): MetricReader? {
@@ -640,8 +731,55 @@ class ElasticAgentTest {
             return metricReader
         }
 
+        override fun flush() {
+            metricReader.forceFlush()
+        }
+    }
+
+    private class InMemoryExporterProvider : ExporterProvider {
+        private var spanExporter = AtomicReference(InMemorySpanExporter.create())
+        private var logRecordExporter = AtomicReference(InMemoryLogRecordExporter.create())
+        private var mericExporter = AtomicReference(InMemoryMetricExporter.create())
+        private lateinit var metricReader: PeriodicMetricReader
+
+        fun reset() {
+            spanExporter.set(InMemorySpanExporter.create())
+            logRecordExporter.set(InMemoryLogRecordExporter.create())
+            mericExporter.set(InMemoryMetricExporter.create())
+        }
+
+        fun resetExporters() {
+            spanExporter.get().reset()
+            logRecordExporter.get().reset()
+            mericExporter.get().reset()
+        }
+
+        fun getFinishedSpans(): List<SpanData> {
+            return spanExporter.get().finishedSpanItems
+        }
+
+        fun getFinishedLogRecords(): List<LogRecordData> {
+            return logRecordExporter.get().finishedLogRecordItems
+        }
+
+        fun getFinishedMetrics(): List<MetricData> {
+            return mericExporter.get().finishedMetricItems
+        }
+
         fun flush() {
             metricReader.forceFlush()
+        }
+
+        override fun getSpanExporter(): SpanExporter? {
+            return spanExporter.get()
+        }
+
+        override fun getLogRecordExporter(): LogRecordExporter? {
+            return logRecordExporter.get()
+        }
+
+        override fun getMetricExporter(): MetricExporter? {
+            return mericExporter.get()
         }
     }
 }

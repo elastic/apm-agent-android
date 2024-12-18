@@ -18,7 +18,6 @@
  */
 package co.elastic.apm.android.sdk.internal.api
 
-import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingManager
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.sdk.OpenTelemetrySdk
@@ -29,19 +28,10 @@ abstract class ElasticOtelAgent(
     private val configuration: Configuration
 ) : Closeable {
 
-    init {
-        configuration.diskBufferingManager.initialize()
-    }
-
     abstract fun getOpenTelemetry(): OpenTelemetry
-
-    internal fun getDiskBufferingManager(): DiskBufferingManager {
-        return configuration.diskBufferingManager
-    }
 
     final override fun close() {
         onClose()
-        configuration.diskBufferingManager.close()
         configuration.openTelemetrySdk.close()
         serviceManager.close()
     }
@@ -49,7 +39,6 @@ abstract class ElasticOtelAgent(
     protected abstract fun onClose()
 
     data class Configuration(
-        val openTelemetrySdk: OpenTelemetrySdk,
-        val diskBufferingManager: DiskBufferingManager
+        val openTelemetrySdk: OpenTelemetrySdk
     )
 }

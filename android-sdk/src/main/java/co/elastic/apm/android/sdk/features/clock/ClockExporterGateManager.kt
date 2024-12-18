@@ -18,7 +18,7 @@
  */
 package co.elastic.apm.android.sdk.features.clock
 
-import co.elastic.apm.android.sdk.features.exportergate.ExporterGateQueue
+import co.elastic.apm.android.sdk.features.exportergate.latch.Latch
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.tools.AttributesOverrideSpanData
 import co.elastic.apm.android.sdk.tools.interceptor.Interceptor
@@ -36,22 +36,23 @@ class ClockExporterGateManager private constructor(
     private val gateOpened = AtomicBoolean(false)
     private val globalAttributesInterceptor =
         MutableInterceptor(ElapsedTimeAttributeInterceptor(systemTimeProvider))
-    private var delegatingInterceptor: GateDelegatingInterceptor? = GateDelegatingInterceptor()
-    private var latch: ExporterGateQueue.Latch? = null
+    private var spanGateProcessingInterceptor: SpanGateProcessingInterceptor? =
+        SpanGateProcessingInterceptor()
+    private var latch: Latch? = null
 
     internal fun getAttributesInterceptor(): Interceptor<Attributes> {
         return globalAttributesInterceptor
     }
 
-    internal fun getGateDelegatingInterceptor(): GateDelegatingInterceptor {
-        return delegatingInterceptor!!
+    internal fun getSpanGateProcessingInterceptor(): SpanGateProcessingInterceptor {
+        return spanGateProcessingInterceptor!!
     }
 
     internal fun onRemoteClockSet() {
         if (gateOpened.compareAndSet(false, true)) {
             latch?.open().also { latch = null }
             globalAttributesInterceptor.setDelegate(Interceptor.noop())
-            delegatingInterceptor = null
+            spanGateProcessingInterceptor = null
         }
     }
 
@@ -59,10 +60,10 @@ class ClockExporterGateManager private constructor(
         internal fun create(
             systemTimeProvider: SystemTimeProvider,
             timeOffsetNanosProvider: Provider<Long?>,
-            latch: ExporterGateQueue.Latch
+            exporterGateLatch: Latch
         ): ClockExporterGateManager {
             val manager = ClockExporterGateManager(systemTimeProvider, timeOffsetNanosProvider)
-            manager.latch = latch
+            manager.latch = exporterGateLatch
             return manager
         }
 
@@ -70,7 +71,7 @@ class ClockExporterGateManager private constructor(
             AttributeKey.longKey("internal.elastic.elapsed_start_time")
     }
 
-    inner class GateDelegatingInterceptor : Interceptor<SpanData> {
+    inner class SpanGateProcessingInterceptor : Interceptor<SpanData> {
 
         override fun intercept(item: SpanData): SpanData {
             val elapsedStartTime = item.attributes.get(ATTRIBUTE_KEY_ELAPSED_START_TIME)

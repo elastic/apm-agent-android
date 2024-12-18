@@ -18,6 +18,7 @@
  */
 package co.elastic.apm.android.sdk.features.exportergate
 
+import co.elastic.apm.android.sdk.features.exportergate.latch.Latch
 import co.elastic.apm.android.sdk.tools.interceptor.Interceptor
 import io.opentelemetry.sdk.common.CompletableResultCode
 import java.util.concurrent.LinkedBlockingQueue
@@ -81,10 +82,6 @@ internal class ExporterGateQueue<DATA>(
         if (open.compareAndSet(false, true)) {
             listener.onOpen()
         }
-    }
-
-    interface Latch {
-        fun open()
     }
 
     fun interface Listener {

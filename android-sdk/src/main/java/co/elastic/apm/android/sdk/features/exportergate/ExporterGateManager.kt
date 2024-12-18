@@ -20,6 +20,7 @@ package co.elastic.apm.android.sdk.features.exportergate
 
 import co.elastic.apm.android.sdk.exporters.configurable.MutableLogRecordExporter
 import co.elastic.apm.android.sdk.exporters.configurable.MutableSpanExporter
+import co.elastic.apm.android.sdk.features.exportergate.latch.Latch
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import co.elastic.apm.android.sdk.tools.interceptor.Interceptor
 import io.opentelemetry.sdk.logs.data.LogRecordData
@@ -50,7 +51,7 @@ internal class ExporterGateManager(serviceManager: ServiceManager) {
         return spanExporter
     }
 
-    internal fun createSpanGateLatch(): ExporterGateQueue.Latch {
+    internal fun createSpanGateLatch(): Latch {
         return spanGateQueue.createLatch()
     }
 
@@ -65,7 +66,7 @@ internal class ExporterGateManager(serviceManager: ServiceManager) {
         return logRecordExporter
     }
 
-    internal fun createLogRecordLatch(): ExporterGateQueue.Latch {
+    internal fun createLogRecordLatch(): Latch {
         return logRecordGateQueue.createLatch()
     }
 

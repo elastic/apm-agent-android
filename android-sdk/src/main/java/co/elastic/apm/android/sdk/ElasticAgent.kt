@@ -30,6 +30,7 @@ import co.elastic.apm.android.sdk.features.clock.ElasticClockManager
 import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingManager
 import co.elastic.apm.android.sdk.features.exportergate.ExporterGateManager
+import co.elastic.apm.android.sdk.features.exportergate.latch.Latch
 import co.elastic.apm.android.sdk.features.sessionmanager.SessionIdGenerator
 import co.elastic.apm.android.sdk.features.sessionmanager.SessionManager
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
@@ -156,7 +157,10 @@ class ElasticAgent private constructor(
                     serviceManager,
                     systemTimeProvider,
                     internalSntpClient ?: SntpClient.create(),
-                    exporterGateManager.createSpanGateLatch()
+                    Latch.composite(
+                        exporterGateManager.createSpanGateLatch(),
+                        exporterGateManager.createLogRecordLatch()
+                    )
                 )
                 val centralConfigurationManager = CentralConfigurationManager.create(
                     serviceManager,
@@ -185,7 +189,7 @@ class ElasticAgent private constructor(
                     elasticClockManager.getExportGateManager().getAttributesInterceptor()
                 )
                 exporterGateManager.setSpanQueueProcessingInterceptor(
-                    elasticClockManager.getExportGateManager().getGateDelegatingInterceptor()
+                    elasticClockManager.getExportGateManager().getSpanGateProcessingInterceptor()
                 )
                 addSpanExporterInterceptor {
                     exporterGateManager.createSpanExporterGate(it)

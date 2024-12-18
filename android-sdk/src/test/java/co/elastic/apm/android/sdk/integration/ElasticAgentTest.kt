@@ -76,13 +76,13 @@ import org.robolectric.RuntimeEnvironment
 class ElasticAgentTest {
     private lateinit var webServer: MockWebServer
     private lateinit var agent: ElasticAgent
-    private lateinit var processorFactory: SimpleProcessorFactory
+    private lateinit var simpleProcessorFactory: SimpleProcessorFactory
     private val inMemoryExporters = InMemoryExporterProvider()
     private val inMemoryExportersInterceptor = Interceptor<ExporterProvider> { inMemoryExporters }
 
     @Before
     fun setUp() {
-        processorFactory = SimpleProcessorFactory()
+        simpleProcessorFactory = SimpleProcessorFactory()
         webServer = MockWebServer()
         webServer.start()
     }
@@ -96,11 +96,8 @@ class ElasticAgentTest {
     @Test
     fun `Validate initial apm server params`() {
         webServer.enqueue(MockResponse().setResponseCode(500))// Central config poll
-        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
-            .setUrl(webServer.url("/").toString())
+        agent = simpleAgentBuilder(webServer.url("/").toString())
             .setServiceName("my-app")
-            .setDiskBufferingConfiguration(DiskBufferingConfiguration.disabled())
-            .setProcessorFactory(processorFactory)
             .setExtraRequestHeaders(mapOf("Extra-header" to "extra value"))
             .build()
 
@@ -142,13 +139,10 @@ class ElasticAgentTest {
                 .addHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
         )// Central config poll
         val secretToken = "secret-token"
-        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
-            .setUrl(webServer.url("/first/").toString())
+        agent = simpleAgentBuilder(webServer.url("/first/").toString())
             .setAuthentication(ApmServerAuthentication.SecretToken(secretToken))
             .setServiceName("my-app")
             .setDeploymentEnvironment("debug")
-            .setDiskBufferingConfiguration(DiskBufferingConfiguration.disabled())
-            .setProcessorFactory(processorFactory)
             .build()
 
         val centralConfigRequest = takeRequest()
@@ -225,13 +219,10 @@ class ElasticAgentTest {
         )// Central config poll
         val secretToken = "secret-token"
         val initialUrl = webServer.url("/first/").toString()
-        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
-            .setUrl(initialUrl)
+        agent = simpleAgentBuilder(initialUrl)
             .setAuthentication(ApmServerAuthentication.SecretToken(secretToken))
             .setServiceName("my-app")
             .setDeploymentEnvironment("debug")
-            .setDiskBufferingConfiguration(DiskBufferingConfiguration.disabled())
-            .setProcessorFactory(processorFactory)
             .build()
 
         val centralConfigRequest = takeRequest()
@@ -315,13 +306,7 @@ class ElasticAgentTest {
         val configuration = DiskBufferingConfiguration.enabled()
         configuration.maxFileAgeForWrite = 500
         configuration.minFileAgeForRead = 501
-        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
-            .setUrl("http://none")
-            .setDiskBufferingConfiguration(configuration)
-            .setProcessorFactory(processorFactory)
-            .apply {
-                internalExporterProviderInterceptor = inMemoryExportersInterceptor
-            }
+        agent = inMemoryAgentBuilder(diskBufferingConfiguration = configuration)
             .build()
 
         sendSpan()
@@ -338,13 +323,7 @@ class ElasticAgentTest {
         // Re-init
         Thread.sleep(1000)
         inMemoryExporters.reset()
-        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
-            .setUrl("http://none")
-            .setDiskBufferingConfiguration(configuration)
-            .setProcessorFactory(processorFactory)
-            .apply {
-                internalExporterProviderInterceptor = inMemoryExportersInterceptor
-            }
+        agent = inMemoryAgentBuilder(diskBufferingConfiguration = configuration)
             .build()
 
         agent.getDiskBufferingManager().exportFromDisk()
@@ -362,18 +341,17 @@ class ElasticAgentTest {
             appInfoService.getCacheDir()
             appInfoService.getAvailableCacheSpace(any())
         }.throws(IOException())
-        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
-            .setUrl("http://none")
-            .setProcessorFactory(processorFactory)
-            .apply {
-                internalExporterProviderInterceptor = inMemoryExportersInterceptor
-                internalServiceManagerInterceptor = Interceptor {
-                    val spy = spyk(it)
-                    every { spy.getAppInfoService() }.returns(appInfoService)
-                    spy
+        agent =
+            inMemoryAgentBuilder(diskBufferingConfiguration = DiskBufferingConfiguration.enabled())
+                .apply {
+                    internalExporterProviderInterceptor = inMemoryExportersInterceptor
+                    internalServiceManagerInterceptor = Interceptor {
+                        val spy = spyk(it)
+                        every { spy.getAppInfoService() }.returns(appInfoService)
+                        spy
+                    }
                 }
-            }
-            .build()
+                .build()
 
         sendSpan()
         sendLog()
@@ -387,14 +365,9 @@ class ElasticAgentTest {
 
     @Test
     fun `Disk buffering disabled`() {
-        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
-            .setUrl("http://none")
-            .setProcessorFactory(processorFactory)
-            .setDiskBufferingConfiguration(DiskBufferingConfiguration.disabled())
-            .apply {
-                internalExporterProviderInterceptor = inMemoryExportersInterceptor
-            }
-            .build()
+        agent =
+            inMemoryAgentBuilder(diskBufferingConfiguration = DiskBufferingConfiguration.disabled())
+                .build()
 
         sendSpan()
         sendLog()
@@ -422,11 +395,8 @@ class ElasticAgentTest {
             SntpClient.Response.Success(timeOffset)
         )
         every { sntpClient.close() } just Runs
-        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
-            .setUrl("http://none")
-            .setProcessorFactory(processorFactory)
+        agent = inMemoryAgentBuilder()
             .apply {
-                internalExporterProviderInterceptor = inMemoryExportersInterceptor
                 internalSntpClient = sntpClient
                 internalSystemTimeProvider = systemTimeProvider
             }
@@ -451,11 +421,8 @@ class ElasticAgentTest {
             SntpClient.Response.Error(SntpClient.ErrorType.TRY_LATER)
         )
         currentTime.set(currentTime.get() + TimeUnit.HOURS.toMillis(24) - 1)
-        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
-            .setUrl("http://none")
-            .setProcessorFactory(processorFactory)
+        agent = inMemoryAgentBuilder()
             .apply {
-                internalExporterProviderInterceptor = inMemoryExportersInterceptor
                 internalSntpClient = sntpClient
                 internalSystemTimeProvider = systemTimeProvider
             }
@@ -487,11 +454,8 @@ class ElasticAgentTest {
             SntpClient.Response.Error(SntpClient.ErrorType.TRY_LATER)
         )
         currentTime.set(currentTime.get() + 1000)
-        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
-            .setUrl("http://none")
-            .setProcessorFactory(processorFactory)
+        agent = inMemoryAgentBuilder()
             .apply {
-                internalExporterProviderInterceptor = inMemoryExportersInterceptor
                 internalSntpClient = sntpClient
                 internalSystemTimeProvider = systemTimeProvider
             }
@@ -523,11 +487,8 @@ class ElasticAgentTest {
             SntpClient.Response.Error(SntpClient.ErrorType.TRY_LATER)
         )
         currentTime.set(currentTime.get() + TimeUnit.HOURS.toMillis(24))
-        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
-            .setUrl("http://none")
-            .setProcessorFactory(processorFactory)
+        agent = inMemoryAgentBuilder()
             .apply {
-                internalExporterProviderInterceptor = inMemoryExportersInterceptor
                 internalSntpClient = sntpClient
                 internalSystemTimeProvider = systemTimeProvider
             }
@@ -560,11 +521,8 @@ class ElasticAgentTest {
             SntpClient.Response.Success(timeOffset)
         )
         every { sntpClient.close() } just Runs
-        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
-            .setUrl("http://none")
-            .setProcessorFactory(processorFactory)
+        agent = inMemoryAgentBuilder()
             .apply {
-                internalExporterProviderInterceptor = inMemoryExportersInterceptor
                 internalSntpClient = sntpClient
                 internalSystemTimeProvider = systemTimeProvider
             }
@@ -592,12 +550,9 @@ class ElasticAgentTest {
         every { systemTimeProvider.getCurrentTimeMillis() }.answers { currentTimeMillis.get() }
         val sessionIdGenerator = mockk<SessionIdGenerator>()
         every { sessionIdGenerator.generate() }.returns("first-id")
-        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
-            .setUrl("http://none")
-            .setProcessorFactory(processorFactory)
+        agent = inMemoryAgentBuilder()
             .setSessionIdGenerator { sessionIdGenerator.generate() }
             .apply {
-                internalExporterProviderInterceptor = inMemoryExportersInterceptor
                 internalSystemTimeProvider = systemTimeProvider
             }
             .build()
@@ -617,12 +572,9 @@ class ElasticAgentTest {
         inMemoryExporters.reset()
         currentTimeMillis.set(currentTimeMillis.get() + timeLimitMillis - 1)
         agent.close()
-        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
-            .setUrl("http://none")
-            .setProcessorFactory(processorFactory)
+        agent = inMemoryAgentBuilder()
             .setSessionIdGenerator { sessionIdGenerator.generate() }
             .apply {
-                internalExporterProviderInterceptor = inMemoryExportersInterceptor
                 internalSystemTimeProvider = systemTimeProvider
             }
             .build()
@@ -685,6 +637,26 @@ class ElasticAgentTest {
         verifySessionId(spanItems[17].attributes, "fourth-id")
     }
 
+    private fun simpleAgentBuilder(
+        url: String,
+        diskBufferingConfiguration: DiskBufferingConfiguration = DiskBufferingConfiguration.disabled()
+    ): ElasticAgent.Builder {
+        return ElasticAgent.builder(RuntimeEnvironment.getApplication())
+            .setProcessorFactory(simpleProcessorFactory)
+            .setDiskBufferingConfiguration(diskBufferingConfiguration)
+            .setUrl(url)
+    }
+
+    private fun inMemoryAgentBuilder(
+        url: String = "http://none",
+        diskBufferingConfiguration: DiskBufferingConfiguration = DiskBufferingConfiguration.disabled()
+    ): ElasticAgent.Builder {
+        return simpleAgentBuilder(url, diskBufferingConfiguration)
+            .apply {
+                internalExporterProviderInterceptor = inMemoryExportersInterceptor
+            }
+    }
+
     private fun verifySessionId(attributes: Attributes, value: String) {
         assertThat(attributes.get(AttributeKey.stringKey("session.id"))).isEqualTo(value)
     }
@@ -708,7 +680,7 @@ class ElasticAgentTest {
             .counterBuilder("counter")
             .build()
             .add(1)
-        processorFactory.flush()
+        simpleProcessorFactory.flush()
     }
 
     private interface FlushableProcessorFactory : ProcessorFactory {
@@ -740,7 +712,6 @@ class ElasticAgentTest {
         private var spanExporter = AtomicReference(InMemorySpanExporter.create())
         private var logRecordExporter = AtomicReference(InMemoryLogRecordExporter.create())
         private var mericExporter = AtomicReference(InMemoryMetricExporter.create())
-        private lateinit var metricReader: PeriodicMetricReader
 
         fun reset() {
             spanExporter.set(InMemorySpanExporter.create())
@@ -764,10 +735,6 @@ class ElasticAgentTest {
 
         fun getFinishedMetrics(): List<MetricData> {
             return mericExporter.get().finishedMetricItems
-        }
-
-        fun flush() {
-            metricReader.forceFlush()
         }
 
         override fun getSpanExporter(): SpanExporter? {

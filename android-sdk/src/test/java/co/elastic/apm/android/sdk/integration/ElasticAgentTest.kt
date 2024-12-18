@@ -563,6 +563,55 @@ class ElasticAgentTest {
     }
 
     @Test
+    fun `Verify clock initialization when the first signal items come after init is done`() {
+        val localTimeReference = 1577836800000L
+        val timeOffset = 500L
+        val expectedCurrentTime = localTimeReference + timeOffset
+        val sntpClient = mockk<SntpClient>()
+        val currentTime = AtomicLong(12345)
+        val systemTimeProvider = spyk(SystemTimeProvider.get())
+        every { systemTimeProvider.getCurrentTimeMillis() }.answers {
+            currentTime.get()
+        }
+        every { systemTimeProvider.getElapsedRealTime() }.returns(0)
+        every { sntpClient.fetchTimeOffset(localTimeReference) }.returns(
+            SntpClient.Response.Success(timeOffset)
+        )
+        every { sntpClient.close() } just Runs
+        agent = inMemoryAgentBuilder()
+            .setSessionIdGenerator { "session-id" }
+            .apply {
+                internalSntpClient = sntpClient
+                internalSystemTimeProvider = systemTimeProvider
+            }
+            .build()
+
+        await untilCallTo {
+            agent.getElasticClockManager().getClock().now()
+        } matches {
+            it == expectedCurrentTime * 1_000_000
+        }
+
+        sendSpan()
+        sendLog()
+        sendMetric()
+
+        // Everything's exported right away
+        assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
+
+        val spanData = inMemoryExporters.getFinishedSpans().first()
+        assertThat(spanData).startsAt(
+            expectedCurrentTime * 1_000_000
+        ).hasAttributes(ElasticAgentRule.SPAN_DEFAULT_ATTRS)
+        val logRecordData = inMemoryExporters.getFinishedLogRecords().first()
+        assertThat(logRecordData).hasTimestamp(0)
+            .hasObservedTimestamp(expectedCurrentTime * 1_000_000)
+            .hasAttributes(ElasticAgentRule.LOG_DEFAULT_ATTRS)
+    }
+
+    @Test
     fun `Verify clock initialization behavior, when latch waiting times out`() {
         val sntpClient = mockk<SntpClient>()
         val currentTime = AtomicLong(12345)

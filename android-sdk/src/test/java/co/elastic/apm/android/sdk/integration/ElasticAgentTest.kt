@@ -509,7 +509,7 @@ class ElasticAgentTest {
         val timeOffset = 500L
         val expectedCurrentTime = localTimeReference + timeOffset
         val sntpClient = mockk<SntpClient>()
-        val currentTime = AtomicLong(0)
+        val currentTime = AtomicLong(12345)
         val systemTimeProvider = spyk(SystemTimeProvider.get())
         every { systemTimeProvider.getCurrentTimeMillis() }.answers {
             currentTime.get()
@@ -530,9 +530,13 @@ class ElasticAgentTest {
             .build()
 
         sendSpan()
+        sendLog()
+        sendMetric()
 
-        // Nothing is exported yet.
+        // Spans and logs aren't exported yet.
         assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
 
         // Time gets eventually set.
         agent.getElasticClockManager().getTimeOffsetManager().sync()

@@ -29,7 +29,7 @@ import co.elastic.apm.android.sdk.features.centralconfig.CentralConfigurationMan
 import co.elastic.apm.android.sdk.features.clock.ElasticClockManager
 import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingManager
-import co.elastic.apm.android.sdk.features.exportgate.GateSpanExporter
+import co.elastic.apm.android.sdk.features.exportergate.ExporterGateManager
 import co.elastic.apm.android.sdk.features.sessionmanager.SessionIdGenerator
 import co.elastic.apm.android.sdk.features.sessionmanager.SessionManager
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
@@ -151,13 +151,12 @@ class ElasticAgent private constructor(
                 addSpanExporterInterceptor(diskBufferingManager::interceptSpanExporter)
                 addLogRecordExporterInterceptor(diskBufferingManager::interceptLogRecordExporter)
                 addMetricExporterInterceptor(diskBufferingManager::interceptMetricExporter)
-                val gateSpanExporter =
-                    GateSpanExporter(1000, serviceManager.getBackgroundWorkService())
+                val exporterGateManager = ExporterGateManager(serviceManager)
                 val elasticClockManager = ElasticClockManager.create(
                     serviceManager,
                     systemTimeProvider,
                     internalSntpClient ?: SntpClient.create(),
-                    gateSpanExporter.createLatch()
+                    exporterGateManager.createSpanGateLatch()
                 )
                 val centralConfigurationManager = CentralConfigurationManager.create(
                     serviceManager,
@@ -185,12 +184,11 @@ class ElasticAgent private constructor(
                 addSpanAttributesInterceptor(
                     elasticClockManager.getExportGateManager().getAttributesInterceptor()
                 )
-                gateSpanExporter.setQueuedDispatchingInterceptor(
+                exporterGateManager.setSpanQueueProcessingInterceptor(
                     elasticClockManager.getExportGateManager().getGateDelegatingInterceptor()
                 )
                 addSpanExporterInterceptor {
-                    gateSpanExporter.setDelegate(it)
-                    gateSpanExporter
+                    exporterGateManager.createSpanExporterGate(it)
                 }
                 setClock(elasticClockManager.getClock())
                 setExporterProvider(internalExporterProviderInterceptor.intercept(exporterProvider))

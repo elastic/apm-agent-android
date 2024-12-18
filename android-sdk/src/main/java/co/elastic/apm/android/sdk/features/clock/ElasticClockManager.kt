@@ -18,7 +18,7 @@
  */
 package co.elastic.apm.android.sdk.features.clock
 
-import co.elastic.apm.android.sdk.features.exportgate.GateSpanExporter
+import co.elastic.apm.android.sdk.features.exportergate.ExporterGateQueue
 import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElapsedTimeOffsetClock
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 internal class ElasticClockManager private constructor(
     systemTimeProvider: SystemTimeProvider,
     private val timeOffsetManager: RemoteTimeOffsetManager,
-    private val exportGateManager: ExportGateManager
+    private val exportGateManager: ClockExporterGateManager
 ) : RemoteTimeOffsetManager.Listener {
     private val elapsedTimeOffsetClock = ElapsedTimeOffsetClock(systemTimeProvider)
     private val systemTimeClock = SystemTimeClock(systemTimeProvider)
@@ -41,13 +41,13 @@ internal class ElasticClockManager private constructor(
             serviceManager: ServiceManager,
             systemTimeProvider: SystemTimeProvider,
             sntpClient: SntpClient,
-            latch: GateSpanExporter.Latch
+            spanGateLatch: ExporterGateQueue.Latch
         ): ElasticClockManager {
             val timeOffsetManager =
                 RemoteTimeOffsetManager.create(serviceManager, systemTimeProvider, sntpClient)
-            val exportGateManager = ExportGateManager.create(systemTimeProvider, {
+            val exportGateManager = ClockExporterGateManager.create(systemTimeProvider, {
                 timeOffsetManager.getTimeOffset()?.let { it * 1_000_000 }
-            }, latch)
+            }, spanGateLatch)
             val clockManager =
                 ElasticClockManager(systemTimeProvider, timeOffsetManager, exportGateManager)
             timeOffsetManager.setListener(clockManager)
@@ -71,7 +71,7 @@ internal class ElasticClockManager private constructor(
         return timeOffsetManager
     }
 
-    internal fun getExportGateManager(): ExportGateManager {
+    internal fun getExportGateManager(): ClockExporterGateManager {
         return exportGateManager
     }
 

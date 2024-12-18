@@ -18,7 +18,7 @@
  */
 package co.elastic.apm.android.sdk.features.clock
 
-import co.elastic.apm.android.sdk.features.exportgate.GateSpanExporter
+import co.elastic.apm.android.sdk.features.exportergate.ExporterGateQueue
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.tools.AttributesOverrideSpanData
 import co.elastic.apm.android.sdk.tools.interceptor.Interceptor
@@ -29,7 +29,7 @@ import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.sdk.trace.data.SpanData
 import java.util.concurrent.atomic.AtomicBoolean
 
-class ExportGateManager private constructor(
+class ClockExporterGateManager private constructor(
     systemTimeProvider: SystemTimeProvider,
     private val timeOffsetNanosProvider: Provider<Long?>
 ) {
@@ -37,7 +37,7 @@ class ExportGateManager private constructor(
     private val globalAttributesInterceptor =
         MutableInterceptor(ElapsedTimeAttributeInterceptor(systemTimeProvider))
     private var delegatingInterceptor: GateDelegatingInterceptor? = GateDelegatingInterceptor()
-    private var latch: GateSpanExporter.Latch? = null
+    private var latch: ExporterGateQueue.Latch? = null
 
     internal fun getAttributesInterceptor(): Interceptor<Attributes> {
         return globalAttributesInterceptor
@@ -59,9 +59,9 @@ class ExportGateManager private constructor(
         internal fun create(
             systemTimeProvider: SystemTimeProvider,
             timeOffsetNanosProvider: Provider<Long?>,
-            latch: GateSpanExporter.Latch
-        ): ExportGateManager {
-            val manager = ExportGateManager(systemTimeProvider, timeOffsetNanosProvider)
+            latch: ExporterGateQueue.Latch
+        ): ClockExporterGateManager {
+            val manager = ClockExporterGateManager(systemTimeProvider, timeOffsetNanosProvider)
             manager.latch = latch
             return manager
         }

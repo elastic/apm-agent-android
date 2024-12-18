@@ -157,9 +157,9 @@ internal class RemoteTimeOffsetManager private constructor(
         }
     }
 
-    private data class TimeOffset(val offset: Long, val expireTimeMillis: Long)
+    internal data class TimeOffset(val offset: Long, val expireTimeMillis: Long)
 
-    private class TimeOffsetCache(
+    internal class TimeOffsetCache(
         private val preferencesService: PreferencesService
     ) {
         fun retrieveTimeOffset(): TimeOffset? {

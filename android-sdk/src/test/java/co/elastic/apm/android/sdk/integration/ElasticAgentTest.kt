@@ -18,11 +18,13 @@
  */
 package co.elastic.apm.android.sdk.integration
 
+import android.content.Intent
 import co.elastic.apm.android.sdk.ElasticAgent
 import co.elastic.apm.android.sdk.exporters.ExporterProvider
 import co.elastic.apm.android.sdk.features.apmserver.ApmServerAuthentication
 import co.elastic.apm.android.sdk.features.apmserver.ApmServerConnectivity
 import co.elastic.apm.android.sdk.features.centralconfig.CentralConfigurationConnectivity
+import co.elastic.apm.android.sdk.features.clock.ElasticClockBroadcastReceiver
 import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.apm.android.sdk.features.sessionmanager.SessionIdGenerator
 import co.elastic.apm.android.sdk.internal.services.kotlin.appinfo.AppInfoService
@@ -522,6 +524,7 @@ class ElasticAgentTest {
 
         // Ensuring cache is cleared on reboot.
         agent.close()
+        triggerRebootBroadcast()
         inMemoryExporters.reset()
         every { sntpClient.fetchTimeOffset(any()) }.returns(
             SntpClient.Response.Error(SntpClient.ErrorType.TRY_LATER)
@@ -541,6 +544,14 @@ class ElasticAgentTest {
         )
 
         agent.close()
+    }
+
+    private fun triggerRebootBroadcast() {
+        val intent = Intent(Intent.ACTION_BOOT_COMPLETED)
+        val broadcastReceivers =
+            RuntimeEnvironment.getApplication().packageManager.queryBroadcastReceivers(intent, 0)
+        assertThat(broadcastReceivers).hasSize(1)
+        ElasticClockBroadcastReceiver().onReceive(RuntimeEnvironment.getApplication(), intent)
     }
 
     @Test

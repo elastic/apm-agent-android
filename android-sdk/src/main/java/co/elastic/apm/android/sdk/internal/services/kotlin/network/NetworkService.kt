@@ -20,7 +20,6 @@ package co.elastic.apm.android.sdk.internal.services.kotlin.network
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Application
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.ConnectivityManager.NetworkCallback
@@ -136,11 +135,11 @@ class NetworkService internal constructor(
     }
 
     companion object {
-        fun create(application: Application, serviceManager: ServiceManager): NetworkService {
+        fun create(context: Context, serviceManager: ServiceManager): NetworkService {
             val connectivityManager =
-                application.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             val telephonyManager =
-                application.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+                context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
             return NetworkService(serviceManager, connectivityManager, telephonyManager)
         }
     }

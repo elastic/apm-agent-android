@@ -18,7 +18,7 @@
  */
 package co.elastic.apm.android.sdk.internal.services.kotlin
 
-import android.app.Application
+import android.content.Context
 import co.elastic.apm.android.sdk.internal.services.kotlin.appinfo.AppInfoService
 import co.elastic.apm.android.sdk.internal.services.kotlin.backgroundwork.BackgroundWorkService
 import co.elastic.apm.android.sdk.internal.services.kotlin.network.NetworkService
@@ -57,12 +57,13 @@ class ServiceManager {
     }
 
     companion object {
-        fun create(application: Application): ServiceManager {
+        fun create(applicationContext: Context): ServiceManager {
             val manager = ServiceManager()
-            manager.services[PreferencesService::class.java] = PreferencesService(application)
-            manager.services[AppInfoService::class.java] = AppInfoService(application)
+            manager.services[PreferencesService::class.java] =
+                PreferencesService(applicationContext)
+            manager.services[AppInfoService::class.java] = AppInfoService(applicationContext)
             manager.services[NetworkService::class.java] =
-                NetworkService.create(application, manager)
+                NetworkService.create(applicationContext, manager)
             manager.services[BackgroundWorkService::class.java] = BackgroundWorkService.create()
 
             manager.start()

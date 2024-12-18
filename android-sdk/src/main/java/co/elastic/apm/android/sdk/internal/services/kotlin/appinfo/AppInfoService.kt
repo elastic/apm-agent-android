@@ -18,7 +18,7 @@
  */
 package co.elastic.apm.android.sdk.internal.services.kotlin.appinfo
 
-import android.app.Application
+import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
@@ -32,14 +32,14 @@ import java.io.File
 import java.io.IOException
 import kotlin.math.min
 
-class AppInfoService(private val application: Application) : Service {
+class AppInfoService(private val context: Context) : Service {
 
     fun isPermissionGranted(permissionName: String): Boolean {
-        return application.checkSelfPermission(permissionName) == PackageManager.PERMISSION_GRANTED
+        return context.checkSelfPermission(permissionName) == PackageManager.PERMISSION_GRANTED
     }
 
     fun isInDebugMode(): Boolean {
-        return (application.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+        return (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
     }
 
     fun getVersionCode(): Int {
@@ -50,9 +50,9 @@ class AppInfoService(private val application: Application) : Service {
         return getPackageInfo()?.versionName
     }
 
-    fun getCacheDir(): File = application.cacheDir
+    fun getCacheDir(): File = context.cacheDir
 
-    fun getFilesDir(): File = application.filesDir
+    fun getFilesDir(): File = context.filesDir
 
     @WorkerThread
     fun getAvailableCacheSpace(maxSpaceNeeded: Long): Long {
@@ -68,7 +68,7 @@ class AppInfoService(private val application: Application) : Service {
         Elog.getLogger()
             .debug("Getting available space for {}, max needed is: {}", directory, maxSpaceNeeded)
         try {
-            val storageManager = application.getSystemService(
+            val storageManager = context.getSystemService(
                 StorageManager::class.java
             )
             val appSpecificInternalDirUuid = storageManager.getUuidForPath(directory)
@@ -97,7 +97,7 @@ class AppInfoService(private val application: Application) : Service {
 
     private fun getPackageInfo(): PackageInfo? {
         return try {
-            application.packageManager.getPackageInfo(application.packageName, 0)
+            context.packageManager.getPackageInfo(context.packageName, 0)
         } catch (e: PackageManager.NameNotFoundException) {
             Elog.getLogger().error("Package info not found", e)
             null

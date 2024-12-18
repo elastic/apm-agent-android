@@ -560,6 +560,25 @@ class ElasticAgentTest {
         assertThat(logRecordData).hasTimestamp(expectedCurrentTime * 1_000_000)
             .hasObservedTimestamp(currentTime.get() * 1_000_000)
             .hasAttributes(ElasticAgentRule.LOG_DEFAULT_ATTRS)
+
+        // Send new data just for fun
+        inMemoryExporters.resetExporters()
+
+        sendSpan()
+        sendLog()
+        sendMetric()
+
+        assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
+
+        assertThat(inMemoryExporters.getFinishedSpans().first()).startsAt(
+            expectedCurrentTime * 1_000_000
+        ).hasAttributes(ElasticAgentRule.SPAN_DEFAULT_ATTRS)
+        assertThat(inMemoryExporters.getFinishedLogRecords().first())
+            .hasTimestamp(0)
+            .hasObservedTimestamp(expectedCurrentTime * 1_000_000)
+            .hasAttributes(ElasticAgentRule.LOG_DEFAULT_ATTRS)
     }
 
     @Test

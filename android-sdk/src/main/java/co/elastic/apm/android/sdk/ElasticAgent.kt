@@ -29,6 +29,7 @@ import co.elastic.apm.android.sdk.features.centralconfig.CentralConfigurationMan
 import co.elastic.apm.android.sdk.features.clock.ElasticClockManager
 import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingManager
+import co.elastic.apm.android.sdk.features.exportgate.GateSpanExporter
 import co.elastic.apm.android.sdk.features.sessionmanager.SessionIdGenerator
 import co.elastic.apm.android.sdk.features.sessionmanager.SessionManager
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
@@ -36,9 +37,9 @@ import co.elastic.apm.android.sdk.internal.opentelemetry.ElasticOpenTelemetryBui
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
-import co.elastic.apm.android.sdk.tools.Interceptor
 import co.elastic.apm.android.sdk.tools.PreferencesLongCacheHandler
 import co.elastic.apm.android.sdk.tools.PreferencesStringCacheHandler
+import co.elastic.apm.android.sdk.tools.interceptor.Interceptor
 import io.opentelemetry.api.OpenTelemetry
 import java.util.UUID
 
@@ -150,10 +151,13 @@ class ElasticAgent private constructor(
                 addSpanExporterInterceptor(diskBufferingManager::interceptSpanExporter)
                 addLogRecordExporterInterceptor(diskBufferingManager::interceptLogRecordExporter)
                 addMetricExporterInterceptor(diskBufferingManager::interceptMetricExporter)
+                val gateSpanExporter =
+                    GateSpanExporter(1000, serviceManager.getBackgroundWorkService())
                 val elasticClockManager = ElasticClockManager.create(
                     serviceManager,
                     systemTimeProvider,
-                    internalSntpClient ?: SntpClient.create()
+                    internalSntpClient ?: SntpClient.create(),
+                    gateSpanExporter.createLatch()
                 )
                 val centralConfigurationManager = CentralConfigurationManager.create(
                     serviceManager,
@@ -178,6 +182,10 @@ class ElasticAgent private constructor(
                     systemTimeProvider
                 )
 
+                addSpanExporterInterceptor {
+                    gateSpanExporter.setDelegate(it)
+                    gateSpanExporter
+                }
                 setClock(elasticClockManager.getClock())
                 setExporterProvider(internalExporterProviderInterceptor.intercept(exporterProvider))
                 setSessionProvider(sessionManager)

@@ -30,8 +30,8 @@ import co.elastic.apm.android.sdk.internal.opentelemetry.processors.spans.SpanIn
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import co.elastic.apm.android.sdk.processors.ProcessorFactory
 import co.elastic.apm.android.sdk.session.SessionProvider
-import co.elastic.apm.android.sdk.tools.Interceptor
 import co.elastic.apm.android.sdk.tools.PreferencesCachedStringProvider
+import co.elastic.apm.android.sdk.tools.interceptor.Interceptor
 import co.elastic.apm.android.sdk.tools.provider.StringProvider
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes

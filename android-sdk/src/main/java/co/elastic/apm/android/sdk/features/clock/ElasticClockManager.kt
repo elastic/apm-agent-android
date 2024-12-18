@@ -18,6 +18,7 @@
  */
 package co.elastic.apm.android.sdk.features.clock
 
+import co.elastic.apm.android.sdk.features.exportgate.GateSpanExporter
 import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElapsedTimeOffsetClock
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
@@ -27,7 +28,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 internal class ElasticClockManager private constructor(
     systemTimeProvider: SystemTimeProvider,
-    private val timeOffsetManager: RemoteTimeOffsetManager
+    private val timeOffsetManager: RemoteTimeOffsetManager,
+    private val exportGateManager: ExportGateManager
 ) : RemoteTimeOffsetManager.Listener {
     private val elapsedTimeOffsetClock = ElapsedTimeOffsetClock(systemTimeProvider)
     private val systemTimeClock = SystemTimeClock(systemTimeProvider)
@@ -38,11 +40,16 @@ internal class ElasticClockManager private constructor(
         internal fun create(
             serviceManager: ServiceManager,
             systemTimeProvider: SystemTimeProvider,
-            sntpClient: SntpClient
+            sntpClient: SntpClient,
+            latch: GateSpanExporter.Latch
         ): ElasticClockManager {
             val timeOffsetManager =
                 RemoteTimeOffsetManager.create(serviceManager, systemTimeProvider, sntpClient)
-            val clockManager = ElasticClockManager(systemTimeProvider, timeOffsetManager)
+            val exportGateManager = ExportGateManager.create(systemTimeProvider, {
+                timeOffsetManager.getTimeOffset()?.let { it * 1_000_000 }
+            }, latch)
+            val clockManager =
+                ElasticClockManager(systemTimeProvider, timeOffsetManager, exportGateManager)
             timeOffsetManager.setListener(clockManager)
             return clockManager
         }
@@ -64,15 +71,27 @@ internal class ElasticClockManager private constructor(
         return timeOffsetManager
     }
 
+    internal fun getExportGateManager(): ExportGateManager {
+        return exportGateManager
+    }
+
+    private fun onClockChange() {
+        if (usingRemoteTime.get()) {
+            exportGateManager.onRemoteClockSet()
+        }
+    }
+
     override fun onTimeOffsetChanged() {
         val timeOffset = timeOffsetManager.getTimeOffset()
         if (timeOffset != null) {
             elapsedTimeOffsetClock.setOffset(timeOffset)
             if (usingRemoteTime.compareAndSet(false, true)) {
                 clock.setDelegate(elapsedTimeOffsetClock)
+                onClockChange()
             }
         } else if (usingRemoteTime.compareAndSet(true, false)) {
             clock.setDelegate(systemTimeClock)
+            onClockChange()
         }
     }
 }

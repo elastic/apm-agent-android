@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.features.exportlatch
+package co.elastic.apm.android.sdk.features.exportgate
 
 import co.elastic.apm.android.sdk.internal.services.kotlin.backgroundwork.BackgroundWorkService
-import co.elastic.apm.android.sdk.tools.Interceptor
+import co.elastic.apm.android.sdk.tools.interceptor.Interceptor
 import io.opentelemetry.sdk.common.CompletableResultCode
 import io.opentelemetry.sdk.trace.data.SpanData
 import io.opentelemetry.sdk.trace.export.SpanExporter
@@ -29,7 +29,6 @@ import java.util.concurrent.atomic.AtomicInteger
 
 internal class GateSpanExporter(
     capacity: Int,
-    private val delegate: SpanExporter,
     private val backgroundWorkService: BackgroundWorkService
 ) : SpanExporter {
     private val queue by lazy { LinkedBlockingQueue<SpanData>(capacity) }
@@ -37,6 +36,7 @@ internal class GateSpanExporter(
     private val open = AtomicBoolean(true)
     private val configurationFinished = AtomicBoolean(false)
     private var queuedInterceptor: Interceptor<SpanData> = Interceptor.noop()
+    private lateinit var delegate: SpanExporter
 
     fun createLatch(): Latch {
         validateConfigurationFinished()
@@ -55,6 +55,11 @@ internal class GateSpanExporter(
                 }
             }
         }
+    }
+
+    fun setDelegate(value: SpanExporter) {
+        validateConfigurationFinished()
+        delegate = value
     }
 
     fun setQueuedDispatchingInterceptor(interceptor: Interceptor<SpanData>) {

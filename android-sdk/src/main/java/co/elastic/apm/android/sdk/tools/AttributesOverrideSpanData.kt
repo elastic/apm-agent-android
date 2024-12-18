@@ -16,27 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.opentelemetry.processors.spans
+package co.elastic.apm.android.sdk.tools
 
-import co.elastic.apm.android.sdk.tools.interceptor.Interceptor
 import io.opentelemetry.api.common.Attributes
-import io.opentelemetry.context.Context
-import io.opentelemetry.sdk.trace.ReadWriteSpan
-import io.opentelemetry.sdk.trace.ReadableSpan
-import io.opentelemetry.sdk.trace.SpanProcessor
+import io.opentelemetry.sdk.trace.data.DelegatingSpanData
+import io.opentelemetry.sdk.trace.data.SpanData
 
-internal class SpanAttributesProcessor(private val interceptor: Interceptor<Attributes>) :
-    SpanProcessor {
+internal open class AttributesOverrideSpanData(
+    delegate: SpanData,
+    private val attributes: Attributes,
+    private val totalAttributeCount: Int = attributes.size()
+) : DelegatingSpanData(delegate) {
 
-    override fun onStart(parentContext: Context, span: ReadWriteSpan) {
-        span.setAllAttributes(interceptor.intercept(span.attributes))
+    override fun getAttributes(): Attributes {
+        return attributes
     }
 
-    override fun isStartRequired(): Boolean = true
-
-    override fun onEnd(span: ReadableSpan) {
-
+    override fun getTotalAttributeCount(): Int {
+        return totalAttributeCount
     }
-
-    override fun isEndRequired(): Boolean = false
 }

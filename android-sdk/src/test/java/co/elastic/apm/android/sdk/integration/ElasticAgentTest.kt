@@ -30,7 +30,7 @@ import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
 import co.elastic.apm.android.sdk.processors.ProcessorFactory
 import co.elastic.apm.android.sdk.testutils.ElasticAgentRule
-import co.elastic.apm.android.sdk.tools.Interceptor
+import co.elastic.apm.android.sdk.tools.interceptor.Interceptor
 import io.mockk.Runs
 import io.mockk.clearMocks
 import io.mockk.every

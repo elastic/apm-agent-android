@@ -546,11 +546,20 @@ class ElasticAgentTest {
         } matches {
             it?.isNotEmpty() == true
         }
+        await untilCallTo {
+            inMemoryExporters.getFinishedLogRecords()
+        } matches {
+            it?.isNotEmpty() == true
+        }
 
         val spanData = inMemoryExporters.getFinishedSpans().first()
         assertThat(spanData).startsAt(
             expectedCurrentTime * 1_000_000
         ).hasAttributes(ElasticAgentRule.SPAN_DEFAULT_ATTRS)
+        val logRecordData = inMemoryExporters.getFinishedLogRecords().first()
+        assertThat(logRecordData).hasTimestamp(
+            expectedCurrentTime * 1_000_000
+        ).hasAttributes(ElasticAgentRule.LOG_DEFAULT_ATTRS)
     }
 
     @Test

@@ -188,6 +188,9 @@ class ElasticAgent private constructor(
                 addSpanAttributesInterceptor(
                     elasticClockManager.getExportGateManager().getAttributesInterceptor()
                 )
+                addLogRecordAttributesInterceptor(
+                    elasticClockManager.getExportGateManager().getAttributesInterceptor()
+                )
                 exporterGateManager.setSpanQueueProcessingInterceptor(
                     elasticClockManager.getExportGateManager().getSpanGateProcessingInterceptor()
                 )

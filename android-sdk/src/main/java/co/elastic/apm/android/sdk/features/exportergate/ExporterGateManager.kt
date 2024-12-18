@@ -18,9 +18,12 @@
  */
 package co.elastic.apm.android.sdk.features.exportergate
 
+import co.elastic.apm.android.sdk.exporters.configurable.MutableLogRecordExporter
 import co.elastic.apm.android.sdk.exporters.configurable.MutableSpanExporter
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import co.elastic.apm.android.sdk.tools.interceptor.Interceptor
+import io.opentelemetry.sdk.logs.data.LogRecordData
+import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.trace.data.SpanData
 import io.opentelemetry.sdk.trace.export.SpanExporter
 
@@ -29,6 +32,15 @@ internal class ExporterGateManager(serviceManager: ServiceManager) {
     private val spanGateQueue by lazy { ExporterGateQueue<SpanData>(1000, ::onSpanGateOpen) }
     private lateinit var delegateSpanExporter: SpanExporter
     private var gateSpanExporter: GateSpanExporter? = null
+    private val logRecordExporter by lazy { MutableLogRecordExporter() }
+    private val logRecordGateQueue by lazy {
+        ExporterGateQueue<LogRecordData>(
+            1000,
+            ::onLogRecordGateOpen
+        )
+    }
+    private lateinit var delegateLogRecordExporter: LogRecordExporter
+    private var gateLogRecordExporter: GateLogRecordExporter? = null
     private val backgroundWorkService by lazy { serviceManager.getBackgroundWorkService() }
 
     internal fun createSpanExporterGate(delegate: SpanExporter): SpanExporter {
@@ -46,12 +58,37 @@ internal class ExporterGateManager(serviceManager: ServiceManager) {
         spanGateQueue.setQueueProcessingInterceptor(interceptor)
     }
 
+    internal fun createLogRecordExporterGate(delegate: LogRecordExporter): LogRecordExporter {
+        delegateLogRecordExporter = delegate
+        gateLogRecordExporter = GateLogRecordExporter(delegateLogRecordExporter, logRecordGateQueue)
+        logRecordExporter.setDelegate(gateLogRecordExporter)
+        return logRecordExporter
+    }
+
+    internal fun createLogRecordLatch(): ExporterGateQueue.Latch {
+        return logRecordGateQueue.createLatch()
+    }
+
+    internal fun setLogRecordQueueProcessingInterceptor(interceptor: Interceptor<LogRecordData>) {
+        logRecordGateQueue.setQueueProcessingInterceptor(interceptor)
+    }
+
     private fun onSpanGateOpen() {
         spanExporter.setDelegate(delegateSpanExporter)
         if (spanGateQueue.hasAvailableItems()) {
             backgroundWorkService.submit {
                 delegateSpanExporter.export(spanGateQueue.getProcessedItems())
                 gateSpanExporter = null
+            }
+        }
+    }
+
+    private fun onLogRecordGateOpen() {
+        logRecordExporter.setDelegate(delegateLogRecordExporter)
+        if (logRecordGateQueue.hasAvailableItems()) {
+            backgroundWorkService.submit {
+                delegateLogRecordExporter.export(logRecordGateQueue.getProcessedItems())
+                gateLogRecordExporter = null
             }
         }
     }

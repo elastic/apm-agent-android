@@ -62,8 +62,8 @@ class CentralConfigurationManager private constructor(
 
     private fun scheduleInSeconds(seconds: Int) {
         backgroundWorkService.scheduleOnce(
-            ConfigurationPoll(),
-            TimeUnit.SECONDS.toMillis(seconds.toLong())
+            TimeUnit.SECONDS.toMillis(seconds.toLong()),
+            ConfigurationPoll()
         )
     }
 

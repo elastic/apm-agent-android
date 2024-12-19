@@ -129,15 +129,15 @@ internal class ExporterGateManager(
     }
 
     private fun onSpanQueueStarted() {
-        backgroundWorkService.scheduleOnce({
+        backgroundWorkService.scheduleOnce(gateLatchTimeout) {
             spanGateQueue.openGate()
-        }, gateLatchTimeout)
+        }
     }
 
     private fun onLogRecordQueueStarted() {
-        backgroundWorkService.scheduleOnce({
+        backgroundWorkService.scheduleOnce(gateLatchTimeout) {
             logRecordGateQueue.openGate()
-        }, gateLatchTimeout)
+        }
     }
 
     override fun onOpen(id: Int) {

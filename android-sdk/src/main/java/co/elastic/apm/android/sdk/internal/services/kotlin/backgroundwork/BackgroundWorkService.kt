@@ -38,8 +38,8 @@ class BackgroundWorkService private constructor(private val executorService: Sch
         return executorService.submit(task)
     }
 
-    internal fun scheduleOnce(task: Runnable, milliseconds: Long): ScheduledFuture<*>? {
-        return executorService.schedule(task, milliseconds, TimeUnit.MILLISECONDS)
+    internal fun scheduleOnce(delayMillis: Long, task: Runnable): ScheduledFuture<*>? {
+        return executorService.schedule(task, delayMillis, TimeUnit.MILLISECONDS)
     }
 
     internal fun schedulePeriodicTask(

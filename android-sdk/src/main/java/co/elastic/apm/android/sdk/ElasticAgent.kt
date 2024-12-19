@@ -47,6 +47,7 @@ import java.util.UUID
 class ElasticAgent private constructor(
     serviceManager: ServiceManager,
     configuration: Configuration,
+    exporterGateManager: ExporterGateManager,
     private val diskBufferingManager: DiskBufferingManager,
     private val apmServerConnectivityManager: ApmServerConnectivityManager,
     private val elasticClockManager: ElasticClockManager,
@@ -58,6 +59,7 @@ class ElasticAgent private constructor(
         elasticClockManager.initialize()
         diskBufferingManager.initialize()
         centralConfigurationManager.initialize()
+        exporterGateManager.initialize()
     }
 
     override fun getOpenTelemetry(): OpenTelemetry {
@@ -107,7 +109,7 @@ class ElasticAgent private constructor(
         internal var internalServiceManagerInterceptor: Interceptor<ServiceManager> =
             Interceptor.noop()
         internal var internalSignalBufferSize = 1000
-        internal var internalDisableGateLatch = false
+        internal var internalEnableGateLatch = true
 
         fun setUrl(value: String) = apply {
             url = value
@@ -149,23 +151,30 @@ class ElasticAgent private constructor(
                 val apmServerConnectivityManager =
                     ApmServerConnectivityManager(configurationManager)
                 val exporterProvider = ApmServerExporterProvider.create(configurationManager)
-                val diskBufferingManager =
-                    DiskBufferingManager(serviceManager, diskBufferingConfiguration)
-                addSpanExporterInterceptor(diskBufferingManager::interceptSpanExporter)
-                addLogRecordExporterInterceptor(diskBufferingManager::interceptLogRecordExporter)
-                addMetricExporterInterceptor(diskBufferingManager::interceptMetricExporter)
-                val exporterGateManager =
-                    ExporterGateManager(serviceManager, signalBufferSize = internalSignalBufferSize)
-                val elasticClockManager = ElasticClockManager.create(
+                val exporterGateManager = ExporterGateManager(
                     serviceManager,
-                    systemTimeProvider,
-                    internalSntpClient ?: SntpClient.create(),
-                    if (!internalDisableGateLatch) {
+                    signalBufferSize = internalSignalBufferSize,
+                    enableGateLatch = internalEnableGateLatch
+                )
+                val diskBufferingManager =
+                    DiskBufferingManager(
+                        serviceManager, diskBufferingConfiguration,
                         Latch.composite(
                             exporterGateManager.createSpanGateLatch(),
                             exporterGateManager.createLogRecordLatch()
                         )
-                    } else null
+                    )
+                addSpanExporterInterceptor(diskBufferingManager::interceptSpanExporter)
+                addLogRecordExporterInterceptor(diskBufferingManager::interceptLogRecordExporter)
+                addMetricExporterInterceptor(diskBufferingManager::interceptMetricExporter)
+                val elasticClockManager = ElasticClockManager.create(
+                    serviceManager,
+                    systemTimeProvider,
+                    internalSntpClient ?: SntpClient.create(),
+                    Latch.composite(
+                        exporterGateManager.createSpanGateLatch(),
+                        exporterGateManager.createLogRecordLatch()
+                    )
                 )
                 val centralConfigurationManager = CentralConfigurationManager.create(
                     serviceManager,
@@ -190,27 +199,25 @@ class ElasticAgent private constructor(
                     systemTimeProvider
                 )
 
-                if (!internalDisableGateLatch) {
-                    addSpanAttributesInterceptor(
-                        elasticClockManager.getExportGateManager().getAttributesInterceptor()
-                    )
-                    addLogRecordAttributesInterceptor(
-                        elasticClockManager.getExportGateManager().getAttributesInterceptor()
-                    )
-                    exporterGateManager.setSpanQueueProcessingInterceptor(
-                        elasticClockManager.getExportGateManager()
-                            .getSpanGateProcessingInterceptor()
-                    )
-                    exporterGateManager.setLogRecordQueueProcessingInterceptor(
-                        elasticClockManager.getExportGateManager()
-                            .getLogRecordGateProcessingInterceptor()
-                    )
-                    addSpanExporterInterceptor {
-                        exporterGateManager.createSpanExporterGate(it)
-                    }
-                    addLogRecordExporterInterceptor {
-                        exporterGateManager.createLogRecordExporterGate(it)
-                    }
+                addSpanAttributesInterceptor(
+                    elasticClockManager.getExportGateManager().getAttributesInterceptor()
+                )
+                addLogRecordAttributesInterceptor(
+                    elasticClockManager.getExportGateManager().getAttributesInterceptor()
+                )
+                exporterGateManager.setSpanQueueProcessingInterceptor(
+                    elasticClockManager.getExportGateManager()
+                        .getSpanGateProcessingInterceptor()
+                )
+                exporterGateManager.setLogRecordQueueProcessingInterceptor(
+                    elasticClockManager.getExportGateManager()
+                        .getLogRecordGateProcessingInterceptor()
+                )
+                addSpanExporterInterceptor {
+                    exporterGateManager.createSpanExporterGate(it)
+                }
+                addLogRecordExporterInterceptor {
+                    exporterGateManager.createLogRecordExporterGate(it)
                 }
                 setClock(elasticClockManager.getClock())
                 setExporterProvider(internalExporterProviderInterceptor.intercept(exporterProvider))
@@ -219,6 +226,7 @@ class ElasticAgent private constructor(
                 return ElasticAgent(
                     serviceManager,
                     buildConfiguration(serviceManager),
+                    exporterGateManager,
                     diskBufferingManager,
                     apmServerConnectivityManager,
                     elasticClockManager,

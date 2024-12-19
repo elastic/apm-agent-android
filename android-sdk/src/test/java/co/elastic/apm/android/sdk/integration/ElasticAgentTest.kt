@@ -577,7 +577,7 @@ class ElasticAgentTest {
             .apply {
                 internalSntpClient = sntpClient
                 internalSystemTimeProvider = systemTimeProvider
-                internalDisableGateLatch = false
+                internalEnableGateLatch = true
             }
             .build()
 
@@ -654,7 +654,7 @@ class ElasticAgentTest {
             .apply {
                 internalSntpClient = sntpClient
                 internalSystemTimeProvider = systemTimeProvider
-                internalDisableGateLatch = false
+                internalEnableGateLatch = true
             }
             .build()
 
@@ -701,7 +701,7 @@ class ElasticAgentTest {
             .apply {
                 internalSntpClient = sntpClient
                 internalSystemTimeProvider = systemTimeProvider
-                internalDisableGateLatch = false
+                internalEnableGateLatch = true
             }
             .build()
 
@@ -759,7 +759,7 @@ class ElasticAgentTest {
                 internalSntpClient = sntpClient
                 internalSystemTimeProvider = systemTimeProvider
                 internalSignalBufferSize = bufferSize
-                internalDisableGateLatch = false
+                internalEnableGateLatch = true
             }
             .build()
 
@@ -907,7 +907,7 @@ class ElasticAgentTest {
             .setDiskBufferingConfiguration(diskBufferingConfiguration)
             .setUrl(url)
             .apply {
-                internalDisableGateLatch = true
+                internalEnableGateLatch = false
             }
     }
 

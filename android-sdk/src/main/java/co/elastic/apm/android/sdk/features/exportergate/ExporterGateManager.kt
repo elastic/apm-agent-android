@@ -32,7 +32,8 @@ import java.util.concurrent.TimeUnit
 internal class ExporterGateManager(
     serviceManager: ServiceManager,
     signalBufferSize: Int = 1000,
-    private val gateLatchTimeout: Long = TimeUnit.SECONDS.toMillis(3)
+    private val gateLatchTimeout: Long = TimeUnit.SECONDS.toMillis(3),
+    private val enableGateLatch: Boolean = true
 ) : ExporterGateQueue.Listener {
     private val spanExporter by lazy { MutableSpanExporter() }
     private val spanGateQueue by lazy {
@@ -47,10 +48,20 @@ internal class ExporterGateManager(
     private lateinit var delegateLogRecordExporter: LogRecordExporter
     private var gateLogRecordExporter: GateLogRecordExporter? = null
     private val backgroundWorkService by lazy { serviceManager.getBackgroundWorkService() }
+    private val initializationLatch by lazy {
+        Latch.composite(
+            spanGateQueue.createLatch(),
+            logRecordGateQueue.createLatch()
+        )
+    }
 
     companion object {
         private const val SPAN_QUEUE_ID = 1
         private const val LOG_RECORD_QUEUE_ID = 2
+    }
+
+    internal fun initialize() {
+        initializationLatch.open()
     }
 
     internal fun createSpanExporterGate(delegate: SpanExporter): SpanExporter {
@@ -61,6 +72,9 @@ internal class ExporterGateManager(
     }
 
     internal fun createSpanGateLatch(): Latch {
+        if (!enableGateLatch) {
+            return Latch.noop()
+        }
         return spanGateQueue.createLatch()
     }
 
@@ -76,6 +90,9 @@ internal class ExporterGateManager(
     }
 
     internal fun createLogRecordLatch(): Latch {
+        if (!enableGateLatch) {
+            return Latch.noop()
+        }
         return logRecordGateQueue.createLatch()
     }
 

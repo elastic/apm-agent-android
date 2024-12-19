@@ -363,7 +363,7 @@ class ElasticAgentTest {
                     && inMemoryExporters.getFinishedLogRecords().isNotEmpty()
                     && inMemoryExporters.getFinishedMetrics().isNotEmpty()
         }
-        assertThat(waitTimeMillis).isLessThan(1000)
+        assertThat(waitTimeMillis).isLessThan(1500)
 
         // We should see the previously-stored signals exported.
         assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)

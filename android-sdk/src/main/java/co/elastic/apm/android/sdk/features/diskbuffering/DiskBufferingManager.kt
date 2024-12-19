@@ -133,9 +133,10 @@ class DiskBufferingManager internal constructor(
     }
 
     private fun startExportSchedule() {
-        serviceManager.getBackgroundWorkService().schedulePeriodicTask({
-            exportFromDisk()
-        }, exportFromDiskIntervalMillis, TimeUnit.MILLISECONDS)
+        serviceManager.getBackgroundWorkService()
+            .schedulePeriodicTask(exportFromDiskIntervalMillis, TimeUnit.MILLISECONDS) {
+                exportFromDisk()
+            }
     }
 
     private fun openLatch() {

@@ -311,14 +311,14 @@ class ElasticAgentTest {
         agent = inMemoryAgentBuilder(diskBufferingConfiguration = configuration)
             .build()
 
-        sendSpan()
-        sendLog()
-        sendMetric()
-
         val waitTimeMillis = awaitAndTrackTimeMillis {
             agent.getExporterGateManager().allGatesAreOpen()
         }
         assertThat(waitTimeMillis).isLessThan(1000)
+
+        sendSpan()
+        sendLog()
+        sendMetric()
 
         // Nothing should have gotten exported because it was stored in disk.
         assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()

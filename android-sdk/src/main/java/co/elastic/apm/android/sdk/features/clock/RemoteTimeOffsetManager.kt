@@ -55,7 +55,7 @@ internal class RemoteTimeOffsetManager private constructor(
                 setTimeOffset(it)
             }
         }
-        backgroundWorkService.schedulePeriodicTask(SyncHandler(), 1, TimeUnit.MINUTES)
+        backgroundWorkService.schedulePeriodicTask(1, TimeUnit.MINUTES, SyncHandler())
     }
 
     internal fun getTimeOffset(): Long? {

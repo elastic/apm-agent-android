@@ -47,7 +47,7 @@ import java.util.UUID
 class ElasticAgent private constructor(
     serviceManager: ServiceManager,
     configuration: Configuration,
-    exporterGateManager: ExporterGateManager,
+    private val exporterGateManager: ExporterGateManager,
     private val diskBufferingManager: DiskBufferingManager,
     private val apmServerConnectivityManager: ApmServerConnectivityManager,
     private val elasticClockManager: ElasticClockManager,
@@ -68,6 +68,10 @@ class ElasticAgent private constructor(
 
     fun getApmServerConnectivityManager(): ApmServerConnectivityManager {
         return apmServerConnectivityManager
+    }
+
+    internal fun getExporterGateManager(): ExporterGateManager {
+        return exporterGateManager
     }
 
     internal fun getDiskBufferingManager(): DiskBufferingManager {

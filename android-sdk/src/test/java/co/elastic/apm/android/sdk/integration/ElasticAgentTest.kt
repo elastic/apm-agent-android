@@ -315,6 +315,11 @@ class ElasticAgentTest {
         sendLog()
         sendMetric()
 
+        val waitTimeMillis = awaitAndTrackTimeMillis {
+            agent.getExporterGateManager().allGatesAreOpen()
+        }
+        assertThat(waitTimeMillis).isLessThan(1000)
+
         // Nothing should have gotten exported because it was stored in disk.
         assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
         assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()
@@ -328,7 +333,12 @@ class ElasticAgentTest {
         agent = inMemoryAgentBuilder(diskBufferingConfiguration = configuration)
             .build()
 
-        agent.getDiskBufferingManager().exportFromDisk()
+        val waitTimeMillis2 = awaitAndTrackTimeMillis {
+            inMemoryExporters.getFinishedSpans().isNotEmpty()
+                    && inMemoryExporters.getFinishedLogRecords().isNotEmpty()
+                    && inMemoryExporters.getFinishedMetrics().isNotEmpty()
+        }
+        assertThat(waitTimeMillis2).isLessThan(1000)
 
         // Now we should see the previously-stored signals exported.
         assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
@@ -714,18 +724,10 @@ class ElasticAgentTest {
         assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()
         assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
 
-        val waitStart = System.nanoTime()
-        await untilCallTo {
-            inMemoryExporters.getFinishedSpans()
-        } matches {
-            it?.isNotEmpty() == true
+        val waitTimeMillis = awaitAndTrackTimeMillis {
+            inMemoryExporters.getFinishedSpans().isNotEmpty()
+                    && inMemoryExporters.getFinishedLogRecords().isNotEmpty()
         }
-        await untilCallTo {
-            inMemoryExporters.getFinishedLogRecords()
-        } matches {
-            it?.isNotEmpty() == true
-        }
-        val waitTimeMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - waitStart)
 
         assertThat(waitTimeMillis).isBetween(2500, 3500)
         val spanData = inMemoryExporters.getFinishedSpans().first()
@@ -776,18 +778,10 @@ class ElasticAgentTest {
         sendSpan()
         sendLog()
 
-        val waitStart = System.nanoTime()
-        await untilCallTo {
-            inMemoryExporters.getFinishedSpans()
-        } matches {
-            it?.isNotEmpty() == true
+        val waitTimeMillis = awaitAndTrackTimeMillis {
+            inMemoryExporters.getFinishedSpans().isNotEmpty()
+                    && inMemoryExporters.getFinishedLogRecords().isNotEmpty()
         }
-        await untilCallTo {
-            inMemoryExporters.getFinishedLogRecords()
-        } matches {
-            it?.isNotEmpty() == true
-        }
-        val waitTimeMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - waitStart)
 
         assertThat(waitTimeMillis).isLessThan(1000)
         assertThat(inMemoryExporters.getFinishedSpans()).hasSize(bufferSize + 1)
@@ -945,6 +939,17 @@ class ElasticAgentTest {
             .build()
             .add(1)
         simpleProcessorFactory.flush()
+    }
+
+    private fun awaitAndTrackTimeMillis(condition: () -> Boolean): Long {
+        val waitStart = System.nanoTime()
+        await untilCallTo {
+            condition()
+        } matches {
+            it == true
+        }
+        val waitTimeMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - waitStart)
+        return waitTimeMillis
     }
 
     private interface FlushableProcessorFactory : ProcessorFactory {

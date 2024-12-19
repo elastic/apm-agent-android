@@ -28,6 +28,7 @@ import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.trace.data.SpanData
 import io.opentelemetry.sdk.trace.export.SpanExporter
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 
 internal class ExporterGateManager(
     serviceManager: ServiceManager,
@@ -54,6 +55,7 @@ internal class ExporterGateManager(
             logRecordGateQueue.createLatch()
         )
     }
+    private val closedGates = AtomicInteger(2)
 
     companion object {
         private const val SPAN_QUEUE_ID = 1
@@ -62,6 +64,10 @@ internal class ExporterGateManager(
 
     internal fun initialize() {
         initializationLatch.open()
+    }
+
+    internal fun allGatesAreOpen(): Boolean {
+        return closedGates.get() == 0
     }
 
     internal fun createSpanExporterGate(delegate: SpanExporter): SpanExporter {
@@ -108,6 +114,7 @@ internal class ExporterGateManager(
                 gateSpanExporter = null
             }
         }
+        closedGates.decrementAndGet()
     }
 
     private fun onLogRecordGateOpen() {
@@ -118,16 +125,17 @@ internal class ExporterGateManager(
                 gateLogRecordExporter = null
             }
         }
+        closedGates.decrementAndGet()
     }
 
     private fun onSpanQueueStarted() {
-        backgroundWorkService.schedule({
+        backgroundWorkService.scheduleOnce({
             spanGateQueue.openGate()
         }, gateLatchTimeout)
     }
 
     private fun onLogRecordQueueStarted() {
-        backgroundWorkService.schedule({
+        backgroundWorkService.scheduleOnce({
             logRecordGateQueue.openGate()
         }, gateLatchTimeout)
     }

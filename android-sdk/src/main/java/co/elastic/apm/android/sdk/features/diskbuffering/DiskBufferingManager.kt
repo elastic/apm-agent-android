@@ -37,11 +37,13 @@ import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.trace.export.SpanExporter
 import java.io.IOException
+import java.util.concurrent.TimeUnit
 
 class DiskBufferingManager internal constructor(
     private val serviceManager: ServiceManager,
     private val configuration: DiskBufferingConfiguration,
-    private var gateLatch: Latch?
+    private var gateLatch: Latch?,
+    private val exportFromDiskIntervalMillis: Long = TimeUnit.SECONDS.toMillis(5)
 ) {
     private var spanExporter: MutableSpanExporter? = null
     private var logRecordExporter: MutableLogRecordExporter? = null
@@ -54,7 +56,7 @@ class DiskBufferingManager internal constructor(
     private var toDiskMetricExporter: MetricToDiskExporter? = null
     private var signalFromDiskExporter: SignalFromDiskExporter? = null
 
-    fun exportFromDisk() {
+    private fun exportFromDisk() {
         signalFromDiskExporter?.exportBatchOfEach()
     }
 
@@ -121,12 +123,19 @@ class DiskBufferingManager internal constructor(
                     )
                 }
                 enableDiskBuffering(configuration.enabled)
+                startExportSchedule()
             } catch (e: IOException) {
                 Elog.getLogger().error("Could not initialize disk buffering", e)
             } finally {
                 openLatch()
             }
         }
+    }
+
+    private fun startExportSchedule() {
+        serviceManager.getBackgroundWorkService().schedulePeriodicTask({
+            exportFromDisk()
+        }, exportFromDiskIntervalMillis, TimeUnit.MILLISECONDS)
     }
 
     private fun openLatch() {

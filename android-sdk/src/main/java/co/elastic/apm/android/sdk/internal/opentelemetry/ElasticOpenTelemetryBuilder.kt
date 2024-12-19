@@ -49,19 +49,19 @@ import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 
 @Suppress("UNCHECKED_CAST")
-open class ElasticOpenTelemetryBuilder<B> {
+abstract class ElasticOpenTelemetryBuilder<B> {
     protected var serviceName: String = "unknown"
     protected var serviceVersion: String? = null
     protected var serviceBuild: Int? = null
     protected var deploymentEnvironment: String? = null
     private var deviceIdProvider: StringProvider? = null
     private var sessionProvider: SessionProvider = SessionProvider.getDefault()
-    private var processorFactory: ProcessorFactory = ProcessorFactory.getDefault()
     private var spanAttributesInterceptors = mutableListOf<Interceptor<Attributes>>()
     private var logRecordAttributesInterceptors = mutableListOf<Interceptor<Attributes>>()
     private var spanExporterInterceptors = mutableListOf<Interceptor<SpanExporter>>()
     private var logRecordExporterInterceptors = mutableListOf<Interceptor<LogRecordExporter>>()
     private var metricExporterInterceptors = mutableListOf<Interceptor<MetricExporter>>()
+    private var processorFactory: ProcessorFactory = ProcessorFactory.getDefault()
     private var clock: Clock = Clock.getDefault()
     private var exporterProvider: ExporterProvider = ExporterProvider.noop()
     private val buildCalled = AtomicBoolean(false)
@@ -102,12 +102,6 @@ open class ElasticOpenTelemetryBuilder<B> {
         return this as B
     }
 
-    fun setProcessorFactory(value: ProcessorFactory): B {
-        checkNotBuilt()
-        processorFactory = value
-        return this as B
-    }
-
     fun addSpanAttributesInterceptor(value: Interceptor<Attributes>): B {
         checkNotBuilt()
         spanAttributesInterceptors.add(value)
@@ -135,6 +129,12 @@ open class ElasticOpenTelemetryBuilder<B> {
     fun addMetricExporterInterceptor(value: Interceptor<MetricExporter>): B {
         checkNotBuilt()
         metricExporterInterceptors.add(value)
+        return this as B
+    }
+
+    internal fun setProcessorFactory(value: ProcessorFactory): B {
+        checkNotBuilt()
+        processorFactory = value
         return this as B
     }
 

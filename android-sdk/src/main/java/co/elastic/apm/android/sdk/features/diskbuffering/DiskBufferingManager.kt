@@ -23,6 +23,7 @@ import co.elastic.apm.android.sdk.exporters.configurable.MutableLogRecordExporte
 import co.elastic.apm.android.sdk.exporters.configurable.MutableMetricExporter
 import co.elastic.apm.android.sdk.exporters.configurable.MutableSpanExporter
 import co.elastic.apm.android.sdk.features.diskbuffering.tools.DiskManager
+import co.elastic.apm.android.sdk.features.exportergate.latch.Latch
 import co.elastic.apm.android.sdk.features.persistence.SimpleTemporaryFileProvider
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import io.opentelemetry.contrib.disk.buffering.LogRecordFromDiskExporter
@@ -39,7 +40,8 @@ import java.io.IOException
 
 class DiskBufferingManager internal constructor(
     private val serviceManager: ServiceManager,
-    private val configuration: DiskBufferingConfiguration
+    private val configuration: DiskBufferingConfiguration,
+    private var gateLatch: Latch?
 ) {
     private var spanExporter: MutableSpanExporter? = null
     private var logRecordExporter: MutableLogRecordExporter? = null
@@ -93,22 +95,42 @@ class DiskBufferingManager internal constructor(
     }
 
     internal fun initialize() {
-        try {
-            val storageConfiguration = createStorageConfiguration()
-            signalFromDiskExporter = createFromDiskExporter(storageConfiguration)
-            toDiskSpanExporter = interceptedSpanExporter?.let {
-                SpanToDiskExporter.create(it, storageConfiguration)
-            }
-            toDiskLogRecordExporter = interceptedLogRecordExporter?.let {
-                LogRecordToDiskExporter.create(it, storageConfiguration)
-            }
-            toDiskMetricExporter = interceptedMetricExporter?.let {
-                MetricToDiskExporter.create(it, storageConfiguration, it::getAggregationTemporality)
-            }
-            enableDiskBuffering(configuration.enabled)
-        } catch (e: IOException) {
-            Elog.getLogger().error("Could not initialize disk buffering", e)
+        if (configuration.enabled) {
+            doInitialize()
+        } else {
+            openLatch()
         }
+    }
+
+    private fun doInitialize() {
+        serviceManager.getBackgroundWorkService().submit {
+            try {
+                val storageConfiguration = createStorageConfiguration()
+                signalFromDiskExporter = createFromDiskExporter(storageConfiguration)
+                toDiskSpanExporter = interceptedSpanExporter?.let {
+                    SpanToDiskExporter.create(it, storageConfiguration)
+                }
+                toDiskLogRecordExporter = interceptedLogRecordExporter?.let {
+                    LogRecordToDiskExporter.create(it, storageConfiguration)
+                }
+                toDiskMetricExporter = interceptedMetricExporter?.let {
+                    MetricToDiskExporter.create(
+                        it,
+                        storageConfiguration,
+                        it::getAggregationTemporality
+                    )
+                }
+                enableDiskBuffering(configuration.enabled)
+            } catch (e: IOException) {
+                Elog.getLogger().error("Could not initialize disk buffering", e)
+            } finally {
+                openLatch()
+            }
+        }
+    }
+
+    private fun openLatch() {
+        gateLatch?.open().also { gateLatch = null }
     }
 
     private fun enableDiskBuffering(enabled: Boolean) {

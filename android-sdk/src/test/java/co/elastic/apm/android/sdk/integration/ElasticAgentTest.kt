@@ -338,9 +338,34 @@ class ElasticAgentTest {
                     && inMemoryExporters.getFinishedLogRecords().isNotEmpty()
                     && inMemoryExporters.getFinishedMetrics().isNotEmpty()
         }
-        assertThat(waitTimeMillis2).isLessThan(1000)
+        assertThat(waitTimeMillis2).isLessThan(2000)
 
         // Now we should see the previously-stored signals exported.
+        assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
+    }
+
+    @Test
+    fun `Disk buffering enabled, when signals come in before init is finished`() {
+        val configuration = DiskBufferingConfiguration.enabled()
+        configuration.maxFileAgeForWrite = 500
+        configuration.minFileAgeForRead = 501
+        agent = inMemoryAgentBuilder(diskBufferingConfiguration = configuration)
+            .build()
+
+        sendSpan()
+        sendLog()
+        sendMetric()
+
+        val waitTimeMillis = awaitAndTrackTimeMillis {
+            inMemoryExporters.getFinishedSpans().isNotEmpty()
+                    && inMemoryExporters.getFinishedLogRecords().isNotEmpty()
+                    && inMemoryExporters.getFinishedMetrics().isNotEmpty()
+        }
+        assertThat(waitTimeMillis).isLessThan(1000)
+
+        // We should see the previously-stored signals exported.
         assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)

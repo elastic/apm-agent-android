@@ -134,7 +134,7 @@ class DiskBufferingManager internal constructor(
 
     private fun startExportSchedule() {
         serviceManager.getBackgroundWorkService()
-            .schedulePeriodicTask(exportFromDiskIntervalMillis, TimeUnit.MILLISECONDS) {
+            .schedulePeriodicTask(exportFromDiskIntervalMillis, TimeUnit.MILLISECONDS, 1000) {
                 exportFromDisk()
             }
     }

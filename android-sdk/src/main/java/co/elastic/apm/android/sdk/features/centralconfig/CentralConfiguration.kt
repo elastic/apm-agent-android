@@ -19,7 +19,7 @@
 package co.elastic.apm.android.sdk.features.centralconfig
 
 import co.elastic.apm.android.common.internal.logging.Elog
-import co.elastic.apm.android.sdk.connectivity.ConnectivityConfigurationManager
+import co.elastic.apm.android.sdk.connectivity.ConnectivityConfigurationHolder
 import co.elastic.apm.android.sdk.features.centralconfig.fetcher.CentralConfigurationFetcher
 import co.elastic.apm.android.sdk.internal.configuration.Configurations
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
@@ -37,7 +37,7 @@ import org.stagemonitor.configuration.source.AbstractConfigurationSource
 
 class CentralConfiguration internal constructor(
     serviceManager: ServiceManager,
-    private val connectivityConfigurationManager: ConnectivityConfigurationManager,
+    private val connectivityConfigurationHolder: ConnectivityConfigurationHolder,
     private val systemTimeProvider: SystemTimeProvider
 ) : AbstractConfigurationSource() {
     private val appInfoService: AppInfoService by lazy { serviceManager.getAppInfoService() }
@@ -55,11 +55,11 @@ class CentralConfiguration internal constructor(
 
         internal fun create(
             serviceManager: ServiceManager,
-            connectivityConfigurationManager: ConnectivityConfigurationManager
+            connectivityConfigurationHolder: ConnectivityConfigurationHolder
         ): CentralConfiguration {
             return CentralConfiguration(
                 serviceManager,
-                connectivityConfigurationManager,
+                connectivityConfigurationHolder,
                 SystemTimeProvider.get()
             )
         }
@@ -85,7 +85,7 @@ class CentralConfiguration internal constructor(
             return null
         }
         try {
-            val fetchResult = fetcher.fetch(connectivityConfigurationManager.get())
+            val fetchResult = fetcher.fetch(connectivityConfigurationHolder.get())
             if (fetchResult.configurationHasChanged) {
                 notifyListeners()
             }

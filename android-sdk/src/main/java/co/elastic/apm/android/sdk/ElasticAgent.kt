@@ -150,11 +150,11 @@ class ElasticAgent private constructor(
                     exportProtocol
                 )
                 val systemTimeProvider = internalSystemTimeProvider ?: SystemTimeProvider.get()
-                val configurationManager =
-                    ApmServerConnectivityManager.ConfigurationManager(apmServerConfiguration)
+                val connectivityHolder =
+                    ApmServerConnectivityManager.ConnectivityHolder(apmServerConfiguration)
                 val apmServerConnectivityManager =
-                    ApmServerConnectivityManager(configurationManager)
-                val exporterProvider = ApmServerExporterProvider.create(configurationManager)
+                    ApmServerConnectivityManager(connectivityHolder)
+                val exporterProvider = ApmServerExporterProvider.create(connectivityHolder)
                 val exporterGateManager = ExporterGateManager(
                     serviceManager,
                     signalBufferSize = internalSignalBufferSize,
@@ -184,7 +184,7 @@ class ElasticAgent private constructor(
                     serviceManager,
                     serviceName,
                     deploymentEnvironment,
-                    configurationManager
+                    connectivityHolder
                 )
                 val sessionManager = SessionManager(
                     PreferencesStringCacheHandler(

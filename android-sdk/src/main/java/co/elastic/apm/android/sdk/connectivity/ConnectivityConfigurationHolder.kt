@@ -22,7 +22,7 @@ import co.elastic.apm.android.sdk.tools.provider.Provider
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicReference
 
-open class ConnectivityConfigurationManager(initialValue: ConnectivityConfiguration) :
+open class ConnectivityConfigurationHolder(initialValue: ConnectivityConfiguration) :
     Provider<ConnectivityConfiguration> {
     private val value = AtomicReference(initialValue)
     private val listeners = CopyOnWriteArrayList<Listener>()

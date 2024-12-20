@@ -18,7 +18,7 @@
  */
 package co.elastic.apm.android.sdk.features.apmserver
 
-import co.elastic.apm.android.sdk.connectivity.ConnectivityConfigurationManager
+import co.elastic.apm.android.sdk.connectivity.ConnectivityConfigurationHolder
 import co.elastic.apm.android.sdk.exporters.ExporterProvider
 import co.elastic.apm.android.sdk.exporters.configurable.ConfigurableExporterProvider
 import co.elastic.apm.android.sdk.exporters.configuration.ExporterConfiguration
@@ -30,10 +30,10 @@ import io.opentelemetry.sdk.trace.export.SpanExporter
 class ApmServerExporterProvider internal constructor(
     private val connectivityConfigurationProvider: Provider<ApmServerConnectivity>,
     private val exporterProvider: ConfigurableExporterProvider
-) : ExporterProvider, ConnectivityConfigurationManager.Listener {
+) : ExporterProvider, ConnectivityConfigurationHolder.Listener {
 
     companion object {
-        internal fun create(connectivityConfigurationManager: ApmServerConnectivityManager.ConfigurationManager): ApmServerExporterProvider {
+        internal fun create(connectivityConfigurationManager: ApmServerConnectivityManager.ConnectivityHolder): ApmServerExporterProvider {
             val configuration =
                 connectivityConfigurationManager.getConnectivityConfiguration()
             val exporterProvider = ConfigurableExporterProvider.create(

@@ -20,7 +20,7 @@ package co.elastic.apm.android.sdk.features.centralconfig
 
 import androidx.annotation.WorkerThread
 import co.elastic.apm.android.common.internal.logging.Elog
-import co.elastic.apm.android.sdk.connectivity.ConnectivityConfigurationManager
+import co.elastic.apm.android.sdk.connectivity.ConnectivityConfigurationHolder
 import co.elastic.apm.android.sdk.features.apmserver.ApmServerConnectivityManager
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import java.io.IOException
@@ -30,18 +30,18 @@ import org.slf4j.Logger
 class CentralConfigurationManager private constructor(
     serviceManager: ServiceManager,
     private val centralConfiguration: CentralConfiguration,
-    private val configurationManager: ConfigurationManager
+    private val connectivityHolder: ConnectivityHolder
 ) {
     private val backgroundWorkService by lazy { serviceManager.getBackgroundWorkService() }
     private val logger: Logger = Elog.getLogger()
 
     fun getConnectivityConfiguration(): CentralConfigurationConnectivity {
-        return configurationManager.get() as CentralConfigurationConnectivity
+        return connectivityHolder.get() as CentralConfigurationConnectivity
     }
 
     fun setConnectivityConfiguration(configuration: CentralConfigurationConnectivity) {
-        configurationManager.unlinkFromExportersConfig()
-        configurationManager.set(configuration)
+        connectivityHolder.unlinkFromExportersConfig()
+        connectivityHolder.set(configuration)
     }
 
     internal fun initialize() {
@@ -86,19 +86,19 @@ class CentralConfigurationManager private constructor(
             serviceManager: ServiceManager,
             serviceName: String,
             serviceDeployment: String?,
-            apmServerConfigurationManager: ApmServerConnectivityManager.ConfigurationManager
+            connectivityHolder: ApmServerConnectivityManager.ConnectivityHolder
         ): CentralConfigurationManager {
-            val centralConfigurationConfigurationManager = ConfigurationManager.fromApmServerConfig(
-                serviceName, serviceDeployment, apmServerConfigurationManager
+            val centralConfigurationConnectivityHolder = ConnectivityHolder.fromApmServerConfig(
+                serviceName, serviceDeployment, connectivityHolder
             )
             val centralConfiguration = CentralConfiguration.create(
                 serviceManager,
-                centralConfigurationConfigurationManager
+                centralConfigurationConnectivityHolder
             )
             return CentralConfigurationManager(
                 serviceManager,
                 centralConfiguration,
-                centralConfigurationConfigurationManager
+                centralConfigurationConnectivityHolder
             )
         }
     }
@@ -114,20 +114,20 @@ class CentralConfigurationManager private constructor(
         }
     }
 
-    internal class ConfigurationManager(
+    internal class ConnectivityHolder(
         connectivity: CentralConfigurationConnectivity,
-        private val apmServerConfigurationManager: ApmServerConnectivityManager.ConfigurationManager,
+        private val apmServerConnectivityHolder: ApmServerConnectivityManager.ConnectivityHolder,
         private val serviceName: String,
         private val serviceDeployment: String?
-    ) : ConnectivityConfigurationManager(connectivity), ConnectivityConfigurationManager.Listener {
+    ) : ConnectivityConfigurationHolder(connectivity), ConnectivityConfigurationHolder.Listener {
 
         companion object {
             fun fromApmServerConfig(
                 serviceName: String,
                 serviceDeployment: String?,
-                apmServerConfigurationManager: ApmServerConnectivityManager.ConfigurationManager
-            ): ConfigurationManager {
-                val instance = ConfigurationManager(
+                apmServerConfigurationManager: ApmServerConnectivityManager.ConnectivityHolder
+            ): ConnectivityHolder {
+                val instance = ConnectivityHolder(
                     CentralConfigurationConnectivity.fromApmServerConfig(
                         serviceName,
                         serviceDeployment,
@@ -140,7 +140,7 @@ class CentralConfigurationManager private constructor(
         }
 
         internal fun unlinkFromExportersConfig() {
-            apmServerConfigurationManager.removeListener(this)
+            apmServerConnectivityHolder.removeListener(this)
         }
 
         override fun onConnectivityConfigurationChange() {
@@ -149,7 +149,7 @@ class CentralConfigurationManager private constructor(
                 CentralConfigurationConnectivity.fromApmServerConfig(
                     serviceName,
                     serviceDeployment,
-                    apmServerConfigurationManager.getConnectivityConfiguration()
+                    apmServerConnectivityHolder.getConnectivityConfiguration()
                 )
             )
         }

@@ -18,21 +18,21 @@
  */
 package co.elastic.apm.android.sdk.features.apmserver
 
-import co.elastic.apm.android.sdk.connectivity.ConnectivityConfigurationManager
+import co.elastic.apm.android.sdk.connectivity.ConnectivityConfigurationHolder
 
 class ApmServerConnectivityManager internal constructor(
-    private val connectivityConfigurationManager: ConfigurationManager
+    private val connectivityConfigurationHolder: ConnectivityHolder
 ) {
     fun setConnectivityConfiguration(configuration: ApmServerConnectivity) {
-        connectivityConfigurationManager.setConnectivityConfiguration(configuration)
+        connectivityConfigurationHolder.setConnectivityConfiguration(configuration)
     }
 
     fun getConnectivityConfiguration(): ApmServerConnectivity {
-        return connectivityConfigurationManager.getConnectivityConfiguration()
+        return connectivityConfigurationHolder.getConnectivityConfiguration()
     }
 
-    internal class ConfigurationManager(initialValue: ApmServerConnectivity) :
-        ConnectivityConfigurationManager(initialValue) {
+    internal class ConnectivityHolder(initialValue: ApmServerConnectivity) :
+        ConnectivityConfigurationHolder(initialValue) {
 
         fun setConnectivityConfiguration(value: ApmServerConnectivity) {
             set(value)

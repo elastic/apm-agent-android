@@ -29,7 +29,7 @@ import org.slf4j.Logger
 
 class CentralConfigurationManager private constructor(
     serviceManager: ServiceManager,
-    private val centralConfiguration: CentralConfiguration,
+    private val centralConfigurationSource: CentralConfigurationSource,
     private val connectivityHolder: ConnectivityHolder
 ) {
     private val backgroundWorkService by lazy { serviceManager.getBackgroundWorkService() }
@@ -47,7 +47,7 @@ class CentralConfigurationManager private constructor(
     internal fun initialize() {
         backgroundWorkService.submit {
             try {
-                centralConfiguration.publishCachedConfig()
+                centralConfigurationSource.publishCachedConfig()
                 doPoll()
             } catch (t: Throwable) {
                 logger.error("CentralConfiguration initialization error", t)
@@ -70,7 +70,7 @@ class CentralConfigurationManager private constructor(
     @WorkerThread
     @Throws(IOException::class)
     private fun doPoll() {
-        val delayForNextPollInSeconds = centralConfiguration.sync()
+        val delayForNextPollInSeconds = centralConfigurationSource.sync()
         if (delayForNextPollInSeconds != null) {
             logger.info("Central config returned max age is null")
             scheduleInSeconds(delayForNextPollInSeconds)
@@ -91,13 +91,13 @@ class CentralConfigurationManager private constructor(
             val centralConfigurationConnectivityHolder = ConnectivityHolder.fromApmServerConfig(
                 serviceName, serviceDeployment, connectivityHolder
             )
-            val centralConfiguration = CentralConfiguration.create(
+            val centralConfigurationSource = CentralConfigurationSource.create(
                 serviceManager,
                 centralConfigurationConnectivityHolder
             )
             return CentralConfigurationManager(
                 serviceManager,
-                centralConfiguration,
+                centralConfigurationSource,
                 centralConfigurationConnectivityHolder
             )
         }

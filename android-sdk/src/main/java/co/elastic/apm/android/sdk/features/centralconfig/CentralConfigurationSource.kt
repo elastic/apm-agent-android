@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit
 import org.slf4j.Logger
 import org.stagemonitor.configuration.source.AbstractConfigurationSource
 
-class CentralConfiguration internal constructor(
+class CentralConfigurationSource internal constructor(
     serviceManager: ServiceManager,
     private val connectivityConfigurationHolder: ConnectivityConfigurationHolder,
     private val systemTimeProvider: SystemTimeProvider
@@ -56,8 +56,8 @@ class CentralConfiguration internal constructor(
         internal fun create(
             serviceManager: ServiceManager,
             connectivityConfigurationHolder: ConnectivityConfigurationHolder
-        ): CentralConfiguration {
-            return CentralConfiguration(
+        ): CentralConfigurationSource {
+            return CentralConfigurationSource(
                 serviceManager,
                 connectivityConfigurationHolder,
                 SystemTimeProvider.get()

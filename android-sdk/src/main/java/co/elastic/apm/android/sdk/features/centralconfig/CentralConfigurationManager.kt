@@ -23,6 +23,7 @@ import co.elastic.apm.android.common.internal.logging.Elog
 import co.elastic.apm.android.sdk.connectivity.ConnectivityConfigurationHolder
 import co.elastic.apm.android.sdk.features.apmserver.ApmServerConnectivityManager
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
+import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 import org.slf4j.Logger
@@ -31,7 +32,7 @@ class CentralConfigurationManager private constructor(
     serviceManager: ServiceManager,
     private val centralConfigurationSource: CentralConfigurationSource,
     private val connectivityHolder: ConnectivityHolder
-) {
+) : CentralConfigurationSource.Listener {
     private val backgroundWorkService by lazy { serviceManager.getBackgroundWorkService() }
     private val logger: Logger = Elog.getLogger()
 
@@ -45,9 +46,9 @@ class CentralConfigurationManager private constructor(
     }
 
     internal fun initialize() {
+        centralConfigurationSource.initialize()
         backgroundWorkService.submit {
             try {
-                centralConfigurationSource.publishCachedConfig()
                 doPoll()
             } catch (t: Throwable) {
                 logger.error("CentralConfiguration initialization error", t)
@@ -84,6 +85,7 @@ class CentralConfigurationManager private constructor(
 
         internal fun create(
             serviceManager: ServiceManager,
+            systemTimeProvider: SystemTimeProvider,
             serviceName: String,
             serviceDeployment: String?,
             connectivityHolder: ApmServerConnectivityManager.ConnectivityHolder
@@ -91,15 +93,18 @@ class CentralConfigurationManager private constructor(
             val centralConfigurationConnectivityHolder = ConnectivityHolder.fromApmServerConfig(
                 serviceName, serviceDeployment, connectivityHolder
             )
-            val centralConfigurationSource = CentralConfigurationSource.create(
+            val centralConfigurationSource = CentralConfigurationSource(
                 serviceManager,
-                centralConfigurationConnectivityHolder
+                centralConfigurationConnectivityHolder,
+                systemTimeProvider
             )
-            return CentralConfigurationManager(
+            val centralConfigurationManager = CentralConfigurationManager(
                 serviceManager,
                 centralConfigurationSource,
                 centralConfigurationConnectivityHolder
             )
+            centralConfigurationSource.listener = centralConfigurationManager
+            return centralConfigurationManager
         }
     }
 
@@ -153,5 +158,9 @@ class CentralConfigurationManager private constructor(
                 )
             )
         }
+    }
+
+    override fun onConfigChange() {
+        TODO("Not yet implemented")
     }
 }

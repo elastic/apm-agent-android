@@ -21,9 +21,7 @@ package co.elastic.apm.android.sdk.features.centralconfig
 import co.elastic.apm.android.common.internal.logging.Elog
 import co.elastic.apm.android.sdk.connectivity.ConnectivityConfigurationHolder
 import co.elastic.apm.android.sdk.features.centralconfig.fetcher.CentralConfigurationFetcher
-import co.elastic.apm.android.sdk.internal.configuration.Configurations
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
-import co.elastic.apm.android.sdk.internal.services.kotlin.appinfo.AppInfoService
 import co.elastic.apm.android.sdk.internal.services.kotlin.preferences.PreferencesService
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import com.dslplatform.json.DslJson
@@ -32,49 +30,31 @@ import java.io.File
 import java.io.IOException
 import java.util.Collections
 import java.util.concurrent.TimeUnit
-import org.slf4j.Logger
 import org.stagemonitor.configuration.source.AbstractConfigurationSource
 
 class CentralConfigurationSource internal constructor(
     serviceManager: ServiceManager,
     private val connectivityConfigurationHolder: ConnectivityConfigurationHolder,
-    private val systemTimeProvider: SystemTimeProvider
+    private val systemTimeProvider: SystemTimeProvider,
 ) : AbstractConfigurationSource() {
-    private val appInfoService: AppInfoService by lazy { serviceManager.getAppInfoService() }
     private val preferences: PreferencesService by lazy { serviceManager.getPreferencesService() }
     private val dslJson = DslJson(DslJson.Settings<Any>())
-    private val logger: Logger = Elog.getLogger()
-    private val configs: MutableMap<String, String> = mutableMapOf()
-    private val fetcher by lazy { CentralConfigurationFetcher(::getConfigurationFile, preferences) }
-
-    @Volatile
-    private var configFile: File? = null
+    private val logger = Elog.getLogger()
+    private val configs = mutableMapOf<String, String>()
+    private val configFile by lazy {
+        File(serviceManager.getAppInfoService().getFilesDir(), "elastic_agent_configuration.json")
+    }
+    private val fetcher by lazy { CentralConfigurationFetcher(configFile, preferences) }
+    internal lateinit var listener: Listener
 
     companion object {
         private const val REFRESH_TIMEOUT_PREFERENCE_NAME = "central_configuration_refresh_timeout"
-
-        internal fun create(
-            serviceManager: ServiceManager,
-            connectivityConfigurationHolder: ConnectivityConfigurationHolder
-        ): CentralConfigurationSource {
-            return CentralConfigurationSource(
-                serviceManager,
-                connectivityConfigurationHolder,
-                SystemTimeProvider.get()
-            )
-        }
     }
 
-    internal fun publishCachedConfig() {
-        val configurationFile = getConfigurationFile()
-        if (!configurationFile.exists()) {
-            logger.debug("No cached central config found")
-            return
-        }
-        try {
-            notifyListeners()
-        } catch (t: Throwable) {
-            logger.error("Exception when publishing cached central config", t)
+    internal fun initialize() {
+        loadFromDisk()
+        if (configs.isNotEmpty()) {
+            notifyListener()
         }
     }
 
@@ -87,7 +67,8 @@ class CentralConfigurationSource internal constructor(
         try {
             val fetchResult = fetcher.fetch(connectivityConfigurationHolder.get())
             if (fetchResult.configurationHasChanged) {
-                notifyListeners()
+                loadFromDisk()
+                notifyListener()
             }
             val maxAgeInSeconds = fetchResult.maxAgeInSeconds
             if (maxAgeInSeconds != null) {
@@ -100,20 +81,28 @@ class CentralConfigurationSource internal constructor(
         }
     }
 
-    @Throws(IOException::class)
-    private fun notifyListeners() {
+    private fun loadFromDisk() {
         try {
-            configs.putAll(readConfigs(getConfigurationFile()))
-            logger.info("Notifying central config change")
-            logger.debug("Central config params: {}", configs)
-            Configurations.reload()
-        } finally {
+            val configsFromDisk = readConfigsFromDisk()
+            configs.clear()
+            configs.putAll(configsFromDisk)
+        } catch (e: IOException) {
+            logger.error("Error wile loading configs from disk", e)
             configs.clear()
         }
     }
 
+    private fun notifyListener() {
+        logger.info("Notifying central config change")
+        logger.debug("Central config params: {}", configs)
+        listener.onConfigChange()
+    }
+
     @Throws(IOException::class)
-    private fun readConfigs(configFile: File): Map<String, String> {
+    private fun readConfigsFromDisk(): Map<String, String> {
+        if (!configFile.exists()) {
+            return emptyMap()
+        }
         val buffer = ByteArray(4096)
         configFile.inputStream().use {
             val reader = dslJson.newReader(it, buffer)
@@ -134,19 +123,15 @@ class CentralConfigurationSource internal constructor(
             preferences.store(REFRESH_TIMEOUT_PREFERENCE_NAME, timeoutMillis)
         }
 
-    @Synchronized
-    fun getConfigurationFile(): File {
-        if (configFile == null) {
-            configFile = File(appInfoService.getFilesDir(), "elastic_agent_configuration.json")
-        }
-        return configFile!!
-    }
-
     override fun getValue(key: String): String? {
         return configs[key]
     }
 
     override fun getName(): String {
-        return "APM Server"
+        return "APM Server Central Configuration"
+    }
+
+    interface Listener {
+        fun onConfigChange()
     }
 }

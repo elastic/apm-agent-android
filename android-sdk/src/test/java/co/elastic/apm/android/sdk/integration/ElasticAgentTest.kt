@@ -89,7 +89,6 @@ class ElasticAgentTest {
     private val wireMock = WireMockServer()
     private lateinit var allResponsesStubId: UUID
 
-
     @Before
     fun setUp() {
         simpleProcessorFactory = SimpleProcessorFactory()

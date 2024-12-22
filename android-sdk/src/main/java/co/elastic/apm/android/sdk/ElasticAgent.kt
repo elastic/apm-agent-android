@@ -182,6 +182,7 @@ class ElasticAgent private constructor(
                 )
                 val centralConfigurationManager = CentralConfigurationManager.create(
                     serviceManager,
+                    systemTimeProvider,
                     serviceName,
                     deploymentEnvironment,
                     connectivityHolder

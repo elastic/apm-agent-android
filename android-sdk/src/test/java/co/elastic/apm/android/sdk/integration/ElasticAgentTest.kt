@@ -33,6 +33,12 @@ import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
 import co.elastic.apm.android.sdk.processors.ProcessorFactory
 import co.elastic.apm.android.sdk.testutils.ElasticAgentRule
 import co.elastic.apm.android.sdk.tools.interceptor.Interceptor
+import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
+import com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import com.github.tomakehurst.wiremock.client.WireMock.any
+import com.github.tomakehurst.wiremock.client.WireMock.anyUrl
+import com.github.tomakehurst.wiremock.verification.LoggedRequest
 import io.mockk.Runs
 import io.mockk.clearMocks
 import io.mockk.every
@@ -59,11 +65,11 @@ import io.opentelemetry.sdk.trace.data.SpanData
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor
 import io.opentelemetry.sdk.trace.export.SpanExporter
 import java.io.IOException
+import java.time.Duration
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
@@ -76,151 +82,175 @@ import org.robolectric.RuntimeEnvironment
 
 @RunWith(RobolectricTestRunner::class)
 class ElasticAgentTest {
-    private lateinit var webServer: MockWebServer
     private lateinit var agent: ElasticAgent
     private lateinit var simpleProcessorFactory: SimpleProcessorFactory
     private val inMemoryExporters = InMemoryExporterProvider()
     private val inMemoryExportersInterceptor = Interceptor<ExporterProvider> { inMemoryExporters }
+    private val wireMock = WireMockServer()
+    private lateinit var allResponsesStubId: UUID
+
 
     @Before
     fun setUp() {
         simpleProcessorFactory = SimpleProcessorFactory()
-        webServer = MockWebServer()
-        webServer.start()
+        allResponsesStubId = UUID.randomUUID()
     }
 
     @After
     fun tearDown() {
-        webServer.close()
         inMemoryExporters.reset()
+        if (wireMock.isRunning) {
+            wireMock.stop()
+        }
     }
 
     @Test
     fun `Validate initial apm server params`() {
-        webServer.enqueue(MockResponse().setResponseCode(500))// Central config poll
-        agent = simpleAgentBuilder(webServer.url("/").toString())
+        stubAllHttpResponses { withStatus(500) }
+        agent = simpleAgentBuilder(wireMock.url("/"))
             .setServiceName("my-app")
             .setExtraRequestHeaders(mapOf("Extra-header" to "extra value"))
             .build()
 
         val centralConfigRequest = takeRequest()
-        assertThat(centralConfigRequest.path).isEqualTo("/config/v1/agents?service.name=my-app")
-        assertThat(centralConfigRequest.headers["Extra-header"]).isEqualTo("extra value")
+        assertThat(centralConfigRequest.url).isEqualTo("/config/v1/agents?service.name=my-app")
+        assertThat(
+            centralConfigRequest.headers.getHeader("Extra-header").firstValue()
+        ).isEqualTo("extra value")
 
         // OTel requests
-        webServer.enqueue(MockResponse().setResponseCode(500))
-        webServer.enqueue(MockResponse().setResponseCode(500))
-        webServer.enqueue(MockResponse().setResponseCode(500))
-
         sendSpan()
         val tracesRequest = takeRequest()
-        assertThat(tracesRequest.path).isEqualTo("/v1/traces")
-        assertThat(tracesRequest.headers["User-Agent"]).startsWith("OTel-OTLP-Exporter-Java/")
-        assertThat(tracesRequest.headers["Extra-header"]).isEqualTo("extra value")
+        assertThat(tracesRequest.url).isEqualTo("/v1/traces")
+        assertThat(
+            tracesRequest.headers.getHeader("User-Agent").firstValue()
+        ).startsWith("OTel-OTLP-Exporter-Java/")
+        assertThat(
+            tracesRequest.headers.getHeader("Extra-header").firstValue()
+        ).isEqualTo("extra value")
 
         sendLog()
         val logsRequest = takeRequest()
-        assertThat(logsRequest.path).isEqualTo("/v1/logs")
-        assertThat(logsRequest.headers["User-Agent"]).startsWith("OTel-OTLP-Exporter-Java/")
-        assertThat(logsRequest.headers["Extra-header"]).isEqualTo("extra value")
+        assertThat(logsRequest.url).isEqualTo("/v1/logs")
+        assertThat(
+            logsRequest.headers.getHeader("User-Agent").firstValue()
+        ).startsWith("OTel-OTLP-Exporter-Java/")
+        assertThat(
+            logsRequest.headers.getHeader("Extra-header").firstValue()
+        ).isEqualTo("extra value")
 
         sendMetric()
         val metricsRequest = takeRequest()
-        assertThat(metricsRequest.path).isEqualTo("/v1/metrics")
-        assertThat(metricsRequest.headers["User-Agent"]).startsWith("OTel-OTLP-Exporter-Java/")
-        assertThat(metricsRequest.headers["Extra-header"]).isEqualTo("extra value")
+        assertThat(metricsRequest.url).isEqualTo("/v1/metrics")
+        assertThat(
+            metricsRequest.headers.getHeader("User-Agent").firstValue()
+        ).startsWith("OTel-OTLP-Exporter-Java/")
+        assertThat(
+            metricsRequest.headers.getHeader("Extra-header").firstValue()
+        ).isEqualTo("extra value")
 
         agent.close()
     }
 
     @Test
     fun `Validate changing endpoint config`() {
-        webServer.enqueue(
-            MockResponse()
-                .setResponseCode(404)
-                .addHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
-        )// Central config poll
+        stubAllHttpResponses {
+            withStatus(404)
+                .withHeader("Cache-Control", "max-age=1")// 1 second to wait for the next poll.
+        }
         val secretToken = "secret-token"
-        agent = simpleAgentBuilder(webServer.url("/first/").toString())
+        agent = simpleAgentBuilder(wireMock.url("/first/"))
             .setAuthentication(ApmServerAuthentication.SecretToken(secretToken))
             .setServiceName("my-app")
             .setDeploymentEnvironment("debug")
             .build()
 
         val centralConfigRequest = takeRequest()
-        assertThat(centralConfigRequest.path).isEqualTo("/first/config/v1/agents?service.name=my-app&service.deployment=debug")
-        assertThat(centralConfigRequest.headers["Authorization"]).isEqualTo("Bearer $secretToken")
+        assertThat(centralConfigRequest.url).isEqualTo("/first/config/v1/agents?service.name=my-app&service.deployment=debug")
+        assertThat(
+            centralConfigRequest.headers.getHeader("Authorization").firstValue()
+        ).isEqualTo("Bearer $secretToken")
 
-        // OTel requests
-        webServer.enqueue(MockResponse().setResponseCode(500))
-        webServer.enqueue(MockResponse().setResponseCode(500))
-        webServer.enqueue(MockResponse().setResponseCode(500))
-
+        stubAllHttpResponses { withStatus(500) }
         sendSpan()
         val tracesRequest = takeRequest()
-        assertThat(tracesRequest.path).isEqualTo("/first/v1/traces")
-        assertThat(tracesRequest.headers["Authorization"]).isEqualTo("Bearer $secretToken")
+        assertThat(tracesRequest.url).isEqualTo("/first/v1/traces")
+        assertThat(
+            tracesRequest.headers.getHeader("Authorization").firstValue()
+        ).isEqualTo("Bearer $secretToken")
 
         sendLog()
         val logsRequest = takeRequest()
-        assertThat(logsRequest.path).isEqualTo("/first/v1/logs")
-        assertThat(logsRequest.headers["Authorization"]).isEqualTo("Bearer $secretToken")
+        assertThat(logsRequest.url).isEqualTo("/first/v1/logs")
+        assertThat(
+            logsRequest.headers.getHeader("Authorization").firstValue()
+        ).isEqualTo("Bearer $secretToken")
 
         sendMetric()
         val metricsRequest = takeRequest()
-        assertThat(metricsRequest.path).isEqualTo("/first/v1/metrics")
-        assertThat(metricsRequest.headers["Authorization"]).isEqualTo("Bearer $secretToken")
+        assertThat(metricsRequest.url).isEqualTo("/first/v1/metrics")
+        assertThat(
+            metricsRequest.headers.getHeader("Authorization").firstValue()
+        ).isEqualTo("Bearer $secretToken")
 
         // Changing config
         val apiKey = "api-key"
-        webServer.enqueue(MockResponse().setResponseCode(500))// Central config poll
         agent.getApmServerConnectivityManager().setConnectivityConfiguration(
             ApmServerConnectivity(
-                webServer.url("/second/").toString(),
+                wireMock.url("/second/"),
                 ApmServerAuthentication.ApiKey(apiKey),
                 mapOf("Custom-Header" to "custom value")
             )
         )
 
         val centralConfigRequest2 = takeRequest()
-        assertThat(centralConfigRequest2.path).isEqualTo("/second/config/v1/agents?service.name=my-app&service.deployment=debug")
-        assertThat(centralConfigRequest2.headers["Authorization"]).isEqualTo("ApiKey $apiKey")
+        assertThat(centralConfigRequest2.url).isEqualTo("/second/config/v1/agents?service.name=my-app&service.deployment=debug")
+        assertThat(centralConfigRequest2.headers.getHeader("Authorization").firstValue()).isEqualTo(
+            "ApiKey $apiKey"
+        )
 
         // OTel requests
-        webServer.enqueue(MockResponse().setResponseCode(500))
-        webServer.enqueue(MockResponse().setResponseCode(500))
-        webServer.enqueue(MockResponse().setResponseCode(500))
-
         sendSpan()
         val tracesRequest2 = takeRequest()
-        assertThat(tracesRequest2.path).isEqualTo("/second/v1/traces")
-        assertThat(tracesRequest2.headers["Authorization"]).isEqualTo("ApiKey $apiKey")
-        assertThat(tracesRequest2.headers["Custom-Header"]).isEqualTo("custom value")
+        assertThat(tracesRequest2.url).isEqualTo("/second/v1/traces")
+        assertThat(
+            tracesRequest2.headers.getHeader("Authorization").firstValue()
+        ).isEqualTo("ApiKey $apiKey")
+        assertThat(
+            tracesRequest2.headers.getHeader("Custom-Header").firstValue()
+        ).isEqualTo("custom value")
 
         sendLog()
         val logsRequest2 = takeRequest()
-        assertThat(logsRequest2.path).isEqualTo("/second/v1/logs")
-        assertThat(logsRequest2.headers["Authorization"]).isEqualTo("ApiKey $apiKey")
-        assertThat(logsRequest2.headers["Custom-Header"]).isEqualTo("custom value")
+        assertThat(logsRequest2.url).isEqualTo("/second/v1/logs")
+        assertThat(
+            logsRequest2.headers.getHeader("Authorization").firstValue()
+        ).isEqualTo("ApiKey $apiKey")
+        assertThat(
+            logsRequest2.headers.getHeader("Custom-Header").firstValue()
+        ).isEqualTo("custom value")
 
         sendMetric()
         val metricsRequest2 = takeRequest()
-        assertThat(metricsRequest2.path).isEqualTo("/second/v1/metrics")
-        assertThat(metricsRequest2.headers["Authorization"]).isEqualTo("ApiKey $apiKey")
-        assertThat(metricsRequest2.headers["Custom-Header"]).isEqualTo("custom value")
+        assertThat(metricsRequest2.url).isEqualTo("/second/v1/metrics")
+        assertThat(
+            metricsRequest2.headers.getHeader("Authorization").firstValue()
+        ).isEqualTo("ApiKey $apiKey")
+        assertThat(
+            metricsRequest2.headers.getHeader("Custom-Header").firstValue()
+        ).isEqualTo("custom value")
 
         agent.close()
     }
 
     @Test
     fun `Validate changing endpoint config after manually setting central config endpoint`() {
-        webServer.enqueue(
-            MockResponse()
-                .setResponseCode(404)
-                .addHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
-        )// Central config poll
+        stubAllHttpResponses {
+            withStatus(404)
+                .withHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
+        }// Central config poll
         val secretToken = "secret-token"
-        val initialUrl = webServer.url("/first/").toString()
+        val initialUrl = wireMock.url("/first/")
         agent = simpleAgentBuilder(initialUrl)
             .setAuthentication(ApmServerAuthentication.SecretToken(secretToken))
             .setServiceName("my-app")
@@ -228,8 +258,10 @@ class ElasticAgentTest {
             .build()
 
         val centralConfigRequest = takeRequest()
-        assertThat(centralConfigRequest.path).isEqualTo("/first/config/v1/agents?service.name=my-app&service.deployment=debug")
-        assertThat(centralConfigRequest.headers["Authorization"]).isEqualTo("Bearer $secretToken")
+        assertThat(centralConfigRequest.url).isEqualTo("/first/config/v1/agents?service.name=my-app&service.deployment=debug")
+        assertThat(
+            centralConfigRequest.headers.getHeader("Authorization").firstValue()
+        ).isEqualTo("Bearer $secretToken")
 
         // Setting central config value manually
         agent.getCentralConfigurationManager().setConnectivityConfiguration(
@@ -242,65 +274,119 @@ class ElasticAgentTest {
         )
 
         // OTel requests
-        webServer.enqueue(MockResponse().setResponseCode(500))
-        webServer.enqueue(MockResponse().setResponseCode(500))
-        webServer.enqueue(MockResponse().setResponseCode(500))
-
+        stubAllHttpResponses { withStatus(500) }
         sendSpan()
         val tracesRequest = takeRequest()
-        assertThat(tracesRequest.path).isEqualTo("/first/v1/traces")
-        assertThat(tracesRequest.headers["Authorization"]).isEqualTo("Bearer $secretToken")
+        assertThat(tracesRequest.url).isEqualTo("/first/v1/traces")
+        assertThat(
+            tracesRequest.headers.getHeader("Authorization").firstValue()
+        ).isEqualTo("Bearer $secretToken")
 
         sendLog()
         val logsRequest = takeRequest()
-        assertThat(logsRequest.path).isEqualTo("/first/v1/logs")
-        assertThat(logsRequest.headers["Authorization"]).isEqualTo("Bearer $secretToken")
+        assertThat(logsRequest.url).isEqualTo("/first/v1/logs")
+        assertThat(
+            logsRequest.headers.getHeader("Authorization").firstValue()
+        ).isEqualTo("Bearer $secretToken")
 
         sendMetric()
         val metricsRequest = takeRequest()
-        assertThat(metricsRequest.path).isEqualTo("/first/v1/metrics")
-        assertThat(metricsRequest.headers["Authorization"]).isEqualTo("Bearer $secretToken")
+        assertThat(metricsRequest.url).isEqualTo("/first/v1/metrics")
+        assertThat(
+            metricsRequest.headers.getHeader("Authorization").firstValue()
+        ).isEqualTo("Bearer $secretToken")
 
         // Changing config
         val apiKey = "api-key"
-        webServer.enqueue(MockResponse().setResponseCode(500))// Central config poll
         agent.getApmServerConnectivityManager().setConnectivityConfiguration(
             ApmServerConnectivity(
-                webServer.url("/second/").toString(),
+                wireMock.url("/second/"),
                 ApmServerAuthentication.ApiKey(apiKey),
                 mapOf("Custom-Header" to "custom value")
             )
         )
 
         val centralConfigRequest2 = takeRequest()
-        assertThat(centralConfigRequest2.path).isEqualTo("/first/config/v1/agents?service.name=other-name")
-        assertThat(centralConfigRequest2.headers["Authorization"]).isNull()
-        assertThat(centralConfigRequest2.headers["Custom-Header"]).isEqualTo("Example")
+        assertThat(centralConfigRequest2.url).isEqualTo("/first/config/v1/agents?service.name=other-name")
+        assertThat(centralConfigRequest2.headers.getHeader("Authorization").isPresent).isFalse()
+        assertThat(centralConfigRequest2.headers.getHeader("Custom-Header").firstValue()).isEqualTo(
+            "Example"
+        )
 
         // OTel requests
-        webServer.enqueue(MockResponse().setResponseCode(500))
-        webServer.enqueue(MockResponse().setResponseCode(500))
-        webServer.enqueue(MockResponse().setResponseCode(500))
-
         sendSpan()
         val tracesRequest2 = takeRequest()
-        assertThat(tracesRequest2.path).isEqualTo("/second/v1/traces")
-        assertThat(tracesRequest2.headers["Authorization"]).isEqualTo("ApiKey $apiKey")
-        assertThat(tracesRequest2.headers["Custom-Header"]).isEqualTo("custom value")
+        assertThat(tracesRequest2.url).isEqualTo("/second/v1/traces")
+        assertThat(
+            tracesRequest2.headers.getHeader("Authorization").firstValue()
+        ).isEqualTo("ApiKey $apiKey")
+        assertThat(
+            tracesRequest2.headers.getHeader("Custom-Header").firstValue()
+        ).isEqualTo("custom value")
 
         sendLog()
         val logsRequest2 = takeRequest()
-        assertThat(logsRequest2.path).isEqualTo("/second/v1/logs")
-        assertThat(logsRequest2.headers["Authorization"]).isEqualTo("ApiKey $apiKey")
-        assertThat(logsRequest2.headers["Custom-Header"]).isEqualTo("custom value")
+        assertThat(logsRequest2.url).isEqualTo("/second/v1/logs")
+        assertThat(
+            logsRequest2.headers.getHeader("Authorization").firstValue()
+        ).isEqualTo("ApiKey $apiKey")
+        assertThat(
+            logsRequest2.headers.getHeader("Custom-Header").firstValue()
+        ).isEqualTo("custom value")
 
         sendMetric()
         val metricsRequest2 = takeRequest()
-        assertThat(metricsRequest2.path).isEqualTo("/second/v1/metrics")
-        assertThat(metricsRequest2.headers["Authorization"]).isEqualTo("ApiKey $apiKey")
-        assertThat(metricsRequest2.headers["Custom-Header"]).isEqualTo("custom value")
+        assertThat(metricsRequest2.url).isEqualTo("/second/v1/metrics")
+        assertThat(
+            metricsRequest2.headers.getHeader("Authorization").firstValue()
+        ).isEqualTo("ApiKey $apiKey")
+        assertThat(
+            metricsRequest2.headers.getHeader("Custom-Header").firstValue()
+        ).isEqualTo("custom value")
 
         agent.close()
+    }
+
+    @Test
+    fun `Validate central configuration changes`() {
+        // First: Empty config
+        stubAllHttpResponses {
+            withStatus(200)
+                .withBody("{}")
+                .withHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
+        }
+
+        agent = inMemoryAgentBuilder(
+            wireMock.url("/")
+        ).build()
+
+        takeRequest() // Await for empty central config response
+
+        sendSpan()
+        sendLog()
+        sendMetric()
+
+        assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
+
+        inMemoryExporters.resetExporters()
+
+        // Next: Config with recording set to false
+        stubAllHttpResponses {
+            withStatus(200)
+                .withBody("""{"recording":"false"}""")
+        }
+
+        takeRequest() // Await for central config response with recording=false
+
+        sendSpan()
+        sendLog()
+        sendMetric()
+
+        assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
     }
 
     @Test
@@ -944,7 +1030,16 @@ class ElasticAgentTest {
         assertThat(attributes.get(AttributeKey.stringKey("session.id"))).isEqualTo(value)
     }
 
-    private fun takeRequest() = webServer.takeRequest(2, TimeUnit.SECONDS)!!
+    private fun takeRequest(awaitSeconds: Int = 2): LoggedRequest {
+        await.atMost(Duration.ofSeconds(awaitSeconds.toLong()))
+            .until { wireMock.allServeEvents.isNotEmpty() }
+        val allServeEvents = wireMock.allServeEvents
+        assertThat(allServeEvents).hasSize(1)
+        val serveEvent = allServeEvents.first()
+        wireMock.removeServeEvent(serveEvent.id)
+        return serveEvent.request
+    }
+
 
     private fun sendSpan(name: String = "span-name") {
         agent.getOpenTelemetry().getTracer("TestTracer")
@@ -975,6 +1070,20 @@ class ElasticAgentTest {
         }
         val waitTimeMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - waitStart)
         return waitTimeMillis
+    }
+
+    private fun stubAllHttpResponses(
+        responseVisitor: ResponseDefinitionBuilder.() -> Unit = {}
+    ) {
+        if (!wireMock.isRunning) {
+            wireMock.start()
+        }
+        wireMock.removeStub(allResponsesStubId)
+        val mappingBuilder = any(anyUrl()).withId(allResponsesStubId)
+        val response = aResponse()
+        responseVisitor(response)
+        mappingBuilder.willReturn(response)
+        wireMock.stubFor(mappingBuilder)
     }
 
     private interface FlushableProcessorFactory : ProcessorFactory {

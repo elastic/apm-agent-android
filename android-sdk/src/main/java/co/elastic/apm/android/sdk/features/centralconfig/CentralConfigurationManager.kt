@@ -27,9 +27,11 @@ import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 import org.slf4j.Logger
+import org.stagemonitor.configuration.ConfigurationRegistry
 
 class CentralConfigurationManager private constructor(
     serviceManager: ServiceManager,
+    private val configurationRegistry: ConfigurationRegistry,
     private val centralConfigurationSource: CentralConfigurationSource,
     private val connectivityHolder: ConnectivityHolder
 ) : CentralConfigurationSource.Listener {
@@ -55,6 +57,10 @@ class CentralConfigurationManager private constructor(
                 scheduleDefault()
             }
         }
+    }
+
+    internal fun getCentralConfiguration(): CentralConfiguration {
+        return configurationRegistry.getConfig(CentralConfiguration::class.java)
     }
 
     private fun scheduleDefault() {
@@ -98,8 +104,12 @@ class CentralConfigurationManager private constructor(
                 centralConfigurationConnectivityHolder,
                 systemTimeProvider
             )
+            val registry = ConfigurationRegistry.builder()
+                .addConfigSource(centralConfigurationSource)
+                .addOptionProvider(CentralConfiguration())
             val centralConfigurationManager = CentralConfigurationManager(
                 serviceManager,
+                registry.build(),
                 centralConfigurationSource,
                 centralConfigurationConnectivityHolder
             )
@@ -161,6 +171,6 @@ class CentralConfigurationManager private constructor(
     }
 
     override fun onConfigChange() {
-        TODO("Not yet implemented")
+        configurationRegistry.reloadDynamicConfigurationOptions()
     }
 }

@@ -185,7 +185,11 @@ class ElasticAgent private constructor(
                     systemTimeProvider,
                     serviceName,
                     deploymentEnvironment,
-                    connectivityHolder
+                    connectivityHolder,
+                    Latch.composite(
+                        exporterGateManager.createSpanGateLatch(),
+                        exporterGateManager.createLogRecordLatch()
+                    )
                 )
                 val sessionManager = SessionManager(
                     PreferencesStringCacheHandler(

@@ -22,6 +22,7 @@ import androidx.annotation.WorkerThread
 import co.elastic.apm.android.common.internal.logging.Elog
 import co.elastic.apm.android.sdk.connectivity.ConnectivityConfigurationHolder
 import co.elastic.apm.android.sdk.features.apmserver.ApmServerConnectivityManager
+import co.elastic.apm.android.sdk.features.exportergate.latch.Latch
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import java.io.IOException
@@ -37,6 +38,7 @@ class CentralConfigurationManager private constructor(
 ) : CentralConfigurationSource.Listener {
     private val backgroundWorkService by lazy { serviceManager.getBackgroundWorkService() }
     private val logger: Logger = Elog.getLogger()
+    private var latch: Latch? = null
 
     fun getConnectivityConfiguration(): CentralConfigurationConnectivity {
         return connectivityHolder.get() as CentralConfigurationConnectivity
@@ -48,19 +50,26 @@ class CentralConfigurationManager private constructor(
     }
 
     internal fun initialize() {
-        centralConfigurationSource.initialize()
         backgroundWorkService.submit {
             try {
+                centralConfigurationSource.initialize()
+                openLatch()
                 doPoll()
             } catch (t: Throwable) {
                 logger.error("CentralConfiguration initialization error", t)
                 scheduleDefault()
+            } finally {
+                openLatch()
             }
         }
     }
 
     internal fun getCentralConfiguration(): CentralConfiguration {
         return configurationRegistry.getConfig(CentralConfiguration::class.java)
+    }
+
+    private fun openLatch() {
+        latch?.open()?.also { latch = null }
     }
 
     private fun scheduleDefault() {
@@ -94,7 +103,8 @@ class CentralConfigurationManager private constructor(
             systemTimeProvider: SystemTimeProvider,
             serviceName: String,
             serviceDeployment: String?,
-            connectivityHolder: ApmServerConnectivityManager.ConnectivityHolder
+            connectivityHolder: ApmServerConnectivityManager.ConnectivityHolder,
+            gateLatch: Latch
         ): CentralConfigurationManager {
             val centralConfigurationConnectivityHolder = ConnectivityHolder.fromApmServerConfig(
                 serviceName, serviceDeployment, connectivityHolder
@@ -113,6 +123,7 @@ class CentralConfigurationManager private constructor(
                 centralConfigurationSource,
                 centralConfigurationConnectivityHolder
             )
+            centralConfigurationManager.latch = gateLatch
             centralConfigurationSource.listener = centralConfigurationManager
             return centralConfigurationManager
         }

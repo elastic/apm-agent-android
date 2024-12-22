@@ -369,13 +369,13 @@ class ElasticAgentTest {
         assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
 
-        inMemoryExporters.resetExporters()
-
         // Next: Config with recording set to false
         stubAllHttpResponses {
             withStatus(200)
                 .withBody("""{"recording":"false"}""")
         }
+
+        inMemoryExporters.resetExporters()
 
         takeRequest() // Await for central config response with recording=false
 

@@ -41,19 +41,19 @@ internal class ExporterGateManager(
 ) : ExporterGateQueue.Listener {
     private val spanExporter by lazy { MutableSpanExporter() }
     private val spanGateQueue by lazy {
-        ExporterGateQueue<SpanData>(signalBufferSize, this, SPAN_QUEUE_ID)
+        ExporterGateQueue<SpanData>(signalBufferSize, this, SPAN_QUEUE_ID, "Span")
     }
     private lateinit var delegateSpanExporter: SpanExporter
     private var gateSpanExporter: GateSpanExporter? = null
     private val logRecordExporter by lazy { MutableLogRecordExporter() }
     private val logRecordGateQueue by lazy {
-        ExporterGateQueue<LogRecordData>(signalBufferSize, this, LOG_RECORD_QUEUE_ID)
+        ExporterGateQueue<LogRecordData>(signalBufferSize, this, LOG_RECORD_QUEUE_ID, "Log")
     }
     private lateinit var delegateLogRecordExporter: LogRecordExporter
     private var gateLogRecordExporter: GateLogRecordExporter? = null
     private val metricExporter by lazy { MutableMetricExporter() }
     private val metricGateQueue by lazy {
-        ExporterGateQueue<MetricData>(signalBufferSize, this, METRIC_QUEUE_ID)
+        ExporterGateQueue<MetricData>(signalBufferSize, this, METRIC_QUEUE_ID, "Metric")
     }
     private lateinit var delegateMetricExporter: MetricExporter
     private var gateMetricExporter: GateMetricExporter? = null
@@ -61,9 +61,9 @@ internal class ExporterGateManager(
     private val backgroundWorkService by lazy { serviceManager.getBackgroundWorkService() }
     private val initializationLatch by lazy {
         Latch.composite(
-            spanGateQueue.createLatch(SPAN_LATCH_NAME_FORMAT.format("Initialization")),
-            logRecordGateQueue.createLatch(LOG_LATCH_NAME_FORMAT.format("Initialization")),
-            metricGateQueue.createLatch(METRIC_LATCH_NAME_FORMAT.format("Initialization"))
+            spanGateQueue.createLatch("Initialization"),
+            logRecordGateQueue.createLatch("Initialization"),
+            metricGateQueue.createLatch("Initialization")
         )
     }
     private val closedGates = AtomicInteger(3)
@@ -72,9 +72,6 @@ internal class ExporterGateManager(
         private const val SPAN_QUEUE_ID = 1
         private const val LOG_RECORD_QUEUE_ID = 2
         private const val METRIC_QUEUE_ID = 3
-        private const val SPAN_LATCH_NAME_FORMAT = "[Span] %s"
-        private const val LOG_LATCH_NAME_FORMAT = "[Log] %s"
-        private const val METRIC_LATCH_NAME_FORMAT = "[Metric] %s"
     }
 
     internal fun initialize() {
@@ -96,7 +93,7 @@ internal class ExporterGateManager(
         if (!enableGateLatch) {
             return Latch.noop()
         }
-        return spanGateQueue.createLatch(SPAN_LATCH_NAME_FORMAT.format(name))
+        return spanGateQueue.createLatch(name)
     }
 
     internal fun setSpanQueueProcessingInterceptor(interceptor: Interceptor<SpanData>) {
@@ -114,7 +111,7 @@ internal class ExporterGateManager(
         if (!enableGateLatch) {
             return Latch.noop()
         }
-        return logRecordGateQueue.createLatch(LOG_LATCH_NAME_FORMAT.format(name))
+        return logRecordGateQueue.createLatch(name)
     }
 
     internal fun setLogRecordQueueProcessingInterceptor(interceptor: Interceptor<LogRecordData>) {
@@ -132,7 +129,7 @@ internal class ExporterGateManager(
         if (!enableGateLatch) {
             return Latch.noop()
         }
-        return metricGateQueue.createLatch(METRIC_LATCH_NAME_FORMAT.format(name))
+        return metricGateQueue.createLatch(name)
     }
 
     internal fun setMetricQueueProcessingInterceptor(interceptor: Interceptor<MetricData>) {
@@ -178,19 +175,19 @@ internal class ExporterGateManager(
 
     private fun onSpanQueueStarted() {
         backgroundWorkService.scheduleOnce(gateLatchTimeout) {
-            spanGateQueue.openGate()
+            spanGateQueue.forceOpenGate("Timeout")
         }
     }
 
     private fun onLogRecordQueueStarted() {
         backgroundWorkService.scheduleOnce(gateLatchTimeout) {
-            logRecordGateQueue.openGate()
+            logRecordGateQueue.forceOpenGate("Timeout")
         }
     }
 
     private fun onMetricQueueStarted() {
         backgroundWorkService.scheduleOnce(gateLatchTimeout) {
-            metricGateQueue.openGate()
+            metricGateQueue.forceOpenGate("Timeout")
         }
     }
 

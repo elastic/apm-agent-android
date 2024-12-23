@@ -18,6 +18,7 @@
  */
 package co.elastic.apm.android.sdk.features.exportergate
 
+import co.elastic.apm.android.common.internal.logging.Elog
 import co.elastic.apm.android.sdk.features.exportergate.latch.Latch
 import co.elastic.apm.android.sdk.tools.interceptor.Interceptor
 import io.opentelemetry.sdk.common.CompletableResultCode
@@ -29,7 +30,8 @@ import java.util.concurrent.atomic.AtomicInteger
 internal class ExporterGateQueue<DATA>(
     capacity: Int,
     private val listener: Listener,
-    private val id: Int
+    private val id: Int,
+    private val gateName: String
 ) {
     private val queue by lazy { LinkedBlockingQueue<DATA>(capacity) }
     private val overflow by lazy { mutableListOf<DATA>() }
@@ -56,7 +58,7 @@ internal class ExporterGateQueue<DATA>(
             }
 
             override fun toString(): String {
-                return "Latch: $name"
+                return "[$gateName] Latch: $name"
             }
         }
         openLatches.add(latch)
@@ -79,7 +81,7 @@ internal class ExporterGateQueue<DATA>(
             }
         }
         if (surpassedQueueSize) {
-            openGate()
+            forceOpenGate("Queue overflow")
         }
         return CompletableResultCode.ofSuccess()
     }
@@ -100,7 +102,20 @@ internal class ExporterGateQueue<DATA>(
         return items
     }
 
-    internal fun openGate() {
+    internal fun forceOpenGate(reason: String) {
+        Elog.getLogger().warn(
+            "Gate {} opened with {} pending latches because: {}",
+            gateName,
+            pendingLatches.get(),
+            reason
+        )
+        Elog.getLogger().debug("Pending latches: {}", openLatches)
+        pendingLatches.set(0)
+        openLatches.clear()
+        openGate()
+    }
+
+    private fun openGate() {
         if (open.compareAndSet(false, true)) {
             listener.onOpen(id)
         }

@@ -115,6 +115,7 @@ class ElasticAgent private constructor(
             Interceptor.noop()
         internal var internalSignalBufferSize = 1000
         internal var internalEnableGateLatch = true
+        internal var internalWaitForClock = true
 
         fun setUrl(value: String) = apply {
             url = value
@@ -174,10 +175,12 @@ class ElasticAgent private constructor(
                     serviceManager,
                     systemTimeProvider,
                     internalSntpClient ?: SntpClient.create(),
-                    Latch.composite(
-                        exporterGateManager.createSpanGateLatch(),
-                        exporterGateManager.createLogRecordLatch()
-                    )
+                    if (internalWaitForClock) {
+                        Latch.composite(
+                            exporterGateManager.createSpanGateLatch(),
+                            exporterGateManager.createLogRecordLatch()
+                        )
+                    } else Latch.noop()
                 )
                 val centralConfigurationManager = CentralConfigurationManager.create(
                     serviceManager,

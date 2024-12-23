@@ -357,6 +357,7 @@ class ElasticAgentTest {
         agent = inMemoryAgentBuilder(wireMock.url("/"))
             .apply {
                 internalEnableGateLatch = true
+                internalWaitForClock = false
             }
             .build()
 
@@ -365,6 +366,8 @@ class ElasticAgentTest {
         sendSpan()
         sendLog()
         sendMetric()
+
+        awaitForOpenGates()
 
         assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
@@ -394,6 +397,7 @@ class ElasticAgentTest {
         agent = inMemoryAgentBuilder(wireMock.url("/"))
             .apply {
                 internalEnableGateLatch = true
+                internalWaitForClock = false
             }
             .build()
 
@@ -401,9 +405,7 @@ class ElasticAgentTest {
         sendLog()
         sendMetric()
 
-        await.atMost(Duration.ofSeconds(1)).until {
-            agent.getExporterGateManager().allGatesAreOpen()
-        }
+        awaitForOpenGates()
 
         assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
         assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()
@@ -1097,6 +1099,12 @@ class ElasticAgentTest {
         responseVisitor(response)
         mappingBuilder.willReturn(response)
         wireMock.stubFor(mappingBuilder)
+    }
+
+    private fun awaitForOpenGates(maxSecondsToWait: Int = 1) {
+        await.atMost(Duration.ofSeconds(maxSecondsToWait.toLong())).until {
+            agent.getExporterGateManager().allGatesAreOpen()
+        }
     }
 
     private interface FlushableProcessorFactory : ProcessorFactory {

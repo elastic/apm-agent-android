@@ -421,7 +421,7 @@ class ElasticAgentTest {
         agent = inMemoryAgentBuilder(diskBufferingConfiguration = configuration)
             .build()
 
-        awaitForOpenGates(1)
+        awaitForOpenGates()
 
         sendSpan()
         sendLog()
@@ -718,8 +718,6 @@ class ElasticAgentTest {
             }
             .build()
 
-        awaitForOpenGates()
-
         sendSpan()
         sendLog()
         sendMetric()
@@ -844,8 +842,6 @@ class ElasticAgentTest {
             }
             .build()
 
-        awaitForOpenGates()
-
         sendSpan()
         sendLog()
         sendMetric()
@@ -900,8 +896,6 @@ class ElasticAgentTest {
             sendSpan()
             sendLog()
         }
-
-        awaitForOpenGates()
 
         // Spans and logs aren't exported yet.
         assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()

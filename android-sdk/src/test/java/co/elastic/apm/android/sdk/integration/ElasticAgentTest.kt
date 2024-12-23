@@ -356,7 +356,6 @@ class ElasticAgentTest {
 
         agent = inMemoryAgentBuilder(wireMock.url("/"))
             .apply {
-                internalEnableGateLatch = true
                 internalWaitForClock = false
             }
             .build()
@@ -383,6 +382,8 @@ class ElasticAgentTest {
 
         takeRequest() // Await for central config response with recording=false
 
+        awaitForOpenGates()
+
         sendSpan()
         sendLog()
         sendMetric()
@@ -396,7 +397,6 @@ class ElasticAgentTest {
         stubAllHttpResponses { withStatus(500) }
         agent = inMemoryAgentBuilder(wireMock.url("/"))
             .apply {
-                internalEnableGateLatch = true
                 internalWaitForClock = false
             }
             .build()
@@ -420,10 +420,7 @@ class ElasticAgentTest {
         agent = inMemoryAgentBuilder(diskBufferingConfiguration = configuration)
             .build()
 
-        val waitTimeMillis = awaitAndTrackTimeMillis {
-            agent.getExporterGateManager().allGatesAreOpen()
-        }
-        assertThat(waitTimeMillis).isLessThan(1000)
+        awaitForOpenGates(1)
 
         sendSpan()
         sendLog()
@@ -433,8 +430,6 @@ class ElasticAgentTest {
         assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
         assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()
         assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
-
-        agent.close()
 
         // Re-init
         Thread.sleep(1000)
@@ -499,6 +494,8 @@ class ElasticAgentTest {
                 }
                 .build()
 
+        awaitForOpenGates()
+
         sendSpan()
         sendLog()
         sendMetric()
@@ -518,6 +515,8 @@ class ElasticAgentTest {
         sendSpan()
         sendLog()
         sendMetric()
+
+        awaitForOpenGates()
 
         // The signals should have gotten exported right away.
         assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
@@ -714,9 +713,11 @@ class ElasticAgentTest {
             .apply {
                 internalSntpClient = sntpClient
                 internalSystemTimeProvider = systemTimeProvider
-                internalEnableGateLatch = true
+                internalWaitForClock = true
             }
             .build()
+
+        awaitForOpenGates()
 
         sendSpan()
         sendLog()
@@ -791,7 +792,7 @@ class ElasticAgentTest {
             .apply {
                 internalSntpClient = sntpClient
                 internalSystemTimeProvider = systemTimeProvider
-                internalEnableGateLatch = true
+                internalWaitForClock = true
             }
             .build()
 
@@ -838,9 +839,11 @@ class ElasticAgentTest {
             .apply {
                 internalSntpClient = sntpClient
                 internalSystemTimeProvider = systemTimeProvider
-                internalEnableGateLatch = true
+                internalWaitForClock = true
             }
             .build()
+
+        awaitForOpenGates()
 
         sendSpan()
         sendLog()
@@ -888,7 +891,7 @@ class ElasticAgentTest {
                 internalSntpClient = sntpClient
                 internalSystemTimeProvider = systemTimeProvider
                 internalSignalBufferSize = bufferSize
-                internalEnableGateLatch = true
+                internalWaitForClock = true
             }
             .build()
 
@@ -896,6 +899,8 @@ class ElasticAgentTest {
             sendSpan()
             sendLog()
         }
+
+        awaitForOpenGates()
 
         // Spans and logs aren't exported yet.
         assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
@@ -1027,7 +1032,7 @@ class ElasticAgentTest {
             .setDiskBufferingConfiguration(diskBufferingConfiguration)
             .setUrl(url)
             .apply {
-                internalEnableGateLatch = false
+                internalWaitForClock = false
             }
     }
 

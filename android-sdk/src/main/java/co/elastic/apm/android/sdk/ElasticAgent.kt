@@ -114,7 +114,6 @@ class ElasticAgent private constructor(
         internal var internalServiceManagerInterceptor: Interceptor<ServiceManager> =
             Interceptor.noop()
         internal var internalSignalBufferSize = 1000
-        internal var internalEnableGateLatch = true
         internal var internalWaitForClock = true
 
         fun setUrl(value: String) = apply {
@@ -159,8 +158,7 @@ class ElasticAgent private constructor(
                 val exporterProvider = ApmServerExporterProvider.create(connectivityHolder)
                 val exporterGateManager = ExporterGateManager(
                     serviceManager,
-                    signalBufferSize = internalSignalBufferSize,
-                    enableGateLatch = internalEnableGateLatch
+                    signalBufferSize = internalSignalBufferSize
                 )
                 val diskBufferingManager =
                     DiskBufferingManager(

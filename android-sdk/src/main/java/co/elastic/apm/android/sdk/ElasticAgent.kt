@@ -27,6 +27,7 @@ import co.elastic.apm.android.sdk.features.apmserver.ApmServerConnectivityManage
 import co.elastic.apm.android.sdk.features.apmserver.ApmServerExporterProvider
 import co.elastic.apm.android.sdk.features.centralconfig.CentralConfigurationManager
 import co.elastic.apm.android.sdk.features.clock.ElasticClockManager
+import co.elastic.apm.android.sdk.features.conditionaldrop.ConditionalDropManager
 import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingManager
 import co.elastic.apm.android.sdk.features.exportergate.ExporterGateManager
@@ -222,6 +223,23 @@ class ElasticAgent private constructor(
                     elasticClockManager.getExportGateManager()
                         .getLogRecordGateProcessingInterceptor()
                 )
+
+                // The conditional drop interceptors must be added before the exporter gate ones.
+                val conditionalDropManager = ConditionalDropManager()
+                conditionalDropManager.dropWhen {
+                    !centralConfigurationManager.getCentralConfiguration().isRecording()
+                }
+                addSpanExporterInterceptor {
+                    conditionalDropManager.createConditionalDropSpanExporter(it)
+                }
+                addLogRecordExporterInterceptor {
+                    conditionalDropManager.createConditionalDropLogRecordExporter(it)
+                }
+                addMetricExporterInterceptor {
+                    conditionalDropManager.createConditionalDropMetricExporter(it)
+                }
+
+                // The exporter gate interceptors must be the last ones added.
                 addSpanExporterInterceptor {
                     exporterGateManager.createSpanExporterGate(it)
                 }

@@ -18,28 +18,26 @@
  */
 package co.elastic.apm.android.sdk.features.conditionaldrop
 
-import io.opentelemetry.sdk.common.CompletableResultCode
-import io.opentelemetry.sdk.logs.data.LogRecordData
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
+import io.opentelemetry.sdk.metrics.export.MetricExporter
+import io.opentelemetry.sdk.trace.export.SpanExporter
 import java.util.function.Predicate
 
-internal class ConditionalDropLogRecordExporter(
-    private val delegate: LogRecordExporter,
-    private val drop: Predicate<SignalType>
-) : LogRecordExporter {
+internal class ConditionalDropManager(private var dropCondition: Predicate<SignalType>? = null) {
 
-    override fun export(logs: MutableCollection<LogRecordData>): CompletableResultCode {
-        if (drop.test(SignalType.LOG)) {
-            return CompletableResultCode.ofSuccess()
-        }
-        return delegate.export(logs)
+    fun dropWhen(condition: Predicate<SignalType>) {
+        dropCondition = dropCondition?.or(condition) ?: condition
     }
 
-    override fun flush(): CompletableResultCode {
-        return delegate.flush()
+    fun createConditionalDropSpanExporter(delegate: SpanExporter): SpanExporter {
+        return dropCondition?.let { ConditionalDropSpanExporter(delegate, it) } ?: delegate
     }
 
-    override fun shutdown(): CompletableResultCode {
-        return delegate.shutdown()
+    fun createConditionalDropLogRecordExporter(delegate: LogRecordExporter): LogRecordExporter {
+        return dropCondition?.let { ConditionalDropLogRecordExporter(delegate, it) } ?: delegate
+    }
+
+    fun createConditionalDropMetricExporter(delegate: MetricExporter): MetricExporter {
+        return dropCondition?.let { ConditionalDropMetricExporter(delegate, it) } ?: delegate
     }
 }

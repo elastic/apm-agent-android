@@ -98,6 +98,7 @@ class ElasticAgentTest {
     @After
     fun tearDown() {
         inMemoryExporters.reset()
+        agent.close()
         if (wireMock.isRunning) {
             wireMock.stop()
         }
@@ -147,8 +148,6 @@ class ElasticAgentTest {
         assertThat(
             metricsRequest.headers.getHeader("Extra-header").firstValue()
         ).isEqualTo("extra value")
-
-        agent.close()
     }
 
     @Test
@@ -238,8 +237,6 @@ class ElasticAgentTest {
         assertThat(
             metricsRequest2.headers.getHeader("Custom-Header").firstValue()
         ).isEqualTo("custom value")
-
-        agent.close()
     }
 
     @Test
@@ -342,12 +339,10 @@ class ElasticAgentTest {
         assertThat(
             metricsRequest2.headers.getHeader("Custom-Header").firstValue()
         ).isEqualTo("custom value")
-
-        agent.close()
     }
 
     @Test
-    fun `Validate central configuration changes`() {
+    fun `Validate central configuration behavior`() {
         // First: Empty config
         stubAllHttpResponses {
             withStatus(200)
@@ -355,9 +350,7 @@ class ElasticAgentTest {
                 .withHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
         }
 
-        agent = inMemoryAgentBuilder(
-            wireMock.url("/")
-        ).build()
+        agent = inMemoryAgentBuilder(wireMock.url("/")).build()
 
         takeRequest() // Await for empty central config response
 
@@ -382,6 +375,24 @@ class ElasticAgentTest {
         sendSpan()
         sendLog()
         sendMetric()
+
+        assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
+
+        // Ensure that the config was persisted
+        agent.close()
+        inMemoryExporters.reset()
+        stubAllHttpResponses { withStatus(500) }
+        agent = inMemoryAgentBuilder(wireMock.url("/")).build()
+
+        sendSpan()
+        sendLog()
+        sendMetric()
+
+        await.atMost(Duration.ofSeconds(1)).until {
+            agent.getExporterGateManager().allGatesAreOpen()
+        }
 
         assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
         assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()
@@ -662,8 +673,6 @@ class ElasticAgentTest {
         assertThat(inMemoryExporters.getFinishedSpans().first()).startsAt(
             currentTime.get() * 1_000_000
         )
-
-        agent.close()
     }
 
     private fun triggerRebootBroadcast() {

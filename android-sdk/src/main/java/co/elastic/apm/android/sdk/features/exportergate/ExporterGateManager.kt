@@ -19,12 +19,15 @@
 package co.elastic.apm.android.sdk.features.exportergate
 
 import co.elastic.apm.android.sdk.exporters.configurable.MutableLogRecordExporter
+import co.elastic.apm.android.sdk.exporters.configurable.MutableMetricExporter
 import co.elastic.apm.android.sdk.exporters.configurable.MutableSpanExporter
 import co.elastic.apm.android.sdk.features.exportergate.latch.Latch
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import co.elastic.apm.android.sdk.tools.interceptor.Interceptor
 import io.opentelemetry.sdk.logs.data.LogRecordData
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
+import io.opentelemetry.sdk.metrics.data.MetricData
+import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.trace.data.SpanData
 import io.opentelemetry.sdk.trace.export.SpanExporter
 import java.util.concurrent.TimeUnit
@@ -48,18 +51,27 @@ internal class ExporterGateManager(
     }
     private lateinit var delegateLogRecordExporter: LogRecordExporter
     private var gateLogRecordExporter: GateLogRecordExporter? = null
+    private val metricExporter by lazy { MutableMetricExporter() }
+    private val metricGateQueue by lazy {
+        ExporterGateQueue<MetricData>(signalBufferSize, this, METRIC_QUEUE_ID)
+    }
+    private lateinit var delegateMetricExporter: MetricExporter
+    private var gateMetricExporter: GateMetricExporter? = null
+
     private val backgroundWorkService by lazy { serviceManager.getBackgroundWorkService() }
     private val initializationLatch by lazy {
         Latch.composite(
             spanGateQueue.createLatch(),
-            logRecordGateQueue.createLatch()
+            logRecordGateQueue.createLatch(),
+            metricGateQueue.createLatch()
         )
     }
-    private val closedGates = AtomicInteger(2)
+    private val closedGates = AtomicInteger(3)
 
     companion object {
         private const val SPAN_QUEUE_ID = 1
         private const val LOG_RECORD_QUEUE_ID = 2
+        private const val METRIC_QUEUE_ID = 3
     }
 
     internal fun initialize() {
@@ -106,6 +118,24 @@ internal class ExporterGateManager(
         logRecordGateQueue.setQueueProcessingInterceptor(interceptor)
     }
 
+    internal fun createMetricExporterGate(delegate: MetricExporter): MetricExporter {
+        delegateMetricExporter = delegate
+        gateMetricExporter = GateMetricExporter(delegateMetricExporter, metricGateQueue)
+        metricExporter.setDelegate(gateMetricExporter)
+        return metricExporter
+    }
+
+    internal fun createMetricGateLatch(): Latch {
+        if (!enableGateLatch) {
+            return Latch.noop()
+        }
+        return metricGateQueue.createLatch()
+    }
+
+    internal fun setMetricQueueProcessingInterceptor(interceptor: Interceptor<MetricData>) {
+        metricGateQueue.setQueueProcessingInterceptor(interceptor)
+    }
+
     private fun onSpanGateOpen() {
         spanExporter.setDelegate(delegateSpanExporter)
         if (spanGateQueue.hasAvailableItems()) {
@@ -128,6 +158,17 @@ internal class ExporterGateManager(
         closedGates.decrementAndGet()
     }
 
+    private fun onMetricGateOpen() {
+        metricExporter.setDelegate(delegateMetricExporter)
+        if (metricGateQueue.hasAvailableItems()) {
+            backgroundWorkService.submit {
+                delegateMetricExporter.export(metricGateQueue.getProcessedItems())
+                gateMetricExporter = null
+            }
+        }
+        closedGates.decrementAndGet()
+    }
+
     private fun onSpanQueueStarted() {
         backgroundWorkService.scheduleOnce(gateLatchTimeout) {
             spanGateQueue.openGate()
@@ -140,10 +181,17 @@ internal class ExporterGateManager(
         }
     }
 
+    private fun onMetricQueueStarted() {
+        backgroundWorkService.scheduleOnce(gateLatchTimeout) {
+            metricGateQueue.openGate()
+        }
+    }
+
     override fun onOpen(id: Int) {
         when (id) {
             SPAN_QUEUE_ID -> onSpanGateOpen()
             LOG_RECORD_QUEUE_ID -> onLogRecordGateOpen()
+            METRIC_QUEUE_ID -> onMetricGateOpen()
             else -> throw IllegalArgumentException()
         }
     }
@@ -152,6 +200,7 @@ internal class ExporterGateManager(
         when (id) {
             SPAN_QUEUE_ID -> onSpanQueueStarted()
             LOG_RECORD_QUEUE_ID -> onLogRecordQueueStarted()
+            METRIC_QUEUE_ID -> onMetricQueueStarted()
             else -> throw IllegalArgumentException()
         }
     }

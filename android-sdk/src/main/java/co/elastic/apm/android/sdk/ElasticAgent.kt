@@ -170,9 +170,6 @@ class ElasticAgent private constructor(
                             exporterGateManager.createMetricGateLatch()
                         )
                     )
-                addSpanExporterInterceptor(diskBufferingManager::interceptSpanExporter)
-                addLogRecordExporterInterceptor(diskBufferingManager::interceptLogRecordExporter)
-                addMetricExporterInterceptor(diskBufferingManager::interceptMetricExporter)
                 val elasticClockManager = ElasticClockManager.create(
                     serviceManager,
                     systemTimeProvider,
@@ -231,7 +228,11 @@ class ElasticAgent private constructor(
                     !centralConfigurationManager.getCentralConfiguration().isRecording()
                 }
 
-                addTheLastInterceptors(conditionalDropManager, exporterGateManager)
+                addInternalInterceptors(
+                    diskBufferingManager,
+                    conditionalDropManager,
+                    exporterGateManager
+                )
                 setClock(elasticClockManager.getClock())
                 setExporterProvider(internalExporterProviderInterceptor.intercept(exporterProvider))
                 setSessionProvider(sessionManager)
@@ -248,10 +249,18 @@ class ElasticAgent private constructor(
             } ?: throw NullPointerException("The url must be set.")
         }
 
-        private fun addTheLastInterceptors(
+        private fun addDiskBufferingInterceptors(diskBufferingManager: DiskBufferingManager) {
+            addSpanExporterInterceptor(diskBufferingManager::interceptSpanExporter)
+            addLogRecordExporterInterceptor(diskBufferingManager::interceptLogRecordExporter)
+            addMetricExporterInterceptor(diskBufferingManager::interceptMetricExporter)
+        }
+
+        private fun addInternalInterceptors(
+            diskBufferingManager: DiskBufferingManager,
             conditionalDropManager: ConditionalDropManager,
             exporterGateManager: ExporterGateManager
         ) {
+            addDiskBufferingInterceptors(diskBufferingManager)
             addConditionalDropInterceptors(conditionalDropManager)
             addExporterGateInterceptors(exporterGateManager)
         }

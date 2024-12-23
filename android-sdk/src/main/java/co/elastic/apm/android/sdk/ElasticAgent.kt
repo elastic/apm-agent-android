@@ -249,12 +249,6 @@ class ElasticAgent private constructor(
             } ?: throw NullPointerException("The url must be set.")
         }
 
-        private fun addDiskBufferingInterceptors(diskBufferingManager: DiskBufferingManager) {
-            addSpanExporterInterceptor(diskBufferingManager::interceptSpanExporter)
-            addLogRecordExporterInterceptor(diskBufferingManager::interceptLogRecordExporter)
-            addMetricExporterInterceptor(diskBufferingManager::interceptMetricExporter)
-        }
-
         private fun addInternalInterceptors(
             diskBufferingManager: DiskBufferingManager,
             conditionalDropManager: ConditionalDropManager,
@@ -263,6 +257,12 @@ class ElasticAgent private constructor(
             addDiskBufferingInterceptors(diskBufferingManager)
             addConditionalDropInterceptors(conditionalDropManager)
             addExporterGateInterceptors(exporterGateManager)
+        }
+
+        private fun addDiskBufferingInterceptors(diskBufferingManager: DiskBufferingManager) {
+            addSpanExporterInterceptor(diskBufferingManager::interceptSpanExporter)
+            addLogRecordExporterInterceptor(diskBufferingManager::interceptLogRecordExporter)
+            addMetricExporterInterceptor(diskBufferingManager::interceptMetricExporter)
         }
 
         private fun addConditionalDropInterceptors(conditionalDropManager: ConditionalDropManager) {

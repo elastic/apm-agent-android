@@ -166,7 +166,8 @@ class ElasticAgent private constructor(
                         serviceManager, diskBufferingConfiguration,
                         Latch.composite(
                             exporterGateManager.createSpanGateLatch(),
-                            exporterGateManager.createLogRecordLatch()
+                            exporterGateManager.createLogRecordLatch(),
+                            exporterGateManager.createMetricGateLatch()
                         )
                     )
                 addSpanExporterInterceptor(diskBufferingManager::interceptSpanExporter)
@@ -189,7 +190,8 @@ class ElasticAgent private constructor(
                     connectivityHolder,
                     Latch.composite(
                         exporterGateManager.createSpanGateLatch(),
-                        exporterGateManager.createLogRecordLatch()
+                        exporterGateManager.createLogRecordLatch(),
+                        exporterGateManager.createMetricGateLatch()
                     )
                 )
                 val sessionManager = SessionManager(
@@ -272,6 +274,9 @@ class ElasticAgent private constructor(
             }
             addLogRecordExporterInterceptor {
                 exporterGateManager.createLogRecordExporterGate(it)
+            }
+            addMetricExporterInterceptor {
+                exporterGateManager.createMetricExporterGate(it)
             }
         }
     }

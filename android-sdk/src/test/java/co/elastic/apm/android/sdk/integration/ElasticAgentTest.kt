@@ -1150,18 +1150,18 @@ class ElasticAgentTest {
     private class InMemoryExporterProvider : ExporterProvider {
         private var spanExporter = AtomicReference(InMemorySpanExporter.create())
         private var logRecordExporter = AtomicReference(InMemoryLogRecordExporter.create())
-        private var mericExporter = AtomicReference(InMemoryMetricExporter.create())
+        private var metricExporter = AtomicReference(InMemoryMetricExporter.create())
 
         fun reset() {
             spanExporter.set(InMemorySpanExporter.create())
             logRecordExporter.set(InMemoryLogRecordExporter.create())
-            mericExporter.set(InMemoryMetricExporter.create())
+            metricExporter.set(InMemoryMetricExporter.create())
         }
 
         fun resetExporters() {
             spanExporter.get().reset()
             logRecordExporter.get().reset()
-            mericExporter.get().reset()
+            metricExporter.get().reset()
         }
 
         fun getFinishedSpans(): List<SpanData> {
@@ -1173,7 +1173,7 @@ class ElasticAgentTest {
         }
 
         fun getFinishedMetrics(): List<MetricData> {
-            return mericExporter.get().finishedMetricItems
+            return metricExporter.get().finishedMetricItems
         }
 
         override fun getSpanExporter(): SpanExporter? {
@@ -1185,7 +1185,7 @@ class ElasticAgentTest {
         }
 
         override fun getMetricExporter(): MetricExporter? {
-            return mericExporter.get()
+            return metricExporter.get()
         }
     }
 }

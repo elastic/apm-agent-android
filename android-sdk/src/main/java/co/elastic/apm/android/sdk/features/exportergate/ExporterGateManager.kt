@@ -61,9 +61,9 @@ internal class ExporterGateManager(
     private val backgroundWorkService by lazy { serviceManager.getBackgroundWorkService() }
     private val initializationLatch by lazy {
         Latch.composite(
-            spanGateQueue.createLatch(),
-            logRecordGateQueue.createLatch(),
-            metricGateQueue.createLatch()
+            spanGateQueue.createLatch(SPAN_LATCH_NAME_FORMAT.format("Initialization")),
+            logRecordGateQueue.createLatch(LOG_LATCH_NAME_FORMAT.format("Initialization")),
+            metricGateQueue.createLatch(METRIC_LATCH_NAME_FORMAT.format("Initialization"))
         )
     }
     private val closedGates = AtomicInteger(3)
@@ -72,6 +72,9 @@ internal class ExporterGateManager(
         private const val SPAN_QUEUE_ID = 1
         private const val LOG_RECORD_QUEUE_ID = 2
         private const val METRIC_QUEUE_ID = 3
+        private const val SPAN_LATCH_NAME_FORMAT = "[Span] %s"
+        private const val LOG_LATCH_NAME_FORMAT = "[Log] %s"
+        private const val METRIC_LATCH_NAME_FORMAT = "[Metric] %s"
     }
 
     internal fun initialize() {
@@ -89,11 +92,11 @@ internal class ExporterGateManager(
         return spanExporter
     }
 
-    internal fun createSpanGateLatch(): Latch {
+    internal fun createSpanGateLatch(name: String): Latch {
         if (!enableGateLatch) {
             return Latch.noop()
         }
-        return spanGateQueue.createLatch()
+        return spanGateQueue.createLatch(SPAN_LATCH_NAME_FORMAT.format(name))
     }
 
     internal fun setSpanQueueProcessingInterceptor(interceptor: Interceptor<SpanData>) {
@@ -107,11 +110,11 @@ internal class ExporterGateManager(
         return logRecordExporter
     }
 
-    internal fun createLogRecordLatch(): Latch {
+    internal fun createLogRecordLatch(name: String): Latch {
         if (!enableGateLatch) {
             return Latch.noop()
         }
-        return logRecordGateQueue.createLatch()
+        return logRecordGateQueue.createLatch(LOG_LATCH_NAME_FORMAT.format(name))
     }
 
     internal fun setLogRecordQueueProcessingInterceptor(interceptor: Interceptor<LogRecordData>) {
@@ -125,15 +128,19 @@ internal class ExporterGateManager(
         return metricExporter
     }
 
-    internal fun createMetricGateLatch(): Latch {
+    internal fun createMetricGateLatch(name: String): Latch {
         if (!enableGateLatch) {
             return Latch.noop()
         }
-        return metricGateQueue.createLatch()
+        return metricGateQueue.createLatch(METRIC_LATCH_NAME_FORMAT.format(name))
     }
 
     internal fun setMetricQueueProcessingInterceptor(interceptor: Interceptor<MetricData>) {
         metricGateQueue.setQueueProcessingInterceptor(interceptor)
+    }
+
+    internal fun getAllOpenLatches(): List<Latch> {
+        return spanGateQueue.getOpenLatches() + logRecordGateQueue.getOpenLatches() + metricGateQueue.getOpenLatches()
     }
 
     private fun onSpanGateOpen() {

@@ -21,6 +21,7 @@ package co.elastic.apm.android.sdk.features.exportergate
 import co.elastic.apm.android.sdk.features.exportergate.latch.Latch
 import co.elastic.apm.android.sdk.tools.interceptor.Interceptor
 import io.opentelemetry.sdk.common.CompletableResultCode
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
@@ -32,26 +33,34 @@ internal class ExporterGateQueue<DATA>(
 ) {
     private val queue by lazy { LinkedBlockingQueue<DATA>(capacity) }
     private val overflow by lazy { mutableListOf<DATA>() }
+    private val openLatches by lazy { CopyOnWriteArrayList<Latch>() }
     private val pendingLatches = AtomicInteger(0)
     private val open = AtomicBoolean(true)
     private val started = AtomicBoolean(false)
     private var queuedInterceptor: Interceptor<DATA> = Interceptor.noop()
 
-    fun createLatch(): Latch {
+    fun createLatch(name: String): Latch {
         open.compareAndSet(true, false)
         pendingLatches.incrementAndGet()
-        return object : Latch {
+        val latch = object : Latch {
             private val opened = AtomicBoolean(false)
 
             override fun open() {
                 if (opened.compareAndSet(false, true)) {
+                    openLatches.remove(this)
                     val size = pendingLatches.decrementAndGet()
                     if (size == 0) {
                         openGate()
                     }
                 }
             }
+
+            override fun toString(): String {
+                return "Latch: $name"
+            }
         }
+        openLatches.add(latch)
+        return latch
     }
 
     fun setQueueProcessingInterceptor(interceptor: Interceptor<DATA>) {
@@ -95,6 +104,10 @@ internal class ExporterGateQueue<DATA>(
         if (open.compareAndSet(false, true)) {
             listener.onOpen(id)
         }
+    }
+
+    internal fun getOpenLatches(): List<Latch> {
+        return openLatches
     }
 
     interface Listener {

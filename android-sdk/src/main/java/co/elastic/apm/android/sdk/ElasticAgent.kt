@@ -164,9 +164,9 @@ class ElasticAgent private constructor(
                     DiskBufferingManager(
                         serviceManager, diskBufferingConfiguration,
                         Latch.composite(
-                            exporterGateManager.createSpanGateLatch(),
-                            exporterGateManager.createLogRecordLatch(),
-                            exporterGateManager.createMetricGateLatch()
+                            exporterGateManager.createSpanGateLatch("Disk buffering"),
+                            exporterGateManager.createLogRecordLatch("Disk buffering"),
+                            exporterGateManager.createMetricGateLatch("Disk buffering")
                         )
                     )
                 val elasticClockManager = ElasticClockManager.create(
@@ -175,8 +175,8 @@ class ElasticAgent private constructor(
                     internalSntpClient ?: SntpClient.create(),
                     if (internalWaitForClock) {
                         Latch.composite(
-                            exporterGateManager.createSpanGateLatch(),
-                            exporterGateManager.createLogRecordLatch()
+                            exporterGateManager.createSpanGateLatch("Clock"),
+                            exporterGateManager.createLogRecordLatch("Clock")
                         )
                     } else Latch.noop()
                 )
@@ -187,9 +187,9 @@ class ElasticAgent private constructor(
                     deploymentEnvironment,
                     connectivityHolder,
                     Latch.composite(
-                        exporterGateManager.createSpanGateLatch(),
-                        exporterGateManager.createLogRecordLatch(),
-                        exporterGateManager.createMetricGateLatch()
+                        exporterGateManager.createSpanGateLatch("Central configuration"),
+                        exporterGateManager.createLogRecordLatch("Central configuration"),
+                        exporterGateManager.createMetricGateLatch("Central configuration")
                     )
                 )
                 val sessionManager = SessionManager(

@@ -70,6 +70,7 @@ import java.util.UUID
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
+import org.awaitility.core.ConditionTimeoutException
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
@@ -1107,8 +1108,17 @@ class ElasticAgentTest {
     }
 
     private fun awaitForOpenGates(maxSecondsToWait: Int = 1) {
-        await.atMost(Duration.ofSeconds(maxSecondsToWait.toLong())).until {
-            agent.getExporterGateManager().allGatesAreOpen()
+        try {
+            await.atMost(Duration.ofSeconds(maxSecondsToWait.toLong())).until {
+                agent.getExporterGateManager().allGatesAreOpen()
+            }
+        } catch (e: ConditionTimeoutException) {
+            println(
+                "Pending latches: \n${
+                    agent.getExporterGateManager().getAllOpenLatches().joinToString("\n")
+                }"
+            )
+            throw e
         }
     }
 

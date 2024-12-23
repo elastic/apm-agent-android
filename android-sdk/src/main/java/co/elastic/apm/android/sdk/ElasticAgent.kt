@@ -224,28 +224,12 @@ class ElasticAgent private constructor(
                         .getLogRecordGateProcessingInterceptor()
                 )
 
-                // The conditional drop interceptors must be added before the exporter gate ones.
                 val conditionalDropManager = ConditionalDropManager()
                 conditionalDropManager.dropWhen {
                     !centralConfigurationManager.getCentralConfiguration().isRecording()
                 }
-                addSpanExporterInterceptor {
-                    conditionalDropManager.createConditionalDropSpanExporter(it)
-                }
-                addLogRecordExporterInterceptor {
-                    conditionalDropManager.createConditionalDropLogRecordExporter(it)
-                }
-                addMetricExporterInterceptor {
-                    conditionalDropManager.createConditionalDropMetricExporter(it)
-                }
 
-                // The exporter gate interceptors must be the last ones added.
-                addSpanExporterInterceptor {
-                    exporterGateManager.createSpanExporterGate(it)
-                }
-                addLogRecordExporterInterceptor {
-                    exporterGateManager.createLogRecordExporterGate(it)
-                }
+                addTheLastInterceptors(conditionalDropManager, exporterGateManager)
                 setClock(elasticClockManager.getClock())
                 setExporterProvider(internalExporterProviderInterceptor.intercept(exporterProvider))
                 setSessionProvider(sessionManager)
@@ -260,6 +244,35 @@ class ElasticAgent private constructor(
                     centralConfigurationManager
                 )
             } ?: throw NullPointerException("The url must be set.")
+        }
+
+        private fun addTheLastInterceptors(
+            conditionalDropManager: ConditionalDropManager,
+            exporterGateManager: ExporterGateManager
+        ) {
+            addConditionalDropInterceptors(conditionalDropManager)
+            addExporterGateInterceptors(exporterGateManager)
+        }
+
+        private fun addConditionalDropInterceptors(conditionalDropManager: ConditionalDropManager) {
+            addSpanExporterInterceptor {
+                conditionalDropManager.createConditionalDropSpanExporter(it)
+            }
+            addLogRecordExporterInterceptor {
+                conditionalDropManager.createConditionalDropLogRecordExporter(it)
+            }
+            addMetricExporterInterceptor {
+                conditionalDropManager.createConditionalDropMetricExporter(it)
+            }
+        }
+
+        private fun addExporterGateInterceptors(exporterGateManager: ExporterGateManager) {
+            addSpanExporterInterceptor {
+                exporterGateManager.createSpanExporterGate(it)
+            }
+            addLogRecordExporterInterceptor {
+                exporterGateManager.createLogRecordExporterGate(it)
+            }
         }
     }
 }

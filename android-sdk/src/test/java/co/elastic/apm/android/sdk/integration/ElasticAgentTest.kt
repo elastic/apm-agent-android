@@ -97,11 +97,15 @@ class ElasticAgentTest {
 
     @After
     fun tearDown() {
-        inMemoryExporters.reset()
-        agent.close()
+        closeAgent()
         if (wireMock.isRunning) {
             wireMock.stop()
         }
+    }
+
+    private fun closeAgent() {
+        agent.close()
+        inMemoryExporters.reset()
     }
 
     @Test
@@ -350,7 +354,11 @@ class ElasticAgentTest {
                 .withHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
         }
 
-        agent = inMemoryAgentBuilder(wireMock.url("/")).build()
+        agent = inMemoryAgentBuilder(wireMock.url("/"))
+            .apply {
+                internalEnableGateLatch = true
+            }
+            .build()
 
         takeRequest() // Await for empty central config response
 
@@ -381,10 +389,13 @@ class ElasticAgentTest {
         assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
 
         // Ensure that the config was persisted
-        agent.close()
-        inMemoryExporters.reset()
+        closeAgent()
         stubAllHttpResponses { withStatus(500) }
-        agent = inMemoryAgentBuilder(wireMock.url("/")).build()
+        agent = inMemoryAgentBuilder(wireMock.url("/"))
+            .apply {
+                internalEnableGateLatch = true
+            }
+            .build()
 
         sendSpan()
         sendLog()
@@ -425,7 +436,7 @@ class ElasticAgentTest {
 
         // Re-init
         Thread.sleep(1000)
-        inMemoryExporters.reset()
+        closeAgent()
         agent = inMemoryAgentBuilder(diskBufferingConfiguration = configuration)
             .build()
 
@@ -548,8 +559,7 @@ class ElasticAgentTest {
         )
 
         // Reset after almost 24h with unavailable ntp server.
-        agent.close()
-        inMemoryExporters.reset()
+        closeAgent()
         every { sntpClient.fetchTimeOffset(any()) }.returns(
             SntpClient.Response.Error(SntpClient.ErrorType.TRY_LATER)
         )
@@ -581,8 +591,7 @@ class ElasticAgentTest {
         )
 
         // Ensuring cache was cleared.
-        agent.close()
-        inMemoryExporters.reset()
+        closeAgent()
         every { sntpClient.fetchTimeOffset(any()) }.returns(
             SntpClient.Response.Error(SntpClient.ErrorType.TRY_LATER)
         )
@@ -614,8 +623,7 @@ class ElasticAgentTest {
         )
 
         // Reset after 24h with unavailable ntp server.
-        agent.close()
-        inMemoryExporters.reset()
+        closeAgent()
         every { sntpClient.fetchTimeOffset(any()) }.returns(
             SntpClient.Response.Error(SntpClient.ErrorType.TRY_LATER)
         )
@@ -634,8 +642,7 @@ class ElasticAgentTest {
         )
 
         // Restarting with remote time available.
-        agent.close()
-        inMemoryExporters.reset()
+        closeAgent()
         every { sntpClient.fetchTimeOffset(localTimeReference + elapsedTime) }.returns(
             SntpClient.Response.Success(timeOffset)
         )
@@ -654,9 +661,8 @@ class ElasticAgentTest {
         )
 
         // Ensuring cache is cleared on reboot.
-        agent.close()
+        closeAgent()
         triggerRebootBroadcast()
-        inMemoryExporters.reset()
         every { sntpClient.fetchTimeOffset(any()) }.returns(
             SntpClient.Response.Error(SntpClient.ErrorType.TRY_LATER)
         )
@@ -943,9 +949,8 @@ class ElasticAgentTest {
 
         // Reset and verify that the id has been cached for just under the time limit.
         clearMocks(sessionIdGenerator)
-        inMemoryExporters.reset()
+        closeAgent()
         currentTimeMillis.set(currentTimeMillis.get() + timeLimitMillis - 1)
-        agent.close()
         agent = inMemoryAgentBuilder()
             .setSessionIdGenerator { sessionIdGenerator.generate() }
             .apply {

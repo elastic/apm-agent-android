@@ -31,7 +31,7 @@ import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.trace.data.SpanData
 import io.opentelemetry.sdk.trace.export.SpanExporter
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicBoolean
 
 internal class ExporterGateManager(
     serviceManager: ServiceManager,
@@ -66,7 +66,9 @@ internal class ExporterGateManager(
             metricGateQueue.createLatch("Initialization")
         )
     }
-    private val closedGates = AtomicInteger(3)
+    private val spanGateOpen = AtomicBoolean(false)
+    private val logGateOpen = AtomicBoolean(false)
+    private val metricGateOpen = AtomicBoolean(false)
 
     companion object {
         private const val SPAN_QUEUE_ID = 1
@@ -78,8 +80,12 @@ internal class ExporterGateManager(
         initializationLatch.open()
     }
 
+    internal fun metricGateIsOpen(): Boolean {
+        return metricGateOpen.get()
+    }
+
     internal fun allGatesAreOpen(): Boolean {
-        return closedGates.get() == 0
+        return spanGateOpen.get() && logGateOpen.get() && metricGateOpen.get()
     }
 
     internal fun createSpanExporterGate(delegate: SpanExporter): SpanExporter {
@@ -149,7 +155,7 @@ internal class ExporterGateManager(
             }
             gateSpanExporter = null
         }
-        closedGates.decrementAndGet()
+        spanGateOpen.set(true)
     }
 
     private fun onLogRecordGateOpen() {
@@ -161,7 +167,7 @@ internal class ExporterGateManager(
             }
             gateLogRecordExporter = null
         }
-        closedGates.decrementAndGet()
+        logGateOpen.set(true)
     }
 
     private fun onMetricGateOpen() {
@@ -173,7 +179,7 @@ internal class ExporterGateManager(
             }
             gateMetricExporter = null
         }
-        closedGates.decrementAndGet()
+        metricGateOpen.set(true)
     }
 
     private fun onSpanQueueStarted() {

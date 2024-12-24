@@ -846,6 +846,10 @@ class ElasticAgentTest {
             }
             .build()
 
+        await.atMost(Duration.ofSeconds(1)).until {
+            agent.getExporterGateManager().metricGateIsOpen()
+        }
+
         sendSpan()
         sendLog()
         sendMetric()

@@ -142,33 +142,36 @@ internal class ExporterGateManager(
 
     private fun onSpanGateOpen() {
         spanExporter.setDelegate(delegateSpanExporter)
-        if (spanGateQueue.hasAvailableItems()) {
-            backgroundWorkService.submit {
-                delegateSpanExporter.export(spanGateQueue.getProcessedItems())
-                gateSpanExporter = null
+        backgroundWorkService.submit {
+            val processedItems = spanGateQueue.getProcessedItems()
+            if (processedItems.isNotEmpty()) {
+                delegateSpanExporter.export(processedItems)
             }
+            gateSpanExporter = null
         }
         closedGates.decrementAndGet()
     }
 
     private fun onLogRecordGateOpen() {
         logRecordExporter.setDelegate(delegateLogRecordExporter)
-        if (logRecordGateQueue.hasAvailableItems()) {
-            backgroundWorkService.submit {
-                delegateLogRecordExporter.export(logRecordGateQueue.getProcessedItems())
-                gateLogRecordExporter = null
+        backgroundWorkService.submit {
+            val processedItems = logRecordGateQueue.getProcessedItems()
+            if (processedItems.isNotEmpty()) {
+                delegateLogRecordExporter.export(processedItems)
             }
+            gateLogRecordExporter = null
         }
         closedGates.decrementAndGet()
     }
 
     private fun onMetricGateOpen() {
         metricExporter.setDelegate(delegateMetricExporter)
-        if (metricGateQueue.hasAvailableItems()) {
-            backgroundWorkService.submit {
-                delegateMetricExporter.export(metricGateQueue.getProcessedItems())
-                gateMetricExporter = null
+        backgroundWorkService.submit {
+            val processedItems = metricGateQueue.getProcessedItems()
+            if (processedItems.isNotEmpty()) {
+                delegateMetricExporter.export(processedItems)
             }
+            gateMetricExporter = null
         }
         closedGates.decrementAndGet()
     }

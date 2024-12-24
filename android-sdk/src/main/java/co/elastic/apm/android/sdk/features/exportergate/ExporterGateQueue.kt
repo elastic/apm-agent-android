@@ -86,10 +86,6 @@ internal class ExporterGateQueue<DATA>(
         return CompletableResultCode.ofSuccess()
     }
 
-    internal fun hasAvailableItems(): Boolean {
-        return queue.size > 0 || overflow.isNotEmpty()
-    }
-
     internal fun getProcessedItems(): Collection<DATA> {
         val items = mutableListOf<DATA>()
         var item = queue.poll()

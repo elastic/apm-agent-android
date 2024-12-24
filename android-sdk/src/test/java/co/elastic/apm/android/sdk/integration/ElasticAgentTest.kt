@@ -64,6 +64,7 @@ import io.opentelemetry.sdk.trace.SpanProcessor
 import io.opentelemetry.sdk.trace.data.SpanData
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor
 import io.opentelemetry.sdk.trace.export.SpanExporter
+import java.io.File
 import java.io.IOException
 import java.time.Duration
 import java.util.UUID
@@ -421,11 +422,11 @@ class ElasticAgentTest {
         agent = inMemoryAgentBuilder(diskBufferingConfiguration = configuration)
             .build()
 
-        awaitForOpenGates()
-
         sendSpan()
         sendLog()
         sendMetric()
+
+        awaitForCacheFileCreation(listOf("spans", "logs", "metrics"))
 
         // Nothing should have gotten exported because it was stored in disk.
         assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
@@ -433,7 +434,6 @@ class ElasticAgentTest {
         assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
 
         // Re-init
-        Thread.sleep(1000)
         closeAgent()
         agent = inMemoryAgentBuilder(diskBufferingConfiguration = configuration)
             .build()
@@ -519,10 +519,14 @@ class ElasticAgentTest {
 
         awaitForOpenGates()
 
+        val waitTimeMillis = awaitAndTrackTimeMillis {
+            inMemoryExporters.getFinishedSpans().size == 1 &&
+                    inMemoryExporters.getFinishedLogRecords().size == 1 &&
+                    inMemoryExporters.getFinishedMetrics().size == 1
+        }
+
         // The signals should have gotten exported right away.
-        assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
-        assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
-        assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
+        assertThat(waitTimeMillis).isLessThan(1000)
     }
 
     @Test
@@ -939,6 +943,8 @@ class ElasticAgentTest {
             }
             .build()
 
+        awaitForOpenGates()
+
         sendSpan()
         sendLog()
 
@@ -1099,6 +1105,20 @@ class ElasticAgentTest {
         responseVisitor(response)
         mappingBuilder.willReturn(response)
         wireMock.stubFor(mappingBuilder)
+    }
+
+    private fun awaitForCacheFileCreation(dirNames: List<String>) {
+        val signalsDir = File(RuntimeEnvironment.getApplication().cacheDir, "opentelemetry/signals")
+        val dirs = dirNames.map { File(signalsDir, it) }
+        await.until {
+            var dirsNotEmpty = 0
+            dirs.forEach {
+                if (it.list().isNotEmpty()) {
+                    dirsNotEmpty++
+                }
+            }
+            dirsNotEmpty == dirs.size
+        }
     }
 
     private fun awaitForOpenGates(maxSecondsToWait: Int = 1) {

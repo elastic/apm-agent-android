@@ -396,7 +396,10 @@ class ElasticAgentTest {
 
         // Ensure that the config was persisted
         closeAgent()
-        stubAllHttpResponses { withStatus(500) }
+        stubAllHttpResponses {
+            withStatus(404)
+                .withHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
+        }
         agent = inMemoryAgentBuilder(wireMock.url("/"))
             .apply {
                 internalWaitForClock = false
@@ -407,11 +410,29 @@ class ElasticAgentTest {
         sendLog()
         sendMetric()
 
+        // Await for request and stub the next one
+        takeRequest()
+        stubAllHttpResponses {
+            withStatus(200)
+                .withBody("""{"recording":"true"}""")
+        }
+
         awaitForOpenGates()
 
         assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
         assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()
         assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
+
+        // Verify recording true value
+        takeRequest() // Await for recording: true request.
+
+        sendSpan()
+        sendLog()
+        sendMetric()
+
+        assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
     }
 
     @Test

@@ -414,6 +414,7 @@ class ElasticAgentTest {
         takeRequest()
         stubAllHttpResponses {
             withStatus(200)
+                .withHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
                 .withBody("""{"recording":"true"}""")
         }
 
@@ -425,6 +426,23 @@ class ElasticAgentTest {
 
         // Verify recording true value
         takeRequest() // Await for recording: true request.
+        // Stub for invalid config
+        stubAllHttpResponses {
+            withStatus(200)
+                .withBody("NOT_A_JSON")
+        }
+
+        sendSpan()
+        sendLog()
+        sendMetric()
+
+        assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
+
+        // Verify invalid config
+        inMemoryExporters.resetExporters()
+        takeRequest() // Await for invalid config.
 
         sendSpan()
         sendLog()

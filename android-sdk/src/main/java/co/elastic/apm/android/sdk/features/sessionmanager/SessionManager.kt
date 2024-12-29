@@ -50,28 +50,36 @@ class SessionManager internal constructor(
         }.also { updateNextTimeForUpdate() }
     }
 
+    internal fun clearSession() {
+        sessionId.set(null)
+        nextTimeForUpdate.set(0)
+        sessionIdExpireTime.set(0)
+        cachedSessionId.clear()
+        cachedSessionIdNextTimeForUpdate.clear()
+        cachedSessionIdExpireTime.clear()
+    }
+
     private fun verifyIdleTime() {
         val currentTime = systemTimeProvider.getCurrentTimeMillis()
         if (currentTime >= nextTimeForUpdate.get() || currentTime >= sessionIdExpireTime.get()) {
-            setSessionId(null)
+            clearSession()
         }
     }
 
-    private fun setSessionId(id: String?) {
+    private fun setSessionId(id: String) {
         sessionId.set(id)
-        if (id == null) {
-            cachedSessionId.clear()
-        } else {
-            cachedSessionId.store(id)
-        }
+        cachedSessionId.store(id)
     }
 
     private fun generateAndStoreId(): String? {
-        return idGenerator.generate()?.let {
+        val generatedId = idGenerator.generate()
+        if (generatedId != null) {
             setSessionIdExpireTime()
-            it
-        }.also {
-            setSessionId(it)
+            setSessionId(generatedId)
+            return generatedId
+        } else {
+            clearSession()
+            return null
         }
     }
 

@@ -357,9 +357,6 @@ class ElasticAgentTest {
         }
 
         agent = inMemoryAgentBuilder(wireMock.url("/"))
-            .apply {
-                internalWaitForClock = false
-            }
             .build()
 
         takeRequest() // Await for empty central config response
@@ -401,9 +398,6 @@ class ElasticAgentTest {
                 .withHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
         }
         agent = inMemoryAgentBuilder(wireMock.url("/"))
-            .apply {
-                internalWaitForClock = false
-            }
             .build()
 
         sendSpan()
@@ -451,6 +445,87 @@ class ElasticAgentTest {
         assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
+    }
+
+    @Test
+    fun `Verify sampling rate config`() {
+        // First: Sample rate: 0.0 and recording false.
+        stubAllHttpResponses {
+            withStatus(200)
+                .withBody("""{"session_sample_rate":"0.0", "recording":"false"}""")
+                .withHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
+        }
+
+        agent = inMemoryAgentBuilder(wireMock.url("/"))
+            .build()
+
+        takeRequest() // Await for central config response
+
+        sendSpan()
+        sendLog()
+        sendMetric()
+
+        awaitForOpenGates()
+
+        assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
+
+        // Next: Sample rate: 1.0 and recording false.
+        stubAllHttpResponses {
+            withStatus(200)
+                .withBody("""{"session_sample_rate":"1.0", "recording":"false"}""")
+                .withHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
+        }
+
+        takeRequest() // Await for central config response
+
+        sendSpan()
+        sendLog()
+        sendMetric()
+
+        awaitForOpenGates()
+
+        assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
+
+        // Next: Sample rate: 1.0 and recording true.
+        stubAllHttpResponses {
+            withStatus(200)
+                .withBody("""{"session_sample_rate":"1.0", "recording":"true"}""")
+                .withHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
+        }
+
+        takeRequest() // Await for central config response
+
+        sendSpan()
+        sendLog()
+        sendMetric()
+
+        awaitForOpenGates()
+
+        assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
+
+        // Next: Sample rate: 0.0 and recording true.
+        stubAllHttpResponses {
+            withStatus(200)
+                .withBody("""{"session_sample_rate":"0.0", "recording":"true"}""")
+        }
+
+        takeRequest() // Await for central config response
+
+        sendSpan()
+        sendLog()
+        sendMetric()
+
+        awaitForOpenGates()
+
+        assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
     }
 
     @Test

@@ -525,7 +525,7 @@ class ElasticAgentTest {
         assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
 
-        // Force refresh session to trigger sampling rate creation
+        // Force refresh session to trigger sampling rate evaluation
         agent.getSessionManager().clearSession()
         inMemoryExporters.resetExporters()
 

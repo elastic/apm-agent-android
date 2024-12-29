@@ -23,6 +23,7 @@ import co.elastic.apm.android.sdk.exporters.ExporterProvider
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
 import co.elastic.apm.android.sdk.internal.opentelemetry.ElasticOpenTelemetryBuilder
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
+import co.elastic.apm.android.sdk.session.SessionProvider
 import co.elastic.apm.android.sdk.tools.interceptor.Interceptor
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.sdk.OpenTelemetrySdk
@@ -55,6 +56,10 @@ class TestElasticOtelAgent(serviceManager: ServiceManager, configuration: Config
 
         public override fun setClock(value: Clock): Builder {
             return super.setClock(value)
+        }
+
+        public override fun setSessionProvider(value: SessionProvider): Builder {
+            return super.setSessionProvider(value)
         }
 
         fun build(): TestElasticOtelAgent {

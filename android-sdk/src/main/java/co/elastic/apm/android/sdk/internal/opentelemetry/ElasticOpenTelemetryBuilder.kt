@@ -55,13 +55,13 @@ abstract class ElasticOpenTelemetryBuilder<B> {
     protected var serviceBuild: Int? = null
     protected var deploymentEnvironment: String? = null
     private var deviceIdProvider: StringProvider? = null
-    private var sessionProvider: SessionProvider = SessionProvider.getDefault()
     private var spanAttributesInterceptors = mutableListOf<Interceptor<Attributes>>()
     private var logRecordAttributesInterceptors = mutableListOf<Interceptor<Attributes>>()
     private var spanExporterInterceptors = mutableListOf<Interceptor<SpanExporter>>()
     private var logRecordExporterInterceptors = mutableListOf<Interceptor<LogRecordExporter>>()
     private var metricExporterInterceptors = mutableListOf<Interceptor<MetricExporter>>()
     private var processorFactory: ProcessorFactory = ProcessorFactory.getDefault()
+    private var sessionProvider: SessionProvider = SessionProvider.getDefault()
     private var clock: Clock = Clock.getDefault()
     private var exporterProvider: ExporterProvider = ExporterProvider.noop()
     private val buildCalled = AtomicBoolean(false)
@@ -93,12 +93,6 @@ abstract class ElasticOpenTelemetryBuilder<B> {
     fun setDeviceIdProvider(value: StringProvider): B {
         checkNotBuilt()
         deviceIdProvider = value
-        return this as B
-    }
-
-    fun setSessionProvider(value: SessionProvider): B {
-        checkNotBuilt()
-        sessionProvider = value
         return this as B
     }
 
@@ -135,6 +129,12 @@ abstract class ElasticOpenTelemetryBuilder<B> {
     internal open fun setProcessorFactory(value: ProcessorFactory): B {
         checkNotBuilt()
         processorFactory = value
+        return this as B
+    }
+
+    protected open fun setSessionProvider(value: SessionProvider): B {
+        checkNotBuilt()
+        sessionProvider = value
         return this as B
     }
 

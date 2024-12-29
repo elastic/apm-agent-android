@@ -460,6 +460,7 @@ class ElasticAgentTest {
             .build()
 
         takeRequest() // Await for central config response
+        agent.getSessionManager().clearSession()
 
         sendSpan()
         sendLog()
@@ -479,12 +480,11 @@ class ElasticAgentTest {
         }
 
         takeRequest() // Await for central config response
+        agent.getSessionManager().clearSession()
 
         sendSpan()
         sendLog()
         sendMetric()
-
-        awaitForOpenGates()
 
         assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
         assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()
@@ -498,18 +498,18 @@ class ElasticAgentTest {
         }
 
         takeRequest() // Await for central config response
+        agent.getSessionManager().clearSession()
 
         sendSpan()
         sendLog()
         sendMetric()
-
-        awaitForOpenGates()
 
         assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
 
         // Next: Sample rate: 0.0 and recording true.
+        inMemoryExporters.resetExporters()
         stubAllHttpResponses {
             withStatus(200)
                 .withBody("""{"session_sample_rate":"0.0", "recording":"true"}""")
@@ -521,7 +521,17 @@ class ElasticAgentTest {
         sendLog()
         sendMetric()
 
-        awaitForOpenGates()
+        assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
+
+        // Force refresh session to trigger sampling rate creation
+        agent.getSessionManager().clearSession()
+        inMemoryExporters.resetExporters()
+
+        sendSpan()
+        sendLog()
+        sendMetric()
 
         assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
         assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()

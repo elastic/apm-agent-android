@@ -52,7 +52,8 @@ class ElasticAgent private constructor(
     private val diskBufferingManager: DiskBufferingManager,
     private val apmServerConnectivityManager: ApmServerConnectivityManager,
     private val elasticClockManager: ElasticClockManager,
-    private val centralConfigurationManager: CentralConfigurationManager
+    private val centralConfigurationManager: CentralConfigurationManager,
+    private val sessionManager: SessionManager
 ) : ElasticOtelAgent(serviceManager, configuration) {
     private val openTelemetry = configuration.openTelemetrySdk
 
@@ -85,6 +86,10 @@ class ElasticAgent private constructor(
 
     internal fun getElasticClockManager(): ElasticClockManager {
         return elasticClockManager
+    }
+
+    internal fun getSessionManager(): SessionManager {
+        return sessionManager
     }
 
     override fun onClose() {
@@ -245,7 +250,8 @@ class ElasticAgent private constructor(
                     diskBufferingManager,
                     apmServerConnectivityManager,
                     elasticClockManager,
-                    centralConfigurationManager
+                    centralConfigurationManager,
+                    sessionManager
                 )
             } ?: throw NullPointerException("The url must be set.")
         }

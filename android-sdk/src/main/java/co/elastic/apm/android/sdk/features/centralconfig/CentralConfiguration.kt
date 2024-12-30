@@ -22,8 +22,13 @@ import co.elastic.apm.android.sdk.internal.configuration.kotlin.Configuration
 
 internal class CentralConfiguration : Configuration() {
     private val recording = createBooleanOption("recording", true)
+    private val sessionSampleRate = createDoubleOption("session_sample_rate", 1.0)
 
     fun isRecording(): Boolean {
         return recording.get()
+    }
+
+    fun getSessionSampleRate(): Double {
+        return sessionSampleRate.get()
     }
 }

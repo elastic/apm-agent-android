@@ -39,8 +39,6 @@ import co.elastic.apm.android.sdk.internal.opentelemetry.ElasticOpenTelemetryBui
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
-import co.elastic.apm.android.sdk.tools.PreferencesLongCacheHandler
-import co.elastic.apm.android.sdk.tools.PreferencesStringCacheHandler
 import co.elastic.apm.android.sdk.tools.interceptor.Interceptor
 import io.opentelemetry.api.OpenTelemetry
 import java.util.UUID
@@ -197,19 +195,8 @@ class ElasticAgent private constructor(
                         exporterGateManager.createMetricGateLatch("Central configuration")
                     )
                 )
-                val sessionManager = SessionManager(
-                    PreferencesStringCacheHandler(
-                        "session_id",
-                        serviceManager.getPreferencesService()
-                    ),
-                    PreferencesLongCacheHandler(
-                        "session_id_expire_time",
-                        serviceManager.getPreferencesService()
-                    ),
-                    PreferencesLongCacheHandler(
-                        "session_id_next_time_for_update",
-                        serviceManager.getPreferencesService()
-                    ),
+                val sessionManager = SessionManager.create(
+                    serviceManager,
                     sessionIdGenerator ?: SessionIdGenerator { UUID.randomUUID().toString() },
                     systemTimeProvider
                 )

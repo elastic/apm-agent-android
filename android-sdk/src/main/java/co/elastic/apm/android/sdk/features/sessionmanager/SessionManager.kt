@@ -18,15 +18,18 @@
  */
 package co.elastic.apm.android.sdk.features.sessionmanager
 
+import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.session.Session
 import co.elastic.apm.android.sdk.session.SessionProvider
 import co.elastic.apm.android.sdk.tools.CacheHandler
+import co.elastic.apm.android.sdk.tools.PreferencesLongCacheHandler
+import co.elastic.apm.android.sdk.tools.PreferencesStringCacheHandler
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 
-class SessionManager internal constructor(
+class SessionManager private constructor(
     private val cachedSessionId: CacheHandler<String>,
     private val cachedSessionIdExpireTime: CacheHandler<Long>,
     private val cachedSessionIdNextTimeForUpdate: CacheHandler<Long>,
@@ -37,9 +40,32 @@ class SessionManager internal constructor(
     private val nextTimeForUpdate = AtomicLong(cachedSessionIdNextTimeForUpdate.retrieve() ?: 0)
     private val sessionIdExpireTime = AtomicLong(cachedSessionIdExpireTime.retrieve() ?: 0)
 
-    private companion object {
+    companion object {
         private val IDLE_TIME_LIMIT = TimeUnit.MINUTES.toMillis(30)
         private val MAX_SESSION_TIME = TimeUnit.HOURS.toMillis(4)
+
+        fun create(
+            serviceManager: ServiceManager,
+            idGenerator: SessionIdGenerator,
+            systemTimeProvider: SystemTimeProvider
+        ): SessionManager {
+            return SessionManager(
+                PreferencesStringCacheHandler(
+                    "session_id",
+                    serviceManager.getPreferencesService()
+                ),
+                PreferencesLongCacheHandler(
+                    "session_id_expire_time",
+                    serviceManager.getPreferencesService()
+                ),
+                PreferencesLongCacheHandler(
+                    "session_id_next_time_for_update",
+                    serviceManager.getPreferencesService()
+                ),
+                idGenerator,
+                systemTimeProvider
+            )
+        }
     }
 
     override fun getSession(): Session? {

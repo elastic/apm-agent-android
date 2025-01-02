@@ -164,7 +164,7 @@ class ElasticAgent private constructor(
                     signalBufferSize = internalSignalBufferSize
                 )
                 val diskBufferingManager =
-                    DiskBufferingManager(
+                    DiskBufferingManager.create(
                         serviceManager, diskBufferingConfiguration,
                         Latch.composite(
                             exporterGateManager.createSpanGateLatch("Disk buffering"),

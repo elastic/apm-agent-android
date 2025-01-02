@@ -44,23 +44,7 @@ internal class ExporterGateQueue<DATA>(
     fun createLatch(name: String): Latch {
         open.compareAndSet(true, false)
         pendingLatches.incrementAndGet()
-        val latch = object : Latch {
-            private val opened = AtomicBoolean(false)
-
-            override fun open() {
-                if (opened.compareAndSet(false, true)) {
-                    openLatches.remove(this)
-                    val size = pendingLatches.decrementAndGet()
-                    if (size == 0) {
-                        openGate()
-                    }
-                }
-            }
-
-            override fun toString(): String {
-                return "[$gateName] Latch: $name"
-            }
-        }
+        val latch = InnerLatch(name)
         openLatches.add(latch)
         return latch
     }
@@ -124,5 +108,23 @@ internal class ExporterGateQueue<DATA>(
     interface Listener {
         fun onOpen(id: Int)
         fun onStartEnqueuing(id: Int)
+    }
+
+    inner class InnerLatch(private val name: String) : Latch {
+        private val opened = AtomicBoolean(false)
+
+        override fun open() {
+            if (opened.compareAndSet(false, true)) {
+                openLatches.remove(this)
+                val size = pendingLatches.decrementAndGet()
+                if (size == 0) {
+                    openGate()
+                }
+            }
+        }
+
+        override fun toString(): String {
+            return "[$gateName] Latch: $name"
+        }
     }
 }

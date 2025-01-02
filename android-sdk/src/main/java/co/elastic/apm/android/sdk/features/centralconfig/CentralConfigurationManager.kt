@@ -26,6 +26,7 @@ import co.elastic.apm.android.sdk.features.exportergate.latch.Latch
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import java.io.IOException
+import java.lang.ref.WeakReference
 import java.util.concurrent.TimeUnit
 import org.slf4j.Logger
 import org.stagemonitor.configuration.ConfigurationRegistry
@@ -34,11 +35,11 @@ class CentralConfigurationManager private constructor(
     serviceManager: ServiceManager,
     private val configurationRegistry: ConfigurationRegistry,
     private val centralConfigurationSource: CentralConfigurationSource,
-    private val connectivityHolder: ConnectivityHolder
+    private val connectivityHolder: ConnectivityHolder,
+    private val latch: WeakReference<Latch>
 ) : CentralConfigurationSource.Listener {
     private val backgroundWorkService by lazy { serviceManager.getBackgroundWorkService() }
     private val logger: Logger = Elog.getLogger()
-    private var latch: Latch? = null
 
     fun getConnectivityConfiguration(): CentralConfigurationConnectivity {
         return connectivityHolder.get() as CentralConfigurationConnectivity
@@ -69,7 +70,7 @@ class CentralConfigurationManager private constructor(
     }
 
     private fun openLatch() {
-        latch?.open()?.also { latch = null }
+        latch.get()?.open()
     }
 
     private fun scheduleDefault() {
@@ -121,9 +122,9 @@ class CentralConfigurationManager private constructor(
                 serviceManager,
                 registry.build(),
                 centralConfigurationSource,
-                centralConfigurationConnectivityHolder
+                centralConfigurationConnectivityHolder,
+                WeakReference(gateLatch)
             )
-            centralConfigurationManager.latch = gateLatch
             centralConfigurationSource.listener = centralConfigurationManager
             return centralConfigurationManager
         }

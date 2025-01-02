@@ -16,24 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.tools
+package co.elastic.apm.android.sdk.tools.cache
 
 import co.elastic.apm.android.sdk.internal.services.kotlin.preferences.PreferencesService
 
-class PreferencesLongCacheHandler(
+class PreferencesStringCacheHandler(
     private val key: String,
     private val preferencesService: PreferencesService
-) : CacheHandler<Long> {
+) : CacheHandler<String> {
 
-    override fun retrieve(): Long {
-        return preferencesService.retrieveLong(key, 0)
+    override fun retrieve(): String? {
+        return preferencesService.retrieveString(key)
     }
 
     override fun clear() {
         preferencesService.remove(key)
     }
 
-    override fun store(value: Long) {
+    override fun store(value: String) {
         preferencesService.store(key, value)
     }
 }

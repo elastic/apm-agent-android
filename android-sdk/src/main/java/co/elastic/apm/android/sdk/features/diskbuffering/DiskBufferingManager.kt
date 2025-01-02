@@ -37,12 +37,13 @@ import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.trace.export.SpanExporter
 import java.io.IOException
+import java.lang.ref.WeakReference
 import java.util.concurrent.TimeUnit
 
-class DiskBufferingManager internal constructor(
+class DiskBufferingManager private constructor(
     private val serviceManager: ServiceManager,
     private val configuration: DiskBufferingConfiguration,
-    private var gateLatch: Latch?,
+    private var gateLatch: WeakReference<Latch>,
     private val exportFromDiskIntervalMillis: Long = TimeUnit.SECONDS.toMillis(5)
 ) {
     private var spanExporter: MutableSpanExporter? = null
@@ -140,7 +141,7 @@ class DiskBufferingManager internal constructor(
     }
 
     private fun openLatch() {
-        gateLatch?.open().also { gateLatch = null }
+        gateLatch.get()?.open()
     }
 
     private fun enableDiskBuffering(enabled: Boolean) {
@@ -202,5 +203,19 @@ class DiskBufferingManager internal constructor(
         }
 
         return builder.build()
+    }
+
+    companion object {
+        internal fun create(
+            serviceManager: ServiceManager,
+            diskBufferingConfiguration: DiskBufferingConfiguration,
+            gateLatch: Latch
+        ): DiskBufferingManager {
+            return DiskBufferingManager(
+                serviceManager,
+                diskBufferingConfiguration,
+                WeakReference(gateLatch)
+            )
+        }
     }
 }

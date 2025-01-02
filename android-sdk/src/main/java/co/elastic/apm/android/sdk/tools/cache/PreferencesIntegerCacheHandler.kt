@@ -16,40 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.tools
+package co.elastic.apm.android.sdk.tools.cache
 
-import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
-import co.elastic.apm.android.sdk.tools.provider.StringProvider
+import co.elastic.apm.android.sdk.internal.services.kotlin.preferences.PreferencesService
 
-class PreferencesCachedStringProvider(
-    private val serviceManager: ServiceManager,
+class PreferencesIntegerCacheHandler(
     private val key: String,
-    private val provider: StringProvider
-) : CacheHandler<String>, StringProvider {
-    private val preferences by lazy { serviceManager.getPreferencesService() }
+    private val preferencesService: PreferencesService,
+    private val defaultValue: Int = 0
+) : CacheHandler<Int> {
 
-    override fun retrieve(): String? {
-        return preferences.retrieveString(key)
+    override fun retrieve(): Int {
+        return preferencesService.retrieveInt(key, defaultValue)
     }
 
     override fun clear() {
-        preferences.remove(key)
+        preferencesService.remove(key)
     }
 
-    override fun store(value: String) {
-        preferences.store(key, value)
-    }
-
-    override fun get(): String {
-        val retrieved = retrieve()
-        if (retrieved != null) {
-            return retrieved
-        }
-
-        val computed = provider.get()
-
-        store(computed)
-
-        return computed
+    override fun store(value: Int) {
+        preferencesService.store(key, value)
     }
 }

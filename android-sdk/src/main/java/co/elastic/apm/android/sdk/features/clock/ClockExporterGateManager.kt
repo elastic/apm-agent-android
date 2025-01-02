@@ -29,11 +29,13 @@ import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.sdk.logs.data.LogRecordData
 import io.opentelemetry.sdk.trace.data.SpanData
+import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicBoolean
 
 class ClockExporterGateManager private constructor(
     systemTimeProvider: SystemTimeProvider,
-    private val timeOffsetNanosProvider: Provider<Long?>
+    private val timeOffsetNanosProvider: Provider<Long?>,
+    private val latch: WeakReference<Latch>
 ) {
     private val gateOpened = AtomicBoolean(false)
     private val globalAttributesInterceptor =
@@ -42,7 +44,6 @@ class ClockExporterGateManager private constructor(
         SpanGateProcessingInterceptor()
     private var logRecordGateProcessingInterceptor: LogRecordGateProcessingInterceptor? =
         LogRecordGateProcessingInterceptor()
-    private var latch: Latch? = null
 
     internal fun getAttributesInterceptor(): Interceptor<Attributes> {
         return globalAttributesInterceptor
@@ -58,7 +59,7 @@ class ClockExporterGateManager private constructor(
 
     internal fun onRemoteClockSet() {
         if (gateOpened.compareAndSet(false, true)) {
-            latch?.open().also { latch = null }
+            latch.get()?.open()
             globalAttributesInterceptor.setDelegate(Interceptor.noop())
             spanGateProcessingInterceptor = null
             logRecordGateProcessingInterceptor = null
@@ -69,10 +70,13 @@ class ClockExporterGateManager private constructor(
         internal fun create(
             systemTimeProvider: SystemTimeProvider,
             timeOffsetNanosProvider: Provider<Long?>,
-            exporterGateLatch: Latch?
+            exporterGateLatch: Latch
         ): ClockExporterGateManager {
-            val manager = ClockExporterGateManager(systemTimeProvider, timeOffsetNanosProvider)
-            manager.latch = exporterGateLatch
+            val manager = ClockExporterGateManager(
+                systemTimeProvider,
+                timeOffsetNanosProvider,
+                WeakReference(exporterGateLatch)
+            )
             return manager
         }
 

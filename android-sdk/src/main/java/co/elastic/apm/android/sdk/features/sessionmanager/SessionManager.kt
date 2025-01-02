@@ -22,9 +22,9 @@ import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.session.Session
 import co.elastic.apm.android.sdk.session.SessionProvider
-import co.elastic.apm.android.sdk.tools.CacheHandler
-import co.elastic.apm.android.sdk.tools.PreferencesLongCacheHandler
-import co.elastic.apm.android.sdk.tools.PreferencesStringCacheHandler
+import co.elastic.apm.android.sdk.tools.cache.CacheHandler
+import co.elastic.apm.android.sdk.tools.cache.PreferencesLongCacheHandler
+import co.elastic.apm.android.sdk.tools.cache.PreferencesStringCacheHandler
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference

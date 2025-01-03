@@ -100,6 +100,7 @@ class SessionManager private constructor(
         }
         if (currentSession != null) {
             currentSession.idleTime = getNextIdleTime()
+            cachedSessionIdIdleTime.store(currentSession.idleTime)
             return Session.create(currentSession.id)
         }
         return null

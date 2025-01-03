@@ -18,36 +18,43 @@
  */
 package co.elastic.apm.android.sdk.features.sessionmanager
 
+import androidx.annotation.GuardedBy
+import co.elastic.apm.android.sdk.features.exportergate.latch.Latch
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
+import co.elastic.apm.android.sdk.internal.services.kotlin.backgroundwork.BackgroundWorkService
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.session.Session
 import co.elastic.apm.android.sdk.session.SessionProvider
 import co.elastic.apm.android.sdk.tools.cache.CacheHandler
 import co.elastic.apm.android.sdk.tools.cache.PreferencesLongCacheHandler
 import co.elastic.apm.android.sdk.tools.cache.PreferencesStringCacheHandler
+import java.lang.ref.WeakReference
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicLong
-import java.util.concurrent.atomic.AtomicReference
 
 class SessionManager private constructor(
     private val cachedSessionId: CacheHandler<String>,
     private val cachedSessionIdExpireTime: CacheHandler<Long>,
-    private val cachedSessionIdNextTimeForUpdate: CacheHandler<Long>,
+    private val cachedSessionIdIdleTime: CacheHandler<Long>,
     private val idGenerator: SessionIdGenerator,
-    private val systemTimeProvider: SystemTimeProvider
+    private val systemTimeProvider: SystemTimeProvider,
+    private val backgroundWorkService: BackgroundWorkService,
+    private val gateLatch: WeakReference<Latch>
 ) : SessionProvider {
-    private val sessionId = AtomicReference<String?>(cachedSessionId.retrieve())
-    private val nextTimeForUpdate = AtomicLong(cachedSessionIdNextTimeForUpdate.retrieve() ?: 0)
-    private val sessionIdExpireTime = AtomicLong(cachedSessionIdExpireTime.retrieve() ?: 0)
+    @GuardedBy("sessionLock")
+    private var session: InnerSession? = null
+    private val sessionLock = Any()
+    private val listeners = CopyOnWriteArrayList<Listener>()
 
     companion object {
         private val IDLE_TIME_LIMIT = TimeUnit.MINUTES.toMillis(30)
         private val MAX_SESSION_TIME = TimeUnit.HOURS.toMillis(4)
 
-        fun create(
+        internal fun create(
             serviceManager: ServiceManager,
             idGenerator: SessionIdGenerator,
-            systemTimeProvider: SystemTimeProvider
+            systemTimeProvider: SystemTimeProvider,
+            gateLatch: Latch
         ): SessionManager {
             return SessionManager(
                 PreferencesStringCacheHandler(
@@ -59,65 +66,101 @@ class SessionManager private constructor(
                     serviceManager.getPreferencesService()
                 ),
                 PreferencesLongCacheHandler(
-                    "session_id_next_time_for_update",
+                    "session_id_idle_time",
                     serviceManager.getPreferencesService()
                 ),
                 idGenerator,
-                systemTimeProvider
+                systemTimeProvider,
+                serviceManager.getBackgroundWorkService(),
+                WeakReference(gateLatch)
             )
         }
     }
 
-    override fun getSession(): Session? {
-        verifyIdleTime()
-        return when (val existingId = sessionId.get()) {
-            null -> generateAndStoreId()?.let { Session.create(it) }
-            else -> Session.create(existingId)
-        }.also { updateNextTimeForUpdate() }
+    internal fun initialize() {
+        backgroundWorkService.submit {
+            cachedSessionId.retrieve()?.let { sessionId ->
+                synchronized(sessionLock) {
+                    session = InnerSession(
+                        sessionId,
+                        cachedSessionIdExpireTime.retrieve() ?: 0,
+                        cachedSessionIdIdleTime.retrieve() ?: 0
+                    )
+                }
+            }
+            gateLatch.get()?.open()
+        }
+    }
+
+    override fun getSession(): Session? = synchronized(sessionLock) {
+        var currentSession = session
+        if (currentSession != null && !isValid(currentSession)) {
+            currentSession = generateSession()
+            setSession(currentSession)
+        }
+        if (currentSession != null) {
+            currentSession.idleTime = getNextIdleTime()
+            return Session.create(currentSession.id)
+        }
+        return null
     }
 
     internal fun clearSession() {
-        sessionId.set(null)
-        nextTimeForUpdate.set(0)
-        sessionIdExpireTime.set(0)
-        cachedSessionId.clear()
-        cachedSessionIdNextTimeForUpdate.clear()
-        cachedSessionIdExpireTime.clear()
+        setSession(null)
     }
 
-    private fun verifyIdleTime() {
-        val currentTime = systemTimeProvider.getCurrentTimeMillis()
-        if (currentTime >= nextTimeForUpdate.get() || currentTime >= sessionIdExpireTime.get()) {
-            clearSession()
+    internal fun addListener(listener: Listener) {
+        listeners.addIfAbsent(listener)
+    }
+
+    private fun setSession(value: InnerSession?) = synchronized(sessionLock) {
+        val currentId = session?.id
+        if (currentId == value?.id) {
+            return
+        }
+        session = value
+        session?.let {
+            cachedSessionId.store(it.id)
+            cachedSessionIdExpireTime.store(it.expireTime)
+            cachedSessionIdIdleTime.store(it.idleTime)
+        } ?: {
+            cachedSessionId.clear()
+            cachedSessionIdExpireTime.clear()
+            cachedSessionIdIdleTime.clear()
+        }
+        notifySessionChange()
+    }
+
+    private fun notifySessionChange() {
+        listeners.forEach {
+            it.onSessionChanged()
         }
     }
 
-    private fun setSessionId(id: String) {
-        sessionId.set(id)
-        cachedSessionId.store(id)
-    }
-
-    private fun generateAndStoreId(): String? {
+    private fun generateSession(): InnerSession? {
         val generatedId = idGenerator.generate()
         if (generatedId != null) {
-            setSessionIdExpireTime()
-            setSessionId(generatedId)
-            return generatedId
-        } else {
-            clearSession()
-            return null
+            InnerSession(generatedId, getSessionIdExpireTime(), getNextIdleTime())
         }
+        return null
     }
 
-    private fun setSessionIdExpireTime() {
-        val expireTime = systemTimeProvider.getCurrentTimeMillis() + MAX_SESSION_TIME
-        sessionIdExpireTime.set(expireTime)
-        cachedSessionIdExpireTime.store(expireTime)
+    private fun isValid(session: InnerSession): Boolean {
+        val currentTime = systemTimeProvider.getCurrentTimeMillis()
+        return currentTime < session.idleTime || currentTime < session.expireTime
     }
 
-    private fun updateNextTimeForUpdate() {
-        val nextTime = systemTimeProvider.getCurrentTimeMillis() + IDLE_TIME_LIMIT
-        nextTimeForUpdate.set(nextTime)
-        cachedSessionIdNextTimeForUpdate.store(nextTime)
+    private fun getSessionIdExpireTime(): Long {
+        return systemTimeProvider.getCurrentTimeMillis() + MAX_SESSION_TIME
     }
+
+    private fun getNextIdleTime(): Long {
+        return systemTimeProvider.getCurrentTimeMillis() + IDLE_TIME_LIMIT
+    }
+
+    interface Listener {
+        fun onSessionChanged()
+    }
+
+    private data class InnerSession(val id: String, val expireTime: Long, var idleTime: Long)
 }

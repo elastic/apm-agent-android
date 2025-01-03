@@ -59,6 +59,7 @@ class ElasticAgent private constructor(
         elasticClockManager.initialize()
         diskBufferingManager.initialize()
         centralConfigurationManager.initialize()
+        sessionManager.initialize()
         exporterGateManager.initialize()
     }
 
@@ -198,7 +199,12 @@ class ElasticAgent private constructor(
                 val sessionManager = SessionManager.create(
                     serviceManager,
                     sessionIdGenerator ?: SessionIdGenerator { UUID.randomUUID().toString() },
-                    systemTimeProvider
+                    systemTimeProvider,
+                    Latch.composite(
+                        exporterGateManager.createSpanGateLatch("Session manager"),
+                        exporterGateManager.createLogRecordLatch("Session manager"),
+                        exporterGateManager.createMetricGateLatch("Session manager")
+                    )
                 )
 
                 addSpanAttributesInterceptor(

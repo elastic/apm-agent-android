@@ -115,8 +115,7 @@ class SessionManager private constructor(
     }
 
     private fun setSession(value: InnerSession?) = synchronized(sessionLock) {
-        val currentId = session?.id
-        if (currentId == value?.id) {
+        if (session?.id == value?.id) {
             return
         }
         session = value

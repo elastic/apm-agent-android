@@ -19,14 +19,14 @@
 package co.elastic.apm.android.sdk.features.sessionmanager.samplerate
 
 import co.elastic.apm.android.sdk.features.centralconfig.CentralConfiguration
-import co.elastic.apm.android.sdk.features.exportergate.latch.Latch
+import co.elastic.apm.android.sdk.features.exportergate.ExporterGateManager
+import co.elastic.apm.android.sdk.features.sessionmanager.SessionManager
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import co.elastic.apm.android.sdk.internal.services.kotlin.backgroundwork.BackgroundWorkService
 import co.elastic.apm.android.sdk.internal.utilities.NumberTools
 import co.elastic.apm.android.sdk.tools.cache.CacheHandler
 import co.elastic.apm.android.sdk.tools.cache.PreferencesIntegerCacheHandler
 import co.elastic.apm.android.sdk.tools.provider.Provider
-import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicBoolean
 
 class SampleRateManager private constructor(
@@ -34,14 +34,14 @@ class SampleRateManager private constructor(
     private val enabledExportingCache: CacheHandler<Int>,
     private val backgroundWorkService: BackgroundWorkService,
     private val numberTools: NumberTools,
-    private val latch: WeakReference<Latch>
-) {
+    private val gateManager: ExporterGateManager
+) : SessionManager.Listener {
     private val allowSignalExporting = AtomicBoolean(false)
 
     fun initialize() {
         backgroundWorkService.submit {
             setUpInitialPolicy()
-            latch.get()?.open()
+            gateManager.openLatches(SampleRateManager::class.java)
         }
     }
 
@@ -86,9 +86,13 @@ class SampleRateManager private constructor(
 
         internal fun create(
             serviceManager: ServiceManager,
-            centralConfiguration: CentralConfiguration,
-            gateLatch: Latch
+            gateManager: ExporterGateManager,
+            centralConfiguration: CentralConfiguration
         ): SampleRateManager {
+            val latchName = "Sample rate manager"
+            gateManager.createSpanGateLatch(SampleRateManager::class.java, latchName)
+            gateManager.createLogRecordLatch(SampleRateManager::class.java, latchName)
+            gateManager.createMetricGateLatch(SampleRateManager::class.java, latchName)
             return SampleRateManager(
                 { centralConfiguration.getSessionSampleRate() },
                 PreferencesIntegerCacheHandler(
@@ -98,7 +102,7 @@ class SampleRateManager private constructor(
                 ),
                 serviceManager.getBackgroundWorkService(),
                 NumberTools.get(),
-                WeakReference(gateLatch)
+                gateManager
             )
         }
     }

@@ -18,7 +18,7 @@
  */
 package co.elastic.apm.android.sdk.features.clock
 
-import co.elastic.apm.android.sdk.features.exportergate.latch.Latch
+import co.elastic.apm.android.sdk.features.exportergate.ExporterGateManager
 import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElapsedTimeOffsetClock
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
@@ -39,15 +39,17 @@ internal class ElasticClockManager private constructor(
     companion object {
         internal fun create(
             serviceManager: ServiceManager,
+            gateManager: ExporterGateManager,
             systemTimeProvider: SystemTimeProvider,
             sntpClient: SntpClient,
-            exporterGateLatch: Latch
+            waitForClock: Boolean
         ): ElasticClockManager {
             val timeOffsetManager =
                 RemoteTimeOffsetManager.create(serviceManager, systemTimeProvider, sntpClient)
-            val exportGateManager = ClockExporterGateManager.create(systemTimeProvider, {
-                timeOffsetManager.getTimeOffset()?.let { it * 1_000_000 }
-            }, exporterGateLatch)
+            val exportGateManager =
+                ClockExporterGateManager.create(systemTimeProvider, gateManager, {
+                    timeOffsetManager.getTimeOffset()?.let { it * 1_000_000 }
+                }, waitForClock)
             val clockManager =
                 ElasticClockManager(systemTimeProvider, timeOffsetManager, exportGateManager)
             timeOffsetManager.setListener(clockManager)

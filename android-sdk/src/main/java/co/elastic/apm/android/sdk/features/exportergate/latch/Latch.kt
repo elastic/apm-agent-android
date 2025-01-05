@@ -18,19 +18,4 @@
  */
 package co.elastic.apm.android.sdk.features.exportergate.latch
 
-internal interface Latch {
-
-    companion object {
-        private object Noop : Latch {
-            override fun open() {}
-        }
-
-        internal fun composite(vararg latches: Latch): Latch {
-            return MultiLatch(latches.toList())
-        }
-
-        internal fun noop(): Latch = Noop
-    }
-
-    fun open()
-}
+data class Latch(val gateName: String, val name: String)

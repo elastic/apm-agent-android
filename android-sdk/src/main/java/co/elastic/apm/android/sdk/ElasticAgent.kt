@@ -31,9 +31,9 @@ import co.elastic.apm.android.sdk.features.conditionaldrop.ConditionalDropManage
 import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingManager
 import co.elastic.apm.android.sdk.features.exportergate.ExporterGateManager
-import co.elastic.apm.android.sdk.features.exportergate.latch.Latch
 import co.elastic.apm.android.sdk.features.sessionmanager.SessionIdGenerator
 import co.elastic.apm.android.sdk.features.sessionmanager.SessionManager
+import co.elastic.apm.android.sdk.features.sessionmanager.samplerate.SampleRateManager
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
 import co.elastic.apm.android.sdk.internal.opentelemetry.ElasticOpenTelemetryBuilder
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
@@ -46,6 +46,7 @@ import java.util.UUID
 class ElasticAgent private constructor(
     serviceManager: ServiceManager,
     configuration: Configuration,
+    sampleRateManager: SampleRateManager,
     private val exporterGateManager: ExporterGateManager,
     private val diskBufferingManager: DiskBufferingManager,
     private val apmServerConnectivityManager: ApmServerConnectivityManager,
@@ -59,6 +60,7 @@ class ElasticAgent private constructor(
         elasticClockManager.initialize()
         diskBufferingManager.initialize()
         centralConfigurationManager.initialize()
+        sampleRateManager.initialize()
         sessionManager.initialize()
         exporterGateManager.initialize()
     }
@@ -164,48 +166,36 @@ class ElasticAgent private constructor(
                     serviceManager,
                     signalBufferSize = internalSignalBufferSize
                 )
-                val diskBufferingManager =
-                    DiskBufferingManager.create(
-                        serviceManager, diskBufferingConfiguration,
-                        Latch.composite(
-                            exporterGateManager.createSpanGateLatch("Disk buffering"),
-                            exporterGateManager.createLogRecordLatch("Disk buffering"),
-                            exporterGateManager.createMetricGateLatch("Disk buffering")
-                        )
-                    )
+                val diskBufferingManager = DiskBufferingManager.create(
+                    serviceManager, exporterGateManager, diskBufferingConfiguration
+                )
                 val elasticClockManager = ElasticClockManager.create(
                     serviceManager,
+                    exporterGateManager,
                     systemTimeProvider,
                     internalSntpClient ?: SntpClient.create(),
-                    if (internalWaitForClock) {
-                        Latch.composite(
-                            exporterGateManager.createSpanGateLatch("Clock"),
-                            exporterGateManager.createLogRecordLatch("Clock")
-                        )
-                    } else Latch.noop()
+                    internalWaitForClock
                 )
                 val centralConfigurationManager = CentralConfigurationManager.create(
                     serviceManager,
                     systemTimeProvider,
+                    exporterGateManager,
                     serviceName,
                     deploymentEnvironment,
-                    connectivityHolder,
-                    Latch.composite(
-                        exporterGateManager.createSpanGateLatch("Central configuration"),
-                        exporterGateManager.createLogRecordLatch("Central configuration"),
-                        exporterGateManager.createMetricGateLatch("Central configuration")
-                    )
+                    connectivityHolder
                 )
                 val sessionManager = SessionManager.create(
                     serviceManager,
+                    exporterGateManager,
                     sessionIdGenerator ?: SessionIdGenerator { UUID.randomUUID().toString() },
-                    systemTimeProvider,
-                    Latch.composite(
-                        exporterGateManager.createSpanGateLatch("Session manager"),
-                        exporterGateManager.createLogRecordLatch("Session manager"),
-                        exporterGateManager.createMetricGateLatch("Session manager")
-                    )
+                    systemTimeProvider
                 )
+                val sampleRateManager = SampleRateManager.create(
+                    serviceManager,
+                    exporterGateManager,
+                    centralConfigurationManager.getCentralConfiguration()
+                )
+                sessionManager.addListener(sampleRateManager)
 
                 addSpanAttributesInterceptor(
                     elasticClockManager.getExportGateManager().getAttributesInterceptor()
@@ -239,6 +229,7 @@ class ElasticAgent private constructor(
                 return ElasticAgent(
                     serviceManager,
                     buildConfiguration(serviceManager),
+                    sampleRateManager,
                     exporterGateManager,
                     diskBufferingManager,
                     apmServerConnectivityManager,

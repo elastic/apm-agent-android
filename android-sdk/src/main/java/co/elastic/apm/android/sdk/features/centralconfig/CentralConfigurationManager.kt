@@ -22,11 +22,10 @@ import androidx.annotation.WorkerThread
 import co.elastic.apm.android.common.internal.logging.Elog
 import co.elastic.apm.android.sdk.connectivity.ConnectivityConfigurationHolder
 import co.elastic.apm.android.sdk.features.apmserver.ApmServerConnectivityManager
-import co.elastic.apm.android.sdk.features.exportergate.latch.Latch
+import co.elastic.apm.android.sdk.features.exportergate.ExporterGateManager
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import java.io.IOException
-import java.lang.ref.WeakReference
 import java.util.concurrent.TimeUnit
 import org.slf4j.Logger
 import org.stagemonitor.configuration.ConfigurationRegistry
@@ -36,7 +35,7 @@ class CentralConfigurationManager private constructor(
     private val configurationRegistry: ConfigurationRegistry,
     private val centralConfigurationSource: CentralConfigurationSource,
     private val connectivityHolder: ConnectivityHolder,
-    private val latch: WeakReference<Latch>
+    private val gateManager: ExporterGateManager
 ) : CentralConfigurationSource.Listener {
     private val backgroundWorkService by lazy { serviceManager.getBackgroundWorkService() }
     private val logger: Logger = Elog.getLogger()
@@ -70,7 +69,7 @@ class CentralConfigurationManager private constructor(
     }
 
     private fun openLatch() {
-        latch.get()?.open()
+        gateManager.openLatches(CentralConfigurationManager::class.java)
     }
 
     private fun scheduleDefault() {
@@ -102,10 +101,10 @@ class CentralConfigurationManager private constructor(
         internal fun create(
             serviceManager: ServiceManager,
             systemTimeProvider: SystemTimeProvider,
+            gateManager: ExporterGateManager,
             serviceName: String,
             serviceDeployment: String?,
-            connectivityHolder: ApmServerConnectivityManager.ConnectivityHolder,
-            gateLatch: Latch
+            connectivityHolder: ApmServerConnectivityManager.ConnectivityHolder
         ): CentralConfigurationManager {
             val centralConfigurationConnectivityHolder = ConnectivityHolder.fromApmServerConfig(
                 serviceName, serviceDeployment, connectivityHolder
@@ -118,12 +117,16 @@ class CentralConfigurationManager private constructor(
             val registry = ConfigurationRegistry.builder()
                 .addConfigSource(centralConfigurationSource)
                 .addOptionProvider(CentralConfiguration())
+            val latchName = "Central configuration"
+            gateManager.createSpanGateLatch(CentralConfigurationManager::class.java, latchName)
+            gateManager.createLogRecordLatch(CentralConfigurationManager::class.java, latchName)
+            gateManager.createMetricGateLatch(CentralConfigurationManager::class.java, latchName)
             val centralConfigurationManager = CentralConfigurationManager(
                 serviceManager,
                 registry.build(),
                 centralConfigurationSource,
                 centralConfigurationConnectivityHolder,
-                WeakReference(gateLatch)
+                gateManager
             )
             centralConfigurationSource.listener = centralConfigurationManager
             return centralConfigurationManager

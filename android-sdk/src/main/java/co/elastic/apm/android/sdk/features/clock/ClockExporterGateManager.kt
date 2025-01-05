@@ -18,7 +18,7 @@
  */
 package co.elastic.apm.android.sdk.features.clock
 
-import co.elastic.apm.android.sdk.features.exportergate.latch.Latch
+import co.elastic.apm.android.sdk.features.exportergate.ExporterGateManager
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.tools.AttributesOverrideLogRecordData
 import co.elastic.apm.android.sdk.tools.AttributesOverrideSpanData
@@ -29,13 +29,12 @@ import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.sdk.logs.data.LogRecordData
 import io.opentelemetry.sdk.trace.data.SpanData
-import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicBoolean
 
 class ClockExporterGateManager private constructor(
     systemTimeProvider: SystemTimeProvider,
-    private val timeOffsetNanosProvider: Provider<Long?>,
-    private val latch: WeakReference<Latch>
+    private val gateManager: ExporterGateManager,
+    private val timeOffsetNanosProvider: Provider<Long?>
 ) {
     private val gateOpened = AtomicBoolean(false)
     private val globalAttributesInterceptor =
@@ -59,7 +58,7 @@ class ClockExporterGateManager private constructor(
 
     internal fun onRemoteClockSet() {
         if (gateOpened.compareAndSet(false, true)) {
-            latch.get()?.open()
+            gateManager.openLatches(ClockExporterGateManager::class.java)
             globalAttributesInterceptor.setDelegate(Interceptor.noop())
             spanGateProcessingInterceptor = null
             logRecordGateProcessingInterceptor = null
@@ -69,13 +68,18 @@ class ClockExporterGateManager private constructor(
     companion object {
         internal fun create(
             systemTimeProvider: SystemTimeProvider,
+            gateManager: ExporterGateManager,
             timeOffsetNanosProvider: Provider<Long?>,
-            exporterGateLatch: Latch
+            waitForClock: Boolean
         ): ClockExporterGateManager {
+            if (waitForClock) {
+                gateManager.createSpanGateLatch(ClockExporterGateManager::class.java, "Clock")
+                gateManager.createLogRecordLatch(ClockExporterGateManager::class.java, "Clock")
+            }
             val manager = ClockExporterGateManager(
                 systemTimeProvider,
-                timeOffsetNanosProvider,
-                WeakReference(exporterGateLatch)
+                gateManager,
+                timeOffsetNanosProvider
             )
             return manager
         }

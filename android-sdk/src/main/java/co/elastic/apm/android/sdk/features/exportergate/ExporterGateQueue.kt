@@ -22,7 +22,7 @@ import co.elastic.apm.android.common.internal.logging.Elog
 import co.elastic.apm.android.sdk.features.exportergate.latch.Latch
 import co.elastic.apm.android.sdk.tools.interceptor.Interceptor
 import io.opentelemetry.sdk.common.CompletableResultCode
-import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
@@ -35,18 +35,22 @@ internal class ExporterGateQueue<DATA>(
 ) {
     private val queue by lazy { LinkedBlockingQueue<DATA>(capacity) }
     private val overflow by lazy { mutableListOf<DATA>() }
-    private val openLatches by lazy { CopyOnWriteArrayList<Latch>() }
+    private val openLatches by lazy { ConcurrentHashMap<Class<*>, Latch>() }
     private val pendingLatches = AtomicInteger(0)
     private val open = AtomicBoolean(true)
     private val started = AtomicBoolean(false)
     private var queuedInterceptor: Interceptor<DATA> = Interceptor.noop()
 
-    fun createLatch(name: String): Latch {
+    fun createLatch(holder: Class<*>, name: String) {
+        if (started.get()) {
+            throw IllegalStateException()
+        }
         open.compareAndSet(true, false)
+        val latch = Latch(gateName, name)
+        if (openLatches.put(holder, latch) != null) {
+            throw IllegalStateException()
+        }
         pendingLatches.incrementAndGet()
-        val latch = InnerLatch(name)
-        openLatches.add(latch)
-        return latch
     }
 
     fun setQueueProcessingInterceptor(interceptor: Interceptor<DATA>) {
@@ -101,8 +105,8 @@ internal class ExporterGateQueue<DATA>(
         }
     }
 
-    internal fun getOpenLatches(): List<Latch> {
-        return openLatches
+    internal fun getOpenLatches(): Collection<Latch> {
+        return openLatches.values
     }
 
     interface Listener {
@@ -110,21 +114,13 @@ internal class ExporterGateQueue<DATA>(
         fun onStartEnqueuing(id: Int)
     }
 
-    inner class InnerLatch(private val name: String) : Latch {
-        private val opened = AtomicBoolean(false)
-
-        override fun open() {
-            if (opened.compareAndSet(false, true)) {
-                openLatches.remove(this)
-                val size = pendingLatches.decrementAndGet()
-                if (size == 0) {
-                    openGate()
-                }
+    internal fun openLatch(holder: Class<*>): Boolean {
+        return openLatches.remove(holder)?.let {
+            val size = pendingLatches.decrementAndGet()
+            if (size == 0) {
+                openGate()
             }
-        }
-
-        override fun toString(): String {
-            return "[$gateName] Latch: $name"
-        }
+            true
+        } ?: false
     }
 }

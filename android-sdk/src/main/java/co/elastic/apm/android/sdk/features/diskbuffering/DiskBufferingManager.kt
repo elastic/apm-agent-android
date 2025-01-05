@@ -23,7 +23,7 @@ import co.elastic.apm.android.sdk.exporters.configurable.MutableLogRecordExporte
 import co.elastic.apm.android.sdk.exporters.configurable.MutableMetricExporter
 import co.elastic.apm.android.sdk.exporters.configurable.MutableSpanExporter
 import co.elastic.apm.android.sdk.features.diskbuffering.tools.DiskManager
-import co.elastic.apm.android.sdk.features.exportergate.latch.Latch
+import co.elastic.apm.android.sdk.features.exportergate.ExporterGateManager
 import co.elastic.apm.android.sdk.features.persistence.SimpleTemporaryFileProvider
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import io.opentelemetry.contrib.disk.buffering.LogRecordFromDiskExporter
@@ -37,13 +37,12 @@ import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.trace.export.SpanExporter
 import java.io.IOException
-import java.lang.ref.WeakReference
 import java.util.concurrent.TimeUnit
 
 class DiskBufferingManager private constructor(
     private val serviceManager: ServiceManager,
+    private val gateManager: ExporterGateManager,
     private val configuration: DiskBufferingConfiguration,
-    private var gateLatch: WeakReference<Latch>,
     private val exportFromDiskIntervalMillis: Long = TimeUnit.SECONDS.toMillis(5)
 ) {
     private var spanExporter: MutableSpanExporter? = null
@@ -141,7 +140,7 @@ class DiskBufferingManager private constructor(
     }
 
     private fun openLatch() {
-        gateLatch.get()?.open()
+        gateManager.openLatches(DiskBufferingManager::class.java)
     }
 
     private fun enableDiskBuffering(enabled: Boolean) {
@@ -208,13 +207,17 @@ class DiskBufferingManager private constructor(
     companion object {
         internal fun create(
             serviceManager: ServiceManager,
-            diskBufferingConfiguration: DiskBufferingConfiguration,
-            gateLatch: Latch
+            gateManager: ExporterGateManager,
+            diskBufferingConfiguration: DiskBufferingConfiguration
         ): DiskBufferingManager {
+            val latchName = "Disk buffering"
+            gateManager.createSpanGateLatch(DiskBufferingManager::class.java, latchName)
+            gateManager.createLogRecordLatch(DiskBufferingManager::class.java, latchName)
+            gateManager.createMetricGateLatch(DiskBufferingManager::class.java, latchName)
             return DiskBufferingManager(
                 serviceManager,
-                diskBufferingConfiguration,
-                WeakReference(gateLatch)
+                gateManager,
+                diskBufferingConfiguration
             )
         }
     }

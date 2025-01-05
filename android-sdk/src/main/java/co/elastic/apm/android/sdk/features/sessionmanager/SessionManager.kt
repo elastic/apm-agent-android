@@ -19,7 +19,7 @@
 package co.elastic.apm.android.sdk.features.sessionmanager
 
 import androidx.annotation.GuardedBy
-import co.elastic.apm.android.sdk.features.exportergate.latch.Latch
+import co.elastic.apm.android.sdk.features.exportergate.ExporterGateManager
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import co.elastic.apm.android.sdk.internal.services.kotlin.backgroundwork.BackgroundWorkService
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
@@ -28,7 +28,6 @@ import co.elastic.apm.android.sdk.session.SessionProvider
 import co.elastic.apm.android.sdk.tools.cache.CacheHandler
 import co.elastic.apm.android.sdk.tools.cache.PreferencesLongCacheHandler
 import co.elastic.apm.android.sdk.tools.cache.PreferencesStringCacheHandler
-import java.lang.ref.WeakReference
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
 
@@ -39,7 +38,7 @@ class SessionManager private constructor(
     private val idGenerator: SessionIdGenerator,
     private val systemTimeProvider: SystemTimeProvider,
     private val backgroundWorkService: BackgroundWorkService,
-    private val gateLatch: WeakReference<Latch>
+    private val gateManager: ExporterGateManager
 ) : SessionProvider {
     @GuardedBy("sessionLock")
     private var session: InnerSession? = null
@@ -52,10 +51,14 @@ class SessionManager private constructor(
 
         internal fun create(
             serviceManager: ServiceManager,
+            gateManager: ExporterGateManager,
             idGenerator: SessionIdGenerator,
-            systemTimeProvider: SystemTimeProvider,
-            gateLatch: Latch
+            systemTimeProvider: SystemTimeProvider
         ): SessionManager {
+            val latchName = "Session manager"
+            gateManager.createSpanGateLatch(SessionManager::class.java, latchName)
+            gateManager.createLogRecordLatch(SessionManager::class.java, latchName)
+            gateManager.createMetricGateLatch(SessionManager::class.java, latchName)
             return SessionManager(
                 PreferencesStringCacheHandler(
                     "session_id",
@@ -72,7 +75,7 @@ class SessionManager private constructor(
                 idGenerator,
                 systemTimeProvider,
                 serviceManager.getBackgroundWorkService(),
-                WeakReference(gateLatch)
+                gateManager
             )
         }
     }
@@ -88,7 +91,7 @@ class SessionManager private constructor(
                     )
                 }
             }
-            gateLatch.get()?.open()
+            gateManager.openLatches(SessionManager::class.java)
         }
     }
 

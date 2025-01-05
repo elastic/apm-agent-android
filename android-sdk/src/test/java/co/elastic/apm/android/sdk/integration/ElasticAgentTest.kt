@@ -508,7 +508,7 @@ class ElasticAgentTest {
         assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
 
-        // Next: Sample rate: 0.0 and recording true.
+        // Next: Sample rate: 0.0 and recording true, before evaluating sample rate.
         inMemoryExporters.resetExporters()
         stubAllHttpResponses {
             withStatus(200)
@@ -532,6 +532,20 @@ class ElasticAgentTest {
         sendSpan()
         sendLog()
         sendMetric()
+
+        assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
+
+        // Ensure that the config is persisted.
+        closeAgent()
+        agent = inMemoryAgentBuilder().build()
+
+        sendSpan()
+        sendLog()
+        sendMetric()
+
+        awaitForOpenGates()
 
         assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
         assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()

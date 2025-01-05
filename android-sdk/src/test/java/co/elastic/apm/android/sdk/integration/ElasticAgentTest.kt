@@ -717,6 +717,8 @@ class ElasticAgentTest {
 
         sendSpan()
 
+        awaitForOpenGates()
+
         assertThat(inMemoryExporters.getFinishedSpans().first()).startsAt(
             expectedCurrentTime * 1_000_000
         )
@@ -748,6 +750,8 @@ class ElasticAgentTest {
             .build()
 
         sendSpan()
+
+        awaitForOpenGates()
 
         assertThat(inMemoryExporters.getFinishedSpans().first()).startsAt(
             currentTime.get() * 1_000_000
@@ -781,6 +785,8 @@ class ElasticAgentTest {
 
         sendSpan()
 
+        awaitForOpenGates()
+
         assertThat(inMemoryExporters.getFinishedSpans().first()).startsAt(
             currentTime.get() * 1_000_000
         )
@@ -799,6 +805,8 @@ class ElasticAgentTest {
         agent.getElasticClockManager().getTimeOffsetManager().sync()
 
         sendSpan()
+
+        awaitForOpenGates()
 
         assertThat(inMemoryExporters.getFinishedSpans().first()).startsAt(
             (timeOffset + localTimeReference + elapsedTime) * 1_000_000
@@ -819,6 +827,8 @@ class ElasticAgentTest {
             .build()
 
         sendSpan()
+
+        awaitForOpenGates()
 
         assertThat(inMemoryExporters.getFinishedSpans().first()).startsAt(
             currentTime.get() * 1_000_000

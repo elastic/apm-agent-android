@@ -19,9 +19,7 @@
 package co.elastic.apm.android.sdk.features.sessionmanager
 
 import androidx.annotation.GuardedBy
-import co.elastic.apm.android.sdk.features.exportergate.ExporterGateManager
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
-import co.elastic.apm.android.sdk.internal.services.kotlin.backgroundwork.BackgroundWorkService
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.session.Session
 import co.elastic.apm.android.sdk.session.SessionProvider
@@ -36,9 +34,7 @@ class SessionManager private constructor(
     private val cachedSessionIdExpireTime: CacheHandler<Long>,
     private val cachedSessionIdIdleTime: CacheHandler<Long>,
     private val idGenerator: SessionIdGenerator,
-    private val systemTimeProvider: SystemTimeProvider,
-    private val backgroundWorkService: BackgroundWorkService,
-    private val gateManager: ExporterGateManager
+    private val systemTimeProvider: SystemTimeProvider
 ) : SessionProvider {
     @GuardedBy("sessionLock")
     private var session: InnerSession? = null
@@ -51,14 +47,9 @@ class SessionManager private constructor(
 
         internal fun create(
             serviceManager: ServiceManager,
-            gateManager: ExporterGateManager,
             idGenerator: SessionIdGenerator,
             systemTimeProvider: SystemTimeProvider
         ): SessionManager {
-            val latchName = "Session manager"
-            gateManager.createSpanGateLatch(SessionManager::class.java, latchName)
-            gateManager.createLogRecordLatch(SessionManager::class.java, latchName)
-            gateManager.createMetricGateLatch(SessionManager::class.java, latchName)
             return SessionManager(
                 PreferencesStringCacheHandler(
                     "session_id",
@@ -73,31 +64,26 @@ class SessionManager private constructor(
                     serviceManager.getPreferencesService()
                 ),
                 idGenerator,
-                systemTimeProvider,
-                serviceManager.getBackgroundWorkService(),
-                gateManager
+                systemTimeProvider
             )
         }
     }
 
     internal fun initialize() {
-        backgroundWorkService.submit {
-            cachedSessionId.retrieve()?.let { sessionId ->
-                synchronized(sessionLock) {
-                    session = InnerSession(
-                        sessionId,
-                        cachedSessionIdExpireTime.retrieve() ?: 0,
-                        cachedSessionIdIdleTime.retrieve() ?: 0
-                    )
-                }
+        cachedSessionId.retrieve()?.let { sessionId ->
+            synchronized(sessionLock) {
+                session = InnerSession(
+                    sessionId,
+                    cachedSessionIdExpireTime.retrieve() ?: 0,
+                    cachedSessionIdIdleTime.retrieve() ?: 0
+                )
             }
-            gateManager.openLatches(SessionManager::class.java)
         }
     }
 
     override fun getSession(): Session? = synchronized(sessionLock) {
         var currentSession = session
-        if (currentSession != null && !isValid(currentSession)) {
+        if (currentSession == null || !isValid(currentSession)) {
             currentSession = generateSession()
             setSession(currentSession)
         }
@@ -143,14 +129,14 @@ class SessionManager private constructor(
     private fun generateSession(): InnerSession? {
         val generatedId = idGenerator.generate()
         if (generatedId != null) {
-            InnerSession(generatedId, getSessionIdExpireTime(), getNextIdleTime())
+            return InnerSession(generatedId, getSessionIdExpireTime(), getNextIdleTime())
         }
         return null
     }
 
     private fun isValid(session: InnerSession): Boolean {
         val currentTime = systemTimeProvider.getCurrentTimeMillis()
-        return currentTime < session.idleTime || currentTime < session.expireTime
+        return currentTime < session.idleTime && currentTime < session.expireTime
     }
 
     private fun getSessionIdExpireTime(): Long {

@@ -186,7 +186,6 @@ class ElasticAgent private constructor(
                 )
                 val sessionManager = SessionManager.create(
                     serviceManager,
-                    exporterGateManager,
                     sessionIdGenerator ?: SessionIdGenerator { UUID.randomUUID().toString() },
                     systemTimeProvider
                 )
@@ -215,6 +214,9 @@ class ElasticAgent private constructor(
                 val conditionalDropManager = ConditionalDropManager()
                 conditionalDropManager.dropWhen {
                     !centralConfigurationManager.getCentralConfiguration().isRecording()
+                }
+                conditionalDropManager.dropWhen {
+                    !sampleRateManager.allowSignalExporting()
                 }
 
                 addInternalInterceptors(

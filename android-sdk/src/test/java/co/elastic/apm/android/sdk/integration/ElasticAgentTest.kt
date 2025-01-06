@@ -891,6 +891,10 @@ class ElasticAgentTest {
         sendLog()
         sendMetric()
 
+        await.atMost(Duration.ofSeconds(1)).until {
+            agent.getExporterGateManager().metricGateIsOpen()
+        }
+
         // Spans and logs aren't exported yet.
         assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
         assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()
@@ -1134,6 +1138,8 @@ class ElasticAgentTest {
                 internalSystemTimeProvider = systemTimeProvider
             }
             .build()
+
+        awaitForOpenGates()
 
         sendSpan()
         sendLog()

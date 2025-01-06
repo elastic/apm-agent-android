@@ -539,7 +539,11 @@ class ElasticAgentTest {
 
         // Ensure that the config is persisted.
         closeAgent()
-        agent = inMemoryAgentBuilder().build()
+        stubAllHttpResponses {
+            withStatus(200)
+            withBody("Not a json")
+        }
+        agent = inMemoryAgentBuilder(wireMock.url("/")).build()
 
         sendSpan()
         sendLog()
@@ -550,6 +554,19 @@ class ElasticAgentTest {
         assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
         assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()
         assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
+
+        // When central config fails and the session gets reset, go with default behavior.
+        takeRequest()
+        agent.getSessionManager().clearSession()
+        inMemoryExporters.resetExporters()
+
+        sendSpan()
+        sendLog()
+        sendMetric()
+
+        assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
     }
 
     @Test

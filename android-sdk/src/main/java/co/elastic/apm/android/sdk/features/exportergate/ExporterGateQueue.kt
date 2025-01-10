@@ -68,7 +68,7 @@ internal class ExporterGateQueue<DATA>(
         return CompletableResultCode.ofSuccess()
     }
 
-    internal fun getProcessedItems(): Collection<DATA> {
+    internal fun getEnqueuedItems(): Collection<DATA> {
         val items = mutableListOf<DATA>()
         var item = queue.poll()
         while (item != null) {

@@ -72,6 +72,7 @@ internal class ExporterGateQueue<DATA>(
         val items = mutableListOf<DATA>()
         var item = queue.poll()
         while (item != null) {
+            items.add(item)
             item = queue.poll()
         }
         items.addAll(overflow)

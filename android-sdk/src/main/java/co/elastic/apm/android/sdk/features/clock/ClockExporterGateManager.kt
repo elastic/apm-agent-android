@@ -18,6 +18,7 @@
  */
 package co.elastic.apm.android.sdk.features.clock
 
+import co.elastic.apm.android.common.internal.logging.Elog
 import co.elastic.apm.android.sdk.features.exportergate.ExporterGateManager
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.tools.AttributesOverrideLogRecordData
@@ -44,17 +45,18 @@ class ClockExporterGateManager private constructor(
     private val spanAttrIntercepted = AtomicInteger(0)
     private val logRecordAttrIntercepted = AtomicInteger(0)
     private val spanAttributesInterceptor = MutableInterceptor(
-        ElapsedTimeAttributeInterceptor(
-            systemTimeProvider,
-            spanAttrIntercepted::incrementAndGet
-        )
+        ElapsedTimeAttributeInterceptor(systemTimeProvider) {
+            spanAttrIntercepted.incrementAndGet()
+            logger.debug("Incrementing intercepted span attrs.")
+        }
     )
     private val logRecordAttributesInterceptor = MutableInterceptor(
-        ElapsedTimeAttributeInterceptor(
-            systemTimeProvider,
-            logRecordAttrIntercepted::incrementAndGet
-        )
+        ElapsedTimeAttributeInterceptor(systemTimeProvider) {
+            logRecordAttrIntercepted.incrementAndGet()
+            logger.debug("Incrementing intercepted log attrs.")
+        }
     )
+    private val logger = Elog.getLogger()
 
     internal fun getSpanAttributesInterceptor(): Interceptor<Attributes> {
         return spanAttributesInterceptor
@@ -77,6 +79,7 @@ class ClockExporterGateManager private constructor(
             gateManager.openLatches(ClockExporterGateManager::class.java)
             spanAttributesInterceptor.setDelegate(Interceptor.noop())
             logRecordAttributesInterceptor.setDelegate(Interceptor.noop())
+            logger.debug("Remote clock set, clock gate manager cleared.")
         }
     }
 
@@ -118,6 +121,7 @@ class ClockExporterGateManager private constructor(
 
         private fun intercept(spans: Collection<SpanData>): Collection<SpanData> {
             if (spanAttrIntercepted.get() == 0) {
+                logger.debug("Skipping span attr intercept.")
                 return spans
             }
             val intercepted = mutableListOf<SpanData>()
@@ -136,6 +140,7 @@ class ClockExporterGateManager private constructor(
                     timeOffsetNanosProvider.get()
                 )
                 spanAttrIntercepted.decrementAndGet()
+                logger.debug("Decrementing intercepted span attrs.")
                 return updatedSpanData
             }
             return span
@@ -158,6 +163,7 @@ class ClockExporterGateManager private constructor(
 
         private fun intercept(logs: Collection<LogRecordData>): Collection<LogRecordData> {
             if (logRecordAttrIntercepted.get() == 0) {
+                logger.debug("Skipping log attr intercept.")
                 return logs
             }
             val intercepted = mutableListOf<LogRecordData>()
@@ -176,6 +182,7 @@ class ClockExporterGateManager private constructor(
                     timeOffsetNanosProvider.get()
                 )
                 logRecordAttrIntercepted.decrementAndGet()
+                logger.debug("Decrementing intercepted log attrs.")
                 return updatedLogRecordData
             }
             return log

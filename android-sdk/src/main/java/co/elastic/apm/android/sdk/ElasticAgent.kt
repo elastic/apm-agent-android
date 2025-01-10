@@ -212,9 +212,9 @@ class ElasticAgent private constructor(
                 }
 
                 addInternalInterceptors(
-                    elasticClockManager,
                     diskBufferingManager,
                     conditionalDropManager,
+                    elasticClockManager,
                     exporterGateManager
                 )
                 setClock(elasticClockManager.getClock())
@@ -236,24 +236,15 @@ class ElasticAgent private constructor(
         }
 
         private fun addInternalInterceptors(
-            elasticClockManager: ElasticClockManager,
             diskBufferingManager: DiskBufferingManager,
             conditionalDropManager: ConditionalDropManager,
+            elasticClockManager: ElasticClockManager,
             exporterGateManager: ExporterGateManager
         ) {
-            addClockExporterInterceptors(elasticClockManager)
             addDiskBufferingInterceptors(diskBufferingManager)
             addConditionalDropInterceptors(conditionalDropManager)
+            addClockExporterInterceptors(elasticClockManager)
             addExporterGateInterceptors(exporterGateManager)
-        }
-
-        private fun addClockExporterInterceptors(elasticClockManager: ElasticClockManager) {
-            addSpanExporterInterceptor {
-                elasticClockManager.getClockExportGateManager().createSpanExporterDelegator(it)
-            }
-            addLogRecordExporterInterceptor {
-                elasticClockManager.getClockExportGateManager().createLogRecordExporterDelegator(it)
-            }
         }
 
         private fun addDiskBufferingInterceptors(diskBufferingManager: DiskBufferingManager) {
@@ -271,6 +262,15 @@ class ElasticAgent private constructor(
             }
             addMetricExporterInterceptor {
                 conditionalDropManager.createConditionalDropMetricExporter(it)
+            }
+        }
+
+        private fun addClockExporterInterceptors(elasticClockManager: ElasticClockManager) {
+            addSpanExporterInterceptor {
+                elasticClockManager.getClockExportGateManager().createSpanExporterDelegator(it)
+            }
+            addLogRecordExporterInterceptor {
+                elasticClockManager.getClockExportGateManager().createLogRecordExporterDelegator(it)
             }
         }
 

@@ -73,8 +73,6 @@ import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 import org.awaitility.core.ConditionTimeoutException
 import org.awaitility.kotlin.await
-import org.awaitility.kotlin.matches
-import org.awaitility.kotlin.untilCallTo
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -707,10 +705,9 @@ class ElasticAgentTest {
             }
             .build()
 
-        await untilCallTo {
-            agent.getElasticClockManager().getTimeOffsetManager().getTimeOffset()
-        } matches {
-            it == expectedCurrentTime
+        await.until {
+            agent.getElasticClockManager().getTimeOffsetManager()
+                .getTimeOffset() == expectedCurrentTime
         }
 
         sendSpan()
@@ -903,15 +900,11 @@ class ElasticAgentTest {
         // Time gets eventually set.
         agent.getElasticClockManager().getTimeOffsetManager().sync()
 
-        await untilCallTo {
-            inMemoryExporters.getFinishedSpans()
-        } matches {
-            it?.isNotEmpty() == true
+        await.until {
+            inMemoryExporters.getFinishedSpans().isNotEmpty()
         }
-        await untilCallTo {
-            inMemoryExporters.getFinishedLogRecords()
-        } matches {
-            it?.isNotEmpty() == true
+        await.until {
+            inMemoryExporters.getFinishedLogRecords().isNotEmpty()
         }
 
         val spanData = inMemoryExporters.getFinishedSpans().first()
@@ -933,6 +926,83 @@ class ElasticAgentTest {
         assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
+
+        assertThat(inMemoryExporters.getFinishedSpans().first()).startsAt(
+            expectedCurrentTime * 1_000_000
+        ).hasAttributes(ElasticAgentRule.SPAN_DEFAULT_ATTRS)
+        assertThat(inMemoryExporters.getFinishedLogRecords().first())
+            .hasTimestamp(0)
+            .hasObservedTimestamp(expectedCurrentTime * 1_000_000)
+            .hasAttributes(ElasticAgentRule.LOG_DEFAULT_ATTRS)
+    }
+
+    @Test
+    fun `Verify clock initialization behavior when processor delays signals`() {
+        val localTimeReference = 1577836800000L
+        val timeOffset = 500L
+        val expectedCurrentTime = localTimeReference + timeOffset
+        val sntpClient = mockk<SntpClient>()
+        val currentTime = AtomicLong(12345)
+        val systemTimeProvider = spyk(SystemTimeProvider.get())
+        every { systemTimeProvider.getCurrentTimeMillis() }.answers {
+            currentTime.get()
+        }
+        every { systemTimeProvider.getElapsedRealTime() }.returns(0)
+        every { sntpClient.fetchTimeOffset(localTimeReference) }.returns(
+            SntpClient.Response.Error(SntpClient.ErrorType.TRY_LATER)
+        ).andThen(
+            SntpClient.Response.Success(timeOffset)
+        )
+        every { sntpClient.close() } just Runs
+        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
+            .setUrl("http://none")
+            .setDiskBufferingConfiguration(DiskBufferingConfiguration.disabled())
+            .setSessionIdGenerator { "session-id" }
+            .apply {
+                internalSntpClient = sntpClient
+                internalSystemTimeProvider = systemTimeProvider
+                internalExporterProviderInterceptor = inMemoryExportersInterceptor
+            }
+            .build()
+
+        sendSpan()
+        sendLog()
+
+        await.atMost(Duration.ofSeconds(1)).until {
+            agent.getExporterGateManager().metricGateIsOpen()
+        }
+
+        // Spans and logs aren't exported yet.
+        assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()
+
+        // Time gets eventually set.
+        agent.getElasticClockManager().getTimeOffsetManager().sync()
+
+        await.until {
+            inMemoryExporters.getFinishedSpans().isNotEmpty()
+        }
+        await.until {
+            inMemoryExporters.getFinishedLogRecords().isNotEmpty()
+        }
+
+        val spanData = inMemoryExporters.getFinishedSpans().first()
+        assertThat(spanData).startsAt(
+            expectedCurrentTime * 1_000_000
+        ).hasAttributes(ElasticAgentRule.SPAN_DEFAULT_ATTRS)
+        val logRecordData = inMemoryExporters.getFinishedLogRecords().first()
+        assertThat(logRecordData).hasTimestamp(expectedCurrentTime * 1_000_000)
+            .hasObservedTimestamp(currentTime.get() * 1_000_000)
+            .hasAttributes(ElasticAgentRule.LOG_DEFAULT_ATTRS)
+
+        // Send new data just for fun
+        inMemoryExporters.resetExporters()
+
+        sendSpan()
+        sendLog()
+
+        assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
 
         assertThat(inMemoryExporters.getFinishedSpans().first()).startsAt(
             expectedCurrentTime * 1_000_000
@@ -968,10 +1038,8 @@ class ElasticAgentTest {
             }
             .build()
 
-        await untilCallTo {
-            agent.getElasticClockManager().getClock().now()
-        } matches {
-            it == expectedCurrentTime * 1_000_000
+        await.until {
+            agent.getElasticClockManager().getClock().now() == expectedCurrentTime * 1_000_000
         }
 
         sendSpan()
@@ -1259,11 +1327,7 @@ class ElasticAgentTest {
 
     private fun awaitAndTrackTimeMillis(condition: () -> Boolean): Long {
         val waitStart = System.nanoTime()
-        await untilCallTo {
-            condition()
-        } matches {
-            it == true
-        }
+        await.until(condition)
         val waitTimeMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - waitStart)
         return waitTimeMillis
     }

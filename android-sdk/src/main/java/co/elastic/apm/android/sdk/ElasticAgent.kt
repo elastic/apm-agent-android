@@ -197,10 +197,11 @@ class ElasticAgent private constructor(
                 sessionManager.addListener(sampleRateManager)
 
                 addSpanAttributesInterceptor(
-                    elasticClockManager.getClockExportGateManager().getAttributesInterceptor()
+                    elasticClockManager.getClockExportGateManager().getSpanAttributesInterceptor()
                 )
                 addLogRecordAttributesInterceptor(
-                    elasticClockManager.getClockExportGateManager().getAttributesInterceptor()
+                    elasticClockManager.getClockExportGateManager()
+                        .getLogRecordAttributesInterceptor()
                 )
 
                 val conditionalDropManager = ConditionalDropManager()

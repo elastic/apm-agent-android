@@ -16,27 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.opentelemetry.processors.spans
+package co.elastic.apm.android.sdk.tools.cache
 
-import co.elastic.apm.android.sdk.tools.interceptor.Interceptor
-import io.opentelemetry.api.common.Attributes
-import io.opentelemetry.context.Context
-import io.opentelemetry.sdk.trace.ReadWriteSpan
-import io.opentelemetry.sdk.trace.ReadableSpan
-import io.opentelemetry.sdk.trace.SpanProcessor
+import co.elastic.apm.android.sdk.internal.services.kotlin.preferences.PreferencesService
 
-internal class SpanAttributesProcessor(private val interceptor: Interceptor<Attributes>) :
-    SpanProcessor {
+class PreferencesLongCacheHandler(
+    private val key: String,
+    private val preferencesService: PreferencesService
+) : CacheHandler<Long> {
 
-    override fun onStart(parentContext: Context, span: ReadWriteSpan) {
-        span.setAllAttributes(interceptor.intercept(span.attributes))
+    override fun retrieve(): Long {
+        return preferencesService.retrieveLong(key, 0)
     }
 
-    override fun isStartRequired(): Boolean = true
-
-    override fun onEnd(span: ReadableSpan) {
-
+    override fun clear() {
+        preferencesService.remove(key)
     }
 
-    override fun isEndRequired(): Boolean = false
+    override fun store(value: Long) {
+        preferencesService.store(key, value)
+    }
 }

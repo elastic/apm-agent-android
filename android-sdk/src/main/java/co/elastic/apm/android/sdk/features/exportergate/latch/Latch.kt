@@ -16,12 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.tools
+package co.elastic.apm.android.sdk.features.exportergate.latch
 
-interface CacheHandler<T> {
-    fun retrieve(): T?
-
-    fun store(value: T)
-
-    fun clear()
-}
+data class Latch(val gateName: String, val name: String)

@@ -16,24 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.tools
+package co.elastic.apm.android.sdk.tools.interceptor
 
-import co.elastic.apm.android.sdk.internal.services.kotlin.preferences.PreferencesService
+fun interface Interceptor<T> {
 
-class PreferencesStringCacheHandler(
-    private val key: String,
-    private val preferencesService: PreferencesService
-) : CacheHandler<String> {
+    companion object {
+        @JvmStatic
+        fun <T> composite(interceptors: List<Interceptor<T>>): Interceptor<T> {
+            if (interceptors.isEmpty()) {
+                return noop()
+            }
 
-    override fun retrieve(): String? {
-        return preferencesService.retrieveString(key)
+            if (interceptors.size == 1) {
+                return interceptors.first()
+            }
+
+            return MultiInterceptor(interceptors)
+        }
+
+        @JvmStatic
+        fun <T> noop(): Interceptor<T> {
+            return NoopInterceptor()
+        }
     }
 
-    override fun clear() {
-        preferencesService.remove(key)
-    }
-
-    override fun store(value: String) {
-        preferencesService.store(key, value)
-    }
+    fun intercept(item: T): T
 }

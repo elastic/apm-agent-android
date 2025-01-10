@@ -16,29 +16,40 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.api
+package co.elastic.apm.android.sdk.tools.cache
 
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
-import io.opentelemetry.api.OpenTelemetry
-import io.opentelemetry.sdk.OpenTelemetrySdk
-import java.io.Closeable
+import co.elastic.apm.android.sdk.tools.provider.StringProvider
 
-abstract class ElasticOtelAgent(
+class PreferencesCachedStringProvider(
     private val serviceManager: ServiceManager,
-    private val configuration: Configuration
-) : Closeable {
+    private val key: String,
+    private val provider: StringProvider
+) : CacheHandler<String>, StringProvider {
+    private val preferences by lazy { serviceManager.getPreferencesService() }
 
-    abstract fun getOpenTelemetry(): OpenTelemetry
-
-    final override fun close() {
-        onClose()
-        configuration.openTelemetrySdk.close()
-        serviceManager.close()
+    override fun retrieve(): String? {
+        return preferences.retrieveString(key)
     }
 
-    protected abstract fun onClose()
+    override fun clear() {
+        preferences.remove(key)
+    }
 
-    data class Configuration(
-        val openTelemetrySdk: OpenTelemetrySdk
-    )
+    override fun store(value: String) {
+        preferences.store(key, value)
+    }
+
+    override fun get(): String {
+        val retrieved = retrieve()
+        if (retrieved != null) {
+            return retrieved
+        }
+
+        val computed = provider.get()
+
+        store(computed)
+
+        return computed
+    }
 }

@@ -18,27 +18,82 @@
  */
 package co.elastic.apm.android.sdk.features.clock
 
-import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElasticClock
+import co.elastic.apm.android.sdk.features.exportergate.ExporterGateManager
+import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElapsedTimeOffsetClock
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
-import java.util.concurrent.TimeUnit
+import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
+import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
+import io.opentelemetry.sdk.common.Clock
+import java.util.concurrent.atomic.AtomicBoolean
 
-internal class ElasticClockManager internal constructor(
-    serviceManager: ServiceManager,
-    private val clock: ElasticClock
-) {
-    private val backgroundWorkService by lazy { serviceManager.getBackgroundWorkService() }
+internal class ElasticClockManager private constructor(
+    systemTimeProvider: SystemTimeProvider,
+    private val timeOffsetManager: RemoteTimeOffsetManager,
+    private val exportGateManager: ClockExporterGateManager
+) : RemoteTimeOffsetManager.Listener {
+    private val elapsedTimeOffsetClock = ElapsedTimeOffsetClock(systemTimeProvider)
+    private val systemTimeClock = SystemTimeClock(systemTimeProvider)
+    private val clock = MutableClock(systemTimeClock)
+    private val usingRemoteTime = AtomicBoolean(false)
+
+    companion object {
+        internal fun create(
+            serviceManager: ServiceManager,
+            gateManager: ExporterGateManager,
+            systemTimeProvider: SystemTimeProvider,
+            sntpClient: SntpClient,
+            waitForClock: Boolean
+        ): ElasticClockManager {
+            val timeOffsetManager =
+                RemoteTimeOffsetManager.create(serviceManager, systemTimeProvider, sntpClient)
+            val exportGateManager =
+                ClockExporterGateManager.create(systemTimeProvider, gateManager, {
+                    timeOffsetManager.getTimeOffset()?.let { it * 1_000_000 }
+                }, waitForClock)
+            val clockManager =
+                ElasticClockManager(systemTimeProvider, timeOffsetManager, exportGateManager)
+            timeOffsetManager.setListener(clockManager)
+            return clockManager
+        }
+    }
 
     internal fun initialize() {
-        backgroundWorkService.schedulePeriodicTask(SyncHandler(), 1, TimeUnit.MINUTES)
+        timeOffsetManager.initialize()
     }
 
     internal fun close() {
-        clock.close()
+        timeOffsetManager.close()
     }
 
-    private inner class SyncHandler : Runnable {
-        override fun run() {
-            clock.sync()
+    internal fun getClock(): Clock {
+        return clock
+    }
+
+    internal fun getTimeOffsetManager(): RemoteTimeOffsetManager {
+        return timeOffsetManager
+    }
+
+    internal fun getClockExportGateManager(): ClockExporterGateManager {
+        return exportGateManager
+    }
+
+    private fun onClockChange() {
+        if (usingRemoteTime.get()) {
+            exportGateManager.onRemoteClockSet()
+        }
+    }
+
+    override fun onTimeOffsetChanged() {
+        val timeOffset = timeOffsetManager.getTimeOffset()
+        if (timeOffset != null) {
+            elapsedTimeOffsetClock.setOffset(timeOffset)
+            if (usingRemoteTime.compareAndSet(false, true)) {
+                clock.setDelegate(elapsedTimeOffsetClock)
+                onClockChange()
+            }
+        } else if (usingRemoteTime.compareAndSet(true, false)) {
+            clock.setDelegate(systemTimeClock)
+            onClockChange()
         }
     }
 }

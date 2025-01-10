@@ -16,29 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.tools
+package co.elastic.apm.android.sdk.features.clock
 
-fun interface Interceptor<T> {
+import io.opentelemetry.sdk.common.Clock
+import java.util.concurrent.atomic.AtomicReference
 
-    companion object {
-        @JvmStatic
-        fun <T> composite(interceptors: List<Interceptor<T>>): Interceptor<T> {
-            if (interceptors.isEmpty()) {
-                return noop()
-            }
+internal class MutableClock(initialClock: Clock) : Clock {
+    private val delegate: AtomicReference<Clock> = AtomicReference(initialClock)
 
-            if (interceptors.size == 1) {
-                return interceptors.first()
-            }
-
-            return MultiInterceptor(interceptors)
-        }
-
-        @JvmStatic
-        fun <T> noop(): Interceptor<T> {
-            return NoopInterceptor()
-        }
+    override fun now(): Long {
+        return delegate.get().now()
     }
 
-    fun intercept(item: T): T
+    override fun nanoTime(): Long {
+        return delegate.get().nanoTime()
+    }
+
+    internal fun setDelegate(clock: Clock) {
+        delegate.set(clock)
+    }
 }

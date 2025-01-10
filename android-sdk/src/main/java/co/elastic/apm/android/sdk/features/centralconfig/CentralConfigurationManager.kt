@@ -20,39 +20,56 @@ package co.elastic.apm.android.sdk.features.centralconfig
 
 import androidx.annotation.WorkerThread
 import co.elastic.apm.android.common.internal.logging.Elog
-import co.elastic.apm.android.sdk.connectivity.ConnectivityConfigurationManager
+import co.elastic.apm.android.sdk.connectivity.ConnectivityConfigurationHolder
 import co.elastic.apm.android.sdk.features.apmserver.ApmServerConnectivityManager
+import co.elastic.apm.android.sdk.features.exportergate.ExporterGateManager
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
+import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import java.io.IOException
+import java.util.concurrent.TimeUnit
 import org.slf4j.Logger
+import org.stagemonitor.configuration.ConfigurationRegistry
 
 class CentralConfigurationManager private constructor(
     serviceManager: ServiceManager,
-    private val centralConfiguration: CentralConfiguration,
-    private val configurationManager: ConfigurationManager
-) {
+    private val configurationRegistry: ConfigurationRegistry,
+    private val centralConfigurationSource: CentralConfigurationSource,
+    private val connectivityHolder: ConnectivityHolder,
+    private val gateManager: ExporterGateManager
+) : CentralConfigurationSource.Listener {
     private val backgroundWorkService by lazy { serviceManager.getBackgroundWorkService() }
     private val logger: Logger = Elog.getLogger()
 
     fun getConnectivityConfiguration(): CentralConfigurationConnectivity {
-        return configurationManager.get() as CentralConfigurationConnectivity
+        return connectivityHolder.get() as CentralConfigurationConnectivity
     }
 
     fun setConnectivityConfiguration(configuration: CentralConfigurationConnectivity) {
-        configurationManager.unlinkFromExportersConfig()
-        configurationManager.set(configuration)
+        connectivityHolder.unlinkFromExportersConfig()
+        connectivityHolder.set(configuration)
     }
 
     internal fun initialize() {
         backgroundWorkService.submit {
             try {
-                centralConfiguration.publishCachedConfig()
+                centralConfigurationSource.initialize()
+                openLatch()
                 doPoll()
             } catch (t: Throwable) {
                 logger.error("CentralConfiguration initialization error", t)
                 scheduleDefault()
+            } finally {
+                openLatch()
             }
         }
+    }
+
+    internal fun getCentralConfiguration(): CentralConfiguration {
+        return configurationRegistry.getConfig(CentralConfiguration::class.java)
+    }
+
+    private fun openLatch() {
+        gateManager.openLatches(CentralConfigurationManager::class.java)
     }
 
     private fun scheduleDefault() {
@@ -60,13 +77,16 @@ class CentralConfigurationManager private constructor(
     }
 
     private fun scheduleInSeconds(seconds: Int) {
-        backgroundWorkService.schedule(ConfigurationPoll(), seconds)
+        backgroundWorkService.scheduleOnce(
+            TimeUnit.SECONDS.toMillis(seconds.toLong()),
+            ConfigurationPoll()
+        )
     }
 
     @WorkerThread
     @Throws(IOException::class)
     private fun doPoll() {
-        val delayForNextPollInSeconds = centralConfiguration.sync()
+        val delayForNextPollInSeconds = centralConfigurationSource.sync()
         if (delayForNextPollInSeconds != null) {
             logger.info("Central config returned max age is null")
             scheduleInSeconds(delayForNextPollInSeconds)
@@ -80,22 +100,36 @@ class CentralConfigurationManager private constructor(
 
         internal fun create(
             serviceManager: ServiceManager,
+            systemTimeProvider: SystemTimeProvider,
+            gateManager: ExporterGateManager,
             serviceName: String,
             serviceDeployment: String?,
-            apmServerConfigurationManager: ApmServerConnectivityManager.ConfigurationManager
+            connectivityHolder: ApmServerConnectivityManager.ConnectivityHolder
         ): CentralConfigurationManager {
-            val centralConfigurationConfigurationManager = ConfigurationManager.fromApmServerConfig(
-                serviceName, serviceDeployment, apmServerConfigurationManager
+            val centralConfigurationConnectivityHolder = ConnectivityHolder.fromApmServerConfig(
+                serviceName, serviceDeployment, connectivityHolder
             )
-            val centralConfiguration = CentralConfiguration.create(
+            val centralConfigurationSource = CentralConfigurationSource(
                 serviceManager,
-                centralConfigurationConfigurationManager
+                centralConfigurationConnectivityHolder,
+                systemTimeProvider
             )
-            return CentralConfigurationManager(
+            val registry = ConfigurationRegistry.builder()
+                .addConfigSource(centralConfigurationSource)
+                .addOptionProvider(CentralConfiguration())
+            val latchName = "Central configuration"
+            gateManager.createSpanGateLatch(CentralConfigurationManager::class.java, latchName)
+            gateManager.createLogRecordLatch(CentralConfigurationManager::class.java, latchName)
+            gateManager.createMetricGateLatch(CentralConfigurationManager::class.java, latchName)
+            val centralConfigurationManager = CentralConfigurationManager(
                 serviceManager,
-                centralConfiguration,
-                centralConfigurationConfigurationManager
+                registry.build(),
+                centralConfigurationSource,
+                centralConfigurationConnectivityHolder,
+                gateManager
             )
+            centralConfigurationSource.listener = centralConfigurationManager
+            return centralConfigurationManager
         }
     }
 
@@ -110,20 +144,20 @@ class CentralConfigurationManager private constructor(
         }
     }
 
-    internal class ConfigurationManager(
+    internal class ConnectivityHolder(
         connectivity: CentralConfigurationConnectivity,
-        private val apmServerConfigurationManager: ApmServerConnectivityManager.ConfigurationManager,
+        private val apmServerConnectivityHolder: ApmServerConnectivityManager.ConnectivityHolder,
         private val serviceName: String,
         private val serviceDeployment: String?
-    ) : ConnectivityConfigurationManager(connectivity), ConnectivityConfigurationManager.Listener {
+    ) : ConnectivityConfigurationHolder(connectivity), ConnectivityConfigurationHolder.Listener {
 
         companion object {
             fun fromApmServerConfig(
                 serviceName: String,
                 serviceDeployment: String?,
-                apmServerConfigurationManager: ApmServerConnectivityManager.ConfigurationManager
-            ): ConfigurationManager {
-                val instance = ConfigurationManager(
+                apmServerConfigurationManager: ApmServerConnectivityManager.ConnectivityHolder
+            ): ConnectivityHolder {
+                val instance = ConnectivityHolder(
                     CentralConfigurationConnectivity.fromApmServerConfig(
                         serviceName,
                         serviceDeployment,
@@ -136,7 +170,7 @@ class CentralConfigurationManager private constructor(
         }
 
         internal fun unlinkFromExportersConfig() {
-            apmServerConfigurationManager.removeListener(this)
+            apmServerConnectivityHolder.removeListener(this)
         }
 
         override fun onConnectivityConfigurationChange() {
@@ -145,9 +179,13 @@ class CentralConfigurationManager private constructor(
                 CentralConfigurationConnectivity.fromApmServerConfig(
                     serviceName,
                     serviceDeployment,
-                    apmServerConfigurationManager.getConnectivityConfiguration()
+                    apmServerConnectivityHolder.getConnectivityConfiguration()
                 )
             )
         }
+    }
+
+    override fun onConfigChange() {
+        configurationRegistry.reloadDynamicConfigurationOptions()
     }
 }

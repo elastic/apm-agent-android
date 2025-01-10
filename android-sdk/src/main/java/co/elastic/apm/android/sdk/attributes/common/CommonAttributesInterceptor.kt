@@ -22,7 +22,7 @@ import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import co.elastic.apm.android.sdk.internal.services.kotlin.network.NetworkService
 import co.elastic.apm.android.sdk.internal.services.kotlin.network.data.NetworkType
 import co.elastic.apm.android.sdk.session.SessionProvider
-import co.elastic.apm.android.sdk.tools.Interceptor
+import co.elastic.apm.android.sdk.tools.interceptor.Interceptor
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.semconv.SemanticAttributes

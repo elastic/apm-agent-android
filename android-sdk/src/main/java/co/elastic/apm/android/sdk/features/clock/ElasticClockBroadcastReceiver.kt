@@ -16,27 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.opentelemetry.processors.spans
+package co.elastic.apm.android.sdk.features.clock
 
-import co.elastic.apm.android.sdk.tools.interceptor.Interceptor
-import io.opentelemetry.api.common.Attributes
-import io.opentelemetry.context.Context
-import io.opentelemetry.sdk.trace.ReadWriteSpan
-import io.opentelemetry.sdk.trace.ReadableSpan
-import io.opentelemetry.sdk.trace.SpanProcessor
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 
-internal class SpanAttributesProcessor(private val interceptor: Interceptor<Attributes>) :
-    SpanProcessor {
-
-    override fun onStart(parentContext: Context, span: ReadWriteSpan) {
-        span.setAllAttributes(interceptor.intercept(span.attributes))
+class ElasticClockBroadcastReceiver : BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent?) {
+        if (intent?.action == Intent.ACTION_BOOT_COMPLETED) {
+            RemoteTimeOffsetManager.TimeOffsetCache(
+                ServiceManager.create(context).getPreferencesService()
+            ).clear()
+        }
     }
-
-    override fun isStartRequired(): Boolean = true
-
-    override fun onEnd(span: ReadableSpan) {
-
-    }
-
-    override fun isEndRequired(): Boolean = false
 }

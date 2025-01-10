@@ -18,15 +18,14 @@
  */
 package co.elastic.apm.android.sdk.internal.services.kotlin.preferences
 
-import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import co.elastic.apm.android.sdk.BuildConfig
 import co.elastic.apm.android.sdk.internal.services.kotlin.Service
 
-class PreferencesService(application: Application) : Service {
+class PreferencesService(context: Context) : Service {
     private val preferences: SharedPreferences by lazy {
-        application.getSharedPreferences(
+        context.getSharedPreferences(
             BuildConfig.LIBRARY_PACKAGE_NAME + ".prefs",
             Context.MODE_PRIVATE
         )

@@ -38,16 +38,30 @@ class BackgroundWorkService private constructor(private val executorService: Sch
         return executorService.submit(task)
     }
 
-    internal fun schedule(task: Runnable, seconds: Int): ScheduledFuture<*>? {
-        return executorService.schedule(task, seconds.toLong(), TimeUnit.SECONDS)
+    internal fun scheduleOnce(delayMillis: Long, task: Runnable): ScheduledFuture<*>? {
+        return executorService.schedule(task, delayMillis, TimeUnit.MILLISECONDS)
     }
 
     internal fun schedulePeriodicTask(
-        task: Runnable,
         delayBetweenExecutions: Long,
-        timeUnit: TimeUnit
+        timeUnit: TimeUnit,
+        task: Runnable
     ): ScheduledFuture<*>? {
-        return executorService.scheduleWithFixedDelay(task, 0, delayBetweenExecutions, timeUnit)
+        return schedulePeriodicTask(delayBetweenExecutions, timeUnit, 0, task)
+    }
+
+    internal fun schedulePeriodicTask(
+        delayBetweenExecutions: Long,
+        timeUnit: TimeUnit,
+        initialDelay: Long,
+        task: Runnable
+    ): ScheduledFuture<*>? {
+        return executorService.scheduleWithFixedDelay(
+            task,
+            initialDelay,
+            delayBetweenExecutions,
+            timeUnit
+        )
     }
 
     override fun stop() {

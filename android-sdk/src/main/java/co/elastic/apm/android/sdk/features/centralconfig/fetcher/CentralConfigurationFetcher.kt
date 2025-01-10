@@ -21,7 +21,6 @@ package co.elastic.apm.android.sdk.features.centralconfig.fetcher
 import co.elastic.apm.android.common.internal.logging.Elog
 import co.elastic.apm.android.sdk.connectivity.ConnectivityConfiguration
 import co.elastic.apm.android.sdk.internal.services.kotlin.preferences.PreferencesService
-import co.elastic.apm.android.sdk.tools.provider.Provider
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
@@ -32,7 +31,7 @@ import java.util.regex.Pattern
 import org.slf4j.Logger
 
 class CentralConfigurationFetcher(
-    private val fileProvider: Provider<File>,
+    private val fileProvider: File,
     private val preferences: PreferencesService
 ) {
     private val logger: Logger = Elog.getLogger()
@@ -92,7 +91,7 @@ class CentralConfigurationFetcher(
 
     @Throws(IOException::class)
     private fun saveConfiguration(inputStream: InputStream) {
-        fileProvider.get().outputStream().use {
+        fileProvider.outputStream().use {
             inputStream.copyTo(it)
         }
     }

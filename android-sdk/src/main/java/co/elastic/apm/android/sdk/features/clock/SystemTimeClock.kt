@@ -16,27 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.opentelemetry.processors.spans
+package co.elastic.apm.android.sdk.features.clock
 
-import co.elastic.apm.android.sdk.tools.interceptor.Interceptor
-import io.opentelemetry.api.common.Attributes
-import io.opentelemetry.context.Context
-import io.opentelemetry.sdk.trace.ReadWriteSpan
-import io.opentelemetry.sdk.trace.ReadableSpan
-import io.opentelemetry.sdk.trace.SpanProcessor
+import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
+import io.opentelemetry.sdk.common.Clock
+import java.util.concurrent.TimeUnit
 
-internal class SpanAttributesProcessor(private val interceptor: Interceptor<Attributes>) :
-    SpanProcessor {
+internal class SystemTimeClock(private val systemTimeProvider: SystemTimeProvider) : Clock {
 
-    override fun onStart(parentContext: Context, span: ReadWriteSpan) {
-        span.setAllAttributes(interceptor.intercept(span.attributes))
+    override fun now(): Long {
+        return TimeUnit.MILLISECONDS.toNanos(systemTimeProvider.getCurrentTimeMillis())
     }
 
-    override fun isStartRequired(): Boolean = true
-
-    override fun onEnd(span: ReadableSpan) {
-
+    override fun nanoTime(): Long {
+        return systemTimeProvider.getNanoTime()
     }
-
-    override fun isEndRequired(): Boolean = false
 }

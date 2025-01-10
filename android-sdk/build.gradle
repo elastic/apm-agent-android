@@ -45,6 +45,8 @@ dependencies {
     annotationProcessor 'co.elastic.apm.compile:processor'
     compileOnly 'co.elastic.apm.compile:processor'
     testImplementation libs.mockwebserver
+    testImplementation libs.wireMock
     testImplementation libs.opentelemetry.testing
     testImplementation libs.robolectric
+    testImplementation libs.awaitility
 }

@@ -16,27 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.opentelemetry.processors.spans
+package co.elastic.apm.android.sdk.features.conditionaldrop
 
-import co.elastic.apm.android.sdk.tools.interceptor.Interceptor
-import io.opentelemetry.api.common.Attributes
-import io.opentelemetry.context.Context
-import io.opentelemetry.sdk.trace.ReadWriteSpan
-import io.opentelemetry.sdk.trace.ReadableSpan
-import io.opentelemetry.sdk.trace.SpanProcessor
+import io.opentelemetry.sdk.common.CompletableResultCode
+import io.opentelemetry.sdk.trace.data.SpanData
+import io.opentelemetry.sdk.trace.export.SpanExporter
+import java.util.function.Predicate
 
-internal class SpanAttributesProcessor(private val interceptor: Interceptor<Attributes>) :
-    SpanProcessor {
+internal class ConditionalDropSpanExporter(
+    private val delegate: SpanExporter,
+    private val drop: Predicate<SignalType>
+) : SpanExporter {
 
-    override fun onStart(parentContext: Context, span: ReadWriteSpan) {
-        span.setAllAttributes(interceptor.intercept(span.attributes))
+    override fun export(spans: MutableCollection<SpanData>): CompletableResultCode {
+        if (drop.test(SignalType.SPAN)) {
+            return CompletableResultCode.ofSuccess()
+        }
+        return delegate.export(spans)
     }
 
-    override fun isStartRequired(): Boolean = true
-
-    override fun onEnd(span: ReadableSpan) {
-
+    override fun flush(): CompletableResultCode {
+        return delegate.flush()
     }
 
-    override fun isEndRequired(): Boolean = false
+    override fun shutdown(): CompletableResultCode {
+        return delegate.shutdown()
+    }
 }

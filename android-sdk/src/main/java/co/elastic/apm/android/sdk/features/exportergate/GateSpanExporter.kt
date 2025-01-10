@@ -16,11 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.tools
+package co.elastic.apm.android.sdk.features.exportergate
 
-internal class NoopInterceptor<T> : Interceptor<T> {
+import io.opentelemetry.sdk.common.CompletableResultCode
+import io.opentelemetry.sdk.trace.data.SpanData
+import io.opentelemetry.sdk.trace.export.SpanExporter
 
-    override fun intercept(item: T): T {
-        return item
+internal class GateSpanExporter(
+    private val delegate: SpanExporter,
+    private val spanQueue: ExporterGateQueue<SpanData>
+) : SpanExporter {
+
+    override fun export(spans: MutableCollection<SpanData>): CompletableResultCode {
+        return spanQueue.enqueue(spans)
+    }
+
+    override fun flush(): CompletableResultCode {
+        return delegate.flush()
+    }
+
+    override fun shutdown(): CompletableResultCode {
+        return delegate.shutdown()
     }
 }

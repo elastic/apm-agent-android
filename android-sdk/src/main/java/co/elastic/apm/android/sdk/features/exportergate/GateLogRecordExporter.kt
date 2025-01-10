@@ -16,24 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.tools
+package co.elastic.apm.android.sdk.features.exportergate
 
-import co.elastic.apm.android.sdk.internal.services.kotlin.preferences.PreferencesService
+import io.opentelemetry.sdk.common.CompletableResultCode
+import io.opentelemetry.sdk.logs.data.LogRecordData
+import io.opentelemetry.sdk.logs.export.LogRecordExporter
 
-class PreferencesLongCacheHandler(
-    private val key: String,
-    private val preferencesService: PreferencesService
-) : CacheHandler<Long> {
+internal class GateLogRecordExporter(
+    private val delegate: LogRecordExporter,
+    private val logRecordQueue: ExporterGateQueue<LogRecordData>
+) : LogRecordExporter {
 
-    override fun retrieve(): Long {
-        return preferencesService.retrieveLong(key, 0)
+    override fun export(logs: MutableCollection<LogRecordData>): CompletableResultCode {
+        return logRecordQueue.enqueue(logs)
     }
 
-    override fun clear() {
-        preferencesService.remove(key)
+    override fun flush(): CompletableResultCode {
+        return delegate.flush()
     }
 
-    override fun store(value: Long) {
-        preferencesService.store(key, value)
+    override fun shutdown(): CompletableResultCode {
+        return delegate.shutdown()
     }
 }

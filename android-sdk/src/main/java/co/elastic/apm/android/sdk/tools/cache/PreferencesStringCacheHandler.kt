@@ -16,16 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.tools
+package co.elastic.apm.android.sdk.tools.cache
 
-internal class MultiInterceptor<T>(private val interceptors: List<Interceptor<T>>) :
-    Interceptor<T> {
+import co.elastic.apm.android.sdk.internal.services.kotlin.preferences.PreferencesService
 
-    override fun intercept(item: T): T {
-        var result = item
-        interceptors.forEach {
-            result = it.intercept(result)
-        }
-        return result
+class PreferencesStringCacheHandler(
+    private val key: String,
+    private val preferencesService: PreferencesService
+) : CacheHandler<String> {
+
+    override fun retrieve(): String? {
+        return preferencesService.retrieveString(key)
+    }
+
+    override fun clear() {
+        preferencesService.remove(key)
+    }
+
+    override fun store(value: String) {
+        preferencesService.store(key, value)
     }
 }

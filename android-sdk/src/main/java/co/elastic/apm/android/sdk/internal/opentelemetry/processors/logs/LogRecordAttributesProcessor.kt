@@ -18,7 +18,7 @@
  */
 package co.elastic.apm.android.sdk.internal.opentelemetry.processors.logs
 
-import co.elastic.apm.android.sdk.tools.Interceptor
+import co.elastic.apm.android.sdk.tools.interceptor.Interceptor
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.context.Context
 import io.opentelemetry.sdk.logs.LogRecordProcessor

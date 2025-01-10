@@ -73,7 +73,7 @@ internal class ElasticClockManager private constructor(
         return timeOffsetManager
     }
 
-    internal fun getExportGateManager(): ClockExporterGateManager {
+    internal fun getClockExportGateManager(): ClockExporterGateManager {
         return exportGateManager
     }
 

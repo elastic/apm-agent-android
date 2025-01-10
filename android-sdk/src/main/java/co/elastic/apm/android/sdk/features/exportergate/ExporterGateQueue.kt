@@ -20,7 +20,6 @@ package co.elastic.apm.android.sdk.features.exportergate
 
 import co.elastic.apm.android.common.internal.logging.Elog
 import co.elastic.apm.android.sdk.features.exportergate.latch.Latch
-import co.elastic.apm.android.sdk.tools.interceptor.Interceptor
 import io.opentelemetry.sdk.common.CompletableResultCode
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.LinkedBlockingQueue
@@ -39,7 +38,6 @@ internal class ExporterGateQueue<DATA>(
     private val pendingLatches = AtomicInteger(0)
     private val open = AtomicBoolean(true)
     private val started = AtomicBoolean(false)
-    private var queuedInterceptor: Interceptor<DATA> = Interceptor.noop()
 
     fun createLatch(holder: Class<*>, name: String) {
         if (started.get()) {
@@ -51,10 +49,6 @@ internal class ExporterGateQueue<DATA>(
             throw IllegalStateException()
         }
         pendingLatches.incrementAndGet()
-    }
-
-    fun setQueueProcessingInterceptor(interceptor: Interceptor<DATA>) {
-        queuedInterceptor = interceptor
     }
 
     fun enqueue(data: Collection<DATA>): CompletableResultCode {
@@ -78,7 +72,6 @@ internal class ExporterGateQueue<DATA>(
         val items = mutableListOf<DATA>()
         var item = queue.poll()
         while (item != null) {
-            items.add(queuedInterceptor.intercept(item))
             item = queue.poll()
         }
         items.addAll(overflow)

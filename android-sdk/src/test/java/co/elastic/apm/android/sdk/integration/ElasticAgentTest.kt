@@ -1001,6 +1001,12 @@ class ElasticAgentTest {
         sendSpan()
         sendLog()
 
+        await.until {
+            inMemoryExporters.getFinishedSpans().isNotEmpty()
+        }
+        await.until {
+            inMemoryExporters.getFinishedLogRecords().isNotEmpty()
+        }
         assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
 

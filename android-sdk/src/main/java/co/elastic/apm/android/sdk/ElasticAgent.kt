@@ -197,18 +197,10 @@ class ElasticAgent private constructor(
                 sessionManager.addListener(sampleRateManager)
 
                 addSpanAttributesInterceptor(
-                    elasticClockManager.getExportGateManager().getAttributesInterceptor()
+                    elasticClockManager.getClockExportGateManager().getAttributesInterceptor()
                 )
                 addLogRecordAttributesInterceptor(
-                    elasticClockManager.getExportGateManager().getAttributesInterceptor()
-                )
-                exporterGateManager.setSpanQueueProcessingInterceptor(
-                    elasticClockManager.getExportGateManager()
-                        .getSpanGateProcessingInterceptor()
-                )
-                exporterGateManager.setLogRecordQueueProcessingInterceptor(
-                    elasticClockManager.getExportGateManager()
-                        .getLogRecordGateProcessingInterceptor()
+                    elasticClockManager.getClockExportGateManager().getAttributesInterceptor()
                 )
 
                 val conditionalDropManager = ConditionalDropManager()
@@ -220,6 +212,7 @@ class ElasticAgent private constructor(
                 }
 
                 addInternalInterceptors(
+                    elasticClockManager,
                     diskBufferingManager,
                     conditionalDropManager,
                     exporterGateManager
@@ -243,13 +236,24 @@ class ElasticAgent private constructor(
         }
 
         private fun addInternalInterceptors(
+            elasticClockManager: ElasticClockManager,
             diskBufferingManager: DiskBufferingManager,
             conditionalDropManager: ConditionalDropManager,
             exporterGateManager: ExporterGateManager
         ) {
+            addClockExporterInterceptors(elasticClockManager)
             addDiskBufferingInterceptors(diskBufferingManager)
             addConditionalDropInterceptors(conditionalDropManager)
             addExporterGateInterceptors(exporterGateManager)
+        }
+
+        private fun addClockExporterInterceptors(elasticClockManager: ElasticClockManager) {
+            addSpanExporterInterceptor {
+                elasticClockManager.getClockExportGateManager().createSpanExporterDelegator(it)
+            }
+            addLogRecordExporterInterceptor {
+                elasticClockManager.getClockExportGateManager().createLogRecordExporterDelegator(it)
+            }
         }
 
         private fun addDiskBufferingInterceptors(diskBufferingManager: DiskBufferingManager) {

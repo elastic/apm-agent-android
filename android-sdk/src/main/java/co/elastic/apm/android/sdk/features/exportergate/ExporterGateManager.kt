@@ -23,7 +23,6 @@ import co.elastic.apm.android.sdk.exporters.configurable.MutableMetricExporter
 import co.elastic.apm.android.sdk.exporters.configurable.MutableSpanExporter
 import co.elastic.apm.android.sdk.features.exportergate.latch.Latch
 import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
-import co.elastic.apm.android.sdk.tools.interceptor.Interceptor
 import io.opentelemetry.sdk.logs.data.LogRecordData
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.metrics.data.MetricData
@@ -103,10 +102,6 @@ internal class ExporterGateManager(
         spanGateQueue.createLatch(holder, name)
     }
 
-    internal fun setSpanQueueProcessingInterceptor(interceptor: Interceptor<SpanData>) {
-        spanGateQueue.setQueueProcessingInterceptor(interceptor)
-    }
-
     internal fun createLogRecordExporterGate(delegate: LogRecordExporter): LogRecordExporter {
         delegateLogRecordExporter = delegate
         gateLogRecordExporter = GateLogRecordExporter(delegateLogRecordExporter, logRecordGateQueue)
@@ -118,10 +113,6 @@ internal class ExporterGateManager(
         logRecordGateQueue.createLatch(holder, name)
     }
 
-    internal fun setLogRecordQueueProcessingInterceptor(interceptor: Interceptor<LogRecordData>) {
-        logRecordGateQueue.setQueueProcessingInterceptor(interceptor)
-    }
-
     internal fun createMetricExporterGate(delegate: MetricExporter): MetricExporter {
         delegateMetricExporter = delegate
         gateMetricExporter = GateMetricExporter(delegateMetricExporter, metricGateQueue)
@@ -131,10 +122,6 @@ internal class ExporterGateManager(
 
     internal fun createMetricGateLatch(holder: Class<*>, name: String) {
         metricGateQueue.createLatch(holder, name)
-    }
-
-    internal fun setMetricQueueProcessingInterceptor(interceptor: Interceptor<MetricData>) {
-        metricGateQueue.setQueueProcessingInterceptor(interceptor)
     }
 
     internal fun getAllOpenLatches(): List<Latch> {

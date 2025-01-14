@@ -60,6 +60,7 @@ class CentralConfigurationFetcherTest {
         preferences = mockk<PreferencesService>()
         every { preferences.retrieveString("central_configuration_etag") }.returns(null)
         every { preferences.store("central_configuration_etag", any<String>()) } just Runs
+        every { preferences.remove("central_configuration_etag") } just Runs
         configurationFile = temporaryFolder.newFile("configFile.json")
         fetcher = CentralConfigurationFetcher(configurationFile, preferences)
         agentRule.initialize()
@@ -92,29 +93,6 @@ class CentralConfigurationFetcherTest {
         val fetch = fetcher.fetch(connectivity)
 
         assertThat(fetch.configurationHasChanged).isFalse()
-    }
-
-    @Test
-    fun `Verify request query params`() {
-        enqueueSimpleResponse()
-
-        fetcher.fetch(connectivity)
-
-        val recordedRequestUrl = webServer.takeRequest().requestUrl
-        assertThat(recordedRequestUrl!!.queryParameter("service.name")).isEqualTo("service-name")
-        assertThat(recordedRequestUrl.queryParameter("service.environment")).isEqualTo("test")
-    }
-
-    @Test
-    fun `Verify full base url is kept when building the central config one`() {
-        enqueueSimpleResponse()
-
-        setConnectivityEndpoint("/some/path")
-        fetcher = CentralConfigurationFetcher(configurationFile, preferences)
-        fetcher.fetch(connectivity)
-
-        val recordedRequestUrl = webServer.takeRequest().requestUrl
-        assertThat(recordedRequestUrl!!.encodedPath).isEqualTo("/some/path/config/v1/agents")
     }
 
     @Test

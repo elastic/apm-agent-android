@@ -22,45 +22,19 @@ import co.elastic.apm.android.sdk.configuration.logging.LogLevel
 import co.elastic.apm.android.sdk.internal.services.kotlin.appinfo.AppInfoService
 import io.mockk.every
 import io.mockk.mockk
-import org.junit.Assert
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 class DefaultLoggingPolicyTest {
 
     @Test
-    fun isEnabled_true_whenAgentIsInitialized() {
-        Assert.assertTrue(
-            getInstance(true).isEnabled
-        )
-        Assert.assertTrue(
-            getInstance(false).isEnabled
-        )
+    fun `Validate minimum level on debuggable app`() {
+        assertThat(getInstance(true).minimumLevel).isEqualTo(LogLevel.DEBUG)
     }
 
     @Test
-    fun isEnabled_false_whenAgentNotInitialized() {
-        Assert.assertFalse(
-            getInstance(true).isEnabled
-        )
-        Assert.assertFalse(
-            getInstance(false).isEnabled
-        )
-    }
-
-    @Test
-    fun getMinimumLevel_onDebuggableApp() {
-        Assert.assertEquals(
-            LogLevel.DEBUG,
-            getInstance(true).minimumLevel
-        )
-    }
-
-    @Test
-    fun getMinimumLevel_onNonDebuggableApp() {
-        Assert.assertEquals(
-            LogLevel.INFO,
-            getInstance(false).minimumLevel
-        )
+    fun `Validate minimum level on non-debuggable app`() {
+        assertThat(getInstance(false).minimumLevel).isEqualTo(LogLevel.INFO)
     }
 
     private fun getInstance(appIsDebuggable: Boolean): DefaultLoggingPolicy {

@@ -22,8 +22,10 @@ import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingConfigurat
 import co.elastic.apm.android.sdk.features.diskbuffering.tools.DiskManager
 import co.elastic.apm.android.sdk.internal.services.kotlin.appinfo.AppInfoService
 import co.elastic.apm.android.sdk.internal.services.kotlin.preferences.PreferencesService
+import io.mockk.Runs
 import io.mockk.clearMocks
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import java.io.File
@@ -99,6 +101,7 @@ class DiskManagerTest {
         diskBufferingConfiguration.maxCacheFileSize = maxCacheFileSize
         every { appInfoService.getAvailableCacheSpace(maxCacheSize) }.returns(maxCacheSize)
         every { preferencesService.retrieveInt(MAX_FOLDER_SIZE_KEY, -1) }.returns(-1)
+        every { preferencesService.store(MAX_FOLDER_SIZE_KEY, any<Int>()) } just Runs
 
         // Expects the size of a single signal type folder minus the size of a cache file, to use as temporary space for reading.
         val expected = 2446677
@@ -106,7 +109,7 @@ class DiskManagerTest {
         verify { preferencesService.store(MAX_FOLDER_SIZE_KEY, expected) }
 
         // On a second call, should get the value from the preferences.
-        clearMocks(appInfoService, diskBufferingConfiguration, preferencesService)
+        clearMocks(appInfoService, preferencesService)
         every { preferencesService.retrieveInt(MAX_FOLDER_SIZE_KEY, -1) }.returns(expected)
         assertThat(expected.toLong()).isEqualTo(diskManager.getMaxFolderSize().toLong())
         verify { preferencesService.retrieveInt(MAX_FOLDER_SIZE_KEY, -1) }

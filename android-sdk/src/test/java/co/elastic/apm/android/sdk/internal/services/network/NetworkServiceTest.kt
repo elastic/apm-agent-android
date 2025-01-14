@@ -29,10 +29,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.junit.MockitoJUnitRunner
 
-@RunWith(MockitoJUnitRunner::class)
 class NetworkServiceTest {
     @MockK
     private lateinit var connectivityManager: ConnectivityManager
@@ -58,14 +55,16 @@ class NetworkServiceTest {
     }
 
     @Test
-    fun getCarrierInfo_whenSimOperatorIsEmpty() {
+    fun `Get carrier info when sim operator is empty`() {
         every { telephonyManager.simOperator }.returns("")
         every { telephonyManager.simState }.returns(TelephonyManager.SIM_STATE_READY)
         assertNull(networkService.getCarrierInfo())
     }
 
     @Test
-    fun getCarrierInfo_fromFirstSimOperatorResponse() {
+    fun `Get carrier info from first sim operator response`() {
+        every { telephonyManager.simOperatorName }.returns("")
+        every { telephonyManager.simCountryIso }.returns("")
         every { telephonyManager.simOperator }.returns("1234").andThen("")
         every { telephonyManager.simState }.returns(TelephonyManager.SIM_STATE_READY)
 

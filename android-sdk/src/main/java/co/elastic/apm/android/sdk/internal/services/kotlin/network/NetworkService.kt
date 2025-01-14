@@ -32,14 +32,14 @@ import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 import co.elastic.apm.android.sdk.internal.services.kotlin.appinfo.AppInfoService
 import co.elastic.apm.android.sdk.internal.services.kotlin.network.data.CarrierInfo
 import co.elastic.apm.android.sdk.internal.services.kotlin.network.data.NetworkType
+import java.util.concurrent.atomic.AtomicReference
 
 class NetworkService internal constructor(
-    serviceManager: ServiceManager,
+    private val appInfoService: AppInfoService,
     private val connectivityManager: ConnectivityManager,
     private val telephonyManager: TelephonyManager
 ) : NetworkCallback(), Service {
-    private var type: NetworkType = NetworkType.None
-    private val appInfoService: AppInfoService by lazy { serviceManager.getAppInfoService() }
+    private val type = AtomicReference<NetworkType>(NetworkType.None)
 
     override fun start() {
         connectivityManager.registerDefaultNetworkCallback(this)
@@ -49,12 +49,8 @@ class NetworkService internal constructor(
         connectivityManager.unregisterNetworkCallback(this)
     }
 
-    fun getType(): NetworkType = synchronized(this) {
-        return type
-    }
-
-    private fun setType(networkType: NetworkType) = synchronized(this) {
-        this.type = networkType
+    fun getType(): NetworkType {
+        return type.get()
     }
 
     fun getCarrierInfo(): CarrierInfo? {
@@ -72,7 +68,7 @@ class NetworkService internal constructor(
 
     override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
         super.onCapabilitiesChanged(network, networkCapabilities)
-        type = getNetworkType(networkCapabilities)
+        type.set(getNetworkType(networkCapabilities))
     }
 
     private fun getNetworkType(networkCapabilities: NetworkCapabilities): NetworkType {
@@ -87,7 +83,7 @@ class NetworkService internal constructor(
 
     override fun onLost(network: Network) {
         super.onLost(network)
-        type = NetworkType.None
+        type.set(NetworkType.None)
     }
 
     private val simOperator: String?
@@ -140,7 +136,11 @@ class NetworkService internal constructor(
                 context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             val telephonyManager =
                 context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-            return NetworkService(serviceManager, connectivityManager, telephonyManager)
+            return NetworkService(
+                serviceManager.getAppInfoService(),
+                connectivityManager,
+                telephonyManager
+            )
         }
     }
 }

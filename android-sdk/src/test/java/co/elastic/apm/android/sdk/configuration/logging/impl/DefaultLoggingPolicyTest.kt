@@ -16,46 +16,56 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.configuration.logging.impl;
+package co.elastic.apm.android.sdk.configuration.logging.impl
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import co.elastic.apm.android.sdk.configuration.logging.LogLevel
+import co.elastic.apm.android.sdk.internal.services.kotlin.appinfo.AppInfoService
+import io.mockk.every
+import io.mockk.mockk
+import org.junit.Assert
+import org.junit.Test
 
-import org.junit.Test;
-
-import co.elastic.apm.android.sdk.configuration.logging.LogLevel;
-import co.elastic.apm.android.sdk.testutils.providers.SimpleProvider;
-
-public class DefaultLoggingPolicyTest {
+class DefaultLoggingPolicyTest {
 
     @Test
-    public void isEnabled_true_whenAgentIsInitialized() {
-        assertTrue(getInstance(true).isEnabled());
-        assertTrue(getInstance(false).isEnabled());
-    }
-
-    @Test
-    public void isEnabled_false_whenAgentNotInitialized() {
-        assertFalse(getInstance(true, false).isEnabled());
-        assertFalse(getInstance(false, false).isEnabled());
+    fun isEnabled_true_whenAgentIsInitialized() {
+        Assert.assertTrue(
+            getInstance(true).isEnabled
+        )
+        Assert.assertTrue(
+            getInstance(false).isEnabled
+        )
     }
 
     @Test
-    public void getMinimumLevel_onDebuggableApp() {
-        assertEquals(LogLevel.DEBUG, getInstance(true).getMinimumLevel());
+    fun isEnabled_false_whenAgentNotInitialized() {
+        Assert.assertFalse(
+            getInstance(true).isEnabled
+        )
+        Assert.assertFalse(
+            getInstance(false).isEnabled
+        )
     }
 
     @Test
-    public void getMinimumLevel_onNonDebuggableApp() {
-        assertEquals(LogLevel.INFO, getInstance(false).getMinimumLevel());
+    fun getMinimumLevel_onDebuggableApp() {
+        Assert.assertEquals(
+            LogLevel.DEBUG,
+            getInstance(true).minimumLevel
+        )
     }
 
-    private static DefaultLoggingPolicy getInstance(boolean appIsDebuggable) {
-        return getInstance(appIsDebuggable, true);
+    @Test
+    fun getMinimumLevel_onNonDebuggableApp() {
+        Assert.assertEquals(
+            LogLevel.INFO,
+            getInstance(false).minimumLevel
+        )
     }
 
-    private static DefaultLoggingPolicy getInstance(boolean appIsDebuggable, boolean agentIsInitialized) {
-        return new DefaultLoggingPolicy(SimpleProvider.create(appIsDebuggable), SimpleProvider.create(agentIsInitialized));
+    private fun getInstance(appIsDebuggable: Boolean): DefaultLoggingPolicy {
+        val appInfoService = mockk<AppInfoService>()
+        every { appInfoService.isInDebugMode() }.returns(appIsDebuggable)
+        return DefaultLoggingPolicy(appInfoService)
     }
 }

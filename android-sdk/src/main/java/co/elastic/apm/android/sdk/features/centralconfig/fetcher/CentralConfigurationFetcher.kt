@@ -31,7 +31,7 @@ import java.util.regex.Pattern
 import org.slf4j.Logger
 
 class CentralConfigurationFetcher(
-    private val fileProvider: File,
+    private val destFile: File,
     private val preferences: PreferencesService
 ) {
     private val logger: Logger = Elog.getLogger()
@@ -91,7 +91,7 @@ class CentralConfigurationFetcher(
 
     @Throws(IOException::class)
     private fun saveConfiguration(inputStream: InputStream) {
-        fileProvider.outputStream().use {
+        destFile.outputStream().use {
             inputStream.copyTo(it)
         }
     }

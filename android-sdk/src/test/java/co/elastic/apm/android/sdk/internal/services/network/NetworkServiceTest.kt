@@ -16,56 +16,59 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.services.network;
+package co.elastic.apm.android.sdk.internal.services.network
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
+import android.net.ConnectivityManager
+import android.telephony.TelephonyManager
+import co.elastic.apm.android.sdk.internal.services.kotlin.appinfo.AppInfoService
+import co.elastic.apm.android.sdk.internal.services.kotlin.network.NetworkService
+import io.mockk.MockKAnnotations
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
+import org.junit.Before
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.mockito.junit.MockitoJUnitRunner
 
-import android.net.ConnectivityManager;
-import android.telephony.TelephonyManager;
+@RunWith(MockitoJUnitRunner::class)
+class NetworkServiceTest {
+    @MockK
+    private lateinit var connectivityManager: ConnectivityManager
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+    @MockK
+    private lateinit var telephonyManager: TelephonyManager
 
-@RunWith(MockitoJUnitRunner.class)
-public class NetworkServiceTest {
-    @Mock
-    private ConnectivityManager connectivityManager;
-    @Mock
-    private TelephonyManager telephonyManager;
-    private NetworkService networkService;
+    @MockK
+    private lateinit var appInfoService: AppInfoService
+    private lateinit var networkService: NetworkService
 
     @Before
-    public void setUp() {
-        networkService = new NetworkService(connectivityManager, telephonyManager);
+    fun setUp() {
+        MockKAnnotations.init(this)
+        networkService = NetworkService(appInfoService, connectivityManager, telephonyManager)
     }
 
     @Test
-    public void getCarrierInfo_whenSimOperatorIsNull() {
-        doReturn(null).when(telephonyManager).getSimOperator();
-        doReturn(TelephonyManager.SIM_STATE_READY).when(telephonyManager).getSimState();
-
-        assertNull(networkService.getCarrierInfo());
+    fun `Get carrier info when sim operator is null`() {
+        every { telephonyManager.simOperator }.returns(null)
+        every { telephonyManager.simState }.returns(TelephonyManager.SIM_STATE_READY)
+        assertNull(networkService.getCarrierInfo())
     }
 
     @Test
-    public void getCarrierInfo_whenSimOperatorIsEmpty() {
-        doReturn("").when(telephonyManager).getSimOperator();
-        doReturn(TelephonyManager.SIM_STATE_READY).when(telephonyManager).getSimState();
-
-        assertNull(networkService.getCarrierInfo());
+    fun getCarrierInfo_whenSimOperatorIsEmpty() {
+        every { telephonyManager.simOperator }.returns("")
+        every { telephonyManager.simState }.returns(TelephonyManager.SIM_STATE_READY)
+        assertNull(networkService.getCarrierInfo())
     }
 
     @Test
-    public void getCarrierInfo_fromFirstSimOperatorResponse() {
-        when(telephonyManager.getSimOperator()).thenReturn("1234").thenReturn("");
-        doReturn(TelephonyManager.SIM_STATE_READY).when(telephonyManager).getSimState();
+    fun getCarrierInfo_fromFirstSimOperatorResponse() {
+        every { telephonyManager.simOperator }.returns("1234").andThen("")
+        every { telephonyManager.simState }.returns(TelephonyManager.SIM_STATE_READY)
 
-        assertNotNull(networkService.getCarrierInfo());
+        assertNotNull(networkService.getCarrierInfo())
     }
 }

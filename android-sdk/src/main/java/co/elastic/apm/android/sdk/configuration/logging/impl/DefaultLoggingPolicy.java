@@ -18,43 +18,29 @@
  */
 package co.elastic.apm.android.sdk.configuration.logging.impl;
 
-import co.elastic.apm.android.sdk.ElasticApmAgent;
 import co.elastic.apm.android.sdk.configuration.logging.LogLevel;
 import co.elastic.apm.android.sdk.configuration.logging.LoggingPolicy;
-import co.elastic.apm.android.sdk.internal.services.Service;
-import co.elastic.apm.android.sdk.internal.services.ServiceManager;
-import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService;
-import co.elastic.apm.android.sdk.internal.utilities.providers.LazyProvider;
-import co.elastic.apm.android.sdk.internal.utilities.providers.Provider;
+import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager;
+import co.elastic.apm.android.sdk.internal.services.kotlin.appinfo.AppInfoService;
 
 public class DefaultLoggingPolicy implements LoggingPolicy {
+    private final AppInfoService appInfoService;
 
-    private final Provider<Boolean> appIsDebuggable;
-    private final Provider<Boolean> agentIsInitialized;
-
-    public static DefaultLoggingPolicy create() {
-        final Provider<Boolean> agentIsInitialized = ElasticApmAgent::isInitialized;
-        return new DefaultLoggingPolicy(LazyProvider.of(() -> {
-            if (!agentIsInitialized.get()) {
-                return false;
-            }
-            AppInfoService service = ServiceManager.get().getService(Service.Names.APP_INFO);
-            return service.isInDebugMode();
-        }), agentIsInitialized);
+    public static DefaultLoggingPolicy create(ServiceManager serviceManager) {
+        return new DefaultLoggingPolicy(serviceManager.getAppInfoService());
     }
 
-    public DefaultLoggingPolicy(Provider<Boolean> appIsDebuggable, Provider<Boolean> agentIsInitialized) {
-        this.appIsDebuggable = appIsDebuggable;
-        this.agentIsInitialized = agentIsInitialized;
+    DefaultLoggingPolicy(AppInfoService appInfoService) {
+        this.appInfoService = appInfoService;
     }
 
     @Override
     public boolean isEnabled() {
-        return agentIsInitialized.get();
+        return true;
     }
 
     @Override
     public LogLevel getMinimumLevel() {
-        return (appIsDebuggable.get()) ? LogLevel.DEBUG : LogLevel.INFO;
+        return appInfoService.isInDebugMode() ? LogLevel.DEBUG : LogLevel.INFO;
     }
 }

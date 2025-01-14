@@ -18,6 +18,7 @@
  */
 package co.elastic.apm.android.sdk.internal.configuration
 
+import co.elastic.apm.android.sdk.internal.configuration.kotlin.Configuration
 import org.stagemonitor.configuration.ConfigurationRegistry
 import org.stagemonitor.configuration.source.ConfigurationSource
 

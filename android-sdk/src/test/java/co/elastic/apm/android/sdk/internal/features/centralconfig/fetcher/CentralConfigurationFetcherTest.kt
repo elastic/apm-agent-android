@@ -18,10 +18,10 @@
  */
 package co.elastic.apm.android.sdk.internal.features.centralconfig.fetcher
 
-import co.elastic.apm.android.sdk.connectivity.auth.AuthConfiguration
-import co.elastic.apm.android.sdk.internal.configuration.impl.ConnectivityConfiguration
-import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService
-import co.elastic.apm.android.sdk.testutils.ElasticApmAgentRule
+import co.elastic.apm.android.sdk.connectivity.ConnectivityConfiguration
+import co.elastic.apm.android.sdk.features.centralconfig.fetcher.CentralConfigurationFetcher
+import co.elastic.apm.android.sdk.internal.services.kotlin.preferences.PreferencesService
+import co.elastic.apm.android.sdk.testutils.ElasticAgentRule
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -41,7 +41,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class CentralConfigurationFetcherTest : ConfigurationFileProvider {
+class CentralConfigurationFetcherTest {
     private lateinit var preferences: PreferencesService
     private lateinit var connectivity: ConnectivityConfiguration
     private lateinit var configurationFile: File
@@ -49,7 +49,7 @@ class CentralConfigurationFetcherTest : ConfigurationFileProvider {
     private lateinit var webServer: MockWebServer
 
     @get:Rule
-    val agentRule = ElasticApmAgentRule()
+    val agentRule = ElasticAgentRule()
 
     @get:Rule
     val temporaryFolder: TemporaryFolder = TemporaryFolder()
@@ -61,7 +61,7 @@ class CentralConfigurationFetcherTest : ConfigurationFileProvider {
         every { preferences.retrieveString("central_configuration_etag") }.returns(null)
         every { preferences.store("central_configuration_etag", any<String>()) } just Runs
         configurationFile = temporaryFolder.newFile("configFile.json")
-        fetcher = CentralConfigurationFetcher(connectivity, this, preferences)
+        fetcher = CentralConfigurationFetcher(configurationFile, preferences)
         agentRule.initialize()
     }
 
@@ -80,7 +80,7 @@ class CentralConfigurationFetcherTest : ConfigurationFileProvider {
     fun `On successful response, notify config changed`() {
         enqueueSimpleResponse()
 
-        val fetch = fetcher.fetch()
+        val fetch = fetcher.fetch(connectivity)
 
         assertThat(fetch.configurationHasChanged).isTrue()
     }
@@ -89,7 +89,7 @@ class CentralConfigurationFetcherTest : ConfigurationFileProvider {
     fun `When config not changed response, notify the caller`() {
         enqueueResponse(getResponse(304, ""))
 
-        val fetch = fetcher.fetch()
+        val fetch = fetcher.fetch(connectivity)
 
         assertThat(fetch.configurationHasChanged).isFalse()
     }
@@ -98,7 +98,7 @@ class CentralConfigurationFetcherTest : ConfigurationFileProvider {
     fun `Verify request query params`() {
         enqueueSimpleResponse()
 
-        fetcher.fetch()
+        fetcher.fetch(connectivity)
 
         val recordedRequestUrl = webServer.takeRequest().requestUrl
         assertThat(recordedRequestUrl!!.queryParameter("service.name")).isEqualTo("service-name")
@@ -110,8 +110,8 @@ class CentralConfigurationFetcherTest : ConfigurationFileProvider {
         enqueueSimpleResponse()
 
         setConnectivityEndpoint("/some/path")
-        fetcher = CentralConfigurationFetcher(connectivity, this, preferences)
-        fetcher.fetch()
+        fetcher = CentralConfigurationFetcher(configurationFile, preferences)
+        fetcher.fetch(connectivity)
 
         val recordedRequestUrl = webServer.takeRequest().requestUrl
         assertThat(recordedRequestUrl!!.encodedPath).isEqualTo("/some/path/config/v1/agents")
@@ -121,20 +121,18 @@ class CentralConfigurationFetcherTest : ConfigurationFileProvider {
     fun `Verify request content type`() {
         enqueueSimpleResponse()
 
-        fetcher.fetch()
+        fetcher.fetch(connectivity)
 
         assertThat(webServer.takeRequest().getHeader("Content-Type")).isEqualTo("application/json")
     }
 
     @Test
-    fun `Send auth info when available`() {
+    fun `Send headers when available`() {
         val authHeaderValue = "Bearer something"
-        val authConfiguration = mockk<AuthConfiguration>()
-        every { authConfiguration.asAuthorizationHeaderValue() }.returns(authHeaderValue)
-        every { connectivity.authConfiguration }.returns(authConfiguration)
+        every { connectivity.getHeaders() }.returns(mapOf("Authorization" to authHeaderValue))
         enqueueSimpleResponse()
 
-        fetcher.fetch()
+        fetcher.fetch(connectivity)
 
         assertThat(webServer.takeRequest().getHeader("Authorization")).isEqualTo(authHeaderValue)
     }
@@ -144,7 +142,7 @@ class CentralConfigurationFetcherTest : ConfigurationFileProvider {
         val theEtag = "someEtag"
         enqueueResponse(getResponse(200, "{}").setHeader("ETag", theEtag))
 
-        fetcher.fetch()
+        fetcher.fetch(connectivity)
 
         verify { preferences.store("central_configuration_etag", theEtag) }
     }
@@ -155,7 +153,7 @@ class CentralConfigurationFetcherTest : ConfigurationFileProvider {
         every { preferences.retrieveString("central_configuration_etag") }.returns(theEtag)
         enqueueSimpleResponse()
 
-        fetcher.fetch()
+        fetcher.fetch(connectivity)
 
         val sentEtag = webServer.takeRequest().getHeader("If-None-Match")
         assertThat(sentEtag).isEqualTo(theEtag)
@@ -167,9 +165,9 @@ class CentralConfigurationFetcherTest : ConfigurationFileProvider {
         val headerValue = "max-age=$headerMaxAge"
         enqueueResponse(getResponse(200, "{}").setHeader("Cache-Control", headerValue))
 
-        val result = fetcher.fetch()
+        val result = fetcher.fetch(connectivity)
 
-        assertThat(result.maxAgeInSeconds.toLong()).isEqualTo(headerMaxAge.toLong())
+        assertThat(result.maxAgeInSeconds?.toLong()).isEqualTo(headerMaxAge.toLong())
     }
 
     @Test
@@ -177,7 +175,7 @@ class CentralConfigurationFetcherTest : ConfigurationFileProvider {
         val headerValue = "no-cache"
         enqueueResponse(getResponse(200, "{}").setHeader("Cache-Control", headerValue))
 
-        val result = fetcher.fetch()
+        val result = fetcher.fetch(connectivity)
 
         assertNull(result.maxAgeInSeconds)
     }
@@ -186,7 +184,7 @@ class CentralConfigurationFetcherTest : ConfigurationFileProvider {
     fun `When no cache control is received, return null max age`() {
         enqueueSimpleResponse()
 
-        val result = fetcher.fetch()
+        val result = fetcher.fetch(connectivity)
 
         assertNull(result.maxAgeInSeconds)
     }
@@ -196,7 +194,7 @@ class CentralConfigurationFetcherTest : ConfigurationFileProvider {
         val body = "{\"some\":\"configValue\"}"
         enqueueResponse(getResponse(200, body))
 
-        fetcher.fetch()
+        fetcher.fetch(connectivity)
 
         assertThat(configurationFile.readText()).isEqualTo(body)
     }
@@ -213,12 +211,8 @@ class CentralConfigurationFetcherTest : ConfigurationFileProvider {
         return MockResponse().setResponseCode(code).setBody(body)
     }
 
-    override fun getConfigurationFile(): File {
-        return configurationFile
-    }
-
     private fun setConnectivityEndpoint(path: String) {
-        every { connectivity.endpoint }.returns("http://" + webServer.hostName + ":" + webServer.port + path)
-        every { connectivity.authConfiguration }.returns(null)
+        every { connectivity.getUrl() }.returns("http://" + webServer.hostName + ":" + webServer.port + path)
+        every { connectivity.getHeaders() }.returns(emptyMap())
     }
 }

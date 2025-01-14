@@ -20,6 +20,7 @@ package co.elastic.apm.android.sdk.configuration.logging;
 
 import co.elastic.apm.android.sdk.configuration.logging.impl.DefaultLoggingPolicy;
 import co.elastic.apm.android.sdk.configuration.logging.impl.SimpleLoggingPolicy;
+import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager;
 
 /**
  * Defines the internal logging behavior of this library.
@@ -32,8 +33,8 @@ public interface LoggingPolicy {
      * <p>
      * No logs will be created until the Agent is initialized.
      */
-    static LoggingPolicy getDefault() {
-        return DefaultLoggingPolicy.create();
+    static LoggingPolicy getDefault(ServiceManager serviceManager) {
+        return DefaultLoggingPolicy.create(serviceManager);
     }
 
     /**

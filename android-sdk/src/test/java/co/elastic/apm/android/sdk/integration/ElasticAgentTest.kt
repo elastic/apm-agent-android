@@ -76,6 +76,7 @@ import org.awaitility.kotlin.await
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
@@ -104,8 +105,20 @@ class ElasticAgentTest {
     }
 
     private fun closeAgent() {
-        agent.close()
-        inMemoryExporters.reset()
+        try {
+            agent.close()
+            inMemoryExporters.reset()
+        } catch (ignored: UninitializedPropertyAccessException) {
+        }
+    }
+
+    @Test
+    fun `Validate url is present`() {
+        val exception = assertThrows<NullPointerException> {
+            ElasticAgent.builder(RuntimeEnvironment.getApplication()).build()
+        }
+
+        assertThat(exception).hasMessage("The url must be set.")
     }
 
     @Test

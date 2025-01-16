@@ -39,11 +39,11 @@ interface SntpClient : Closeable {
             }
         }
 
-        fun create(): SntpClient {
+        fun create(systemTimeProvider: SystemTimeProvider): SntpClient {
             if (System.getProperty("elastic.test")?.equals("true") == true) {
                 return noop
             }
-            return SntpClientImpl(UdpClient("time.android.com", 123, 48), SystemTimeProvider.get())
+            return SntpClientImpl(UdpClient("time.android.com", 123, 48), systemTimeProvider)
         }
     }
 

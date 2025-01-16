@@ -157,7 +157,7 @@ class ElasticAgent private constructor(
                 extraRequestHeaders,
                 exportProtocol
             )
-            val systemTimeProvider = internalSystemTimeProvider ?: SystemTimeProvider.get()
+            val systemTimeProvider = internalSystemTimeProvider ?: SystemTimeProvider()
             val connectivityHolder =
                 ApmServerConnectivityManager.ConnectivityHolder(apmServerConfiguration)
             val apmServerConnectivityManager =
@@ -168,13 +168,13 @@ class ElasticAgent private constructor(
                 signalBufferSize = internalSignalBufferSize
             )
             val diskBufferingManager = DiskBufferingManager.create(
-                serviceManager, exporterGateManager, diskBufferingConfiguration
+                systemTimeProvider, serviceManager, exporterGateManager, diskBufferingConfiguration
             )
             val elasticClockManager = ElasticClockManager.create(
                 serviceManager,
                 exporterGateManager,
                 systemTimeProvider,
-                internalSntpClient ?: SntpClient.create(),
+                internalSntpClient ?: SntpClient.create(systemTimeProvider),
                 internalWaitForClock
             )
             val centralConfigurationManager = CentralConfigurationManager.create(

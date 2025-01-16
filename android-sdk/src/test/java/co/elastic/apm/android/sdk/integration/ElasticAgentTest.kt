@@ -702,7 +702,7 @@ class ElasticAgentTest {
         val expectedCurrentTime = localTimeReference + timeOffset
         val sntpClient = mockk<SntpClient>()
         val currentTime = AtomicLong(0)
-        val systemTimeProvider = spyk(SystemTimeProvider.get())
+        val systemTimeProvider = spyk(SystemTimeProvider())
         every { systemTimeProvider.getCurrentTimeMillis() }.answers {
             currentTime.get()
         }
@@ -877,7 +877,7 @@ class ElasticAgentTest {
         val expectedCurrentTime = localTimeReference + timeOffset
         val sntpClient = mockk<SntpClient>()
         val currentTime = AtomicLong(12345)
-        val systemTimeProvider = spyk(SystemTimeProvider.get())
+        val systemTimeProvider = spyk(SystemTimeProvider())
         every { systemTimeProvider.getCurrentTimeMillis() }.answers {
             currentTime.get()
         }
@@ -956,7 +956,7 @@ class ElasticAgentTest {
         val expectedCurrentTime = localTimeReference + timeOffset
         val sntpClient = mockk<SntpClient>()
         val currentTime = AtomicLong(12345)
-        val systemTimeProvider = spyk(SystemTimeProvider.get())
+        val systemTimeProvider = spyk(SystemTimeProvider())
         every { systemTimeProvider.getCurrentTimeMillis() }.answers {
             currentTime.get()
         }
@@ -1039,7 +1039,7 @@ class ElasticAgentTest {
         val expectedCurrentTime = localTimeReference + timeOffset
         val sntpClient = mockk<SntpClient>()
         val currentTime = AtomicLong(12345)
-        val systemTimeProvider = spyk(SystemTimeProvider.get())
+        val systemTimeProvider = spyk(SystemTimeProvider())
         every { systemTimeProvider.getCurrentTimeMillis() }.answers {
             currentTime.get()
         }
@@ -1084,7 +1084,7 @@ class ElasticAgentTest {
     fun `Verify clock initialization behavior, when latch waiting times out`() {
         val sntpClient = mockk<SntpClient>()
         val currentTime = AtomicLong(12345)
-        val systemTimeProvider = spyk(SystemTimeProvider.get())
+        val systemTimeProvider = spyk(SystemTimeProvider())
         every { systemTimeProvider.getCurrentTimeMillis() }.answers {
             currentTime.get()
         }
@@ -1136,7 +1136,7 @@ class ElasticAgentTest {
     fun `Verify clock initialization behavior, when buffer gets full`() {
         val sntpClient = mockk<SntpClient>()
         val currentTime = AtomicLong(12345)
-        val systemTimeProvider = spyk(SystemTimeProvider.get())
+        val systemTimeProvider = spyk(SystemTimeProvider())
         val bufferSize = 10
         every { systemTimeProvider.getCurrentTimeMillis() }.answers {
             currentTime.get()
@@ -1192,7 +1192,7 @@ class ElasticAgentTest {
     fun `Verify session manager behavior`() {
         val timeLimitMillis = TimeUnit.MINUTES.toMillis(30)
         val currentTimeMillis = AtomicLong(timeLimitMillis)
-        val systemTimeProvider = spyk(SystemTimeProvider.get())
+        val systemTimeProvider = spyk(SystemTimeProvider())
         every { systemTimeProvider.getCurrentTimeMillis() }.answers { currentTimeMillis.get() }
         val sessionIdGenerator = mockk<SessionIdGenerator>()
         every { sessionIdGenerator.generate() }.returns("first-id")

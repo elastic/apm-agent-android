@@ -26,6 +26,7 @@ import co.elastic.apm.android.sdk.features.diskbuffering.tools.DiskManager
 import co.elastic.apm.android.sdk.features.exportergate.ExporterGateManager
 import co.elastic.apm.android.sdk.features.persistence.SimpleTemporaryFileProvider
 import co.elastic.apm.android.sdk.internal.services.ServiceManager
+import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import io.opentelemetry.contrib.disk.buffering.LogRecordFromDiskExporter
 import io.opentelemetry.contrib.disk.buffering.LogRecordToDiskExporter
 import io.opentelemetry.contrib.disk.buffering.MetricFromDiskExporter
@@ -40,6 +41,7 @@ import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 class DiskBufferingManager private constructor(
+    private val systemTimeProvider: SystemTimeProvider,
     private val serviceManager: ServiceManager,
     private val gateManager: ExporterGateManager,
     private val configuration: DiskBufferingConfiguration,
@@ -191,7 +193,12 @@ class DiskBufferingManager private constructor(
         val builder = StorageConfiguration.builder()
             .setMaxFileSize(diskManager.getMaxCacheFileSize())
             .setMaxFolderSize(diskManager.getMaxFolderSize())
-            .setTemporaryFileProvider(SimpleTemporaryFileProvider(diskManager.getTemporaryDir()))
+            .setTemporaryFileProvider(
+                SimpleTemporaryFileProvider(
+                    systemTimeProvider,
+                    diskManager.getTemporaryDir()
+                )
+            )
             .setRootDir(diskManager.getSignalsCacheDir())
 
         configuration.maxFileAgeForWrite?.let {
@@ -206,6 +213,7 @@ class DiskBufferingManager private constructor(
 
     companion object {
         internal fun create(
+            systemTimeProvider: SystemTimeProvider,
             serviceManager: ServiceManager,
             gateManager: ExporterGateManager,
             diskBufferingConfiguration: DiskBufferingConfiguration
@@ -215,6 +223,7 @@ class DiskBufferingManager private constructor(
             gateManager.createLogRecordLatch(DiskBufferingManager::class.java, latchName)
             gateManager.createMetricGateLatch(DiskBufferingManager::class.java, latchName)
             return DiskBufferingManager(
+                systemTimeProvider,
                 serviceManager,
                 gateManager,
                 diskBufferingConfiguration

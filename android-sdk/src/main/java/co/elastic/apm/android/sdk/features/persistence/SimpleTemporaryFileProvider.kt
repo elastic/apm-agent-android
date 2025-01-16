@@ -18,12 +18,16 @@
  */
 package co.elastic.apm.android.sdk.features.persistence
 
-import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider.Companion.get
+import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import io.opentelemetry.contrib.disk.buffering.internal.files.TemporaryFileProvider
 import java.io.File
 
-class SimpleTemporaryFileProvider(private val tempDir: File) : TemporaryFileProvider {
+class SimpleTemporaryFileProvider(
+    private val systemTimeProvider: SystemTimeProvider,
+    private val tempDir: File
+) : TemporaryFileProvider {
+
     override fun createTemporaryFile(prefix: String): File {
-        return File(tempDir, prefix + "_" + get().getCurrentTimeMillis() + ".tmp")
+        return File(tempDir, prefix + "_" + systemTimeProvider.getCurrentTimeMillis() + ".tmp")
     }
 }

@@ -20,24 +20,11 @@ package co.elastic.apm.android.sdk.internal.time
 
 import android.os.SystemClock
 
-class SystemTimeProvider private constructor() {
+class SystemTimeProvider {
 
     fun getCurrentTimeMillis(): Long = System.currentTimeMillis()
 
     fun getNanoTime(): Long = System.nanoTime()
 
     fun getElapsedRealTime(): Long = SystemClock.elapsedRealtime()
-
-    companion object {
-        private var INSTANCE: SystemTimeProvider? = null
-
-        @JvmStatic
-        fun get(): SystemTimeProvider = synchronized(this) {
-            if (INSTANCE == null) {
-                INSTANCE = SystemTimeProvider()
-            }
-
-            return INSTANCE!!
-        }
-    }
 }

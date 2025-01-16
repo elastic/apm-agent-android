@@ -20,16 +20,8 @@ package co.elastic.apm.android.sdk.internal.utilities
 
 import java.util.Random
 
-class NumberTools private constructor() {
+class NumberTools {
     fun random(): Double {
         return Random().nextDouble()
-    }
-
-    companion object {
-        private val INSTANCE by lazy { NumberTools() }
-
-        fun get(): NumberTools {
-            return INSTANCE
-        }
     }
 }

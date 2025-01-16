@@ -101,7 +101,7 @@ class SampleRateManager private constructor(
                     FLAG_UNSET
                 ),
                 serviceManager.getBackgroundWorkService(),
-                NumberTools.get(),
+                NumberTools(),
                 gateManager
             )
         }

@@ -147,93 +147,93 @@ class ElasticAgent private constructor(
         }
 
         fun build(): ElasticAgent {
-            url?.let { finalUrl ->
-                val serviceManager =
-                    internalServiceManagerInterceptor.intercept(ServiceManager.create(application))
-                val apmServerConfiguration = ApmServerConnectivity(
-                    finalUrl,
-                    authentication,
-                    extraRequestHeaders,
-                    exportProtocol
-                )
-                val systemTimeProvider = internalSystemTimeProvider ?: SystemTimeProvider.get()
-                val connectivityHolder =
-                    ApmServerConnectivityManager.ConnectivityHolder(apmServerConfiguration)
-                val apmServerConnectivityManager =
-                    ApmServerConnectivityManager(connectivityHolder)
-                val exporterProvider = ApmServerExporterProvider.create(connectivityHolder)
-                val exporterGateManager = ExporterGateManager(
-                    serviceManager,
-                    signalBufferSize = internalSignalBufferSize
-                )
-                val diskBufferingManager = DiskBufferingManager.create(
-                    serviceManager, exporterGateManager, diskBufferingConfiguration
-                )
-                val elasticClockManager = ElasticClockManager.create(
-                    serviceManager,
-                    exporterGateManager,
-                    systemTimeProvider,
-                    internalSntpClient ?: SntpClient.create(),
-                    internalWaitForClock
-                )
-                val centralConfigurationManager = CentralConfigurationManager.create(
-                    serviceManager,
-                    systemTimeProvider,
-                    exporterGateManager,
-                    serviceName,
-                    deploymentEnvironment,
-                    connectivityHolder
-                )
-                val sessionManager = SessionManager.create(
-                    serviceManager,
-                    sessionIdGenerator ?: SessionIdGenerator { UUID.randomUUID().toString() },
-                    systemTimeProvider
-                )
-                val sampleRateManager = SampleRateManager.create(
-                    serviceManager,
-                    exporterGateManager,
-                    centralConfigurationManager.getCentralConfiguration()
-                )
-                sessionManager.addListener(sampleRateManager)
+            val finalUrl = url ?: throw NullPointerException("The url must be set.")
 
-                addSpanAttributesInterceptor(
-                    elasticClockManager.getClockExportGateManager().getSpanAttributesInterceptor()
-                )
-                addLogRecordAttributesInterceptor(
-                    elasticClockManager.getClockExportGateManager()
-                        .getLogRecordAttributesInterceptor()
-                )
+            val serviceManager =
+                internalServiceManagerInterceptor.intercept(ServiceManager.create(application))
+            val apmServerConfiguration = ApmServerConnectivity(
+                finalUrl,
+                authentication,
+                extraRequestHeaders,
+                exportProtocol
+            )
+            val systemTimeProvider = internalSystemTimeProvider ?: SystemTimeProvider.get()
+            val connectivityHolder =
+                ApmServerConnectivityManager.ConnectivityHolder(apmServerConfiguration)
+            val apmServerConnectivityManager =
+                ApmServerConnectivityManager(connectivityHolder)
+            val exporterProvider = ApmServerExporterProvider.create(connectivityHolder)
+            val exporterGateManager = ExporterGateManager(
+                serviceManager,
+                signalBufferSize = internalSignalBufferSize
+            )
+            val diskBufferingManager = DiskBufferingManager.create(
+                serviceManager, exporterGateManager, diskBufferingConfiguration
+            )
+            val elasticClockManager = ElasticClockManager.create(
+                serviceManager,
+                exporterGateManager,
+                systemTimeProvider,
+                internalSntpClient ?: SntpClient.create(),
+                internalWaitForClock
+            )
+            val centralConfigurationManager = CentralConfigurationManager.create(
+                serviceManager,
+                systemTimeProvider,
+                exporterGateManager,
+                serviceName,
+                deploymentEnvironment,
+                connectivityHolder
+            )
+            val sessionManager = SessionManager.create(
+                serviceManager,
+                sessionIdGenerator ?: SessionIdGenerator { UUID.randomUUID().toString() },
+                systemTimeProvider
+            )
+            val sampleRateManager = SampleRateManager.create(
+                serviceManager,
+                exporterGateManager,
+                centralConfigurationManager.getCentralConfiguration()
+            )
+            sessionManager.addListener(sampleRateManager)
 
-                val conditionalDropManager = ConditionalDropManager()
-                conditionalDropManager.dropWhen {
-                    !centralConfigurationManager.getCentralConfiguration().isRecording()
-                }
-                conditionalDropManager.dropWhen {
-                    !sampleRateManager.allowSignalExporting()
-                }
+            addSpanAttributesInterceptor(
+                elasticClockManager.getClockExportGateManager().getSpanAttributesInterceptor()
+            )
+            addLogRecordAttributesInterceptor(
+                elasticClockManager.getClockExportGateManager()
+                    .getLogRecordAttributesInterceptor()
+            )
 
-                addInternalInterceptors(
-                    diskBufferingManager,
-                    conditionalDropManager,
-                    elasticClockManager,
-                    exporterGateManager
-                )
-                setClock(elasticClockManager.getClock())
-                setExporterProvider(internalExporterProviderInterceptor.intercept(exporterProvider))
-                setSessionProvider(sessionManager)
+            val conditionalDropManager = ConditionalDropManager()
+            conditionalDropManager.dropWhen {
+                !centralConfigurationManager.getCentralConfiguration().isRecording()
+            }
+            conditionalDropManager.dropWhen {
+                !sampleRateManager.allowSignalExporting()
+            }
 
-                return ElasticAgent(
-                    serviceManager,
-                    buildConfiguration(serviceManager),
-                    sampleRateManager,
-                    exporterGateManager,
-                    diskBufferingManager,
-                    apmServerConnectivityManager,
-                    elasticClockManager,
-                    centralConfigurationManager,
-                    sessionManager
-                )
-            } ?: throw NullPointerException("The url must be set.")
+            addInternalInterceptors(
+                diskBufferingManager,
+                conditionalDropManager,
+                elasticClockManager,
+                exporterGateManager
+            )
+            setClock(elasticClockManager.getClock())
+            setExporterProvider(internalExporterProviderInterceptor.intercept(exporterProvider))
+            setSessionProvider(sessionManager)
+
+            return ElasticAgent(
+                serviceManager,
+                buildConfiguration(serviceManager),
+                sampleRateManager,
+                exporterGateManager,
+                diskBufferingManager,
+                apmServerConnectivityManager,
+                elasticClockManager,
+                centralConfigurationManager,
+                sessionManager
+            )
         }
 
         private fun addInternalInterceptors(

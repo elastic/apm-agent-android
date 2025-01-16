@@ -18,7 +18,7 @@
  */
 package co.elastic.apm.android.sdk.tools.cache
 
-import co.elastic.apm.android.sdk.internal.services.kotlin.preferences.PreferencesService
+import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService
 
 class PreferencesStringCacheHandler(
     private val key: String,

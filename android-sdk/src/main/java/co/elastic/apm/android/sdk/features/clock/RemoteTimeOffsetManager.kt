@@ -20,8 +20,8 @@ package co.elastic.apm.android.sdk.features.clock
 
 import androidx.annotation.GuardedBy
 import co.elastic.apm.android.common.internal.logging.Elog
-import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
-import co.elastic.apm.android.sdk.internal.services.kotlin.preferences.PreferencesService
+import co.elastic.apm.android.sdk.internal.services.ServiceManager
+import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
 import java.util.concurrent.TimeUnit

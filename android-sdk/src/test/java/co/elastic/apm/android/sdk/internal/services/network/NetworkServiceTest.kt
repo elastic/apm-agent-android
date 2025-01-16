@@ -20,8 +20,7 @@ package co.elastic.apm.android.sdk.internal.services.network
 
 import android.net.ConnectivityManager
 import android.telephony.TelephonyManager
-import co.elastic.apm.android.sdk.internal.services.kotlin.appinfo.AppInfoService
-import co.elastic.apm.android.sdk.internal.services.kotlin.network.NetworkService
+import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK

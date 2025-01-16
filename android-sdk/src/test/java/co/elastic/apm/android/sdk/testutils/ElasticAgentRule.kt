@@ -20,7 +20,7 @@ package co.elastic.apm.android.sdk.testutils
 
 import co.elastic.apm.android.sdk.exporters.ExporterProvider
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
-import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
+import co.elastic.apm.android.sdk.internal.services.ServiceManager
 import co.elastic.apm.android.sdk.processors.ProcessorFactory
 import co.elastic.apm.android.sdk.session.Session
 import co.elastic.apm.android.sdk.session.SessionProvider

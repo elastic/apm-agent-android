@@ -22,7 +22,7 @@ import android.app.Application
 import co.elastic.apm.android.sdk.exporters.ExporterProvider
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
 import co.elastic.apm.android.sdk.internal.opentelemetry.ElasticOpenTelemetryBuilder
-import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
+import co.elastic.apm.android.sdk.internal.services.ServiceManager
 import co.elastic.apm.android.sdk.session.SessionProvider
 import co.elastic.apm.android.sdk.tools.interceptor.Interceptor
 import io.opentelemetry.api.OpenTelemetry

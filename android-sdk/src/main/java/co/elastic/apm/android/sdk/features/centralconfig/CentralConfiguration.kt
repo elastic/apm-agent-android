@@ -18,7 +18,7 @@
  */
 package co.elastic.apm.android.sdk.features.centralconfig
 
-import co.elastic.apm.android.sdk.internal.configuration.kotlin.Configuration
+import co.elastic.apm.android.sdk.internal.configuration.Configuration
 
 internal class CentralConfiguration : Configuration() {
     private val recording = createBooleanOption("recording", true)

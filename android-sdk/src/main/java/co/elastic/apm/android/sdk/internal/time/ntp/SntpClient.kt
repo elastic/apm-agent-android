@@ -29,15 +29,16 @@ interface SntpClient : Closeable {
     fun fetchTimeOffset(currentTimeMillis: Long): Response
 
     companion object {
-        private val noop = object : SntpClient {
-            override fun fetchTimeOffset(currentTimeMillis: Long): Response {
-                return Response.Error(ErrorType.TRY_LATER)
-            }
+        private val noop by lazy {
+            object : SntpClient {
+                override fun fetchTimeOffset(currentTimeMillis: Long): Response {
+                    return Response.Error(ErrorType.TRY_LATER)
+                }
 
-            override fun close() {}
+                override fun close() {}
+            }
         }
 
-        @JvmStatic
         fun create(): SntpClient {
             if (System.getProperty("elastic.test")?.equals("true") == true) {
                 return noop

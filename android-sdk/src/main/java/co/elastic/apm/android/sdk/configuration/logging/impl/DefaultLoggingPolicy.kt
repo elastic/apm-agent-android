@@ -20,8 +20,8 @@ package co.elastic.apm.android.sdk.configuration.logging.impl
 
 import co.elastic.apm.android.sdk.configuration.logging.LogLevel
 import co.elastic.apm.android.sdk.configuration.logging.LoggingPolicy
-import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
-import co.elastic.apm.android.sdk.internal.services.kotlin.appinfo.AppInfoService
+import co.elastic.apm.android.sdk.internal.services.ServiceManager
+import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService
 
 class DefaultLoggingPolicy internal constructor(private val appInfoService: AppInfoService) :
     LoggingPolicy {

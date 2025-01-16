@@ -19,7 +19,7 @@
 package co.elastic.apm.android.sdk.configuration.logging.impl
 
 import co.elastic.apm.android.sdk.configuration.logging.LogLevel
-import co.elastic.apm.android.sdk.internal.services.kotlin.appinfo.AppInfoService
+import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat

@@ -18,7 +18,7 @@
  */
 package co.elastic.apm.android.sdk.internal.api
 
-import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
+import co.elastic.apm.android.sdk.internal.services.ServiceManager
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.sdk.OpenTelemetrySdk
 import java.io.Closeable

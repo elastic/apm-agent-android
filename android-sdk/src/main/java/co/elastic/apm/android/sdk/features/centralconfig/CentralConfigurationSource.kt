@@ -21,8 +21,8 @@ package co.elastic.apm.android.sdk.features.centralconfig
 import co.elastic.apm.android.common.internal.logging.Elog
 import co.elastic.apm.android.sdk.connectivity.ConnectivityConfigurationHolder
 import co.elastic.apm.android.sdk.features.centralconfig.fetcher.CentralConfigurationFetcher
-import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
-import co.elastic.apm.android.sdk.internal.services.kotlin.preferences.PreferencesService
+import co.elastic.apm.android.sdk.internal.services.ServiceManager
+import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import com.dslplatform.json.DslJson
 import com.dslplatform.json.MapConverter

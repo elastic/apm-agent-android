@@ -16,25 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.utilities;
+package co.elastic.apm.android.sdk.internal.utilities
 
-import java.util.Random;
+import java.util.Random
 
-public class NumberTools {
-    private static NumberTools INSTANCE;
+class NumberTools private constructor() {
+    fun random(): Double {
+        return Random().nextDouble()
+    }
 
-    public static NumberTools get() {
-        if (INSTANCE == null) {
-            INSTANCE = new NumberTools();
+    companion object {
+        private val INSTANCE by lazy { NumberTools() }
+
+        fun get(): NumberTools {
+            return INSTANCE
         }
-
-        return INSTANCE;
-    }
-
-    private NumberTools() {
-    }
-
-    public double random() {
-        return new Random().nextDouble();
     }
 }

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.services.kotlin.appinfo
+package co.elastic.apm.android.sdk.internal.services.appinfo
 
 import android.content.Context
 import android.content.pm.ApplicationInfo
@@ -27,7 +27,7 @@ import android.os.storage.StorageManager
 import androidx.annotation.RequiresApi
 import androidx.annotation.WorkerThread
 import co.elastic.apm.android.common.internal.logging.Elog
-import co.elastic.apm.android.sdk.internal.services.kotlin.Service
+import co.elastic.apm.android.sdk.internal.services.Service
 import java.io.File
 import java.io.IOException
 import kotlin.math.min

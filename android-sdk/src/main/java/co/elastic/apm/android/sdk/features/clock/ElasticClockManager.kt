@@ -20,7 +20,7 @@ package co.elastic.apm.android.sdk.features.clock
 
 import co.elastic.apm.android.sdk.features.exportergate.ExporterGateManager
 import co.elastic.apm.android.sdk.internal.opentelemetry.clock.ElapsedTimeOffsetClock
-import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
+import co.elastic.apm.android.sdk.internal.services.ServiceManager
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
 import io.opentelemetry.sdk.common.Clock

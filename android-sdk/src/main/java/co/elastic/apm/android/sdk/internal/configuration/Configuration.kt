@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.configuration.kotlin
+package co.elastic.apm.android.sdk.internal.configuration
 
 import org.stagemonitor.configuration.ConfigurationOptionProvider
 

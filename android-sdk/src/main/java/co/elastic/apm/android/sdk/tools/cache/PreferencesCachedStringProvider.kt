@@ -18,7 +18,7 @@
  */
 package co.elastic.apm.android.sdk.tools.cache
 
-import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
+import co.elastic.apm.android.sdk.internal.services.ServiceManager
 import co.elastic.apm.android.sdk.tools.provider.StringProvider
 
 class PreferencesCachedStringProvider(

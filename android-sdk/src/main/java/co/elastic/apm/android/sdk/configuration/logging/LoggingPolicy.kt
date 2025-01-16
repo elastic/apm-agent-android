@@ -20,7 +20,7 @@ package co.elastic.apm.android.sdk.configuration.logging
 
 import co.elastic.apm.android.sdk.configuration.logging.impl.DefaultLoggingPolicy
 import co.elastic.apm.android.sdk.configuration.logging.impl.SimpleLoggingPolicy
-import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
+import co.elastic.apm.android.sdk.internal.services.ServiceManager
 
 /**
  * Defines the internal logging behavior of this library.

@@ -16,22 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.features.persistence;
+package co.elastic.apm.android.sdk.features.persistence
 
-import java.io.File;
+import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider.Companion.get
+import io.opentelemetry.contrib.disk.buffering.internal.files.TemporaryFileProvider
+import java.io.File
 
-import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider;
-import io.opentelemetry.contrib.disk.buffering.internal.files.TemporaryFileProvider;
-
-public class SimpleTemporaryFileProvider implements TemporaryFileProvider {
-    private final File tempDir;
-
-    public SimpleTemporaryFileProvider(File tempDir) {
-        this.tempDir = tempDir;
-    }
-
-    @Override
-    public File createTemporaryFile(String prefix) {
-        return new File(tempDir, prefix + "_" + SystemTimeProvider.get().getCurrentTimeMillis() + ".tmp");
+class SimpleTemporaryFileProvider(private val tempDir: File) : TemporaryFileProvider {
+    override fun createTemporaryFile(prefix: String): File {
+        return File(tempDir, prefix + "_" + get().getCurrentTimeMillis() + ".tmp")
     }
 }

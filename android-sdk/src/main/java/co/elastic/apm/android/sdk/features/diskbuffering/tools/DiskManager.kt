@@ -20,9 +20,9 @@ package co.elastic.apm.android.sdk.features.diskbuffering.tools
 
 import co.elastic.apm.android.common.internal.logging.Elog
 import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingConfiguration
-import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
-import co.elastic.apm.android.sdk.internal.services.kotlin.appinfo.AppInfoService
-import co.elastic.apm.android.sdk.internal.services.kotlin.preferences.PreferencesService
+import co.elastic.apm.android.sdk.internal.services.ServiceManager
+import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService
+import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService
 import java.io.File
 import java.io.IOException
 

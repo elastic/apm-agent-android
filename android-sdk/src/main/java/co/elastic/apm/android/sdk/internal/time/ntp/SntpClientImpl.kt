@@ -71,7 +71,6 @@ class SntpClientImpl internal constructor(
         private const val NTP_EPOCH_DIFF_MILLIS = 2208988800000L // According to RFC-868.
         private const val VERSION = 4
 
-        @JvmStatic
         fun create(): SntpClientImpl {
             return SntpClientImpl(UdpClient("time.android.com", 123, 48), SystemTimeProvider.get())
         }

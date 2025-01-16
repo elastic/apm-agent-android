@@ -16,75 +16,51 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.utilities.logging;
+package co.elastic.apm.android.sdk.internal.utilities.logging
 
-import android.util.Log;
+import android.util.Log
+import co.elastic.apm.android.common.internal.logging.BaseELogger
+import co.elastic.apm.android.sdk.configuration.logging.LogLevel
+import co.elastic.apm.android.sdk.configuration.logging.LoggingPolicy
+import org.slf4j.event.Level
 
-import org.slf4j.event.Level;
+internal class AndroidLogger(tag: String?, private val policy: LoggingPolicy) : BaseELogger(tag) {
 
-import co.elastic.apm.android.common.internal.logging.BaseELogger;
-import co.elastic.apm.android.sdk.configuration.logging.LogLevel;
-import co.elastic.apm.android.sdk.configuration.logging.LoggingPolicy;
-
-class AndroidLogger extends BaseELogger {
-    private final LoggingPolicy policy;
-
-    AndroidLogger(String tag, LoggingPolicy policy) {
-        super(tag);
-        this.policy = policy;
-    }
-
-    @Override
-    protected void handleLoggingCall(Level level, String formattedMessage, Throwable throwable) {
-        switch (level) {
-            case ERROR:
-                Log.e(name, formattedMessage, throwable);
-                break;
-            case WARN:
-                Log.w(name, formattedMessage, throwable);
-                break;
-            case INFO:
-                Log.i(name, formattedMessage, throwable);
-                break;
-            case DEBUG:
-                Log.d(name, formattedMessage, throwable);
-                break;
-            case TRACE:
-                Log.v(name, formattedMessage, throwable);
-                break;
+    override fun handleLoggingCall(level: Level, formattedMessage: String, throwable: Throwable) {
+        when (level) {
+            Level.ERROR -> Log.e(name, formattedMessage, throwable)
+            Level.WARN -> Log.w(name, formattedMessage, throwable)
+            Level.INFO -> Log.i(name, formattedMessage, throwable)
+            Level.DEBUG -> Log.d(name, formattedMessage, throwable)
+            Level.TRACE -> Log.v(name, formattedMessage, throwable)
         }
     }
 
-    @Override
-    public boolean isTraceEnabled() {
-        return checkIfEnabledFor(LogLevel.TRACE);
+    override fun isTraceEnabled(): Boolean {
+        return checkIfEnabledFor(LogLevel.TRACE)
     }
 
-    @Override
-    public boolean isDebugEnabled() {
-        return checkIfEnabledFor(LogLevel.DEBUG);
+    override fun isDebugEnabled(): Boolean {
+        return checkIfEnabledFor(LogLevel.DEBUG)
     }
 
-    @Override
-    public boolean isInfoEnabled() {
-        return checkIfEnabledFor(LogLevel.INFO);
+    override fun isInfoEnabled(): Boolean {
+        return checkIfEnabledFor(LogLevel.INFO)
     }
 
-    @Override
-    public boolean isWarnEnabled() {
-        return checkIfEnabledFor(LogLevel.WARN);
+    override fun isWarnEnabled(): Boolean {
+        return checkIfEnabledFor(LogLevel.WARN)
     }
 
-    @Override
-    public boolean isErrorEnabled() {
-        return checkIfEnabledFor(LogLevel.ERROR);
+    override fun isErrorEnabled(): Boolean {
+        return checkIfEnabledFor(LogLevel.ERROR)
     }
 
-    private boolean checkIfEnabledFor(LogLevel logLevel) {
+    private fun checkIfEnabledFor(logLevel: LogLevel): Boolean {
         if (!policy.isEnabled()) {
-            return false;
+            return false
         }
 
-        return logLevel.getValue() >= policy.getMinimumLevel().getValue();
+        return logLevel.value >= policy.getMinimumLevel().value
     }
 }

@@ -27,7 +27,7 @@ import co.elastic.apm.android.sdk.features.centralconfig.CentralConfigurationCon
 import co.elastic.apm.android.sdk.features.clock.ElasticClockBroadcastReceiver
 import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.apm.android.sdk.features.sessionmanager.SessionIdGenerator
-import co.elastic.apm.android.sdk.internal.services.kotlin.appinfo.AppInfoService
+import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
 import co.elastic.apm.android.sdk.processors.ProcessorFactory

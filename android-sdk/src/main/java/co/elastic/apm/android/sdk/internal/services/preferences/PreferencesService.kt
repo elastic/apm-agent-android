@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.services.kotlin.preferences
+package co.elastic.apm.android.sdk.internal.services.preferences
 
 import android.content.Context
 import android.content.SharedPreferences
 import co.elastic.apm.android.sdk.BuildConfig
-import co.elastic.apm.android.sdk.internal.services.kotlin.Service
+import co.elastic.apm.android.sdk.internal.services.Service
 
 class PreferencesService(context: Context) : Service {
     private val preferences: SharedPreferences by lazy {

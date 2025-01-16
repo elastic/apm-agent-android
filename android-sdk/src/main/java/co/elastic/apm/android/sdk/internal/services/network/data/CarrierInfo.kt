@@ -16,6 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.services.kotlin.network.data
+package co.elastic.apm.android.sdk.internal.services.network.data
 
 data class CarrierInfo(val name: String, val mcc: String, val mnc: String, val icc: String)

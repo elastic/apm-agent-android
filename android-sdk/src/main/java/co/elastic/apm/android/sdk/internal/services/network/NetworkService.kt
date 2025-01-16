@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.services.kotlin.network
+package co.elastic.apm.android.sdk.internal.services.network
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -27,11 +27,11 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.telephony.TelephonyManager
 import co.elastic.apm.android.common.internal.logging.Elog
-import co.elastic.apm.android.sdk.internal.services.kotlin.Service
-import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
-import co.elastic.apm.android.sdk.internal.services.kotlin.appinfo.AppInfoService
-import co.elastic.apm.android.sdk.internal.services.kotlin.network.data.CarrierInfo
-import co.elastic.apm.android.sdk.internal.services.kotlin.network.data.NetworkType
+import co.elastic.apm.android.sdk.internal.services.Service
+import co.elastic.apm.android.sdk.internal.services.ServiceManager
+import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService
+import co.elastic.apm.android.sdk.internal.services.network.data.CarrierInfo
+import co.elastic.apm.android.sdk.internal.services.network.data.NetworkType
 import java.util.concurrent.atomic.AtomicReference
 
 class NetworkService internal constructor(

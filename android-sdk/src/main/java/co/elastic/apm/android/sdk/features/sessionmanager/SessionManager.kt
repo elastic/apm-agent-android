@@ -19,7 +19,7 @@
 package co.elastic.apm.android.sdk.features.sessionmanager
 
 import androidx.annotation.GuardedBy
-import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
+import co.elastic.apm.android.sdk.internal.services.ServiceManager
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.session.Session
 import co.elastic.apm.android.sdk.session.SessionProvider

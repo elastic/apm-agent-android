@@ -22,7 +22,7 @@ import co.elastic.apm.android.sdk.exporters.configurable.MutableLogRecordExporte
 import co.elastic.apm.android.sdk.exporters.configurable.MutableMetricExporter
 import co.elastic.apm.android.sdk.exporters.configurable.MutableSpanExporter
 import co.elastic.apm.android.sdk.features.exportergate.latch.Latch
-import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
+import co.elastic.apm.android.sdk.internal.services.ServiceManager
 import io.opentelemetry.sdk.logs.data.LogRecordData
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.metrics.data.MetricData

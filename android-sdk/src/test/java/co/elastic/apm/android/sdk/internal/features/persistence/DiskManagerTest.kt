@@ -20,8 +20,8 @@ package co.elastic.apm.android.sdk.internal.features.persistence
 
 import co.elastic.apm.android.sdk.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.apm.android.sdk.features.diskbuffering.tools.DiskManager
-import co.elastic.apm.android.sdk.internal.services.kotlin.appinfo.AppInfoService
-import co.elastic.apm.android.sdk.internal.services.kotlin.preferences.PreferencesService
+import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService
+import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService
 import io.mockk.Runs
 import io.mockk.clearMocks
 import io.mockk.every

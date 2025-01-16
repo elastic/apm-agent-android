@@ -20,7 +20,7 @@ package co.elastic.apm.android.sdk.internal.features.centralconfig.fetcher
 
 import co.elastic.apm.android.sdk.connectivity.ConnectivityConfiguration
 import co.elastic.apm.android.sdk.features.centralconfig.fetcher.CentralConfigurationFetcher
-import co.elastic.apm.android.sdk.internal.services.kotlin.preferences.PreferencesService
+import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService
 import co.elastic.apm.android.sdk.testutils.ElasticAgentRule
 import io.mockk.Runs
 import io.mockk.every

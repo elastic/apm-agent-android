@@ -36,7 +36,7 @@ import co.elastic.apm.android.sdk.features.sessionmanager.SessionManager
 import co.elastic.apm.android.sdk.features.sessionmanager.samplerate.SampleRateManager
 import co.elastic.apm.android.sdk.internal.api.ElasticOtelAgent
 import co.elastic.apm.android.sdk.internal.opentelemetry.ElasticOpenTelemetryBuilder
-import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
+import co.elastic.apm.android.sdk.internal.services.ServiceManager
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
 import co.elastic.apm.android.sdk.tools.interceptor.Interceptor

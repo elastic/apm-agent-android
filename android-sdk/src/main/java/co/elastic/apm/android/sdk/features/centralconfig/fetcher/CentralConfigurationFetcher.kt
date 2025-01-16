@@ -20,7 +20,7 @@ package co.elastic.apm.android.sdk.features.centralconfig.fetcher
 
 import co.elastic.apm.android.common.internal.logging.Elog
 import co.elastic.apm.android.sdk.connectivity.ConnectivityConfiguration
-import co.elastic.apm.android.sdk.internal.services.kotlin.preferences.PreferencesService
+import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService
 import java.io.File
 import java.io.IOException
 import java.io.InputStream

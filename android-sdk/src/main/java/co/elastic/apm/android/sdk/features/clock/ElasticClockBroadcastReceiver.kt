@@ -21,7 +21,7 @@ package co.elastic.apm.android.sdk.features.clock
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
+import co.elastic.apm.android.sdk.internal.services.ServiceManager
 
 class ElasticClockBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {

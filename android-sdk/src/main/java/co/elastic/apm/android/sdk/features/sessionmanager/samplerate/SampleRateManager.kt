@@ -21,8 +21,8 @@ package co.elastic.apm.android.sdk.features.sessionmanager.samplerate
 import co.elastic.apm.android.sdk.features.centralconfig.CentralConfiguration
 import co.elastic.apm.android.sdk.features.exportergate.ExporterGateManager
 import co.elastic.apm.android.sdk.features.sessionmanager.SessionManager
-import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
-import co.elastic.apm.android.sdk.internal.services.kotlin.backgroundwork.BackgroundWorkService
+import co.elastic.apm.android.sdk.internal.services.ServiceManager
+import co.elastic.apm.android.sdk.internal.services.backgroundwork.BackgroundWorkService
 import co.elastic.apm.android.sdk.internal.utilities.NumberTools
 import co.elastic.apm.android.sdk.tools.cache.CacheHandler
 import co.elastic.apm.android.sdk.tools.cache.PreferencesIntegerCacheHandler

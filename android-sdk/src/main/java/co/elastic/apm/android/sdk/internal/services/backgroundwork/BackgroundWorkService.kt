@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.services.kotlin.backgroundwork
+package co.elastic.apm.android.sdk.internal.services.backgroundwork
 
-import co.elastic.apm.android.sdk.internal.services.kotlin.Service
+import co.elastic.apm.android.sdk.internal.services.Service
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.ScheduledExecutorService

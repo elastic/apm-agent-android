@@ -23,7 +23,7 @@ import co.elastic.apm.android.common.internal.logging.Elog
 import co.elastic.apm.android.sdk.connectivity.ConnectivityConfigurationHolder
 import co.elastic.apm.android.sdk.features.apmserver.ApmServerConnectivityManager
 import co.elastic.apm.android.sdk.features.exportergate.ExporterGateManager
-import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
+import co.elastic.apm.android.sdk.internal.services.ServiceManager
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import java.io.IOException
 import java.util.concurrent.TimeUnit

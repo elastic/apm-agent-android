@@ -16,10 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.services.kotlin
+package co.elastic.apm.android.sdk.internal.services.network.data
 
-interface Service {
-    fun start() {}
-
-    fun stop() {}
+sealed class NetworkType(val name: String) {
+    data class Cell(val subTypeName: String?) : NetworkType("cell")
+    data object Wifi : NetworkType("wifi")
+    data object Unknown : NetworkType("unknown")
+    data object None : NetworkType("unavailable")
 }

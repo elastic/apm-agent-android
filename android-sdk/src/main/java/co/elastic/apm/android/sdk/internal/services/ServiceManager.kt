@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.services.kotlin
+package co.elastic.apm.android.sdk.internal.services
 
 import android.content.Context
-import co.elastic.apm.android.sdk.internal.services.kotlin.appinfo.AppInfoService
-import co.elastic.apm.android.sdk.internal.services.kotlin.backgroundwork.BackgroundWorkService
-import co.elastic.apm.android.sdk.internal.services.kotlin.network.NetworkService
-import co.elastic.apm.android.sdk.internal.services.kotlin.preferences.PreferencesService
+import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService
+import co.elastic.apm.android.sdk.internal.services.backgroundwork.BackgroundWorkService
+import co.elastic.apm.android.sdk.internal.services.network.NetworkService
+import co.elastic.apm.android.sdk.internal.services.preferences.PreferencesService
 
 class ServiceManager {
     private val services = mutableMapOf<Class<out Service>, Service>()

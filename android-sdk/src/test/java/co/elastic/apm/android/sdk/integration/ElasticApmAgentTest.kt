@@ -19,7 +19,7 @@
 package co.elastic.apm.android.sdk.integration
 
 import android.content.Intent
-import co.elastic.apm.android.sdk.ElasticAgent
+import co.elastic.apm.android.sdk.ElasticApmAgent
 import co.elastic.apm.android.sdk.exporters.ExporterProvider
 import co.elastic.apm.android.sdk.features.apmserver.ApmServerAuthentication
 import co.elastic.apm.android.sdk.features.apmserver.ApmServerConnectivity
@@ -82,8 +82,8 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 
 @RunWith(RobolectricTestRunner::class)
-class ElasticAgentTest {
-    private lateinit var agent: ElasticAgent
+class ElasticApmAgentTest {
+    private lateinit var agent: ElasticApmAgent
     private lateinit var simpleProcessorFactory: SimpleProcessorFactory
     private val inMemoryExporters = InMemoryExporterProvider()
     private val inMemoryExportersInterceptor = Interceptor<ExporterProvider> { inMemoryExporters }
@@ -115,7 +115,7 @@ class ElasticAgentTest {
     @Test
     fun `Validate url is present`() {
         val exception = assertThrows<NullPointerException> {
-            ElasticAgent.builder(RuntimeEnvironment.getApplication()).build()
+            ElasticApmAgent.builder(RuntimeEnvironment.getApplication()).build()
         }
 
         assertThat(exception).hasMessage("The url must be set.")
@@ -967,7 +967,7 @@ class ElasticAgentTest {
             SntpClient.Response.Success(timeOffset)
         )
         every { sntpClient.close() } just Runs
-        agent = ElasticAgent.builder(RuntimeEnvironment.getApplication())
+        agent = ElasticApmAgent.builder(RuntimeEnvironment.getApplication())
             .setUrl("http://none")
             .setDiskBufferingConfiguration(DiskBufferingConfiguration.disabled())
             .setSessionIdGenerator { "session-id" }
@@ -1289,8 +1289,8 @@ class ElasticAgentTest {
     private fun simpleAgentBuilder(
         url: String,
         diskBufferingConfiguration: DiskBufferingConfiguration = DiskBufferingConfiguration.disabled()
-    ): ElasticAgent.Builder {
-        return ElasticAgent.builder(RuntimeEnvironment.getApplication())
+    ): ElasticApmAgent.Builder {
+        return ElasticApmAgent.builder(RuntimeEnvironment.getApplication())
             .setProcessorFactory(simpleProcessorFactory)
             .setDiskBufferingConfiguration(diskBufferingConfiguration)
             .setUrl(url)
@@ -1302,7 +1302,7 @@ class ElasticAgentTest {
     private fun inMemoryAgentBuilder(
         url: String = "http://none",
         diskBufferingConfiguration: DiskBufferingConfiguration = DiskBufferingConfiguration.disabled()
-    ): ElasticAgent.Builder {
+    ): ElasticApmAgent.Builder {
         return simpleAgentBuilder(url, diskBufferingConfiguration)
             .apply {
                 internalExporterProviderInterceptor = inMemoryExportersInterceptor

@@ -43,7 +43,7 @@ import co.elastic.apm.android.sdk.tools.interceptor.Interceptor
 import io.opentelemetry.api.OpenTelemetry
 import java.util.UUID
 
-class ElasticAgent private constructor(
+class ElasticApmAgent private constructor(
     serviceManager: ServiceManager,
     configuration: Configuration,
     sampleRateManager: SampleRateManager,
@@ -146,7 +146,7 @@ class ElasticAgent private constructor(
             diskBufferingConfiguration = value
         }
 
-        fun build(): ElasticAgent {
+        fun build(): ElasticApmAgent {
             val finalUrl = url ?: throw NullPointerException("The url must be set.")
 
             val serviceManager =
@@ -223,7 +223,7 @@ class ElasticAgent private constructor(
             setExporterProvider(internalExporterProviderInterceptor.intercept(exporterProvider))
             setSessionProvider(sessionManager)
 
-            return ElasticAgent(
+            return ElasticApmAgent(
                 serviceManager,
                 buildConfiguration(serviceManager),
                 sampleRateManager,

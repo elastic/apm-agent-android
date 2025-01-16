@@ -16,31 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.configuration.logging.impl;
+package co.elastic.apm.android.sdk.configuration.logging.impl
 
-import co.elastic.apm.android.sdk.configuration.logging.LogLevel;
-import co.elastic.apm.android.sdk.configuration.logging.LoggingPolicy;
-import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager;
-import co.elastic.apm.android.sdk.internal.services.kotlin.appinfo.AppInfoService;
+import co.elastic.apm.android.sdk.configuration.logging.LogLevel
+import co.elastic.apm.android.sdk.configuration.logging.LoggingPolicy
+import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
+import co.elastic.apm.android.sdk.internal.services.kotlin.appinfo.AppInfoService
 
-public class DefaultLoggingPolicy implements LoggingPolicy {
-    private final AppInfoService appInfoService;
-
-    public static DefaultLoggingPolicy create(ServiceManager serviceManager) {
-        return new DefaultLoggingPolicy(serviceManager.getAppInfoService());
+class DefaultLoggingPolicy internal constructor(private val appInfoService: AppInfoService) :
+    LoggingPolicy {
+    override fun isEnabled(): Boolean {
+        return true
     }
 
-    DefaultLoggingPolicy(AppInfoService appInfoService) {
-        this.appInfoService = appInfoService;
+    override fun getMinimumLevel(): LogLevel {
+        return if (appInfoService.isInDebugMode()) LogLevel.DEBUG else LogLevel.INFO
     }
 
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
-
-    @Override
-    public LogLevel getMinimumLevel() {
-        return appInfoService.isInDebugMode() ? LogLevel.DEBUG : LogLevel.INFO;
+    companion object {
+        fun create(serviceManager: ServiceManager): DefaultLoggingPolicy {
+            return DefaultLoggingPolicy(serviceManager.getAppInfoService())
+        }
     }
 }

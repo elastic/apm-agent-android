@@ -16,89 +16,85 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.internal.utilities.logging;
+package co.elastic.apm.android.sdk.internal.utilities.logging
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import co.elastic.apm.android.sdk.configuration.logging.LogLevel
+import co.elastic.apm.android.sdk.configuration.logging.LoggingPolicy
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.Test
 
-import org.junit.Test;
-
-import co.elastic.apm.android.sdk.configuration.logging.LogLevel;
-import co.elastic.apm.android.sdk.configuration.logging.LoggingPolicy;
-
-public class AndroidLoggerTest {
+class AndroidLoggerTest {
 
     @Test
-    public void checkTraceLogger() {
-        AndroidLogger logger = getLogger(LogLevel.TRACE);
+    fun checkTraceLogger() {
+        val logger = getLogger(LogLevel.TRACE)
 
-        assertTrue(logger.isTraceEnabled());
-        assertTrue(logger.isDebugEnabled());
-        assertTrue(logger.isInfoEnabled());
-        assertTrue(logger.isWarnEnabled());
-        assertTrue(logger.isErrorEnabled());
+        assertThat(logger.isTraceEnabled).isTrue()
+        assertThat(logger.isDebugEnabled).isTrue()
+        assertThat(logger.isInfoEnabled).isTrue()
+        assertThat(logger.isWarnEnabled).isTrue()
+        assertThat(logger.isErrorEnabled).isTrue()
     }
 
     @Test
-    public void checkDebugLogger() {
-        AndroidLogger logger = getLogger(LogLevel.DEBUG);
+    fun checkDebugLogger() {
+        val logger = getLogger(LogLevel.DEBUG)
 
-        assertFalse(logger.isTraceEnabled());
-        assertTrue(logger.isDebugEnabled());
-        assertTrue(logger.isInfoEnabled());
-        assertTrue(logger.isWarnEnabled());
-        assertTrue(logger.isErrorEnabled());
+        assertThat(logger.isTraceEnabled).isFalse()
+        assertThat(logger.isDebugEnabled).isTrue()
+        assertThat(logger.isInfoEnabled).isTrue()
+        assertThat(logger.isWarnEnabled).isTrue()
+        assertThat(logger.isErrorEnabled).isTrue()
     }
 
     @Test
-    public void checkInfoLogger() {
-        AndroidLogger logger = getLogger(LogLevel.INFO);
+    fun checkInfoLogger() {
+        val logger = getLogger(LogLevel.INFO)
 
-        assertFalse(logger.isTraceEnabled());
-        assertFalse(logger.isDebugEnabled());
-        assertTrue(logger.isInfoEnabled());
-        assertTrue(logger.isWarnEnabled());
-        assertTrue(logger.isErrorEnabled());
+        assertThat(logger.isTraceEnabled).isFalse()
+        assertThat(logger.isDebugEnabled).isFalse()
+        assertThat(logger.isInfoEnabled).isTrue()
+        assertThat(logger.isWarnEnabled).isTrue()
+        assertThat(logger.isErrorEnabled).isTrue()
     }
 
     @Test
-    public void checkWarnLogger() {
-        AndroidLogger logger = getLogger(LogLevel.WARN);
+    fun checkWarnLogger() {
+        val logger = getLogger(LogLevel.WARN)
 
-        assertFalse(logger.isTraceEnabled());
-        assertFalse(logger.isDebugEnabled());
-        assertFalse(logger.isInfoEnabled());
-        assertTrue(logger.isWarnEnabled());
-        assertTrue(logger.isErrorEnabled());
+        assertThat(logger.isTraceEnabled).isFalse()
+        assertThat(logger.isDebugEnabled).isFalse()
+        assertThat(logger.isInfoEnabled).isFalse()
+        assertThat(logger.isWarnEnabled).isTrue()
+        assertThat(logger.isErrorEnabled).isTrue()
     }
 
     @Test
-    public void checkErrorLogger() {
-        AndroidLogger logger = getLogger(LogLevel.ERROR);
+    fun checkErrorLogger() {
+        val logger = getLogger(LogLevel.ERROR)
 
-        assertFalse(logger.isTraceEnabled());
-        assertFalse(logger.isDebugEnabled());
-        assertFalse(logger.isInfoEnabled());
-        assertFalse(logger.isWarnEnabled());
-        assertTrue(logger.isErrorEnabled());
+        assertThat(logger.isTraceEnabled).isFalse()
+        assertThat(logger.isDebugEnabled).isFalse()
+        assertThat(logger.isInfoEnabled).isFalse()
+        assertThat(logger.isWarnEnabled).isFalse()
+        assertThat(logger.isErrorEnabled).isTrue()
     }
 
     @Test
-    public void checkDisabledPolicy() {
-        AndroidLogger logger = getLoggerWithDisabledPolicy();
+    fun checkDisabledPolicy() {
+        val logger = loggerWithDisabledPolicy
 
-        assertFalse(logger.isTraceEnabled());
-        assertFalse(logger.isDebugEnabled());
-        assertFalse(logger.isInfoEnabled());
-        assertFalse(logger.isWarnEnabled());
-        assertFalse(logger.isErrorEnabled());
+        assertThat(logger.isTraceEnabled).isFalse()
+        assertThat(logger.isDebugEnabled).isFalse()
+        assertThat(logger.isInfoEnabled).isFalse()
+        assertThat(logger.isWarnEnabled).isFalse()
+        assertThat(logger.isErrorEnabled).isFalse()
     }
 
-    private AndroidLogger getLogger(LogLevel minimumLevel) {
-        return new AndroidLogger("TAG", LoggingPolicy.enabled(minimumLevel));
+    private fun getLogger(minimumLevel: LogLevel): AndroidLogger {
+        return AndroidLogger("TAG", LoggingPolicy.enabled(minimumLevel))
     }
 
-    private AndroidLogger getLoggerWithDisabledPolicy() {
-        return new AndroidLogger("TAG", LoggingPolicy.disabled());
-    }
+    private val loggerWithDisabledPolicy: AndroidLogger
+        get() = AndroidLogger("TAG", LoggingPolicy.disabled())
 }

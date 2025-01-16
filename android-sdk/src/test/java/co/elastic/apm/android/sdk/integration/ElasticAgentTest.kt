@@ -1396,7 +1396,7 @@ class ElasticAgentTest {
             return SimpleLogRecordProcessor.create(exporter)
         }
 
-        override fun createMetricReader(exporter: MetricExporter?): MetricReader? {
+        override fun createMetricReader(exporter: MetricExporter?): MetricReader {
             metricReader = PeriodicMetricReader.create(exporter)
             return metricReader
         }

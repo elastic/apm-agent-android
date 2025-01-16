@@ -85,6 +85,6 @@ class AndroidLogger extends BaseELogger {
             return false;
         }
 
-        return logLevel.value >= policy.getMinimumLevel().value;
+        return logLevel.getValue() >= policy.getMinimumLevel().getValue();
     }
 }

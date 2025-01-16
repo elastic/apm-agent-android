@@ -29,12 +29,12 @@ class DefaultLoggingPolicyTest {
 
     @Test
     fun `Validate minimum level on debuggable app`() {
-        assertThat(getInstance(true).minimumLevel).isEqualTo(LogLevel.DEBUG)
+        assertThat(getInstance(true).getMinimumLevel()).isEqualTo(LogLevel.DEBUG)
     }
 
     @Test
     fun `Validate minimum level on non-debuggable app`() {
-        assertThat(getInstance(false).minimumLevel).isEqualTo(LogLevel.INFO)
+        assertThat(getInstance(false).getMinimumLevel()).isEqualTo(LogLevel.INFO)
     }
 
     private fun getInstance(appIsDebuggable: Boolean): DefaultLoggingPolicy {

@@ -16,27 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.configuration.logging.impl;
+package co.elastic.apm.android.sdk.configuration.logging.impl
 
-import co.elastic.apm.android.sdk.configuration.logging.LogLevel;
-import co.elastic.apm.android.sdk.configuration.logging.LoggingPolicy;
+import co.elastic.apm.android.sdk.configuration.logging.LogLevel
+import co.elastic.apm.android.sdk.configuration.logging.LoggingPolicy
 
-public final class SimpleLoggingPolicy implements LoggingPolicy {
-    private final boolean isEnabled;
-    private final LogLevel minimumLevel;
+class SimpleLoggingPolicy(private val isEnabled: Boolean, private val minimumLevel: LogLevel) :
+    LoggingPolicy {
 
-    public SimpleLoggingPolicy(boolean isEnabled, LogLevel minimumLevel) {
-        this.isEnabled = isEnabled;
-        this.minimumLevel = minimumLevel;
+    override fun isEnabled(): Boolean {
+        return isEnabled
     }
 
-    @Override
-    public boolean isEnabled() {
-        return isEnabled;
-    }
-
-    @Override
-    public LogLevel getMinimumLevel() {
-        return minimumLevel;
+    override fun getMinimumLevel(): LogLevel {
+        return minimumLevel
     }
 }

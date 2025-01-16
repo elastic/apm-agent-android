@@ -16,51 +16,53 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.configuration.logging;
+package co.elastic.apm.android.sdk.configuration.logging
 
-import co.elastic.apm.android.sdk.configuration.logging.impl.DefaultLoggingPolicy;
-import co.elastic.apm.android.sdk.configuration.logging.impl.SimpleLoggingPolicy;
-import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager;
+import co.elastic.apm.android.sdk.configuration.logging.impl.DefaultLoggingPolicy
+import co.elastic.apm.android.sdk.configuration.logging.impl.SimpleLoggingPolicy
+import co.elastic.apm.android.sdk.internal.services.kotlin.ServiceManager
 
 /**
  * Defines the internal logging behavior of this library.
  */
-public interface LoggingPolicy {
-
-    /**
-     * Provides the default logging policy which will log all the {@link LogLevel}s on debuggable applications
-     * and only logs from level INFO and above for non-debuggable applications.
-     * <p>
-     * No logs will be created until the Agent is initialized.
-     */
-    static LoggingPolicy getDefault(ServiceManager serviceManager) {
-        return DefaultLoggingPolicy.create(serviceManager);
-    }
-
-    /**
-     * Convenience method for creating an enabled logging policy with a static minimum level.
-     *
-     * @param minimumLevel - The minimum {@link LogLevel}, all the logs with this level and above will get printed, others will be ignored.
-     */
-    static LoggingPolicy enabled(LogLevel minimumLevel) {
-        return new SimpleLoggingPolicy(true, minimumLevel);
-    }
-
-    /**
-     * Convenience method for creating a policy that disables all internal logs.
-     */
-    static LoggingPolicy disabled() {
-        return new SimpleLoggingPolicy(false, LogLevel.TRACE);
-    }
-
+interface LoggingPolicy {
     /**
      * Whether logging in general is enabled or not. This value will be checked before the log level.
      */
-    boolean isEnabled();
+    fun isEnabled(): Boolean
 
     /**
      * If logging is enabled, this value will be checked later to filter which logs will
      * get printed. Logs with at least the level provided here or higher will pass, other ones (below the level provided here) will be ignored.
      */
-    LogLevel getMinimumLevel();
+    fun getMinimumLevel(): LogLevel
+
+    companion object {
+        /**
+         * Provides the default logging policy which will log all the [LogLevel]s on debuggable applications
+         * and only logs from level INFO and above for non-debuggable applications.
+         *
+         *
+         * No logs will be created until the Agent is initialized.
+         */
+        fun getDefault(serviceManager: ServiceManager): LoggingPolicy {
+            return DefaultLoggingPolicy.create(serviceManager)
+        }
+
+        /**
+         * Convenience method for creating an enabled logging policy with a static minimum level.
+         *
+         * @param minimumLevel - The minimum [LogLevel], all the logs with this level and above will get printed, others will be ignored.
+         */
+        fun enabled(minimumLevel: LogLevel): LoggingPolicy {
+            return SimpleLoggingPolicy(true, minimumLevel)
+        }
+
+        /**
+         * Convenience method for creating a policy that disables all internal logs.
+         */
+        fun disabled(): LoggingPolicy {
+            return SimpleLoggingPolicy(false, LogLevel.TRACE)
+        }
+    }
 }

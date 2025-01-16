@@ -59,14 +59,14 @@ class DiskManagerTest {
     @Test
     fun provideSignalCacheDir() {
         val expected = File(cacheDir, "opentelemetry/signals")
-        Assert.assertEquals(expected, diskManager!!.getSignalsCacheDir())
+        Assert.assertEquals(expected, diskManager.getSignalsCacheDir())
         Assert.assertTrue(expected.exists())
     }
 
     @Test
     fun provideTemporaryDir() {
         val expected = File(cacheDir, "opentelemetry/temp")
-        Assert.assertEquals(expected, diskManager!!.getTemporaryDir())
+        Assert.assertEquals(expected, diskManager.getTemporaryDir())
         Assert.assertTrue(expected.exists())
     }
 
@@ -79,7 +79,7 @@ class DiskManagerTest {
         Assert.assertTrue(File(dir, "somedir").mkdirs())
         Assert.assertTrue(File(dir, "somedir/some_other_file.tmp").createNewFile())
 
-        val temporaryDir = diskManager!!.getTemporaryDir()
+        val temporaryDir = diskManager.getTemporaryDir()
 
         Assert.assertTrue(temporaryDir.exists())
         Assert.assertEquals(0, Objects.requireNonNull(temporaryDir.listFiles()).size.toLong())

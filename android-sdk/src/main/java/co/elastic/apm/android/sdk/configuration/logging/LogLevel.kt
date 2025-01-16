@@ -16,14 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.sdk.configuration.logging;
+package co.elastic.apm.android.sdk.configuration.logging
 
-public enum LogLevel {
-    TRACE(0), DEBUG(1), INFO(2), WARN(3), ERROR(4);
-
-    public final int value;
-
-    LogLevel(int value) {
-        this.value = value;
-    }
+enum class LogLevel(val value: Int) {
+    TRACE(0), DEBUG(1), INFO(2), WARN(3), ERROR(4)
 }

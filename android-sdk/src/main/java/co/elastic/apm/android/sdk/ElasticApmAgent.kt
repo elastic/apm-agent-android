@@ -19,6 +19,8 @@
 package co.elastic.apm.android.sdk
 
 import android.app.Application
+import co.elastic.apm.android.common.internal.logging.Elog
+import co.elastic.apm.android.sdk.configuration.logging.LoggingPolicy
 import co.elastic.apm.android.sdk.exporters.ExporterProvider
 import co.elastic.apm.android.sdk.exporters.configuration.ExportProtocol
 import co.elastic.apm.android.sdk.features.apmserver.ApmServerAuthentication
@@ -39,6 +41,7 @@ import co.elastic.apm.android.sdk.internal.opentelemetry.ElasticOpenTelemetryBui
 import co.elastic.apm.android.sdk.internal.services.ServiceManager
 import co.elastic.apm.android.sdk.internal.time.SystemTimeProvider
 import co.elastic.apm.android.sdk.internal.time.ntp.SntpClient
+import co.elastic.apm.android.sdk.internal.utilities.logging.AndroidLoggerFactory
 import co.elastic.apm.android.sdk.tools.interceptor.Interceptor
 import io.opentelemetry.api.OpenTelemetry
 import java.util.UUID
@@ -113,6 +116,7 @@ class ElasticApmAgent private constructor(
         private var extraRequestHeaders: Map<String, String> = emptyMap()
         private var sessionIdGenerator: SessionIdGenerator? = null
         private var diskBufferingConfiguration = DiskBufferingConfiguration.enabled()
+        private var loggingPolicy: LoggingPolicy? = null
         internal var internalSntpClient: SntpClient? = null
         internal var internalSystemTimeProvider: SystemTimeProvider? = null
         internal var internalExporterProviderInterceptor: Interceptor<ExporterProvider> =
@@ -138,6 +142,10 @@ class ElasticApmAgent private constructor(
             extraRequestHeaders = value
         }
 
+        fun setLoggingPolicy(value: LoggingPolicy) = apply {
+            loggingPolicy = value
+        }
+
         internal fun setSessionIdGenerator(value: SessionIdGenerator) = apply {
             sessionIdGenerator = value
         }
@@ -151,6 +159,13 @@ class ElasticApmAgent private constructor(
 
             val serviceManager =
                 internalServiceManagerInterceptor.intercept(ServiceManager.create(application))
+
+            Elog.init(
+                AndroidLoggerFactory(
+                    loggingPolicy ?: LoggingPolicy.getDefault(serviceManager)
+                )
+            )
+
             val apmServerConfiguration = ApmServerConnectivity(
                 finalUrl,
                 authentication,

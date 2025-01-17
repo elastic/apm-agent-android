@@ -21,21 +21,23 @@ package co.elastic.apm.android.sdk.configuration.logging.impl
 import co.elastic.apm.android.sdk.configuration.logging.LogLevel
 import co.elastic.apm.android.sdk.configuration.logging.LoggingPolicy
 import co.elastic.apm.android.sdk.internal.services.ServiceManager
-import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService
 
-class DefaultLoggingPolicy internal constructor(private val appInfoService: AppInfoService) :
+class DefaultLoggingPolicy internal constructor(debugMode: Boolean) :
     LoggingPolicy {
+
+    private val logLevel by lazy { if (debugMode) LogLevel.DEBUG else LogLevel.INFO }
+
     override fun isEnabled(): Boolean {
         return true
     }
 
     override fun getMinimumLevel(): LogLevel {
-        return if (appInfoService.isInDebugMode()) LogLevel.DEBUG else LogLevel.INFO
+        return logLevel
     }
 
     companion object {
         fun create(serviceManager: ServiceManager): DefaultLoggingPolicy {
-            return DefaultLoggingPolicy(serviceManager.getAppInfoService())
+            return DefaultLoggingPolicy(serviceManager.getAppInfoService().isInDebugMode())
         }
     }
 }

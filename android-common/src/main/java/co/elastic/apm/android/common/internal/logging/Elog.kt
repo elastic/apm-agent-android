@@ -28,7 +28,6 @@ object Elog {
     @GuardedBy("this")
     private var initialized = false
 
-    @Synchronized
     fun init(factory: ELoggerFactory) {
         if (initialized) {
             return

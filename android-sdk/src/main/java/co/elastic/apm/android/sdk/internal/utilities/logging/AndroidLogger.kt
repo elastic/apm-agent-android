@@ -24,7 +24,7 @@ import co.elastic.apm.android.sdk.configuration.logging.LogLevel
 import co.elastic.apm.android.sdk.configuration.logging.LoggingPolicy
 import org.slf4j.event.Level
 
-internal class AndroidLogger(tag: String?, private val policy: LoggingPolicy) : BaseELogger(tag) {
+internal class AndroidLogger(tag: String, private val policy: LoggingPolicy) : BaseELogger(tag) {
 
     override fun handleLoggingCall(level: Level, formattedMessage: String, throwable: Throwable) {
         when (level) {

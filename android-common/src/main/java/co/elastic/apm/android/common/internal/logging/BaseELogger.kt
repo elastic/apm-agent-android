@@ -16,32 +16,39 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.common.internal.logging;
+package co.elastic.apm.android.common.internal.logging
 
-import org.slf4j.Marker;
-import org.slf4j.event.Level;
-import org.slf4j.helpers.LegacyAbstractLogger;
-import org.slf4j.helpers.MessageFormatter;
+import org.slf4j.Marker
+import org.slf4j.event.Level
+import org.slf4j.helpers.LegacyAbstractLogger
+import org.slf4j.helpers.MessageFormatter
 
-public abstract class BaseELogger extends LegacyAbstractLogger {
-
-    protected BaseELogger(String tag) {
-        name = tag;
+abstract class BaseELogger protected constructor(tag: String) : LegacyAbstractLogger() {
+    init {
+        name = tag
     }
 
-    @Override
-    protected String getFullyQualifiedCallerName() {
-        return null;
+    override fun getFullyQualifiedCallerName(): String? {
+        return null
     }
 
-    @Override
-    protected void handleNormalizedLoggingCall(Level level, Marker marker, String msg, Object[] arguments, Throwable throwable) {
+    override fun handleNormalizedLoggingCall(
+        level: Level,
+        marker: Marker,
+        msg: String,
+        arguments: Array<Any>,
+        throwable: Throwable
+    ) {
         handleLoggingCall(
-                level,
-                MessageFormatter.arrayFormat(msg, arguments, throwable).getMessage(),
-                throwable
-        );
+            level,
+            MessageFormatter.arrayFormat(msg, arguments, throwable).message,
+            throwable
+        )
     }
 
-    protected abstract void handleLoggingCall(Level level, String formattedMessage, Throwable throwable);
+    protected abstract fun handleLoggingCall(
+        level: Level,
+        formattedMessage: String,
+        throwable: Throwable
+    )
 }

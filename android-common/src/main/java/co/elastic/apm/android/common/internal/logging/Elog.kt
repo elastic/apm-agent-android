@@ -16,30 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.common.internal.logging;
+package co.elastic.apm.android.common.internal.logging
 
-import androidx.annotation.NonNull;
+import androidx.annotation.GuardedBy
+import java.util.concurrent.atomic.AtomicReference
+import org.slf4j.Logger
 
-import org.slf4j.Logger;
+object Elog {
+    private val loggerFactory = AtomicReference<ELoggerFactory>(ELoggerFactory.Noop())
 
-public class Elog {
+    @GuardedBy("this")
+    private var initialized = false
 
-    private static ELoggerFactory loggerFactory = new ELoggerFactory.Noop();
-    private static boolean initialized = false;
-
-    public static synchronized void init(ELoggerFactory factory) {
+    @Synchronized
+    fun init(factory: ELoggerFactory) {
         if (initialized) {
-            return;
+            return
         }
-        loggerFactory = factory;
-        initialized = true;
+        loggerFactory.set(factory)
+        initialized = true
     }
 
-    public static Logger getLogger(@NonNull String name) {
-        return loggerFactory.getLogger(name);
+    fun getLogger(name: String): Logger {
+        return loggerFactory.get().getLogger(name)
     }
 
-    public static Logger getLogger() {
-        return loggerFactory.getDefaultLogger();
-    }
+    fun getLogger(): Logger = loggerFactory.get().defaultLogger
 }

@@ -16,31 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.common.internal.logging;
+package co.elastic.apm.android.common.internal.logging
 
-import org.slf4j.ILoggerFactory;
-import org.slf4j.Logger;
-import org.slf4j.helpers.NOPLogger;
+import org.slf4j.ILoggerFactory
+import org.slf4j.Logger
+import org.slf4j.helpers.NOPLogger
 
-public abstract class ELoggerFactory implements ILoggerFactory {
+abstract class ELoggerFactory : ILoggerFactory {
 
-    public Logger getLogger(Class<?> type) {
-        return getLogger(getId() + " - " + type.getSimpleName());
+    fun getLogger(type: Class<*>): Logger {
+        return getLogger(id + " - " + type.simpleName)
     }
 
-    public Logger getDefaultLogger() {
-        return getLogger(getId());
-    }
+    val defaultLogger: Logger
+        get() = getLogger(id)
 
-    protected String getId() {
-        return "ELASTIC_AGENT";
-    }
+    protected val id: String
+        get() = "ELASTIC_AGENT"
 
-    static class Noop extends ELoggerFactory {
-
-        @Override
-        public Logger getLogger(String name) {
-            return NOPLogger.NOP_LOGGER;
+    internal class Noop : ELoggerFactory() {
+        override fun getLogger(name: String): Logger {
+            return NOPLogger.NOP_LOGGER
         }
     }
 }

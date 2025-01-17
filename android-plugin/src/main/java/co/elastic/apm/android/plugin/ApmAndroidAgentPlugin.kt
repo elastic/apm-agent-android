@@ -16,66 +16,36 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.plugin;
+package co.elastic.apm.android.plugin
 
-import com.android.build.api.instrumentation.InstrumentationScope;
-import com.android.build.api.variant.ApplicationAndroidComponentsExtension;
-import com.android.build.api.variant.ApplicationVariant;
-import com.android.build.gradle.BaseExtension;
+import co.elastic.apm.android.common.internal.logging.Elog
+import co.elastic.apm.android.plugin.logging.GradleLoggerFactory
+import co.elastic.apm.generated.BuildConfig
+import net.bytebuddy.build.gradle.android.ByteBuddyAndroidPlugin
+import org.gradle.api.Plugin
+import org.gradle.api.Project
 
-import net.bytebuddy.build.gradle.android.ByteBuddyAndroidPlugin;
+internal class ApmAndroidAgentPlugin : Plugin<Project> {
+    private lateinit var project: Project
 
-import org.gradle.api.Plugin;
-import org.gradle.api.Project;
-import org.gradle.api.plugins.ExtensionContainer;
-
-import co.elastic.apm.android.common.internal.logging.Elog;
-import co.elastic.apm.android.plugin.instrumentation.ElasticLocalInstrumentationFactory;
-import co.elastic.apm.android.plugin.logging.GradleLoggerFactory;
-import co.elastic.apm.generated.BuildConfig;
-import kotlin.Unit;
-
-class ApmAndroidAgentPlugin implements Plugin<Project> {
-
-    private Project project;
-    private BaseExtension androidExtension;
-
-    @Override
-    public void apply(Project project) {
-        this.project = project;
-        Elog.init(new GradleLoggerFactory());
-        androidExtension = project.getExtensions().getByType(BaseExtension.class);
-        addBytebuddyPlugin();
-        addSdkDependency();
-        addInstrumentationDependency();
-        addTasks();
+    override fun apply(target: Project) {
+        this.project = target
+        Elog.init(GradleLoggerFactory())
+        addByteBuddyPlugin()
+        addSdkDependency()
+        addInstrumentationDependency()
     }
 
-    private void addBytebuddyPlugin() {
-        project.getPluginManager().apply(ByteBuddyAndroidPlugin.class);
+    private fun addByteBuddyPlugin() {
+        project.pluginManager.apply(ByteBuddyAndroidPlugin::class.java)
     }
 
-    private void addSdkDependency() {
-        project.getDependencies().add("implementation", BuildConfig.SDK_DEPENDENCY_URI);
+    private fun addSdkDependency() {
+        project.dependencies.add("implementation", BuildConfig.SDK_DEPENDENCY_URI)
     }
 
-    private void addInstrumentationDependency() {
-        project.getDependencies().add("implementation", BuildConfig.OTEL_OKHTTP_LIBRARY_URI);
-        project.getDependencies().add("byteBuddy", BuildConfig.OTEL_OKHTTP_AGENT_URI);
-    }
-
-    private void addTasks() {
-        ExtensionContainer extensions = project.getExtensions();
-        ApplicationAndroidComponentsExtension extension = extensions.getByType(ApplicationAndroidComponentsExtension.class);
-
-        extension.onVariants(extension.selector().all(), this::enhanceVariant);
-    }
-
-    private void enhanceVariant(ApplicationVariant applicationVariant) {
-        addLocalRemapping(applicationVariant);
-    }
-
-    private void addLocalRemapping(ApplicationVariant applicationVariant) {
-        applicationVariant.getInstrumentation().transformClassesWith(ElasticLocalInstrumentationFactory.class, InstrumentationScope.PROJECT, none -> Unit.INSTANCE);
+    private fun addInstrumentationDependency() {
+        project.dependencies.add("implementation", BuildConfig.OTEL_OKHTTP_LIBRARY_URI)
+        project.dependencies.add("byteBuddy", BuildConfig.OTEL_OKHTTP_AGENT_URI)
     }
 }

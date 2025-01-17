@@ -16,17 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.android.plugin.logging;
+package co.elastic.apm.android.plugin.logging
 
-import org.gradle.api.logging.Logging;
-import org.slf4j.Logger;
+import co.elastic.apm.android.common.internal.logging.ELoggerFactory
+import org.gradle.api.logging.Logging
+import org.slf4j.Logger
 
-import co.elastic.apm.android.common.internal.logging.ELoggerFactory;
+class GradleLoggerFactory : ELoggerFactory() {
 
-public class GradleLoggerFactory extends ELoggerFactory {
-
-    @Override
-    public Logger getLogger(String name) {
-        return Logging.getLogger(name);
+    override fun getLogger(name: String): Logger {
+        return Logging.getLogger(name)
     }
 }

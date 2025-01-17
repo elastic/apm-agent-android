@@ -14,7 +14,6 @@ dependencies {
 buildConfig {
     packageName("${group}.generated")
     buildConfigField("String", "SDK_DEPENDENCY_URI", "\"$group:android-sdk:$version\"")
-    buildConfigField("String", "SDK_KTX_DEPENDENCY_URI", "\"$group:android-sdk-ktx:$version\"")
     buildConfigField(
         "String",
         "OTEL_OKHTTP_LIBRARY_URI",

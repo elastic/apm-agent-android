@@ -26,7 +26,7 @@ import org.slf4j.event.Level
 
 internal class AndroidLogger(tag: String, private val policy: LoggingPolicy) : BaseELogger(tag) {
 
-    override fun handleLoggingCall(level: Level, formattedMessage: String, throwable: Throwable) {
+    override fun handleLoggingCall(level: Level, formattedMessage: String, throwable: Throwable?) {
         when (level) {
             Level.ERROR -> Log.e(name, formattedMessage, throwable)
             Level.WARN -> Log.w(name, formattedMessage, throwable)

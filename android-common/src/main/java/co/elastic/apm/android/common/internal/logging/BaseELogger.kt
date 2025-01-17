@@ -34,10 +34,10 @@ abstract class BaseELogger protected constructor(tag: String) : LegacyAbstractLo
 
     override fun handleNormalizedLoggingCall(
         level: Level,
-        marker: Marker,
+        marker: Marker?,
         msg: String,
-        arguments: Array<Any>,
-        throwable: Throwable
+        arguments: Array<Any>?,
+        throwable: Throwable?
     ) {
         handleLoggingCall(
             level,
@@ -49,6 +49,6 @@ abstract class BaseELogger protected constructor(tag: String) : LegacyAbstractLo
     protected abstract fun handleLoggingCall(
         level: Level,
         formattedMessage: String,
-        throwable: Throwable
+        throwable: Throwable?
     )
 }

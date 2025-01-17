@@ -19,9 +19,6 @@
 package co.elastic.apm.android.sdk.configuration.logging.impl
 
 import co.elastic.apm.android.sdk.configuration.logging.LogLevel
-import co.elastic.apm.android.sdk.internal.services.appinfo.AppInfoService
-import io.mockk.every
-import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
@@ -38,8 +35,6 @@ class DefaultLoggingPolicyTest {
     }
 
     private fun getInstance(appIsDebuggable: Boolean): DefaultLoggingPolicy {
-        val appInfoService = mockk<AppInfoService>()
-        every { appInfoService.isInDebugMode() }.returns(appIsDebuggable)
-        return DefaultLoggingPolicy(appInfoService)
+        return DefaultLoggingPolicy(appIsDebuggable)
     }
 }

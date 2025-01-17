@@ -1,5 +1,5 @@
 plugins {
-    id 'elastic.java-library'
+    id("elastic.java-library")
 }
 
 licensesConfig {
@@ -7,6 +7,6 @@ licensesConfig {
 }
 
 dependencies {
-    api libs.slf4j.api
-    implementation libs.androidx.annotations
+    api(libs.slf4j.api)
+    implementation(libs.androidx.annotations)
 }

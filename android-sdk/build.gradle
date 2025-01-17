@@ -42,8 +42,6 @@ dependencies {
     implementation libs.opentelemetry.diskBuffering
     implementation libs.androidx.annotations
     implementation libs.dsl.json
-    annotationProcessor 'co.elastic.apm.compile:processor'
-    compileOnly 'co.elastic.apm.compile:processor'
     testImplementation libs.mockwebserver
     testImplementation libs.wireMock
     testImplementation libs.opentelemetry.testing

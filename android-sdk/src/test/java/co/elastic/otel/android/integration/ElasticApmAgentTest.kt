@@ -32,13 +32,8 @@ import co.elastic.otel.android.internal.time.SystemTimeProvider
 import co.elastic.otel.android.internal.time.ntp.SntpClient
 import co.elastic.otel.android.processors.ProcessorFactory
 import co.elastic.otel.android.testutils.ElasticAgentRule
+import co.elastic.otel.android.testutils.WireMockRule
 import co.elastic.otel.android.tools.interceptor.Interceptor
-import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
-import com.github.tomakehurst.wiremock.client.WireMock.aResponse
-import com.github.tomakehurst.wiremock.client.WireMock.any
-import com.github.tomakehurst.wiremock.client.WireMock.anyUrl
-import com.github.tomakehurst.wiremock.verification.LoggedRequest
 import io.mockk.Runs
 import io.mockk.clearMocks
 import io.mockk.every
@@ -67,7 +62,6 @@ import io.opentelemetry.sdk.trace.export.SpanExporter
 import java.io.File
 import java.io.IOException
 import java.time.Duration
-import java.util.UUID
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
@@ -75,6 +69,7 @@ import org.awaitility.core.ConditionTimeoutException
 import org.awaitility.kotlin.await
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.runner.RunWith
@@ -87,21 +82,18 @@ class ElasticApmAgentTest {
     private lateinit var simpleProcessorFactory: SimpleProcessorFactory
     private val inMemoryExporters = InMemoryExporterProvider()
     private val inMemoryExportersInterceptor = Interceptor<ExporterProvider> { inMemoryExporters }
-    private val wireMock = WireMockServer()
-    private lateinit var allResponsesStubId: UUID
+
+    @get:Rule
+    val wireMockRule = WireMockRule()
 
     @Before
     fun setUp() {
         simpleProcessorFactory = SimpleProcessorFactory()
-        allResponsesStubId = UUID.randomUUID()
     }
 
     @After
     fun tearDown() {
         closeAgent()
-        if (wireMock.isRunning) {
-            wireMock.stop()
-        }
     }
 
     private fun closeAgent() {
@@ -123,13 +115,13 @@ class ElasticApmAgentTest {
 
     @Test
     fun `Validate initial apm server params`() {
-        stubAllHttpResponses { withStatus(500) }
-        agent = simpleAgentBuilder(wireMock.url("/"))
+        wireMockRule.stubAllHttpResponses { withStatus(500) }
+        agent = simpleAgentBuilder(wireMockRule.url("/"))
             .setServiceName("my-app")
             .setExtraRequestHeaders(mapOf("Extra-header" to "extra value"))
             .build()
 
-        val centralConfigRequest = takeRequest()
+        val centralConfigRequest = wireMockRule.takeRequest()
         assertThat(centralConfigRequest.url).isEqualTo("/config/v1/agents?service.name=my-app")
         assertThat(
             centralConfigRequest.headers.getHeader("Extra-header").firstValue()
@@ -137,7 +129,7 @@ class ElasticApmAgentTest {
 
         // OTel requests
         sendSpan()
-        val tracesRequest = takeRequest()
+        val tracesRequest = wireMockRule.takeRequest()
         assertThat(tracesRequest.url).isEqualTo("/v1/traces")
         assertThat(
             tracesRequest.headers.getHeader("User-Agent").firstValue()
@@ -147,7 +139,7 @@ class ElasticApmAgentTest {
         ).isEqualTo("extra value")
 
         sendLog()
-        val logsRequest = takeRequest()
+        val logsRequest = wireMockRule.takeRequest()
         assertThat(logsRequest.url).isEqualTo("/v1/logs")
         assertThat(
             logsRequest.headers.getHeader("User-Agent").firstValue()
@@ -157,7 +149,7 @@ class ElasticApmAgentTest {
         ).isEqualTo("extra value")
 
         sendMetric()
-        val metricsRequest = takeRequest()
+        val metricsRequest = wireMockRule.takeRequest()
         assertThat(metricsRequest.url).isEqualTo("/v1/metrics")
         assertThat(
             metricsRequest.headers.getHeader("User-Agent").firstValue()
@@ -169,40 +161,40 @@ class ElasticApmAgentTest {
 
     @Test
     fun `Validate changing endpoint config`() {
-        stubAllHttpResponses {
+        wireMockRule.stubAllHttpResponses {
             withStatus(404)
                 .withHeader("Cache-Control", "max-age=1")// 1 second to wait for the next poll.
         }
         val secretToken = "secret-token"
-        agent = simpleAgentBuilder(wireMock.url("/first/"))
+        agent = simpleAgentBuilder(wireMockRule.url("/first/"))
             .setAuthentication(ApmServerAuthentication.SecretToken(secretToken))
             .setServiceName("my-app")
             .setDeploymentEnvironment("debug")
             .build()
 
-        val centralConfigRequest = takeRequest()
+        val centralConfigRequest = wireMockRule.takeRequest()
         assertThat(centralConfigRequest.url).isEqualTo("/first/config/v1/agents?service.name=my-app&service.deployment=debug")
         assertThat(
             centralConfigRequest.headers.getHeader("Authorization").firstValue()
         ).isEqualTo("Bearer $secretToken")
 
-        stubAllHttpResponses { withStatus(500) }
+        wireMockRule.stubAllHttpResponses { withStatus(500) }
         sendSpan()
-        val tracesRequest = takeRequest()
+        val tracesRequest = wireMockRule.takeRequest()
         assertThat(tracesRequest.url).isEqualTo("/first/v1/traces")
         assertThat(
             tracesRequest.headers.getHeader("Authorization").firstValue()
         ).isEqualTo("Bearer $secretToken")
 
         sendLog()
-        val logsRequest = takeRequest()
+        val logsRequest = wireMockRule.takeRequest()
         assertThat(logsRequest.url).isEqualTo("/first/v1/logs")
         assertThat(
             logsRequest.headers.getHeader("Authorization").firstValue()
         ).isEqualTo("Bearer $secretToken")
 
         sendMetric()
-        val metricsRequest = takeRequest()
+        val metricsRequest = wireMockRule.takeRequest()
         assertThat(metricsRequest.url).isEqualTo("/first/v1/metrics")
         assertThat(
             metricsRequest.headers.getHeader("Authorization").firstValue()
@@ -212,13 +204,13 @@ class ElasticApmAgentTest {
         val apiKey = "api-key"
         agent.getApmServerConnectivityManager().setConnectivityConfiguration(
             ApmServerConnectivity(
-                wireMock.url("/second/"),
+                wireMockRule.url("/second/"),
                 ApmServerAuthentication.ApiKey(apiKey),
                 mapOf("Custom-Header" to "custom value")
             )
         )
 
-        val centralConfigRequest2 = takeRequest()
+        val centralConfigRequest2 = wireMockRule.takeRequest()
         assertThat(centralConfigRequest2.url).isEqualTo("/second/config/v1/agents?service.name=my-app&service.deployment=debug")
         assertThat(centralConfigRequest2.headers.getHeader("Authorization").firstValue()).isEqualTo(
             "ApiKey $apiKey"
@@ -226,7 +218,7 @@ class ElasticApmAgentTest {
 
         // OTel requests
         sendSpan()
-        val tracesRequest2 = takeRequest()
+        val tracesRequest2 = wireMockRule.takeRequest()
         assertThat(tracesRequest2.url).isEqualTo("/second/v1/traces")
         assertThat(
             tracesRequest2.headers.getHeader("Authorization").firstValue()
@@ -236,7 +228,7 @@ class ElasticApmAgentTest {
         ).isEqualTo("custom value")
 
         sendLog()
-        val logsRequest2 = takeRequest()
+        val logsRequest2 = wireMockRule.takeRequest()
         assertThat(logsRequest2.url).isEqualTo("/second/v1/logs")
         assertThat(
             logsRequest2.headers.getHeader("Authorization").firstValue()
@@ -246,7 +238,7 @@ class ElasticApmAgentTest {
         ).isEqualTo("custom value")
 
         sendMetric()
-        val metricsRequest2 = takeRequest()
+        val metricsRequest2 = wireMockRule.takeRequest()
         assertThat(metricsRequest2.url).isEqualTo("/second/v1/metrics")
         assertThat(
             metricsRequest2.headers.getHeader("Authorization").firstValue()
@@ -258,19 +250,19 @@ class ElasticApmAgentTest {
 
     @Test
     fun `Validate changing endpoint config after manually setting central config endpoint`() {
-        stubAllHttpResponses {
+        wireMockRule.stubAllHttpResponses {
             withStatus(404)
                 .withHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
         }// Central config poll
         val secretToken = "secret-token"
-        val initialUrl = wireMock.url("/first/")
+        val initialUrl = wireMockRule.url("/first/")
         agent = simpleAgentBuilder(initialUrl)
             .setAuthentication(ApmServerAuthentication.SecretToken(secretToken))
             .setServiceName("my-app")
             .setDeploymentEnvironment("debug")
             .build()
 
-        val centralConfigRequest = takeRequest()
+        val centralConfigRequest = wireMockRule.takeRequest()
         assertThat(centralConfigRequest.url).isEqualTo("/first/config/v1/agents?service.name=my-app&service.deployment=debug")
         assertThat(
             centralConfigRequest.headers.getHeader("Authorization").firstValue()
@@ -287,23 +279,23 @@ class ElasticApmAgentTest {
         )
 
         // OTel requests
-        stubAllHttpResponses { withStatus(500) }
+        wireMockRule.stubAllHttpResponses { withStatus(500) }
         sendSpan()
-        val tracesRequest = takeRequest()
+        val tracesRequest = wireMockRule.takeRequest()
         assertThat(tracesRequest.url).isEqualTo("/first/v1/traces")
         assertThat(
             tracesRequest.headers.getHeader("Authorization").firstValue()
         ).isEqualTo("Bearer $secretToken")
 
         sendLog()
-        val logsRequest = takeRequest()
+        val logsRequest = wireMockRule.takeRequest()
         assertThat(logsRequest.url).isEqualTo("/first/v1/logs")
         assertThat(
             logsRequest.headers.getHeader("Authorization").firstValue()
         ).isEqualTo("Bearer $secretToken")
 
         sendMetric()
-        val metricsRequest = takeRequest()
+        val metricsRequest = wireMockRule.takeRequest()
         assertThat(metricsRequest.url).isEqualTo("/first/v1/metrics")
         assertThat(
             metricsRequest.headers.getHeader("Authorization").firstValue()
@@ -313,13 +305,13 @@ class ElasticApmAgentTest {
         val apiKey = "api-key"
         agent.getApmServerConnectivityManager().setConnectivityConfiguration(
             ApmServerConnectivity(
-                wireMock.url("/second/"),
+                wireMockRule.url("/second/"),
                 ApmServerAuthentication.ApiKey(apiKey),
                 mapOf("Custom-Header" to "custom value")
             )
         )
 
-        val centralConfigRequest2 = takeRequest()
+        val centralConfigRequest2 = wireMockRule.takeRequest()
         assertThat(centralConfigRequest2.url).isEqualTo("/first/config/v1/agents?service.name=other-name")
         assertThat(centralConfigRequest2.headers.getHeader("Authorization").isPresent).isFalse()
         assertThat(centralConfigRequest2.headers.getHeader("Custom-Header").firstValue()).isEqualTo(
@@ -328,7 +320,7 @@ class ElasticApmAgentTest {
 
         // OTel requests
         sendSpan()
-        val tracesRequest2 = takeRequest()
+        val tracesRequest2 = wireMockRule.takeRequest()
         assertThat(tracesRequest2.url).isEqualTo("/second/v1/traces")
         assertThat(
             tracesRequest2.headers.getHeader("Authorization").firstValue()
@@ -338,7 +330,7 @@ class ElasticApmAgentTest {
         ).isEqualTo("custom value")
 
         sendLog()
-        val logsRequest2 = takeRequest()
+        val logsRequest2 = wireMockRule.takeRequest()
         assertThat(logsRequest2.url).isEqualTo("/second/v1/logs")
         assertThat(
             logsRequest2.headers.getHeader("Authorization").firstValue()
@@ -348,7 +340,7 @@ class ElasticApmAgentTest {
         ).isEqualTo("custom value")
 
         sendMetric()
-        val metricsRequest2 = takeRequest()
+        val metricsRequest2 = wireMockRule.takeRequest()
         assertThat(metricsRequest2.url).isEqualTo("/second/v1/metrics")
         assertThat(
             metricsRequest2.headers.getHeader("Authorization").firstValue()
@@ -361,16 +353,16 @@ class ElasticApmAgentTest {
     @Test
     fun `Validate central configuration behavior`() {
         // First: Empty config
-        stubAllHttpResponses {
+        wireMockRule.stubAllHttpResponses {
             withStatus(200)
                 .withBody("{}")
                 .withHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
         }
 
-        agent = inMemoryAgentBuilder(wireMock.url("/"))
+        agent = inMemoryAgentBuilder(wireMockRule.url("/"))
             .build()
 
-        takeRequest() // Await for empty central config response
+        wireMockRule.takeRequest() // Await for empty central config response
 
         sendSpan()
         sendLog()
@@ -383,14 +375,14 @@ class ElasticApmAgentTest {
         assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
 
         // Next: Config with recording set to false
-        stubAllHttpResponses {
+        wireMockRule.stubAllHttpResponses {
             withStatus(200)
                 .withBody("""{"recording":"false"}""")
         }
 
         inMemoryExporters.resetExporters()
 
-        takeRequest() // Await for central config response with recording=false
+        wireMockRule.takeRequest() // Await for central config response with recording=false
 
         awaitForOpenGates()
 
@@ -404,11 +396,11 @@ class ElasticApmAgentTest {
 
         // Ensure that the config was persisted
         closeAgent()
-        stubAllHttpResponses {
+        wireMockRule.stubAllHttpResponses {
             withStatus(404)
                 .withHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
         }
-        agent = inMemoryAgentBuilder(wireMock.url("/"))
+        agent = inMemoryAgentBuilder(wireMockRule.url("/"))
             .build()
 
         sendSpan()
@@ -416,8 +408,8 @@ class ElasticApmAgentTest {
         sendMetric()
 
         // Await for request and stub the next one
-        takeRequest()
-        stubAllHttpResponses {
+        wireMockRule.takeRequest()
+        wireMockRule.stubAllHttpResponses {
             withStatus(200)
                 .withHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
                 .withBody("""{"recording":"true"}""")
@@ -430,9 +422,9 @@ class ElasticApmAgentTest {
         assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
 
         // Verify recording true value
-        takeRequest() // Await for recording: true request.
+        wireMockRule.takeRequest() // Await for recording: true request.
         // Stub for invalid config
-        stubAllHttpResponses {
+        wireMockRule.stubAllHttpResponses {
             withStatus(200)
                 .withBody("NOT_A_JSON")
         }
@@ -447,7 +439,7 @@ class ElasticApmAgentTest {
 
         // Verify invalid config
         inMemoryExporters.resetExporters()
-        takeRequest() // Await for invalid config.
+        wireMockRule.takeRequest() // Await for invalid config.
 
         sendSpan()
         sendLog()
@@ -461,16 +453,16 @@ class ElasticApmAgentTest {
     @Test
     fun `Verify sampling rate config`() {
         // First: Sample rate: 0.0 and recording false.
-        stubAllHttpResponses {
+        wireMockRule.stubAllHttpResponses {
             withStatus(200)
                 .withBody("""{"session_sample_rate":"0.0", "recording":"false"}""")
                 .withHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
         }
 
-        agent = inMemoryAgentBuilder(wireMock.url("/"))
+        agent = inMemoryAgentBuilder(wireMockRule.url("/"))
             .build()
 
-        takeRequest() // Await for central config response
+        wireMockRule.takeRequest() // Await for central config response
         agent.getSessionManager().clearSession()
 
         sendSpan()
@@ -484,13 +476,13 @@ class ElasticApmAgentTest {
         assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
 
         // Next: Sample rate: 1.0 and recording false.
-        stubAllHttpResponses {
+        wireMockRule.stubAllHttpResponses {
             withStatus(200)
                 .withBody("""{"session_sample_rate":"1.0", "recording":"false"}""")
                 .withHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
         }
 
-        takeRequest() // Await for central config response
+        wireMockRule.takeRequest() // Await for central config response
         agent.getSessionManager().clearSession()
 
         sendSpan()
@@ -502,13 +494,13 @@ class ElasticApmAgentTest {
         assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
 
         // Next: Sample rate: 1.0 and recording true.
-        stubAllHttpResponses {
+        wireMockRule.stubAllHttpResponses {
             withStatus(200)
                 .withBody("""{"session_sample_rate":"1.0", "recording":"true"}""")
                 .withHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
         }
 
-        takeRequest() // Await for central config response
+        wireMockRule.takeRequest() // Await for central config response
         agent.getSessionManager().clearSession()
 
         sendSpan()
@@ -521,12 +513,12 @@ class ElasticApmAgentTest {
 
         // Next: Sample rate: 0.0 and recording true, before evaluating sample rate.
         inMemoryExporters.resetExporters()
-        stubAllHttpResponses {
+        wireMockRule.stubAllHttpResponses {
             withStatus(200)
                 .withBody("""{"session_sample_rate":"0.0", "recording":"true"}""")
         }
 
-        takeRequest() // Await for central config response
+        wireMockRule.takeRequest() // Await for central config response
 
         sendSpan()
         sendLog()
@@ -550,11 +542,11 @@ class ElasticApmAgentTest {
 
         // Ensure that the config is persisted.
         closeAgent()
-        stubAllHttpResponses {
+        wireMockRule.stubAllHttpResponses {
             withStatus(200)
             withBody("Not a json")
         }
-        agent = inMemoryAgentBuilder(wireMock.url("/")).build()
+        agent = inMemoryAgentBuilder(wireMockRule.url("/")).build()
 
         sendSpan()
         sendLog()
@@ -567,7 +559,7 @@ class ElasticApmAgentTest {
         assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
 
         // When central config fails and the session gets reset, go with default behavior.
-        takeRequest()
+        wireMockRule.takeRequest()
         agent.getSessionManager().clearSession()
         inMemoryExporters.resetExporters()
 
@@ -1313,17 +1305,6 @@ class ElasticApmAgentTest {
         assertThat(attributes.get(AttributeKey.stringKey("session.id"))).isEqualTo(value)
     }
 
-    private fun takeRequest(awaitSeconds: Int = 2): LoggedRequest {
-        await.atMost(Duration.ofSeconds(awaitSeconds.toLong()))
-            .until { wireMock.allServeEvents.isNotEmpty() }
-        val allServeEvents = wireMock.allServeEvents
-        assertThat(allServeEvents).hasSize(1)
-        val serveEvent = allServeEvents.first()
-        wireMock.removeServeEvent(serveEvent.id)
-        return serveEvent.request
-    }
-
-
     private fun sendSpan(name: String = "span-name") {
         agent.getOpenTelemetry().getTracer("TestTracer")
             .spanBuilder(name)
@@ -1349,20 +1330,6 @@ class ElasticApmAgentTest {
         await.until(condition)
         val waitTimeMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - waitStart)
         return waitTimeMillis
-    }
-
-    private fun stubAllHttpResponses(
-        responseVisitor: ResponseDefinitionBuilder.() -> Unit = {}
-    ) {
-        if (!wireMock.isRunning) {
-            wireMock.start()
-        }
-        wireMock.removeStub(allResponsesStubId)
-        val mappingBuilder = any(anyUrl()).withId(allResponsesStubId)
-        val response = aResponse()
-        responseVisitor(response)
-        mappingBuilder.willReturn(response)
-        wireMock.stubFor(mappingBuilder)
     }
 
     private fun awaitForCacheFileCreation(dirNames: List<String>) {

@@ -22,16 +22,14 @@ import co.elastic.otel.android.connectivity.ConnectivityConfiguration
 import co.elastic.otel.android.features.centralconfig.fetcher.CentralConfigurationFetcher
 import co.elastic.otel.android.internal.services.preferences.PreferencesService
 import co.elastic.otel.android.testutils.ElasticAgentRule
+import co.elastic.otel.android.testutils.WireMockRule
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import java.io.File
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.After
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Rule
@@ -46,7 +44,9 @@ class CentralConfigurationFetcherTest {
     private lateinit var connectivity: ConnectivityConfiguration
     private lateinit var configurationFile: File
     private lateinit var fetcher: CentralConfigurationFetcher
-    private lateinit var webServer: MockWebServer
+
+    @get:Rule
+    val wireMockRule = WireMockRule()
 
     @get:Rule
     val agentRule = ElasticAgentRule()
@@ -66,15 +66,9 @@ class CentralConfigurationFetcherTest {
         agentRule.initialize()
     }
 
-    @After
-    fun tearDown() {
-        webServer.shutdown()
-    }
-
     private fun setUpConnectivity() {
-        webServer = MockWebServer()
         connectivity = mockk<ConnectivityConfiguration>()
-        setConnectivityEndpoint("")
+        setConnectivityEndpoint("/")
     }
 
     @Test
@@ -88,7 +82,9 @@ class CentralConfigurationFetcherTest {
 
     @Test
     fun `When config not changed response, notify the caller`() {
-        enqueueResponse(getResponse(304, ""))
+        wireMockRule.stubAllHttpResponses {
+            withStatus(304).withBody("")
+        }
 
         val fetch = fetcher.fetch(connectivity)
 
@@ -101,7 +97,9 @@ class CentralConfigurationFetcherTest {
 
         fetcher.fetch(connectivity)
 
-        assertThat(webServer.takeRequest().getHeader("Content-Type")).isEqualTo("application/json")
+        assertThat(
+            wireMockRule.takeRequest().getHeader("Content-Type")
+        ).isEqualTo("application/json")
     }
 
     @Test
@@ -112,13 +110,15 @@ class CentralConfigurationFetcherTest {
 
         fetcher.fetch(connectivity)
 
-        assertThat(webServer.takeRequest().getHeader("Authorization")).isEqualTo(authHeaderValue)
+        assertThat(wireMockRule.takeRequest().getHeader("Authorization")).isEqualTo(authHeaderValue)
     }
 
     @Test
     fun `Store eTag when received`() {
         val theEtag = "someEtag"
-        enqueueResponse(getResponse(200, "{}").setHeader("ETag", theEtag))
+        wireMockRule.stubAllHttpResponses {
+            withStatus(200).withBody("{}").withHeader("ETag", theEtag)
+        }
 
         fetcher.fetch(connectivity)
 
@@ -133,7 +133,7 @@ class CentralConfigurationFetcherTest {
 
         fetcher.fetch(connectivity)
 
-        val sentEtag = webServer.takeRequest().getHeader("If-None-Match")
+        val sentEtag = wireMockRule.takeRequest().getHeader("If-None-Match")
         assertThat(sentEtag).isEqualTo(theEtag)
     }
 
@@ -141,7 +141,9 @@ class CentralConfigurationFetcherTest {
     fun `When max age is provided, return it`() {
         val headerMaxAge = 12345
         val headerValue = "max-age=$headerMaxAge"
-        enqueueResponse(getResponse(200, "{}").setHeader("Cache-Control", headerValue))
+        wireMockRule.stubAllHttpResponses {
+            withStatus(200).withBody("{}").withHeader("Cache-Control", headerValue)
+        }
 
         val result = fetcher.fetch(connectivity)
 
@@ -151,7 +153,9 @@ class CentralConfigurationFetcherTest {
     @Test
     fun `When max age is not provided, return null`() {
         val headerValue = "no-cache"
-        enqueueResponse(getResponse(200, "{}").setHeader("Cache-Control", headerValue))
+        wireMockRule.stubAllHttpResponses {
+            withStatus(200).withBody("{}").withHeader("Cache-Control", headerValue)
+        }
 
         val result = fetcher.fetch(connectivity)
 
@@ -170,7 +174,9 @@ class CentralConfigurationFetcherTest {
     @Test
     fun `Store received config in provided file`() {
         val body = "{\"some\":\"configValue\"}"
-        enqueueResponse(getResponse(200, body))
+        wireMockRule.stubAllHttpResponses {
+            withStatus(200).withBody(body)
+        }
 
         fetcher.fetch(connectivity)
 
@@ -178,19 +184,13 @@ class CentralConfigurationFetcherTest {
     }
 
     private fun enqueueSimpleResponse() {
-        enqueueResponse(getResponse(200, "{}"))
-    }
-
-    private fun enqueueResponse(response: MockResponse) {
-        webServer.enqueue(response)
-    }
-
-    private fun getResponse(code: Int, body: String): MockResponse {
-        return MockResponse().setResponseCode(code).setBody(body)
+        wireMockRule.stubAllHttpResponses {
+            withStatus(200).withBody("{}")
+        }
     }
 
     private fun setConnectivityEndpoint(path: String) {
-        every { connectivity.getUrl() }.returns("http://" + webServer.hostName + ":" + webServer.port + path)
+        every { connectivity.getUrl() }.returns(wireMockRule.url(path))
         every { connectivity.getHeaders() }.returns(emptyMap())
     }
 }

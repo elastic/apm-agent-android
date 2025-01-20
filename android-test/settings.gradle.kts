@@ -24,7 +24,7 @@ val instrumentationDirName = "instrumentation"
 val instrumentationDir = File(rootDir, instrumentationDirName)
 val separator = Regex("[/\\\\]")
 instrumentationDir.walk().maxDepth(2).forEach {
-    if (it.name.equals("build.gradle.kts")) {
+    if (it.name.equals("build.gradle.kts.kts")) {
         include(
             ":$instrumentationDirName:${
                 it.parentFile.toRelativeString(instrumentationDir).replace(separator, ":")

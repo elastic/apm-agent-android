@@ -32,10 +32,10 @@ licensesConfig {
 
 gradlePlugin {
     plugins {
-        create("apmPlugin") {
-            id = "co.elastic.apm.android"
-            implementationClass = "co.elastic.apm.android.plugin.ApmAndroidAgentPlugin"
-            displayName = "Elastic APM Android Agent"
+        create("androidOtelPlugin") {
+            id = "co.elastic.otel.android"
+            implementationClass = "co.elastic.otel.android.plugin.ApmAndroidAgentPlugin"
+            displayName = "Elastic OTel Android Agent"
             description = project.description
             tags.addAll("Android", "APM", "Elastic", "ELK", "opentelemetry")
         }

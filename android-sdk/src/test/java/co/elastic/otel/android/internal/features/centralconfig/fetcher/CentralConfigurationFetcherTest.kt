@@ -19,7 +19,6 @@
 package co.elastic.otel.android.internal.features.centralconfig.fetcher
 
 import co.elastic.otel.android.connectivity.ConnectivityConfiguration
-import co.elastic.otel.android.features.centralconfig.fetcher.CentralConfigurationFetcher
 import co.elastic.otel.android.internal.services.preferences.PreferencesService
 import co.elastic.otel.android.testutils.ElasticAgentRule
 import co.elastic.otel.android.testutils.WireMockRule

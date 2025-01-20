@@ -18,6 +18,7 @@
  */
 package co.elastic.otel.android.processors
 
+import co.elastic.otel.android.internal.opentelemetry.processors.DefaultProcessorFactory
 import io.opentelemetry.sdk.logs.LogRecordProcessor
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.metrics.export.MetricExporter

@@ -18,8 +18,8 @@
  */
 package co.elastic.otel.android.impl
 
+import co.elastic.otel.android.internal.logging.DefaultLoggingPolicy
 import co.elastic.otel.android.logging.LogLevel
-import co.elastic.otel.android.logging.impl.DefaultLoggingPolicy
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 

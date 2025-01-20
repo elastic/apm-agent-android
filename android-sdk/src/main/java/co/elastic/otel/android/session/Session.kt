@@ -18,7 +18,7 @@
  */
 package co.elastic.otel.android.session
 
-import co.elastic.otel.android.session.impl.DefaultSession
+import co.elastic.otel.android.internal.session.DefaultSession
 
 interface Session {
     fun getId(): String

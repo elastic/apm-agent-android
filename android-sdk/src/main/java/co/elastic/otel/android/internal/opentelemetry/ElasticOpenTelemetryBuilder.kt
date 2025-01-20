@@ -20,19 +20,19 @@ package co.elastic.otel.android.internal.opentelemetry
 
 import android.os.Build
 import co.elastic.otel.android.BuildConfig
-import co.elastic.otel.android.common.CommonAttributesInterceptor
-import co.elastic.otel.android.common.SpanAttributesInterceptor
+import co.elastic.otel.android.api.ElasticOtelAgent
 import co.elastic.otel.android.exporters.ExporterProvider
-import co.elastic.otel.android.internal.api.ElasticOtelAgent
+import co.elastic.otel.android.internal.attributes.CommonAttributesInterceptor
+import co.elastic.otel.android.internal.attributes.SpanAttributesInterceptor
 import co.elastic.otel.android.internal.opentelemetry.processors.logs.LogRecordAttributesProcessor
 import co.elastic.otel.android.internal.opentelemetry.processors.spans.SpanAttributesProcessor
 import co.elastic.otel.android.internal.opentelemetry.processors.spans.SpanInterceptorProcessor
 import co.elastic.otel.android.internal.services.ServiceManager
+import co.elastic.otel.android.internal.utilities.cache.PreferencesCachedStringProvider
+import co.elastic.otel.android.internal.utilities.interceptor.Interceptor
+import co.elastic.otel.android.internal.utilities.provider.StringProvider
 import co.elastic.otel.android.processors.ProcessorFactory
 import co.elastic.otel.android.session.SessionProvider
-import co.elastic.otel.android.tools.cache.PreferencesCachedStringProvider
-import co.elastic.otel.android.tools.interceptor.Interceptor
-import co.elastic.otel.android.tools.provider.StringProvider
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.sdk.OpenTelemetrySdk

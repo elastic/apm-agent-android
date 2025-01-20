@@ -18,13 +18,13 @@
  */
 package co.elastic.otel.android.testutils
 
+import co.elastic.otel.android.api.ElasticOtelAgent
 import co.elastic.otel.android.exporters.ExporterProvider
-import co.elastic.otel.android.internal.api.ElasticOtelAgent
 import co.elastic.otel.android.internal.services.ServiceManager
+import co.elastic.otel.android.internal.utilities.interceptor.Interceptor
 import co.elastic.otel.android.processors.ProcessorFactory
 import co.elastic.otel.android.session.Session
 import co.elastic.otel.android.session.SessionProvider
-import co.elastic.otel.android.tools.interceptor.Interceptor
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.api.logs.LogRecordBuilder

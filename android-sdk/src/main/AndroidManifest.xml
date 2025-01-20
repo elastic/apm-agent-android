@@ -9,7 +9,7 @@
     <application>
 
         <receiver
-            android:name="co.elastic.otel.android.features.clock.ElasticClockBroadcastReceiver"
+            android:name=".internal.features.clock.ElasticClockBroadcastReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

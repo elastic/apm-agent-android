@@ -25,9 +25,9 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import co.elastic.otel.android.internal.logging.SimpleLoggingPolicy;
 import co.elastic.otel.android.logging.LogLevel;
 import co.elastic.otel.android.logging.LoggingPolicy;
-import co.elastic.otel.android.logging.impl.SimpleLoggingPolicy;
 
 public class SimpleLoggingPolicyTest {
 

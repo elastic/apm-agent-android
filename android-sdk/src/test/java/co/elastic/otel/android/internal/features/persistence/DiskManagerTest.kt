@@ -18,8 +18,8 @@
  */
 package co.elastic.otel.android.internal.features.persistence
 
-import co.elastic.otel.android.features.diskbuffering.DiskBufferingConfiguration
-import co.elastic.otel.android.features.diskbuffering.tools.DiskManager
+import co.elastic.otel.android.internal.features.diskbuffering.DiskBufferingConfiguration
+import co.elastic.otel.android.internal.features.diskbuffering.tools.DiskManager
 import co.elastic.otel.android.internal.services.appinfo.AppInfoService
 import co.elastic.otel.android.internal.services.preferences.PreferencesService
 import io.mockk.Runs

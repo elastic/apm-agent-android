@@ -18,7 +18,7 @@
  */
 package co.elastic.otel.android.internal.opentelemetry.processors.spans
 
-import co.elastic.otel.android.tools.interceptor.Interceptor
+import co.elastic.otel.android.internal.utilities.interceptor.Interceptor
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.context.Context
 import io.opentelemetry.sdk.trace.ReadWriteSpan

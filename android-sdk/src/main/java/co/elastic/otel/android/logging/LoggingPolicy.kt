@@ -18,9 +18,9 @@
  */
 package co.elastic.otel.android.logging
 
+import co.elastic.otel.android.internal.logging.DefaultLoggingPolicy
+import co.elastic.otel.android.internal.logging.SimpleLoggingPolicy
 import co.elastic.otel.android.internal.services.ServiceManager
-import co.elastic.otel.android.logging.impl.DefaultLoggingPolicy
-import co.elastic.otel.android.logging.impl.SimpleLoggingPolicy
 
 /**
  * Defines the internal logging behavior of this library.

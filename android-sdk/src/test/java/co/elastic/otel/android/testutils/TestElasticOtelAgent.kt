@@ -19,12 +19,12 @@
 package co.elastic.otel.android.testutils
 
 import android.app.Application
+import co.elastic.otel.android.api.ElasticOtelAgent
 import co.elastic.otel.android.exporters.ExporterProvider
-import co.elastic.otel.android.internal.api.ElasticOtelAgent
 import co.elastic.otel.android.internal.opentelemetry.ElasticOpenTelemetryBuilder
 import co.elastic.otel.android.internal.services.ServiceManager
+import co.elastic.otel.android.internal.utilities.interceptor.Interceptor
 import co.elastic.otel.android.session.SessionProvider
-import co.elastic.otel.android.tools.interceptor.Interceptor
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.sdk.OpenTelemetrySdk
 import io.opentelemetry.sdk.common.Clock

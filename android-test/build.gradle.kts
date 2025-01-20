@@ -1,5 +1,5 @@
-import java.util.Properties
 import java.io.File
+import java.util.Properties
 
 val agentProperties = Properties()
 val propertiesFile = File(rootDir, "../gradle.properties")

@@ -46,7 +46,6 @@ android {
 }
 
 dependencies {
-    implementation project(':android-test-common')
     implementation libs.appCompat
     implementation libs.espresso.idlingResource
     implementation libs.fragmentTesting

@@ -19,7 +19,6 @@ dependencyResolutionManagement {
 }
 includeBuild("..")
 include(":app")
-include(":android-test-common")
 
 val instrumentationDirName = "instrumentation"
 val instrumentationDir = File(rootDir, instrumentationDirName)

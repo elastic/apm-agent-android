@@ -7,13 +7,9 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application>
-        <provider
-            android:name=".internal.features.contentprovider.ElasticInitializer"
-            android:authorities="${applicationId}.elasticagentinitializer"
-            android:exported="false" />
 
         <receiver
-            android:name=".features.clock.ElasticClockBroadcastReceiver"
+            android:name="co.elastic.otel.android.features.clock.ElasticClockBroadcastReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

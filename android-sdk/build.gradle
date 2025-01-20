@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "co.elastic.apm.android.sdk"
+    namespace = "co.elastic.otel.android"
     buildFeatures.buildConfig true
 
     defaultConfig {

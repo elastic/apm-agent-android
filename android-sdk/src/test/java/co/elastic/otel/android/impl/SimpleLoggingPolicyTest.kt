@@ -16,29 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.impl;
+package co.elastic.otel.android.impl
 
+import co.elastic.otel.android.internal.logging.SimpleLoggingPolicy
+import co.elastic.otel.android.logging.LogLevel
+import co.elastic.otel.android.logging.LoggingPolicy
+import org.junit.Assert
+import org.junit.Test
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import org.junit.Test;
-
-import co.elastic.otel.android.internal.logging.SimpleLoggingPolicy;
-import co.elastic.otel.android.logging.LogLevel;
-import co.elastic.otel.android.logging.LoggingPolicy;
-
-public class SimpleLoggingPolicyTest {
-
+class SimpleLoggingPolicyTest {
     @Test
-    public void verifyProvidedValues() {
-        LoggingPolicy policy = new SimpleLoggingPolicy(true, LogLevel.INFO);
-        LoggingPolicy policy2 = new SimpleLoggingPolicy(false, LogLevel.ERROR);
+    fun verifyProvidedValues() {
+        val policy: LoggingPolicy = SimpleLoggingPolicy(true, LogLevel.INFO)
+        val policy2: LoggingPolicy = SimpleLoggingPolicy(false, LogLevel.ERROR)
 
-        assertTrue(policy.isEnabled());
-        assertEquals(LogLevel.INFO, policy.getMinimumLevel());
-        assertFalse(policy2.isEnabled());
-        assertEquals(LogLevel.ERROR, policy2.getMinimumLevel());
+        Assert.assertTrue(policy.isEnabled())
+        Assert.assertEquals(LogLevel.INFO, policy.getMinimumLevel())
+        Assert.assertFalse(policy2.isEnabled())
+        Assert.assertEquals(LogLevel.ERROR, policy2.getMinimumLevel())
     }
 }

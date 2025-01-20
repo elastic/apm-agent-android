@@ -26,7 +26,7 @@ import co.elastic.otel.android.internal.services.ServiceManager
 class ElasticClockBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
         if (intent?.action == Intent.ACTION_BOOT_COMPLETED) {
-            co.elastic.otel.android.internal.features.clock.RemoteTimeOffsetManager.TimeOffsetCache(
+            RemoteTimeOffsetManager.TimeOffsetCache(
                 ServiceManager.create(context).getPreferencesService()
             ).clear()
         }

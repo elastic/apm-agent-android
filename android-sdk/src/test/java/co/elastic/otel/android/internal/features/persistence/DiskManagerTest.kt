@@ -100,19 +100,19 @@ class DiskManagerTest {
         diskBufferingConfiguration.maxCacheSize = maxCacheSize.toInt()
         diskBufferingConfiguration.maxCacheFileSize = maxCacheFileSize
         every { appInfoService.getAvailableCacheSpace(maxCacheSize) }.returns(maxCacheSize)
-        every { preferencesService.retrieveInt(co.elastic.otel.android.internal.features.persistence.DiskManagerTest.Companion.MAX_FOLDER_SIZE_KEY, -1) }.returns(-1)
-        every { preferencesService.store(co.elastic.otel.android.internal.features.persistence.DiskManagerTest.Companion.MAX_FOLDER_SIZE_KEY, any<Int>()) } just Runs
+        every { preferencesService.retrieveInt(MAX_FOLDER_SIZE_KEY, -1) }.returns(-1)
+        every { preferencesService.store(MAX_FOLDER_SIZE_KEY, any<Int>()) } just Runs
 
         // Expects the size of a single signal type folder minus the size of a cache file, to use as temporary space for reading.
         val expected = 2446677
         assertThat(expected.toLong()).isEqualTo(diskManager.getMaxFolderSize().toLong())
-        verify { preferencesService.store(co.elastic.otel.android.internal.features.persistence.DiskManagerTest.Companion.MAX_FOLDER_SIZE_KEY, expected) }
+        verify { preferencesService.store(MAX_FOLDER_SIZE_KEY, expected) }
 
         // On a second call, should get the value from the preferences.
         clearMocks(appInfoService, preferencesService)
-        every { preferencesService.retrieveInt(co.elastic.otel.android.internal.features.persistence.DiskManagerTest.Companion.MAX_FOLDER_SIZE_KEY, -1) }.returns(expected)
+        every { preferencesService.retrieveInt(MAX_FOLDER_SIZE_KEY, -1) }.returns(expected)
         assertThat(expected.toLong()).isEqualTo(diskManager.getMaxFolderSize().toLong())
-        verify { preferencesService.retrieveInt(co.elastic.otel.android.internal.features.persistence.DiskManagerTest.Companion.MAX_FOLDER_SIZE_KEY, -1) }
+        verify { preferencesService.retrieveInt(MAX_FOLDER_SIZE_KEY, -1) }
     }
 
     companion object {

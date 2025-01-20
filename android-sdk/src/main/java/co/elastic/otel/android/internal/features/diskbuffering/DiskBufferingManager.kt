@@ -56,8 +56,7 @@ internal class DiskBufferingManager private constructor(
     private var toDiskSpanExporter: SpanToDiskExporter? = null
     private var toDiskLogRecordExporter: LogRecordToDiskExporter? = null
     private var toDiskMetricExporter: MetricToDiskExporter? = null
-    private var signalFromDiskExporter: co.elastic.otel.android.internal.features.diskbuffering.SignalFromDiskExporter? =
-        null
+    private var signalFromDiskExporter: SignalFromDiskExporter? = null
 
     private fun exportFromDisk() {
         signalFromDiskExporter?.exportBatchOfEach()
@@ -170,9 +169,9 @@ internal class DiskBufferingManager private constructor(
         }
     }
 
-    private fun createFromDiskExporter(storageConfiguration: StorageConfiguration): co.elastic.otel.android.internal.features.diskbuffering.SignalFromDiskExporter {
+    private fun createFromDiskExporter(storageConfiguration: StorageConfiguration): SignalFromDiskExporter {
         val builder =
-            co.elastic.otel.android.internal.features.diskbuffering.SignalFromDiskExporter.builder()
+            SignalFromDiskExporter.builder()
         interceptedSpanExporter?.let {
             builder.setSpanFromDiskExporter(SpanFromDiskExporter.create(it, storageConfiguration))
         }

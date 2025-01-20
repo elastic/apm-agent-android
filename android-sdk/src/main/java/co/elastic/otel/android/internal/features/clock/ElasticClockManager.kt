@@ -28,9 +28,9 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 internal class ElasticClockManager private constructor(
     systemTimeProvider: SystemTimeProvider,
-    private val timeOffsetManager: co.elastic.otel.android.internal.features.clock.RemoteTimeOffsetManager,
+    private val timeOffsetManager: RemoteTimeOffsetManager,
     private val exportGateManager: ClockExporterGateManager
-) : co.elastic.otel.android.internal.features.clock.RemoteTimeOffsetManager.Listener {
+) : RemoteTimeOffsetManager.Listener {
     private val elapsedTimeOffsetClock = ElapsedTimeOffsetClock(systemTimeProvider)
     private val systemTimeClock = SystemTimeClock(systemTimeProvider)
     private val clock = MutableClock(systemTimeClock)
@@ -45,7 +45,7 @@ internal class ElasticClockManager private constructor(
             waitForClock: Boolean
         ): ElasticClockManager {
             val timeOffsetManager =
-                co.elastic.otel.android.internal.features.clock.RemoteTimeOffsetManager.create(serviceManager, systemTimeProvider, sntpClient)
+                RemoteTimeOffsetManager.create(serviceManager, systemTimeProvider, sntpClient)
             val exportGateManager =
                 ClockExporterGateManager.create(systemTimeProvider, gateManager, {
                     timeOffsetManager.getTimeOffset()?.let { it * 1_000_000 }
@@ -69,7 +69,7 @@ internal class ElasticClockManager private constructor(
         return clock
     }
 
-    internal fun getTimeOffsetManager(): co.elastic.otel.android.internal.features.clock.RemoteTimeOffsetManager {
+    internal fun getTimeOffsetManager(): RemoteTimeOffsetManager {
         return timeOffsetManager
     }
 

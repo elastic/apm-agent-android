@@ -31,15 +31,15 @@ internal class RemoteTimeOffsetManager private constructor(
     serviceManager: ServiceManager,
     private val systemTimeProvider: SystemTimeProvider,
     private val sntpClient: SntpClient,
-    private val timeOffsetCache: co.elastic.otel.android.internal.features.clock.RemoteTimeOffsetManager.TimeOffsetCache
+    private val timeOffsetCache: TimeOffsetCache
 ) {
     private val backgroundWorkService by lazy { serviceManager.getBackgroundWorkService() }
     private val logger = Elog.getLogger()
     private val writeLock = Any()
-    private lateinit var listener: co.elastic.otel.android.internal.features.clock.RemoteTimeOffsetManager.Listener
+    private lateinit var listener: Listener
 
     @GuardedBy("writeLock")
-    private var timeOffset: AtomicReference<co.elastic.otel.android.internal.features.clock.RemoteTimeOffsetManager.TimeOffset?> = AtomicReference(null)
+    private var timeOffset: AtomicReference<TimeOffset?> = AtomicReference(null)
 
     init {
         logger.debug(
@@ -66,11 +66,11 @@ internal class RemoteTimeOffsetManager private constructor(
         logger.debug("Starting clock sync.")
         try {
             val response =
-                sntpClient.fetchTimeOffset(systemTimeProvider.getElapsedRealTime() + co.elastic.otel.android.internal.features.clock.RemoteTimeOffsetManager.Companion.TIME_REFERENCE)
+                sntpClient.fetchTimeOffset(systemTimeProvider.getElapsedRealTime() + TIME_REFERENCE)
             if (response is SntpClient.Response.Success) {
-                val offset = co.elastic.otel.android.internal.features.clock.RemoteTimeOffsetManager.Companion.TIME_REFERENCE + response.offsetMillis
+                val offset = TIME_REFERENCE + response.offsetMillis
                 val timeOffset =
-                    co.elastic.otel.android.internal.features.clock.RemoteTimeOffsetManager.TimeOffset(
+                    TimeOffset(
                         offset,
                         calculateExpireTime()
                     )
@@ -89,7 +89,7 @@ internal class RemoteTimeOffsetManager private constructor(
         }
     }
 
-    private fun checkIfExpired(timeOffset: co.elastic.otel.android.internal.features.clock.RemoteTimeOffsetManager.TimeOffset?): Boolean {
+    private fun checkIfExpired(timeOffset: TimeOffset?): Boolean {
         synchronized(writeLock) {
             if (timeOffset != null && hasExpired(timeOffset.expireTimeMillis)) {
                 clearTimeOffset()
@@ -109,14 +109,14 @@ internal class RemoteTimeOffsetManager private constructor(
     }
 
     private fun calculateExpireTime(): Long {
-        return systemTimeProvider.getCurrentTimeMillis() + co.elastic.otel.android.internal.features.clock.RemoteTimeOffsetManager.Companion.CACHE_MAX_VALID_TIME
+        return systemTimeProvider.getCurrentTimeMillis() + CACHE_MAX_VALID_TIME
     }
 
-    private fun storeTimeOffsetInCache(timeOffset: co.elastic.otel.android.internal.features.clock.RemoteTimeOffsetManager.TimeOffset) {
+    private fun storeTimeOffsetInCache(timeOffset: TimeOffset) {
         timeOffsetCache.storeTimeOffset(timeOffset)
     }
 
-    private fun setTimeOffset(value: co.elastic.otel.android.internal.features.clock.RemoteTimeOffsetManager.TimeOffset?) = synchronized(writeLock) {
+    private fun setTimeOffset(value: TimeOffset?) = synchronized(writeLock) {
         if (timeOffset.get() != value) {
             timeOffset.set(value)
             notifyChange()
@@ -131,7 +131,7 @@ internal class RemoteTimeOffsetManager private constructor(
         sntpClient.close()
     }
 
-    internal fun setListener(listener: co.elastic.otel.android.internal.features.clock.RemoteTimeOffsetManager.Listener) {
+    internal fun setListener(listener: Listener) {
         this.listener = listener
     }
 
@@ -143,10 +143,10 @@ internal class RemoteTimeOffsetManager private constructor(
             serviceManager: ServiceManager,
             systemTimeProvider: SystemTimeProvider,
             sntpClient: SntpClient
-        ): co.elastic.otel.android.internal.features.clock.RemoteTimeOffsetManager {
-            return co.elastic.otel.android.internal.features.clock.RemoteTimeOffsetManager(
+        ): RemoteTimeOffsetManager {
+            return RemoteTimeOffsetManager(
                 serviceManager, systemTimeProvider, sntpClient,
-                co.elastic.otel.android.internal.features.clock.RemoteTimeOffsetManager.TimeOffsetCache(
+                TimeOffsetCache(
                     serviceManager.getPreferencesService()
                 )
             )
@@ -168,38 +168,38 @@ internal class RemoteTimeOffsetManager private constructor(
     internal class TimeOffsetCache(
         private val preferencesService: PreferencesService
     ) {
-        fun retrieveTimeOffset(): co.elastic.otel.android.internal.features.clock.RemoteTimeOffsetManager.TimeOffset? {
+        fun retrieveTimeOffset(): TimeOffset? {
             return checkNoValue(
                 preferencesService.retrieveLong(
-                    co.elastic.otel.android.internal.features.clock.RemoteTimeOffsetManager.TimeOffsetCache.Companion.KEY_TIME_OFFSET,
-                    co.elastic.otel.android.internal.features.clock.RemoteTimeOffsetManager.TimeOffsetCache.Companion.NO_VALUE
+                    KEY_TIME_OFFSET,
+                    NO_VALUE
                 )
             )?.let { offset ->
                 val expireTime =
                     checkNoValue(preferencesService.retrieveLong(
-                        co.elastic.otel.android.internal.features.clock.RemoteTimeOffsetManager.TimeOffsetCache.Companion.KEY_EXPIRE_TIME,
-                        co.elastic.otel.android.internal.features.clock.RemoteTimeOffsetManager.TimeOffsetCache.Companion.NO_VALUE
+                        KEY_EXPIRE_TIME,
+                        NO_VALUE
                     ))
                         ?: throw IllegalStateException()
-                co.elastic.otel.android.internal.features.clock.RemoteTimeOffsetManager.TimeOffset(
+                TimeOffset(
                     offset,
                     expireTime
                 )
             }
         }
 
-        fun storeTimeOffset(timeOffset: co.elastic.otel.android.internal.features.clock.RemoteTimeOffsetManager.TimeOffset) {
-            preferencesService.store(co.elastic.otel.android.internal.features.clock.RemoteTimeOffsetManager.TimeOffsetCache.Companion.KEY_TIME_OFFSET, timeOffset.offset)
-            preferencesService.store(co.elastic.otel.android.internal.features.clock.RemoteTimeOffsetManager.TimeOffsetCache.Companion.KEY_EXPIRE_TIME, timeOffset.expireTimeMillis)
+        fun storeTimeOffset(timeOffset: TimeOffset) {
+            preferencesService.store(KEY_TIME_OFFSET, timeOffset.offset)
+            preferencesService.store(KEY_EXPIRE_TIME, timeOffset.expireTimeMillis)
         }
 
         fun clear() {
-            preferencesService.remove(co.elastic.otel.android.internal.features.clock.RemoteTimeOffsetManager.TimeOffsetCache.Companion.KEY_TIME_OFFSET)
-            preferencesService.remove(co.elastic.otel.android.internal.features.clock.RemoteTimeOffsetManager.TimeOffsetCache.Companion.KEY_EXPIRE_TIME)
+            preferencesService.remove(KEY_TIME_OFFSET)
+            preferencesService.remove(KEY_EXPIRE_TIME)
         }
 
         private fun checkNoValue(value: Long): Long? {
-            return if (value == co.elastic.otel.android.internal.features.clock.RemoteTimeOffsetManager.TimeOffsetCache.Companion.NO_VALUE) null else value
+            return if (value == NO_VALUE) null else value
         }
 
         companion object {

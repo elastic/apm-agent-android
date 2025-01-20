@@ -18,27 +18,10 @@
  */
 package co.elastic.otel.android.api
 
-import co.elastic.otel.android.internal.services.ServiceManager
 import io.opentelemetry.api.OpenTelemetry
-import io.opentelemetry.sdk.OpenTelemetrySdk
 import java.io.Closeable
 
-abstract class ElasticOtelAgent(
-    private val serviceManager: ServiceManager,
-    private val configuration: Configuration
-) : Closeable {
+interface ElasticOtelAgent : Closeable {
 
-    abstract fun getOpenTelemetry(): OpenTelemetry
-
-    final override fun close() {
-        onClose()
-        configuration.openTelemetrySdk.close()
-        serviceManager.close()
-    }
-
-    protected abstract fun onClose()
-
-    data class Configuration(
-        val openTelemetrySdk: OpenTelemetrySdk
-    )
+    fun getOpenTelemetry(): OpenTelemetry
 }

@@ -20,8 +20,8 @@ package co.elastic.otel.android.internal.opentelemetry
 
 import android.os.Build
 import co.elastic.otel.android.BuildConfig
-import co.elastic.otel.android.api.ElasticOtelAgent
 import co.elastic.otel.android.exporters.ExporterProvider
+import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
 import co.elastic.otel.android.internal.attributes.CommonAttributesInterceptor
 import co.elastic.otel.android.internal.attributes.SpanAttributesInterceptor
 import co.elastic.otel.android.internal.opentelemetry.processors.logs.LogRecordAttributesProcessor
@@ -150,7 +150,7 @@ abstract class ElasticOpenTelemetryBuilder<B> {
         return this as B
     }
 
-    protected fun buildConfiguration(serviceManager: ServiceManager): ElasticOtelAgent.Configuration {
+    protected fun buildConfiguration(serviceManager: ServiceManager): ManagedElasticOtelAgent.Configuration {
         val commonAttributesInterceptor =
             CommonAttributesInterceptor(serviceManager, sessionProvider)
         addSpanAttributesInterceptor(commonAttributesInterceptor)
@@ -242,7 +242,7 @@ abstract class ElasticOpenTelemetryBuilder<B> {
             )
         }
         buildCalled.set(true)
-        return ElasticOtelAgent.Configuration(openTelemetryBuilder.build())
+        return ManagedElasticOtelAgent.Configuration(openTelemetryBuilder.build())
     }
 
     private fun getOsDescription(): String {

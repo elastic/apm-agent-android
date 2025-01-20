@@ -26,7 +26,7 @@ licensesConfig {
 }
 
 dependencies {
-    api(libs.opentelemetry.sdk)
+    api(project(":android-api"))
     implementation(libs.stagemonitor.configuration)
     implementation(project(":android-common"))
     implementation(libs.opentelemetry.exporter.otlp)

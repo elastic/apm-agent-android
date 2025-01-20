@@ -18,8 +18,8 @@
  */
 package co.elastic.otel.android.testutils
 
-import co.elastic.otel.android.api.ElasticOtelAgent
 import co.elastic.otel.android.exporters.ExporterProvider
+import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.utilities.interceptor.Interceptor
 import co.elastic.otel.android.processors.ProcessorFactory
@@ -52,12 +52,12 @@ import org.junit.runners.model.Statement
 import org.robolectric.RuntimeEnvironment
 
 class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory,
-    Interceptor<ElasticOtelAgent.Configuration> {
+    Interceptor<ManagedElasticOtelAgent.Configuration> {
     private var spanExporter: InMemorySpanExporter? = null
     private var metricReader: MetricReader? = null
     private var metricsExporter: InMemoryMetricExporter? = null
     private var logsExporter: InMemoryLogRecordExporter? = null
-    var agent: ElasticOtelAgent? = null
+    var agent: ManagedElasticOtelAgent? = null
     val openTelemetry: OpenTelemetry
         get() {
             return agent!!.getOpenTelemetry()
@@ -92,14 +92,14 @@ class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory,
         deploymentEnvironment: String = "test",
         clock: Clock = Clock.getDefault(),
         sessionProvider: SessionProvider = SessionProvider { Session.create("session-id") },
-        configurationInterceptor: Interceptor<ElasticOtelAgent.Configuration> = this,
+        configurationInterceptor: Interceptor<ManagedElasticOtelAgent.Configuration> = this,
         serviceManagerInterceptor: Interceptor<ServiceManager>? = null
     ) {
         spanExporter = InMemorySpanExporter.create()
         metricsExporter = InMemoryMetricExporter.create()
         logsExporter = InMemoryLogRecordExporter.create()
 
-        val builder = TestElasticOtelAgent.builder(RuntimeEnvironment.getApplication())
+        val builder = TestManagedElasticOtelAgent.builder(RuntimeEnvironment.getApplication())
             .setServiceName(serviceName)
             .setDeploymentEnvironment(deploymentEnvironment)
             .setDeviceIdProvider { "device-id" }
@@ -182,7 +182,7 @@ class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory,
         return metricReader
     }
 
-    override fun intercept(item: ElasticOtelAgent.Configuration): ElasticOtelAgent.Configuration {
+    override fun intercept(item: ManagedElasticOtelAgent.Configuration): ManagedElasticOtelAgent.Configuration {
         return item
     }
 

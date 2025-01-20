@@ -19,8 +19,8 @@
 package co.elastic.otel.android.testutils
 
 import android.app.Application
-import co.elastic.otel.android.api.ElasticOtelAgent
 import co.elastic.otel.android.exporters.ExporterProvider
+import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
 import co.elastic.otel.android.internal.opentelemetry.ElasticOpenTelemetryBuilder
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.utilities.interceptor.Interceptor
@@ -29,8 +29,8 @@ import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.sdk.OpenTelemetrySdk
 import io.opentelemetry.sdk.common.Clock
 
-class TestElasticOtelAgent(serviceManager: ServiceManager, configuration: Configuration) :
-    ElasticOtelAgent(serviceManager, configuration) {
+class TestManagedElasticOtelAgent(serviceManager: ServiceManager, configuration: Configuration) :
+    ManagedElasticOtelAgent(serviceManager, configuration) {
     private val openTelemetry: OpenTelemetrySdk = configuration.openTelemetrySdk
 
     override fun getOpenTelemetry(): OpenTelemetry {
@@ -62,10 +62,10 @@ class TestElasticOtelAgent(serviceManager: ServiceManager, configuration: Config
             return super.setSessionProvider(value)
         }
 
-        fun build(): TestElasticOtelAgent {
+        fun build(): TestManagedElasticOtelAgent {
             val serviceManager = Interceptor.composite(serviceManagerInterceptors)
                 .intercept(ServiceManager.create(application))
-            return TestElasticOtelAgent(
+            return TestManagedElasticOtelAgent(
                 serviceManager,
                 Interceptor.composite(configurationInterceptors)
                     .intercept(buildConfiguration(serviceManager))

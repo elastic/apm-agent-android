@@ -16,6 +16,7 @@ dependencyResolutionManagement {
 }
 rootProject.name = "APM Android Agent"
 includeBuild("build-tools")
+include(":android-api")
 include(":android-sdk")
 include(":android-plugin")
 include(":android-common")

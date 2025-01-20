@@ -19,10 +19,10 @@
 package co.elastic.otel.android
 
 import android.app.Application
-import co.elastic.otel.android.api.ElasticOtelAgent
 import co.elastic.otel.android.common.internal.logging.Elog
 import co.elastic.otel.android.exporters.ExporterProvider
 import co.elastic.otel.android.exporters.configuration.ExportProtocol
+import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
 import co.elastic.otel.android.internal.features.apmserver.ApmServerAuthentication
 import co.elastic.otel.android.internal.features.apmserver.ApmServerConnectivity
 import co.elastic.otel.android.internal.features.apmserver.ApmServerConnectivityManager
@@ -56,7 +56,7 @@ class ElasticApmAgent private constructor(
     private val elasticClockManager: ElasticClockManager,
     private val centralConfigurationManager: CentralConfigurationManager,
     private val sessionManager: SessionManager
-) : ElasticOtelAgent(serviceManager, configuration) {
+) : ManagedElasticOtelAgent(serviceManager, configuration) {
     private val openTelemetry = configuration.openTelemetrySdk
 
     init {

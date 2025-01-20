@@ -18,7 +18,7 @@
  */
 package co.elastic.otel.android.internal.features.conditionaldrop
 
-enum class SignalType {
+internal enum class SignalType {
     SPAN,
     METRIC,
     LOG

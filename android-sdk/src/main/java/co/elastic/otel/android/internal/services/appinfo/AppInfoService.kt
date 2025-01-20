@@ -32,7 +32,7 @@ import java.io.File
 import java.io.IOException
 import kotlin.math.min
 
-class AppInfoService(private val context: Context) : Service {
+internal class AppInfoService(private val context: Context) : Service {
 
     fun isPermissionGranted(permissionName: String): Boolean {
         return context.checkSelfPermission(permissionName) == PackageManager.PERMISSION_GRANTED

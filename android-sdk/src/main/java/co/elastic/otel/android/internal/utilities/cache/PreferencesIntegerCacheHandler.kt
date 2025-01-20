@@ -20,7 +20,7 @@ package co.elastic.otel.android.internal.utilities.cache
 
 import co.elastic.otel.android.internal.services.preferences.PreferencesService
 
-class PreferencesIntegerCacheHandler(
+internal class PreferencesIntegerCacheHandler(
     private val key: String,
     private val preferencesService: PreferencesService,
     private val defaultValue: Int = 0

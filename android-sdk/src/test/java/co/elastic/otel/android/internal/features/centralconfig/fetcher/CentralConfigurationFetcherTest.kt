@@ -38,7 +38,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class CentralConfigurationFetcherTest {
+internal class CentralConfigurationFetcherTest {
     private lateinit var preferences: PreferencesService
     private lateinit var connectivity: ConnectivityConfiguration
     private lateinit var configurationFile: File

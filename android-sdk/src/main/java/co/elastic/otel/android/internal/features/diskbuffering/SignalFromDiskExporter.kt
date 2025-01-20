@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit
 /**
  * Entrypoint to read and export previously cached signals.
  */
-class SignalFromDiskExporter internal constructor(
+internal class SignalFromDiskExporter internal constructor(
     private val spanDiskExporter: SpanFromDiskExporter?,
     private val metricDiskExporter: MetricFromDiskExporter?,
     private val logRecordDiskExporter: LogRecordFromDiskExporter?,

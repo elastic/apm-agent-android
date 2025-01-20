@@ -23,7 +23,7 @@ import io.opentelemetry.sdk.trace.data.SpanData
 import io.opentelemetry.sdk.trace.export.SpanExporter
 import java.util.concurrent.atomic.AtomicReference
 
-class MutableSpanExporter : SpanExporter {
+internal class MutableSpanExporter : SpanExporter {
     private val delegate = AtomicReference<SpanExporter?>()
 
     override fun export(spans: MutableCollection<SpanData>): CompletableResultCode {

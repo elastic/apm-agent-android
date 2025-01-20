@@ -22,7 +22,7 @@ import co.elastic.otel.android.common.internal.logging.ELoggerFactory
 import co.elastic.otel.android.logging.LoggingPolicy
 import org.slf4j.Logger
 
-class AndroidLoggerFactory(private val policy: LoggingPolicy) : ELoggerFactory() {
+internal class AndroidLoggerFactory(private val policy: LoggingPolicy) : ELoggerFactory() {
 
     override fun getLogger(name: String): Logger {
         return AndroidLogger(name, policy)

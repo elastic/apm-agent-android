@@ -23,7 +23,7 @@ import co.elastic.otel.android.internal.time.SystemTimeProvider
 /**
  * According to RFC-4330.
  */
-class SntpClientImpl internal constructor(
+internal class SntpClientImpl internal constructor(
     private val udpClient: UdpClient,
     private val systemTimeProvider: SystemTimeProvider
 ) : SntpClient {

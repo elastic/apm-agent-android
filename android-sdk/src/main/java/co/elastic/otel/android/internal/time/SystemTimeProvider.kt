@@ -20,7 +20,7 @@ package co.elastic.otel.android.internal.time
 
 import android.os.SystemClock
 
-class SystemTimeProvider {
+internal class SystemTimeProvider {
 
     fun getCurrentTimeMillis(): Long = System.currentTimeMillis()
 

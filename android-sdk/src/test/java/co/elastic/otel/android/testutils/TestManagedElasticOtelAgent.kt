@@ -20,17 +20,20 @@ package co.elastic.otel.android.testutils
 
 import android.app.Application
 import co.elastic.otel.android.exporters.ExporterProvider
+import co.elastic.otel.android.interceptor.Interceptor
 import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
 import co.elastic.otel.android.internal.opentelemetry.ElasticOpenTelemetryBuilder
 import co.elastic.otel.android.internal.services.ServiceManager
-import co.elastic.otel.android.internal.utilities.interceptor.Interceptor
 import co.elastic.otel.android.session.SessionProvider
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.sdk.OpenTelemetrySdk
 import io.opentelemetry.sdk.common.Clock
 
-class TestManagedElasticOtelAgent(serviceManager: ServiceManager, configuration: Configuration) :
-    ManagedElasticOtelAgent(serviceManager, configuration) {
+internal class TestManagedElasticOtelAgent(
+    private val serviceManager: ServiceManager,
+    configuration: Configuration
+) :
+    ManagedElasticOtelAgent(configuration) {
     private val openTelemetry: OpenTelemetrySdk = configuration.openTelemetrySdk
 
     override fun getOpenTelemetry(): OpenTelemetry {
@@ -38,6 +41,7 @@ class TestManagedElasticOtelAgent(serviceManager: ServiceManager, configuration:
     }
 
     override fun onClose() {
+        serviceManager.close()
     }
 
     companion object {

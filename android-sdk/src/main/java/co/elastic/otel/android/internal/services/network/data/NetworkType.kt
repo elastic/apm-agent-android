@@ -18,7 +18,7 @@
  */
 package co.elastic.otel.android.internal.services.network.data
 
-sealed class NetworkType(val name: String) {
+internal sealed class NetworkType(val name: String) {
     data class Cell(val subTypeName: String?) : NetworkType("cell")
     data object Wifi : NetworkType("wifi")
     data object Unknown : NetworkType("unknown")

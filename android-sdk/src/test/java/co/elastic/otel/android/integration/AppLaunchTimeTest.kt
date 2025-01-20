@@ -32,7 +32,7 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 @Ignore("Not implemented yet")
-class AppLaunchTimeTest {
+internal class AppLaunchTimeTest {
 
     @get:Rule
     val agentRule = ElasticAgentRule()

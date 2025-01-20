@@ -19,9 +19,9 @@
 package co.elastic.otel.android.testutils
 
 import co.elastic.otel.android.exporters.ExporterProvider
+import co.elastic.otel.android.interceptor.Interceptor
 import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
 import co.elastic.otel.android.internal.services.ServiceManager
-import co.elastic.otel.android.internal.utilities.interceptor.Interceptor
 import co.elastic.otel.android.processors.ProcessorFactory
 import co.elastic.otel.android.session.Session
 import co.elastic.otel.android.session.SessionProvider
@@ -51,7 +51,7 @@ import org.junit.runner.Description
 import org.junit.runners.model.Statement
 import org.robolectric.RuntimeEnvironment
 
-class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory,
+internal class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory,
     Interceptor<ManagedElasticOtelAgent.Configuration> {
     private var spanExporter: InMemorySpanExporter? = null
     private var metricReader: MetricReader? = null

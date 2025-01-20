@@ -40,7 +40,7 @@ import io.opentelemetry.sdk.trace.export.SpanExporter
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
-class DiskBufferingManager private constructor(
+internal class DiskBufferingManager private constructor(
     private val systemTimeProvider: SystemTimeProvider,
     private val serviceManager: ServiceManager,
     private val gateManager: ExporterGateManager,

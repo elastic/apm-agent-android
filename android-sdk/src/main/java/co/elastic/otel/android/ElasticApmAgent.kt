@@ -22,10 +22,11 @@ import android.app.Application
 import co.elastic.otel.android.common.internal.logging.Elog
 import co.elastic.otel.android.exporters.ExporterProvider
 import co.elastic.otel.android.exporters.configuration.ExportProtocol
+import co.elastic.otel.android.features.apmserver.ApmServerAuthentication
+import co.elastic.otel.android.features.apmserver.ApmServerConnectivity
+import co.elastic.otel.android.features.apmserver.ApmServerConnectivityManager
+import co.elastic.otel.android.interceptor.Interceptor
 import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
-import co.elastic.otel.android.internal.features.apmserver.ApmServerAuthentication
-import co.elastic.otel.android.internal.features.apmserver.ApmServerConnectivity
-import co.elastic.otel.android.internal.features.apmserver.ApmServerConnectivityManager
 import co.elastic.otel.android.internal.features.apmserver.ApmServerExporterProvider
 import co.elastic.otel.android.internal.features.centralconfig.CentralConfigurationManager
 import co.elastic.otel.android.internal.features.clock.ElasticClockManager
@@ -40,23 +41,22 @@ import co.elastic.otel.android.internal.opentelemetry.ElasticOpenTelemetryBuilde
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.time.SystemTimeProvider
 import co.elastic.otel.android.internal.time.ntp.SntpClient
-import co.elastic.otel.android.internal.utilities.interceptor.Interceptor
 import co.elastic.otel.android.internal.utilities.logging.AndroidLoggerFactory
 import co.elastic.otel.android.logging.LoggingPolicy
 import io.opentelemetry.api.OpenTelemetry
 import java.util.UUID
 
 class ElasticApmAgent private constructor(
-    serviceManager: ServiceManager,
     configuration: Configuration,
     sampleRateManager: SampleRateManager,
+    private val serviceManager: ServiceManager,
     private val exporterGateManager: ExporterGateManager,
     private val diskBufferingManager: DiskBufferingManager,
     private val apmServerConnectivityManager: ApmServerConnectivityManager,
     private val elasticClockManager: ElasticClockManager,
     private val centralConfigurationManager: CentralConfigurationManager,
     private val sessionManager: SessionManager
-) : ManagedElasticOtelAgent(serviceManager, configuration) {
+) : ManagedElasticOtelAgent(configuration) {
     private val openTelemetry = configuration.openTelemetrySdk
 
     init {
@@ -99,6 +99,7 @@ class ElasticApmAgent private constructor(
     override fun onClose() {
         diskBufferingManager.close()
         elasticClockManager.close()
+        serviceManager.close()
     }
 
     companion object {
@@ -239,9 +240,9 @@ class ElasticApmAgent private constructor(
             setSessionProvider(sessionManager)
 
             return ElasticApmAgent(
-                serviceManager,
                 buildConfiguration(serviceManager),
                 sampleRateManager,
+                serviceManager,
                 exporterGateManager,
                 diskBufferingManager,
                 apmServerConnectivityManager,

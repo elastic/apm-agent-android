@@ -20,7 +20,7 @@ package co.elastic.otel.android.internal.utilities
 
 import java.util.Random
 
-class NumberTools {
+internal class NumberTools {
     fun random(): Double {
         return Random().nextDouble()
     }

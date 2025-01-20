@@ -18,6 +18,8 @@
  */
 package co.elastic.otel.android.internal.utilities.interceptor
 
+import co.elastic.otel.android.interceptor.Interceptor
+
 internal class NoopInterceptor<T> : Interceptor<T> {
 
     override fun intercept(item: T): T {

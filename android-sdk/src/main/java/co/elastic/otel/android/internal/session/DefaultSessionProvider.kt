@@ -22,7 +22,7 @@ import co.elastic.otel.android.session.Session
 import co.elastic.otel.android.session.SessionProvider
 import java.util.UUID
 
-class DefaultSessionProvider : SessionProvider {
+internal class DefaultSessionProvider : SessionProvider {
     private val providedSession by lazy {
         Session.create(UUID.randomUUID().toString())
     }

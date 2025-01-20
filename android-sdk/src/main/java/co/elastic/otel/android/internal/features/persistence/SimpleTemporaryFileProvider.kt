@@ -22,7 +22,7 @@ import co.elastic.otel.android.internal.time.SystemTimeProvider
 import io.opentelemetry.contrib.disk.buffering.internal.files.TemporaryFileProvider
 import java.io.File
 
-class SimpleTemporaryFileProvider(
+internal class SimpleTemporaryFileProvider(
     private val systemTimeProvider: SystemTimeProvider,
     private val tempDir: File
 ) : TemporaryFileProvider {

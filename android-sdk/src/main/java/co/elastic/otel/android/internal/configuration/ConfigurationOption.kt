@@ -20,7 +20,7 @@ package co.elastic.otel.android.internal.configuration
 
 import org.stagemonitor.configuration.ConfigurationOption.ConfigurationOptionBuilder
 
-class ConfigurationOption<T>(internal val wrapped: org.stagemonitor.configuration.ConfigurationOption<T>) {
+internal class ConfigurationOption<T>(internal val wrapped: org.stagemonitor.configuration.ConfigurationOption<T>) {
 
     fun get(): T {
         return wrapped.get()

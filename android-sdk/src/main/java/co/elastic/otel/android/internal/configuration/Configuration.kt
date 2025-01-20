@@ -20,7 +20,7 @@ package co.elastic.otel.android.internal.configuration
 
 import org.stagemonitor.configuration.ConfigurationOptionProvider
 
-abstract class Configuration : ConfigurationOptionProvider() {
+internal abstract class Configuration : ConfigurationOptionProvider() {
     private val options by lazy { mutableListOf<ConfigurationOption<*>>() }
 
     protected fun createBooleanOption(

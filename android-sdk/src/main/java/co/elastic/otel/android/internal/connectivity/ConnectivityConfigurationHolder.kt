@@ -19,11 +19,11 @@
 package co.elastic.otel.android.internal.connectivity
 
 import co.elastic.otel.android.connectivity.ConnectivityConfiguration
-import co.elastic.otel.android.internal.utilities.provider.Provider
+import co.elastic.otel.android.provider.Provider
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicReference
 
-open class ConnectivityConfigurationHolder(initialValue: ConnectivityConfiguration) :
+internal open class ConnectivityConfigurationHolder(initialValue: ConnectivityConfiguration) :
     Provider<ConnectivityConfiguration> {
     private val value = AtomicReference(initialValue)
     private val listeners = CopyOnWriteArrayList<Listener>()

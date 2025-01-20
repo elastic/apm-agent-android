@@ -20,14 +20,16 @@ package co.elastic.otel.android.internal.features.apmserver
 
 import co.elastic.otel.android.exporters.ExporterProvider
 import co.elastic.otel.android.exporters.configuration.ExporterConfiguration
+import co.elastic.otel.android.features.apmserver.ApmServerConnectivity
+import co.elastic.otel.android.features.apmserver.ApmServerConnectivityManager
 import co.elastic.otel.android.internal.connectivity.ConnectivityConfigurationHolder
 import co.elastic.otel.android.internal.opentelemetry.exporters.configurable.ConfigurableExporterProvider
-import co.elastic.otel.android.internal.utilities.provider.Provider
+import co.elastic.otel.android.provider.Provider
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.trace.export.SpanExporter
 
-class ApmServerExporterProvider internal constructor(
+internal class ApmServerExporterProvider internal constructor(
     private val connectivityConfigurationProvider: Provider<ApmServerConnectivity>,
     private val exporterProvider: ConfigurableExporterProvider
 ) : ExporterProvider, ConnectivityConfigurationHolder.Listener {

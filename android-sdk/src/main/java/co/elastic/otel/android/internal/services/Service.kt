@@ -18,7 +18,7 @@
  */
 package co.elastic.otel.android.internal.services
 
-interface Service {
+internal interface Service {
     fun start() {}
 
     fun stop() {}

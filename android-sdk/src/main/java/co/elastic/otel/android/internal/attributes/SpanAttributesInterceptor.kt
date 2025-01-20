@@ -18,9 +18,9 @@
  */
 package co.elastic.otel.android.internal.attributes
 
+import co.elastic.otel.android.interceptor.Interceptor
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.services.network.NetworkService
-import co.elastic.otel.android.internal.utilities.interceptor.Interceptor
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.semconv.SemanticAttributes

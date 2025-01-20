@@ -20,7 +20,7 @@ package co.elastic.otel.android.internal.session
 
 import co.elastic.otel.android.session.Session
 
-data class DefaultSession(private val id: String) : Session {
+internal data class DefaultSession(private val id: String) : Session {
 
     override fun getId(): String {
         return id

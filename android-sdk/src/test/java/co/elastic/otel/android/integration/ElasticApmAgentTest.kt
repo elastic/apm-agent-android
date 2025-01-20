@@ -21,8 +21,9 @@ package co.elastic.otel.android.integration
 import android.content.Intent
 import co.elastic.otel.android.ElasticApmAgent
 import co.elastic.otel.android.exporters.ExporterProvider
-import co.elastic.otel.android.internal.features.apmserver.ApmServerAuthentication
-import co.elastic.otel.android.internal.features.apmserver.ApmServerConnectivity
+import co.elastic.otel.android.features.apmserver.ApmServerAuthentication
+import co.elastic.otel.android.features.apmserver.ApmServerConnectivity
+import co.elastic.otel.android.interceptor.Interceptor
 import co.elastic.otel.android.internal.features.centralconfig.CentralConfigurationConnectivity
 import co.elastic.otel.android.internal.features.clock.ElasticClockBroadcastReceiver
 import co.elastic.otel.android.internal.features.diskbuffering.DiskBufferingConfiguration
@@ -30,7 +31,6 @@ import co.elastic.otel.android.internal.features.sessionmanager.SessionIdGenerat
 import co.elastic.otel.android.internal.services.appinfo.AppInfoService
 import co.elastic.otel.android.internal.time.SystemTimeProvider
 import co.elastic.otel.android.internal.time.ntp.SntpClient
-import co.elastic.otel.android.internal.utilities.interceptor.Interceptor
 import co.elastic.otel.android.processors.ProcessorFactory
 import co.elastic.otel.android.testutils.ElasticAgentRule
 import co.elastic.otel.android.testutils.WireMockRule

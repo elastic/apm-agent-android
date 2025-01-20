@@ -32,7 +32,7 @@ import java.util.Collections
 import java.util.concurrent.TimeUnit
 import org.stagemonitor.configuration.source.AbstractConfigurationSource
 
-class CentralConfigurationSource internal constructor(
+internal class CentralConfigurationSource internal constructor(
     serviceManager: ServiceManager,
     private val connectivityConfigurationHolder: ConnectivityConfigurationHolder,
     private val systemTimeProvider: SystemTimeProvider,

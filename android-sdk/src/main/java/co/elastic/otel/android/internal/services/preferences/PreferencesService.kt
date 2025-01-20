@@ -23,7 +23,7 @@ import android.content.SharedPreferences
 import co.elastic.otel.android.BuildConfig
 import co.elastic.otel.android.internal.services.Service
 
-class PreferencesService(context: Context) : Service {
+internal class PreferencesService(context: Context) : Service {
     private val preferences: SharedPreferences by lazy {
         context.getSharedPreferences(
             BuildConfig.LIBRARY_PACKAGE_NAME + ".prefs",

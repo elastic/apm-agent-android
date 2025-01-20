@@ -18,7 +18,7 @@
  */
 package co.elastic.otel.android.internal.features.diskbuffering
 
-data class DiskBufferingConfiguration private constructor(val enabled: Boolean) {
+internal data class DiskBufferingConfiguration private constructor(val enabled: Boolean) {
     internal var maxCacheFileSize = 1024 * 1024
     internal var maxCacheSize = 30 * 1024 * 1024 // 30 MB
     internal var maxFileAgeForWrite: Long? = null

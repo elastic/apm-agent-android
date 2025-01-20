@@ -18,4 +18,4 @@
  */
 package co.elastic.otel.android.internal.services.network.data
 
-data class CarrierInfo(val name: String, val mcc: String, val mnc: String, val icc: String)
+internal data class CarrierInfo(val name: String, val mcc: String, val mnc: String, val icc: String)

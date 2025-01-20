@@ -18,7 +18,7 @@
  */
 package co.elastic.otel.android.internal.utilities.cache
 
-interface CacheHandler<T> {
+internal interface CacheHandler<T> {
     fun retrieve(): T?
 
     fun store(value: T)

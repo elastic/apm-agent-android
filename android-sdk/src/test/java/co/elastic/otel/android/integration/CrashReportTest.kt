@@ -37,7 +37,7 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 @Ignore("Not implemented yet.")
-class CrashReportTest {
+internal class CrashReportTest {
 
     @get:Rule
     val agentRule = ElasticAgentRule()

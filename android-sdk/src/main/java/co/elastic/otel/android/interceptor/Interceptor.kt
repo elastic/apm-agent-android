@@ -16,8 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.internal.utilities.provider
+package co.elastic.otel.android.interceptor
 
-fun interface Provider<T> {
-    fun get(): T
+import co.elastic.otel.android.internal.utilities.interceptor.MultiInterceptor
+import co.elastic.otel.android.internal.utilities.interceptor.NoopInterceptor
+
+fun interface Interceptor<T> {
+
+    companion object {
+        @JvmStatic
+        fun <T> composite(interceptors: List<Interceptor<T>>): Interceptor<T> {
+            if (interceptors.isEmpty()) {
+                return noop()
+            }
+
+            if (interceptors.size == 1) {
+                return interceptors.first()
+            }
+
+            return MultiInterceptor(interceptors)
+        }
+
+        @JvmStatic
+        fun <T> noop(): Interceptor<T> {
+            return NoopInterceptor()
+        }
+    }
+
+    fun intercept(item: T): T
 }

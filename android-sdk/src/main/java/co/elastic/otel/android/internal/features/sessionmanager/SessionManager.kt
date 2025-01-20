@@ -29,7 +29,7 @@ import co.elastic.otel.android.session.SessionProvider
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
 
-class SessionManager private constructor(
+internal class SessionManager private constructor(
     private val cachedSessionId: CacheHandler<String>,
     private val cachedSessionIdExpireTime: CacheHandler<Long>,
     private val cachedSessionIdIdleTime: CacheHandler<Long>,

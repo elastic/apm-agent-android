@@ -49,7 +49,7 @@ import org.robolectric.annotation.Config
 import org.robolectric.util.ReflectionHelpers
 
 @RunWith(RobolectricTestRunner::class)
-class AttributesTest {
+internal class AttributesTest {
     private lateinit var originalConstants: Map<String, String>
 
     @get:Rule

@@ -18,6 +18,8 @@
  */
 package co.elastic.otel.android.internal.utilities.interceptor
 
+import co.elastic.otel.android.interceptor.Interceptor
+
 internal class MultiInterceptor<T>(private val interceptors: List<Interceptor<T>>) :
     Interceptor<T> {
 

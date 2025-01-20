@@ -24,7 +24,7 @@ import java.io.Closeable
 /**
  * According to RFC-4330.
  */
-interface SntpClient : Closeable {
+internal interface SntpClient : Closeable {
 
     fun fetchTimeOffset(currentTimeMillis: Long): Response
 

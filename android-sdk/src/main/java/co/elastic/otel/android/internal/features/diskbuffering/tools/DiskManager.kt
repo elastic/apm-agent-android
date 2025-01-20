@@ -26,7 +26,7 @@ import co.elastic.otel.android.internal.services.preferences.PreferencesService
 import java.io.File
 import java.io.IOException
 
-class DiskManager internal constructor(
+internal class DiskManager internal constructor(
     private val appInfoService: AppInfoService,
     private val preferencesService: PreferencesService,
     private val diskBufferingConfiguration: DiskBufferingConfiguration

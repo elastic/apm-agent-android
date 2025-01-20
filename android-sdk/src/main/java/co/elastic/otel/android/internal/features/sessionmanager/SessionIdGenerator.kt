@@ -18,6 +18,6 @@
  */
 package co.elastic.otel.android.internal.features.sessionmanager
 
-fun interface SessionIdGenerator {
+internal fun interface SessionIdGenerator {
     fun generate(): String?
 }

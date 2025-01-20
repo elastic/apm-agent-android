@@ -45,7 +45,7 @@ interface LoggingPolicy {
          *
          * No logs will be created until the Agent is initialized.
          */
-        fun getDefault(serviceManager: ServiceManager): LoggingPolicy {
+        internal fun getDefault(serviceManager: ServiceManager): LoggingPolicy {
             return DefaultLoggingPolicy.create(serviceManager)
         }
 

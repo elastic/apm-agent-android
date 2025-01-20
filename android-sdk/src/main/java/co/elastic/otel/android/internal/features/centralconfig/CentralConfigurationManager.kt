@@ -20,8 +20,8 @@ package co.elastic.otel.android.internal.features.centralconfig
 
 import androidx.annotation.WorkerThread
 import co.elastic.otel.android.common.internal.logging.Elog
+import co.elastic.otel.android.features.apmserver.ApmServerConnectivityManager
 import co.elastic.otel.android.internal.connectivity.ConnectivityConfigurationHolder
-import co.elastic.otel.android.internal.features.apmserver.ApmServerConnectivityManager
 import co.elastic.otel.android.internal.features.exportergate.ExporterGateManager
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.time.SystemTimeProvider
@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit
 import org.slf4j.Logger
 import org.stagemonitor.configuration.ConfigurationRegistry
 
-class CentralConfigurationManager private constructor(
+internal class CentralConfigurationManager private constructor(
     serviceManager: ServiceManager,
     private val configurationRegistry: ConfigurationRegistry,
     private val centralConfigurationSource: CentralConfigurationSource,

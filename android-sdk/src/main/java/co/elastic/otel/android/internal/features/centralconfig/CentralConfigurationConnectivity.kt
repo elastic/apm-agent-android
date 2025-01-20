@@ -19,9 +19,9 @@
 package co.elastic.otel.android.internal.features.centralconfig
 
 import co.elastic.otel.android.connectivity.ConnectivityConfiguration
-import co.elastic.otel.android.internal.features.apmserver.ApmServerConnectivity
+import co.elastic.otel.android.features.apmserver.ApmServerConnectivity
 
-data class CentralConfigurationConnectivity(
+internal data class CentralConfigurationConnectivity(
     val apmServerUrl: String,
     val serviceName: String,
     val serviceDeployment: String?,

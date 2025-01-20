@@ -21,7 +21,7 @@ package co.elastic.otel.android.internal.logging
 import co.elastic.otel.android.logging.LogLevel
 import co.elastic.otel.android.logging.LoggingPolicy
 
-class SimpleLoggingPolicy(private val isEnabled: Boolean, private val minimumLevel: LogLevel) :
+internal class SimpleLoggingPolicy(private val isEnabled: Boolean, private val minimumLevel: LogLevel) :
     LoggingPolicy {
 
     override fun isEnabled(): Boolean {

@@ -19,13 +19,13 @@
 package co.elastic.otel.android.internal.features.clock
 
 import co.elastic.otel.android.common.internal.logging.Elog
+import co.elastic.otel.android.interceptor.Interceptor
 import co.elastic.otel.android.internal.features.exportergate.ExporterGateManager
 import co.elastic.otel.android.internal.time.SystemTimeProvider
 import co.elastic.otel.android.internal.utilities.AttributesOverrideLogRecordData
 import co.elastic.otel.android.internal.utilities.AttributesOverrideSpanData
-import co.elastic.otel.android.internal.utilities.interceptor.Interceptor
 import co.elastic.otel.android.internal.utilities.interceptor.MutableInterceptor
-import co.elastic.otel.android.internal.utilities.provider.Provider
+import co.elastic.otel.android.provider.Provider
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.sdk.common.CompletableResultCode
@@ -36,7 +36,7 @@ import io.opentelemetry.sdk.trace.export.SpanExporter
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
-class ClockExporterGateManager private constructor(
+internal class ClockExporterGateManager private constructor(
     systemTimeProvider: SystemTimeProvider,
     private val gateManager: ExporterGateManager,
     private val timeOffsetNanosProvider: Provider<Long?>

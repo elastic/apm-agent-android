@@ -22,7 +22,7 @@ import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.logging.LogLevel
 import co.elastic.otel.android.logging.LoggingPolicy
 
-class DefaultLoggingPolicy internal constructor(debugMode: Boolean) :
+internal class DefaultLoggingPolicy internal constructor(debugMode: Boolean) :
     LoggingPolicy {
 
     private val logLevel by lazy { if (debugMode) LogLevel.DEBUG else LogLevel.INFO }

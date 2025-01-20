@@ -16,6 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.internal.utilities.provider
+package co.elastic.otel.android.features.apmserver
 
-fun interface StringProvider : Provider<String>
+sealed class ApmServerAuthentication {
+    data class ApiKey(val key: String) : ApmServerAuthentication()
+    data class SecretToken(val token: String) : ApmServerAuthentication()
+    data object None : ApmServerAuthentication()
+}

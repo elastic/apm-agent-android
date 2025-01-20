@@ -26,10 +26,10 @@ import co.elastic.otel.android.internal.services.backgroundwork.BackgroundWorkSe
 import co.elastic.otel.android.internal.utilities.NumberTools
 import co.elastic.otel.android.internal.utilities.cache.CacheHandler
 import co.elastic.otel.android.internal.utilities.cache.PreferencesIntegerCacheHandler
-import co.elastic.otel.android.internal.utilities.provider.Provider
+import co.elastic.otel.android.provider.Provider
 import java.util.concurrent.atomic.AtomicBoolean
 
-class SampleRateManager private constructor(
+internal class SampleRateManager private constructor(
     private val sampleRateCentralConfigurationProvider: Provider<Double>,
     private val enabledExportingCache: CacheHandler<Int>,
     private val backgroundWorkService: BackgroundWorkService,

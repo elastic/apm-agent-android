@@ -34,7 +34,7 @@ import co.elastic.otel.android.internal.services.network.data.CarrierInfo
 import co.elastic.otel.android.internal.services.network.data.NetworkType
 import java.util.concurrent.atomic.AtomicReference
 
-class NetworkService internal constructor(
+internal class NetworkService internal constructor(
     private val appInfoService: AppInfoService,
     private val connectivityManager: ConnectivityManager,
     private val telephonyManager: TelephonyManager

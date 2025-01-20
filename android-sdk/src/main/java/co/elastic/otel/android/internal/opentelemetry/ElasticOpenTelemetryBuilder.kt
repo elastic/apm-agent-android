@@ -21,6 +21,7 @@ package co.elastic.otel.android.internal.opentelemetry
 import android.os.Build
 import co.elastic.otel.android.BuildConfig
 import co.elastic.otel.android.exporters.ExporterProvider
+import co.elastic.otel.android.interceptor.Interceptor
 import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
 import co.elastic.otel.android.internal.attributes.CommonAttributesInterceptor
 import co.elastic.otel.android.internal.attributes.SpanAttributesInterceptor
@@ -29,9 +30,8 @@ import co.elastic.otel.android.internal.opentelemetry.processors.spans.SpanAttri
 import co.elastic.otel.android.internal.opentelemetry.processors.spans.SpanInterceptorProcessor
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.utilities.cache.PreferencesCachedStringProvider
-import co.elastic.otel.android.internal.utilities.interceptor.Interceptor
-import co.elastic.otel.android.internal.utilities.provider.StringProvider
 import co.elastic.otel.android.processors.ProcessorFactory
+import co.elastic.otel.android.provider.StringProvider
 import co.elastic.otel.android.session.SessionProvider
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
@@ -150,7 +150,7 @@ abstract class ElasticOpenTelemetryBuilder<B> {
         return this as B
     }
 
-    protected fun buildConfiguration(serviceManager: ServiceManager): ManagedElasticOtelAgent.Configuration {
+    internal fun buildConfiguration(serviceManager: ServiceManager): ManagedElasticOtelAgent.Configuration {
         val commonAttributesInterceptor =
             CommonAttributesInterceptor(serviceManager, sessionProvider)
         addSpanAttributesInterceptor(commonAttributesInterceptor)

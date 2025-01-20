@@ -19,9 +19,9 @@
 package co.elastic.otel.android.internal.utilities.cache
 
 import co.elastic.otel.android.internal.services.ServiceManager
-import co.elastic.otel.android.internal.utilities.provider.StringProvider
+import co.elastic.otel.android.provider.StringProvider
 
-class PreferencesCachedStringProvider(
+internal class PreferencesCachedStringProvider(
     private val serviceManager: ServiceManager,
     private val key: String,
     private val provider: StringProvider

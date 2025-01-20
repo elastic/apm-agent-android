@@ -18,6 +18,7 @@
  */
 package co.elastic.otel.android.internal.utilities.interceptor
 
+import co.elastic.otel.android.interceptor.Interceptor
 import java.util.concurrent.atomic.AtomicReference
 
 internal class MutableInterceptor<T>(initialValue: Interceptor<T>) : Interceptor<T> {

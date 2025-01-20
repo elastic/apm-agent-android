@@ -30,7 +30,7 @@ import java.net.URL
 import java.util.regex.Pattern
 import org.slf4j.Logger
 
-class CentralConfigurationFetcher(
+internal class CentralConfigurationFetcher(
     private val destFile: File,
     private val preferences: PreferencesService
 ) {

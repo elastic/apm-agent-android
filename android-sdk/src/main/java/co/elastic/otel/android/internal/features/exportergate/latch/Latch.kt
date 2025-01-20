@@ -18,4 +18,4 @@
  */
 package co.elastic.otel.android.internal.features.exportergate.latch
 
-data class Latch(val gateName: String, val name: String)
+internal data class Latch(val gateName: String, val name: String)

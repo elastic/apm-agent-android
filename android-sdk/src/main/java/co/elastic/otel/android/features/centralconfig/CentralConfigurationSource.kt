@@ -18,7 +18,7 @@
  */
 package co.elastic.otel.android.features.centralconfig
 
-import co.elastic.apm.android.common.internal.logging.Elog
+import co.elastic.otel.android.common.internal.logging.Elog
 import co.elastic.otel.android.connectivity.ConnectivityConfigurationHolder
 import co.elastic.otel.android.features.centralconfig.fetcher.CentralConfigurationFetcher
 import co.elastic.otel.android.internal.services.ServiceManager

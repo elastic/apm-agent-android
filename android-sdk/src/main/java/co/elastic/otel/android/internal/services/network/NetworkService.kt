@@ -26,7 +26,7 @@ import android.net.ConnectivityManager.NetworkCallback
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.telephony.TelephonyManager
-import co.elastic.apm.android.common.internal.logging.Elog
+import co.elastic.otel.android.common.internal.logging.Elog
 import co.elastic.otel.android.internal.services.Service
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.services.appinfo.AppInfoService

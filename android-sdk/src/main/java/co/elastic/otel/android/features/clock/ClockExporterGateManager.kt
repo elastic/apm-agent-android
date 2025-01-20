@@ -18,7 +18,7 @@
  */
 package co.elastic.otel.android.features.clock
 
-import co.elastic.apm.android.common.internal.logging.Elog
+import co.elastic.otel.android.common.internal.logging.Elog
 import co.elastic.otel.android.features.exportergate.ExporterGateManager
 import co.elastic.otel.android.internal.time.SystemTimeProvider
 import co.elastic.otel.android.tools.AttributesOverrideLogRecordData

@@ -18,7 +18,7 @@
  */
 package co.elastic.otel.android.features.diskbuffering.tools
 
-import co.elastic.apm.android.common.internal.logging.Elog
+import co.elastic.otel.android.common.internal.logging.Elog
 import co.elastic.otel.android.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.services.appinfo.AppInfoService

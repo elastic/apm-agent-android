@@ -18,7 +18,7 @@
  */
 package co.elastic.otel.android.features.diskbuffering
 
-import co.elastic.apm.android.common.internal.logging.Elog
+import co.elastic.otel.android.common.internal.logging.Elog
 import co.elastic.otel.android.exporters.configurable.MutableLogRecordExporter
 import co.elastic.otel.android.exporters.configurable.MutableMetricExporter
 import co.elastic.otel.android.exporters.configurable.MutableSpanExporter

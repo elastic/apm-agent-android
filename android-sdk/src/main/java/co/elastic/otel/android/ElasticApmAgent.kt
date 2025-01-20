@@ -19,7 +19,7 @@
 package co.elastic.otel.android
 
 import android.app.Application
-import co.elastic.apm.android.common.internal.logging.Elog
+import co.elastic.otel.android.common.internal.logging.Elog
 import co.elastic.otel.android.exporters.ExporterProvider
 import co.elastic.otel.android.exporters.configuration.ExportProtocol
 import co.elastic.otel.android.features.apmserver.ApmServerAuthentication

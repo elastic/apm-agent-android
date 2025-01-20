@@ -18,7 +18,7 @@
  */
 package co.elastic.otel.android.internal.utilities.logging
 
-import co.elastic.apm.android.common.internal.logging.ELoggerFactory
+import co.elastic.otel.android.common.internal.logging.ELoggerFactory
 import co.elastic.otel.android.logging.LoggingPolicy
 import org.slf4j.Logger
 

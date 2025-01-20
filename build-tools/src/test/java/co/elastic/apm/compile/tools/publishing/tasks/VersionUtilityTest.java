@@ -4,6 +4,8 @@ import static junit.framework.TestCase.assertEquals;
 
 import org.junit.Test;
 
+import co.elastic.otel.android.compilation.tools.publishing.tasks.VersionUtility;
+
 public class VersionUtilityTest {
 
     @Test

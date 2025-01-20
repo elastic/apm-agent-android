@@ -19,7 +19,7 @@
 package co.elastic.otel.android.features.clock
 
 import androidx.annotation.GuardedBy
-import co.elastic.apm.android.common.internal.logging.Elog
+import co.elastic.otel.android.common.internal.logging.Elog
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.services.preferences.PreferencesService
 import co.elastic.otel.android.internal.time.SystemTimeProvider

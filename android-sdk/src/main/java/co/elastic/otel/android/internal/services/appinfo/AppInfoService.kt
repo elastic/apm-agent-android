@@ -26,7 +26,7 @@ import android.os.Build
 import android.os.storage.StorageManager
 import androidx.annotation.RequiresApi
 import androidx.annotation.WorkerThread
-import co.elastic.apm.android.common.internal.logging.Elog
+import co.elastic.otel.android.common.internal.logging.Elog
 import co.elastic.otel.android.internal.services.Service
 import java.io.File
 import java.io.IOException

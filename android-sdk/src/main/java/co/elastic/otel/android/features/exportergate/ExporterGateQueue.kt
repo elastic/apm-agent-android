@@ -18,7 +18,7 @@
  */
 package co.elastic.otel.android.features.exportergate
 
-import co.elastic.apm.android.common.internal.logging.Elog
+import co.elastic.otel.android.common.internal.logging.Elog
 import co.elastic.otel.android.features.exportergate.latch.Latch
 import io.opentelemetry.sdk.common.CompletableResultCode
 import java.util.concurrent.ConcurrentHashMap

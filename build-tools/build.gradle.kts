@@ -27,13 +27,14 @@ dependencies {
 gradlePlugin {
     plugins {
         create("publishingPlugin") {
-            id = "co.elastic.apm.publishing"
-            implementationClass = "co.elastic.apm.compile.tools.publishing.ApmPublisherRootPlugin"
+            id = "co.elastic.otel.publishing"
+            implementationClass =
+                "co.elastic.otel.android.compilation.tools.publishing.ApmPublisherRootPlugin"
         }
         create("dependencyEmbedderPlugin") {
-            id = "co.elastic.apm.dependency.embedder"
+            id = "co.elastic.otel.dependency.embedder"
             implementationClass =
-                "co.elastic.apm.compile.tools.embedding.EmbeddingDependenciesPlugin"
+                "co.elastic.otel.android.compilation.tools.embedding.EmbeddingDependenciesPlugin"
         }
     }
 }

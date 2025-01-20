@@ -19,7 +19,7 @@
 package co.elastic.otel.android.internal.utilities.logging
 
 import android.util.Log
-import co.elastic.apm.android.common.internal.logging.BaseELogger
+import co.elastic.otel.android.common.internal.logging.BaseELogger
 import co.elastic.otel.android.logging.LogLevel
 import co.elastic.otel.android.logging.LoggingPolicy
 import org.slf4j.event.Level

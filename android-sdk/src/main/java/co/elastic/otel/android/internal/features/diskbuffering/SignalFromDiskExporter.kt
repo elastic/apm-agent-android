@@ -83,28 +83,28 @@ internal class SignalFromDiskExporter internal constructor(
         private var logRecordDiskExporter: LogRecordFromDiskExporter? = null
         private var exportTimeoutInMillis = TimeUnit.SECONDS.toMillis(5)
 
-        fun setSpanFromDiskExporter(spanDiskExporter: SpanFromDiskExporter?): co.elastic.otel.android.internal.features.diskbuffering.SignalFromDiskExporter.Builder {
+        fun setSpanFromDiskExporter(spanDiskExporter: SpanFromDiskExporter?): Builder {
             this.spanDiskExporter = spanDiskExporter
             return this
         }
 
-        fun setMetricFromDiskExporter(metricDiskExporter: MetricFromDiskExporter?): co.elastic.otel.android.internal.features.diskbuffering.SignalFromDiskExporter.Builder {
+        fun setMetricFromDiskExporter(metricDiskExporter: MetricFromDiskExporter?): Builder {
             this.metricDiskExporter = metricDiskExporter
             return this
         }
 
-        fun setLogRecordFromDiskExporter(logRecordDiskExporter: LogRecordFromDiskExporter?): co.elastic.otel.android.internal.features.diskbuffering.SignalFromDiskExporter.Builder {
+        fun setLogRecordFromDiskExporter(logRecordDiskExporter: LogRecordFromDiskExporter?): Builder {
             this.logRecordDiskExporter = logRecordDiskExporter
             return this
         }
 
-        fun setExportTimeoutInMillis(exportTimeoutInMillis: Long): co.elastic.otel.android.internal.features.diskbuffering.SignalFromDiskExporter.Builder {
+        fun setExportTimeoutInMillis(exportTimeoutInMillis: Long): Builder {
             this.exportTimeoutInMillis = exportTimeoutInMillis
             return this
         }
 
-        fun build(): co.elastic.otel.android.internal.features.diskbuffering.SignalFromDiskExporter {
-            return co.elastic.otel.android.internal.features.diskbuffering.SignalFromDiskExporter(
+        fun build(): SignalFromDiskExporter {
+            return SignalFromDiskExporter(
                 spanDiskExporter,
                 metricDiskExporter,
                 logRecordDiskExporter,
@@ -114,8 +114,8 @@ internal class SignalFromDiskExporter internal constructor(
     }
 
     companion object {
-        fun builder(): co.elastic.otel.android.internal.features.diskbuffering.SignalFromDiskExporter.Builder {
-            return co.elastic.otel.android.internal.features.diskbuffering.SignalFromDiskExporter.Builder()
+        fun builder(): Builder {
+            return Builder()
         }
     }
 }

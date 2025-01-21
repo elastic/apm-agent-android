@@ -5,15 +5,12 @@ Copyright 2018-2022 Elasticsearch B.V.
 
 This product includes software licensed under the 'Apache License Version 2.0' license from the following sources:
 
- - Android Lifecycle Process (https://developer.android.com/jetpack/androidx/releases/lifecycle#2.6.2)
+ - Android Support Library Annotations (https://developer.android.com/jetpack/androidx/releases/annotation#1.4.0)
  - Kotlin Stdlib (https://kotlinlang.org/)
- - okhttp (https://square.github.io/okhttp/)
- - OpenTelemetry Android (https://github.com/open-telemetry/opentelemetry-android)
  - OpenTelemetry Java (https://github.com/open-telemetry/opentelemetry-java)
  - OpenTelemetry Java Contrib (https://github.com/open-telemetry/opentelemetry-java-contrib)
  - OpenTelemetry Semantic Conventions Java (https://github.com/open-telemetry/semantic-conventions-java)
  - org.stagemonitor:stagemonitor-configuration (http://www.stagemonitor.org)
- - Weakly referenced lock-free data structures (https://github.com/raphw/weak-lock-free)
 
 -------------------------------------------------------------------------------
 

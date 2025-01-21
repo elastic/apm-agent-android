@@ -14,7 +14,6 @@ dependencies {
 buildConfig {
     packageName("${group}.generated")
     buildConfigField("String", "SDK_DEPENDENCY_URI", "\"$group:android-sdk:$version\"")
-    buildConfigField("String", "SDK_KTX_DEPENDENCY_URI", "\"$group:android-sdk-ktx:$version\"")
     buildConfigField(
         "String",
         "OTEL_OKHTTP_LIBRARY_URI",
@@ -33,10 +32,10 @@ licensesConfig {
 
 gradlePlugin {
     plugins {
-        create("apmPlugin") {
-            id = "co.elastic.apm.android"
-            implementationClass = "co.elastic.apm.android.plugin.ApmAndroidAgentPlugin"
-            displayName = "Elastic APM Android Agent"
+        create("androidOtelPlugin") {
+            id = "co.elastic.otel.android"
+            implementationClass = "co.elastic.otel.android.plugin.ApmAndroidAgentPlugin"
+            displayName = "Elastic OTel Android Agent"
             description = project.description
             tags.addAll("Android", "APM", "Elastic", "ELK", "opentelemetry")
         }

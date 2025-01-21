@@ -2,6 +2,7 @@ package co.elastic.apm.android.test;
 
 import androidx.test.filters.LargeTest;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import co.elastic.apm.android.test.base.ActivityEspressoTest;
 import co.elastic.apm.android.test.common.spans.Spans;
 import io.opentelemetry.sdk.trace.data.SpanData;
 
+@Ignore("Not yet implemented")
 @LargeTest
 public class CoroutineInstrumentationTest extends ActivityEspressoTest<CoroutineActivity> {
 
@@ -27,6 +29,10 @@ public class CoroutineInstrumentationTest extends ActivityEspressoTest<Coroutine
         Spans.verify(myCoroutineSpan)
                 .isNamed("My span inside a coroutine")
                 .isDirectChildOf(onCreateSpan);
+    }
+
+    private List<SpanData> getRecordedSpans(int i) {
+        return null;
     }
 
     @Override

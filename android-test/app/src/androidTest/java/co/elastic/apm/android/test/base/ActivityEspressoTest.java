@@ -11,7 +11,7 @@ import org.junit.Before;
 
 import co.elastic.apm.android.test.activities.espresso.IdlingResourceProvider;
 
-public abstract class ActivityEspressoTest<T extends Activity> extends BaseEspressoTest {
+public abstract class ActivityEspressoTest<T extends Activity> {
     private IdlingResource idlingResource;
     protected T activity;
 

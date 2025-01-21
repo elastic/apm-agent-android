@@ -6,7 +6,7 @@ project `build.gradle` file:
 
 ```groovy
 plugins {
-    id 'co.elastic.apm.publishing'
+    id 'co.elastic.otel.publishing'
 }
 ```
 

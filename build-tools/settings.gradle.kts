@@ -18,4 +18,3 @@ dependencyResolutionManagement {
         gradlePluginPortal()
     }
 }
-include(":processor")

@@ -50,10 +50,6 @@ internal open class ConnectivityConfigurationHolder(initialValue: ConnectivityCo
         listeners.addIfAbsent(listener)
     }
 
-    fun removeListener(listener: Listener) = synchronized(setLock) {
-        listeners.remove(listener)
-    }
-
     interface Listener {
         fun onConnectivityConfigurationChange()
     }

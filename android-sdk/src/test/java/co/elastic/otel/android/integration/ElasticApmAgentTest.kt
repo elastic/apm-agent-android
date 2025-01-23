@@ -200,9 +200,9 @@ class ElasticApmAgentTest {
             metricsRequest.headers.getHeader("Authorization").firstValue()
         ).isEqualTo("Bearer $secretToken")
 
-        // Changing config
+        // Changing global config
         val apiKey = "api-key"
-        agent.getApmServerConnectivityManager().setConnectivityConfiguration(
+        agent.setApmServerConnectivity(
             ApmServerConnectivity(
                 wireMockRule.url("/second/"),
                 ApmServerAuthentication.ApiKey(apiKey),

@@ -16,11 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.features.apmserver
+package co.elastic.otel.android.internal.features.apmserver
 
+import co.elastic.otel.android.features.apmserver.ApmServerConnectivity
 import co.elastic.otel.android.internal.connectivity.ConnectivityConfigurationHolder
 
-class ApmServerConnectivityManager internal constructor(
+internal class ApmServerConnectivityManager internal constructor(
     private val connectivityConfigurationHolder: ConnectivityHolder
 ) {
     fun setConnectivityConfiguration(configuration: ApmServerConnectivity) {

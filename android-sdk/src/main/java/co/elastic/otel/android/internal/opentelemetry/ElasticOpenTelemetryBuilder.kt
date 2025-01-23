@@ -25,6 +25,7 @@ import co.elastic.otel.android.interceptor.Interceptor
 import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
 import co.elastic.otel.android.internal.attributes.CommonAttributesInterceptor
 import co.elastic.otel.android.internal.attributes.SpanAttributesInterceptor
+import co.elastic.otel.android.internal.opentelemetry.processors.DefaultProcessorFactory
 import co.elastic.otel.android.internal.opentelemetry.processors.logs.LogRecordAttributesProcessor
 import co.elastic.otel.android.internal.opentelemetry.processors.spans.SpanAttributesProcessor
 import co.elastic.otel.android.internal.opentelemetry.processors.spans.SpanInterceptorProcessor
@@ -60,7 +61,7 @@ abstract class ElasticOpenTelemetryBuilder<B> {
     private var spanExporterInterceptors = mutableListOf<Interceptor<SpanExporter>>()
     private var logRecordExporterInterceptors = mutableListOf<Interceptor<LogRecordExporter>>()
     private var metricExporterInterceptors = mutableListOf<Interceptor<MetricExporter>>()
-    private var processorFactory: ProcessorFactory = ProcessorFactory.getDefault()
+    private var processorFactory: ProcessorFactory? = null
     private var sessionProvider: SessionProvider = SessionProvider.getDefault()
     private var clock: Clock = Clock.getDefault()
     private var exporterProvider: ExporterProvider = ExporterProvider.noop()
@@ -162,6 +163,8 @@ abstract class ElasticOpenTelemetryBuilder<B> {
                 "device_id"
             ) { UUID.randomUUID().toString() }
         }
+        val finalProcessorFactory = processorFactory
+            ?: DefaultProcessorFactory(serviceManager.getBackgroundWorkService())
         val resource = Resource.builder()
             .put(ResourceAttributes.SERVICE_NAME, serviceName)
             .put(
@@ -198,7 +201,7 @@ abstract class ElasticOpenTelemetryBuilder<B> {
         val metricExporter = exporterProvider.getMetricExporter()?.let {
             Interceptor.composite(metricExporterInterceptors).intercept(it)
         }
-        processorFactory.createSpanProcessor(spanExporter)?.let {
+        finalProcessorFactory.createSpanProcessor(spanExporter)?.let {
             openTelemetryBuilder.setTracerProvider(
                 SdkTracerProvider.builder()
                     .setClock(clock)
@@ -215,7 +218,7 @@ abstract class ElasticOpenTelemetryBuilder<B> {
                     .build()
             )
         }
-        processorFactory.createLogRecordProcessor(logRecordExporter)
+        finalProcessorFactory.createLogRecordProcessor(logRecordExporter)
             ?.let {
                 openTelemetryBuilder.setLoggerProvider(
                     SdkLoggerProvider.builder()
@@ -232,7 +235,7 @@ abstract class ElasticOpenTelemetryBuilder<B> {
                         .build()
                 )
             }
-        processorFactory.createMetricReader(metricExporter)?.let {
+        finalProcessorFactory.createMetricReader(metricExporter)?.let {
             openTelemetryBuilder.setMeterProvider(
                 SdkMeterProvider.builder()
                     .setClock(clock)

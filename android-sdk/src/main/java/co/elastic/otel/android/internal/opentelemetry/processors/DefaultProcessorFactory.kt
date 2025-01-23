@@ -18,6 +18,7 @@
  */
 package co.elastic.otel.android.internal.opentelemetry.processors
 
+import co.elastic.otel.android.internal.services.backgroundwork.BackgroundWorkService
 import co.elastic.otel.android.processors.ProcessorFactory
 import io.opentelemetry.sdk.logs.LogRecordProcessor
 import io.opentelemetry.sdk.logs.export.BatchLogRecordProcessor
@@ -28,18 +29,38 @@ import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader
 import io.opentelemetry.sdk.trace.SpanProcessor
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor
 import io.opentelemetry.sdk.trace.export.SpanExporter
+import java.time.Duration
 
-internal class DefaultProcessorFactory : ProcessorFactory {
+internal class DefaultProcessorFactory(private val backgroundWorkService: BackgroundWorkService) :
+    ProcessorFactory {
+
+    companion object {
+        private val PROCESSING_INTERVAL = Duration.ofSeconds(2)
+        private val READING_INTERVAL = Duration.ofSeconds(4)
+    }
 
     override fun createSpanProcessor(exporter: SpanExporter?): SpanProcessor? {
-        return exporter?.let { BatchSpanProcessor.builder(exporter).build() }
+        return exporter?.let {
+            BatchSpanProcessor.builder(exporter)
+                .setScheduleDelay(PROCESSING_INTERVAL)
+                .build()
+        }
     }
 
     override fun createLogRecordProcessor(exporter: LogRecordExporter?): LogRecordProcessor? {
-        return exporter?.let { BatchLogRecordProcessor.builder(exporter).build() }
+        return exporter?.let {
+            BatchLogRecordProcessor.builder(exporter)
+                .setScheduleDelay(PROCESSING_INTERVAL)
+                .build()
+        }
     }
 
     override fun createMetricReader(exporter: MetricExporter?): MetricReader? {
-        return exporter?.let { PeriodicMetricReader.create(exporter) }
+        return exporter?.let {
+            PeriodicMetricReader.builder(exporter)
+                .setInterval(READING_INTERVAL)
+                .setExecutor(backgroundWorkService.executorService)
+                .build()
+        }
     }
 }

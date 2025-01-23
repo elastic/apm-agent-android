@@ -25,7 +25,7 @@ import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 
-internal class BackgroundWorkService private constructor(private val executorService: ScheduledExecutorService) :
+internal class BackgroundWorkService private constructor(internal val executorService: ScheduledExecutorService) :
     Service {
 
     companion object {

@@ -18,7 +18,6 @@
  */
 package co.elastic.otel.android.processors
 
-import co.elastic.otel.android.internal.opentelemetry.processors.DefaultProcessorFactory
 import io.opentelemetry.sdk.logs.LogRecordProcessor
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.metrics.export.MetricExporter
@@ -27,13 +26,6 @@ import io.opentelemetry.sdk.trace.SpanProcessor
 import io.opentelemetry.sdk.trace.export.SpanExporter
 
 interface ProcessorFactory {
-    companion object {
-        @JvmStatic
-        fun getDefault(): ProcessorFactory {
-            return DefaultProcessorFactory()
-        }
-    }
-
     fun createSpanProcessor(exporter: SpanExporter?): SpanProcessor?
 
     fun createLogRecordProcessor(exporter: LogRecordExporter?): LogRecordProcessor?

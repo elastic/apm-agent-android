@@ -53,7 +53,9 @@ internal class NetworkApi23QueryManager(
 
     private fun onNetworkUpdate(network: Network) {
         if (network == connectivityManager.activeNetwork) {
-            onActiveNetworkSet(network)
+            connectivityManager.getNetworkCapabilities(network)?.let { capabilities ->
+                onActiveNetworkSet(network, capabilities)
+            }
         }
     }
 
@@ -64,11 +66,11 @@ internal class NetworkApi23QueryManager(
         super.onLost(network)
     }
 
-    private fun onActiveNetworkSet(network: Network) {
+    private fun onActiveNetworkSet(network: Network, capabilities: NetworkCapabilities) {
         synchronized(networkLock) {
             if (network != currentNetwork) {
                 currentNetwork = network
-                listener.onNewNetwork()
+                listener.onNewNetwork(capabilities)
             }
         }
     }

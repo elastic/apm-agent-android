@@ -23,7 +23,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.os.Build
 import android.telephony.TelephonyManager
 import co.elastic.otel.android.common.internal.logging.Elog
 import co.elastic.otel.android.internal.services.Service
@@ -32,8 +31,6 @@ import co.elastic.otel.android.internal.services.appinfo.AppInfoService
 import co.elastic.otel.android.internal.services.network.data.CarrierInfo
 import co.elastic.otel.android.internal.services.network.data.NetworkType
 import co.elastic.otel.android.internal.services.network.listener.NetworkChangeListener
-import co.elastic.otel.android.internal.services.network.query.NetworkApi23QueryManager
-import co.elastic.otel.android.internal.services.network.query.NetworkApi24QueryManager
 import co.elastic.otel.android.internal.services.network.query.NetworkQueryManager
 import java.util.concurrent.atomic.AtomicReference
 
@@ -137,16 +134,9 @@ internal class NetworkService internal constructor(
                 context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             val telephonyManager =
                 context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-            val queryManager = Build.VERSION.SDK_INT.let {
-                when {
-                    it >= Build.VERSION_CODES.N -> NetworkApi24QueryManager(
-                        connectivityManager,
-                        telephonyManager
-                    )
 
-                    else -> NetworkApi23QueryManager(connectivityManager, telephonyManager)
-                }
-            }
+            val queryManager = NetworkQueryManager.create(connectivityManager, telephonyManager)
+
             val service = NetworkService(
                 serviceManager.getAppInfoService(),
                 telephonyManager,

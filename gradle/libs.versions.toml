@@ -14,6 +14,7 @@ opentelemetry-android-okhttpLib = { module = "io.opentelemetry.android:okhttp-3.
 opentelemetry-android-okhttpAgent = { module = "io.opentelemetry.android:okhttp-3.0-agent", version.ref = "opentelemetry-android" }
 stagemonitor-configuration = "org.stagemonitor:stagemonitor-configuration:0.89.1"
 androidx-annotations = "androidx.annotation:annotation:1.4.0"
+androidx-core = "androidx.core:core:1.15.0"
 dsl-json = "com.dslplatform:dsl-json-java8:1.10.0"
 slf4j-api = "org.slf4j:slf4j-api:2.0.0"
 byteBuddy = { module = "net.bytebuddy:byte-buddy", version.ref = "byteBuddy" }

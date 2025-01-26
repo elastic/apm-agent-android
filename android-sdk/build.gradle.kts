@@ -33,6 +33,7 @@ dependencies {
     implementation(libs.opentelemetry.semconv)
     implementation(libs.opentelemetry.diskBuffering)
     implementation(libs.androidx.annotations)
+    implementation(libs.androidx.core)
     implementation(libs.dsl.json)
     testImplementation(libs.wireMock)
     testImplementation(libs.opentelemetry.testing)

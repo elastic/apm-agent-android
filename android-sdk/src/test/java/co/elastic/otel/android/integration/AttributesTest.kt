@@ -23,8 +23,12 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
+import android.net.NetworkInfo
 import android.os.Build
 import android.telephony.TelephonyManager
+import co.elastic.otel.android.internal.services.network.query.NetworkApi21QueryManager
+import co.elastic.otel.android.internal.services.network.query.NetworkApi23QueryManager
+import co.elastic.otel.android.internal.services.network.query.NetworkApi24QueryManager
 import co.elastic.otel.android.testutils.ElasticAgentRule
 import co.elastic.otel.android.testutils.ElasticAgentRule.Companion.LOG_DEFAULT_ATTRS
 import co.elastic.otel.android.testutils.ElasticAgentRule.Companion.SPAN_DEFAULT_ATTRS
@@ -46,6 +50,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.Shadows
 import org.robolectric.annotation.Config
+import org.robolectric.shadows.ShadowNetwork
 import org.robolectric.util.ReflectionHelpers
 
 @RunWith(RobolectricTestRunner::class)
@@ -93,7 +98,7 @@ internal class AttributesTest {
         setVersionCode(0)
     }
 
-    @Config(sdk = [24, Config.NEWEST_SDK])
+    @Config(sdk = [21, 23, Config.NEWEST_SDK])
     @Test
     fun `Check resources`() {
         agentRule.initialize()
@@ -133,7 +138,7 @@ internal class AttributesTest {
         assertThat(metricItems.first()).hasResource(expectedResource)
     }
 
-    @Config(sdk = [24, Config.NEWEST_SDK])
+    @Config(sdk = [21, 23, Config.NEWEST_SDK])
     @Test
     fun `Check resources with not provided service version`() {
         setVersionName("1.2.3")
@@ -174,7 +179,7 @@ internal class AttributesTest {
         assertThat(metricItems.first()).hasResource(expectedResource)
     }
 
-    @Config(sdk = [24, Config.NEWEST_SDK])
+    @Config(sdk = [21, 23, Config.NEWEST_SDK])
     @Test
     fun `Check global attributes and span status`() {
         agentRule.initialize()
@@ -190,7 +195,7 @@ internal class AttributesTest {
         assertThat(logItems.first()).hasAttributes(LOG_DEFAULT_ATTRS)
     }
 
-    @Config(sdk = [24, Config.NEWEST_SDK])
+    @Config(sdk = [21, 23, Config.NEWEST_SDK])
     @Test
     fun `Check global attributes with cellular connectivity available`() {
         agentRule.initialize()
@@ -216,7 +221,7 @@ internal class AttributesTest {
         assertThat(logItems.first()).hasAttributes(expectedLogAttributes)
     }
 
-    @Config(sdk = [24, Config.NEWEST_SDK])
+    @Config(sdk = [21, 23, Config.NEWEST_SDK])
     @Test
     fun `Check global attributes with carrier info available`() {
         agentRule.initialize()
@@ -295,22 +300,50 @@ internal class AttributesTest {
 
     private fun enableCellularDataAttr() {
         val application = RuntimeEnvironment.getApplication()
-        Shadows.shadowOf(application)
-            .grantPermissions(Manifest.permission.READ_PHONE_STATE)
+        Shadows.shadowOf(application).run {
+            grantPermissions(Manifest.permission.READ_PHONE_STATE)
+            grantPermissions(Manifest.permission.ACCESS_NETWORK_STATE)
+        }
+        val connectivityManager =
+            application.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val shadowConnectivityManager =
-            Shadows.shadowOf(application.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager?)
+            Shadows.shadowOf(connectivityManager)
         val shadowTelephonyManager =
-            Shadows.shadowOf(application.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager?)
-        val callbacks = ArrayList(shadowConnectivityManager.networkCallbacks)
-        val defaultNetworkCallback = callbacks[0]
+            Shadows.shadowOf(application.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager)
+        val defaultNetworkCallback = shadowConnectivityManager.networkCallbacks.first()
+        val activeNetworkInfo = mockk<NetworkInfo>()
+        every { activeNetworkInfo.type }.returns(ConnectivityManager.TYPE_MOBILE)
+        shadowConnectivityManager.setActiveNetworkInfo(activeNetworkInfo)
+        var activeNetwork: Network = ShadowNetwork.newInstance(ConnectivityManager.TYPE_MOBILE)
+
+        when (Build.VERSION.SDK_INT) {
+            in 21..22 -> {
+                assertThat(defaultNetworkCallback).isInstanceOf(NetworkApi21QueryManager::class.java)
+                shadowTelephonyManager.setNetworkType(TelephonyManager.NETWORK_TYPE_EDGE)
+            }
+
+            23 -> {
+                assertThat(defaultNetworkCallback).isInstanceOf(NetworkApi23QueryManager::class.java)
+                shadowTelephonyManager.setNetworkType(TelephonyManager.NETWORK_TYPE_EDGE)
+                activeNetwork = connectivityManager.activeNetwork!!
+            }
+
+            else -> {
+                assertThat(defaultNetworkCallback).isInstanceOf(NetworkApi24QueryManager::class.java)
+                shadowTelephonyManager.setDataNetworkType(TelephonyManager.NETWORK_TYPE_EDGE)
+                activeNetwork = connectivityManager.activeNetwork!!
+            }
+        }
 
         val capabilities = mockk<NetworkCapabilities>()
         every {
             capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
         } returns true
-        shadowTelephonyManager.setDataNetworkType(TelephonyManager.NETWORK_TYPE_EDGE)
 
-        defaultNetworkCallback.onCapabilitiesChanged(mockk<Network>(), capabilities)
+        defaultNetworkCallback.onCapabilitiesChanged(
+            activeNetwork,
+            capabilities
+        )
     }
 
     private fun enableCarrierInfoAttrs() {

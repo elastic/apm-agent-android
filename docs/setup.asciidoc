@@ -25,12 +25,12 @@ Follow these steps to start reporting your Android application's performance to 
 |7.4.0
 
 |Android API level
-|24
+|21
 
 |===
 
 [float]
-[[minsdk-24-support]]
+[[minsdk-21-support]]
 ==== For projects using minSdkVersion < 26
 
 Due to Android's limited support for Java 8 features on devices with an API level < 26, or in other words, older than Android 8.0, you must add https://developer.android.com/studio/write/java8-support#library-desugaring[Java 8+ desugaring support] to apps with a `minSdkVersion` less than 26.

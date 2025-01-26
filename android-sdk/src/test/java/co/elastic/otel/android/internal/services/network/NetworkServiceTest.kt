@@ -18,9 +18,9 @@
  */
 package co.elastic.otel.android.internal.services.network
 
-import android.net.ConnectivityManager
 import android.telephony.TelephonyManager
 import co.elastic.otel.android.internal.services.appinfo.AppInfoService
+import co.elastic.otel.android.internal.services.network.query.NetworkQueryManager
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -31,7 +31,7 @@ import org.junit.Test
 
 class NetworkServiceTest {
     @MockK
-    private lateinit var connectivityManager: ConnectivityManager
+    private lateinit var networkQueryManager: NetworkQueryManager
 
     @MockK
     private lateinit var telephonyManager: TelephonyManager
@@ -43,7 +43,7 @@ class NetworkServiceTest {
     @Before
     fun setUp() {
         MockKAnnotations.init(this)
-        networkService = NetworkService(appInfoService, connectivityManager, telephonyManager)
+        networkService = NetworkService(appInfoService, telephonyManager, networkQueryManager)
     }
 
     @Test

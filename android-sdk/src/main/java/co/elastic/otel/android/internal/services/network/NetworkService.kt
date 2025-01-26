@@ -22,31 +22,35 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.net.ConnectivityManager
-import android.net.ConnectivityManager.NetworkCallback
-import android.net.Network
 import android.net.NetworkCapabilities
+import android.os.Build
 import android.telephony.TelephonyManager
 import co.elastic.otel.android.common.internal.logging.Elog
 import co.elastic.otel.android.internal.services.Service
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.services.appinfo.AppInfoService
+import co.elastic.otel.android.internal.services.network.callbacks.NetworkApi21Callback
+import co.elastic.otel.android.internal.services.network.callbacks.NetworkApi24Callback
+import co.elastic.otel.android.internal.services.network.callbacks.NetworkCallbackManager
 import co.elastic.otel.android.internal.services.network.data.CarrierInfo
 import co.elastic.otel.android.internal.services.network.data.NetworkType
+import co.elastic.otel.android.internal.services.network.listener.NetworkChangeListener
 import java.util.concurrent.atomic.AtomicReference
 
 internal class NetworkService internal constructor(
     private val appInfoService: AppInfoService,
     private val connectivityManager: ConnectivityManager,
-    private val telephonyManager: TelephonyManager
-) : NetworkCallback(), Service {
+    private val telephonyManager: TelephonyManager,
+    private val callbackManager: NetworkCallbackManager
+) : Service, NetworkChangeListener {
     private val type = AtomicReference<NetworkType>(NetworkType.None)
 
     override fun start() {
-        connectivityManager.registerDefaultNetworkCallback(this)
+        callbackManager.register(connectivityManager)
     }
 
     override fun stop() {
-        connectivityManager.unregisterNetworkCallback(this)
+        callbackManager.unregister(connectivityManager)
     }
 
     fun getType(): NetworkType {
@@ -66,9 +70,12 @@ internal class NetworkService internal constructor(
         )
     }
 
-    override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
-        super.onCapabilitiesChanged(network, networkCapabilities)
-        type.set(getNetworkType(networkCapabilities))
+    override fun onNewNetwork(capabilities: NetworkCapabilities) {
+        type.set(getNetworkType(capabilities))
+    }
+
+    override fun onNetworkLost() {
+        type.set(NetworkType.None)
     }
 
     private fun getNetworkType(networkCapabilities: NetworkCapabilities): NetworkType {
@@ -80,23 +87,6 @@ internal class NetworkService internal constructor(
             NetworkType.Unknown
         }
     }
-
-    override fun onLost(network: Network) {
-        super.onLost(network)
-        type.set(NetworkType.None)
-    }
-
-    private val simOperator: String?
-        get() {
-            if (telephonyManager.simState == TelephonyManager.SIM_STATE_READY) {
-                val simOperator = telephonyManager.simOperator
-                if (simOperator != null && simOperator.length > 3) {
-                    return simOperator
-                }
-            }
-
-            return null
-        }
 
     @SuppressLint("MissingPermission")
     private fun getSubtypeName(): String? {
@@ -130,17 +120,39 @@ internal class NetworkService internal constructor(
         }
     }
 
+    private val simOperator: String?
+        get() {
+            if (telephonyManager.simState == TelephonyManager.SIM_STATE_READY) {
+                val simOperator = telephonyManager.simOperator
+                if (simOperator != null && simOperator.length > 3) {
+                    return simOperator
+                }
+            }
+
+            return null
+        }
+
     companion object {
         fun create(context: Context, serviceManager: ServiceManager): NetworkService {
             val connectivityManager =
                 context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             val telephonyManager =
                 context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-            return NetworkService(
+            val callbackManager = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+                NetworkApi21Callback()
+            } else {
+                NetworkApi24Callback()
+            }
+            val service = NetworkService(
                 serviceManager.getAppInfoService(),
                 connectivityManager,
-                telephonyManager
+                telephonyManager,
+                callbackManager
             )
+
+            callbackManager.setListener(service)
+
+            return service
         }
     }
 }

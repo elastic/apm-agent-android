@@ -14,6 +14,7 @@ java {
 
 kotlin.compilerOptions {
     jvmTarget.set(JvmTarget.fromTarget(javaVersionStr))
+    freeCompilerArgs = listOf("-Xjvm-default=all")
 }
 
 tasks.withType(Test::class).configureEach {

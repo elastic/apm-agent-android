@@ -29,28 +29,28 @@ import co.elastic.otel.android.common.internal.logging.Elog
 import co.elastic.otel.android.internal.services.Service
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.services.appinfo.AppInfoService
-import co.elastic.otel.android.internal.services.network.callbacks.NetworkApi21CallbackManager
-import co.elastic.otel.android.internal.services.network.callbacks.NetworkApi24CallbackManager
-import co.elastic.otel.android.internal.services.network.callbacks.NetworkCallbackManager
 import co.elastic.otel.android.internal.services.network.data.CarrierInfo
 import co.elastic.otel.android.internal.services.network.data.NetworkType
 import co.elastic.otel.android.internal.services.network.listener.NetworkChangeListener
+import co.elastic.otel.android.internal.services.network.query.NetworkApi21QueryManager
+import co.elastic.otel.android.internal.services.network.query.NetworkApi24QueryManager
+import co.elastic.otel.android.internal.services.network.query.NetworkQueryManager
 import java.util.concurrent.atomic.AtomicReference
 
 internal class NetworkService internal constructor(
     private val appInfoService: AppInfoService,
     private val connectivityManager: ConnectivityManager,
     private val telephonyManager: TelephonyManager,
-    private val callbackManager: NetworkCallbackManager
+    private val networkQueryManager: NetworkQueryManager
 ) : Service, NetworkChangeListener {
     private val type = AtomicReference<NetworkType>(NetworkType.None)
 
     override fun start() {
-        callbackManager.register(connectivityManager)
+        networkQueryManager.register(connectivityManager)
     }
 
     override fun stop() {
-        callbackManager.unregister(connectivityManager)
+        networkQueryManager.unregister(connectivityManager)
     }
 
     fun getType(): NetworkType {
@@ -95,7 +95,7 @@ internal class NetworkService internal constructor(
             return null
         }
 
-        return when (telephonyManager.dataNetworkType) {
+        return when (networkQueryManager.getNetworkType(telephonyManager)) {
             TelephonyManager.NETWORK_TYPE_GPRS -> "GPRS"
             TelephonyManager.NETWORK_TYPE_EDGE -> "EDGE"
             TelephonyManager.NETWORK_TYPE_UMTS -> "UMTS"
@@ -138,19 +138,19 @@ internal class NetworkService internal constructor(
                 context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             val telephonyManager =
                 context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-            val callbackManager = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-                NetworkApi21CallbackManager()
+            val queryManager = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+                NetworkApi21QueryManager()
             } else {
-                NetworkApi24CallbackManager()
+                NetworkApi24QueryManager()
             }
             val service = NetworkService(
                 serviceManager.getAppInfoService(),
                 connectivityManager,
                 telephonyManager,
-                callbackManager
+                queryManager
             )
 
-            callbackManager.setListener(service)
+            queryManager.setChangeListener(service)
 
             return service
         }

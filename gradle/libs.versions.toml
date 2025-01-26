@@ -1,5 +1,4 @@
 [versions]
-opentelemetry-android = "0.5.0-alpha"
 opentelemetry = "1.40.0"
 opentelemetry-semconv = "1.26.0-alpha"
 opentelemetry-contrib = "1.37.0-alpha"
@@ -10,8 +9,6 @@ junit5 = "5.11.3"
 
 [libraries]
 opentelemetry-sdk = { module = "io.opentelemetry:opentelemetry-sdk", version.ref = "opentelemetry" }
-opentelemetry-android-okhttpLib = { module = "io.opentelemetry.android:okhttp-3.0-library", version.ref = "opentelemetry-android" }
-opentelemetry-android-okhttpAgent = { module = "io.opentelemetry.android:okhttp-3.0-agent", version.ref = "opentelemetry-android" }
 stagemonitor-configuration = "org.stagemonitor:stagemonitor-configuration:0.89.1"
 androidx-annotations = "androidx.annotation:annotation:1.4.0"
 androidx-core = "androidx.core:core:1.13.1"

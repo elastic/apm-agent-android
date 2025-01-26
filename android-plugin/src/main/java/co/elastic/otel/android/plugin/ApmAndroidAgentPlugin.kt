@@ -33,7 +33,6 @@ internal class ApmAndroidAgentPlugin : Plugin<Project> {
         Elog.init(GradleLoggerFactory())
         addByteBuddyPlugin()
         addSdkDependency()
-        addInstrumentationDependency()
     }
 
     private fun addByteBuddyPlugin() {
@@ -42,10 +41,5 @@ internal class ApmAndroidAgentPlugin : Plugin<Project> {
 
     private fun addSdkDependency() {
         project.dependencies.add("implementation", BuildConfig.SDK_DEPENDENCY_URI)
-    }
-
-    private fun addInstrumentationDependency() {
-        project.dependencies.add("implementation", BuildConfig.OTEL_OKHTTP_LIBRARY_URI)
-        project.dependencies.add("byteBuddy", BuildConfig.OTEL_OKHTTP_AGENT_URI)
     }
 }

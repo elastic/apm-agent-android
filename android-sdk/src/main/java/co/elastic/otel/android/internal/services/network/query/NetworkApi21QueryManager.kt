@@ -51,13 +51,13 @@ internal class NetworkApi21QueryManager(
     }
 
     private fun onNetworkUpdate(network: Network, capabilities: NetworkCapabilities) {
-        if (network == connectivityManager.activeNetwork) {
+        if (connectivityManager.getNetworkInfo(network) == connectivityManager.activeNetworkInfo) {
             onActiveNetworkSet(network, capabilities)
         }
     }
 
     override fun onLost(network: Network) {
-        if (connectivityManager.activeNetwork == null) {
+        if (connectivityManager.activeNetworkInfo == null) {
             onNetworkLost()
         }
         super.onLost(network)

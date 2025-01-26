@@ -9,7 +9,7 @@ import android.os.Build
 import co.elastic.otel.android.internal.services.network.listener.NetworkChangeListener
 
 @TargetApi(Build.VERSION_CODES.N)
-internal class NetworkApi24Callback : NetworkCallback(), NetworkCallbackManager {
+internal class NetworkApi24CallbackManager : NetworkCallback(), NetworkCallbackManager {
     internal lateinit var listener: NetworkChangeListener
 
     override fun setListener(listener: NetworkChangeListener) {

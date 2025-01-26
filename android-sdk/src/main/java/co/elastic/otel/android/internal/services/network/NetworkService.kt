@@ -29,8 +29,8 @@ import co.elastic.otel.android.common.internal.logging.Elog
 import co.elastic.otel.android.internal.services.Service
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.services.appinfo.AppInfoService
-import co.elastic.otel.android.internal.services.network.callbacks.NetworkApi21Callback
-import co.elastic.otel.android.internal.services.network.callbacks.NetworkApi24Callback
+import co.elastic.otel.android.internal.services.network.callbacks.NetworkApi21CallbackManager
+import co.elastic.otel.android.internal.services.network.callbacks.NetworkApi24CallbackManager
 import co.elastic.otel.android.internal.services.network.callbacks.NetworkCallbackManager
 import co.elastic.otel.android.internal.services.network.data.CarrierInfo
 import co.elastic.otel.android.internal.services.network.data.NetworkType
@@ -139,9 +139,9 @@ internal class NetworkService internal constructor(
             val telephonyManager =
                 context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
             val callbackManager = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-                NetworkApi21Callback()
+                NetworkApi21CallbackManager()
             } else {
-                NetworkApi24Callback()
+                NetworkApi24CallbackManager()
             }
             val service = NetworkService(
                 serviceManager.getAppInfoService(),

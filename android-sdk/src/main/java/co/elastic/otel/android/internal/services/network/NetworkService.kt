@@ -32,25 +32,24 @@ import co.elastic.otel.android.internal.services.appinfo.AppInfoService
 import co.elastic.otel.android.internal.services.network.data.CarrierInfo
 import co.elastic.otel.android.internal.services.network.data.NetworkType
 import co.elastic.otel.android.internal.services.network.listener.NetworkChangeListener
-import co.elastic.otel.android.internal.services.network.query.NetworkApi21QueryManager
+import co.elastic.otel.android.internal.services.network.query.NetworkApi23QueryManager
 import co.elastic.otel.android.internal.services.network.query.NetworkApi24QueryManager
 import co.elastic.otel.android.internal.services.network.query.NetworkQueryManager
 import java.util.concurrent.atomic.AtomicReference
 
 internal class NetworkService internal constructor(
     private val appInfoService: AppInfoService,
-    private val connectivityManager: ConnectivityManager,
     private val telephonyManager: TelephonyManager,
     private val networkQueryManager: NetworkQueryManager
 ) : Service, NetworkChangeListener {
     private val type = AtomicReference<NetworkType>(NetworkType.None)
 
     override fun start() {
-        networkQueryManager.register(connectivityManager)
+        networkQueryManager.start()
     }
 
     override fun stop() {
-        networkQueryManager.unregister(connectivityManager)
+        networkQueryManager.stop()
     }
 
     fun getType(): NetworkType {
@@ -95,7 +94,7 @@ internal class NetworkService internal constructor(
             return null
         }
 
-        return when (networkQueryManager.getNetworkType(telephonyManager)) {
+        return when (networkQueryManager.getNetworkType()) {
             TelephonyManager.NETWORK_TYPE_GPRS -> "GPRS"
             TelephonyManager.NETWORK_TYPE_EDGE -> "EDGE"
             TelephonyManager.NETWORK_TYPE_UMTS -> "UMTS"
@@ -138,14 +137,18 @@ internal class NetworkService internal constructor(
                 context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             val telephonyManager =
                 context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-            val queryManager = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-                NetworkApi21QueryManager()
-            } else {
-                NetworkApi24QueryManager()
+            val queryManager = Build.VERSION.SDK_INT.let {
+                when {
+                    it >= Build.VERSION_CODES.N -> NetworkApi24QueryManager(
+                        connectivityManager,
+                        telephonyManager
+                    )
+
+                    else -> NetworkApi23QueryManager(connectivityManager, telephonyManager)
+                }
             }
             val service = NetworkService(
                 serviceManager.getAppInfoService(),
-                connectivityManager,
                 telephonyManager,
                 queryManager
             )

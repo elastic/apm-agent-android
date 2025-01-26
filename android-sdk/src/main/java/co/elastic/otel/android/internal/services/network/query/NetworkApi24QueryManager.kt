@@ -10,22 +10,25 @@ import android.telephony.TelephonyManager
 import co.elastic.otel.android.internal.services.network.listener.NetworkChangeListener
 
 @TargetApi(Build.VERSION_CODES.N)
-internal class NetworkApi24QueryManager : NetworkCallback(), NetworkQueryManager {
+internal class NetworkApi24QueryManager(
+    private val connectivityManager: ConnectivityManager,
+    private val telephonyManager: TelephonyManager
+) : NetworkCallback(), NetworkQueryManager {
     internal lateinit var listener: NetworkChangeListener
 
     override fun setChangeListener(listener: NetworkChangeListener) {
         this.listener = listener
     }
 
-    override fun getNetworkType(telephonyManager: TelephonyManager): Int {
+    override fun getNetworkType(): Int {
         return telephonyManager.dataNetworkType
     }
 
-    override fun register(connectivityManager: ConnectivityManager) {
+    override fun start() {
         connectivityManager.registerDefaultNetworkCallback(this)
     }
 
-    override fun unregister(connectivityManager: ConnectivityManager) {
+    override fun stop() {
         connectivityManager.unregisterNetworkCallback(this)
     }
 

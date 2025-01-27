@@ -23,7 +23,7 @@ import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.services.network.NetworkService
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
-import io.opentelemetry.semconv.SemanticAttributes
+import io.opentelemetry.semconv.incubating.NetworkIncubatingAttributes
 
 internal class SpanAttributesInterceptor(serviceManager: ServiceManager) : Interceptor<Attributes> {
     private val networkService: NetworkService by lazy {
@@ -37,10 +37,10 @@ internal class SpanAttributesInterceptor(serviceManager: ServiceManager) : Inter
         builder.put(TRANSACTION_TYPE_ATTRIBUTE_KEY, TRANSACTION_TYPE_VALUE)
 
         if (carrierInfo != null) {
-            builder.put(SemanticAttributes.NETWORK_CARRIER_NAME, carrierInfo.name)
-            builder.put(SemanticAttributes.NETWORK_CARRIER_MCC, carrierInfo.mcc)
-            builder.put(SemanticAttributes.NETWORK_CARRIER_MNC, carrierInfo.mnc)
-            builder.put(SemanticAttributes.NETWORK_CARRIER_ICC, carrierInfo.icc)
+            builder.put(NetworkIncubatingAttributes.NETWORK_CARRIER_NAME, carrierInfo.name)
+            builder.put(NetworkIncubatingAttributes.NETWORK_CARRIER_MCC, carrierInfo.mcc)
+            builder.put(NetworkIncubatingAttributes.NETWORK_CARRIER_MNC, carrierInfo.mnc)
+            builder.put(NetworkIncubatingAttributes.NETWORK_CARRIER_ICC, carrierInfo.icc)
         }
 
         return builder.build()

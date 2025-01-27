@@ -1,7 +1,7 @@
 [versions]
 opentelemetry = "1.46.0"
-opentelemetry-semconv = "1.26.0-alpha"
-opentelemetry-contrib = "1.37.0-alpha"
+opentelemetry-semconv = "1.29.0-alpha"
+opentelemetry-contrib = "1.43.0-alpha"
 byteBuddy = "1.16.1"
 kotlin = "2.1.0"
 android = "8.7.3"
@@ -16,6 +16,7 @@ dsl-json = "com.dslplatform:dsl-json-java8:1.10.0"
 slf4j-api = "org.slf4j:slf4j-api:2.0.7"
 byteBuddy = { module = "net.bytebuddy:byte-buddy", version.ref = "byteBuddy" }
 opentelemetry-semconv = { module = "io.opentelemetry.semconv:opentelemetry-semconv", version.ref = "opentelemetry-semconv" }
+opentelemetry-semconv-incubating = { module = "io.opentelemetry.semconv:opentelemetry-semconv-incubating", version.ref = "opentelemetry-semconv" }
 opentelemetry-diskBuffering = { module = "io.opentelemetry.contrib:opentelemetry-disk-buffering", version.ref = "opentelemetry-contrib" }
 opentelemetry-exporter-otlp = { module = "io.opentelemetry:opentelemetry-exporter-otlp", version.ref = "opentelemetry" }
 
@@ -45,6 +46,7 @@ kotlin-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.
 [bundles]
 mocking = ["mockk"]
 junit = ["junit4", "junit5"]
+opentelemetry-semconv = ["opentelemetry-semconv", "opentelemetry-semconv-incubating"]
 
 [plugins]
 androidApp = { id = "com.android.application", version.ref = "android" }

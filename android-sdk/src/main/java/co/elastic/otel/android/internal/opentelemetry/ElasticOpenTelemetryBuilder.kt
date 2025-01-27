@@ -45,7 +45,12 @@ import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.resources.Resource
 import io.opentelemetry.sdk.trace.SdkTracerProvider
 import io.opentelemetry.sdk.trace.export.SpanExporter
-import io.opentelemetry.semconv.ResourceAttributes
+import io.opentelemetry.semconv.ServiceAttributes
+import io.opentelemetry.semconv.TelemetryAttributes
+import io.opentelemetry.semconv.incubating.DeploymentIncubatingAttributes
+import io.opentelemetry.semconv.incubating.DeviceIncubatingAttributes
+import io.opentelemetry.semconv.incubating.OsIncubatingAttributes
+import io.opentelemetry.semconv.incubating.ProcessIncubatingAttributes
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -166,30 +171,30 @@ abstract class ElasticOpenTelemetryBuilder<B> {
         val finalProcessorFactory = processorFactory
             ?: DefaultProcessorFactory(serviceManager.getBackgroundWorkService())
         val resource = Resource.builder()
-            .put(ResourceAttributes.SERVICE_NAME, serviceName)
+            .put(ServiceAttributes.SERVICE_NAME, serviceName)
             .put(
-                ResourceAttributes.SERVICE_VERSION,
+                ServiceAttributes.SERVICE_VERSION,
                 serviceVersion ?: serviceManager.getAppInfoService().getVersionName() ?: "unknown"
             )
             .put(
                 AttributeKey.longKey("service.build"),
                 serviceBuild ?: serviceManager.getAppInfoService().getVersionCode()
             )
-            .put(ResourceAttributes.DEPLOYMENT_ENVIRONMENT, deploymentEnvironment)
-            .put(ResourceAttributes.DEVICE_ID, deviceIdProvider!!.get())
-            .put(ResourceAttributes.DEVICE_MODEL_IDENTIFIER, Build.MODEL)
-            .put(ResourceAttributes.DEVICE_MANUFACTURER, Build.MANUFACTURER)
-            .put(ResourceAttributes.OS_DESCRIPTION, getOsDescription())
-            .put(ResourceAttributes.OS_VERSION, Build.VERSION.RELEASE)
-            .put(ResourceAttributes.OS_NAME, "Android")
-            .put(ResourceAttributes.PROCESS_RUNTIME_NAME, "Android Runtime")
+            .put(DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT, deploymentEnvironment)
+            .put(DeviceIncubatingAttributes.DEVICE_ID, deviceIdProvider!!.get())
+            .put(DeviceIncubatingAttributes.DEVICE_MODEL_IDENTIFIER, Build.MODEL)
+            .put(DeviceIncubatingAttributes.DEVICE_MANUFACTURER, Build.MANUFACTURER)
+            .put(OsIncubatingAttributes.OS_DESCRIPTION, getOsDescription())
+            .put(OsIncubatingAttributes.OS_VERSION, Build.VERSION.RELEASE)
+            .put(OsIncubatingAttributes.OS_NAME, "Android")
+            .put(ProcessIncubatingAttributes.PROCESS_RUNTIME_NAME, "Android Runtime")
             .put(
-                ResourceAttributes.PROCESS_RUNTIME_VERSION,
+                ProcessIncubatingAttributes.PROCESS_RUNTIME_VERSION,
                 System.getProperty("java.vm.version")
             )
-            .put(ResourceAttributes.TELEMETRY_SDK_NAME, "android")
-            .put(ResourceAttributes.TELEMETRY_SDK_VERSION, BuildConfig.APM_AGENT_VERSION)
-            .put(ResourceAttributes.TELEMETRY_SDK_LANGUAGE, "java")
+            .put(TelemetryAttributes.TELEMETRY_SDK_NAME, "android")
+            .put(TelemetryAttributes.TELEMETRY_SDK_VERSION, BuildConfig.APM_AGENT_VERSION)
+            .put(TelemetryAttributes.TELEMETRY_SDK_LANGUAGE, "java")
             .build()
         val openTelemetryBuilder = OpenTelemetrySdk.builder()
         val spanExporter = exporterProvider.getSpanExporter()?.let {

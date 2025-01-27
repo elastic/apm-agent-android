@@ -30,7 +30,7 @@ dependencies {
     implementation(libs.stagemonitor.configuration)
     implementation(project(":android-common"))
     implementation(libs.opentelemetry.exporter.otlp)
-    implementation(libs.opentelemetry.semconv)
+    implementation(libs.bundles.opentelemetry.semconv)
     implementation(libs.opentelemetry.diskBuffering)
     implementation(libs.androidx.annotations)
     implementation(libs.androidx.core)

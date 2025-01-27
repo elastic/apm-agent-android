@@ -5,7 +5,7 @@ Copyright 2018-2022 Elasticsearch B.V.
 
 This product includes software licensed under the 'Apache License Version 2.0' license from the following sources:
 
- - Core (https://developer.android.com/jetpack/androidx/releases/core#1.13.1)
+ - Core (https://developer.android.com/jetpack/androidx/releases/core#1.15.0)
  - Kotlin Stdlib (https://kotlinlang.org/)
  - OpenTelemetry Java (https://github.com/open-telemetry/opentelemetry-java)
  - OpenTelemetry Java Contrib (https://github.com/open-telemetry/opentelemetry-java-contrib)

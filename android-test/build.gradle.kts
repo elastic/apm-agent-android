@@ -9,7 +9,7 @@ propertiesFile.inputStream().use {
 
 extra.apply {
     set("jvmCompatibility", JavaVersion.VERSION_17)
-    set("androidCompileSdk", 34)
+    set("androidCompileSdk", 35)
     set("androidMinSdk", 26)
     set("agentVersion", agentProperties["version"])
 }

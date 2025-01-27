@@ -59,13 +59,6 @@ internal class NetworkApi23QueryManager(
         connectivityManager.unregisterNetworkCallback(this)
     }
 
-    override fun onAvailable(network: Network) {
-        super.onAvailable(network)
-        connectivityManager.getNetworkCapabilities(network)?.let { capabilities ->
-            onNetworkUpdate(network, capabilities)
-        }
-    }
-
     override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
         super.onCapabilitiesChanged(network, networkCapabilities)
         onNetworkUpdate(network, networkCapabilities)

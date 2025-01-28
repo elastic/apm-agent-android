@@ -1,8 +1,8 @@
-package co.elastic.otel.android.instrumentation
+package co.elastic.otel.android.instrumentation.internal
 
 import co.elastic.otel.android.api.ElasticOtelAgent
 
-interface AndroidInstrumentation {
+interface Instrumentation {
 
     fun install(agent: ElasticOtelAgent)
 }

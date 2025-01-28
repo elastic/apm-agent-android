@@ -25,6 +25,7 @@ import co.elastic.otel.android.interceptor.Interceptor
 import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
 import co.elastic.otel.android.internal.attributes.CommonAttributesInterceptor
 import co.elastic.otel.android.internal.attributes.SpanAttributesInterceptor
+import co.elastic.otel.android.internal.opentelemetry.processors.DefaultProcessorFactory
 import co.elastic.otel.android.internal.opentelemetry.processors.logs.LogRecordAttributesProcessor
 import co.elastic.otel.android.internal.opentelemetry.processors.spans.SpanAttributesProcessor
 import co.elastic.otel.android.internal.opentelemetry.processors.spans.SpanInterceptorProcessor
@@ -44,7 +45,12 @@ import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.resources.Resource
 import io.opentelemetry.sdk.trace.SdkTracerProvider
 import io.opentelemetry.sdk.trace.export.SpanExporter
-import io.opentelemetry.semconv.ResourceAttributes
+import io.opentelemetry.semconv.ServiceAttributes
+import io.opentelemetry.semconv.TelemetryAttributes
+import io.opentelemetry.semconv.incubating.DeploymentIncubatingAttributes
+import io.opentelemetry.semconv.incubating.DeviceIncubatingAttributes
+import io.opentelemetry.semconv.incubating.OsIncubatingAttributes
+import io.opentelemetry.semconv.incubating.ProcessIncubatingAttributes
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -60,7 +66,7 @@ abstract class ElasticOpenTelemetryBuilder<B> {
     private var spanExporterInterceptors = mutableListOf<Interceptor<SpanExporter>>()
     private var logRecordExporterInterceptors = mutableListOf<Interceptor<LogRecordExporter>>()
     private var metricExporterInterceptors = mutableListOf<Interceptor<MetricExporter>>()
-    private var processorFactory: ProcessorFactory = ProcessorFactory.getDefault()
+    private var processorFactory: ProcessorFactory? = null
     private var sessionProvider: SessionProvider = SessionProvider.getDefault()
     private var clock: Clock = Clock.getDefault()
     private var exporterProvider: ExporterProvider = ExporterProvider.noop()
@@ -162,31 +168,33 @@ abstract class ElasticOpenTelemetryBuilder<B> {
                 "device_id"
             ) { UUID.randomUUID().toString() }
         }
+        val finalProcessorFactory = processorFactory
+            ?: DefaultProcessorFactory(serviceManager.getBackgroundWorkService())
         val resource = Resource.builder()
-            .put(ResourceAttributes.SERVICE_NAME, serviceName)
+            .put(ServiceAttributes.SERVICE_NAME, serviceName)
             .put(
-                ResourceAttributes.SERVICE_VERSION,
+                ServiceAttributes.SERVICE_VERSION,
                 serviceVersion ?: serviceManager.getAppInfoService().getVersionName() ?: "unknown"
             )
             .put(
                 AttributeKey.longKey("service.build"),
                 serviceBuild ?: serviceManager.getAppInfoService().getVersionCode()
             )
-            .put(ResourceAttributes.DEPLOYMENT_ENVIRONMENT, deploymentEnvironment)
-            .put(ResourceAttributes.DEVICE_ID, deviceIdProvider!!.get())
-            .put(ResourceAttributes.DEVICE_MODEL_IDENTIFIER, Build.MODEL)
-            .put(ResourceAttributes.DEVICE_MANUFACTURER, Build.MANUFACTURER)
-            .put(ResourceAttributes.OS_DESCRIPTION, getOsDescription())
-            .put(ResourceAttributes.OS_VERSION, Build.VERSION.RELEASE)
-            .put(ResourceAttributes.OS_NAME, "Android")
-            .put(ResourceAttributes.PROCESS_RUNTIME_NAME, "Android Runtime")
+            .put(DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT, deploymentEnvironment)
+            .put(DeviceIncubatingAttributes.DEVICE_ID, deviceIdProvider!!.get())
+            .put(DeviceIncubatingAttributes.DEVICE_MODEL_IDENTIFIER, Build.MODEL)
+            .put(DeviceIncubatingAttributes.DEVICE_MANUFACTURER, Build.MANUFACTURER)
+            .put(OsIncubatingAttributes.OS_DESCRIPTION, getOsDescription())
+            .put(OsIncubatingAttributes.OS_VERSION, Build.VERSION.RELEASE)
+            .put(OsIncubatingAttributes.OS_NAME, "Android")
+            .put(ProcessIncubatingAttributes.PROCESS_RUNTIME_NAME, "Android Runtime")
             .put(
-                ResourceAttributes.PROCESS_RUNTIME_VERSION,
+                ProcessIncubatingAttributes.PROCESS_RUNTIME_VERSION,
                 System.getProperty("java.vm.version")
             )
-            .put(ResourceAttributes.TELEMETRY_SDK_NAME, "android")
-            .put(ResourceAttributes.TELEMETRY_SDK_VERSION, BuildConfig.APM_AGENT_VERSION)
-            .put(ResourceAttributes.TELEMETRY_SDK_LANGUAGE, "java")
+            .put(TelemetryAttributes.TELEMETRY_SDK_NAME, "android")
+            .put(TelemetryAttributes.TELEMETRY_SDK_VERSION, BuildConfig.APM_AGENT_VERSION)
+            .put(TelemetryAttributes.TELEMETRY_SDK_LANGUAGE, "java")
             .build()
         val openTelemetryBuilder = OpenTelemetrySdk.builder()
         val spanExporter = exporterProvider.getSpanExporter()?.let {
@@ -198,7 +206,7 @@ abstract class ElasticOpenTelemetryBuilder<B> {
         val metricExporter = exporterProvider.getMetricExporter()?.let {
             Interceptor.composite(metricExporterInterceptors).intercept(it)
         }
-        processorFactory.createSpanProcessor(spanExporter)?.let {
+        finalProcessorFactory.createSpanProcessor(spanExporter)?.let {
             openTelemetryBuilder.setTracerProvider(
                 SdkTracerProvider.builder()
                     .setClock(clock)
@@ -215,7 +223,7 @@ abstract class ElasticOpenTelemetryBuilder<B> {
                     .build()
             )
         }
-        processorFactory.createLogRecordProcessor(logRecordExporter)
+        finalProcessorFactory.createLogRecordProcessor(logRecordExporter)
             ?.let {
                 openTelemetryBuilder.setLoggerProvider(
                     SdkLoggerProvider.builder()
@@ -232,7 +240,7 @@ abstract class ElasticOpenTelemetryBuilder<B> {
                         .build()
                 )
             }
-        processorFactory.createMetricReader(metricExporter)?.let {
+        finalProcessorFactory.createMetricReader(metricExporter)?.let {
             openTelemetryBuilder.setMeterProvider(
                 SdkMeterProvider.builder()
                     .setClock(clock)

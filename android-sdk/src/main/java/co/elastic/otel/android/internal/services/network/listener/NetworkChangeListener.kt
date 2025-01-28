@@ -16,19 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.processors
+package co.elastic.otel.android.internal.services.network.listener
 
-import io.opentelemetry.sdk.logs.LogRecordProcessor
-import io.opentelemetry.sdk.logs.export.LogRecordExporter
-import io.opentelemetry.sdk.metrics.export.MetricExporter
-import io.opentelemetry.sdk.metrics.export.MetricReader
-import io.opentelemetry.sdk.trace.SpanProcessor
-import io.opentelemetry.sdk.trace.export.SpanExporter
+import android.net.NetworkCapabilities
 
-interface ProcessorFactory {
-    fun createSpanProcessor(exporter: SpanExporter?): SpanProcessor?
+internal interface NetworkChangeListener {
+    fun onNewNetwork(capabilities: NetworkCapabilities)
 
-    fun createLogRecordProcessor(exporter: LogRecordExporter?): LogRecordProcessor?
-
-    fun createMetricReader(exporter: MetricExporter?): MetricReader?
+    fun onNetworkLost()
 }

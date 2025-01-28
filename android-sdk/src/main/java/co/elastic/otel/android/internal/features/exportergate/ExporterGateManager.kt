@@ -29,6 +29,7 @@ import io.opentelemetry.sdk.metrics.data.MetricData
 import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.trace.data.SpanData
 import io.opentelemetry.sdk.trace.export.SpanExporter
+import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -60,6 +61,9 @@ internal class ExporterGateManager(
     private val spanGateOpen = AtomicBoolean(false)
     private val logGateOpen = AtomicBoolean(false)
     private val metricGateOpen = AtomicBoolean(false)
+    private var spanTimeoutTask: ScheduledFuture<*>? = null
+    private var logTimeoutTask: ScheduledFuture<*>? = null
+    private var metricTimeoutTask: ScheduledFuture<*>? = null
 
     companion object {
         private const val SPAN_QUEUE_ID = 1
@@ -129,6 +133,8 @@ internal class ExporterGateManager(
     }
 
     private fun onSpanGateOpen() {
+        spanTimeoutTask?.cancel(false)
+        spanTimeoutTask = null
         spanExporter.setDelegate(delegateSpanExporter)
         backgroundWorkService.submit {
             val items = spanGateQueue.getEnqueuedItems()
@@ -141,6 +147,8 @@ internal class ExporterGateManager(
     }
 
     private fun onLogRecordGateOpen() {
+        logTimeoutTask?.cancel(false)
+        logTimeoutTask = null
         logRecordExporter.setDelegate(delegateLogRecordExporter)
         backgroundWorkService.submit {
             val items = logRecordGateQueue.getEnqueuedItems()
@@ -153,6 +161,8 @@ internal class ExporterGateManager(
     }
 
     private fun onMetricGateOpen() {
+        metricTimeoutTask?.cancel(false)
+        metricTimeoutTask = null
         metricExporter.setDelegate(delegateMetricExporter)
         backgroundWorkService.submit {
             val items = metricGateQueue.getEnqueuedItems()
@@ -165,19 +175,19 @@ internal class ExporterGateManager(
     }
 
     private fun onSpanQueueStarted() {
-        backgroundWorkService.scheduleOnce(gateLatchTimeout) {
+        spanTimeoutTask = backgroundWorkService.scheduleOnce(gateLatchTimeout) {
             spanGateQueue.forceOpenGate("Timeout")
         }
     }
 
     private fun onLogRecordQueueStarted() {
-        backgroundWorkService.scheduleOnce(gateLatchTimeout) {
+        logTimeoutTask = backgroundWorkService.scheduleOnce(gateLatchTimeout) {
             logRecordGateQueue.forceOpenGate("Timeout")
         }
     }
 
     private fun onMetricQueueStarted() {
-        backgroundWorkService.scheduleOnce(gateLatchTimeout) {
+        metricTimeoutTask = backgroundWorkService.scheduleOnce(gateLatchTimeout) {
             metricGateQueue.forceOpenGate("Timeout")
         }
     }

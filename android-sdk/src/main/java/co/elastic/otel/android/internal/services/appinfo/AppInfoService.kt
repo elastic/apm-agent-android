@@ -26,6 +26,7 @@ import android.os.Build
 import android.os.storage.StorageManager
 import androidx.annotation.RequiresApi
 import androidx.annotation.WorkerThread
+import androidx.core.content.ContextCompat
 import co.elastic.otel.android.common.internal.logging.Elog
 import co.elastic.otel.android.internal.services.Service
 import java.io.File
@@ -35,7 +36,10 @@ import kotlin.math.min
 internal class AppInfoService(private val context: Context) : Service {
 
     fun isPermissionGranted(permissionName: String): Boolean {
-        return context.checkSelfPermission(permissionName) == PackageManager.PERMISSION_GRANTED
+        return ContextCompat.checkSelfPermission(
+            context,
+            permissionName
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
     fun isInDebugMode(): Boolean {

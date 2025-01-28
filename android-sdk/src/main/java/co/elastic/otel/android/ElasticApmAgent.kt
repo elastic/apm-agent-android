@@ -24,10 +24,11 @@ import co.elastic.otel.android.exporters.ExporterProvider
 import co.elastic.otel.android.exporters.configuration.ExportProtocol
 import co.elastic.otel.android.features.apmserver.ApmServerAuthentication
 import co.elastic.otel.android.features.apmserver.ApmServerConnectivity
-import co.elastic.otel.android.features.apmserver.ApmServerConnectivityManager
 import co.elastic.otel.android.interceptor.Interceptor
 import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
+import co.elastic.otel.android.internal.features.apmserver.ApmServerConnectivityManager
 import co.elastic.otel.android.internal.features.apmserver.ApmServerExporterProvider
+import co.elastic.otel.android.internal.features.centralconfig.CentralConfigurationConnectivity
 import co.elastic.otel.android.internal.features.centralconfig.CentralConfigurationManager
 import co.elastic.otel.android.internal.features.clock.ElasticClockManager
 import co.elastic.otel.android.internal.features.conditionaldrop.ConditionalDropManager
@@ -72,7 +73,20 @@ class ElasticApmAgent private constructor(
         return openTelemetry
     }
 
-    fun getApmServerConnectivityManager(): ApmServerConnectivityManager {
+    fun setApmServerConnectivity(connectivity: ApmServerConnectivity) {
+        apmServerConnectivityManager.setConnectivityConfiguration(connectivity)
+        val currentCentralConnectivityConfig =
+            centralConfigurationManager.getConnectivityConfiguration()
+        centralConfigurationManager.setConnectivityConfiguration(
+            CentralConfigurationConnectivity.fromApmServerConfig(
+                currentCentralConnectivityConfig.serviceName,
+                currentCentralConnectivityConfig.serviceDeployment,
+                connectivity
+            )
+        )
+    }
+
+    internal fun getApmServerConnectivityManager(): ApmServerConnectivityManager {
         return apmServerConnectivityManager
     }
 

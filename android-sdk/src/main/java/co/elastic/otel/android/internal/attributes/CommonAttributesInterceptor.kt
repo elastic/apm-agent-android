@@ -25,7 +25,7 @@ import co.elastic.otel.android.internal.services.network.data.NetworkType
 import co.elastic.otel.android.session.SessionProvider
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
-import io.opentelemetry.semconv.SemanticAttributes
+import io.opentelemetry.semconv.incubating.NetworkIncubatingAttributes
 
 internal class CommonAttributesInterceptor(
     private val serviceManager: ServiceManager,
@@ -39,13 +39,13 @@ internal class CommonAttributesInterceptor(
         val builder = Attributes.builder().putAll(item)
         val networkType = networkService.getType()
 
-        builder.put(SemanticAttributes.NETWORK_CONNECTION_TYPE, networkType.name)
+        builder.put(NetworkIncubatingAttributes.NETWORK_CONNECTION_TYPE, networkType.name)
         sessionProvider.getSession()?.getId()?.let { builder.put(SESSION_ID_ATTRIBUTE_KEY, it) }
 
         if (networkType is NetworkType.Cell) {
             networkType.subTypeName?.let {
                 builder.put(
-                    SemanticAttributes.NETWORK_CONNECTION_SUBTYPE,
+                    NetworkIncubatingAttributes.NETWORK_CONNECTION_SUBTYPE,
                     it
                 )
             }

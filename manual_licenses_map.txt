@@ -1,5 +1,3 @@
 net.bytebuddy:byte-buddy:1.16.1|apache_v2
 net.bytebuddy:byte-buddy-gradle-plugin:1.16.1|apache_v2
 org.slf4j:slf4j-api:2.0.7|mit
-com.squareup.okhttp3:okhttp:3.11.0|apache_v2
-com.github.instacart.truetime-android:library:3.5|apache_v2

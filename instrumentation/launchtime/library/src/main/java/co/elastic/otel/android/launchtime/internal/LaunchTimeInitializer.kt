@@ -26,7 +26,8 @@ import android.net.Uri
 class LaunchTimeInitializer : ContentProvider() {
 
     override fun onCreate(): Boolean {
-        TODO("Not yet implemented")
+        LaunchTimeTracker.startTimer()
+        return true
     }
 
     override fun query(

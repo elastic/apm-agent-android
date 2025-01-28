@@ -18,12 +18,12 @@
  */
 package co.elastic.otel.android.launchtime.internal
 
+import android.app.Application
 import co.elastic.otel.android.api.ElasticOtelAgent
 import co.elastic.otel.android.instrumentation.internal.Instrumentation
 
 class LaunchTimeInstrumentation : Instrumentation {
-
-    override fun install(agent: ElasticOtelAgent) {
+    override fun install(application: Application, agent: ElasticOtelAgent) {
         TODO("Not yet implemented")
     }
 }

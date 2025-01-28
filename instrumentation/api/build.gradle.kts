@@ -1,5 +1,9 @@
 plugins {
-    id("elastic.java-library")
+    id("elastic.android-library")
+}
+
+android {
+    namespace = "co.elastic.otel.android.instrumentation.api"
 }
 
 licensesConfig {

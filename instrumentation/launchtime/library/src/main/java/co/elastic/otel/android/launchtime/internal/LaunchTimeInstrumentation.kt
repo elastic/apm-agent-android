@@ -19,11 +19,33 @@
 package co.elastic.otel.android.launchtime.internal
 
 import android.app.Application
+import androidx.lifecycle.ProcessLifecycleOwner
 import co.elastic.otel.android.api.ElasticOtelAgent
+import co.elastic.otel.android.api.internal.MetricFlusher
 import co.elastic.otel.android.instrumentation.internal.Instrumentation
 
-class LaunchTimeInstrumentation : Instrumentation {
+class LaunchTimeInstrumentation : Instrumentation, LaunchTimeApplicationListener.Callback {
+    private var agent: ElasticOtelAgent? = null
+
     override fun install(application: Application, agent: ElasticOtelAgent) {
-        TODO("Not yet implemented")
+        this.agent = agent
+        ProcessLifecycleOwner.get().lifecycle.addObserver(LaunchTimeApplicationListener(this))
+    }
+
+    override fun onLaunchTimeAvailable(launchTimeMillis: Long) {
+        agent?.let { sendAppLaunchTimeMetric(it, launchTimeMillis) }
+        agent = null
+    }
+
+    private fun sendAppLaunchTimeMetric(agent: ElasticOtelAgent, launchTimeMillis: Long) {
+        val meter = agent.getOpenTelemetry().getMeter("LaunchTimeTracker")
+        val launchTime = meter.gaugeBuilder("application.launch.time").buildObserver()
+        val batchCallback = meter.batchCallback({
+            launchTime.record(launchTimeMillis.toDouble())
+        }, launchTime)
+        if (agent is MetricFlusher) {
+            agent.flushMetrics()
+        }
+        batchCallback.close()
     }
 }

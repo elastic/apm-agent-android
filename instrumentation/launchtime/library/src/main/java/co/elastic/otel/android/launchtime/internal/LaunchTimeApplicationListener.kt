@@ -20,28 +20,18 @@ package co.elastic.otel.android.launchtime.internal
 
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import io.opentelemetry.api.metrics.BatchCallback
-import io.opentelemetry.api.metrics.Meter
-import io.opentelemetry.api.metrics.ObservableDoubleMeasurement
 import java.util.concurrent.TimeUnit
 
-internal class LaunchTimeApplicationListener : DefaultLifecycleObserver {
+internal class LaunchTimeApplicationListener(private val callback: Callback) :
+    DefaultLifecycleObserver {
 
     override fun onStart(owner: LifecycleOwner) {
-        if (LaunchTimeTracker.stopTimer()) {
-            val launchTimeInNanos = LaunchTimeTracker.elapsedTimeInNanos
-            sendAppLaunchTimeMetric(TimeUnit.NANOSECONDS.toMillis(launchTimeInNanos))
+        LaunchTimeTracker.stopTimer()?.let { launchTimeInNanos ->
+            callback.onLaunchTimeAvailable(TimeUnit.NANOSECONDS.toMillis(launchTimeInNanos))
         }
     }
 
-    private fun sendAppLaunchTimeMetric(launchTimeMillis: Long) {
-        val meter: Meter = ElasticMeters.create("LaunchTimeTracker")
-        val launchTime: ObservableDoubleMeasurement =
-            meter.gaugeBuilder("application.launch.time").buildObserver()
-        val batchCallback: BatchCallback = meter.batchCallback({
-            launchTime.record(launchTimeMillis)
-        }, launchTime)
-        ElasticApmAgent.get().getFlusher().flushMetrics()
-        batchCallback.close()
+    interface Callback {
+        fun onLaunchTimeAvailable(launchTimeMillis: Long)
     }
 }

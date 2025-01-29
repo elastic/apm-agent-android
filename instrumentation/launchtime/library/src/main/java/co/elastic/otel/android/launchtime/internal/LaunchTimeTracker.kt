@@ -18,42 +18,21 @@
  */
 package co.elastic.otel.android.launchtime.internal
 
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
+
 internal object LaunchTimeTracker {
-    private var initialTimeInNanos: Long = 0
-    private var launchTimeInNanos: Long = 0
-    private var finalizedTracking = false
-    private var timeAlreadyQueried = false
+    private var initialTimeInNanos = AtomicLong(0)
+    private var finalizedTracking = AtomicBoolean(false)
 
     fun startTimer() {
-        initialTimeInNanos = System.nanoTime()
+        initialTimeInNanos.set(System.nanoTime())
     }
 
-    fun resetForTest() {
-        finalizedTracking = false
-        timeAlreadyQueried = false
-    }
-
-    fun stopTimer(): Boolean {
-        if (finalizedTracking) {
-            return false
+    fun stopTimer(): Long? {
+        if (finalizedTracking.compareAndSet(false, true)) {
+            return System.nanoTime() - initialTimeInNanos.get()
         }
-
-        launchTimeInNanos = System.nanoTime() - initialTimeInNanos
-        initialTimeInNanos = 0
-        finalizedTracking = true
-
-        return true
+        return null
     }
-
-    val elapsedTimeInNanos: Long
-        get() {
-            check(finalizedTracking) { "No tracked time available" }
-            check(!timeAlreadyQueried) { "Launch time already queried" }
-
-            val time = launchTimeInNanos
-            launchTimeInNanos = 0
-            timeAlreadyQueried = true
-
-            return time
-        }
 }

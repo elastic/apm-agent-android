@@ -22,8 +22,8 @@ licensesConfig {
 
 gradlePlugin {
     plugins {
-        create("androidOtelPlugin") {
-            id = "co.elastic.otel.android"
+        create("elasticAndroidAgent") {
+            id = "co.elastic.otel.android.agent"
             implementationClass = "co.elastic.otel.android.plugin.ApmAndroidAgentPlugin"
             displayName = "Elastic OTel Android Agent"
             description = project.description

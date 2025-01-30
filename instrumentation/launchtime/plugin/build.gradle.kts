@@ -9,8 +9,9 @@ licensesConfig {
 }
 
 buildConfig {
-    packageName("${group}.generated")
-    buildConfigField("String", "LIBRARY_URI", "\"$group:launchtime-library:$version\"")
+    val groupId = "${rootProject.group}.instrumentation"
+    packageName("${groupId}.generated")
+    buildConfigField("String", "LIBRARY_URI", "\"$groupId:launchtime-library:$version\"")
 }
 
 dependencies {

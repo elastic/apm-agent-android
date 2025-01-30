@@ -1,6 +1,7 @@
 package co.elastic.otel.android.compilation.tools.publishing;
 
 import static co.elastic.otel.android.compilation.tools.publishing.PublishingUtils.setArtifactId;
+import static co.elastic.otel.android.compilation.tools.publishing.PublishingUtils.setGroupId;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -33,7 +34,8 @@ public class ApmPublisherRootPlugin implements Plugin<Project> {
         project.subprojects(subproject -> {
             Matcher instrumentationMatcher = INSTRUMENTATION_PROJECT_PATTERN.matcher(subproject.getPath());
             if (instrumentationMatcher.matches()) {
-                subproject.setGroup(subproject.getGroup() + ".instrumentation");
+                subproject.setGroup(subproject.getGroup() + "." + instrumentationMatcher.group(1));
+                setGroupId(subproject, subproject.getGroup() + ".instrumentation");
                 setArtifactId(subproject, instrumentationMatcher.group(1) + "-" + instrumentationMatcher.group(2));
             }
             applySubprojectPlugins(subproject.getPlugins());

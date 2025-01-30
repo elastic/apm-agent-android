@@ -1,6 +1,7 @@
 package co.elastic.otel.android.compilation.tools.publishing.subprojects;
 
 import static co.elastic.otel.android.compilation.tools.publishing.PublishingUtils.getArtifactId;
+import static co.elastic.otel.android.compilation.tools.publishing.PublishingUtils.getGroupId;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -22,6 +23,7 @@ public abstract class BaseApmPublisherPlugin implements Plugin<Project> {
         mavenPublishExtension.getPublications().configureEach(publication -> {
             if (publication instanceof MavenPublication) {
                 ((MavenPublication) publication).setArtifactId(getArtifactId(project));
+                ((MavenPublication) publication).setGroupId(getGroupId(project));
             }
         });
     }

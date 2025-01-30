@@ -15,7 +15,8 @@ android {
     compileSdk = (properties.getProperty("elastic.android.compileSdk") as String).toInt()
 
     defaultConfig {
-        minSdk = (properties.getProperty("elastic.android.minSdk") as String).toInt()
+        minSdk = 26
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     testOptions {

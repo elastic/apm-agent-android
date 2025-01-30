@@ -1,6 +1,5 @@
 package co.elastic.otel.android.test
 
-import android.app.Activity
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.core.app.launchActivity
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -17,6 +16,7 @@ import io.opentelemetry.sdk.testing.exporter.InMemoryMetricExporter
 import io.opentelemetry.sdk.trace.SpanProcessor
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor
 import io.opentelemetry.sdk.trace.export.SpanExporter
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -32,8 +32,9 @@ class InstrumentationTest {
             .setProcessorFactory(processorFactory)
             .build()
 
-        launchActivity<DummyActivity>().use {
-
+        launchActivity<MainActivity>().use {
+            val finishedMetrics = processorFactory.getFinishedMetrics()
+            assertThat(finishedMetrics).hasSize(1)
         }
     }
 
@@ -56,6 +57,4 @@ class InstrumentationTest {
             return PeriodicMetricReader.create(inMemoryMetricExporter)
         }
     }
-
-    class DummyActivity : Activity()
 }

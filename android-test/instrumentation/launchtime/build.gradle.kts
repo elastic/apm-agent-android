@@ -4,5 +4,5 @@ plugins {
 }
 
 android {
-    namespace = "co.elastic.apm.android.test"
+    namespace = "co.elastic.otel.android.test"
 }

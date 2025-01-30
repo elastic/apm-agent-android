@@ -45,7 +45,7 @@ public abstract class BaseApmPublisherPlugin implements Plugin<Project> {
             String repoUrl = getRepositoryUrl();
             String organizationName = "Elastic Inc.";
             String organizationUrl = getWebsiteUrl();
-            mavenPom.getName().set(project.getGroup() + ":" + getArtifactId(project));
+            mavenPom.getName().set(getGroupId(project) + ":" + getArtifactId(project));
             mavenPom.getDescription().set(project.getDescription());
             mavenPom.getUrl().set(repoUrl);
             mavenPom.organization(organization -> {

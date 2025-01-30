@@ -34,9 +34,9 @@ public class ApmPublisherRootPlugin implements Plugin<Project> {
         project.subprojects(subproject -> {
             Matcher instrumentationMatcher = INSTRUMENTATION_PROJECT_PATTERN.matcher(subproject.getPath());
             if (instrumentationMatcher.matches()) {
-                subproject.setGroup(subproject.getGroup() + "." + instrumentationMatcher.group(1));
                 setGroupId(subproject, subproject.getGroup() + ".instrumentation");
                 setArtifactId(subproject, instrumentationMatcher.group(1) + "-" + instrumentationMatcher.group(2));
+                subproject.setGroup(subproject.getGroup() + "." + instrumentationMatcher.group(1));
             }
             applySubprojectPlugins(subproject.getPlugins());
             project.getDependencies().add("noticeProducer", subproject);

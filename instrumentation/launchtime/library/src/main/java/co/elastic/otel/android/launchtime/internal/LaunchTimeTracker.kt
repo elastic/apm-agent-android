@@ -19,19 +19,22 @@
 package co.elastic.otel.android.launchtime.internal
 
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicLong
 
 internal object LaunchTimeTracker {
-    private var initialTimeInNanos = AtomicLong(0)
+    @Volatile
+    private var initialTimeInNanos: Long? = null
     private var finalizedTracking = AtomicBoolean(false)
 
     fun startTimer() {
-        initialTimeInNanos.set(System.nanoTime())
+        initialTimeInNanos = System.nanoTime()
     }
 
     fun stopTimer(): Long? {
         if (finalizedTracking.compareAndSet(false, true)) {
-            return System.nanoTime() - initialTimeInNanos.get()
+            return initialTimeInNanos?.let {
+                initialTimeInNanos = null
+                System.nanoTime() - it
+            }
         }
         return null
     }

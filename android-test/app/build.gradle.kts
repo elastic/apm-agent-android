@@ -1,7 +1,7 @@
 plugins {
     alias(rootLibs.plugins.androidApp)
     alias(rootLibs.plugins.kotlin.android)
-    id("co.elastic.otel.android")
+    id("co.elastic.otel.android.agent")
 }
 
 android {

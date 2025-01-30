@@ -48,4 +48,6 @@ dependencies {
     testImplementation(libs.findLibrary("assertj").get())
     testRuntimeOnly(libs.findLibrary("junit5-vintage").get())
     coreLibraryDesugaring(libs.findLibrary("coreLib").get())
+    androidTestImplementation(libs.findBundle("junit").get())
+    androidTestImplementation(libs.findBundle("androidTest").get())
 }

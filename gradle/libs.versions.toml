@@ -31,6 +31,7 @@ coreLib = "com.android.tools:desugar_jdk_libs:2.1.4"
 mockk = "io.mockk:mockk:1.13.16"
 awaitility = "org.awaitility:awaitility-kotlin:4.2.2"
 wireMock = "org.wiremock:wiremock:3.10.0"
+androidx-test-core = "androidx.test:core-ktx:1.6.1"
 androidx-test-rules = "androidx.test:rules:1.6.1"
 androidx-test-runner = "androidx.test:runner:1.6.2"
 androidx-test-ext = "androidx.test.ext:junit:1.2.1"
@@ -50,7 +51,7 @@ kotlin-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.
 mocking = ["mockk"]
 junit = ["junit4", "junit5"]
 opentelemetry-semconv = ["opentelemetry-semconv", "opentelemetry-semconv-incubating"]
-androidTest = ["androidx-test-rules", "androidx-test-runner", "androidx-test-ext"]
+androidTest = ["androidx-test-rules", "androidx-test-runner", "androidx-test-ext", "androidx-test-core"]
 
 [plugins]
 androidApp = { id = "com.android.application", version.ref = "android" }

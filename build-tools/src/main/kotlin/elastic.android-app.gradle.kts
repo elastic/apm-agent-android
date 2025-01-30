@@ -30,24 +30,22 @@ android {
     compileOptions {
         sourceCompatibility = javaVersion
         targetCompatibility = javaVersion
-        isCoreLibraryDesugaringEnabled = true
     }
     kotlinOptions {
         jvmTarget = javaVersionStr
     }
-}
-
-tasks.withType(Test::class).configureEach {
-    useJUnitPlatform()
+    packaging.resources {
+        excludes += "META-INF/LICENSE*"
+    }
 }
 
 val libs = extensions.getByType<VersionCatalogsExtension>().named("rootLibs")
 dependencies {
     testImplementation(libs.findBundle("mocking").get())
-    testImplementation(libs.findBundle("junit").get())
+    testImplementation(libs.findLibrary("junit4").get())
     testImplementation(libs.findLibrary("assertj").get())
-    testRuntimeOnly(libs.findLibrary("junit5-vintage").get())
-    coreLibraryDesugaring(libs.findLibrary("coreLib").get())
-    androidTestImplementation(libs.findBundle("junit").get())
+    androidTestImplementation(libs.findLibrary("assertj").get())
+    androidTestImplementation(libs.findLibrary("junit4").get())
     androidTestImplementation(libs.findBundle("androidTest").get())
+    androidTestImplementation(libs.findLibrary("opentelemetry-testing").get())
 }

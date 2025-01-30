@@ -1,10 +1,16 @@
 plugins {
     id("elastic.java-library")
     id("java-gradle-plugin")
+    alias(libs.plugins.buildconfig)
 }
 
 licensesConfig {
     manualMappingFile = rootProject.file("manual_licenses_map.txt")
+}
+
+buildConfig {
+    packageName("${group}.generated")
+    buildConfigField("String", "LIBRARY_URI", "\"$group:launchtime-library:$version\"")
 }
 
 dependencies {

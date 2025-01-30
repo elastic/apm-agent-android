@@ -18,6 +18,13 @@ android {
         minSdk = (properties.getProperty("elastic.android.minSdk") as String).toInt()
     }
 
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+        animationsDisabled = true
+    }
+
     val javaVersionStr = properties.getProperty("elastic.java.compatibility") as String
     val javaVersion = JavaVersion.toVersion(javaVersionStr)
     compileOptions {

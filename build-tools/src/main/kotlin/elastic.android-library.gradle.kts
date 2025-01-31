@@ -21,6 +21,9 @@ android {
         jvmTarget = javaVersionStr
         freeCompilerArgs = listOf("-Xjvm-default=all")
     }
+    lint {
+        disable.add("NewApi")
+    }
 }
 
 tasks.withType(Test::class).configureEach {

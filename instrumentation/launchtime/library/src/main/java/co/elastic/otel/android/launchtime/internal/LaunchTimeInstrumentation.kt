@@ -25,15 +25,23 @@ import co.elastic.otel.android.api.internal.MetricFlusher
 import co.elastic.otel.android.instrumentation.internal.Instrumentation
 
 class LaunchTimeInstrumentation : Instrumentation, LaunchTimeApplicationListener.Callback {
+    @Volatile
     private var agent: ElasticOtelAgent? = null
+
+    @Volatile
+    private var observer: LaunchTimeApplicationListener? = null
 
     override fun install(application: Application, agent: ElasticOtelAgent) {
         this.agent = agent
-        ProcessLifecycleOwner.get().lifecycle.addObserver(LaunchTimeApplicationListener(this))
+        val observer = LaunchTimeApplicationListener(this)
+        ProcessLifecycleOwner.get().lifecycle.addObserver(observer)
+        this.observer = observer
     }
 
     override fun onLaunchTimeAvailable(launchTimeMillis: Long) {
         agent?.let { sendAppLaunchTimeMetric(it, launchTimeMillis) }
+        observer?.let { ProcessLifecycleOwner.get().lifecycle.removeObserver(it) }
+        observer = null
         agent = null
     }
 

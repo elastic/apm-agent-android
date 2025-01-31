@@ -1,4 +1,0 @@
-<resources>
-
-    <style name="Theme.APMAndroidAgent" parent="Theme.AppCompat.DayNight.DarkActionBar" />
-</resources>

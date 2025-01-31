@@ -18,7 +18,6 @@ dependencyResolutionManagement {
     }
 }
 includeBuild("..")
-include(":app")
 
 val instrumentationDirName = "instrumentation"
 val instrumentationDir = File(rootDir, instrumentationDirName)

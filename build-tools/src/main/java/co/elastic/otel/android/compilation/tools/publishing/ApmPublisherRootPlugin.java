@@ -38,9 +38,14 @@ public class ApmPublisherRootPlugin implements Plugin<Project> {
                 setArtifactId(subproject, instrumentationMatcher.group(1) + "-" + instrumentationMatcher.group(2));
                 subproject.setGroup(subproject.getGroup() + "." + instrumentationMatcher.group(1));
             }
-            applySubprojectPlugins(subproject.getPlugins());
-            project.getDependencies().add("noticeProducer", subproject);
+            subproject.getPluginManager().withPlugin("java-library", appliedPlugin -> configureProject(project, subproject));
+            subproject.getPluginManager().withPlugin("com.android.library", appliedPlugin -> configureProject(project, subproject));
         });
+    }
+
+    private void configureProject(Project project, Project subproject) {
+        applySubprojectPlugins(subproject.getPlugins());
+        project.getDependencies().add("noticeProducer", subproject);
     }
 
     private void configureVersion(Project project) {

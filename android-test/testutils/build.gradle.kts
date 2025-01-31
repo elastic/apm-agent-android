@@ -28,4 +28,5 @@ android {
 
 dependencies {
     implementation(libs.androidx.test.runner)
+    implementation("co.elastic.otel.android:android-api")
 }

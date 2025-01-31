@@ -1,6 +1,5 @@
 package co.elastic.otel.android.test
 
-import androidx.test.core.app.ApplicationProvider
 import androidx.test.core.app.launchActivity
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import co.elastic.otel.android.ElasticApmAgent
@@ -17,20 +16,25 @@ import io.opentelemetry.sdk.trace.SpanProcessor
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor
 import io.opentelemetry.sdk.trace.export.SpanExporter
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class InstrumentationTest {
+    @get:Rule
+    val agentRule = AgentRule()
 
     @Test
     fun verifyAppLaunchTimeTracking() {
         val processorFactory = SimpleProcessorFactory()
 
-        ElasticApmAgent.builder(ApplicationProvider.getApplicationContext())
-            .setUrl("http://none")
-            .setProcessorFactory(processorFactory)
-            .build()
+        agentRule.agentInitializer = {
+            ElasticApmAgent.builder(it)
+                .setUrl("http://none")
+                .setProcessorFactory(processorFactory)
+                .build()
+        }
 
         launchActivity<MainActivity>().use {
             val finishedMetrics = processorFactory.getFinishedMetrics()

@@ -23,7 +23,9 @@ import androidx.lifecycle.ProcessLifecycleOwner
 import co.elastic.otel.android.api.ElasticOtelAgent
 import co.elastic.otel.android.api.internal.MetricFlusher
 import co.elastic.otel.android.instrumentation.internal.Instrumentation
+import com.google.auto.service.AutoService
 
+@AutoService(Instrumentation::class)
 class LaunchTimeInstrumentation : Instrumentation, LaunchTimeApplicationListener.Callback {
     @Volatile
     private var agent: ElasticOtelAgent? = null
@@ -33,9 +35,9 @@ class LaunchTimeInstrumentation : Instrumentation, LaunchTimeApplicationListener
 
     override fun install(application: Application, agent: ElasticOtelAgent) {
         this.agent = agent
-        val observer = LaunchTimeApplicationListener(this)
-        ProcessLifecycleOwner.get().lifecycle.addObserver(observer)
-        this.observer = observer
+        observer = LaunchTimeApplicationListener(this).apply {
+            ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+        }
     }
 
     override fun onLaunchTimeAvailable(launchTimeMillis: Long) {

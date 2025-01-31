@@ -6,6 +6,7 @@ byteBuddy = "1.16.1"
 kotlin = "2.1.0"
 android = "8.7.3"
 junit5 = "5.11.4"
+autoService = "1.1.1"
 
 [libraries]
 opentelemetry-sdk = { module = "io.opentelemetry:opentelemetry-sdk", version.ref = "opentelemetry" }
@@ -46,6 +47,8 @@ gradle-publish-plugin = "com.gradle.publish:plugin-publish-plugin:1.2.1"
 gradle-shadow-plugin = "gradle.plugin.com.github.johnrengelman:shadow:7.1.2"
 byteBuddy-plugin = { module = "net.bytebuddy:byte-buddy-gradle-plugin", version.ref = "byteBuddy" }
 kotlin-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+autoService-annotations = { module = "com.google.auto.service:auto-service-annotations", version.ref = "autoService" }
+autoService-compiler = { module = "com.google.auto.service:auto-service", version.ref = "autoService" }
 
 [bundles]
 mocking = ["mockk"]

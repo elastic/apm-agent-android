@@ -1,5 +1,6 @@
 plugins {
     id("elastic.android-library")
+    id("kotlin-kapt")
 }
 
 android {
@@ -13,4 +14,6 @@ licensesConfig {
 dependencies {
     api(project(":instrumentation:api"))
     implementation(instrumentation.androidx.lifecycle.process)
+    compileOnly(libs.autoService.annotations)
+    kapt(libs.autoService.compiler)
 }

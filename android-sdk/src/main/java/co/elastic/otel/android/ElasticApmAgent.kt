@@ -19,7 +19,6 @@
 package co.elastic.otel.android
 
 import android.app.Application
-import co.elastic.otel.android.api.ElasticOtelAgent
 import co.elastic.otel.android.common.internal.logging.Elog
 import co.elastic.otel.android.exporters.ExporterProvider
 import co.elastic.otel.android.exporters.configuration.ExportProtocol
@@ -321,10 +320,6 @@ class ElasticApmAgent private constructor(
             addMetricExporterInterceptor {
                 exporterGateManager.createMetricExporterGate(it)
             }
-        }
-
-        private fun installInstrumentations(agent: ElasticOtelAgent) {
-            TODO("Not yet implemented")
         }
     }
 }

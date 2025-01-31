@@ -27,6 +27,9 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.test.runner)
-    implementation("co.elastic.otel.android:android-api")
+    api(libs.bundles.androidTest)
+    api("co.elastic.otel.android:android-sdk")
+    api(rootLibs.opentelemetry.testing)
+    api(rootLibs.assertj)
+    api(rootLibs.junit4)
 }

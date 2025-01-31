@@ -19,15 +19,21 @@
 package co.elastic.otel.android.internal.api
 
 import co.elastic.otel.android.api.ElasticOtelAgent
+import co.elastic.otel.android.api.internal.MetricFlusher
 import io.opentelemetry.sdk.OpenTelemetrySdk
+import io.opentelemetry.sdk.common.CompletableResultCode
 
 abstract class ManagedElasticOtelAgent(
     private val configuration: Configuration
-) : ElasticOtelAgent {
+) : ElasticOtelAgent, MetricFlusher {
 
     final override fun close() {
         onClose()
         configuration.openTelemetrySdk.close()
+    }
+
+    override fun flushMetrics(): CompletableResultCode {
+        return configuration.openTelemetrySdk.sdkMeterProvider.forceFlush()
     }
 
     protected abstract fun onClose()

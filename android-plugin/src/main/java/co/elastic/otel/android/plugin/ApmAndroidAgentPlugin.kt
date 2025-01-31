@@ -18,8 +18,8 @@
  */
 package co.elastic.otel.android.plugin
 
-import co.elastic.apm.generated.BuildConfig
 import co.elastic.otel.android.common.internal.logging.Elog
+import co.elastic.otel.android.generated.BuildConfig
 import co.elastic.otel.android.plugin.logging.GradleLoggerFactory
 import net.bytebuddy.build.gradle.android.ByteBuddyAndroidPlugin
 import org.gradle.api.Plugin

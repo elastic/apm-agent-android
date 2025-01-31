@@ -1,11 +1,15 @@
 package co.elastic.otel.android.compilation.tools.publishing;
 
+import static co.elastic.otel.android.compilation.tools.publishing.PublishingUtils.setArtifactId;
+import static co.elastic.otel.android.compilation.tools.publishing.PublishingUtils.setGroupId;
+
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.PluginContainer;
 import org.gradle.util.internal.VersionNumber;
 
 import java.time.Duration;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import co.elastic.otel.android.compilation.tools.NoticeProviderPlugin;
@@ -19,6 +23,7 @@ import io.github.gradlenexus.publishplugin.NexusRepositoryContainer;
 public class ApmPublisherRootPlugin implements Plugin<Project> {
 
     private final static String PROPERTY_VERSION_OVERRIDE = "version_override";
+    private final static Pattern INSTRUMENTATION_PROJECT_PATTERN = Pattern.compile(":instrumentation:([^:]+):([^:]+)$");
 
     @Override
     public void apply(Project project) {
@@ -27,11 +32,20 @@ public class ApmPublisherRootPlugin implements Plugin<Project> {
         addPostDeployTask(project);
         configureMavenCentral(project);
         project.subprojects(subproject -> {
-            if (!subproject.getName().equals("agp-compatibility")) {
-                applySubprojectPlugins(subproject.getPlugins());
-                project.getDependencies().add("noticeProducer", subproject);
+            Matcher instrumentationMatcher = INSTRUMENTATION_PROJECT_PATTERN.matcher(subproject.getPath());
+            if (instrumentationMatcher.matches()) {
+                setGroupId(subproject, subproject.getGroup() + ".instrumentation");
+                setArtifactId(subproject, instrumentationMatcher.group(1) + "-" + instrumentationMatcher.group(2));
+                subproject.setGroup(subproject.getGroup() + "." + instrumentationMatcher.group(1));
             }
+            subproject.getPluginManager().withPlugin("java-library", appliedPlugin -> configureProject(project, subproject));
+            subproject.getPluginManager().withPlugin("com.android.library", appliedPlugin -> configureProject(project, subproject));
         });
+    }
+
+    private void configureProject(Project project, Project subproject) {
+        applySubprojectPlugins(subproject.getPlugins());
+        project.getDependencies().add("noticeProducer", subproject);
     }
 
     private void configureVersion(Project project) {

@@ -1,5 +1,8 @@
 package co.elastic.otel.android.compilation.tools.publishing.subprojects;
 
+import static co.elastic.otel.android.compilation.tools.publishing.PublishingUtils.getArtifactId;
+import static co.elastic.otel.android.compilation.tools.publishing.PublishingUtils.getGroupId;
+
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.publish.PublishingExtension;
@@ -10,17 +13,24 @@ import co.elastic.otel.android.compilation.tools.publishing.PublishingUtils;
 
 public abstract class BaseApmPublisherPlugin implements Plugin<Project> {
     protected Project project;
+    private PublishingExtension mavenPublishExtension;
 
     @Override
     public final void apply(Project project) {
         this.project = project;
+        mavenPublishExtension = project.getExtensions().getByType(PublishingExtension.class);
         onApply();
+        mavenPublishExtension.getPublications().configureEach(publication -> {
+            if (publication instanceof MavenPublication) {
+                ((MavenPublication) publication).setArtifactId(getArtifactId(project));
+                ((MavenPublication) publication).setGroupId(getGroupId(project));
+            }
+        });
     }
 
     protected abstract void onApply();
 
     protected void addMavenPublication(String componentName) {
-        PublishingExtension mavenPublishExtension = project.getExtensions().getByType(PublishingExtension.class);
         mavenPublishExtension.getPublications().create("elastic", MavenPublication.class, publication -> {
             publication.from(project.getComponents().findByName(componentName));
             configurePom(publication);
@@ -35,7 +45,7 @@ public abstract class BaseApmPublisherPlugin implements Plugin<Project> {
             String repoUrl = getRepositoryUrl();
             String organizationName = "Elastic Inc.";
             String organizationUrl = getWebsiteUrl();
-            mavenPom.getName().set(project.getGroup() + ":" + project.getName());
+            mavenPom.getName().set(getGroupId(project) + ":" + getArtifactId(project));
             mavenPom.getDescription().set(project.getDescription());
             mavenPom.getUrl().set(repoUrl);
             mavenPom.organization(organization -> {

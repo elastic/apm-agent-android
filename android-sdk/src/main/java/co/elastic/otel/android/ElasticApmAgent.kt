@@ -19,6 +19,7 @@
 package co.elastic.otel.android
 
 import android.app.Application
+import co.elastic.otel.android.api.ElasticOtelAgent
 import co.elastic.otel.android.common.internal.logging.Elog
 import co.elastic.otel.android.exporters.ExporterProvider
 import co.elastic.otel.android.exporters.configuration.ExportProtocol
@@ -35,6 +36,7 @@ import co.elastic.otel.android.internal.features.conditionaldrop.ConditionalDrop
 import co.elastic.otel.android.internal.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.otel.android.internal.features.diskbuffering.DiskBufferingManager
 import co.elastic.otel.android.internal.features.exportergate.ExporterGateManager
+import co.elastic.otel.android.internal.features.instrumentation.InstrumentationManager
 import co.elastic.otel.android.internal.features.sessionmanager.SessionIdGenerator
 import co.elastic.otel.android.internal.features.sessionmanager.SessionManager
 import co.elastic.otel.android.internal.features.sessionmanager.samplerate.SampleRateManager
@@ -47,15 +49,17 @@ import co.elastic.otel.android.logging.LoggingPolicy
 import io.opentelemetry.api.OpenTelemetry
 import java.util.UUID
 
+@Suppress("CanBeParameter")
 class ElasticApmAgent private constructor(
     configuration: Configuration,
-    sampleRateManager: SampleRateManager,
+    private val sampleRateManager: SampleRateManager,
     private val serviceManager: ServiceManager,
     private val exporterGateManager: ExporterGateManager,
     private val diskBufferingManager: DiskBufferingManager,
     private val apmServerConnectivityManager: ApmServerConnectivityManager,
     private val elasticClockManager: ElasticClockManager,
     private val centralConfigurationManager: CentralConfigurationManager,
+    private val instrumentationManager: InstrumentationManager,
     private val sessionManager: SessionManager
 ) : ManagedElasticOtelAgent(configuration) {
     private val openTelemetry = configuration.openTelemetrySdk
@@ -67,6 +71,7 @@ class ElasticApmAgent private constructor(
         sampleRateManager.initialize()
         sessionManager.initialize()
         exporterGateManager.initialize()
+        instrumentationManager.initialize(this)
     }
 
     override fun getOpenTelemetry(): OpenTelemetry {
@@ -262,6 +267,7 @@ class ElasticApmAgent private constructor(
                 apmServerConnectivityManager,
                 elasticClockManager,
                 centralConfigurationManager,
+                InstrumentationManager.create(application),
                 sessionManager
             )
         }
@@ -315,6 +321,10 @@ class ElasticApmAgent private constructor(
             addMetricExporterInterceptor {
                 exporterGateManager.createMetricExporterGate(it)
             }
+        }
+
+        private fun installInstrumentations(agent: ElasticOtelAgent) {
+            TODO("Not yet implemented")
         }
     }
 }

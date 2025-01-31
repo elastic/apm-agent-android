@@ -7,3 +7,7 @@ plugins {
 android {
     namespace = "co.elastic.otel.android.test"
 }
+
+dependencies {
+    implementation(project(":testutils"))
+}

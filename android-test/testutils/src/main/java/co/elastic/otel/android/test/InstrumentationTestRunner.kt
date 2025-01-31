@@ -1,4 +1,7 @@
 package co.elastic.otel.android.test
 
-class InstrumentationTestRunner {
+import androidx.test.runner.AndroidJUnitRunner
+
+class InstrumentationTestRunner: AndroidJUnitRunner() {
+
 }

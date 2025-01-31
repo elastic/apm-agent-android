@@ -43,6 +43,7 @@ android {
 val rootLibs = extensions.getByType<VersionCatalogsExtension>().named("rootLibs")
 val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 dependencies {
+    implementation(project(":testutils"))
     testImplementation(rootLibs.findBundle("mocking").get())
     testImplementation(rootLibs.findLibrary("junit4").get())
     testImplementation(rootLibs.findLibrary("assertj").get())

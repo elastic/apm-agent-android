@@ -16,11 +16,13 @@ android {
     compileOptions {
         sourceCompatibility = javaVersion
         targetCompatibility = javaVersion
-        isCoreLibraryDesugaringEnabled = true
     }
     kotlinOptions {
         jvmTarget = javaVersionStr
         freeCompilerArgs = listOf("-Xjvm-default=all")
+    }
+    lint {
+        disable.add("NewApi")
     }
 }
 
@@ -34,5 +36,4 @@ dependencies {
     testImplementation(libs.findBundle("junit").get())
     testImplementation(libs.findLibrary("assertj").get())
     testRuntimeOnly(libs.findLibrary("junit5-vintage").get())
-    coreLibraryDesugaring(libs.findLibrary("coreLib").get())
 }

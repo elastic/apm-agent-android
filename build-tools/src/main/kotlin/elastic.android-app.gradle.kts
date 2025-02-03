@@ -15,7 +15,15 @@ android {
     compileSdk = (properties.getProperty("elastic.android.compileSdk") as String).toInt()
 
     defaultConfig {
-        minSdk = (properties.getProperty("elastic.android.minSdk") as String).toInt()
+        minSdk = 26
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+        animationsDisabled = true
     }
 
     val javaVersionStr = properties.getProperty("elastic.java.compatibility") as String
@@ -23,22 +31,11 @@ android {
     compileOptions {
         sourceCompatibility = javaVersion
         targetCompatibility = javaVersion
-        isCoreLibraryDesugaringEnabled = true
     }
     kotlinOptions {
         jvmTarget = javaVersionStr
     }
-}
-
-tasks.withType(Test::class).configureEach {
-    useJUnitPlatform()
-}
-
-val libs = extensions.getByType<VersionCatalogsExtension>().named("rootLibs")
-dependencies {
-    testImplementation(libs.findBundle("mocking").get())
-    testImplementation(libs.findBundle("junit").get())
-    testImplementation(libs.findLibrary("assertj").get())
-    testRuntimeOnly(libs.findLibrary("junit5-vintage").get())
-    coreLibraryDesugaring(libs.findLibrary("coreLib").get())
+    packaging.resources {
+        excludes += "META-INF/LICENSE*"
+    }
 }

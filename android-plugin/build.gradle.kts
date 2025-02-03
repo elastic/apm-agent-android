@@ -1,7 +1,7 @@
 plugins {
     id("elastic.java-library")
     id("java-gradle-plugin")
-    id("com.github.gmazzo.buildconfig") version "3.1.0"
+    alias(libs.plugins.buildconfig)
 }
 
 dependencies {
@@ -22,8 +22,8 @@ licensesConfig {
 
 gradlePlugin {
     plugins {
-        create("androidOtelPlugin") {
-            id = "co.elastic.otel.android"
+        create("elasticAndroidAgent") {
+            id = "co.elastic.otel.android.agent"
             implementationClass = "co.elastic.otel.android.plugin.ApmAndroidAgentPlugin"
             displayName = "Elastic OTel Android Agent"
             description = project.description

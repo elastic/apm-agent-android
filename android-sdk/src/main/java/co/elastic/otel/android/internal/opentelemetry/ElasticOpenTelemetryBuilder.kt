@@ -132,7 +132,7 @@ abstract class ElasticOpenTelemetryBuilder<B> {
         return this as B
     }
 
-    internal open fun setProcessorFactory(value: ProcessorFactory): B {
+    fun setProcessorFactory(value: ProcessorFactory): B {
         checkNotBuilt()
         processorFactory = value
         return this as B

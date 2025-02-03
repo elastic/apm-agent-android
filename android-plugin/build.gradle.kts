@@ -1,7 +1,7 @@
 plugins {
     id("elastic.java-library")
     id("java-gradle-plugin")
-    alias(libs.plugins.buildconfig)
+    id("com.github.gmazzo.buildconfig")
 }
 
 dependencies {

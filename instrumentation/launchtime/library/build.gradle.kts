@@ -1,6 +1,5 @@
 plugins {
-    id("elastic.android-library")
-    id("kotlin-kapt")
+    id("elastic.instrumentation-library")
 }
 
 android {
@@ -8,8 +7,5 @@ android {
 }
 
 dependencies {
-    api(project(":instrumentation:api"))
     implementation(instrumentation.androidx.lifecycle.process)
-    compileOnly(libs.autoService.annotations)
-    kapt(libs.autoService.compiler)
 }

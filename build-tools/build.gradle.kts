@@ -20,6 +20,7 @@ dependencies {
     implementation(rootLibs.gradle.publish.plugin)
     implementation(rootLibs.gradle.shadow.plugin)
     implementation(rootLibs.kotlin.plugin)
+    implementation(rootLibs.buildconfig.plugin)
     implementation("com.android.tools.build:gradle:${properties.getProperty("androidGradlePlugin_version")}")
     testImplementation(rootLibs.junit4)
 }

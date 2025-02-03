@@ -20,7 +20,7 @@ gradlePlugin {
     plugins {
         create("elasticAndroidAgent") {
             id = "co.elastic.otel.android.agent"
-            implementationClass = "co.elastic.otel.android.plugin.ApmAndroidAgentPlugin"
+            implementationClass = "co.elastic.otel.android.plugin.ElasticAgentPlugin"
             displayName = "Elastic OTel Android Agent"
             description = project.description
             tags.addAll("Android", "APM", "Elastic", "ELK", "opentelemetry")

@@ -20,12 +20,12 @@ package co.elastic.otel.android.plugin
 
 import co.elastic.otel.android.common.internal.logging.Elog
 import co.elastic.otel.android.generated.BuildConfig
-import co.elastic.otel.android.plugin.logging.GradleLoggerFactory
+import co.elastic.otel.android.plugin.internal.logging.GradleLoggerFactory
 import net.bytebuddy.build.gradle.android.ByteBuddyAndroidPlugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
-internal class ApmAndroidAgentPlugin : Plugin<Project> {
+internal class ElasticAgentPlugin : Plugin<Project> {
     private lateinit var project: Project
 
     override fun apply(target: Project) {

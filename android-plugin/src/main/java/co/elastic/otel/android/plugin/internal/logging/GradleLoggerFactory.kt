@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.plugin.logging
+package co.elastic.otel.android.plugin.internal.logging
 
 import co.elastic.otel.android.common.internal.logging.ELoggerFactory
 import org.gradle.api.logging.Logging

@@ -21,10 +21,6 @@ android {
     }
 }
 
-licensesConfig {
-    manualMappingFile = rootProject.file("manual_licenses_map.txt")
-}
-
 dependencies {
     api(project(":android-api"))
     api(project(":instrumentation:api"))

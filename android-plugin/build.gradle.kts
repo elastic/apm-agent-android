@@ -16,10 +16,6 @@ buildConfig {
     buildConfigField("String", "SDK_DEPENDENCY_URI", "\"$group:android-sdk:$version\"")
 }
 
-licensesConfig {
-    manualMappingFile = rootProject.file("manual_licenses_map.txt")
-}
-
 gradlePlugin {
     plugins {
         create("elasticAndroidAgent") {

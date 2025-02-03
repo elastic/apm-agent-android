@@ -4,10 +4,6 @@ plugins {
     alias(libs.plugins.buildconfig)
 }
 
-licensesConfig {
-    manualMappingFile = rootProject.file("manual_licenses_map.txt")
-}
-
 buildConfig {
     val groupId = "${rootProject.group}.instrumentation"
     packageName("${groupId}.generated")

@@ -55,5 +55,6 @@ project.extensions.create(
 )
 
 dependencies {
+    implementation(project(":android-plugin"))
     implementation(project(":android-api"))
 }

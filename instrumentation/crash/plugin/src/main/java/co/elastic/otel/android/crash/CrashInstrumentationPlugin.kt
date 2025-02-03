@@ -1,11 +1,11 @@
 package co.elastic.otel.android.crash
 
-import org.gradle.api.Plugin
+import co.elastic.otel.android.plugin.internal.InstrumentationPlugin
 import org.gradle.api.Project
 
-class CrashInstrumentationPlugin : Plugin<Project> {
+class CrashInstrumentationPlugin : InstrumentationPlugin() {
 
-    override fun apply(target: Project) {
+    override fun onApply(target: Project) {
         TODO("Not yet implemented")
     }
 }

@@ -8,7 +8,7 @@ elasticBuildConfig {
 
 elasticInstrumentationPlugins {
     create("launchtime") {
-        implementationClass = "co.elastic.otel.android.launchtime.LaunchTimePlugin"
+        implementationClass = "co.elastic.otel.android.launchtime.LaunchTimeInstrumentationPlugin"
         displayName = "Elastic OTel Android instrumentation for tracking app launch time"
     }
 }

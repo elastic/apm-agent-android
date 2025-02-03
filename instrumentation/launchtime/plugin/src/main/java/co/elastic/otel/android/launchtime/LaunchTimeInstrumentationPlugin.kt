@@ -4,7 +4,7 @@ import co.elastic.otel.android.instrumentation.generated.BuildConfig
 import co.elastic.otel.android.plugin.internal.InstrumentationPlugin
 import org.gradle.api.Project
 
-class LaunchTimePlugin : InstrumentationPlugin() {
+class LaunchTimeInstrumentationPlugin : InstrumentationPlugin() {
 
     override fun onApply(target: Project) {
         target.dependencies.add(

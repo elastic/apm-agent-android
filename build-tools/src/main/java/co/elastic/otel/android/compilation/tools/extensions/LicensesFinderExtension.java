@@ -3,5 +3,6 @@ package co.elastic.otel.android.compilation.tools.extensions;
 import org.gradle.api.file.RegularFileProperty;
 
 public abstract class LicensesFinderExtension {
-    public RegularFileProperty manualMappingFile;
+
+    public abstract RegularFileProperty getManualMappingFile();
 }

@@ -45,7 +45,7 @@ public class AarNoticeProviderPlugin extends BaseSubprojectPlugin {
             TaskProvider<PomLicensesCollectorTask> pomLicensesFinder = project.getTasks().register(variant.getName() + "DependenciesLicencesFinder", PomLicensesCollectorTask.class, task -> {
                 task.getRuntimeDependencies().set(runtimeConfigs);
                 task.getLicensesFound().set(project.getLayout().getBuildDirectory().file(task.getName() + "/licenses.txt"));
-                task.getManualLicenseMapping().set(licensesConfig.manualMappingFile.getAsFile());
+                task.getManualLicenseMapping().set(licensesConfig.getManualMappingFile().getAsFile());
             });
             TaskProvider<NoticeFilesCollectorTask> noticeCollector = project.getTasks().register(variant.getName() + "NoticeFilesCollector", NoticeFilesCollectorTask.class, task -> {
                 task.getRuntimeDependencies().set(runtimeConfigs);

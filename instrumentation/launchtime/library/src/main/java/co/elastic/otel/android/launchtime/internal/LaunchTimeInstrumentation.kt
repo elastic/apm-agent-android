@@ -21,7 +21,7 @@ package co.elastic.otel.android.launchtime.internal
 import android.app.Application
 import androidx.lifecycle.ProcessLifecycleOwner
 import co.elastic.otel.android.api.ElasticOtelAgent
-import co.elastic.otel.android.api.internal.MetricFlusher
+import co.elastic.otel.android.api.flusher.MetricFlusher
 import co.elastic.otel.android.instrumentation.internal.Instrumentation
 import com.google.auto.service.AutoService
 

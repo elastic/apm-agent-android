@@ -19,7 +19,7 @@
 package co.elastic.otel.android.internal.api
 
 import co.elastic.otel.android.api.ElasticOtelAgent
-import co.elastic.otel.android.api.internal.MetricFlusher
+import co.elastic.otel.android.api.flusher.MetricFlusher
 import io.opentelemetry.sdk.OpenTelemetrySdk
 import io.opentelemetry.sdk.common.CompletableResultCode
 

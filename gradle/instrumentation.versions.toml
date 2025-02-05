@@ -1,2 +1,3 @@
 [libraries]
 androidx-lifecycle-process = "androidx.lifecycle:lifecycle-process:2.8.7"
+opentelemetry-api-incubator = "io.opentelemetry:opentelemetry-api-incubator:1.46.0-alpha"

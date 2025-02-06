@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.internal.features.sessionmanager
+package co.elastic.otel.android.features.session
 
-internal fun interface SessionIdGenerator {
+fun interface SessionIdGenerator {
     fun generate(): String?
 }

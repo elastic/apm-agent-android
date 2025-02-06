@@ -26,7 +26,6 @@ import co.elastic.otel.android.processors.ProcessorFactory
 import co.elastic.otel.android.session.Session
 import co.elastic.otel.android.session.SessionProvider
 import io.opentelemetry.api.OpenTelemetry
-import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.api.logs.LogRecordBuilder
 import io.opentelemetry.api.trace.SpanBuilder
 import io.opentelemetry.sdk.common.Clock
@@ -62,17 +61,6 @@ internal class ElasticAgentRule : TestRule, ExporterProvider, ProcessorFactory,
         get() {
             return agent!!.getOpenTelemetry()
         }
-
-    companion object {
-        val LOG_DEFAULT_ATTRS: Attributes = Attributes.builder()
-            .put("session.id", "session-id")
-            .put("network.connection.type", "unavailable")
-            .build()
-        val SPAN_DEFAULT_ATTRS: Attributes = Attributes.builder()
-            .putAll(LOG_DEFAULT_ATTRS)
-            .put("type", "mobile")
-            .build()
-    }
 
     override fun apply(base: Statement, description: Description): Statement {
         try {

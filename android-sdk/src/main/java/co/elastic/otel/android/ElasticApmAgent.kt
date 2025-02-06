@@ -24,6 +24,7 @@ import co.elastic.otel.android.exporters.ExporterProvider
 import co.elastic.otel.android.exporters.configuration.ExportProtocol
 import co.elastic.otel.android.features.apmserver.ApmServerAuthentication
 import co.elastic.otel.android.features.apmserver.ApmServerConnectivity
+import co.elastic.otel.android.features.session.SessionIdGenerator
 import co.elastic.otel.android.interceptor.Interceptor
 import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
 import co.elastic.otel.android.internal.features.apmserver.ApmServerConnectivityManager
@@ -36,7 +37,6 @@ import co.elastic.otel.android.internal.features.diskbuffering.DiskBufferingConf
 import co.elastic.otel.android.internal.features.diskbuffering.DiskBufferingManager
 import co.elastic.otel.android.internal.features.exportergate.ExporterGateManager
 import co.elastic.otel.android.internal.features.instrumentation.InstrumentationManager
-import co.elastic.otel.android.internal.features.sessionmanager.SessionIdGenerator
 import co.elastic.otel.android.internal.features.sessionmanager.SessionManager
 import co.elastic.otel.android.internal.features.sessionmanager.samplerate.SampleRateManager
 import co.elastic.otel.android.internal.opentelemetry.ElasticOpenTelemetryBuilder
@@ -165,7 +165,7 @@ class ElasticApmAgent private constructor(
             loggingPolicy = value
         }
 
-        internal fun setSessionIdGenerator(value: SessionIdGenerator) = apply {
+        fun setSessionIdGenerator(value: SessionIdGenerator) = apply {
             sessionIdGenerator = value
         }
 

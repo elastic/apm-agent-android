@@ -18,6 +18,7 @@
  */
 package co.elastic.otel.android.crash
 
+import co.elastic.otel.android.test.common.ElasticAttributes.getLogRecordDefaultAttributes
 import co.elastic.otel.android.test.rule.RobolectricAgentRule
 import io.mockk.Runs
 import io.mockk.every
@@ -26,8 +27,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat
-import java.io.PrintWriter
-import java.io.StringWriter
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -48,11 +47,11 @@ class CrashReportTest {
 
         assertThat(logs).hasSize(1)
         assertThat(logs.first()).hasAttributes(
-            Attributes.builder().putAll(LOG_DEFAULT_ATTRS)
+            Attributes.builder().putAll(getLogRecordDefaultAttributes())
                 .put("event.name", "crash")
                 .put("event.domain", "device")
                 .put("exception.message", "Custom exception")
-                .put("exception.stacktrace", stackTraceToString(exception))
+                .put("exception.stacktrace", exception.stackTraceToString())
                 .put("exception.type", "java.lang.IllegalStateException")
                 .build()
         )
@@ -75,15 +74,5 @@ class CrashReportTest {
         val exceptionHandler = Thread.getDefaultUncaughtExceptionHandler()
         exceptionHandler?.uncaughtException(Thread.currentThread(), exception)
         return exceptionHandler
-    }
-
-    private fun stackTraceToString(throwable: Throwable): String {
-        val sw = StringWriter()
-        val pw = PrintWriter(sw)
-
-        throwable.printStackTrace(pw)
-        pw.flush()
-
-        return sw.toString()
     }
 }

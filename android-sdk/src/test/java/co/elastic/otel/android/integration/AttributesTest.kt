@@ -29,9 +29,9 @@ import android.telephony.TelephonyManager
 import co.elastic.otel.android.internal.services.network.query.NetworkApi21QueryManager
 import co.elastic.otel.android.internal.services.network.query.NetworkApi23QueryManager
 import co.elastic.otel.android.internal.services.network.query.NetworkApi24QueryManager
+import co.elastic.otel.android.test.common.ElasticAttributes.getLogRecordDefaultAttributes
+import co.elastic.otel.android.test.common.ElasticAttributes.getSpanDefaultAttributes
 import co.elastic.otel.android.testutils.ElasticAgentRule
-import co.elastic.otel.android.testutils.ElasticAgentRule.Companion.LOG_DEFAULT_ATTRS
-import co.elastic.otel.android.testutils.ElasticAgentRule.Companion.SPAN_DEFAULT_ATTRS
 import io.mockk.every
 import io.mockk.mockk
 import io.opentelemetry.api.common.Attributes
@@ -191,8 +191,9 @@ internal class AttributesTest {
         val logItems = agentRule.getFinishedLogRecords()
         assertThat(spanItems).hasSize(1)
         assertThat(logItems).hasSize(1)
-        assertThat(spanItems.first()).hasAttributes(SPAN_DEFAULT_ATTRS).hasStatus(StatusData.ok())
-        assertThat(logItems.first()).hasAttributes(LOG_DEFAULT_ATTRS)
+        assertThat(spanItems.first()).hasAttributes(getSpanDefaultAttributes())
+            .hasStatus(StatusData.ok())
+        assertThat(logItems.first()).hasAttributes(getLogRecordDefaultAttributes())
     }
 
     @Config(sdk = [21, 23, Config.NEWEST_SDK])

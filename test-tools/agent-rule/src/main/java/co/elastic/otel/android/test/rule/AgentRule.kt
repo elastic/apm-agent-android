@@ -4,6 +4,7 @@ import android.app.Application
 import co.elastic.otel.android.ElasticApmAgent
 import co.elastic.otel.android.api.ElasticOtelAgent
 import co.elastic.otel.android.processors.ProcessorFactory
+import co.elastic.otel.android.test.common.ElasticAttributes.DEFAULT_SESSION_ID
 import io.opentelemetry.sdk.logs.LogRecordProcessor
 import io.opentelemetry.sdk.logs.data.LogRecordData
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
@@ -40,6 +41,7 @@ abstract class AgentRule : TestRule {
                             ElasticApmAgent.builder(it)
                                 .setUrl("http://none")
                                 .setProcessorFactory(processorFactory!!)
+                                .setSessionIdGenerator { DEFAULT_SESSION_ID }
                                 .build()
                     }
                     base.evaluate()

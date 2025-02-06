@@ -19,6 +19,7 @@
 package co.elastic.otel.android.internal.features.sessionmanager
 
 import androidx.annotation.GuardedBy
+import co.elastic.otel.android.features.session.SessionIdGenerator
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.time.SystemTimeProvider
 import co.elastic.otel.android.internal.utilities.cache.CacheHandler

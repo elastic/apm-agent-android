@@ -23,16 +23,16 @@ import co.elastic.otel.android.ElasticApmAgent
 import co.elastic.otel.android.exporters.ExporterProvider
 import co.elastic.otel.android.features.apmserver.ApmServerAuthentication
 import co.elastic.otel.android.features.apmserver.ApmServerConnectivity
+import co.elastic.otel.android.features.session.SessionIdGenerator
 import co.elastic.otel.android.interceptor.Interceptor
 import co.elastic.otel.android.internal.features.centralconfig.CentralConfigurationConnectivity
 import co.elastic.otel.android.internal.features.clock.ElasticClockBroadcastReceiver
 import co.elastic.otel.android.internal.features.diskbuffering.DiskBufferingConfiguration
-import co.elastic.otel.android.internal.features.sessionmanager.SessionIdGenerator
 import co.elastic.otel.android.internal.services.appinfo.AppInfoService
 import co.elastic.otel.android.internal.time.SystemTimeProvider
 import co.elastic.otel.android.internal.time.ntp.SntpClient
 import co.elastic.otel.android.processors.ProcessorFactory
-import co.elastic.otel.android.testutils.ElasticAgentRule
+import co.elastic.otel.android.test.common.ElasticAttributes.getSpanDefaultAttributes
 import co.elastic.otel.android.testutils.WireMockRule
 import io.mockk.Runs
 import io.mockk.clearMocks
@@ -82,6 +82,11 @@ class ElasticApmAgentTest {
     private lateinit var simpleProcessorFactory: SimpleProcessorFactory
     private val inMemoryExporters = InMemoryExporterProvider()
     private val inMemoryExportersInterceptor = Interceptor<ExporterProvider> { inMemoryExporters }
+
+    companion object {
+        private val SPAN_DEFAULT_ATTRIBUTES = getSpanDefaultAttributes()
+        private val LOG_DEFAULT_ATTRIBUTES = getSpanDefaultAttributes()
+    }
 
     @get:Rule
     val wireMockRule = WireMockRule()
@@ -915,11 +920,11 @@ class ElasticApmAgentTest {
         val spanData = inMemoryExporters.getFinishedSpans().first()
         assertThat(spanData).startsAt(
             expectedCurrentTime * 1_000_000
-        ).hasAttributes(ElasticAgentRule.SPAN_DEFAULT_ATTRS)
+        ).hasAttributes(SPAN_DEFAULT_ATTRIBUTES)
         val logRecordData = inMemoryExporters.getFinishedLogRecords().first()
         assertThat(logRecordData).hasTimestamp(expectedCurrentTime * 1_000_000)
             .hasObservedTimestamp(currentTime.get() * 1_000_000)
-            .hasAttributes(ElasticAgentRule.LOG_DEFAULT_ATTRS)
+            .hasAttributes(LOG_DEFAULT_ATTRIBUTES)
 
         // Send new data just for fun
         inMemoryExporters.resetExporters()
@@ -934,11 +939,11 @@ class ElasticApmAgentTest {
 
         assertThat(inMemoryExporters.getFinishedSpans().first()).startsAt(
             expectedCurrentTime * 1_000_000
-        ).hasAttributes(ElasticAgentRule.SPAN_DEFAULT_ATTRS)
+        ).hasAttributes(SPAN_DEFAULT_ATTRIBUTES)
         assertThat(inMemoryExporters.getFinishedLogRecords().first())
             .hasTimestamp(0)
             .hasObservedTimestamp(expectedCurrentTime * 1_000_000)
-            .hasAttributes(ElasticAgentRule.LOG_DEFAULT_ATTRS)
+            .hasAttributes(LOG_DEFAULT_ATTRIBUTES)
     }
 
     @Test
@@ -994,11 +999,11 @@ class ElasticApmAgentTest {
         val spanData = inMemoryExporters.getFinishedSpans().first()
         assertThat(spanData).startsAt(
             expectedCurrentTime * 1_000_000
-        ).hasAttributes(ElasticAgentRule.SPAN_DEFAULT_ATTRS)
+        ).hasAttributes(SPAN_DEFAULT_ATTRIBUTES)
         val logRecordData = inMemoryExporters.getFinishedLogRecords().first()
         assertThat(logRecordData).hasTimestamp(expectedCurrentTime * 1_000_000)
             .hasObservedTimestamp(currentTime.get() * 1_000_000)
-            .hasAttributes(ElasticAgentRule.LOG_DEFAULT_ATTRS)
+            .hasAttributes(LOG_DEFAULT_ATTRIBUTES)
 
         // Send new data just for fun
         inMemoryExporters.resetExporters()
@@ -1017,11 +1022,11 @@ class ElasticApmAgentTest {
 
         assertThat(inMemoryExporters.getFinishedSpans().first()).startsAt(
             expectedCurrentTime * 1_000_000
-        ).hasAttributes(ElasticAgentRule.SPAN_DEFAULT_ATTRS)
+        ).hasAttributes(SPAN_DEFAULT_ATTRIBUTES)
         assertThat(inMemoryExporters.getFinishedLogRecords().first())
             .hasTimestamp(0)
             .hasObservedTimestamp(expectedCurrentTime * 1_000_000)
-            .hasAttributes(ElasticAgentRule.LOG_DEFAULT_ATTRS)
+            .hasAttributes(LOG_DEFAULT_ATTRIBUTES)
     }
 
     @Test
@@ -1065,11 +1070,11 @@ class ElasticApmAgentTest {
         val spanData = inMemoryExporters.getFinishedSpans().first()
         assertThat(spanData).startsAt(
             expectedCurrentTime * 1_000_000
-        ).hasAttributes(ElasticAgentRule.SPAN_DEFAULT_ATTRS)
+        ).hasAttributes(SPAN_DEFAULT_ATTRIBUTES)
         val logRecordData = inMemoryExporters.getFinishedLogRecords().first()
         assertThat(logRecordData).hasTimestamp(0)
             .hasObservedTimestamp(expectedCurrentTime * 1_000_000)
-            .hasAttributes(ElasticAgentRule.LOG_DEFAULT_ATTRS)
+            .hasAttributes(LOG_DEFAULT_ATTRIBUTES)
     }
 
     @Test
@@ -1116,12 +1121,12 @@ class ElasticApmAgentTest {
         val spanData = inMemoryExporters.getFinishedSpans().first()
         assertThat(spanData).startsAt(
             currentTime.get() * 1_000_000
-        ).hasAttributes(ElasticAgentRule.SPAN_DEFAULT_ATTRS)
+        ).hasAttributes(SPAN_DEFAULT_ATTRIBUTES)
         val logRecordData = inMemoryExporters.getFinishedLogRecords().first()
         assertThat(logRecordData)
             .hasTimestamp(0)
             .hasObservedTimestamp(currentTime.get() * 1_000_000)
-            .hasAttributes(ElasticAgentRule.LOG_DEFAULT_ATTRS)
+            .hasAttributes(LOG_DEFAULT_ATTRIBUTES)
     }
 
     @Test
@@ -1172,12 +1177,12 @@ class ElasticApmAgentTest {
         val spanData = inMemoryExporters.getFinishedSpans().first()
         assertThat(spanData).startsAt(
             currentTime.get() * 1_000_000
-        ).hasAttributes(ElasticAgentRule.SPAN_DEFAULT_ATTRS)
+        ).hasAttributes(SPAN_DEFAULT_ATTRIBUTES)
         val logRecordData = inMemoryExporters.getFinishedLogRecords().first()
         assertThat(logRecordData)
             .hasTimestamp(0)
             .hasObservedTimestamp(currentTime.get() * 1_000_000)
-            .hasAttributes(ElasticAgentRule.LOG_DEFAULT_ATTRS)
+            .hasAttributes(LOG_DEFAULT_ATTRIBUTES)
     }
 
     @Test

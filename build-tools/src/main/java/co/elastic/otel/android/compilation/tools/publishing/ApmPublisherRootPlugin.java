@@ -32,14 +32,16 @@ public class ApmPublisherRootPlugin implements Plugin<Project> {
         addPostDeployTask(project);
         configureMavenCentral(project);
         project.subprojects(subproject -> {
-            Matcher instrumentationMatcher = INSTRUMENTATION_PROJECT_PATTERN.matcher(subproject.getPath());
-            if (instrumentationMatcher.matches()) {
-                setGroupId(subproject, subproject.getGroup() + ".instrumentation");
-                setArtifactId(subproject, instrumentationMatcher.group(1) + "-" + instrumentationMatcher.group(2));
-                subproject.setGroup(subproject.getGroup() + "." + instrumentationMatcher.group(1));
+            if (!subproject.getName().contains("test-tools")) {
+                Matcher instrumentationMatcher = INSTRUMENTATION_PROJECT_PATTERN.matcher(subproject.getPath());
+                if (instrumentationMatcher.matches()) {
+                    setGroupId(subproject, subproject.getGroup() + ".instrumentation");
+                    setArtifactId(subproject, instrumentationMatcher.group(1) + "-" + instrumentationMatcher.group(2));
+                    subproject.setGroup(subproject.getGroup() + "." + instrumentationMatcher.group(1));
+                }
+                subproject.getPluginManager().withPlugin("java-library", appliedPlugin -> configureProject(project, subproject));
+                subproject.getPluginManager().withPlugin("com.android.library", appliedPlugin -> configureProject(project, subproject));
             }
-            subproject.getPluginManager().withPlugin("java-library", appliedPlugin -> configureProject(project, subproject));
-            subproject.getPluginManager().withPlugin("com.android.library", appliedPlugin -> configureProject(project, subproject));
         });
     }
 

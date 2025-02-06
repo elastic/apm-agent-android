@@ -25,6 +25,7 @@ include(":android-api")
 include(":android-sdk")
 include(":android-plugin")
 include(":android-common")
+include(":test-tools:agent-rule")
 
 val instrumentationDirName = "instrumentation"
 val instrumentationDir = File(rootDir, instrumentationDirName)

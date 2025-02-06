@@ -9,4 +9,5 @@ android {
 dependencies {
     implementation(libs.bundles.opentelemetry.semconv)
     implementation(instrumentation.opentelemetry.api.incubator)
+    testImplementation(libs.opentelemetry.testing)
 }

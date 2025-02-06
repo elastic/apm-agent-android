@@ -32,6 +32,7 @@ import co.elastic.otel.android.internal.services.appinfo.AppInfoService
 import co.elastic.otel.android.internal.time.SystemTimeProvider
 import co.elastic.otel.android.internal.time.ntp.SntpClient
 import co.elastic.otel.android.processors.ProcessorFactory
+import co.elastic.otel.android.test.common.ElasticAttributes.getLogRecordDefaultAttributes
 import co.elastic.otel.android.test.common.ElasticAttributes.getSpanDefaultAttributes
 import co.elastic.otel.android.testutils.WireMockRule
 import io.mockk.Runs
@@ -85,7 +86,7 @@ class ElasticApmAgentTest {
 
     companion object {
         private val SPAN_DEFAULT_ATTRIBUTES = getSpanDefaultAttributes()
-        private val LOG_DEFAULT_ATTRIBUTES = getSpanDefaultAttributes()
+        private val LOG_DEFAULT_ATTRIBUTES = getLogRecordDefaultAttributes()
     }
 
     @get:Rule

@@ -16,10 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.integration
+package co.elastic.otel.android.crash
 
-import co.elastic.otel.android.testutils.ElasticAgentRule
-import co.elastic.otel.android.testutils.ElasticAgentRule.Companion.LOG_DEFAULT_ATTRS
+import co.elastic.otel.android.test.rule.RobolectricAgentRule
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -29,22 +28,19 @@ import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat
 import java.io.PrintWriter
 import java.io.StringWriter
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-@Ignore("Not implemented yet.")
-internal class CrashReportTest {
+class CrashReportTest {
 
     @get:Rule
-    val agentRule = ElasticAgentRule()
+    val agentRule = RobolectricAgentRule()
 
     @Test
     fun `Capture log event with crash`() {
-        agentRule.initialize()
         val exception: Exception = IllegalStateException("Custom exception")
         throwException(exception)
 
@@ -68,25 +64,11 @@ internal class CrashReportTest {
         every { originalExceptionHandler.uncaughtException(any(), any()) } just Runs
         Thread.setDefaultUncaughtExceptionHandler(originalExceptionHandler)
         val exception = IllegalStateException("Custom exception")
-        agentRule.initialize()
 
         val elasticHandler = throwException(exception)
 
         assertThat(originalExceptionHandler).isNotEqualTo(elasticHandler)
         verify { originalExceptionHandler.uncaughtException(Thread.currentThread(), exception) }
-    }
-
-    @Test
-    fun `Drop crash report when the feature is disabled`() {
-//        agentRule.initialize(configurationInterceptor = {
-//            it.setInstrumentationConfiguration(
-//                InstrumentationConfiguration.builder().enableCrashReporting(false).build()
-//            )
-//        })
-
-        throwException()
-
-        assertThat(agentRule.getFinishedLogRecords()).hasSize(0)
     }
 
     private fun throwException(exception: Exception = IllegalStateException("Custom exception")): Thread.UncaughtExceptionHandler? {

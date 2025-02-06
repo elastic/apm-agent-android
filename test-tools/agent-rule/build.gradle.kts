@@ -19,8 +19,7 @@ android {
 }
 
 dependencies {
-    api(project(":android-sdk"))
-    api(libs.opentelemetry.testing)
-    api(libs.assertj)
-    api(libs.junit4)
+    implementation(project(":android-sdk"))
+    implementation(libs.opentelemetry.testing)
+    implementation(libs.junit4)
 }

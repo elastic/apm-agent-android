@@ -24,7 +24,7 @@ import co.elastic.otel.android.internal.services.backgroundwork.BackgroundWorkSe
 import co.elastic.otel.android.internal.services.network.NetworkService
 import co.elastic.otel.android.internal.services.preferences.PreferencesService
 
-internal class ServiceManager {
+internal class ServiceManager private constructor() {
     private val services = mutableMapOf<Class<out Service>, Service>()
 
     fun getPreferencesService(): PreferencesService {

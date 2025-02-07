@@ -19,6 +19,7 @@
 package co.elastic.otel.android
 
 import android.app.Application
+import co.elastic.otel.android.api.ElasticOtelAgent
 import co.elastic.otel.android.common.internal.logging.Elog
 import co.elastic.otel.android.exporters.ExporterProvider
 import co.elastic.otel.android.exporters.configuration.ExportProtocol
@@ -32,49 +33,37 @@ import co.elastic.otel.android.internal.features.apmserver.ApmServerExporterProv
 import co.elastic.otel.android.internal.features.centralconfig.CentralConfigurationConnectivity
 import co.elastic.otel.android.internal.features.centralconfig.CentralConfigurationManager
 import co.elastic.otel.android.internal.features.clock.ElasticClockManager
-import co.elastic.otel.android.internal.features.conditionaldrop.ConditionalDropManager
 import co.elastic.otel.android.internal.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.otel.android.internal.features.diskbuffering.DiskBufferingManager
 import co.elastic.otel.android.internal.features.exportergate.ExporterGateManager
-import co.elastic.otel.android.internal.features.instrumentation.InstrumentationManager
 import co.elastic.otel.android.internal.features.sessionmanager.SessionManager
 import co.elastic.otel.android.internal.features.sessionmanager.samplerate.SampleRateManager
-import co.elastic.otel.android.internal.opentelemetry.ElasticOpenTelemetryBuilder
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.time.SystemTimeProvider
 import co.elastic.otel.android.internal.time.ntp.SntpClient
 import co.elastic.otel.android.internal.utilities.logging.AndroidLoggerFactory
 import co.elastic.otel.android.logging.LoggingPolicy
 import io.opentelemetry.api.OpenTelemetry
-import java.util.UUID
 
 @Suppress("CanBeParameter")
 class ElasticApmAgent private constructor(
-    configuration: Configuration,
-    private val sampleRateManager: SampleRateManager,
-    private val serviceManager: ServiceManager,
-    private val exporterGateManager: ExporterGateManager,
-    private val diskBufferingManager: DiskBufferingManager,
+    private val delegate: ManagedElasticOtelAgent,
     private val apmServerConnectivityManager: ApmServerConnectivityManager,
-    private val elasticClockManager: ElasticClockManager,
     private val centralConfigurationManager: CentralConfigurationManager,
-    private val instrumentationManager: InstrumentationManager,
-    private val sessionManager: SessionManager
-) : ManagedElasticOtelAgent(configuration) {
-    private val openTelemetry = configuration.openTelemetrySdk
+    private val sampleRateManager: SampleRateManager
+) : ElasticOtelAgent {
 
     init {
-        elasticClockManager.initialize()
-        diskBufferingManager.initialize()
         centralConfigurationManager.initialize()
         sampleRateManager.initialize()
-        sessionManager.initialize()
-        exporterGateManager.initialize()
-        instrumentationManager.initialize(this)
     }
 
     override fun getOpenTelemetry(): OpenTelemetry {
-        return openTelemetry
+        return delegate.getOpenTelemetry()
+    }
+
+    override fun close() {
+        delegate.close()
     }
 
     fun setApmServerConnectivity(connectivity: ApmServerConnectivity) {
@@ -95,11 +84,11 @@ class ElasticApmAgent private constructor(
     }
 
     internal fun getExporterGateManager(): ExporterGateManager {
-        return exporterGateManager
+        return delegate.exporterGateManager
     }
 
     internal fun getDiskBufferingManager(): DiskBufferingManager {
-        return diskBufferingManager
+        return delegate.diskBufferingManager
     }
 
     internal fun getCentralConfigurationManager(): CentralConfigurationManager {
@@ -107,17 +96,11 @@ class ElasticApmAgent private constructor(
     }
 
     internal fun getElasticClockManager(): ElasticClockManager {
-        return elasticClockManager
+        return delegate.elasticClockManager
     }
 
     internal fun getSessionManager(): SessionManager {
-        return sessionManager
-    }
-
-    override fun onClose() {
-        diskBufferingManager.close()
-        elasticClockManager.close()
-        serviceManager.close()
+        return delegate.sessionManager
     }
 
     companion object {
@@ -127,14 +110,13 @@ class ElasticApmAgent private constructor(
         }
     }
 
-    class Builder internal constructor(private val application: Application) :
-        ElasticOpenTelemetryBuilder<Builder>() {
+    class Builder internal constructor(private val application: Application) {
         private var url: String? = null
         private var authentication: ApmServerAuthentication = ApmServerAuthentication.None
         private var exportProtocol: ExportProtocol = ExportProtocol.HTTP
         private var extraRequestHeaders: Map<String, String> = emptyMap()
         private var sessionIdGenerator: SessionIdGenerator? = null
-        private var diskBufferingConfiguration = DiskBufferingConfiguration.enabled()
+        private var diskBufferingConfiguration: DiskBufferingConfiguration? = null
         private var loggingPolicy: LoggingPolicy? = null
         internal var internalSntpClient: SntpClient? = null
         internal var internalSystemTimeProvider: SystemTimeProvider? = null
@@ -142,8 +124,8 @@ class ElasticApmAgent private constructor(
             Interceptor.noop()
         internal var internalServiceManagerInterceptor: Interceptor<ServiceManager> =
             Interceptor.noop()
-        internal var internalSignalBufferSize = 1000
-        internal var internalWaitForClock = true
+        internal var internalSignalBufferSize: Int? = null
+        internal var internalWaitForClock: Boolean? = null
 
         fun setUrl(value: String) = apply {
             url = value
@@ -180,9 +162,7 @@ class ElasticApmAgent private constructor(
                 internalServiceManagerInterceptor.intercept(ServiceManager.create(application))
 
             Elog.init(
-                AndroidLoggerFactory(
-                    loggingPolicy ?: LoggingPolicy.getDefault(serviceManager)
-                )
+                AndroidLoggerFactory(loggingPolicy ?: LoggingPolicy.getDefault(serviceManager))
             )
 
             val apmServerConfiguration = ApmServerConnectivity(
@@ -197,129 +177,56 @@ class ElasticApmAgent private constructor(
             val apmServerConnectivityManager =
                 ApmServerConnectivityManager(connectivityHolder)
             val exporterProvider = ApmServerExporterProvider.create(connectivityHolder)
-            val exporterGateManager = ExporterGateManager(
-                serviceManager,
-                signalBufferSize = internalSignalBufferSize
-            )
-            val diskBufferingManager = DiskBufferingManager.create(
-                systemTimeProvider, serviceManager, exporterGateManager, diskBufferingConfiguration
-            )
-            val elasticClockManager = ElasticClockManager.create(
-                serviceManager,
-                exporterGateManager,
-                systemTimeProvider,
-                internalSntpClient ?: SntpClient.create(systemTimeProvider),
-                internalWaitForClock
-            )
+
+            val managedConfiguration =
+                createManagedConfiguration(serviceManager, systemTimeProvider)
+
             val centralConfigurationManager = CentralConfigurationManager.create(
                 serviceManager,
                 systemTimeProvider,
-                exporterGateManager,
+                managedConfiguration.exporterGateManager,
                 serviceName,
                 deploymentEnvironment,
                 connectivityHolder
             )
-            val sessionManager = SessionManager.create(
-                serviceManager,
-                sessionIdGenerator ?: SessionIdGenerator { UUID.randomUUID().toString() },
-                systemTimeProvider
-            )
             val sampleRateManager = SampleRateManager.create(
                 serviceManager,
-                exporterGateManager,
+                managedConfiguration.exporterGateManager,
                 centralConfigurationManager.getCentralConfiguration()
             )
-            sessionManager.addListener(sampleRateManager)
-
-            addSpanAttributesInterceptor(
-                elasticClockManager.getClockExportGateManager().getSpanAttributesInterceptor()
-            )
-            addLogRecordAttributesInterceptor(
-                elasticClockManager.getClockExportGateManager()
-                    .getLogRecordAttributesInterceptor()
-            )
-
-            val conditionalDropManager = ConditionalDropManager()
-            conditionalDropManager.dropWhen {
+            managedConfiguration.sessionManager.addListener(sampleRateManager)
+            managedConfiguration.conditionalDropManager.dropWhen {
                 !centralConfigurationManager.getCentralConfiguration().isRecording()
             }
-            conditionalDropManager.dropWhen {
+            managedConfiguration.conditionalDropManager.dropWhen {
                 !sampleRateManager.allowSignalExporting()
             }
 
-            addInternalInterceptors(
-                diskBufferingManager,
-                conditionalDropManager,
-                elasticClockManager,
-                exporterGateManager
+            val managedAgentBuilder = ManagedElasticOtelAgent.Builder(managedConfiguration)
+            managedAgentBuilder.setExporterProvider(
+                internalExporterProviderInterceptor.intercept(
+                    exporterProvider
+                )
             )
-            setClock(elasticClockManager.getClock())
-            setExporterProvider(internalExporterProviderInterceptor.intercept(exporterProvider))
-            setSessionProvider(sessionManager)
-
             return ElasticApmAgent(
-                buildConfiguration(serviceManager),
-                sampleRateManager,
-                serviceManager,
-                exporterGateManager,
-                diskBufferingManager,
+                managedAgentBuilder.build(serviceManager),
                 apmServerConnectivityManager,
-                elasticClockManager,
                 centralConfigurationManager,
-                InstrumentationManager.create(application),
-                sessionManager
+                sampleRateManager
             )
         }
 
-        private fun addInternalInterceptors(
-            diskBufferingManager: DiskBufferingManager,
-            conditionalDropManager: ConditionalDropManager,
-            elasticClockManager: ElasticClockManager,
-            exporterGateManager: ExporterGateManager
-        ) {
-            addDiskBufferingInterceptors(diskBufferingManager)
-            addConditionalDropInterceptors(conditionalDropManager)
-            addClockExporterInterceptors(elasticClockManager)
-            addExporterGateInterceptors(exporterGateManager)
-        }
-
-        private fun addDiskBufferingInterceptors(diskBufferingManager: DiskBufferingManager) {
-            addSpanExporterInterceptor(diskBufferingManager::interceptSpanExporter)
-            addLogRecordExporterInterceptor(diskBufferingManager::interceptLogRecordExporter)
-            addMetricExporterInterceptor(diskBufferingManager::interceptMetricExporter)
-        }
-
-        private fun addConditionalDropInterceptors(conditionalDropManager: ConditionalDropManager) {
-            addSpanExporterInterceptor {
-                conditionalDropManager.createConditionalDropSpanExporter(it)
-            }
-            addLogRecordExporterInterceptor {
-                conditionalDropManager.createConditionalDropLogRecordExporter(it)
-            }
-            addMetricExporterInterceptor {
-                conditionalDropManager.createConditionalDropMetricExporter(it)
-            }
-        }
-
-        private fun addClockExporterInterceptors(elasticClockManager: ElasticClockManager) {
-            addSpanExporterInterceptor {
-                elasticClockManager.getClockExportGateManager().createSpanExporterDelegator(it)
-            }
-            addLogRecordExporterInterceptor {
-                elasticClockManager.getClockExportGateManager().createLogRecordExporterDelegator(it)
-            }
-        }
-
-        private fun addExporterGateInterceptors(exporterGateManager: ExporterGateManager) {
-            addSpanExporterInterceptor {
-                exporterGateManager.createSpanExporterGate(it)
-            }
-            addLogRecordExporterInterceptor {
-                exporterGateManager.createLogRecordExporterGate(it)
-            }
-            addMetricExporterInterceptor {
-                exporterGateManager.createMetricExporterGate(it)
-            }
+        private fun createManagedConfiguration(
+            serviceManager: ServiceManager,
+            systemTimeProvider: SystemTimeProvider
+        ): ManagedElasticOtelAgent.Configuration {
+            val managedConfigBuilder = ManagedElasticOtelAgent.Configuration.Builder(application)
+            sessionIdGenerator?.let { managedConfigBuilder.setSessionIdGenerator(it) }
+            diskBufferingConfiguration?.let { managedConfigBuilder.setDiskBufferingConfiguration(it) }
+            internalSntpClient?.let { managedConfigBuilder.setSntpClient(it) }
+            internalSignalBufferSize?.let { managedConfigBuilder.setGateSignalBufferSize(it) }
+            internalWaitForClock?.let { managedConfigBuilder.setWaitForClock(it) }
+            return managedConfigBuilder.build(serviceManager, systemTimeProvider)
         }
     }
 }

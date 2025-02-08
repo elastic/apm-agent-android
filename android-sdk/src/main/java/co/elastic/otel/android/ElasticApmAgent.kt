@@ -43,6 +43,7 @@ import co.elastic.otel.android.internal.time.SystemTimeProvider
 import co.elastic.otel.android.internal.time.ntp.SntpClient
 import co.elastic.otel.android.internal.utilities.logging.AndroidLoggerFactory
 import co.elastic.otel.android.logging.LoggingPolicy
+import co.elastic.otel.android.processors.ProcessorFactory
 import io.opentelemetry.api.OpenTelemetry
 
 @Suppress("CanBeParameter")
@@ -54,7 +55,7 @@ class ElasticApmAgent private constructor(
 ) : ElasticOtelAgent {
 
     init {
-        centralConfigurationManager.initialize()
+        centralConfigurationManager.initialize(delegate.openTelemetryConfig)
         sampleRateManager.initialize()
     }
 
@@ -111,8 +112,6 @@ class ElasticApmAgent private constructor(
     }
 
     class Builder internal constructor(private val application: Application) {
-        private var serviceName: String? = null
-        private var deploymentEnvironment: String? = null
         private var url: String? = null
         private var authentication: ApmServerAuthentication = ApmServerAuthentication.None
         private var exportProtocol: ExportProtocol = ExportProtocol.HTTP
@@ -120,6 +119,7 @@ class ElasticApmAgent private constructor(
         private var sessionIdGenerator: SessionIdGenerator? = null
         private var diskBufferingConfiguration: DiskBufferingConfiguration? = null
         private var loggingPolicy: LoggingPolicy? = null
+        private val managedAgentBuilder = ManagedElasticOtelAgent.Builder()
         internal var internalSntpClient: SntpClient? = null
         internal var internalSystemTimeProvider: SystemTimeProvider? = null
         internal var internalExporterProviderInterceptor: Interceptor<ExporterProvider> =
@@ -130,11 +130,11 @@ class ElasticApmAgent private constructor(
         internal var internalWaitForClock: Boolean? = null
 
         fun setServiceName(value: String) = apply {
-            serviceName = value
+            managedAgentBuilder.setServiceName(value)
         }
 
         fun setDeploymentEnvironment(value: String) = apply {
-            deploymentEnvironment = value
+            managedAgentBuilder.setDeploymentEnvironment(value)
         }
 
         fun setUrl(value: String) = apply {
@@ -161,14 +161,16 @@ class ElasticApmAgent private constructor(
             sessionIdGenerator = value
         }
 
+        fun setProcessorFactory(value: ProcessorFactory) = apply {
+            managedAgentBuilder.setProcessorFactory(value)
+        }
+
         internal fun setDiskBufferingConfiguration(value: DiskBufferingConfiguration) = apply {
             diskBufferingConfiguration = value
         }
 
         fun build(): ElasticApmAgent {
             val finalUrl = url ?: throw NullPointerException("The url must be set.")
-            val finalServiceName =
-                serviceName ?: throw NullPointerException("The serviceName value must be set.")
 
             val serviceManager =
                 internalServiceManagerInterceptor.intercept(ServiceManager.create(application))
@@ -184,44 +186,41 @@ class ElasticApmAgent private constructor(
                 exportProtocol
             )
             val systemTimeProvider = internalSystemTimeProvider ?: SystemTimeProvider()
-            val connectivityHolder =
+            val apmServerConnectivityHolder =
                 ApmServerConnectivityManager.ConnectivityHolder(apmServerConfiguration)
             val apmServerConnectivityManager =
-                ApmServerConnectivityManager(connectivityHolder)
-            val exporterProvider = ApmServerExporterProvider.create(connectivityHolder)
+                ApmServerConnectivityManager(apmServerConnectivityHolder)
+            val exporterProvider = ApmServerExporterProvider.create(apmServerConnectivityHolder)
 
-            val managedConfiguration =
+            val managedFeatures =
                 createManagedConfiguration(serviceManager, systemTimeProvider)
 
             val centralConfigurationManager = CentralConfigurationManager.create(
                 serviceManager,
                 systemTimeProvider,
-                managedConfiguration.exporterGateManager,
-                finalServiceName,
-                deploymentEnvironment,
-                connectivityHolder
+                managedFeatures.exporterGateManager,
+                apmServerConnectivityHolder
             )
             val sampleRateManager = SampleRateManager.create(
                 serviceManager,
-                managedConfiguration.exporterGateManager,
+                managedFeatures.exporterGateManager,
                 centralConfigurationManager.getCentralConfiguration()
             )
-            managedConfiguration.sessionManager.addListener(sampleRateManager)
-            managedConfiguration.conditionalDropManager.dropWhen {
+            managedFeatures.sessionManager.addListener(sampleRateManager)
+            managedFeatures.conditionalDropManager.dropWhen {
                 !centralConfigurationManager.getCentralConfiguration().isRecording()
             }
-            managedConfiguration.conditionalDropManager.dropWhen {
+            managedFeatures.conditionalDropManager.dropWhen {
                 !sampleRateManager.allowSignalExporting()
             }
 
-            val managedAgentBuilder = ManagedElasticOtelAgent.Builder(managedConfiguration)
             managedAgentBuilder.setExporterProvider(
                 internalExporterProviderInterceptor.intercept(
                     exporterProvider
                 )
             )
             return ElasticApmAgent(
-                managedAgentBuilder.build(serviceManager),
+                managedAgentBuilder.build(serviceManager, managedFeatures),
                 apmServerConnectivityManager,
                 centralConfigurationManager,
                 sampleRateManager

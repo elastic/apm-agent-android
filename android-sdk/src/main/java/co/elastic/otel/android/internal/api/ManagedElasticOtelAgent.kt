@@ -35,13 +35,16 @@ import co.elastic.otel.android.internal.opentelemetry.ElasticOpenTelemetryConfig
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.time.SystemTimeProvider
 import co.elastic.otel.android.internal.time.ntp.SntpClient
+import co.elastic.otel.android.processors.ProcessorFactory
+import co.elastic.otel.android.provider.StringProvider
 import io.opentelemetry.api.OpenTelemetry
+import io.opentelemetry.sdk.common.Clock
 import io.opentelemetry.sdk.common.CompletableResultCode
 import java.util.UUID
 
 class ManagedElasticOtelAgent private constructor(
     private val serviceManager: ServiceManager,
-    private val openTelemetryConfig: ElasticOpenTelemetryConfig,
+    internal val openTelemetryConfig: ElasticOpenTelemetryConfig,
     internal val features: ManagedFeatures
 ) : ElasticOtelAgent, MetricFlusher, LogRecordFlusher {
 
@@ -148,14 +151,42 @@ class ManagedElasticOtelAgent private constructor(
         }
     }
 
-    internal class Builder(private val features: ManagedFeatures) {
+    internal class Builder {
         private val elasticOpenTelemetryConfigBuilder = ElasticOpenTelemetryConfig.Builder()
+        private var internalClock: Clock? = null
+
+        fun setServiceName(value: String) = apply {
+            elasticOpenTelemetryConfigBuilder.setServiceName(value)
+        }
+
+        fun setServiceVersion(value: String) = apply {
+            elasticOpenTelemetryConfigBuilder.setServiceVersion(value)
+        }
+
+        fun setDeploymentEnvironment(value: String) = apply {
+            elasticOpenTelemetryConfigBuilder.setDeploymentEnvironment(value)
+        }
+
+        fun setDeviceIdProvider(value: StringProvider) = apply {
+            elasticOpenTelemetryConfigBuilder.setDeviceIdProvider(value)
+        }
 
         fun setExporterProvider(value: ExporterProvider) = apply {
             elasticOpenTelemetryConfigBuilder.setExporterProvider(value)
         }
 
-        fun build(serviceManager: ServiceManager): ManagedElasticOtelAgent {
+        fun setProcessorFactory(value: ProcessorFactory) = apply {
+            elasticOpenTelemetryConfigBuilder.setProcessorFactory(value)
+        }
+
+        internal fun setClock(value: Clock) = apply {
+            internalClock = value
+        }
+
+        fun build(
+            serviceManager: ServiceManager,
+            features: ManagedFeatures
+        ): ManagedElasticOtelAgent {
             elasticOpenTelemetryConfigBuilder.addSpanAttributesInterceptor(
                 features.elasticClockManager.getClockExportGateManager()
                     .getSpanAttributesInterceptor()
@@ -170,7 +201,8 @@ class ManagedElasticOtelAgent private constructor(
                 features.elasticClockManager,
                 features.exporterGateManager
             )
-            elasticOpenTelemetryConfigBuilder.setClock(features.elasticClockManager.getClock())
+            internalClock?.let { elasticOpenTelemetryConfigBuilder.setClock(it) }
+                ?: elasticOpenTelemetryConfigBuilder.setClock(features.elasticClockManager.getClock())
             elasticOpenTelemetryConfigBuilder.setSessionProvider(features.sessionManager)
 
             return ManagedElasticOtelAgent(

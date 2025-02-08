@@ -54,6 +54,8 @@ import java.util.UUID
 
 class ElasticOpenTelemetryConfig private constructor(
     val sdk: OpenTelemetrySdk,
+    val serviceName: String,
+    val deploymentEnvironment: String?,
     val clock: Clock
 ) {
 
@@ -223,7 +225,12 @@ class ElasticOpenTelemetryConfig private constructor(
                         .build()
                 )
             }
-            return ElasticOpenTelemetryConfig(openTelemetryBuilder.build(), clock)
+            return ElasticOpenTelemetryConfig(
+                openTelemetryBuilder.build(),
+                serviceName,
+                deploymentEnvironment,
+                clock
+            )
         }
 
         private fun getOsDescription(): String {

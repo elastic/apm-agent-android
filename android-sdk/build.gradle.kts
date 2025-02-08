@@ -15,7 +15,6 @@ android {
             isIncludeAndroidResources = true
             all {
                 it.systemProperty("agent_version", project.version)
-                it.systemProperty("elastic.test", "true")
             }
         }
     }

@@ -23,6 +23,7 @@ import co.elastic.otel.android.exporters.ExporterProvider
 import co.elastic.otel.android.features.apmserver.ApmServerAuthentication
 import co.elastic.otel.android.features.apmserver.ApmServerConnectivity
 import co.elastic.otel.android.interceptor.Interceptor
+import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
 import co.elastic.otel.android.internal.features.centralconfig.CentralConfigurationConnectivity
 import co.elastic.otel.android.internal.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.otel.android.processors.ProcessorFactory
@@ -30,6 +31,12 @@ import co.elastic.otel.android.test.common.ElasticAttributes.getLogRecordDefault
 import co.elastic.otel.android.test.common.ElasticAttributes.getSpanDefaultAttributes
 import co.elastic.otel.android.testutils.DummySntpClient
 import co.elastic.otel.android.testutils.WireMockRule
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.verify
+import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.sdk.logs.LogRecordProcessor
@@ -103,6 +110,28 @@ class ElasticApmAgentTest {
         }
 
         assertThat(exception).hasMessage("The url must be set.")
+    }
+
+    @Test
+    fun `Validate delegation`() {
+        val delegate = mockk<ManagedElasticOtelAgent>()
+        val openTelemetry = mockk<OpenTelemetry>()
+        every { delegate.getOpenTelemetry() }.returns(openTelemetry)
+        every { delegate.openTelemetry }.returns(mockk())
+        every { delegate.close() } just Runs
+
+        val agent = ElasticApmAgent(
+            delegate,
+            mockk(relaxUnitFun = true),
+            mockk(relaxUnitFun = true),
+            mockk(relaxUnitFun = true)
+        )
+
+        assertThat(agent.getOpenTelemetry()).isEqualTo(openTelemetry)
+        verify { delegate.getOpenTelemetry() }
+
+        agent.close()
+        verify { delegate.close() }
     }
 
     @Test

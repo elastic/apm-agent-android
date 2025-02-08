@@ -45,7 +45,7 @@ import co.elastic.otel.android.processors.ProcessorFactory
 import io.opentelemetry.api.OpenTelemetry
 
 @Suppress("CanBeParameter")
-class ElasticApmAgent private constructor(
+class ElasticApmAgent internal constructor(
     private val delegate: ManagedElasticOtelAgent,
     private val apmServerConnectivityManager: ApmServerConnectivityManager,
     private val centralConfigurationManager: CentralConfigurationManager,

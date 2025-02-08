@@ -95,7 +95,6 @@ class ManagedElasticOtelAgent private constructor(
             private var diskBufferingConfiguration = DiskBufferingConfiguration.enabled()
             private var sntpClient: SntpClient? = null
             private var gateSignalBufferSize = 1000
-            private var waitForClock = true
 
             fun setSessionIdGenerator(value: SessionIdGenerator) = apply {
                 sessionIdGenerator = value
@@ -111,10 +110,6 @@ class ManagedElasticOtelAgent private constructor(
 
             fun setGateSignalBufferSize(value: Int) {
                 gateSignalBufferSize = value
-            }
-
-            fun setWaitForClock(value: Boolean) = apply {
-                waitForClock = value
             }
 
             fun build(
@@ -135,8 +130,7 @@ class ManagedElasticOtelAgent private constructor(
                     serviceManager,
                     exporterGateManager,
                     systemTimeProvider,
-                    sntpClient ?: SntpClient.create(systemTimeProvider),
-                    waitForClock
+                    sntpClient ?: SntpClient.create(systemTimeProvider)
                 )
                 val sessionManager = SessionManager.create(
                     serviceManager,

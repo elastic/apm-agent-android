@@ -32,9 +32,7 @@ import co.elastic.otel.android.internal.features.apmserver.ApmServerConnectivity
 import co.elastic.otel.android.internal.features.apmserver.ApmServerExporterProvider
 import co.elastic.otel.android.internal.features.centralconfig.CentralConfigurationConnectivity
 import co.elastic.otel.android.internal.features.centralconfig.CentralConfigurationManager
-import co.elastic.otel.android.internal.features.clock.ElasticClockManager
 import co.elastic.otel.android.internal.features.diskbuffering.DiskBufferingConfiguration
-import co.elastic.otel.android.internal.features.diskbuffering.DiskBufferingManager
 import co.elastic.otel.android.internal.features.exportergate.ExporterGateManager
 import co.elastic.otel.android.internal.features.sessionmanager.SessionManager
 import co.elastic.otel.android.internal.features.sessionmanager.samplerate.SampleRateManager
@@ -88,16 +86,8 @@ class ElasticApmAgent private constructor(
         return delegate.features.exporterGateManager
     }
 
-    internal fun getDiskBufferingManager(): DiskBufferingManager {
-        return delegate.features.diskBufferingManager
-    }
-
     internal fun getCentralConfigurationManager(): CentralConfigurationManager {
         return centralConfigurationManager
-    }
-
-    internal fun getElasticClockManager(): ElasticClockManager {
-        return delegate.features.elasticClockManager
     }
 
     internal fun getSessionManager(): SessionManager {
@@ -120,14 +110,9 @@ class ElasticApmAgent private constructor(
         private var diskBufferingConfiguration: DiskBufferingConfiguration? = null
         private var loggingPolicy: LoggingPolicy? = null
         private val managedAgentBuilder = ManagedElasticOtelAgent.Builder()
-        internal var internalSntpClient: SntpClient? = null
-        internal var internalSystemTimeProvider: SystemTimeProvider? = null
         internal var internalExporterProviderInterceptor: Interceptor<ExporterProvider> =
             Interceptor.noop()
-        internal var internalServiceManagerInterceptor: Interceptor<ServiceManager> =
-            Interceptor.noop()
-        internal var internalSignalBufferSize: Int? = null
-        internal var internalWaitForClock: Boolean? = null
+        internal var internalSntpClient: SntpClient? = null
 
         fun setServiceName(value: String) = apply {
             managedAgentBuilder.setServiceName(value)
@@ -172,20 +157,19 @@ class ElasticApmAgent private constructor(
         fun build(): ElasticApmAgent {
             val finalUrl = url ?: throw NullPointerException("The url must be set.")
 
-            val serviceManager =
-                internalServiceManagerInterceptor.intercept(ServiceManager.create(application))
+            val serviceManager = ServiceManager.create(application)
 
             Elog.init(
                 AndroidLoggerFactory(loggingPolicy ?: LoggingPolicy.getDefault(serviceManager))
             )
 
+            val systemTimeProvider = SystemTimeProvider()
             val apmServerConfiguration = ApmServerConnectivity(
                 finalUrl,
                 authentication,
                 extraRequestHeaders,
                 exportProtocol
             )
-            val systemTimeProvider = internalSystemTimeProvider ?: SystemTimeProvider()
             val apmServerConnectivityHolder =
                 ApmServerConnectivityManager.ConnectivityHolder(apmServerConfiguration)
             val apmServerConnectivityManager =
@@ -235,8 +219,6 @@ class ElasticApmAgent private constructor(
             sessionIdGenerator?.let { managedConfigBuilder.setSessionIdGenerator(it) }
             diskBufferingConfiguration?.let { managedConfigBuilder.setDiskBufferingConfiguration(it) }
             internalSntpClient?.let { managedConfigBuilder.setSntpClient(it) }
-            internalSignalBufferSize?.let { managedConfigBuilder.setGateSignalBufferSize(it) }
-            internalWaitForClock?.let { managedConfigBuilder.setWaitForClock(it) }
             return managedConfigBuilder.build(serviceManager, systemTimeProvider)
         }
     }

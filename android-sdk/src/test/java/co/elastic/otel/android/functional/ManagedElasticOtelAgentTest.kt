@@ -32,6 +32,7 @@ import co.elastic.otel.android.internal.time.ntp.SntpClient
 import co.elastic.otel.android.processors.ProcessorFactory
 import co.elastic.otel.android.test.common.ElasticAttributes.getLogRecordDefaultAttributes
 import co.elastic.otel.android.test.common.ElasticAttributes.getSpanDefaultAttributes
+import co.elastic.otel.android.testutils.DummySntpClient
 import co.elastic.otel.android.testutils.WireMockRule
 import io.mockk.Runs
 import io.mockk.clearMocks
@@ -280,8 +281,12 @@ class ManagedElasticOtelAgentTest {
         agent = initialize(sntpClient = sntpClient, systemTimeProvider = systemTimeProvider)
 
         sendSpan()
+        sendLog()
 
-        awaitForOpenGates()
+        awaitForOpenGates(5)
+
+        await.atMost(Duration.ofSeconds(2))
+            .until { inMemoryExporters.getFinishedSpans().isNotEmpty() }
 
         assertThat(inMemoryExporters.getFinishedSpans().first()).startsAt(
             currentTime.get() * 1_000_000
@@ -309,8 +314,9 @@ class ManagedElasticOtelAgentTest {
         agent = initialize(sntpClient = sntpClient, systemTimeProvider = systemTimeProvider)
 
         sendSpan()
+        sendLog()
 
-        awaitForOpenGates()
+        awaitForOpenGates(5)
 
         assertThat(inMemoryExporters.getFinishedSpans().first()).startsAt(
             currentTime.get() * 1_000_000
@@ -342,8 +348,9 @@ class ManagedElasticOtelAgentTest {
         agent = initialize(sntpClient = sntpClient, systemTimeProvider = systemTimeProvider)
 
         sendSpan()
+        sendLog()
 
-        awaitForOpenGates()
+        awaitForOpenGates(5)
 
         assertThat(inMemoryExporters.getFinishedSpans().first()).startsAt(
             currentTime.get() * 1_000_000
@@ -379,7 +386,6 @@ class ManagedElasticOtelAgentTest {
         agent = initialize(
             sntpClient = sntpClient,
             systemTimeProvider = systemTimeProvider,
-            waitForClock = true,
             sessionIdGenerator = { "session-id" }
         )
 
@@ -534,7 +540,6 @@ class ManagedElasticOtelAgentTest {
             sessionIdGenerator = { "session-id" },
             sntpClient = sntpClient,
             systemTimeProvider = systemTimeProvider,
-            waitForClock = true
         )
 
         await.until {
@@ -577,7 +582,6 @@ class ManagedElasticOtelAgentTest {
             sessionIdGenerator = { "session-id" },
             sntpClient = sntpClient,
             systemTimeProvider = systemTimeProvider,
-            waitForClock = true
         )
 
         await.atMost(Duration.ofSeconds(1)).until {
@@ -628,7 +632,6 @@ class ManagedElasticOtelAgentTest {
             sessionIdGenerator = { "session-id" },
             sntpClient = sntpClient,
             systemTimeProvider = systemTimeProvider,
-            waitForClock = true,
             gateSignalBufferSize = bufferSize
         )
 
@@ -763,15 +766,13 @@ class ManagedElasticOtelAgentTest {
         serviceManager: ServiceManager = ServiceManager.create(application),
         diskBufferingConfiguration: DiskBufferingConfiguration = DiskBufferingConfiguration.disabled(),
         systemTimeProvider: SystemTimeProvider = SystemTimeProvider(),
-        sntpClient: SntpClient = SntpClient.create(systemTimeProvider),
-        waitForClock: Boolean = false,
+        sntpClient: SntpClient = DummySntpClient(),
         gateSignalBufferSize: Int? = null,
         sessionIdGenerator: SessionIdGenerator? = null,
         processorFactory: ProcessorFactory = simpleProcessorFactory
     ): ManagedElasticOtelAgent {
         val featuresBuilder =
             ManagedElasticOtelAgent.ManagedFeatures.Builder(application)
-                .setWaitForClock(waitForClock)
                 .setSntpClient(sntpClient)
                 .setDiskBufferingConfiguration(diskBufferingConfiguration)
         sessionIdGenerator?.let { featuresBuilder.setSessionIdGenerator(it) }

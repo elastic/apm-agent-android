@@ -24,6 +24,7 @@ import co.elastic.otel.android.api.flusher.LogRecordFlusher
 import co.elastic.otel.android.api.flusher.MetricFlusher
 import co.elastic.otel.android.exporters.ExporterProvider
 import co.elastic.otel.android.features.session.SessionIdGenerator
+import co.elastic.otel.android.interceptor.Interceptor
 import co.elastic.otel.android.internal.features.clock.ElasticClockManager
 import co.elastic.otel.android.internal.features.conditionaldrop.ConditionalDropManager
 import co.elastic.otel.android.internal.features.diskbuffering.DiskBufferingConfiguration
@@ -38,7 +39,11 @@ import co.elastic.otel.android.internal.time.ntp.SntpClient
 import co.elastic.otel.android.processors.ProcessorFactory
 import co.elastic.otel.android.provider.StringProvider
 import io.opentelemetry.api.OpenTelemetry
+import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.sdk.common.CompletableResultCode
+import io.opentelemetry.sdk.logs.export.LogRecordExporter
+import io.opentelemetry.sdk.metrics.export.MetricExporter
+import io.opentelemetry.sdk.trace.export.SpanExporter
 import java.util.UUID
 
 class ManagedElasticOtelAgent private constructor(
@@ -163,12 +168,36 @@ class ManagedElasticOtelAgent private constructor(
             elasticOpenTelemetryBuilder.setServiceVersion(value)
         }
 
+        fun setServiceBuild(value: Int) = apply {
+            elasticOpenTelemetryBuilder.setServiceBuild(value)
+        }
+
         fun setDeploymentEnvironment(value: String) = apply {
             elasticOpenTelemetryBuilder.setDeploymentEnvironment(value)
         }
 
         fun setDeviceIdProvider(value: StringProvider) = apply {
             elasticOpenTelemetryBuilder.setDeviceIdProvider(value)
+        }
+
+        fun addSpanAttributesInterceptor(value: Interceptor<Attributes>) = apply {
+            elasticOpenTelemetryBuilder.addSpanAttributesInterceptor(value)
+        }
+
+        fun addLogRecordAttributesInterceptor(value: Interceptor<Attributes>) = apply {
+            elasticOpenTelemetryBuilder.addLogRecordAttributesInterceptor(value)
+        }
+
+        fun addSpanExporterInterceptor(value: Interceptor<SpanExporter>) = apply {
+            elasticOpenTelemetryBuilder.addSpanExporterInterceptor(value)
+        }
+
+        fun addLogRecordExporterInterceptor(value: Interceptor<LogRecordExporter>) = apply {
+            elasticOpenTelemetryBuilder.addLogRecordExporterInterceptor(value)
+        }
+
+        fun addMetricExporterInterceptor(value: Interceptor<MetricExporter>) = apply {
+            elasticOpenTelemetryBuilder.addMetricExporterInterceptor(value)
         }
 
         fun setExporterProvider(value: ExporterProvider) = apply {

@@ -43,6 +43,10 @@ import co.elastic.otel.android.internal.utilities.logging.AndroidLoggerFactory
 import co.elastic.otel.android.logging.LoggingPolicy
 import co.elastic.otel.android.processors.ProcessorFactory
 import io.opentelemetry.api.OpenTelemetry
+import io.opentelemetry.api.common.Attributes
+import io.opentelemetry.sdk.logs.export.LogRecordExporter
+import io.opentelemetry.sdk.metrics.export.MetricExporter
+import io.opentelemetry.sdk.trace.export.SpanExporter
 
 @Suppress("CanBeParameter")
 class ElasticApmAgent internal constructor(
@@ -118,6 +122,14 @@ class ElasticApmAgent internal constructor(
             managedAgentBuilder.setServiceName(value)
         }
 
+        fun setServiceVersion(value: String) = apply {
+            managedAgentBuilder.setServiceVersion(value)
+        }
+
+        fun setServiceBuild(value: Int) = apply {
+            managedAgentBuilder.setServiceBuild(value)
+        }
+
         fun setDeploymentEnvironment(value: String) = apply {
             managedAgentBuilder.setDeploymentEnvironment(value)
         }
@@ -136,6 +148,26 @@ class ElasticApmAgent internal constructor(
 
         fun setExtraRequestHeaders(value: Map<String, String>) = apply {
             extraRequestHeaders = value
+        }
+
+        fun addSpanAttributesInterceptor(value: Interceptor<Attributes>) = apply {
+            managedAgentBuilder.addSpanAttributesInterceptor(value)
+        }
+
+        fun addLogRecordAttributesInterceptor(value: Interceptor<Attributes>) = apply {
+            managedAgentBuilder.addLogRecordAttributesInterceptor(value)
+        }
+
+        fun addSpanExporterInterceptor(value: Interceptor<SpanExporter>) = apply {
+            managedAgentBuilder.addSpanExporterInterceptor(value)
+        }
+
+        fun addLogRecordExporterInterceptor(value: Interceptor<LogRecordExporter>) = apply {
+            managedAgentBuilder.addLogRecordExporterInterceptor(value)
+        }
+
+        fun addMetricExporterInterceptor(value: Interceptor<MetricExporter>) = apply {
+            managedAgentBuilder.addMetricExporterInterceptor(value)
         }
 
         fun setLoggingPolicy(value: LoggingPolicy) = apply {

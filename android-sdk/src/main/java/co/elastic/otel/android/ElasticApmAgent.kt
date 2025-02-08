@@ -55,7 +55,7 @@ class ElasticApmAgent private constructor(
 ) : ElasticOtelAgent {
 
     init {
-        centralConfigurationManager.initialize(delegate.openTelemetryConfig)
+        centralConfigurationManager.initialize(delegate.openTelemetry)
         sampleRateManager.initialize()
     }
 

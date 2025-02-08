@@ -31,20 +31,19 @@ import co.elastic.otel.android.internal.features.diskbuffering.DiskBufferingMana
 import co.elastic.otel.android.internal.features.exportergate.ExporterGateManager
 import co.elastic.otel.android.internal.features.instrumentation.InstrumentationManager
 import co.elastic.otel.android.internal.features.sessionmanager.SessionManager
-import co.elastic.otel.android.internal.opentelemetry.ElasticOpenTelemetryConfig
+import co.elastic.otel.android.internal.opentelemetry.ElasticOpenTelemetry
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.time.SystemTimeProvider
 import co.elastic.otel.android.internal.time.ntp.SntpClient
 import co.elastic.otel.android.processors.ProcessorFactory
 import co.elastic.otel.android.provider.StringProvider
 import io.opentelemetry.api.OpenTelemetry
-import io.opentelemetry.sdk.common.Clock
 import io.opentelemetry.sdk.common.CompletableResultCode
 import java.util.UUID
 
 class ManagedElasticOtelAgent private constructor(
     private val serviceManager: ServiceManager,
-    internal val openTelemetryConfig: ElasticOpenTelemetryConfig,
+    internal val openTelemetry: ElasticOpenTelemetry,
     internal val features: ManagedFeatures
 ) : ElasticOtelAgent, MetricFlusher, LogRecordFlusher {
 
@@ -57,22 +56,22 @@ class ManagedElasticOtelAgent private constructor(
     }
 
     override fun getOpenTelemetry(): OpenTelemetry {
-        return openTelemetryConfig.sdk
+        return openTelemetry.sdk
     }
 
     override fun close() {
         features.diskBufferingManager.close()
         features.elasticClockManager.close()
         serviceManager.close()
-        openTelemetryConfig.sdk.close()
+        openTelemetry.sdk.close()
     }
 
     override fun flushMetrics(): CompletableResultCode {
-        return openTelemetryConfig.sdk.sdkMeterProvider.forceFlush()
+        return openTelemetry.sdk.sdkMeterProvider.forceFlush()
     }
 
     override fun flushLogRecords(): CompletableResultCode {
-        return openTelemetryConfig.sdk.sdkLoggerProvider.forceFlush()
+        return openTelemetry.sdk.sdkLoggerProvider.forceFlush()
     }
 
     class ManagedFeatures private constructor(
@@ -152,46 +151,41 @@ class ManagedElasticOtelAgent private constructor(
     }
 
     internal class Builder {
-        private val elasticOpenTelemetryConfigBuilder = ElasticOpenTelemetryConfig.Builder()
-        private var internalClock: Clock? = null
+        private val elasticOpenTelemetryBuilder = ElasticOpenTelemetry.Builder()
 
         fun setServiceName(value: String) = apply {
-            elasticOpenTelemetryConfigBuilder.setServiceName(value)
+            elasticOpenTelemetryBuilder.setServiceName(value)
         }
 
         fun setServiceVersion(value: String) = apply {
-            elasticOpenTelemetryConfigBuilder.setServiceVersion(value)
+            elasticOpenTelemetryBuilder.setServiceVersion(value)
         }
 
         fun setDeploymentEnvironment(value: String) = apply {
-            elasticOpenTelemetryConfigBuilder.setDeploymentEnvironment(value)
+            elasticOpenTelemetryBuilder.setDeploymentEnvironment(value)
         }
 
         fun setDeviceIdProvider(value: StringProvider) = apply {
-            elasticOpenTelemetryConfigBuilder.setDeviceIdProvider(value)
+            elasticOpenTelemetryBuilder.setDeviceIdProvider(value)
         }
 
         fun setExporterProvider(value: ExporterProvider) = apply {
-            elasticOpenTelemetryConfigBuilder.setExporterProvider(value)
+            elasticOpenTelemetryBuilder.setExporterProvider(value)
         }
 
         fun setProcessorFactory(value: ProcessorFactory) = apply {
-            elasticOpenTelemetryConfigBuilder.setProcessorFactory(value)
-        }
-
-        internal fun setClock(value: Clock) = apply {
-            internalClock = value
+            elasticOpenTelemetryBuilder.setProcessorFactory(value)
         }
 
         fun build(
             serviceManager: ServiceManager,
             features: ManagedFeatures
         ): ManagedElasticOtelAgent {
-            elasticOpenTelemetryConfigBuilder.addSpanAttributesInterceptor(
+            elasticOpenTelemetryBuilder.addSpanAttributesInterceptor(
                 features.elasticClockManager.getClockExportGateManager()
                     .getSpanAttributesInterceptor()
             )
-            elasticOpenTelemetryConfigBuilder.addLogRecordAttributesInterceptor(
+            elasticOpenTelemetryBuilder.addLogRecordAttributesInterceptor(
                 features.elasticClockManager.getClockExportGateManager()
                     .getLogRecordAttributesInterceptor()
             )
@@ -201,13 +195,12 @@ class ManagedElasticOtelAgent private constructor(
                 features.elasticClockManager,
                 features.exporterGateManager
             )
-            internalClock?.let { elasticOpenTelemetryConfigBuilder.setClock(it) }
-                ?: elasticOpenTelemetryConfigBuilder.setClock(features.elasticClockManager.getClock())
-            elasticOpenTelemetryConfigBuilder.setSessionProvider(features.sessionManager)
+            elasticOpenTelemetryBuilder.setClock(features.elasticClockManager.getClock())
+            elasticOpenTelemetryBuilder.setSessionProvider(features.sessionManager)
 
             return ManagedElasticOtelAgent(
                 serviceManager,
-                elasticOpenTelemetryConfigBuilder.build(serviceManager),
+                elasticOpenTelemetryBuilder.build(serviceManager),
                 features
             )
         }
@@ -225,40 +218,40 @@ class ManagedElasticOtelAgent private constructor(
         }
 
         private fun addDiskBufferingInterceptors(diskBufferingManager: DiskBufferingManager) {
-            elasticOpenTelemetryConfigBuilder.addSpanExporterInterceptor(diskBufferingManager::interceptSpanExporter)
-            elasticOpenTelemetryConfigBuilder.addLogRecordExporterInterceptor(diskBufferingManager::interceptLogRecordExporter)
-            elasticOpenTelemetryConfigBuilder.addMetricExporterInterceptor(diskBufferingManager::interceptMetricExporter)
+            elasticOpenTelemetryBuilder.addSpanExporterInterceptor(diskBufferingManager::interceptSpanExporter)
+            elasticOpenTelemetryBuilder.addLogRecordExporterInterceptor(diskBufferingManager::interceptLogRecordExporter)
+            elasticOpenTelemetryBuilder.addMetricExporterInterceptor(diskBufferingManager::interceptMetricExporter)
         }
 
         private fun addConditionalDropInterceptors(conditionalDropManager: ConditionalDropManager) {
-            elasticOpenTelemetryConfigBuilder.addSpanExporterInterceptor {
+            elasticOpenTelemetryBuilder.addSpanExporterInterceptor {
                 conditionalDropManager.createConditionalDropSpanExporter(it)
             }
-            elasticOpenTelemetryConfigBuilder.addLogRecordExporterInterceptor {
+            elasticOpenTelemetryBuilder.addLogRecordExporterInterceptor {
                 conditionalDropManager.createConditionalDropLogRecordExporter(it)
             }
-            elasticOpenTelemetryConfigBuilder.addMetricExporterInterceptor {
+            elasticOpenTelemetryBuilder.addMetricExporterInterceptor {
                 conditionalDropManager.createConditionalDropMetricExporter(it)
             }
         }
 
         private fun addClockExporterInterceptors(elasticClockManager: ElasticClockManager) {
-            elasticOpenTelemetryConfigBuilder.addSpanExporterInterceptor {
+            elasticOpenTelemetryBuilder.addSpanExporterInterceptor {
                 elasticClockManager.getClockExportGateManager().createSpanExporterDelegator(it)
             }
-            elasticOpenTelemetryConfigBuilder.addLogRecordExporterInterceptor {
+            elasticOpenTelemetryBuilder.addLogRecordExporterInterceptor {
                 elasticClockManager.getClockExportGateManager().createLogRecordExporterDelegator(it)
             }
         }
 
         private fun addExporterGateInterceptors(exporterGateManager: ExporterGateManager) {
-            elasticOpenTelemetryConfigBuilder.addSpanExporterInterceptor {
+            elasticOpenTelemetryBuilder.addSpanExporterInterceptor {
                 exporterGateManager.createSpanExporterGate(it)
             }
-            elasticOpenTelemetryConfigBuilder.addLogRecordExporterInterceptor {
+            elasticOpenTelemetryBuilder.addLogRecordExporterInterceptor {
                 exporterGateManager.createLogRecordExporterGate(it)
             }
-            elasticOpenTelemetryConfigBuilder.addMetricExporterInterceptor {
+            elasticOpenTelemetryBuilder.addMetricExporterInterceptor {
                 exporterGateManager.createMetricExporterGate(it)
             }
         }

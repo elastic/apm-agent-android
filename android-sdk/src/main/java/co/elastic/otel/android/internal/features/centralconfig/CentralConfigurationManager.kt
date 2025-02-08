@@ -24,7 +24,7 @@ import co.elastic.otel.android.features.apmserver.ApmServerConnectivity
 import co.elastic.otel.android.internal.connectivity.ConnectivityConfigurationHolder
 import co.elastic.otel.android.internal.features.apmserver.ApmServerConnectivityManager
 import co.elastic.otel.android.internal.features.exportergate.ExporterGateManager
-import co.elastic.otel.android.internal.opentelemetry.ElasticOpenTelemetryConfig
+import co.elastic.otel.android.internal.opentelemetry.ElasticOpenTelemetry
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.time.SystemTimeProvider
 import java.io.IOException
@@ -51,11 +51,11 @@ internal class CentralConfigurationManager private constructor(
         centralConnectivityHolder.set(configuration)
     }
 
-    internal fun initialize(openTelemetryConfig: ElasticOpenTelemetryConfig) {
+    internal fun initialize(openTelemetry: ElasticOpenTelemetry) {
         centralConnectivityHolder = CentralConnectivityHolder(
             CentralConfigurationConnectivity.fromApmServerConfig(
-                openTelemetryConfig.serviceName,
-                openTelemetryConfig.deploymentEnvironment,
+                openTelemetry.serviceName,
+                openTelemetry.deploymentEnvironment,
                 apmServerConnectivityHolder.getConnectivityConfiguration()
             )
         )

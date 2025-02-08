@@ -52,7 +52,7 @@ import io.opentelemetry.semconv.incubating.OsIncubatingAttributes
 import io.opentelemetry.semconv.incubating.ProcessIncubatingAttributes
 import java.util.UUID
 
-class ElasticOpenTelemetryConfig private constructor(
+class ElasticOpenTelemetry private constructor(
     val sdk: OpenTelemetrySdk,
     val serviceName: String,
     val deploymentEnvironment: String?,
@@ -131,7 +131,7 @@ class ElasticOpenTelemetryConfig private constructor(
             exporterProvider = value
         }
 
-        fun build(serviceManager: ServiceManager): ElasticOpenTelemetryConfig {
+        fun build(serviceManager: ServiceManager): ElasticOpenTelemetry {
             val commonAttributesInterceptor =
                 CommonAttributesInterceptor(serviceManager, sessionProvider)
             addSpanAttributesInterceptor(commonAttributesInterceptor)
@@ -225,7 +225,7 @@ class ElasticOpenTelemetryConfig private constructor(
                         .build()
                 )
             }
-            return ElasticOpenTelemetryConfig(
+            return ElasticOpenTelemetry(
                 openTelemetryBuilder.build(),
                 serviceName,
                 deploymentEnvironment,

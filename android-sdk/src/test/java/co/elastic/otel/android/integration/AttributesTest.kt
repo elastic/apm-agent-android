@@ -26,24 +26,44 @@ import android.net.NetworkCapabilities
 import android.net.NetworkInfo
 import android.os.Build
 import android.telephony.TelephonyManager
+import co.elastic.otel.android.exporters.ExporterProvider
+import co.elastic.otel.android.internal.opentelemetry.ElasticOpenTelemetry
+import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.services.network.query.NetworkApi21QueryManager
 import co.elastic.otel.android.internal.services.network.query.NetworkApi23QueryManager
 import co.elastic.otel.android.internal.services.network.query.NetworkApi24QueryManager
+import co.elastic.otel.android.processors.ProcessorFactory
+import co.elastic.otel.android.session.Session
 import co.elastic.otel.android.test.common.ElasticAttributes.getLogRecordDefaultAttributes
 import co.elastic.otel.android.test.common.ElasticAttributes.getSpanDefaultAttributes
-import co.elastic.otel.android.testutils.ElasticAgentRule
 import io.mockk.every
 import io.mockk.mockk
 import io.opentelemetry.api.common.Attributes
+import io.opentelemetry.api.logs.LogRecordBuilder
+import io.opentelemetry.api.trace.SpanBuilder
 import io.opentelemetry.sdk.common.Clock
+import io.opentelemetry.sdk.logs.LogRecordProcessor
+import io.opentelemetry.sdk.logs.data.LogRecordData
+import io.opentelemetry.sdk.logs.export.LogRecordExporter
+import io.opentelemetry.sdk.logs.export.SimpleLogRecordProcessor
 import io.opentelemetry.sdk.metrics.data.MetricData
 import io.opentelemetry.sdk.metrics.data.PointData
+import io.opentelemetry.sdk.metrics.export.MetricExporter
+import io.opentelemetry.sdk.metrics.export.MetricReader
+import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader
 import io.opentelemetry.sdk.resources.Resource
 import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat
+import io.opentelemetry.sdk.testing.exporter.InMemoryLogRecordExporter
+import io.opentelemetry.sdk.testing.exporter.InMemoryMetricExporter
+import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter
+import io.opentelemetry.sdk.trace.SpanProcessor
+import io.opentelemetry.sdk.trace.data.SpanData
 import io.opentelemetry.sdk.trace.data.StatusData
+import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor
+import io.opentelemetry.sdk.trace.export.SpanExporter
+import java.util.concurrent.TimeUnit
 import org.junit.After
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -54,11 +74,13 @@ import org.robolectric.shadows.ShadowNetwork
 import org.robolectric.util.ReflectionHelpers
 
 @RunWith(RobolectricTestRunner::class)
-internal class AttributesTest {
+internal class AttributesTest : ExporterProvider, ProcessorFactory {
     private lateinit var originalConstants: Map<String, String>
-
-    @get:Rule
-    val agentRule = ElasticAgentRule()
+    private var spanExporter: InMemorySpanExporter? = null
+    private var metricReader: MetricReader? = null
+    private var metricsExporter: InMemoryMetricExporter? = null
+    private var logsExporter: InMemoryLogRecordExporter? = null
+    private var elasticOpenTelemetry: ElasticOpenTelemetry? = null
 
     companion object {
         private const val RUNTIME_VERSION: String = "runtime-version"
@@ -101,7 +123,7 @@ internal class AttributesTest {
     @Config(sdk = [21, 23, Config.NEWEST_SDK])
     @Test
     fun `Check resources`() {
-        agentRule.initialize()
+        initialize()
         val expectedResource = Resource.builder()
             .put("deployment.environment", "test")
             .put("device.id", "device-id")
@@ -123,13 +145,13 @@ internal class AttributesTest {
             .put("telemetry.sdk.version", System.getProperty("agent_version")!!)
             .build()
 
-        agentRule.sendSpan()
-        agentRule.sendLog()
-        agentRule.sendMetricCounter()
+        sendSpan()
+        sendLog()
+        sendMetricCounter()
 
-        val spanItems = agentRule.getFinishedSpans()
-        val logItems = agentRule.getFinishedLogRecords()
-        val metricItems = agentRule.getFinishedMetrics()
+        val spanItems = getFinishedSpans()
+        val logItems = getFinishedLogRecords()
+        val metricItems = getFinishedMetrics()
         assertThat(spanItems).hasSize(1)
         assertThat(logItems).hasSize(1)
         assertThat(metricItems).hasSize(1)
@@ -142,7 +164,7 @@ internal class AttributesTest {
     @Test
     fun `Check resources with not provided service version`() {
         setVersionName("1.2.3")
-        agentRule.initialize(serviceVersion = null)
+        initialize(serviceVersion = null)
         val expectedResource = Resource.builder()
             .put("deployment.environment", "test")
             .put("device.id", "device-id")
@@ -164,13 +186,13 @@ internal class AttributesTest {
             .put("telemetry.sdk.version", System.getProperty("agent_version")!!)
             .build()
 
-        agentRule.sendSpan()
-        agentRule.sendLog()
-        agentRule.sendMetricCounter()
+        sendSpan()
+        sendLog()
+        sendMetricCounter()
 
-        val spanItems = agentRule.getFinishedSpans()
-        val logItems = agentRule.getFinishedLogRecords()
-        val metricItems = agentRule.getFinishedMetrics()
+        val spanItems = getFinishedSpans()
+        val logItems = getFinishedLogRecords()
+        val metricItems = getFinishedMetrics()
         assertThat(spanItems).hasSize(1)
         assertThat(logItems).hasSize(1)
         assertThat(metricItems).hasSize(1)
@@ -182,13 +204,13 @@ internal class AttributesTest {
     @Config(sdk = [21, 23, Config.NEWEST_SDK])
     @Test
     fun `Check global attributes and span status`() {
-        agentRule.initialize()
+        initialize()
 
-        agentRule.sendSpan()
-        agentRule.sendLog()
+        sendSpan()
+        sendLog()
 
-        val spanItems = agentRule.getFinishedSpans()
-        val logItems = agentRule.getFinishedLogRecords()
+        val spanItems = getFinishedSpans()
+        val logItems = getFinishedLogRecords()
         assertThat(spanItems).hasSize(1)
         assertThat(logItems).hasSize(1)
         assertThat(spanItems.first()).hasAttributes(getSpanDefaultAttributes())
@@ -199,7 +221,7 @@ internal class AttributesTest {
     @Config(sdk = [21, 23, Config.NEWEST_SDK])
     @Test
     fun `Check global attributes with cellular connectivity available`() {
-        agentRule.initialize()
+        initialize()
         enableCellularDataAttr()
         val expectedLogAttributes = Attributes.builder()
             .put("session.id", "session-id")
@@ -211,11 +233,11 @@ internal class AttributesTest {
             .put("type", "mobile")
             .build()
 
-        agentRule.sendSpan()
-        agentRule.sendLog()
+        sendSpan()
+        sendLog()
 
-        val spanItems = agentRule.getFinishedSpans()
-        val logItems = agentRule.getFinishedLogRecords()
+        val spanItems = getFinishedSpans()
+        val logItems = getFinishedLogRecords()
         assertThat(spanItems).hasSize(1)
         assertThat(logItems).hasSize(1)
         assertThat(spanItems.first()).hasAttributes(expectedSpanAttributes)
@@ -225,7 +247,7 @@ internal class AttributesTest {
     @Config(sdk = [21, 23, Config.NEWEST_SDK])
     @Test
     fun `Check global attributes with carrier info available`() {
-        agentRule.initialize()
+        initialize()
         enableCarrierInfoAttrs()
         val expectedLogAttributes = Attributes.builder()
             .put("session.id", "session-id")
@@ -240,11 +262,11 @@ internal class AttributesTest {
             .put("type", "mobile")
             .build()
 
-        agentRule.sendSpan()
-        agentRule.sendLog()
+        sendSpan()
+        sendLog()
 
-        val spanItems = agentRule.getFinishedSpans()
-        val logItems = agentRule.getFinishedLogRecords()
+        val spanItems = getFinishedSpans()
+        val logItems = getFinishedLogRecords()
         assertThat(spanItems).hasSize(1)
         assertThat(logItems).hasSize(1)
         assertThat(spanItems.first()).hasAttributes(expectedSpanAttributes)
@@ -257,17 +279,17 @@ internal class AttributesTest {
         val clock = mockk<Clock>()
         every { clock.now() }.returns(nowTime)
         every { clock.nanoTime() }.answers { System.nanoTime() }
-        agentRule.initialize(clock = clock)
+        initialize(clock = clock)
 
-        agentRule.sendSpan()
-        agentRule.sendLog()
-        agentRule.sendMetricCounter()
+        sendSpan()
+        sendLog()
+        sendMetricCounter()
 
-        assertThat(agentRule.getFinishedSpans().first().startEpochNanos).isEqualTo(nowTime)
-        assertThat(agentRule.getFinishedLogRecords().first().observedTimestampEpochNanos).isEqualTo(
+        assertThat(getFinishedSpans().first().startEpochNanos).isEqualTo(nowTime)
+        assertThat(getFinishedLogRecords().first().observedTimestampEpochNanos).isEqualTo(
             nowTime
         )
-        assertThat(getStartTime(agentRule.getFinishedMetrics().first())).isEqualTo(nowTime)
+        assertThat(getStartTime(getFinishedMetrics().first())).isEqualTo(nowTime)
     }
 
     @Test
@@ -279,9 +301,9 @@ internal class AttributesTest {
         val clock = mockk<Clock>()
         every { clock.now() }.returns(startTimeFromElasticClock)
         every { clock.nanoTime() }.answers { System.nanoTime() }
-        agentRule.initialize(clock = clock)
+        initialize(clock = clock)
 
-        val span = agentRule.openTelemetry.getTracer("SomeTracer").spanBuilder("TimeChangeSpan")
+        val span = elasticOpenTelemetry!!.sdk.getTracer("SomeTracer").spanBuilder("TimeChangeSpan")
             .startSpan()
 
         // Moving now backwards:
@@ -289,7 +311,7 @@ internal class AttributesTest {
 
         span.end()
 
-        val spanData = agentRule.getFinishedSpans().first()
+        val spanData = getFinishedSpans().first()
         assertThat(spanData.startEpochNanos).isEqualTo(startTimeFromElasticClock)
         assertThat(spanData.endEpochNanos).isGreaterThan(startTimeFromElasticClock)
     }
@@ -369,5 +391,90 @@ internal class AttributesTest {
         Shadows.shadowOf(RuntimeEnvironment.getApplication().packageManager)
             .getInternalMutablePackageInfo(RuntimeEnvironment.getApplication().packageName).versionName =
             versionName
+    }
+
+    private fun initialize(
+        serviceName: String = "service-name",
+        serviceVersion: String? = "0.0.0",
+        deploymentEnvironment: String = "test",
+        clock: Clock = Clock.getDefault()
+    ) {
+        val serviceManager = ServiceManager.create(RuntimeEnvironment.getApplication())
+        val builder = ElasticOpenTelemetry.Builder()
+            .setServiceName(serviceName)
+            .setDeploymentEnvironment(deploymentEnvironment)
+            .setClock(clock)
+            .setSessionProvider { Session.create("session-id") }
+            .setDeviceIdProvider { "device-id" }
+        serviceVersion?.let { builder.setServiceVersion(it) }
+
+        builder.setExporterProvider(this)
+        builder.setProcessorFactory(this)
+
+        spanExporter = InMemorySpanExporter.create()
+        metricsExporter = InMemoryMetricExporter.create()
+        logsExporter = InMemoryLogRecordExporter.create()
+        elasticOpenTelemetry = builder.build(serviceManager)
+    }
+
+    private fun sendLog(body: String = "", builderVisitor: LogRecordBuilder.() -> Unit = {}) {
+        val logRecordBuilder =
+            elasticOpenTelemetry!!.sdk.logsBridge.get("LoggerScope").logRecordBuilder()
+        builderVisitor(logRecordBuilder)
+        logRecordBuilder.setBody(body).emit()
+    }
+
+    private fun sendSpan(name: String = "SomeSpan", builderVisitor: SpanBuilder.() -> Unit = {}) {
+        val spanBuilder = elasticOpenTelemetry!!.sdk.getTracer("SomeTracer").spanBuilder(name)
+        builderVisitor(spanBuilder)
+        spanBuilder.startSpan().end()
+    }
+
+    private fun sendMetricCounter(name: String = "Counter") {
+        elasticOpenTelemetry!!.sdk.getMeter("MeterScope").counterBuilder(name).build().add(1)
+    }
+
+    private fun getFinishedSpans(): List<SpanData> {
+        val list = ArrayList(spanExporter!!.finishedSpanItems)
+        spanExporter!!.reset()
+        return list
+    }
+
+    private fun getFinishedLogRecords(): List<LogRecordData> {
+        val list = ArrayList(logsExporter!!.finishedLogRecordItems)
+        logsExporter!!.reset()
+        return list
+    }
+
+    private fun getFinishedMetrics(): List<MetricData> {
+        metricReader!!.forceFlush().join(1, TimeUnit.SECONDS)
+        val list = ArrayList(metricsExporter!!.finishedMetricItems)
+        metricsExporter!!.reset()
+        return list
+    }
+
+    override fun getSpanExporter(): SpanExporter? {
+        return spanExporter
+    }
+
+    override fun getLogRecordExporter(): LogRecordExporter? {
+        return logsExporter
+    }
+
+    override fun getMetricExporter(): MetricExporter? {
+        return metricsExporter
+    }
+
+    override fun createSpanProcessor(exporter: SpanExporter?): SpanProcessor? {
+        return SimpleSpanProcessor.create(exporter)
+    }
+
+    override fun createLogRecordProcessor(exporter: LogRecordExporter?): LogRecordProcessor? {
+        return SimpleLogRecordProcessor.create(exporter)
+    }
+
+    override fun createMetricReader(exporter: MetricExporter?): MetricReader? {
+        metricReader = PeriodicMetricReader.create(exporter)
+        return metricReader
     }
 }

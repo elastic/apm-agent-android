@@ -74,6 +74,14 @@ class ManagedElasticOtelAgent private constructor(
         return openTelemetry.sdk.sdkLoggerProvider.forceFlush()
     }
 
+    internal fun getElasticClockManager(): ElasticClockManager {
+        return features.elasticClockManager
+    }
+
+    internal fun getExporterGateManager(): ExporterGateManager {
+        return features.exporterGateManager
+    }
+
     class ManagedFeatures private constructor(
         internal val exporterGateManager: ExporterGateManager,
         internal val diskBufferingManager: DiskBufferingManager,

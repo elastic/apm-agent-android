@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.integration
+package co.elastic.otel.android.functional
 
 import android.content.Intent
 import co.elastic.otel.android.ElasticApmAgent

@@ -84,11 +84,11 @@ class ElasticApmAgent private constructor(
     }
 
     internal fun getExporterGateManager(): ExporterGateManager {
-        return delegate.exporterGateManager
+        return delegate.features.exporterGateManager
     }
 
     internal fun getDiskBufferingManager(): DiskBufferingManager {
-        return delegate.diskBufferingManager
+        return delegate.features.diskBufferingManager
     }
 
     internal fun getCentralConfigurationManager(): CentralConfigurationManager {
@@ -96,11 +96,11 @@ class ElasticApmAgent private constructor(
     }
 
     internal fun getElasticClockManager(): ElasticClockManager {
-        return delegate.elasticClockManager
+        return delegate.features.elasticClockManager
     }
 
     internal fun getSessionManager(): SessionManager {
-        return delegate.sessionManager
+        return delegate.features.sessionManager
     }
 
     companion object {
@@ -111,6 +111,8 @@ class ElasticApmAgent private constructor(
     }
 
     class Builder internal constructor(private val application: Application) {
+        private var serviceName: String? = null
+        private var deploymentEnvironment: String? = null
         private var url: String? = null
         private var authentication: ApmServerAuthentication = ApmServerAuthentication.None
         private var exportProtocol: ExportProtocol = ExportProtocol.HTTP
@@ -126,6 +128,14 @@ class ElasticApmAgent private constructor(
             Interceptor.noop()
         internal var internalSignalBufferSize: Int? = null
         internal var internalWaitForClock: Boolean? = null
+
+        fun setServiceName(value: String) = apply {
+            serviceName = value
+        }
+
+        fun setDeploymentEnvironment(value: String) = apply {
+            deploymentEnvironment = value
+        }
 
         fun setUrl(value: String) = apply {
             url = value
@@ -157,6 +167,8 @@ class ElasticApmAgent private constructor(
 
         fun build(): ElasticApmAgent {
             val finalUrl = url ?: throw NullPointerException("The url must be set.")
+            val finalServiceName =
+                serviceName ?: throw NullPointerException("The serviceName value must be set.")
 
             val serviceManager =
                 internalServiceManagerInterceptor.intercept(ServiceManager.create(application))
@@ -185,7 +197,7 @@ class ElasticApmAgent private constructor(
                 serviceManager,
                 systemTimeProvider,
                 managedConfiguration.exporterGateManager,
-                serviceName,
+                finalServiceName,
                 deploymentEnvironment,
                 connectivityHolder
             )
@@ -219,8 +231,8 @@ class ElasticApmAgent private constructor(
         private fun createManagedConfiguration(
             serviceManager: ServiceManager,
             systemTimeProvider: SystemTimeProvider
-        ): ManagedElasticOtelAgent.Configuration {
-            val managedConfigBuilder = ManagedElasticOtelAgent.Configuration.Builder(application)
+        ): ManagedElasticOtelAgent.ManagedFeatures {
+            val managedConfigBuilder = ManagedElasticOtelAgent.ManagedFeatures.Builder(application)
             sessionIdGenerator?.let { managedConfigBuilder.setSessionIdGenerator(it) }
             diskBufferingConfiguration?.let { managedConfigBuilder.setDiskBufferingConfiguration(it) }
             internalSntpClient?.let { managedConfigBuilder.setSntpClient(it) }

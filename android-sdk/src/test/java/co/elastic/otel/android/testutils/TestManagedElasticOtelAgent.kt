@@ -22,7 +22,7 @@ import android.app.Application
 import co.elastic.otel.android.exporters.ExporterProvider
 import co.elastic.otel.android.interceptor.Interceptor
 import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
-import co.elastic.otel.android.internal.opentelemetry.ElasticOpenTelemetryBuilder
+import co.elastic.otel.android.internal.opentelemetry.ElasticOpenTelemetryConfig
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.session.SessionProvider
 import io.opentelemetry.api.OpenTelemetry
@@ -31,7 +31,7 @@ import io.opentelemetry.sdk.common.Clock
 
 internal class TestManagedElasticOtelAgent(
     private val serviceManager: ServiceManager,
-    configuration: Configuration
+    configuration: ManagedFeatures
 ) :
     ManagedElasticOtelAgent(configuration) {
     private val openTelemetry: OpenTelemetrySdk = configuration.openTelemetrySdk
@@ -50,8 +50,8 @@ internal class TestManagedElasticOtelAgent(
         }
     }
 
-    class Builder(private val application: Application) : ElasticOpenTelemetryBuilder<Builder>() {
-        val configurationInterceptors = mutableListOf<Interceptor<Configuration>>()
+    class Builder(private val application: Application) : ElasticOpenTelemetryConfig<Builder>() {
+        val configurationInterceptors = mutableListOf<Interceptor<ManagedFeatures>>()
         val serviceManagerInterceptors = mutableListOf<Interceptor<ServiceManager>>()
 
         public override fun setExporterProvider(value: ExporterProvider): Builder {

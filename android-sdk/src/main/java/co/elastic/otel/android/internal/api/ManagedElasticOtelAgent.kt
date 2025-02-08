@@ -41,16 +41,16 @@ import java.util.UUID
 
 class ManagedElasticOtelAgent private constructor(
     private val serviceManager: ServiceManager,
-    private val configuration: Configuration,
-    private val openTelemetryConfig: ElasticOpenTelemetryConfig
+    private val openTelemetryConfig: ElasticOpenTelemetryConfig,
+    internal val features: ManagedFeatures
 ) : ElasticOtelAgent, MetricFlusher, LogRecordFlusher {
 
     init {
-        configuration.elasticClockManager.initialize()
-        configuration.diskBufferingManager.initialize()
-        configuration.sessionManager.initialize()
-        configuration.exporterGateManager.initialize()
-        configuration.instrumentationManager.initialize(this)
+        features.elasticClockManager.initialize()
+        features.diskBufferingManager.initialize()
+        features.sessionManager.initialize()
+        features.exporterGateManager.initialize()
+        features.instrumentationManager.initialize(this)
     }
 
     override fun getOpenTelemetry(): OpenTelemetry {
@@ -58,8 +58,8 @@ class ManagedElasticOtelAgent private constructor(
     }
 
     override fun close() {
-        configuration.diskBufferingManager.close()
-        configuration.elasticClockManager.close()
+        features.diskBufferingManager.close()
+        features.elasticClockManager.close()
         serviceManager.close()
         openTelemetryConfig.sdk.close()
     }
@@ -72,7 +72,7 @@ class ManagedElasticOtelAgent private constructor(
         return openTelemetryConfig.sdk.sdkLoggerProvider.forceFlush()
     }
 
-    class Configuration private constructor(
+    class ManagedFeatures private constructor(
         internal val exporterGateManager: ExporterGateManager,
         internal val diskBufferingManager: DiskBufferingManager,
         internal val elasticClockManager: ElasticClockManager,
@@ -110,7 +110,7 @@ class ManagedElasticOtelAgent private constructor(
             fun build(
                 serviceManager: ServiceManager,
                 systemTimeProvider: SystemTimeProvider
-            ): Configuration {
+            ): ManagedFeatures {
                 val exporterGateManager = ExporterGateManager(
                     serviceManager,
                     signalBufferSize = gateSignalBufferSize
@@ -136,7 +136,7 @@ class ManagedElasticOtelAgent private constructor(
                 val conditionalDropManager = ConditionalDropManager()
                 val instrumentationManager = InstrumentationManager.create(application)
 
-                return Configuration(
+                return ManagedFeatures(
                     exporterGateManager,
                     diskBufferingManager,
                     elasticClockManager,
@@ -148,7 +148,7 @@ class ManagedElasticOtelAgent private constructor(
         }
     }
 
-    internal class Builder(private val configuration: Configuration) {
+    internal class Builder(private val features: ManagedFeatures) {
         private val elasticOpenTelemetryConfigBuilder = ElasticOpenTelemetryConfig.Builder()
 
         fun setExporterProvider(value: ExporterProvider) = apply {
@@ -157,26 +157,26 @@ class ManagedElasticOtelAgent private constructor(
 
         fun build(serviceManager: ServiceManager): ManagedElasticOtelAgent {
             elasticOpenTelemetryConfigBuilder.addSpanAttributesInterceptor(
-                configuration.elasticClockManager.getClockExportGateManager()
+                features.elasticClockManager.getClockExportGateManager()
                     .getSpanAttributesInterceptor()
             )
             elasticOpenTelemetryConfigBuilder.addLogRecordAttributesInterceptor(
-                configuration.elasticClockManager.getClockExportGateManager()
+                features.elasticClockManager.getClockExportGateManager()
                     .getLogRecordAttributesInterceptor()
             )
             addInternalInterceptors(
-                configuration.diskBufferingManager,
-                configuration.conditionalDropManager,
-                configuration.elasticClockManager,
-                configuration.exporterGateManager
+                features.diskBufferingManager,
+                features.conditionalDropManager,
+                features.elasticClockManager,
+                features.exporterGateManager
             )
-            elasticOpenTelemetryConfigBuilder.setClock(configuration.elasticClockManager.getClock())
-            elasticOpenTelemetryConfigBuilder.setSessionProvider(configuration.sessionManager)
+            elasticOpenTelemetryConfigBuilder.setClock(features.elasticClockManager.getClock())
+            elasticOpenTelemetryConfigBuilder.setSessionProvider(features.sessionManager)
 
             return ManagedElasticOtelAgent(
                 serviceManager,
-                configuration,
-                elasticOpenTelemetryConfigBuilder.build(serviceManager)
+                elasticOpenTelemetryConfigBuilder.build(serviceManager),
+                features
             )
         }
 

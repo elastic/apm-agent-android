@@ -20,6 +20,8 @@ package co.elastic.otel.android
 
 import android.app.Application
 import co.elastic.otel.android.api.ElasticOtelAgent
+import co.elastic.otel.android.api.flusher.LogRecordFlusher
+import co.elastic.otel.android.api.flusher.MetricFlusher
 import co.elastic.otel.android.common.internal.logging.Elog
 import co.elastic.otel.android.exporters.ExporterProvider
 import co.elastic.otel.android.exporters.configuration.ExportProtocol
@@ -44,6 +46,7 @@ import co.elastic.otel.android.logging.LoggingPolicy
 import co.elastic.otel.android.processors.ProcessorFactory
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.api.common.Attributes
+import io.opentelemetry.sdk.common.CompletableResultCode
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.trace.export.SpanExporter
@@ -54,7 +57,7 @@ class ElasticApmAgent internal constructor(
     private val apmServerConnectivityManager: ApmServerConnectivityManager,
     private val centralConfigurationManager: CentralConfigurationManager,
     private val sampleRateManager: SampleRateManager
-) : ElasticOtelAgent {
+) : ElasticOtelAgent, MetricFlusher, LogRecordFlusher {
 
     init {
         centralConfigurationManager.initialize(delegate.openTelemetry)
@@ -63,6 +66,14 @@ class ElasticApmAgent internal constructor(
 
     override fun getOpenTelemetry(): OpenTelemetry {
         return delegate.getOpenTelemetry()
+    }
+
+    override fun flushMetrics(): CompletableResultCode {
+        return delegate.flushMetrics()
+    }
+
+    override fun flushLogRecords(): CompletableResultCode {
+        return delegate.flushLogRecords()
     }
 
     override fun close() {

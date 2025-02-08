@@ -39,6 +39,7 @@ import io.mockk.verify
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
+import io.opentelemetry.sdk.common.CompletableResultCode
 import io.opentelemetry.sdk.logs.LogRecordProcessor
 import io.opentelemetry.sdk.logs.data.LogRecordData
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
@@ -115,8 +116,12 @@ class ElasticApmAgentTest {
     @Test
     fun `Validate delegation`() {
         val delegate = mockk<ManagedElasticOtelAgent>()
+        val flushMetricsResult = mockk<CompletableResultCode>()
+        val flushLogRecordsResult = mockk<CompletableResultCode>()
         val openTelemetry = mockk<OpenTelemetry>()
         every { delegate.getOpenTelemetry() }.returns(openTelemetry)
+        every { delegate.flushMetrics() }.returns(flushMetricsResult)
+        every { delegate.flushLogRecords() }.returns(flushLogRecordsResult)
         every { delegate.openTelemetry }.returns(mockk())
         every { delegate.close() } just Runs
 
@@ -128,8 +133,8 @@ class ElasticApmAgentTest {
         )
 
         assertThat(agent.getOpenTelemetry()).isEqualTo(openTelemetry)
-        verify { delegate.getOpenTelemetry() }
-
+        assertThat(agent.flushMetrics()).isEqualTo(flushMetricsResult)
+        assertThat(agent.flushLogRecords()).isEqualTo(flushLogRecordsResult)
         agent.close()
         verify { delegate.close() }
     }

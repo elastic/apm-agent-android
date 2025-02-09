@@ -24,12 +24,12 @@ import java.io.Closeable
 /**
  * According to RFC-4330.
  */
-internal interface SntpClient : Closeable {
+interface SntpClient : Closeable {
 
     fun fetchTimeOffset(currentTimeMillis: Long): Response
 
     companion object {
-        fun create(systemTimeProvider: SystemTimeProvider): SntpClient {
+        internal fun create(systemTimeProvider: SystemTimeProvider): SntpClient {
             return SntpClientImpl(UdpClient("time.android.com", 123, 48), systemTimeProvider)
         }
     }

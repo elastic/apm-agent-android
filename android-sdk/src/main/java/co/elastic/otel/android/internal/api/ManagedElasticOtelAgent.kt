@@ -95,7 +95,7 @@ class ManagedElasticOtelAgent private constructor(
         internal val conditionalDropManager: ConditionalDropManager,
         internal val instrumentationManager: InstrumentationManager
     ) {
-        internal class Builder(private val application: Application) {
+        class Builder(private val application: Application) {
             private var sessionIdGenerator: SessionIdGenerator? = null
             private var diskBufferingConfiguration = DiskBufferingConfiguration.enabled()
             private var sntpClient: SntpClient? = null
@@ -157,7 +157,7 @@ class ManagedElasticOtelAgent private constructor(
         }
     }
 
-    internal class Builder {
+    class Builder {
         private val elasticOpenTelemetryBuilder = ElasticOpenTelemetry.Builder()
 
         fun setServiceName(value: String) = apply {

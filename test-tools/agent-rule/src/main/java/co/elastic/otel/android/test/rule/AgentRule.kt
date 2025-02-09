@@ -1,24 +1,22 @@
 package co.elastic.otel.android.test.rule
 
 import android.app.Application
-import co.elastic.otel.android.ElasticApmAgent
 import co.elastic.otel.android.api.ElasticOtelAgent
-import co.elastic.otel.android.processors.ProcessorFactory
+import co.elastic.otel.android.exporters.ExporterProvider
+import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
+import co.elastic.otel.android.internal.features.diskbuffering.DiskBufferingConfiguration
+import co.elastic.otel.android.internal.services.ServiceManager
+import co.elastic.otel.android.internal.time.SystemTimeProvider
+import co.elastic.otel.android.internal.time.ntp.SntpClient
 import co.elastic.otel.android.test.common.ElasticAttributes.DEFAULT_SESSION_ID
-import io.opentelemetry.sdk.logs.LogRecordProcessor
 import io.opentelemetry.sdk.logs.data.LogRecordData
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
-import io.opentelemetry.sdk.logs.export.SimpleLogRecordProcessor
 import io.opentelemetry.sdk.metrics.data.MetricData
 import io.opentelemetry.sdk.metrics.export.MetricExporter
-import io.opentelemetry.sdk.metrics.export.MetricReader
-import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader
 import io.opentelemetry.sdk.testing.exporter.InMemoryLogRecordExporter
 import io.opentelemetry.sdk.testing.exporter.InMemoryMetricExporter
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter
-import io.opentelemetry.sdk.trace.SpanProcessor
 import io.opentelemetry.sdk.trace.data.SpanData
-import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor
 import io.opentelemetry.sdk.trace.export.SpanExporter
 import org.junit.rules.TestRule
 import org.junit.runner.Description
@@ -29,43 +27,61 @@ abstract class AgentRule : TestRule {
     private var agent: ElasticOtelAgent? = null
 
     @Volatile
-    private var processorFactory: SimpleProcessorFactory? = null
+    private var inMemoryExporters: InMemoryExporterProvider? = null
 
     override fun apply(base: Statement, description: Description): Statement {
         return try {
             object : Statement() {
                 override fun evaluate() {
-                    processorFactory = SimpleProcessorFactory()
+                    inMemoryExporters = InMemoryExporterProvider()
                     runInitialization {
-                        agent =
-                            ElasticApmAgent.builder(it)
-                                .setUrl("http://none")
-                                .setProcessorFactory(processorFactory!!)
-                                .setSessionIdGenerator { DEFAULT_SESSION_ID }
-                                .build()
+                        agent = createAgent(getApplication())
                     }
                     base.evaluate()
                 }
             }
         } finally {
             agent = null
-            processorFactory = null
+            inMemoryExporters = null
         }
     }
 
     fun getFinishedMetrics(): List<MetricData> {
-        return processorFactory!!.getFinishedMetrics()
+        return inMemoryExporters!!.getFinishedMetrics()
     }
 
     fun getFinishedLogRecords(): List<LogRecordData> {
-        return processorFactory!!.getFinishedLogRecords()
+        return inMemoryExporters!!.getFinishedLogRecords()
     }
 
     fun getFinishedSpans(): List<SpanData> {
-        return processorFactory!!.getFinishedSpans()
+        return inMemoryExporters!!.getFinishedSpans()
     }
 
-    private class SimpleProcessorFactory : ProcessorFactory {
+    private fun createAgent(application: Application): ElasticOtelAgent {
+        val serviceManager = ServiceManager.create(application)
+        val features = ManagedElasticOtelAgent.ManagedFeatures.Builder(application)
+            .setSntpClient(LocalSntpClient())
+            .setSessionIdGenerator { DEFAULT_SESSION_ID }
+            .setDiskBufferingConfiguration(DiskBufferingConfiguration.disabled())
+            .build(serviceManager, SystemTimeProvider())
+
+        return ManagedElasticOtelAgent.Builder()
+            .setExporterProvider(inMemoryExporters!!)
+            .build(serviceManager, features)
+    }
+
+    class LocalSntpClient : SntpClient {
+
+        override fun fetchTimeOffset(currentTimeMillis: Long): SntpClient.Response {
+            return SntpClient.Response.Success(0)
+        }
+
+        override fun close() {
+        }
+    }
+
+    private class InMemoryExporterProvider : ExporterProvider {
         private val inMemoryMetricExporter = InMemoryMetricExporter.create()
         private val inMemoryLogRecordExporter = InMemoryLogRecordExporter.create()
         private val inMemorySpanExporter = InMemorySpanExporter.create()
@@ -82,18 +98,20 @@ abstract class AgentRule : TestRule {
             return inMemorySpanExporter.finishedSpanItems
         }
 
-        override fun createSpanProcessor(exporter: SpanExporter?): SpanProcessor? {
-            return SimpleSpanProcessor.create(inMemorySpanExporter)
+        override fun getSpanExporter(): SpanExporter? {
+            return inMemorySpanExporter
         }
 
-        override fun createLogRecordProcessor(exporter: LogRecordExporter?): LogRecordProcessor? {
-            return SimpleLogRecordProcessor.create(inMemoryLogRecordExporter)
+        override fun getLogRecordExporter(): LogRecordExporter? {
+            return inMemoryLogRecordExporter
         }
 
-        override fun createMetricReader(exporter: MetricExporter?): MetricReader? {
-            return PeriodicMetricReader.create(inMemoryMetricExporter)
+        override fun getMetricExporter(): MetricExporter? {
+            return inMemoryMetricExporter
         }
     }
 
-    abstract fun runInitialization(initialization: (Application) -> Unit)
+    abstract fun runInitialization(initialization: () -> Unit)
+
+    abstract fun getApplication(): Application
 }

@@ -16,8 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.crash
+package co.elastic.otel.android.crash.internal.handler
 
+import android.app.Application
 import co.elastic.otel.android.test.common.ElasticAttributes.getLogRecordDefaultAttributes
 import co.elastic.otel.android.test.rule.RobolectricAgentRule
 import io.mockk.Runs
@@ -31,17 +32,18 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
+import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-class CrashReportTest {
+class ElasticExceptionHandlerTest {
 
     @get:Rule
     val agentRule = RobolectricAgentRule()
 
     @Test
     fun `Capture log event with crash`() {
-        val exception: Exception = IllegalStateException("Custom exception")
-        throwException(exception)
+        val exception = throwException()
 
         val logs = agentRule.getFinishedLogRecords()
 
@@ -57,22 +59,31 @@ class CrashReportTest {
         )
     }
 
+    @Config(application = ExistingExceptionHandlerApp::class)
     @Test
     fun `Delegate to existing exception handler when available`() {
-        val originalExceptionHandler: Thread.UncaughtExceptionHandler = mockk()
-        every { originalExceptionHandler.uncaughtException(any(), any()) } just Runs
-        Thread.setDefaultUncaughtExceptionHandler(originalExceptionHandler)
-        val exception = IllegalStateException("Custom exception")
+        val app = RuntimeEnvironment.getApplication() as ExistingExceptionHandlerApp
 
-        val elasticHandler = throwException(exception)
+        val exception = throwException()
 
-        assertThat(originalExceptionHandler).isNotEqualTo(elasticHandler)
-        verify { originalExceptionHandler.uncaughtException(Thread.currentThread(), exception) }
+        assertThat(agentRule.getFinishedLogRecords()).hasSize(1)
+        verify { app.existingHandler.uncaughtException(Thread.currentThread(), exception) }
     }
 
-    private fun throwException(exception: Exception = IllegalStateException("Custom exception")): Thread.UncaughtExceptionHandler? {
-        val exceptionHandler = Thread.getDefaultUncaughtExceptionHandler()
-        exceptionHandler?.uncaughtException(Thread.currentThread(), exception)
-        return exceptionHandler
+    private class ExistingExceptionHandlerApp : Application() {
+        lateinit var existingHandler: Thread.UncaughtExceptionHandler
+
+        override fun onCreate() {
+            super.onCreate()
+            existingHandler = mockk()
+            Thread.setDefaultUncaughtExceptionHandler(existingHandler)
+            every { existingHandler.uncaughtException(any(), any()) } just Runs
+        }
+    }
+
+    private fun throwException(exception: Exception = IllegalStateException("Custom exception")): Exception {
+        Thread.getDefaultUncaughtExceptionHandler()
+            ?.uncaughtException(Thread.currentThread(), exception)
+        return exception
     }
 }

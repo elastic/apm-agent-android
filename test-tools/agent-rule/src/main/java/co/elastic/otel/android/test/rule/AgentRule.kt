@@ -46,6 +46,10 @@ abstract class AgentRule : TestRule {
         }
     }
 
+    fun getAgent(): ElasticOtelAgent {
+        return agent!!
+    }
+
     fun getFinishedMetrics(): List<MetricData> {
         return inMemoryExporters!!.getFinishedMetrics()
     }

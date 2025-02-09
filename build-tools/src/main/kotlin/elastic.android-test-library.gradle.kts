@@ -25,5 +25,5 @@ android {
 
 val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 dependencies {
-    implementation(libs.findLibrary("junit4").get())
+    api(libs.findLibrary("junit4").get())
 }

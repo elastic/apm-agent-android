@@ -87,19 +87,15 @@ internal class ClockExporterGateManager private constructor(
         internal fun create(
             systemTimeProvider: SystemTimeProvider,
             gateManager: ExporterGateManager,
-            timeOffsetNanosProvider: Provider<Long?>,
-            waitForClock: Boolean
+            timeOffsetNanosProvider: Provider<Long?>
         ): ClockExporterGateManager {
-            if (waitForClock) {
-                gateManager.createSpanGateLatch(ClockExporterGateManager::class.java, "Clock")
-                gateManager.createLogRecordLatch(ClockExporterGateManager::class.java, "Clock")
-            }
-            val manager = ClockExporterGateManager(
+            gateManager.createSpanGateLatch(ClockExporterGateManager::class.java, "Clock")
+            gateManager.createLogRecordLatch(ClockExporterGateManager::class.java, "Clock")
+            return ClockExporterGateManager(
                 systemTimeProvider,
                 gateManager,
                 timeOffsetNanosProvider
             )
-            return manager
         }
 
         private val ATTRIBUTE_KEY_CREATION_ELAPSED_TIME =

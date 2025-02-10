@@ -40,11 +40,10 @@ android {
     }
 }
 
-val rootLibs = extensions.getByType<VersionCatalogsExtension>().named("rootLibs")
 val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 dependencies {
-    testImplementation(rootLibs.findBundle("mocking").get())
-    testImplementation(rootLibs.findLibrary("junit4").get())
-    testImplementation(rootLibs.findLibrary("assertj").get())
-    androidTestImplementation(project(":testutils"))
+    testImplementation(libs.findBundle("mocking").get())
+    testImplementation(libs.findLibrary("junit4").get())
+    testImplementation(libs.findLibrary("assertj").get())
+    androidTestImplementation("co.elastic.otel.android:androidtest-agent-rule")
 }

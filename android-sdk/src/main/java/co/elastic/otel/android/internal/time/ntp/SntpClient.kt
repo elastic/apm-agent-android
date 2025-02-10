@@ -24,25 +24,12 @@ import java.io.Closeable
 /**
  * According to RFC-4330.
  */
-internal interface SntpClient : Closeable {
+interface SntpClient : Closeable {
 
     fun fetchTimeOffset(currentTimeMillis: Long): Response
 
     companion object {
-        private val noop by lazy {
-            object : SntpClient {
-                override fun fetchTimeOffset(currentTimeMillis: Long): Response {
-                    return Response.Error(ErrorType.TRY_LATER)
-                }
-
-                override fun close() {}
-            }
-        }
-
-        fun create(systemTimeProvider: SystemTimeProvider): SntpClient {
-            if (System.getProperty("elastic.test")?.equals("true") == true) {
-                return noop
-            }
+        internal fun create(systemTimeProvider: SystemTimeProvider): SntpClient {
             return SntpClientImpl(UdpClient("time.android.com", 123, 48), systemTimeProvider)
         }
     }

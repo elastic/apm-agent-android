@@ -20,7 +20,6 @@ package co.elastic.otel.android.internal.features.centralconfig.fetcher
 
 import co.elastic.otel.android.connectivity.ConnectivityConfiguration
 import co.elastic.otel.android.internal.services.preferences.PreferencesService
-import co.elastic.otel.android.testutils.ElasticAgentRule
 import co.elastic.otel.android.testutils.WireMockRule
 import io.mockk.Runs
 import io.mockk.every
@@ -48,9 +47,6 @@ internal class CentralConfigurationFetcherTest {
     val wireMockRule = WireMockRule()
 
     @get:Rule
-    val agentRule = ElasticAgentRule()
-
-    @get:Rule
     val temporaryFolder: TemporaryFolder = TemporaryFolder()
 
     @Before
@@ -62,7 +58,6 @@ internal class CentralConfigurationFetcherTest {
         every { preferences.remove("central_configuration_etag") } just Runs
         configurationFile = temporaryFolder.newFile("configFile.json")
         fetcher = CentralConfigurationFetcher(configurationFile, preferences)
-        agentRule.initialize()
     }
 
     private fun setUpConnectivity() {

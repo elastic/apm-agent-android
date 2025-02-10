@@ -25,16 +25,19 @@ include(":android-api")
 include(":android-sdk")
 include(":android-plugin")
 include(":android-common")
+includeFromDir("instrumentation")
+includeFromDir("test-tools", 2)
 
-val instrumentationDirName = "instrumentation"
-val instrumentationDir = File(rootDir, instrumentationDirName)
-val separator = Regex("[/\\\\]")
-instrumentationDir.walk().maxDepth(3).forEach {
-    if (it.name.equals("build.gradle.kts")) {
-        include(
-            ":$instrumentationDirName:${
-                it.parentFile.toRelativeString(instrumentationDir).replace(separator, ":")
-            }"
-        )
+fun includeFromDir(dirName: String, maxDepth: Int = 3) {
+    val instrumentationDir = File(rootDir, dirName)
+    val separator = Regex("[/\\\\]")
+    instrumentationDir.walk().maxDepth(maxDepth).forEach {
+        if (it.name.equals("build.gradle.kts")) {
+            include(
+                ":$dirName:${
+                    it.parentFile.toRelativeString(instrumentationDir).replace(separator, ":")
+                }"
+            )
+        }
     }
 }

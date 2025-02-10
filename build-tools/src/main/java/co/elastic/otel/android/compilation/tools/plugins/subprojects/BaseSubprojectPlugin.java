@@ -23,6 +23,7 @@ public class BaseSubprojectPlugin extends BaseNoticePlugin {
     @Override
     public void apply(Project project) {
         licensesConfig = project.getExtensions().create(EXTENSION_LICENSES_CONFIG, LicensesFinderExtension.class);
+        licensesConfig.getManualMappingFile().convention(project.getRootProject().getLayout().getProjectDirectory().file("manual_licenses_map.txt"));
     }
 
     protected void setUpLicensedDependencies(Project project, TaskProvider<PomLicensesCollectorTask> licensesCollectorProvider) {

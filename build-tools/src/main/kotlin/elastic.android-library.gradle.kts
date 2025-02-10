@@ -35,5 +35,6 @@ dependencies {
     testImplementation(libs.findBundle("mocking").get())
     testImplementation(libs.findBundle("junit").get())
     testImplementation(libs.findLibrary("assertj").get())
+    testImplementation(project(":test-tools:test-common"))
     testRuntimeOnly(libs.findLibrary("junit5-vintage").get())
 }

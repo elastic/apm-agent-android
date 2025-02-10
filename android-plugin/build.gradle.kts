@@ -1,13 +1,13 @@
 plugins {
     id("elastic.java-library")
     id("java-gradle-plugin")
-    alias(libs.plugins.buildconfig)
+    id("com.github.gmazzo.buildconfig")
 }
 
 dependencies {
+    api(project(":android-common"))
     implementation(libs.byteBuddy)
     implementation(libs.byteBuddy.plugin)
-    implementation(project(":android-common"))
     compileOnly("com.android.tools.build:gradle:${project.property("androidGradlePlugin_version")}")
 }
 
@@ -16,15 +16,11 @@ buildConfig {
     buildConfigField("String", "SDK_DEPENDENCY_URI", "\"$group:android-sdk:$version\"")
 }
 
-licensesConfig {
-    manualMappingFile = rootProject.file("manual_licenses_map.txt")
-}
-
 gradlePlugin {
     plugins {
         create("elasticAndroidAgent") {
             id = "co.elastic.otel.android.agent"
-            implementationClass = "co.elastic.otel.android.plugin.ApmAndroidAgentPlugin"
+            implementationClass = "co.elastic.otel.android.plugin.ElasticAgentPlugin"
             displayName = "Elastic OTel Android Agent"
             description = project.description
             tags.addAll("Android", "APM", "Elastic", "ELK", "opentelemetry")

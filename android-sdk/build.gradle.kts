@@ -15,14 +15,9 @@ android {
             isIncludeAndroidResources = true
             all {
                 it.systemProperty("agent_version", project.version)
-                it.systemProperty("elastic.test", "true")
             }
         }
     }
-}
-
-licensesConfig {
-    manualMappingFile = rootProject.file("manual_licenses_map.txt")
 }
 
 dependencies {

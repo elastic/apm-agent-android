@@ -27,7 +27,7 @@ public class JarNoticeProviderPlugin extends BaseSubprojectPlugin {
         TaskProvider<PomLicensesCollectorTask> pomLicensesFinder = project.getTasks().register("dependenciesLicencesFinder", PomLicensesCollectorTask.class, task -> {
             task.getRuntimeDependencies().set(runtimeClasspath);
             task.getLicensesFound().set(project.getLayout().getBuildDirectory().file(task.getName() + "/licenses.txt"));
-            task.getManualLicenseMapping().set(licensesConfig.manualMappingFile);
+            task.getManualLicenseMapping().set(licensesConfig.getManualMappingFile().getAsFile());
         });
         TaskProvider<NoticeFilesCollectorTask> noticeCollector = project.getTasks().register("noticeFilesCollector", NoticeFilesCollectorTask.class, task -> {
             task.getRuntimeDependencies().set(runtimeClasspath);

@@ -24,22 +24,22 @@ import co.elastic.otel.android.internal.services.backgroundwork.BackgroundWorkSe
 import co.elastic.otel.android.internal.services.network.NetworkService
 import co.elastic.otel.android.internal.services.preferences.PreferencesService
 
-internal class ServiceManager {
+class ServiceManager private constructor() {
     private val services = mutableMapOf<Class<out Service>, Service>()
 
-    fun getPreferencesService(): PreferencesService {
+    internal fun getPreferencesService(): PreferencesService {
         return getService(PreferencesService::class.java)
     }
 
-    fun getAppInfoService(): AppInfoService {
+    internal fun getAppInfoService(): AppInfoService {
         return getService(AppInfoService::class.java)
     }
 
-    fun getNetworkService(): NetworkService {
+    internal fun getNetworkService(): NetworkService {
         return getService(NetworkService::class.java)
     }
 
-    fun getBackgroundWorkService(): BackgroundWorkService {
+    internal fun getBackgroundWorkService(): BackgroundWorkService {
         return getService(BackgroundWorkService::class.java)
     }
 

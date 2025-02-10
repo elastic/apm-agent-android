@@ -1,13 +1,14 @@
 package co.elastic.otel.android.test
 
 import androidx.test.core.app.launchActivity
+import co.elastic.otel.android.test.rule.AndroidTestAgentRule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Rule
 import org.junit.Test
 
 class InstrumentationTest {
     @get:Rule
-    val agentRule = AgentRule()
+    val agentRule = AndroidTestAgentRule()
 
     @Test
     fun verifyAppLaunchTimeTracking() {

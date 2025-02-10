@@ -20,9 +20,11 @@ package co.elastic.otel.android.internal.features.centralconfig
 
 import androidx.annotation.WorkerThread
 import co.elastic.otel.android.common.internal.logging.Elog
+import co.elastic.otel.android.features.apmserver.ApmServerConnectivity
 import co.elastic.otel.android.internal.connectivity.ConnectivityConfigurationHolder
 import co.elastic.otel.android.internal.features.apmserver.ApmServerConnectivityManager
 import co.elastic.otel.android.internal.features.exportergate.ExporterGateManager
+import co.elastic.otel.android.internal.opentelemetry.ElasticOpenTelemetry
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.time.SystemTimeProvider
 import java.io.IOException
@@ -34,21 +36,30 @@ internal class CentralConfigurationManager private constructor(
     serviceManager: ServiceManager,
     private val configurationRegistry: ConfigurationRegistry,
     private val centralConfigurationSource: CentralConfigurationSource,
-    private val connectivityHolder: ConnectivityHolder,
+    private val apmServerConnectivityHolder: ApmServerConnectivityManager.ConnectivityHolder,
     private val gateManager: ExporterGateManager
 ) : CentralConfigurationSource.Listener {
+    private lateinit var centralConnectivityHolder: CentralConnectivityHolder
     private val backgroundWorkService by lazy { serviceManager.getBackgroundWorkService() }
     private val logger: Logger = Elog.getLogger()
 
     fun getConnectivityConfiguration(): CentralConfigurationConnectivity {
-        return connectivityHolder.get() as CentralConfigurationConnectivity
+        return centralConnectivityHolder.get() as CentralConfigurationConnectivity
     }
 
     fun setConnectivityConfiguration(configuration: CentralConfigurationConnectivity) {
-        connectivityHolder.set(configuration)
+        centralConnectivityHolder.set(configuration)
     }
 
-    internal fun initialize() {
+    internal fun initialize(openTelemetry: ElasticOpenTelemetry) {
+        centralConnectivityHolder = CentralConnectivityHolder(
+            CentralConfigurationConnectivity.fromApmServerConfig(
+                openTelemetry.serviceName,
+                openTelemetry.deploymentEnvironment,
+                apmServerConnectivityHolder.getConnectivityConfiguration()
+            )
+        )
+        centralConfigurationSource.listener = this
         backgroundWorkService.submit {
             try {
                 centralConfigurationSource.initialize()
@@ -85,7 +96,8 @@ internal class CentralConfigurationManager private constructor(
     @WorkerThread
     @Throws(IOException::class)
     private fun doPoll() {
-        val delayForNextPollInSeconds = centralConfigurationSource.sync()
+        val delayForNextPollInSeconds =
+            centralConfigurationSource.sync(getConnectivityConfiguration())
         if (delayForNextPollInSeconds != null) {
             logger.info("Central config returned max age is null")
             scheduleInSeconds(delayForNextPollInSeconds)
@@ -101,16 +113,10 @@ internal class CentralConfigurationManager private constructor(
             serviceManager: ServiceManager,
             systemTimeProvider: SystemTimeProvider,
             gateManager: ExporterGateManager,
-            serviceName: String,
-            serviceDeployment: String?,
-            connectivityHolder: ApmServerConnectivityManager.ConnectivityHolder
+            apmServerConnectivityHolder: ApmServerConnectivityManager.ConnectivityHolder
         ): CentralConfigurationManager {
-            val centralConfigurationConnectivityHolder = ConnectivityHolder.fromApmServerConfig(
-                serviceName, serviceDeployment, connectivityHolder
-            )
             val centralConfigurationSource = CentralConfigurationSource(
                 serviceManager,
-                centralConfigurationConnectivityHolder,
                 systemTimeProvider
             )
             val registry = ConfigurationRegistry.builder()
@@ -120,15 +126,13 @@ internal class CentralConfigurationManager private constructor(
             gateManager.createSpanGateLatch(CentralConfigurationManager::class.java, latchName)
             gateManager.createLogRecordLatch(CentralConfigurationManager::class.java, latchName)
             gateManager.createMetricGateLatch(CentralConfigurationManager::class.java, latchName)
-            val centralConfigurationManager = CentralConfigurationManager(
+            return CentralConfigurationManager(
                 serviceManager,
                 registry.build(),
                 centralConfigurationSource,
-                centralConfigurationConnectivityHolder,
+                apmServerConnectivityHolder,
                 gateManager
             )
-            centralConfigurationSource.listener = centralConfigurationManager
-            return centralConfigurationManager
         }
     }
 
@@ -143,21 +147,20 @@ internal class CentralConfigurationManager private constructor(
         }
     }
 
-    internal class ConnectivityHolder(
+    internal class CentralConnectivityHolder(
         connectivity: CentralConfigurationConnectivity
     ) : ConnectivityConfigurationHolder(connectivity) {
-
         companion object {
             fun fromApmServerConfig(
                 serviceName: String,
                 serviceDeployment: String?,
-                apmServerConfigurationManager: ApmServerConnectivityManager.ConnectivityHolder
-            ): ConnectivityHolder {
-                return ConnectivityHolder(
+                apmServerConnectivity: ApmServerConnectivity
+            ): CentralConnectivityHolder {
+                return CentralConnectivityHolder(
                     CentralConfigurationConnectivity.fromApmServerConfig(
                         serviceName,
                         serviceDeployment,
-                        apmServerConfigurationManager.getConnectivityConfiguration()
+                        apmServerConnectivity
                     )
                 )
             }

@@ -7,7 +7,7 @@ pluginManagement {
 }
 dependencyResolutionManagement {
     versionCatalogs {
-        create("rootLibs") {
+        create("libs") {
             from(files("../gradle/libs.versions.toml"))
         }
     }
@@ -18,7 +18,6 @@ dependencyResolutionManagement {
     }
 }
 includeBuild("..")
-include(":testutils")
 
 val instrumentationDirName = "instrumentation"
 val instrumentationDir = File(rootDir, instrumentationDirName)

@@ -19,7 +19,6 @@
 package co.elastic.otel.android.internal.features.centralconfig
 
 import co.elastic.otel.android.common.internal.logging.Elog
-import co.elastic.otel.android.internal.connectivity.ConnectivityConfigurationHolder
 import co.elastic.otel.android.internal.features.centralconfig.fetcher.CentralConfigurationFetcher
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.services.preferences.PreferencesService
@@ -34,7 +33,6 @@ import org.stagemonitor.configuration.source.AbstractConfigurationSource
 
 internal class CentralConfigurationSource internal constructor(
     serviceManager: ServiceManager,
-    private val connectivityConfigurationHolder: ConnectivityConfigurationHolder,
     private val systemTimeProvider: SystemTimeProvider,
 ) : AbstractConfigurationSource() {
     private val preferences: PreferencesService by lazy { serviceManager.getPreferencesService() }
@@ -59,13 +57,13 @@ internal class CentralConfigurationSource internal constructor(
     }
 
     @Throws(IOException::class)
-    internal fun sync(): Int? {
+    internal fun sync(connectivity: CentralConfigurationConnectivity): Int? {
         if (refreshTimeoutMillis > systemTimeProvider.getCurrentTimeMillis()) {
             logger.debug("Ignoring central config sync request")
             return null
         }
         try {
-            val fetchResult = fetcher.fetch(connectivityConfigurationHolder.get())
+            val fetchResult = fetcher.fetch(connectivity)
             if (fetchResult.configurationHasChanged) {
                 loadFromDisk()
                 notifyListener()

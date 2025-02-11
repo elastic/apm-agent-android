@@ -26,13 +26,19 @@ import io.opentelemetry.semconv.UrlAttributes
 class HttpSpanNameInterceptor : Interceptor<SpanData> {
     private companion object {
         private val URL_PATTERN = Regex("https?://([^/]+).*")
+        private val KNOWN_METHODS =
+            listOf("CONNECT", "DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT", "TRACE")
     }
 
     override fun intercept(item: SpanData): SpanData {
+        if (item.name !in KNOWN_METHODS) {
+            return item
+        }
+
         val url = item.attributes.get(UrlAttributes.URL_FULL) ?: return item
 
         return getNewName(item.name, url)?.let { newName ->
-            NameDelegatingSpanData(item, newName)
+            NameOverrideDelegatingSpanData(item, newName)
         } ?: item
     }
 
@@ -42,7 +48,7 @@ class HttpSpanNameInterceptor : Interceptor<SpanData> {
         }
     }
 
-    private class NameDelegatingSpanData(
+    private class NameOverrideDelegatingSpanData(
         delegate: SpanData,
         private val name: String
     ) : DelegatingSpanData(delegate) {

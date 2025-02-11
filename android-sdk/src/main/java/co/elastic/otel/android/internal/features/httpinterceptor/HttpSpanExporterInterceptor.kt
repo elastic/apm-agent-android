@@ -8,6 +8,6 @@ internal class HttpSpanExporterInterceptor(private val httpSpanInterceptor: Inte
     Interceptor<SpanExporter> {
 
     override fun intercept(item: SpanExporter): SpanExporter {
-        return HttpInterceptorSpanExporter(item, httpSpanInterceptor)
+        return HttpSpanExporter(item, httpSpanInterceptor)
     }
 }

@@ -6,7 +6,7 @@ import io.opentelemetry.sdk.trace.data.SpanData
 import io.opentelemetry.sdk.trace.export.SpanExporter
 import io.opentelemetry.semconv.UrlAttributes
 
-internal class HttpInterceptorSpanExporter(
+internal class HttpSpanExporter(
     private val delegate: SpanExporter,
     private val httpSpanInterceptor: Interceptor<SpanData>
 ) : SpanExporter {

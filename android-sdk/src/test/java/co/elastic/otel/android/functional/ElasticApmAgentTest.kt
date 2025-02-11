@@ -646,6 +646,56 @@ class ElasticApmAgentTest {
         )
     }
 
+    @Test
+    fun `Validate http span name change disabled`() {
+        agent = inMemoryAgentBuilder()
+            .setHttpSpanInterceptor(null)
+            .build()
+
+        sendSpan("Normal Span")
+        sendSpan(
+            "GET",
+            Attributes.of(
+                AttributeKey.stringKey("url.full"),
+                "http://somehost.com/some/path?q=some%20query"
+            )
+        )
+        sendSpan(
+            "POST",
+            Attributes.of(
+                AttributeKey.stringKey("url.full"),
+                "https://anotherhost.net:8080/some/path?q=elastic"
+            )
+        )
+        sendSpan(
+            "PUT",
+            Attributes.of(
+                AttributeKey.stringKey("url.full"),
+                "http://127.0.0.1:8080/some/path"
+            )
+        )
+        sendSpan(
+            "GET with something else apart from the verb",
+            Attributes.of(
+                AttributeKey.stringKey("url.full"),
+                "https://anotherhost.net:8080/some/path?q=elastic"
+            )
+        )
+
+        await.atMost(Duration.ofSeconds(1)).until {
+            agent.getExporterGateManager().spanGateIsOpen()
+        }
+
+        val finishedSpanNames = inMemoryExporters.getFinishedSpans().map { it.name }
+        assertThat(finishedSpanNames).containsExactlyInAnyOrder(
+            "Normal Span",
+            "GET",
+            "POST",
+            "PUT",
+            "GET with something else apart from the verb",
+        )
+    }
+
     private fun simpleAgentBuilder(
         url: String,
         diskBufferingConfiguration: DiskBufferingConfiguration = DiskBufferingConfiguration.disabled()

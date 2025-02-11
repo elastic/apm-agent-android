@@ -598,6 +598,38 @@ class ElasticApmAgentTest {
         assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
     }
 
+    @Test
+    fun `Validate http span name change`() {
+        agent = inMemoryAgentBuilder().build()
+
+        sendSpan("Normal Span")
+        sendSpan(
+            "GET",
+            Attributes.of(
+                AttributeKey.stringKey("url.full"),
+                "http://somehost.com/some/path?q=some%20query"
+            )
+        )
+        sendSpan(
+            "POST",
+            Attributes.of(
+                AttributeKey.stringKey("url.full"),
+                "https://anotherhost.net:8080/some/path?q=elastic"
+            )
+        )
+
+        await.atMost(Duration.ofSeconds(1)).until {
+            agent.getExporterGateManager().spanGateIsOpen()
+        }
+
+        val finishedSpanNames = inMemoryExporters.getFinishedSpans().map { it.name }
+        assertThat(finishedSpanNames).containsExactlyInAnyOrder(
+            "Normal Span",
+            "GET somehost.com",
+            "POST anotherhost.net:8080"
+        )
+    }
+
     private fun simpleAgentBuilder(
         url: String,
         diskBufferingConfiguration: DiskBufferingConfiguration = DiskBufferingConfiguration.disabled()
@@ -625,9 +657,10 @@ class ElasticApmAgentTest {
         assertThat(attributes.get(AttributeKey.stringKey("session.id"))).isEqualTo(value)
     }
 
-    private fun sendSpan(name: String = "span-name") {
+    private fun sendSpan(name: String = "span-name", attributes: Attributes = Attributes.empty()) {
         agent.getOpenTelemetry().getTracer("TestTracer")
             .spanBuilder(name)
+            .setAllAttributes(attributes)
             .startSpan()
             .end()
     }

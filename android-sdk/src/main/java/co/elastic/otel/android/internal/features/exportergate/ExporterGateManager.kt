@@ -87,6 +87,10 @@ internal class ExporterGateManager(
         metricGateQueue.openLatch(holder)
     }
 
+    internal fun spanGateIsOpen(): Boolean {
+        return spanGateOpen.get()
+    }
+
     internal fun metricGateIsOpen(): Boolean {
         return metricGateOpen.get()
     }

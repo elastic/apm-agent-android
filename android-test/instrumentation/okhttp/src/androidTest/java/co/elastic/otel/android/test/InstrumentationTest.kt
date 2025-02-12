@@ -63,25 +63,57 @@ class InstrumentationTest {
             .hasAttribute(AttributeKey.longKey("server.port"), webServer.port.toLong())
     }
 
-    private fun executeSuccessfulHttpCall(responseCode: Int) {
-        executeSuccessfulHttpCall(responseCode, "{}", emptyMap())
+    @Test
+    fun verifyOkHttpAsyncCallSpan() {
+        val url = webServer.url("/")
+        executeAsyncSuccessfulHttpCall("GET", 200, "{}", url)
+
+        agentRule.flushSpans().join(5, TimeUnit.SECONDS)
+
+        assertThat(agentRule.getFinishedSpans()).hasSize(1)
+        assertThat(agentRule.getFinishedSpans().first()).hasName("GET")
+            .hasKind(SpanKind.CLIENT)
+            .hasStatus(StatusData.ok())
+            .hasAttribute(AttributeKey.stringKey("url.full"), url.toString())
+            .hasAttribute(AttributeKey.stringKey("http.request.method"), "GET")
+            .hasAttribute(AttributeKey.longKey("http.response.status_code"), 200)
+            .hasAttribute(AttributeKey.stringKey("server.address"), "localhost")
+            .hasAttribute(AttributeKey.longKey("server.port"), webServer.port.toLong())
     }
 
-    private fun executeSuccessfulHttpCall(
+    @Test
+    fun verifyOkHttpAsyncCallSpan_withErrorCode() {
+        val url = webServer.url("/")
+        executeAsyncSuccessfulHttpCall("GET", 500, "{}", url)
+
+        agentRule.flushSpans().join(5, TimeUnit.SECONDS)
+
+        assertThat(agentRule.getFinishedSpans()).hasSize(1)
+        assertThat(agentRule.getFinishedSpans().first()).hasName("GET")
+            .hasKind(SpanKind.CLIENT)
+            .hasStatus(StatusData.ok())
+            .hasAttribute(AttributeKey.stringKey("url.full"), url.toString())
+            .hasAttribute(AttributeKey.stringKey("http.request.method"), "GET")
+            .hasAttribute(AttributeKey.longKey("http.response.status_code"), 500)
+            .hasAttribute(AttributeKey.stringKey("server.address"), "localhost")
+            .hasAttribute(AttributeKey.longKey("server.port"), webServer.port.toLong())
+    }
+
+    private fun executeAsyncSuccessfulHttpCall(
+        method: String,
         responseCode: Int,
         responseBody: String,
-        responseHeaders: Map<String, String>
+        url: HttpUrl = webServer.url("/")
     ) {
         val mockResponse = MockResponse().setResponseCode(responseCode).setBody(responseBody)
-        responseHeaders.forEach { (name: String, value: String) ->
-            mockResponse.addHeader(name, value)
-        }
         webServer.enqueue(mockResponse)
 
         val responseStr = AtomicReference("")
         try {
             executeAsyncHttpCall(
-                Request.Builder().url(webServer.url("/")).build()
+                Request.Builder()
+                    .method(method, null)
+                    .url(url).build()
             ) { response ->
                 try {
                     responseStr.set(response.body!!.string())
@@ -93,17 +125,6 @@ class InstrumentationTest {
             throw RuntimeException(e)
         }
         assertThat(responseStr.get()).isEqualTo(responseBody)
-    }
-
-    private fun executeFailedHttpCall() {
-        val url = webServer.url("/")
-        webServer.shutdown()
-
-        try {
-            executeAsyncHttpCall(Request.Builder().url(url).build()) { }
-        } catch (e: InterruptedException) {
-            throw RuntimeException(e)
-        }
     }
 
     private fun executeAsyncHttpCall(request: Request, responseConsumer: Consumer<Response>) {

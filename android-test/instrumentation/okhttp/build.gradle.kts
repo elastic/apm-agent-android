@@ -7,3 +7,8 @@ plugins {
 android {
     namespace = "co.elastic.otel.android.test"
 }
+
+dependencies {
+    androidTestImplementation(instrumentation.okhttp)
+    androidTestImplementation(instrumentation.mockWebServer)
+}

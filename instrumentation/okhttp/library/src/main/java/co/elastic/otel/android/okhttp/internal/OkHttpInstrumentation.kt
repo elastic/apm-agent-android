@@ -27,6 +27,6 @@ import com.google.auto.service.AutoService
 class OkHttpInstrumentation : Instrumentation {
 
     override fun install(application: Application, agent: ElasticOtelAgent) {
-        TODO()
+
     }
 }

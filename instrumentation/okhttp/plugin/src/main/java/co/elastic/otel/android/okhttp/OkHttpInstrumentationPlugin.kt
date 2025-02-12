@@ -11,5 +11,9 @@ class OkHttpInstrumentationPlugin : InstrumentationPlugin() {
             "implementation",
             target.dependencies.create(BuildConfig.LIBRARY_URI)
         )
+        target.dependencies.add(
+            "byteBuddy",
+            target.dependencies.create(BuildConfig.BYTEBUDDY_PLUGIN)
+        )
     }
 }

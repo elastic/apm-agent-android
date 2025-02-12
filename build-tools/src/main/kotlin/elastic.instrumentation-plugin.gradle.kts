@@ -17,11 +17,15 @@ abstract class ElasticBuildConfig @Inject constructor(
     private val buildConfigGroupId: String,
     private val projectVersion: String
 ) {
-    fun projectUri(fieldName: String, dependencyProjectName: String) {
+    fun projectUri(fieldName: String, artifactName: String) {
+        dependencyUri(fieldName, "${buildConfigGroupId}:$artifactName:$projectVersion")
+    }
+
+    fun dependencyUri(fieldName: String, dependencyUri: String) {
         buildConfigExtension.buildConfigField(
             "String",
             fieldName,
-            """"${buildConfigGroupId}:$dependencyProjectName:$projectVersion""""
+            """"$dependencyUri""""
         )
     }
 }

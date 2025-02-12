@@ -4,6 +4,7 @@ plugins {
 
 elasticBuildConfig {
     projectUri("LIBRARY_URI", "okhttp-library")
+    projectUri("BYTEBUDDY_PLUGIN", "okhttp-bytebuddy")
 }
 
 elasticInstrumentationPlugins {

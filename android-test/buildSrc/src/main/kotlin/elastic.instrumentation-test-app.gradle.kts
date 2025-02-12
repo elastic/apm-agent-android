@@ -45,5 +45,6 @@ dependencies {
     testImplementation(libs.findBundle("mocking").get())
     testImplementation(libs.findLibrary("junit4").get())
     testImplementation(libs.findLibrary("assertj").get())
+    androidTestImplementation("co.elastic.otel.android:test-common")
     androidTestImplementation("co.elastic.otel.android:androidtest-agent-rule")
 }

@@ -1,7 +1,10 @@
 package co.elastic.otel.android.test
 
 import co.elastic.otel.android.test.rule.AndroidTestAgentRule
+import io.opentelemetry.api.common.AttributeKey
+import io.opentelemetry.api.trace.SpanKind
 import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat
+import io.opentelemetry.sdk.trace.data.StatusData
 import java.io.IOException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -10,6 +13,7 @@ import java.util.function.Consumer
 import junit.framework.TestCase.fail
 import okhttp3.Call
 import okhttp3.Callback
+import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -43,12 +47,20 @@ class InstrumentationTest {
 
     @Test
     fun verifyOkHttpSyncCallSpan() {
-        executeSyncHttpCall("GET", 200, "{}")
+        val url = webServer.url("/")
+        executeSyncHttpCall("GET", 200, "{}", url)
 
         agentRule.flushSpans().join(5, TimeUnit.SECONDS)
 
         assertThat(agentRule.getFinishedSpans()).hasSize(1)
         assertThat(agentRule.getFinishedSpans().first()).hasName("GET")
+            .hasKind(SpanKind.CLIENT)
+            .hasStatus(StatusData.ok())
+            .hasAttribute(AttributeKey.stringKey("url.full"), url.toString())
+            .hasAttribute(AttributeKey.stringKey("http.request.method"), "GET")
+            .hasAttribute(AttributeKey.longKey("http.response.status_code"), 200)
+            .hasAttribute(AttributeKey.stringKey("server.address"), "localhost")
+            .hasAttribute(AttributeKey.longKey("server.port"), webServer.port.toLong())
     }
 
     private fun executeSuccessfulHttpCall(responseCode: Int) {
@@ -112,14 +124,15 @@ class InstrumentationTest {
     private fun executeSyncHttpCall(
         method: String,
         responseCode: Int,
-        responseBody: String
+        responseBody: String,
+        url: HttpUrl = webServer.url("/")
     ): Response {
         val mockResponse = MockResponse().setResponseCode(responseCode).setBody(responseBody)
         webServer.enqueue(mockResponse)
 
         val request = Request.Builder()
             .method(method, null)
-            .url(webServer.url("/")).build()
+            .url(url).build()
 
         return clientBuilder.build().newCall(request).execute()
     }

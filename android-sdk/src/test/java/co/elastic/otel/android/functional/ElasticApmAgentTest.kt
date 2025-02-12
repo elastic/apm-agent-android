@@ -118,10 +118,12 @@ class ElasticApmAgentTest {
         val delegate = mockk<ManagedElasticOtelAgent>()
         val flushMetricsResult = mockk<CompletableResultCode>()
         val flushLogRecordsResult = mockk<CompletableResultCode>()
+        val flushSpansRecordsResult = mockk<CompletableResultCode>()
         val openTelemetry = mockk<OpenTelemetry>()
         every { delegate.getOpenTelemetry() }.returns(openTelemetry)
         every { delegate.flushMetrics() }.returns(flushMetricsResult)
         every { delegate.flushLogRecords() }.returns(flushLogRecordsResult)
+        every { delegate.flushSpans() }.returns(flushSpansRecordsResult)
         every { delegate.openTelemetry }.returns(mockk())
         every { delegate.close() } just Runs
 
@@ -135,6 +137,7 @@ class ElasticApmAgentTest {
         assertThat(agent.getOpenTelemetry()).isEqualTo(openTelemetry)
         assertThat(agent.flushMetrics()).isEqualTo(flushMetricsResult)
         assertThat(agent.flushLogRecords()).isEqualTo(flushLogRecordsResult)
+        assertThat(agent.flushSpans()).isEqualTo(flushSpansRecordsResult)
         agent.close()
         verify { delegate.close() }
     }

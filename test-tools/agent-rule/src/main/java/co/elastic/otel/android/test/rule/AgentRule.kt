@@ -9,6 +9,7 @@ import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.time.SystemTimeProvider
 import co.elastic.otel.android.internal.time.ntp.SntpClient
 import co.elastic.otel.android.test.common.ElasticAttributes.DEFAULT_SESSION_ID
+import io.opentelemetry.sdk.common.CompletableResultCode
 import io.opentelemetry.sdk.logs.data.LogRecordData
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.metrics.data.MetricData
@@ -24,7 +25,7 @@ import org.junit.runners.model.Statement
 
 abstract class AgentRule : TestRule {
     @Volatile
-    private var agent: ElasticOtelAgent? = null
+    private var agent: ManagedElasticOtelAgent? = null
 
     @Volatile
     private var inMemoryExporters: InMemoryExporterProvider? = null
@@ -62,7 +63,11 @@ abstract class AgentRule : TestRule {
         return inMemoryExporters!!.getFinishedSpans()
     }
 
-    private fun createAgent(application: Application): ElasticOtelAgent {
+    fun flushSpans(): CompletableResultCode {
+        return agent!!.flushSpans()
+    }
+
+    private fun createAgent(application: Application): ManagedElasticOtelAgent {
         val serviceManager = ServiceManager.create(application)
         val features = ManagedElasticOtelAgent.ManagedFeatures.Builder(application)
             .setSntpClient(LocalSntpClient())

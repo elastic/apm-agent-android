@@ -45,6 +45,8 @@ class InstrumentationTest {
     fun verifyOkHttpSyncCallSpan() {
         executeSyncHttpCall("GET", 200, "{}")
 
+        agentRule.flushSpans().join(5, TimeUnit.SECONDS)
+
         assertThat(agentRule.getFinishedSpans()).hasSize(1)
         assertThat(agentRule.getFinishedSpans().first()).hasName("GET")
     }

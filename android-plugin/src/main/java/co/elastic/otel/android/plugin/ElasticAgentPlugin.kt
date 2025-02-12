@@ -20,19 +20,39 @@ package co.elastic.otel.android.plugin
 
 import co.elastic.otel.android.common.internal.logging.Elog
 import co.elastic.otel.android.generated.BuildConfig
+import co.elastic.otel.android.plugin.extensions.ElasticApmExtension
+import co.elastic.otel.android.plugin.internal.BuildVariantListener
 import co.elastic.otel.android.plugin.internal.logging.GradleLoggerFactory
+import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import net.bytebuddy.build.gradle.android.ByteBuddyAndroidPlugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
-internal class ElasticAgentPlugin : Plugin<Project> {
+class ElasticAgentPlugin : Plugin<Project> {
     private lateinit var project: Project
+    private val buildVariantListeners = mutableSetOf<BuildVariantListener>()
 
     override fun apply(target: Project) {
         this.project = target
         Elog.init(GradleLoggerFactory())
         addByteBuddyPlugin()
         addSdkDependency()
+        val extension = project.extensions.create("elasticAgent", ElasticApmExtension::class.java)
+        val androidComponents =
+            project.extensions.getByType(ApplicationAndroidComponentsExtension::class.java)
+        androidComponents.finalizeDsl { androidExtension ->
+            val disableForBuildTypes = extension.bytecodeInstrumentation.disableForBuildTypes.get()
+            androidExtension.buildTypes.forEach { buildType ->
+                val name = buildType.name
+                if (name !in disableForBuildTypes) {
+                    buildVariantListeners.forEach { listener -> listener.onBuildVariant(name) }
+                }
+            }
+        }
+    }
+
+    fun addBuildVariantListener(listener: BuildVariantListener) {
+        buildVariantListeners.add(listener)
     }
 
     private fun addByteBuddyPlugin() {

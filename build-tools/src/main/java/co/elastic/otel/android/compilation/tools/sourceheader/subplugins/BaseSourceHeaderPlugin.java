@@ -17,6 +17,10 @@ public class BaseSourceHeaderPlugin implements Plugin<Project> {
         spotlessExtension = project.getExtensions().getByType(SpotlessExtension.class);
 
         spotlessExtension.java(javaExtension -> javaExtension.licenseHeader(getLicenseHeader()));
+        spotlessExtension.kotlin(kotlinExtension -> {
+            kotlinExtension.licenseHeader(getLicenseHeader());
+            kotlinExtension.target("src/*/java/**/*.kt");
+        });
     }
 
     protected String getLicenseHeader() {

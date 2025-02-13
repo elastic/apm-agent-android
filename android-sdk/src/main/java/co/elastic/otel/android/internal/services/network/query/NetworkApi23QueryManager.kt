@@ -18,7 +18,6 @@
  */
 package co.elastic.otel.android.internal.services.network.query
 
-import android.annotation.TargetApi
 import android.net.ConnectivityManager
 import android.net.ConnectivityManager.NetworkCallback
 import android.net.Network
@@ -27,9 +26,10 @@ import android.net.NetworkRequest
 import android.os.Build
 import android.telephony.TelephonyManager
 import androidx.annotation.GuardedBy
+import androidx.annotation.RequiresApi
 import co.elastic.otel.android.internal.services.network.listener.NetworkChangeListener
 
-@TargetApi(Build.VERSION_CODES.M)
+@RequiresApi(Build.VERSION_CODES.M)
 internal class NetworkApi23QueryManager(
     private val connectivityManager: ConnectivityManager,
     private val telephonyManager: TelephonyManager

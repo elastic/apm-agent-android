@@ -22,6 +22,7 @@ import android.app.Application
 import co.elastic.otel.android.api.ElasticOtelAgent
 import co.elastic.otel.android.api.flusher.LogRecordFlusher
 import co.elastic.otel.android.api.flusher.MetricFlusher
+import co.elastic.otel.android.api.flusher.SpanFlusher
 import co.elastic.otel.android.common.internal.logging.Elog
 import co.elastic.otel.android.exporters.ExporterProvider
 import co.elastic.otel.android.exporters.configuration.ExportProtocol
@@ -36,6 +37,8 @@ import co.elastic.otel.android.internal.features.centralconfig.CentralConfigurat
 import co.elastic.otel.android.internal.features.centralconfig.CentralConfigurationManager
 import co.elastic.otel.android.internal.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.otel.android.internal.features.exportergate.ExporterGateManager
+import co.elastic.otel.android.internal.features.httpinterceptor.HttpSpanExporterInterceptor
+import co.elastic.otel.android.internal.features.httpinterceptor.HttpSpanNameInterceptor
 import co.elastic.otel.android.internal.features.sessionmanager.SessionManager
 import co.elastic.otel.android.internal.features.sessionmanager.samplerate.SampleRateManager
 import co.elastic.otel.android.internal.services.ServiceManager
@@ -49,6 +52,7 @@ import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.sdk.common.CompletableResultCode
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.metrics.export.MetricExporter
+import io.opentelemetry.sdk.trace.data.SpanData
 import io.opentelemetry.sdk.trace.export.SpanExporter
 
 @Suppress("CanBeParameter")
@@ -57,7 +61,7 @@ class ElasticApmAgent internal constructor(
     private val apmServerConnectivityManager: ApmServerConnectivityManager,
     private val centralConfigurationManager: CentralConfigurationManager,
     private val sampleRateManager: SampleRateManager
-) : ElasticOtelAgent, MetricFlusher, LogRecordFlusher {
+) : ElasticOtelAgent, MetricFlusher, LogRecordFlusher, SpanFlusher {
 
     init {
         centralConfigurationManager.initialize(delegate.openTelemetry)
@@ -74,6 +78,10 @@ class ElasticApmAgent internal constructor(
 
     override fun flushLogRecords(): CompletableResultCode {
         return delegate.flushLogRecords()
+    }
+
+    override fun flushSpans(): CompletableResultCode {
+        return delegate.flushSpans()
     }
 
     override fun close() {
@@ -124,6 +132,7 @@ class ElasticApmAgent internal constructor(
         private var sessionIdGenerator: SessionIdGenerator? = null
         private var diskBufferingConfiguration: DiskBufferingConfiguration? = null
         private var loggingPolicy: LoggingPolicy? = null
+        private var httpSpanInterceptor: Interceptor<SpanData>? = HttpSpanNameInterceptor()
         private val managedAgentBuilder = ManagedElasticOtelAgent.Builder()
         internal var internalExporterProviderInterceptor: Interceptor<ExporterProvider> =
             Interceptor.noop()
@@ -193,6 +202,10 @@ class ElasticApmAgent internal constructor(
             managedAgentBuilder.setProcessorFactory(value)
         }
 
+        fun setHttpSpanInterceptor(value: Interceptor<SpanData>?) = apply {
+            httpSpanInterceptor = value
+        }
+
         internal fun setDiskBufferingConfiguration(value: DiskBufferingConfiguration) = apply {
             diskBufferingConfiguration = value
         }
@@ -246,6 +259,11 @@ class ElasticApmAgent internal constructor(
                     exporterProvider
                 )
             )
+
+            httpSpanInterceptor?.let {
+                managedAgentBuilder.addSpanExporterInterceptor(HttpSpanExporterInterceptor(it))
+            }
+
             return ElasticApmAgent(
                 managedAgentBuilder.build(serviceManager, managedFeatures),
                 apmServerConnectivityManager,

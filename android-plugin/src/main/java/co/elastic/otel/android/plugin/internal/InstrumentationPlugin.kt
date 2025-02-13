@@ -12,8 +12,8 @@ abstract class InstrumentationPlugin : Plugin<Project> {
                 apply(ElasticAgentPlugin::class.java)
             }
         }
-        onApply(target)
+        onApply(target, target.plugins.getPlugin(ElasticAgentPlugin::class.java))
     }
 
-    abstract fun onApply(target: Project)
+    abstract fun onApply(target: Project, agentPlugin: ElasticAgentPlugin)
 }

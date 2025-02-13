@@ -23,6 +23,10 @@ subprojects {
                 substitute(module("co.elastic.otel.android.instrumentation:${moduleId}-library"))
                     .using(module("co.elastic.otel.android.${moduleId}:library:$agentVersion"))
             }
+            resolutionStrategy.dependencySubstitution {
+                substitute(module("co.elastic.otel.android.instrumentation:${moduleId}-bytebuddy"))
+                    .using(module("co.elastic.otel.android.${moduleId}:bytebuddy:$agentVersion"))
+            }
         }
     }
 }

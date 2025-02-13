@@ -1,0 +1,2 @@
+co.elastic.otel.android.okhttp.internal.OkHttpClientPlugin
+co.elastic.otel.android.okhttp.internal.callback.OkHttpCallbackPlugin

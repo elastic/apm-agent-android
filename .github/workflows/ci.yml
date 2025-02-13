@@ -35,7 +35,7 @@ jobs:
       - uses: ./.github/actions/setup
       - name: Build
         run: ./gradlew assemble
-      - name: Check and unit tests
+      - name: Checks and unit tests
         run: ./checks.sh
       - name: Enable KVM for Android tests
         run: |

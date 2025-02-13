@@ -1,0 +1,1 @@
+./gradlew -p "android-test" connectedCheck

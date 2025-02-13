@@ -35,8 +35,18 @@ jobs:
       - uses: ./.github/actions/setup
       - name: Build
         run: ./gradlew assemble
-      - name: Test
+      - name: Unit tests
         run: ./tests.sh
+      - name: Enable KVM for Android tests
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Android tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          script: ./android_tests.sh
       - name: Store test results
         if: success() || failure()
         uses: actions/upload-artifact@v4
@@ -45,6 +55,7 @@ jobs:
           path: |
             **/build/test-results/testRelease*/TEST-*.xml
             **/build/test-results/test/TEST-*.xml
+            **/build/outputs/androidTest-results/**/TEST-*.xml
 
   # The very last job to report whether the Workflow passed.
   # This will act as the Branch Protection gatekeeper

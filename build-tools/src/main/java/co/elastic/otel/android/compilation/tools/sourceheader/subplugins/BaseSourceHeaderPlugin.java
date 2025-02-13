@@ -34,7 +34,7 @@ public class BaseSourceHeaderPlugin implements Plugin<Project> {
         });
         spotlessExtension.format("internalNoticeExtension", formatExtension -> {
             formatExtension.target("src/main/java/**/*.kt", "src/main/java/**/*.java");
-            formatExtension.addStep(new InternalNoticeStep());
+            formatExtension.addStep(InternalNoticeStep.INSTANCE);
         });
     }
 
@@ -64,6 +64,11 @@ public class BaseSourceHeaderPlugin implements Plugin<Project> {
     }
 
     public static class InternalNoticeStep implements FormatterStep {
+        public static final InternalNoticeStep INSTANCE = new InternalNoticeStep();
+
+        private InternalNoticeStep() {
+        }
+
         private static final Pattern LAST_IMPORT_PATTERN = Pattern.compile("import .+\\n*(?![\\S\\s]*import .+)");
         private static final Pattern PACKAGE_PATTERN = Pattern.compile("package .+\\n*");
         private static final String INTERNAL_NOTICE = """

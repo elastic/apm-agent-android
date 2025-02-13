@@ -68,7 +68,7 @@ if the author does not have commit access, should "Squash and merge".
 You can run the following command to run all the unit tests available:
 
 ```text
-./tests.sh
+./checks.sh
 ```
 
 For instrumentation tests, you'd need to have an Android Emulator running on your host machine, or a

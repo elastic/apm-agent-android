@@ -22,9 +22,9 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.SocketException
 
-class TestUdpServer(port: Int) : Thread() {
+class TestUdpServer : Thread() {
     private val buf = ByteArray(256)
-    val socket = DatagramSocket(port)
+    val socket = DatagramSocket()
 
     @Volatile
     var responseHandler: (DatagramPacket) -> Unit = { clientPacket ->
@@ -52,5 +52,9 @@ class TestUdpServer(port: Int) : Thread() {
 
     fun close() {
         socket.close()
+    }
+
+    fun getPort(): Int {
+        return socket.localPort
     }
 }

@@ -37,14 +37,13 @@ class UdpClientTest {
 
     companion object {
         private const val SERVER_HOST = "localhost"
-        private const val SERVER_PORT = 4447
     }
 
     @BeforeEach
     fun setUp() {
-        server = TestUdpServer(SERVER_PORT)
+        server = TestUdpServer()
         server.start()
-        client = UdpClient(SERVER_HOST, SERVER_PORT, 256)
+        client = UdpClient(SERVER_HOST, server.getPort(), 256)
     }
 
     @AfterEach
@@ -99,7 +98,7 @@ class UdpClientTest {
 
     @Test
     fun `Server port is not reachable`() {
-        client = UdpClient(SERVER_HOST, SERVER_PORT + 1, 256)
+        client = UdpClient(SERVER_HOST, server.getPort() + 1, 256)
 
         assertThrows<SocketTimeoutException> {
             client.send("Example".toByteArray(), Duration.ofSeconds(1))
@@ -117,7 +116,7 @@ class UdpClientTest {
 
     @Test
     fun `Server host not found`() {
-        client = UdpClient("nonexistent", SERVER_PORT, 256)
+        client = UdpClient("nonexistent", 1, 256)
         assertThrows<UnknownHostException> {
             client.send("Example".toByteArray())
         }

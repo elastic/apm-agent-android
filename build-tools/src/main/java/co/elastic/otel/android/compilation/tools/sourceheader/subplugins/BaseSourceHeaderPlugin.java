@@ -33,7 +33,7 @@ public class BaseSourceHeaderPlugin implements Plugin<Project> {
             kotlinExtension.target("src/*/java/**/*.kt");
         });
         spotlessExtension.format("internalNoticeExtension", formatExtension -> {
-            formatExtension.target("src/*/java/**/*.kt", "src/*/java/**/*.java");
+            formatExtension.target("src/main/java/**/*.kt", "src/main/java/**/*.java");
             formatExtension.addStep(new InternalNoticeStep());
         });
     }

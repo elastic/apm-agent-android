@@ -8,7 +8,8 @@ import android.widget.ArrayAdapter
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import co.elastic.apm.android.sample.databinding.FragmentFirstBinding
+import co.elastic.otel.android.sample.R
+import co.elastic.otel.android.sample.databinding.FragmentFirstBinding
 
 class FirstFragment : Fragment() {
 

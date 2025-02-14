@@ -5,8 +5,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
-import co.elastic.apm.android.sample.databinding.ActivityMainBinding
-import com.google.android.material.snackbar.Snackbar
+import co.elastic.apm.android.sample.MyApp.Companion.agent
+import co.elastic.otel.android.extensions.log
+import co.elastic.otel.android.extensions.span
+import co.elastic.otel.android.sample.R
+import co.elastic.otel.android.sample.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
@@ -15,19 +18,19 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        agent.span("Main Activity creation") {
+            binding = ActivityMainBinding.inflate(layoutInflater)
+            setContentView(binding.root)
 
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+            setSupportActionBar(binding.toolbar)
 
-        setSupportActionBar(binding.toolbar)
+            val navController = findNavController(R.id.nav_host_fragment_content_main)
+            appBarConfiguration = AppBarConfiguration(navController.graph)
+            setupActionBarWithNavController(navController, appBarConfiguration)
 
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
-        appBarConfiguration = AppBarConfiguration(navController.graph)
-        setupActionBarWithNavController(navController, appBarConfiguration)
-
-        binding.fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
+            binding.fab.setOnClickListener { view ->
+                agent.log("Button click")
+            }
         }
     }
 

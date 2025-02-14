@@ -1,24 +1,22 @@
 package co.elastic.apm.android.sample
 
 import android.app.Application
-import co.elastic.apm.android.sdk.ElasticApmAgent
-import co.elastic.apm.android.sdk.ElasticApmConfiguration
-import co.elastic.apm.android.sdk.configuration.logging.LogLevel
-import co.elastic.apm.android.sdk.configuration.logging.LoggingPolicy
-import co.elastic.apm.android.sdk.features.persistence.PersistenceConfiguration
+import co.elastic.otel.android.ElasticApmAgent
+import co.elastic.otel.android.api.ElasticOtelAgent
+import co.elastic.otel.android.extensions.log
 
 class MyApp : Application() {
+    companion object {
+        internal lateinit var agent: ElasticOtelAgent
+    }
 
     override fun onCreate() {
         super.onCreate()
-        ElasticApmAgent.initialize(
-            this,
-            ElasticApmConfiguration.builder()
-                .setPersistenceConfiguration(
-                    PersistenceConfiguration.builder().setEnabled(true).build()
-                )
-                .setLibraryLoggingPolicy(LoggingPolicy.enabled(LogLevel.TRACE))
-                .build()
-        )
+        agent = ElasticApmAgent.builder(this)
+            .setUrl("http://10.0.2.2:8200")
+            .setServiceName("weather-sample-app")
+            .build()
+
+        agent.log("App created")
     }
 }

@@ -27,6 +27,7 @@ import android.net.NetworkInfo
 import android.os.Build
 import android.telephony.TelephonyManager
 import co.elastic.otel.android.exporters.ExporterProvider
+import co.elastic.otel.android.interceptor.Interceptor
 import co.elastic.otel.android.internal.opentelemetry.ElasticOpenTelemetry
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.services.network.query.NetworkApi21QueryManager
@@ -38,6 +39,7 @@ import co.elastic.otel.android.test.common.ElasticAttributes.getLogRecordDefault
 import co.elastic.otel.android.test.common.ElasticAttributes.getSpanDefaultAttributes
 import io.mockk.every
 import io.mockk.mockk
+import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.api.logs.LogRecordBuilder
 import io.opentelemetry.api.trace.SpanBuilder
@@ -143,6 +145,55 @@ internal class AttributesTest : ExporterProvider, ProcessorFactory {
             .put("telemetry.sdk.language", "java")
             .put("telemetry.sdk.name", "android")
             .put("telemetry.sdk.version", System.getProperty("agent_version")!!)
+            .build()
+
+        sendSpan()
+        sendLog()
+        sendMetricCounter()
+
+        val spanItems = getFinishedSpans()
+        val logItems = getFinishedLogRecords()
+        val metricItems = getFinishedMetrics()
+        assertThat(spanItems).hasSize(1)
+        assertThat(logItems).hasSize(1)
+        assertThat(metricItems).hasSize(1)
+        assertThat(spanItems.first()).hasResource(expectedResource)
+        assertThat(logItems.first()).hasResource(expectedResource)
+        assertThat(metricItems.first()).hasResource(expectedResource)
+    }
+
+    @Test
+    fun `Check resources with interceptor`() {
+        initialize(resourceInterceptor = {
+            it.merge(
+                Resource.create(
+                    Attributes.of(
+                        AttributeKey.stringKey("custom.key"),
+                        "custom value"
+                    )
+                )
+            )
+        })
+        val expectedResource = Resource.builder()
+            .put("deployment.environment", "test")
+            .put("device.id", "device-id")
+            .put("device.manufacturer", DEVICE_MANUFACTURER)
+            .put("device.model.identifier", DEVICE_MODEL_NAME)
+            .put(
+                "os.description",
+                "Android ${Build.VERSION.RELEASE}, API level ${Build.VERSION.SDK_INT}, BUILD $OS_BUILD"
+            )
+            .put("os.name", "Android")
+            .put("os.version", Build.VERSION.RELEASE)
+            .put("process.runtime.name", "Android Runtime")
+            .put("process.runtime.version", RUNTIME_VERSION)
+            .put("service.build", VERSION_CODE)
+            .put("service.name", "service-name")
+            .put("service.version", "0.0.0")
+            .put("telemetry.sdk.language", "java")
+            .put("telemetry.sdk.name", "android")
+            .put("telemetry.sdk.version", System.getProperty("agent_version")!!)
+            .put("custom.key", "custom value")
             .build()
 
         sendSpan()
@@ -397,7 +448,8 @@ internal class AttributesTest : ExporterProvider, ProcessorFactory {
         serviceName: String = "service-name",
         serviceVersion: String? = "0.0.0",
         deploymentEnvironment: String = "test",
-        clock: Clock = Clock.getDefault()
+        clock: Clock = Clock.getDefault(),
+        resourceInterceptor: Interceptor<Resource>? = null
     ) {
         val serviceManager = ServiceManager.create(RuntimeEnvironment.getApplication())
         val builder = ElasticOpenTelemetry.Builder()
@@ -407,6 +459,7 @@ internal class AttributesTest : ExporterProvider, ProcessorFactory {
             .setSessionProvider { Session.create("session-id") }
             .setDeviceIdProvider { "device-id" }
         serviceVersion?.let { builder.setServiceVersion(it) }
+        resourceInterceptor?.let { builder.setResourceInterceptor(it) }
 
         builder.setExporterProvider(this)
         builder.setProcessorFactory(this)

@@ -46,11 +46,13 @@ class InstrumentationTest {
 
     @Test
     fun verifyOkHttpSyncCallSpan() {
-        val url = webServer.url("/")
+        val url = webServer.url("/some/path")
         executeSyncHttpCall("GET", 200, "{}", url)
 
+        val request = webServer.takeRequest()
         agentRule.flushSpans().join(5, TimeUnit.SECONDS)
 
+        assertThat(request.getHeader("traceparent")).isNotNull()
         assertThat(agentRule.getFinishedSpans()).hasSize(1)
         assertThat(agentRule.getFinishedSpans().first()).hasName("GET")
             .hasKind(SpanKind.CLIENT)

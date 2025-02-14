@@ -35,6 +35,8 @@ import co.elastic.otel.android.provider.StringProvider
 import co.elastic.otel.android.session.SessionProvider
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
+import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator
+import io.opentelemetry.context.propagation.ContextPropagators
 import io.opentelemetry.sdk.OpenTelemetrySdk
 import io.opentelemetry.sdk.common.Clock
 import io.opentelemetry.sdk.logs.SdkLoggerProvider
@@ -51,6 +53,7 @@ import io.opentelemetry.semconv.incubating.DeviceIncubatingAttributes
 import io.opentelemetry.semconv.incubating.OsIncubatingAttributes
 import io.opentelemetry.semconv.incubating.ProcessIncubatingAttributes
 import java.util.UUID
+
 
 class ElasticOpenTelemetry private constructor(
     val sdk: OpenTelemetrySdk,
@@ -231,6 +234,7 @@ class ElasticOpenTelemetry private constructor(
                         .build()
                 )
             }
+            openTelemetryBuilder.setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
             return ElasticOpenTelemetry(
                 openTelemetryBuilder.build(),
                 serviceName,

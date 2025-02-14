@@ -197,6 +197,8 @@ internal class DiskBufferingManager private constructor(
         val builder = StorageConfiguration.builder()
             .setMaxFileSize(diskManager.getMaxCacheFileSize())
             .setMaxFolderSize(diskManager.getMaxFolderSize())
+            .setMaxFileAgeForWriteMillis(TimeUnit.SECONDS.toMillis(2))
+            .setMinFileAgeForReadMillis(TimeUnit.SECONDS.toMillis(4))
             .setTemporaryFileProvider(
                 SimpleTemporaryFileProvider(
                     systemTimeProvider,

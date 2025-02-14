@@ -1,14 +1,6 @@
-import java.util.Properties
-
 plugins {
     id("java-gradle-plugin")
     `kotlin-dsl`
-}
-
-val properties = Properties()
-val propertiesFile = File(rootDir, "../gradle.properties")
-propertiesFile.inputStream().use {
-    properties.load(it)
 }
 
 dependencies {

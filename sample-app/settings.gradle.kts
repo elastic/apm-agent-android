@@ -20,6 +20,6 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "Android APM Sample app"
-includeBuild '..'
-include ':app'
-include ':backend'
+includeBuild("..")
+include(":app")
+include(":backend")

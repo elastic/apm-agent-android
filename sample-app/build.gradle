@@ -1,5 +1,0 @@
-plugins {
-    alias(rootLibs.plugins.androidApp) apply false
-    alias(rootLibs.plugins.androidLib) apply false
-    alias(rootLibs.plugins.kotlin.android) apply false
-}

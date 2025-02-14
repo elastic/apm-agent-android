@@ -57,9 +57,11 @@ internal class DiskBufferingManager private constructor(
     private var toDiskLogRecordExporter: LogRecordToDiskExporter? = null
     private var toDiskMetricExporter: MetricToDiskExporter? = null
     private var signalFromDiskExporter: SignalFromDiskExporter? = null
+    private val logger = Elog.getLogger("Disk buffering")
 
     private fun exportFromDisk() {
-        signalFromDiskExporter?.exportBatchOfEach()
+        val exported = signalFromDiskExporter?.exportBatchOfEach()
+        logger.debug("Signals exported from disk: {}", exported)
     }
 
     internal fun close() {
@@ -127,7 +129,7 @@ internal class DiskBufferingManager private constructor(
                 enableDiskBuffering(configuration.enabled)
                 startExportSchedule()
             } catch (e: IOException) {
-                Elog.getLogger().error("Could not initialize disk buffering", e)
+                logger.error("Could not initialize disk buffering", e)
             } finally {
                 openLatch()
             }
@@ -146,6 +148,7 @@ internal class DiskBufferingManager private constructor(
     }
 
     private fun enableDiskBuffering(enabled: Boolean) {
+        logger.debug("Disk buffering enabled: {}", enabled)
         if (enabled) {
             toDiskSpanExporter?.let {
                 spanExporter!!.setDelegate(it)

@@ -22,7 +22,7 @@ dependencies {
     implementation(rootLibs.kotlin.plugin)
     implementation(rootLibs.buildconfig.plugin)
     implementation(rootLibs.animalsniffer.plugin)
-    implementation("com.android.tools.build:gradle:${properties.getProperty("androidGradlePlugin_version")}")
+    implementation(rootLibs.android.plugin)
     testImplementation(rootLibs.junit4)
 }
 

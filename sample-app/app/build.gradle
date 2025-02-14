@@ -1,15 +1,15 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
-    id 'co.elastic.apm.android'
+    id 'co.elastic.otel.android.agent'
 }
 
 android {
-    namespace 'co.elastic.apm.android.sample'
+    namespace 'co.elastic.otel.android.sample'
     compileSdk 34
 
     defaultConfig {
-        applicationId "co.elastic.apm.android.sample"
+        applicationId "co.elastic.otel.android.sample"
         minSdk 26
         targetSdk 34
         versionCode 1
@@ -28,7 +28,6 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
-        coreLibraryDesugaringEnabled true
     }
     kotlinOptions {
         jvmTarget = '1.8'
@@ -38,16 +37,9 @@ android {
     }
 }
 
-elasticApm {
-    serviceName = "weather-sample-app"
-    serverUrl = "http://10.0.2.2:8200" // Your Elastic APM server endpoint.
-//    secretToken = "my-apm-secret-token" // Uncomment and set it if this is your preferred auth method.
-}
-
 dependencies {
     def lifecycle_version = "2.4.0"
     def retrofit_version = "2.11.0"
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
     implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     implementation 'androidx.core:core-ktx:1.7.0'

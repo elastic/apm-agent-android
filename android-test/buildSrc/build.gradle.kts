@@ -12,6 +12,6 @@ propertiesFile.inputStream().use {
 
 dependencies {
     implementation(rootLibs.kotlin.plugin)
-    implementation("com.android.tools.build:gradle:${properties.getProperty("androidGradlePlugin_version")}")
+    implementation(rootLibs.android.plugin)
 }
 

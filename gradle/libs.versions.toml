@@ -34,6 +34,7 @@ awaitility = "org.awaitility:awaitility-kotlin:4.2.2"
 wireMock = "org.wiremock:wiremock:3.10.0"
 
 #Compilation tools
+android-plugin = { module = "com.android.tools.build:gradle", version.ref = "android" }
 apache-commons-text = "org.apache.commons:commons-text:1.10.0"
 commons-io = "commons-io:commons-io:2.13.0"
 spotless-plugin = "com.diffplug.spotless:spotless-plugin-gradle:7.0.2"

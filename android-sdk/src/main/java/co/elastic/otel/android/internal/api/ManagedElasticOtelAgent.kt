@@ -44,6 +44,7 @@ import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.sdk.common.CompletableResultCode
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.metrics.export.MetricExporter
+import io.opentelemetry.sdk.resources.Resource
 import io.opentelemetry.sdk.trace.export.SpanExporter
 import java.util.UUID
 
@@ -183,6 +184,10 @@ class ManagedElasticOtelAgent private constructor(
 
         fun setDeviceIdProvider(value: StringProvider) = apply {
             elasticOpenTelemetryBuilder.setDeviceIdProvider(value)
+        }
+
+        fun setResourceInterceptor(value: Interceptor<Resource>) = apply {
+            elasticOpenTelemetryBuilder.setResourceInterceptor(value)
         }
 
         fun addSpanAttributesInterceptor(value: Interceptor<Attributes>) = apply {

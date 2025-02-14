@@ -35,8 +35,8 @@ internal class DefaultProcessorFactory(private val backgroundWorkService: Backgr
     ProcessorFactory {
 
     companion object {
-        private val PROCESSING_INTERVAL = Duration.ofSeconds(2)
-        private val READING_INTERVAL = Duration.ofSeconds(4)
+        private val PROCESSING_INTERVAL = Duration.ofSeconds(1)
+        private val READING_INTERVAL = Duration.ofSeconds(2)
     }
 
     override fun createSpanProcessor(exporter: SpanExporter?): SpanProcessor? {

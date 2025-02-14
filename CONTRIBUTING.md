@@ -68,16 +68,28 @@ if the author does not have commit access, should "Squash and merge".
 You can run the following command to run all the unit tests available:
 
 ```text
-./tests.sh
+./checks.sh
+```
+
+For instrumentation tests, you'd need to have an Android Emulator running on your host machine, or a
+device connected with developer mode enabled. Once that's available, you can run the following
+command to execute those tests:
+
+```text
+./android_tests.sh
 ```
 
 ### Releasing
 
-The release steps have been defined in `.ci/release.sh` which it gets triggered within the BuildKite context.
+The release steps have been defined in `.ci/release.sh` which it gets triggered within the BuildKite
+context.
 
-Releases are triggered manually using GitHub actions, and the GitHub action is the one contacting BuildKite.
+Releases are triggered manually using GitHub actions, and the GitHub action is the one contacting
+BuildKite.
 To run a release then
-* Navigate to the [GitHub job](https://github.com/elastic/apm-agent-android/actions/workflows/release.yml)
+
+* Navigate to
+  the [GitHub job](https://github.com/elastic/apm-agent-android/actions/workflows/release.yml)
 * Choose Run workflow.
 * Fill the form and click `Run workflow` and wait for a few minutes to complete
 

@@ -35,6 +35,8 @@ import co.elastic.otel.android.provider.StringProvider
 import co.elastic.otel.android.session.SessionProvider
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
+import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator
+import io.opentelemetry.context.propagation.ContextPropagators
 import io.opentelemetry.sdk.OpenTelemetrySdk
 import io.opentelemetry.sdk.common.Clock
 import io.opentelemetry.sdk.logs.SdkLoggerProvider
@@ -52,6 +54,7 @@ import io.opentelemetry.semconv.incubating.OsIncubatingAttributes
 import io.opentelemetry.semconv.incubating.ProcessIncubatingAttributes
 import java.util.UUID
 
+
 class ElasticOpenTelemetry private constructor(
     val sdk: OpenTelemetrySdk,
     val serviceName: String,
@@ -65,6 +68,7 @@ class ElasticOpenTelemetry private constructor(
         private var serviceBuild: Int? = null
         private var deploymentEnvironment: String? = null
         private var deviceIdProvider: StringProvider? = null
+        private var resourceInterceptor: Interceptor<Resource>? = null
         private var spanAttributesInterceptors = mutableListOf<Interceptor<Attributes>>()
         private var logRecordAttributesInterceptors = mutableListOf<Interceptor<Attributes>>()
         private var spanExporterInterceptors = mutableListOf<Interceptor<SpanExporter>>()
@@ -93,6 +97,10 @@ class ElasticOpenTelemetry private constructor(
 
         fun setDeviceIdProvider(value: StringProvider) = apply {
             deviceIdProvider = value
+        }
+
+        fun setResourceInterceptor(value: Interceptor<Resource>) = apply {
+            resourceInterceptor = value
         }
 
         fun addSpanAttributesInterceptor(value: Interceptor<Attributes>) = apply {
@@ -145,7 +153,7 @@ class ElasticOpenTelemetry private constructor(
             }
             val finalProcessorFactory = processorFactory
                 ?: DefaultProcessorFactory(serviceManager.getBackgroundWorkService())
-            val resource = Resource.builder()
+            var resource = Resource.builder()
                 .put(ServiceAttributes.SERVICE_NAME, serviceName)
                 .put(
                     ServiceAttributes.SERVICE_VERSION,
@@ -172,6 +180,7 @@ class ElasticOpenTelemetry private constructor(
                 .put(TelemetryAttributes.TELEMETRY_SDK_VERSION, BuildConfig.APM_AGENT_VERSION)
                 .put(TelemetryAttributes.TELEMETRY_SDK_LANGUAGE, "java")
                 .build()
+            resource = resourceInterceptor?.intercept(resource) ?: resource
             val openTelemetryBuilder = OpenTelemetrySdk.builder()
             val spanExporter = exporterProvider.getSpanExporter()?.let {
                 Interceptor.composite(spanExporterInterceptors).intercept(it)
@@ -225,6 +234,7 @@ class ElasticOpenTelemetry private constructor(
                         .build()
                 )
             }
+            openTelemetryBuilder.setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
             return ElasticOpenTelemetry(
                 openTelemetryBuilder.build(),
                 serviceName,

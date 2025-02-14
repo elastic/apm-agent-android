@@ -25,6 +25,7 @@ include(":android-api")
 include(":android-sdk")
 include(":android-plugin")
 include(":android-common")
+include(":animalsniffer-signature")
 includeFromDir("instrumentation")
 includeFromDir("test-tools", 2)
 

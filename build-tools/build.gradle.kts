@@ -1,14 +1,6 @@
-import java.util.Properties
-
 plugins {
     id("java-gradle-plugin")
     `kotlin-dsl`
-}
-
-val properties = Properties()
-val propertiesFile = File(rootDir, "../gradle.properties")
-propertiesFile.inputStream().use {
-    properties.load(it)
 }
 
 dependencies {
@@ -21,7 +13,8 @@ dependencies {
     implementation(rootLibs.gradle.shadow.plugin)
     implementation(rootLibs.kotlin.plugin)
     implementation(rootLibs.buildconfig.plugin)
-    implementation("com.android.tools.build:gradle:${properties.getProperty("androidGradlePlugin_version")}")
+    implementation(rootLibs.animalsniffer.plugin)
+    implementation(rootLibs.android.plugin)
     testImplementation(rootLibs.junit4)
 }
 

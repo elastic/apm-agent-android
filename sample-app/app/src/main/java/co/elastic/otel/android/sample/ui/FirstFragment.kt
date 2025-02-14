@@ -1,4 +1,4 @@
-package co.elastic.apm.android.sample
+package co.elastic.otel.android.sample.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater

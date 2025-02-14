@@ -1,4 +1,4 @@
-package co.elastic.apm.android.sample
+package co.elastic.otel.android.sample
 
 import android.app.Application
 import co.elastic.otel.android.ElasticApmAgent

@@ -1,11 +1,11 @@
-package co.elastic.apm.android.sample
+package co.elastic.otel.android.sample.ui
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
-import co.elastic.apm.android.sample.MyApp.Companion.agent
+import co.elastic.otel.android.sample.MyApp.Companion.agent
 import co.elastic.otel.android.extensions.log
 import co.elastic.otel.android.extensions.span
 import co.elastic.otel.android.sample.R

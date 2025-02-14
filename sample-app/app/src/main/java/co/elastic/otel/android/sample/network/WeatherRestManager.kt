@@ -1,6 +1,6 @@
-package co.elastic.apm.android.sample.network
+package co.elastic.otel.android.sample.network
 
-import co.elastic.apm.android.sample.network.data.ForecastResponse
+import co.elastic.otel.android.sample.network.data.ForecastResponse
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 

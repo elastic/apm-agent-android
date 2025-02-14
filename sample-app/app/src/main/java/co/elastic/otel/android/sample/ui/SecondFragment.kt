@@ -1,4 +1,4 @@
-package co.elastic.apm.android.sample
+package co.elastic.otel.android.sample.ui
 
 import android.os.Bundle
 import android.text.Html
@@ -10,8 +10,8 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import co.elastic.apm.android.sample.network.WeatherRestManager
-import co.elastic.apm.android.sample.network.data.ForecastResponse
+import co.elastic.otel.android.sample.network.WeatherRestManager
+import co.elastic.otel.android.sample.network.data.ForecastResponse
 import co.elastic.otel.android.sample.R
 import co.elastic.otel.android.sample.databinding.FragmentSecondBinding
 import kotlinx.coroutines.launch

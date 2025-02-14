@@ -52,6 +52,7 @@ import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.sdk.common.CompletableResultCode
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.metrics.export.MetricExporter
+import io.opentelemetry.sdk.resources.Resource
 import io.opentelemetry.sdk.trace.data.SpanData
 import io.opentelemetry.sdk.trace.export.SpanExporter
 
@@ -200,6 +201,10 @@ class ElasticApmAgent internal constructor(
 
         fun setProcessorFactory(value: ProcessorFactory) = apply {
             managedAgentBuilder.setProcessorFactory(value)
+        }
+
+        fun setResourceInterceptor(value: Interceptor<Resource>) = apply {
+            managedAgentBuilder.setResourceInterceptor(value)
         }
 
         fun setHttpSpanInterceptor(value: Interceptor<SpanData>?) = apply {

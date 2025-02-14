@@ -57,7 +57,7 @@ internal class DiskBufferingManager private constructor(
     private var toDiskLogRecordExporter: LogRecordToDiskExporter? = null
     private var toDiskMetricExporter: MetricToDiskExporter? = null
     private var signalFromDiskExporter: SignalFromDiskExporter? = null
-    private val logger = Elog.getLogger("Disk buffering")
+    private val logger = Elog.getLogger()
 
     private fun exportFromDisk() {
         val exported = signalFromDiskExporter?.exportBatchOfEach()

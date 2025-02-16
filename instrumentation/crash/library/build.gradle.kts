@@ -11,5 +11,5 @@ dependencies {
     implementation(instrumentation.opentelemetry.api.incubator)
     testImplementation(libs.robolectric)
     testImplementation(libs.opentelemetry.testing)
-    testImplementation(project(":test-tools:robolectric-agent-rule"))
+    testImplementation(project(":internal-tools:robolectric-agent-rule"))
 }

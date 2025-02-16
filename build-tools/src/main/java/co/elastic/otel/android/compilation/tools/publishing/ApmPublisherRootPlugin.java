@@ -32,7 +32,7 @@ public class ApmPublisherRootPlugin implements Plugin<Project> {
         addPostDeployTask(project);
         configureMavenCentral(project);
         project.subprojects(subproject -> {
-            if (!subproject.getPath().contains("test-tools")) {
+            if (!subproject.getPath().startsWith(":internal-tools")) {
                 Matcher instrumentationMatcher = INSTRUMENTATION_PROJECT_PATTERN.matcher(subproject.getPath());
                 if (instrumentationMatcher.matches()) {
                     setGroupId(subproject, subproject.getGroup() + ".instrumentation");

@@ -27,7 +27,7 @@ include(":android-plugin")
 include(":android-common")
 include(":animalsniffer-signature")
 includeFromDir("instrumentation")
-includeFromDir("test-tools", 2)
+includeFromDir("internal-tools", 2)
 
 fun includeFromDir(dirName: String, maxDepth: Int = 3) {
     val instrumentationDir = File(rootDir, dirName)

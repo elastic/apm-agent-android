@@ -7,5 +7,5 @@ android {
 }
 
 dependencies {
-    api(project(":android-api"))
+    api(project(":agent-api"))
 }

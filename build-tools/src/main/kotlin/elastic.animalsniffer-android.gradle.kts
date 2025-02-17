@@ -7,7 +7,12 @@ plugins {
 }
 
 dependencies {
-    signature(project(path = ":animalsniffer-signature", configuration = "generatedSignature"))
+    signature(
+        project(
+            path = ":internal-tools:animalsniffer-signature",
+            configuration = "generatedSignature"
+        )
+    )
 }
 
 val capitalizedVariantNames = mutableListOf<String>()

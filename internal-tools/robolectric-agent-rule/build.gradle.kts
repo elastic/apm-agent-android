@@ -3,6 +3,6 @@ plugins {
 }
 
 dependencies {
-    api(project(":test-tools:agent-rule"))
+    api(project(":internal-tools:agent-rule"))
     implementation(libs.robolectric)
 }

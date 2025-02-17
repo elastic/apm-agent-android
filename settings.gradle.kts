@@ -19,15 +19,14 @@ dependencyResolutionManagement {
         google()
     }
 }
-rootProject.name = "APM Android Agent"
+rootProject.name = "elastic-otel-android"
 includeBuild("build-tools")
-include(":android-api")
-include(":android-sdk")
-include(":android-plugin")
-include(":android-common")
-include(":animalsniffer-signature")
+include(":agent-api")
+include(":agent-sdk")
+include(":agent-plugin")
+include(":agent-common")
 includeFromDir("instrumentation")
-includeFromDir("test-tools", 2)
+includeFromDir("internal-tools", 2)
 
 fun includeFromDir(dirName: String, maxDepth: Int = 3) {
     val instrumentationDir = File(rootDir, dirName)

@@ -53,7 +53,8 @@ jobs:
         with:
           name: test-results
           path: |
-            **/build/test-results/testRelease*/TEST-*.xml
+            **/build/reports/tests/testDebugUnitTest/**/*
+            **/build/test-results/testDebug*/TEST-*.xml
             **/build/test-results/test/TEST-*.xml
             **/build/outputs/androidTest-results/**/TEST-*.xml
 

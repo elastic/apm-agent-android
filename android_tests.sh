@@ -1,1 +1,1 @@
-./gradlew -p "android-test" connectedCheck
+./gradlew -p "instrumentation-test" connectedCheck

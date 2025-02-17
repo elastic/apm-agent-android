@@ -1,3 +1,6 @@
+import com.android.build.api.variant.HasHostTestsBuilder
+import com.android.build.api.variant.HostTestBuilder
+
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
@@ -27,6 +30,12 @@ android {
     }
 }
 
+androidComponents.beforeVariants {
+    if (it.buildType?.equals("debug") == false) {
+        (it as HasHostTestsBuilder).hostTests.get(HostTestBuilder.UNIT_TEST_TYPE)?.enable = false
+    }
+}
+
 tasks.withType(Test::class).configureEach {
     useJUnitPlatform()
 }
@@ -36,6 +45,6 @@ dependencies {
     testImplementation(libs.findBundle("mocking").get())
     testImplementation(libs.findBundle("junit").get())
     testImplementation(libs.findLibrary("assertj").get())
-    testImplementation(project(":test-tools:test-common"))
+    testImplementation(project(":internal-tools:test-common"))
     testRuntimeOnly(libs.findLibrary("junit5-vintage").get())
 }

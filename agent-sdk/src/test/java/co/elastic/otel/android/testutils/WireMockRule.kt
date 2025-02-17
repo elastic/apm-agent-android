@@ -28,60 +28,42 @@ import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat
 import java.time.Duration
 import java.util.UUID
 import org.awaitility.kotlin.await
-import org.junit.rules.TestRule
-import org.junit.runner.Description
-import org.junit.runners.model.Statement
+import org.junit.rules.ExternalResource
 
-class WireMockRule : TestRule {
-    private var wireMock: WireMockServer? = null
-    private var allResponsesStubId: UUID? = null
+class WireMockRule : ExternalResource() {
+    private val wireMock = WireMockServer()
+    private var allResponsesStubId = UUID.randomUUID()
 
-    override fun apply(base: Statement, description: Description): Statement {
-        try {
-            return object : Statement() {
-                override fun evaluate() {
-                    base.evaluate()
-                    wireMock?.stop()
-                }
-            }
-        } finally {
-            wireMock = null
-            allResponsesStubId = null
-        }
+    override fun before() {
+        wireMock.start()
+    }
+
+    override fun after() {
+        wireMock.stop()
     }
 
     fun url(path: String): String {
-        ensureStarted()
-        return wireMock!!.url(path)
+        return wireMock.url(path)
     }
 
     fun stubAllHttpResponses(
         responseVisitor: ResponseDefinitionBuilder.() -> Unit = {}
     ) {
-        ensureStarted()
-        wireMock!!.removeStub(allResponsesStubId)
+        wireMock.removeStub(allResponsesStubId)
         val mappingBuilder = any(anyUrl()).withId(allResponsesStubId)
         val response = aResponse()
         responseVisitor(response)
         mappingBuilder.willReturn(response)
-        wireMock!!.stubFor(mappingBuilder)
-    }
-
-    private fun ensureStarted() {
-        if (wireMock == null) {
-            allResponsesStubId = UUID.randomUUID()
-            wireMock = WireMockServer()
-            wireMock?.start()
-        }
+        wireMock.stubFor(mappingBuilder)
     }
 
     fun takeRequest(awaitSeconds: Int = 2): LoggedRequest {
         await.atMost(Duration.ofSeconds(awaitSeconds.toLong()))
-            .until { wireMock?.allServeEvents?.isNotEmpty() }
-        val allServeEvents = wireMock?.allServeEvents
+            .until { wireMock.allServeEvents?.isNotEmpty() }
+        val allServeEvents = wireMock.allServeEvents
         assertThat(allServeEvents).hasSize(1)
         val serveEvent = allServeEvents?.first()
-        wireMock?.removeServeEvent(serveEvent?.id)
+        wireMock.removeServeEvent(serveEvent?.id)
         return serveEvent!!.request
     }
 }

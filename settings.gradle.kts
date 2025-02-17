@@ -24,7 +24,7 @@ includeBuild("build-tools")
 include(":agent-api")
 include(":agent-sdk")
 include(":agent-plugin")
-include(":android-common")
+include(":agent-common")
 includeFromDir("instrumentation")
 includeFromDir("internal-tools", 2)
 

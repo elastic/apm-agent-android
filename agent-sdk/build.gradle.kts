@@ -24,7 +24,7 @@ dependencies {
     api(project(":agent-api"))
     api(project(":instrumentation:api"))
     implementation(libs.stagemonitor.configuration)
-    implementation(project(":android-common"))
+    implementation(project(":agent-common"))
     implementation(libs.opentelemetry.exporter.otlp)
     implementation(libs.bundles.opentelemetry.semconv)
     implementation(libs.opentelemetry.diskBuffering)

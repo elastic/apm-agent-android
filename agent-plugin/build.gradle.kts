@@ -5,7 +5,7 @@ plugins {
 }
 
 dependencies {
-    api(project(":android-common"))
+    api(project(":agent-common"))
     implementation(libs.byteBuddy)
     implementation(libs.byteBuddy.plugin)
     compileOnly(libs.android.plugin)

@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":android-sdk"))
+    implementation(project(":agent-sdk"))
     implementation(project(":internal-tools:test-common"))
     implementation(libs.opentelemetry.testing)
 }

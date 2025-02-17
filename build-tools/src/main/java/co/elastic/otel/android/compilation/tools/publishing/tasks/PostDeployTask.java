@@ -96,7 +96,7 @@ public class PostDeployTask extends DefaultTask {
         log("Updating setup doc to show version: " + currentVersion);
         Path setupDocPath = getProjectPath("docs/setup.asciidoc");
         String contents = getContents(setupDocPath);
-        Pattern versionMentionsPattern = Pattern.compile("(?<=co\\.elastic\\.apm\\.android/)\\d+\\.\\d+\\.\\d+|(?<=co\\.elastic\\.apm:android-sdk:)\\d+\\.\\d+\\.\\d+|(?<=id\\s\"co\\.elastic\\.apm\\.android\"\\sversion\\s\")\\d+\\.\\d+\\.\\d+");
+        Pattern versionMentionsPattern = Pattern.compile("(?<=co\\.elastic\\.apm\\.android/)\\d+\\.\\d+\\.\\d+|(?<=co\\.elastic\\.apm:agent-sdk:)\\d+\\.\\d+\\.\\d+|(?<=id\\s\"co\\.elastic\\.apm\\.android\"\\sversion\\s\")\\d+\\.\\d+\\.\\d+");
         Matcher versionMentionMatcher = versionMentionsPattern.matcher(contents);
 
         String setupDocWithNewVersion = versionMentionMatcher.replaceAll(currentVersion);

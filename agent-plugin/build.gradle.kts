@@ -13,7 +13,7 @@ dependencies {
 
 buildConfig {
     packageName("${group}.generated")
-    buildConfigField("String", "SDK_DEPENDENCY_URI", "\"$group:android-sdk:$version\"")
+    buildConfigField("String", "SDK_DEPENDENCY_URI", "\"$group:agent-sdk:$version\"")
 }
 
 gradlePlugin {

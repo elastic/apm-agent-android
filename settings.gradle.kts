@@ -19,7 +19,7 @@ dependencyResolutionManagement {
         google()
     }
 }
-rootProject.name = "APM Android Agent"
+rootProject.name = "elastic-otel-android"
 includeBuild("build-tools")
 include(":agent-api")
 include(":agent-sdk")

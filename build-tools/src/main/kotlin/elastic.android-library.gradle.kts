@@ -1,3 +1,6 @@
+import com.android.build.api.variant.HasHostTestsBuilder
+import com.android.build.api.variant.HostTestBuilder
+
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
@@ -24,6 +27,12 @@ android {
     }
     lint {
         disable.add("NewApi")
+    }
+}
+
+androidComponents.beforeVariants {
+    if (it.buildType?.equals("debug") == false) {
+        (it as HasHostTestsBuilder).hostTests.get(HostTestBuilder.UNIT_TEST_TYPE)?.enable = false
     }
 }
 

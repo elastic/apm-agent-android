@@ -19,6 +19,8 @@ import co.elastic.otel.android.compilation.tools.sourceheader.ApmSourceHeaderPlu
 import io.github.gradlenexus.publishplugin.NexusPublishExtension;
 import io.github.gradlenexus.publishplugin.NexusPublishPlugin;
 import io.github.gradlenexus.publishplugin.NexusRepositoryContainer;
+import kotlinx.validation.ApiValidationExtension;
+import kotlinx.validation.BinaryCompatibilityValidatorPlugin;
 
 public class ApmPublisherRootPlugin implements Plugin<Project> {
 
@@ -48,6 +50,12 @@ public class ApmPublisherRootPlugin implements Plugin<Project> {
     private void configureProject(Project project, Project subproject) {
         applySubprojectPlugins(subproject.getPlugins());
         project.getDependencies().add("noticeProducer", subproject);
+        configureBinaryValidator(subproject);
+    }
+
+    private static void configureBinaryValidator(Project subproject) {
+        ApiValidationExtension binaryValidatorExtension = subproject.getExtensions().getByType(ApiValidationExtension.class);
+        binaryValidatorExtension.getNonPublicMarkers().add("co.elastic.otel.android.common.internal.annotations.InternalApi");
     }
 
     private void configureVersion(Project project) {
@@ -96,6 +104,7 @@ public class ApmPublisherRootPlugin implements Plugin<Project> {
     }
 
     private void applySubprojectPlugins(PluginContainer subprojectPlugins) {
+        subprojectPlugins.apply(BinaryCompatibilityValidatorPlugin.class);
         subprojectPlugins.apply(ApmSourceHeaderPlugin.class);
         subprojectPlugins.apply(NoticeProviderPlugin.class);
         subprojectPlugins.apply(ApmPublisherPlugin.class);

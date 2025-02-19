@@ -23,6 +23,10 @@ import io.opentelemetry.sdk.trace.data.DelegatingSpanData
 import io.opentelemetry.sdk.trace.data.SpanData
 import io.opentelemetry.semconv.UrlAttributes
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 class HttpSpanNameInterceptor : Interceptor<SpanData> {
     private companion object {
         private val URL_PATTERN = Regex("https?://([^/]+).*")

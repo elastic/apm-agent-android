@@ -24,6 +24,10 @@ import co.elastic.otel.android.instrumentation.internal.Instrumentation
 import co.elastic.otel.android.okhttp.internal.plugin.OkHttp3Singletons
 import com.google.auto.service.AutoService
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 @AutoService(Instrumentation::class)
 class OkHttpInstrumentation : Instrumentation {
 

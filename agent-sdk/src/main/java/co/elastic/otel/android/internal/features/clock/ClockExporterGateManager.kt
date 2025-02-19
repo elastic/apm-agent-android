@@ -36,6 +36,10 @@ import io.opentelemetry.sdk.trace.export.SpanExporter
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class ClockExporterGateManager private constructor(
     systemTimeProvider: SystemTimeProvider,
     private val gateManager: ExporterGateManager,

@@ -22,6 +22,10 @@ import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.sdk.trace.data.DelegatingSpanData
 import io.opentelemetry.sdk.trace.data.SpanData
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal open class AttributesOverrideSpanData(
     delegate: SpanData,
     private val attributes: Attributes,

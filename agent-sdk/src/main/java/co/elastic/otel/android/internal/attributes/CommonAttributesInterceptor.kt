@@ -27,6 +27,10 @@ import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.semconv.incubating.NetworkIncubatingAttributes
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class CommonAttributesInterceptor(
     private val serviceManager: ServiceManager,
     private val sessionProvider: SessionProvider

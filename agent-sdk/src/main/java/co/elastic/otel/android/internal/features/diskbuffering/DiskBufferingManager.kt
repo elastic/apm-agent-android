@@ -40,6 +40,10 @@ import io.opentelemetry.sdk.trace.export.SpanExporter
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class DiskBufferingManager private constructor(
     private val systemTimeProvider: SystemTimeProvider,
     private val serviceManager: ServiceManager,

@@ -23,6 +23,10 @@ import net.bytebuddy.asm.Advice;
 import co.elastic.otel.android.okhttp.internal.plugin.OkHttp3Singletons;
 import okhttp3.OkHttpClient;
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 public class OkHttpClientAdvice {
 
     @Advice.OnMethodEnter

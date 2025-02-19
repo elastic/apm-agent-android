@@ -32,6 +32,10 @@ import java.util.regex.Pattern;
 
 import okhttp3.Callback;
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 public class OkHttpCallbackPlugin implements Plugin {
     private static final Pattern REAL_CALL_PATTERN = Pattern.compile("^okhttp3\\..*RealCall$");
 

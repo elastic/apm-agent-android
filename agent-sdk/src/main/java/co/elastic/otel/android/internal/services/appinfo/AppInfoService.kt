@@ -33,6 +33,10 @@ import java.io.File
 import java.io.IOException
 import kotlin.math.min
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class AppInfoService(private val context: Context) : Service {
 
     fun isPermissionGranted(permissionName: String): Boolean {

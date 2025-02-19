@@ -26,6 +26,10 @@ import io.opentelemetry.sdk.logs.data.Body
 import io.opentelemetry.sdk.logs.data.LogRecordData
 import io.opentelemetry.sdk.resources.Resource
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal open class DelegateLogRecordData(private val delegate: LogRecordData) : LogRecordData {
 
     override fun getResource(): Resource {

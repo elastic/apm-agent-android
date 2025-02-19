@@ -21,6 +21,10 @@ package co.elastic.otel.android.instrumentation.internal
 import android.app.Application
 import co.elastic.otel.android.api.ElasticOtelAgent
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 interface Instrumentation {
 
     fun install(application: Application, agent: ElasticOtelAgent)

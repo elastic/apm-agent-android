@@ -18,4 +18,8 @@
  */
 package co.elastic.otel.android.internal.services.network.data
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal data class CarrierInfo(val name: String, val mcc: String, val mnc: String, val icc: String)

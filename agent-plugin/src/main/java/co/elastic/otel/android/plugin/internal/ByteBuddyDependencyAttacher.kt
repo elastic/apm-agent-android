@@ -20,6 +20,10 @@ package co.elastic.otel.android.plugin.internal
 
 import org.gradle.api.Project
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 class ByteBuddyDependencyAttacher(
     private val project: Project,
     private val dependencyUri: String

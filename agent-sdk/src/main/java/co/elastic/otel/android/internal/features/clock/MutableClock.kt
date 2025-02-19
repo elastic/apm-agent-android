@@ -21,6 +21,10 @@ package co.elastic.otel.android.internal.features.clock
 import io.opentelemetry.sdk.common.Clock
 import java.util.concurrent.atomic.AtomicReference
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class MutableClock(initialClock: Clock) : Clock {
     private val delegate: AtomicReference<Clock> = AtomicReference(initialClock)
 

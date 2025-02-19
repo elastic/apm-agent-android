@@ -21,6 +21,10 @@ package co.elastic.otel.android.internal.time.ntp
 import java.nio.ByteBuffer
 import kotlin.math.roundToLong
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal data class NtpPacket(
     val leapIndicator: Int,
     val versionNumber: Int,

@@ -20,6 +20,10 @@ package co.elastic.otel.android.internal.configuration
 
 import org.stagemonitor.configuration.ConfigurationOption.ConfigurationOptionBuilder
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class ConfigurationOption<T>(internal val wrapped: org.stagemonitor.configuration.ConfigurationOption<T>) {
 
     fun get(): T {

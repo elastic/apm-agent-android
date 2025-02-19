@@ -18,6 +18,10 @@
  */
 package co.elastic.otel.android.internal.features.diskbuffering
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 data class DiskBufferingConfiguration private constructor(val enabled: Boolean) {
     internal var maxCacheFileSize = 1024 * 1024
     internal var maxCacheSize = 15 * 1024 * 1024 // 15 MB

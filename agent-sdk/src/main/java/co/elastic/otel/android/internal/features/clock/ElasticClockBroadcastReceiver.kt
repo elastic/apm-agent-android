@@ -23,6 +23,10 @@ import android.content.Context
 import android.content.Intent
 import co.elastic.otel.android.internal.services.ServiceManager
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 class ElasticClockBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
         if (intent?.action == Intent.ACTION_BOOT_COMPLETED) {

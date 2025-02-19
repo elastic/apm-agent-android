@@ -48,6 +48,10 @@ import io.opentelemetry.sdk.resources.Resource
 import io.opentelemetry.sdk.trace.export.SpanExporter
 import java.util.UUID
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 class ManagedElasticOtelAgent private constructor(
     private val serviceManager: ServiceManager,
     internal val openTelemetry: ElasticOpenTelemetry,

@@ -33,6 +33,10 @@ import io.opentelemetry.sdk.metrics.export.AggregationTemporalitySelector
 import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.trace.export.SpanExporter
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class ConfigurableExporterProvider(
     private val spanExporter: MutableSpanExporter,
     private val logRecordExporter: MutableLogRecordExporter,

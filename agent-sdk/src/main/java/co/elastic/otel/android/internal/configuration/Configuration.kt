@@ -20,6 +20,10 @@ package co.elastic.otel.android.internal.configuration
 
 import org.stagemonitor.configuration.ConfigurationOptionProvider
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal abstract class Configuration : ConfigurationOptionProvider() {
     private val options by lazy { mutableListOf<ConfigurationOption<*>>() }
 

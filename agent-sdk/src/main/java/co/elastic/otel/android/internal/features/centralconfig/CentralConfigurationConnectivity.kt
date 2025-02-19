@@ -21,6 +21,10 @@ package co.elastic.otel.android.internal.features.centralconfig
 import co.elastic.otel.android.connectivity.ConnectivityConfiguration
 import co.elastic.otel.android.features.apmserver.ApmServerConnectivity
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal data class CentralConfigurationConnectivity(
     val apmServerUrl: String,
     val serviceName: String,

@@ -28,6 +28,10 @@ import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.trace.export.SpanExporter
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class ApmServerExporterProvider internal constructor(
     private val connectivityConfigurationProvider: Provider<ApmServerConnectivity>,
     private val exporterProvider: ConfigurableExporterProvider

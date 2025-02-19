@@ -20,6 +20,10 @@ package co.elastic.otel.android.internal.utilities.interceptor
 
 import co.elastic.otel.android.interceptor.Interceptor
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class NoopInterceptor<T> : Interceptor<T> {
 
     override fun intercept(item: T): T {

@@ -22,6 +22,10 @@ import org.slf4j.ILoggerFactory
 import org.slf4j.Logger
 import org.slf4j.helpers.NOPLogger
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 abstract class ELoggerFactory : ILoggerFactory {
 
     fun getLogger(type: Class<*>): Logger {

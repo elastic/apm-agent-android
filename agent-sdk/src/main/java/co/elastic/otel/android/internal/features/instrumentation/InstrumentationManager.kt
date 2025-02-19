@@ -23,6 +23,10 @@ import co.elastic.otel.android.api.ElasticOtelAgent
 import co.elastic.otel.android.instrumentation.internal.Instrumentation
 import java.util.ServiceLoader
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class InstrumentationManager(
     private val application: Application,
     private val instrumentations: List<Instrumentation>

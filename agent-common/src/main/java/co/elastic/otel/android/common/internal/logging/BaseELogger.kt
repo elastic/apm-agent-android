@@ -23,6 +23,10 @@ import org.slf4j.event.Level
 import org.slf4j.helpers.LegacyAbstractLogger
 import org.slf4j.helpers.MessageFormatter
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 abstract class BaseELogger protected constructor(tag: String) : LegacyAbstractLogger() {
     init {
         name = tag

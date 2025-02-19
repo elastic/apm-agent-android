@@ -21,6 +21,10 @@ package co.elastic.otel.android.internal.utilities.cache
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.provider.StringProvider
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class PreferencesCachedStringProvider(
     private val serviceManager: ServiceManager,
     private val key: String,

@@ -24,6 +24,10 @@ import co.elastic.otel.android.internal.services.backgroundwork.BackgroundWorkSe
 import co.elastic.otel.android.internal.services.network.NetworkService
 import co.elastic.otel.android.internal.services.preferences.PreferencesService
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 class ServiceManager private constructor() {
     private val services = mutableMapOf<Class<out Service>, Service>()
 

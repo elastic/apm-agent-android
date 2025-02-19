@@ -24,6 +24,10 @@ import io.opentelemetry.sdk.metrics.data.AggregationTemporality
 import io.opentelemetry.sdk.metrics.data.MetricData
 import io.opentelemetry.sdk.metrics.export.MetricExporter
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class GateMetricExporter(
     private val delegate: MetricExporter,
     private val metricQueue: ExporterGateQueue<MetricData>

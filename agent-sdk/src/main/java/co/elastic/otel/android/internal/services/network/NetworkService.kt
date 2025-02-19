@@ -34,6 +34,10 @@ import co.elastic.otel.android.internal.services.network.listener.NetworkChangeL
 import co.elastic.otel.android.internal.services.network.query.NetworkQueryManager
 import java.util.concurrent.atomic.AtomicReference
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class NetworkService internal constructor(
     private val appInfoService: AppInfoService,
     private val telephonyManager: TelephonyManager,

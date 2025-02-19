@@ -28,6 +28,10 @@ import io.opentelemetry.semconv.ExceptionAttributes
 import io.opentelemetry.semconv.SemanticAttributes.EVENT_DOMAIN
 import java.util.concurrent.TimeUnit
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 class ElasticExceptionHandler internal constructor(
     private val agent: ElasticOtelAgent,
     private val crashEventBuilder: EventBuilder,

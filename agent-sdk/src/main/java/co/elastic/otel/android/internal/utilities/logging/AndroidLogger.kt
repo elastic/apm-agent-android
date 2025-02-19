@@ -24,6 +24,10 @@ import co.elastic.otel.android.logging.LogLevel
 import co.elastic.otel.android.logging.LoggingPolicy
 import org.slf4j.event.Level
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class AndroidLogger(tag: String, private val policy: LoggingPolicy) : BaseELogger(tag) {
 
     override fun handleLoggingCall(level: Level, formattedMessage: String, throwable: Throwable?) {

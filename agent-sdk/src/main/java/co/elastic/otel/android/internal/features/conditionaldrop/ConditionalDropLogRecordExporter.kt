@@ -23,6 +23,10 @@ import io.opentelemetry.sdk.logs.data.LogRecordData
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import java.util.function.Predicate
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class ConditionalDropLogRecordExporter(
     private val delegate: LogRecordExporter,
     private val drop: Predicate<SignalType>

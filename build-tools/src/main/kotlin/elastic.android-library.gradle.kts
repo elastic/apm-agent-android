@@ -42,6 +42,7 @@ tasks.withType(Test::class).configureEach {
 
 val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 dependencies {
+    implementation(project(":agent-common"))
     testImplementation(libs.findBundle("mocking").get())
     testImplementation(libs.findBundle("junit").get())
     testImplementation(libs.findLibrary("assertj").get())

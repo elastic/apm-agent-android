@@ -19,6 +19,7 @@
 package co.elastic.otel.android
 
 import android.app.Application
+import co.elastic.otel.android.api.ElasticOtelAgent
 import co.elastic.otel.android.common.internal.logging.Elog
 import co.elastic.otel.android.exporters.ExporterProvider
 import co.elastic.otel.android.exporters.configuration.ExportProtocol
@@ -42,17 +43,24 @@ import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.time.SystemTimeProvider
 import co.elastic.otel.android.internal.time.ntp.SntpClient
 import co.elastic.otel.android.internal.utilities.logging.AndroidLoggerFactory
+import co.elastic.otel.android.logging.LogLevel
 import co.elastic.otel.android.logging.LoggingPolicy
 import co.elastic.otel.android.processors.ProcessorFactory
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.sdk.common.CompletableResultCode
+import io.opentelemetry.sdk.logs.LogRecordProcessor
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.metrics.export.MetricExporter
+import io.opentelemetry.sdk.metrics.export.MetricReader
 import io.opentelemetry.sdk.resources.Resource
+import io.opentelemetry.sdk.trace.SpanProcessor
 import io.opentelemetry.sdk.trace.data.SpanData
 import io.opentelemetry.sdk.trace.export.SpanExporter
 
+/**
+ * Opinionated [ElasticOtelAgent] implementation.
+ */
 @Suppress("CanBeParameter")
 class ElasticApmAgent internal constructor(
     private val delegate: ManagedElasticOtelAgent,
@@ -86,6 +94,12 @@ class ElasticApmAgent internal constructor(
         delegate.close()
     }
 
+    /**
+     * Updates the server connectivity parameters, this changes where the telemetry is sent to and
+     * also where the central configuration is polled from.
+     *
+     * @param connectivity The new server configuration.
+     */
     fun setApmServerConnectivity(connectivity: ApmServerConnectivity) {
         apmServerConnectivityManager.setConnectivityConfiguration(connectivity)
         val currentCentralConnectivityConfig =
@@ -122,6 +136,9 @@ class ElasticApmAgent internal constructor(
         }
     }
 
+    /**
+     * Builds an instance of [ElasticApmAgent].
+     */
     class Builder internal constructor(private val application: Application) {
         private var url: String? = null
         private var authentication: ApmServerAuthentication = ApmServerAuthentication.None
@@ -136,74 +153,139 @@ class ElasticApmAgent internal constructor(
             Interceptor.noop()
         internal var internalSntpClient: SntpClient? = null
 
+        /**
+         * This value is set as the [service.name](https://opentelemetry.io/docs/specs/semconv/resource/#service) resource attribute, which is later used as an
+         * application identifier in Kibana, so it should typically contain the Android app name as value.
+         *
+         * Its default value is "unknown".
+         */
         fun setServiceName(value: String) = apply {
             managedAgentBuilder.setServiceName(value)
         }
 
+        /**
+         * This value is set as the [service.version](https://opentelemetry.io/docs/specs/semconv/resource/#service) resource attribute,
+         * which represents the Android app version.
+         *
+         * Its default value is the application version.
+         */
         fun setServiceVersion(value: String) = apply {
             managedAgentBuilder.setServiceVersion(value)
         }
 
-        fun setServiceBuild(value: Int) = apply {
-            managedAgentBuilder.setServiceBuild(value)
-        }
-
+        /**
+         * This value is set as the [deployment.environment](https://opentelemetry.io/docs/specs/semconv/attributes-registry/deployment/#deployment-environment) resource attribute.
+         * It provides a place for Android applications to specify their environment/flavor or buildType.
+         */
         fun setDeploymentEnvironment(value: String) = apply {
             managedAgentBuilder.setDeploymentEnvironment(value)
         }
 
+        /**
+         * This is the APM server URL where the telemetry is exported and is also where the central configuration
+         * is polled from.
+         */
         fun setUrl(value: String) = apply {
             url = value
         }
 
+        /**
+         * This is the authentication method needed to connect to the value provided in [setUrl].
+         */
         fun setAuthentication(value: ApmServerAuthentication) = apply {
             authentication = value
         }
 
+        /**
+         * This is the protocol used to connect to the server provided in [setUrl], it can be either
+         * HTTP or gRPC.
+         *
+         * Its default value is HTTP.
+         */
         fun setExportProtocol(value: ExportProtocol) = apply {
             exportProtocol = value
         }
 
+        /**
+         * Allows to set extra network request headers to the exporting requests, as well as the central configuration ones.
+         */
         fun setExtraRequestHeaders(value: Map<String, String>) = apply {
             extraRequestHeaders = value
         }
 
+        /**
+         * Allows to set an interceptor for attributes sent for each span.
+         */
         fun addSpanAttributesInterceptor(value: Interceptor<Attributes>) = apply {
             managedAgentBuilder.addSpanAttributesInterceptor(value)
         }
 
+        /**
+         * Allows to set an interceptor for attributes sent for each log record.
+         */
         fun addLogRecordAttributesInterceptor(value: Interceptor<Attributes>) = apply {
             managedAgentBuilder.addLogRecordAttributesInterceptor(value)
         }
 
+        /**
+         * Allows to set an interceptor for the agent-preconfigured [SpanExporter] during initialization.
+         */
         fun addSpanExporterInterceptor(value: Interceptor<SpanExporter>) = apply {
             managedAgentBuilder.addSpanExporterInterceptor(value)
         }
 
+        /**
+         * Allows to set an interceptor for the agent-preconfigured [LogRecordExporter] during initialization.
+         */
         fun addLogRecordExporterInterceptor(value: Interceptor<LogRecordExporter>) = apply {
             managedAgentBuilder.addLogRecordExporterInterceptor(value)
         }
 
+        /**
+         * Allows to set an interceptor for the agent-preconfigured [MetricExporter] during initialization.
+         */
         fun addMetricExporterInterceptor(value: Interceptor<MetricExporter>) = apply {
             managedAgentBuilder.addMetricExporterInterceptor(value)
         }
 
+        /**
+         * Defines the agent's internal logging policy.
+         *
+         * By default it will be [LogLevel.DEBUG] for debuggable builds, [LogLevel.INFO] otherwise.
+         */
         fun setLoggingPolicy(value: LoggingPolicy) = apply {
             loggingPolicy = value
         }
 
+        /**
+         * It allows to set a custom [SessionIdGenerator], for providing a value that will be set as
+         * [session.id](https://opentelemetry.io/docs/specs/semconv/attributes-registry/session/#session-id) on
+         * every span and log record.
+         */
         fun setSessionIdGenerator(value: SessionIdGenerator) = apply {
             sessionIdGenerator = value
         }
 
+        /**
+         * It allows to set a custom [ProcessorFactory] where you can decide which [SpanProcessor], [LogRecordProcessor] and [MetricReader]
+         * implementation you'd like to use.
+         *
+         * Its default values are the batch processors for spans and logs and the periodic metric reader for metrics.
+         */
         fun setProcessorFactory(value: ProcessorFactory) = apply {
             managedAgentBuilder.setProcessorFactory(value)
         }
 
+        /**
+         * Allows to intercept the agent-preconfigured resources during initialization.
+         */
         fun setResourceInterceptor(value: Interceptor<Resource>) = apply {
             managedAgentBuilder.setResourceInterceptor(value)
         }
 
+        /**
+         * Allows to intercept HTTP spans.
+         */
         fun setHttpSpanInterceptor(value: Interceptor<SpanData>?) = apply {
             httpSpanInterceptor = value
         }
@@ -212,6 +294,9 @@ class ElasticApmAgent internal constructor(
             diskBufferingConfiguration = value
         }
 
+        /**
+         * Builds an [ElasticApmAgent] instance by using the provided configuration within this builder.
+         */
         fun build(): ElasticApmAgent {
             val finalUrl = url ?: throw NullPointerException("The url must be set.")
 

@@ -174,10 +174,6 @@ class ManagedElasticOtelAgent private constructor(
             elasticOpenTelemetryBuilder.setServiceVersion(value)
         }
 
-        fun setServiceBuild(value: Int) = apply {
-            elasticOpenTelemetryBuilder.setServiceBuild(value)
-        }
-
         fun setDeploymentEnvironment(value: String) = apply {
             elasticOpenTelemetryBuilder.setDeploymentEnvironment(value)
         }

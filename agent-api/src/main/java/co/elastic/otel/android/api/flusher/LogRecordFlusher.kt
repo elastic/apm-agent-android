@@ -19,7 +19,18 @@
 package co.elastic.otel.android.api.flusher
 
 import io.opentelemetry.sdk.common.CompletableResultCode
+import io.opentelemetry.sdk.logs.LogRecordProcessor
 
+/**
+ * Marks the ability to force flush log records.
+ */
 interface LogRecordFlusher {
+
+    /**
+     * Flushes log records. This is useful when the [LogRecordProcessor] temporarily stores items in-memory
+     * and it's needed to send them to the exporter before they're due.
+     *
+     * @return [CompletableResultCode] to keep track of the async operation.
+     */
     fun flushLogRecords(): CompletableResultCode
 }

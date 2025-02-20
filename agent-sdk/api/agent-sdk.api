@@ -1,4 +1,4 @@
-public final class co/elastic/otel/android/ElasticApmAgent : co/elastic/otel/android/api/ElasticOtelAgent, co/elastic/otel/android/api/flusher/LogRecordFlusher, co/elastic/otel/android/api/flusher/MetricFlusher, co/elastic/otel/android/api/flusher/SpanFlusher {
+public final class co/elastic/otel/android/ElasticApmAgent : co/elastic/otel/android/internal/api/ManagedElasticOtelAgentContract {
 	public static final field Companion Lco/elastic/otel/android/ElasticApmAgent$Companion;
 	public static final fun builder (Landroid/app/Application;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
 	public fun close ()V
@@ -24,7 +24,6 @@ public final class co/elastic/otel/android/ElasticApmAgent$Builder {
 	public final fun setLoggingPolicy (Lco/elastic/otel/android/logging/LoggingPolicy;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
 	public final fun setProcessorFactory (Lco/elastic/otel/android/processors/ProcessorFactory;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
 	public final fun setResourceInterceptor (Lco/elastic/otel/android/interceptor/Interceptor;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
-	public final fun setServiceBuild (I)Lco/elastic/otel/android/ElasticApmAgent$Builder;
 	public final fun setServiceName (Ljava/lang/String;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
 	public final fun setServiceVersion (Ljava/lang/String;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
 	public final fun setSessionIdGenerator (Lco/elastic/otel/android/features/session/SessionIdGenerator;)Lco/elastic/otel/android/ElasticApmAgent$Builder;

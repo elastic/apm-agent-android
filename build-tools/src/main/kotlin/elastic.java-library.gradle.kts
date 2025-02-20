@@ -20,6 +20,9 @@ kotlin.compilerOptions {
 tasks.withType(Test::class).configureEach {
     useJUnitPlatform()
 }
+tasks.withType(Javadoc::class).configureEach {
+    enabled = false
+}
 
 val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 dependencies {

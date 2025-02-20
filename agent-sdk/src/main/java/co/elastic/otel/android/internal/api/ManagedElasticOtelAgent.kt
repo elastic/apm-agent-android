@@ -19,10 +19,6 @@
 package co.elastic.otel.android.internal.api
 
 import android.app.Application
-import co.elastic.otel.android.api.ElasticOtelAgent
-import co.elastic.otel.android.api.flusher.LogRecordFlusher
-import co.elastic.otel.android.api.flusher.MetricFlusher
-import co.elastic.otel.android.api.flusher.SpanFlusher
 import co.elastic.otel.android.exporters.ExporterProvider
 import co.elastic.otel.android.features.session.SessionIdGenerator
 import co.elastic.otel.android.interceptor.Interceptor
@@ -56,7 +52,7 @@ class ManagedElasticOtelAgent private constructor(
     private val serviceManager: ServiceManager,
     internal val openTelemetry: ElasticOpenTelemetry,
     internal val features: ManagedFeatures
-) : ElasticOtelAgent, MetricFlusher, LogRecordFlusher, SpanFlusher {
+) : ManagedElasticOtelAgentContract {
 
     init {
         features.elasticClockManager.initialize()

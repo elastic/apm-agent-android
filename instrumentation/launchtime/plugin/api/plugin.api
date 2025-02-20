@@ -1,0 +1,5 @@
+public final class co/elastic/otel/android/launchtime/LaunchTimeInstrumentationPlugin : co/elastic/otel/android/plugin/internal/InstrumentationPlugin {
+	public fun <init> ()V
+	public fun onApply (Lorg/gradle/api/Project;Lco/elastic/otel/android/plugin/ElasticAgentPlugin;)V
+}
+

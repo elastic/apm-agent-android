@@ -1,0 +1,20 @@
+public abstract interface class co/elastic/otel/android/api/ElasticOtelAgent : java/io/Closeable {
+	public abstract fun getOpenTelemetry ()Lio/opentelemetry/api/OpenTelemetry;
+}
+
+public abstract interface class co/elastic/otel/android/api/clock/ClockProvider {
+	public abstract fun getClock ()Lio/opentelemetry/sdk/common/Clock;
+}
+
+public abstract interface class co/elastic/otel/android/api/flusher/LogRecordFlusher {
+	public abstract fun flushLogRecords ()Lio/opentelemetry/sdk/common/CompletableResultCode;
+}
+
+public abstract interface class co/elastic/otel/android/api/flusher/MetricFlusher {
+	public abstract fun flushMetrics ()Lio/opentelemetry/sdk/common/CompletableResultCode;
+}
+
+public abstract interface class co/elastic/otel/android/api/flusher/SpanFlusher {
+	public abstract fun flushSpans ()Lio/opentelemetry/sdk/common/CompletableResultCode;
+}
+

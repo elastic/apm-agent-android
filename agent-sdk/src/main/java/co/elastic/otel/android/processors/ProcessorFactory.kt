@@ -25,10 +25,31 @@ import io.opentelemetry.sdk.metrics.export.MetricReader
 import io.opentelemetry.sdk.trace.SpanProcessor
 import io.opentelemetry.sdk.trace.export.SpanExporter
 
+/**
+ * Provides instances of each OpenTelemetry's signal processor.
+ */
 interface ProcessorFactory {
+    /**
+     * Provides a processor for spans.
+     *
+     * @param exporter A preconfigured exporter where the processor should send data to.
+     * @return A span processor or null to disable this signal.
+     */
     fun createSpanProcessor(exporter: SpanExporter?): SpanProcessor?
 
+    /**
+     * Provides a processor for log records.
+     *
+     * @param exporter A preconfigured exporter where the processor should send data to.
+     * @return A log record processor or null to disable this signal.
+     */
     fun createLogRecordProcessor(exporter: LogRecordExporter?): LogRecordProcessor?
 
+    /**
+     * Provides a reader (analogous to processors for other signals) for metrics.
+     *
+     * @param exporter A preconfigured exporter where the reader should send data to.
+     * @return A metric reader or null to disable this signal.
+     */
     fun createMetricReader(exporter: MetricExporter?): MetricReader?
 }

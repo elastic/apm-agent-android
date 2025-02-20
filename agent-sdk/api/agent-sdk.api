@@ -1,11 +1,3 @@
-public final class co/elastic/otel/android/BuildConfig {
-	public static final field APM_AGENT_VERSION Ljava/lang/String;
-	public static final field BUILD_TYPE Ljava/lang/String;
-	public static final field DEBUG Z
-	public static final field LIBRARY_PACKAGE_NAME Ljava/lang/String;
-	public fun <init> ()V
-}
-
 public final class co/elastic/otel/android/ElasticApmAgent : co/elastic/otel/android/api/ElasticOtelAgent, co/elastic/otel/android/api/flusher/LogRecordFlusher, co/elastic/otel/android/api/flusher/MetricFlusher, co/elastic/otel/android/api/flusher/SpanFlusher {
 	public static final field Companion Lco/elastic/otel/android/ElasticApmAgent$Companion;
 	public static final fun builder (Landroid/app/Application;)Lco/elastic/otel/android/ElasticApmAgent$Builder;

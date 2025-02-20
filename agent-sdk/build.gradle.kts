@@ -20,6 +20,10 @@ android {
     }
 }
 
+apiValidation {
+    ignoredClasses.add("co.elastic.otel.android.BuildConfig")
+}
+
 dependencies {
     api(project(":agent-api"))
     api(project(":instrumentation:api"))

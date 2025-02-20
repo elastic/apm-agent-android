@@ -87,6 +87,9 @@ public class BaseSourceHeaderPlugin implements Plugin<Project> {
         @Nullable
         @Override
         public String format(@Nonnull String rawUnix, File file) {
+            if (file.getName().equals("package-info.java")) {
+                return null;
+            }
             if (!file.getPath().contains("/internal/")) {
                 return null;
             }

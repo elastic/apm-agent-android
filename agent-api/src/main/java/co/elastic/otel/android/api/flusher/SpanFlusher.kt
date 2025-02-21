@@ -19,7 +19,18 @@
 package co.elastic.otel.android.api.flusher
 
 import io.opentelemetry.sdk.common.CompletableResultCode
+import io.opentelemetry.sdk.trace.SpanProcessor
 
+/**
+ * Marks the ability to force flush spans.
+ */
 interface SpanFlusher {
+
+    /**
+     * Flushes spans. This is useful when the [SpanProcessor] temporarily stores items in-memory
+     * and it's needed to send them to the exporter before they're due.
+     *
+     * @return [CompletableResultCode] to keep track of the async operation.
+     */
     fun flushSpans(): CompletableResultCode
 }

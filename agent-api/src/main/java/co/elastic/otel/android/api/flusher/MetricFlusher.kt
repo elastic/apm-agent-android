@@ -19,7 +19,17 @@
 package co.elastic.otel.android.api.flusher
 
 import io.opentelemetry.sdk.common.CompletableResultCode
+import io.opentelemetry.sdk.metrics.export.MetricReader
 
+/**
+ * Marks the ability to force flush metrics.
+ */
 interface MetricFlusher {
+
+    /**
+     * Flushes metrics. This is useful to signal the [MetricReader] to read and export metrics on demand.
+     *
+     * @return [CompletableResultCode] to keep track of the async operation.
+     */
     fun flushMetrics(): CompletableResultCode
 }

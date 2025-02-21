@@ -30,6 +30,10 @@ import java.net.URL
 import java.util.regex.Pattern
 import org.slf4j.Logger
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class CentralConfigurationFetcher(
     private val destFile: File,
     private val preferences: PreferencesService

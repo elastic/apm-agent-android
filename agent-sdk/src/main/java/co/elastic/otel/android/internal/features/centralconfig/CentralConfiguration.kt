@@ -20,6 +20,10 @@ package co.elastic.otel.android.internal.features.centralconfig
 
 import co.elastic.otel.android.internal.configuration.Configuration
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class CentralConfiguration : Configuration() {
     private val recording = createBooleanOption("recording", true)
     private val sessionSampleRate = createDoubleOption("session_sample_rate", 1.0)

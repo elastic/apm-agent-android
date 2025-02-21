@@ -22,6 +22,10 @@ import io.opentelemetry.sdk.common.CompletableResultCode
 import io.opentelemetry.sdk.logs.data.LogRecordData
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class GateLogRecordExporter(
     private val delegate: LogRecordExporter,
     private val logRecordQueue: ExporterGateQueue<LogRecordData>

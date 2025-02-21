@@ -18,8 +18,16 @@
  */
 package co.elastic.otel.android.api.clock
 
+import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.sdk.common.Clock
 
+/**
+ * Marks the ability to provide a [Clock] instance.
+ */
 interface ClockProvider {
+
+    /**
+     * Provides a [Clock] instance, it should be the same used by the [OpenTelemetry] instance.
+     */
     fun getClock(): Clock
 }

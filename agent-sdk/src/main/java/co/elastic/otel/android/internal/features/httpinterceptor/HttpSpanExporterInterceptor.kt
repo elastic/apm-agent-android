@@ -22,6 +22,10 @@ import co.elastic.otel.android.interceptor.Interceptor
 import io.opentelemetry.sdk.trace.data.SpanData
 import io.opentelemetry.sdk.trace.export.SpanExporter
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class HttpSpanExporterInterceptor(private val httpSpanInterceptor: Interceptor<SpanData>) :
     Interceptor<SpanExporter> {
 

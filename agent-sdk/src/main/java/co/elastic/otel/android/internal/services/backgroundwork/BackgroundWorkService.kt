@@ -25,6 +25,10 @@ import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class BackgroundWorkService private constructor(internal val executorService: ScheduledExecutorService) :
     Service {
 

@@ -26,6 +26,10 @@ import io.opentelemetry.sdk.metrics.export.AggregationTemporalitySelector
 import io.opentelemetry.sdk.metrics.export.MetricExporter
 import java.util.concurrent.atomic.AtomicReference
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class MutableMetricExporter : MetricExporter {
     private val delegate = AtomicReference<MetricExporter?>()
     private val defaultAggregationSelector = AggregationTemporalitySelector.deltaPreferred()

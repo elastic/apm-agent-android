@@ -25,6 +25,10 @@ import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.semconv.incubating.NetworkIncubatingAttributes
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class SpanAttributesInterceptor(serviceManager: ServiceManager) : Interceptor<Attributes> {
     private val networkService: NetworkService by lazy {
         serviceManager.getNetworkService()

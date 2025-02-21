@@ -21,6 +21,10 @@ package co.elastic.otel.android.internal.features.apmserver
 import co.elastic.otel.android.features.apmserver.ApmServerConnectivity
 import co.elastic.otel.android.internal.connectivity.ConnectivityConfigurationHolder
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class ApmServerConnectivityManager internal constructor(
     private val connectivityConfigurationHolder: ConnectivityHolder
 ) {

@@ -29,6 +29,10 @@ import androidx.annotation.GuardedBy
 import androidx.annotation.RequiresApi
 import co.elastic.otel.android.internal.services.network.listener.NetworkChangeListener
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 @RequiresApi(Build.VERSION_CODES.M)
 internal class NetworkApi23QueryManager(
     private val connectivityManager: ConnectivityManager,

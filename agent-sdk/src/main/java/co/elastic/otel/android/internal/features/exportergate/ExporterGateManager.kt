@@ -33,6 +33,10 @@ import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class ExporterGateManager(
     serviceManager: ServiceManager,
     signalBufferSize: Int = 1000,

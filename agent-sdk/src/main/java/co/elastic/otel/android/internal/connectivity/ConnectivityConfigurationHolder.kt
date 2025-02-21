@@ -23,6 +23,10 @@ import co.elastic.otel.android.provider.Provider
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicReference
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal open class ConnectivityConfigurationHolder(initialValue: ConnectivityConfiguration) :
     Provider<ConnectivityConfiguration> {
     private val value = AtomicReference(initialValue)

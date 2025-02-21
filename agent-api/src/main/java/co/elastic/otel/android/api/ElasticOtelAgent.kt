@@ -21,7 +21,13 @@ package co.elastic.otel.android.api
 import io.opentelemetry.api.OpenTelemetry
 import java.io.Closeable
 
+/**
+ * Entry point for the Elastic Android OpenTelemetry agent.
+ */
 interface ElasticOtelAgent : Closeable {
 
+    /**
+     * Provides the underlying [OpenTelemetry] instance.
+     */
     fun getOpenTelemetry(): OpenTelemetry
 }

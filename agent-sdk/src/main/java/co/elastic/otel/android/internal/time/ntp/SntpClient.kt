@@ -22,7 +22,8 @@ import co.elastic.otel.android.internal.time.SystemTimeProvider
 import java.io.Closeable
 
 /**
- * According to RFC-4330.
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
  */
 interface SntpClient : Closeable {
 

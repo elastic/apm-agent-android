@@ -31,6 +31,10 @@ import java.util.Collections
 import java.util.concurrent.TimeUnit
 import org.stagemonitor.configuration.source.AbstractConfigurationSource
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class CentralConfigurationSource internal constructor(
     serviceManager: ServiceManager,
     private val systemTimeProvider: SystemTimeProvider,

@@ -22,6 +22,10 @@ import androidx.annotation.GuardedBy
 import java.util.concurrent.atomic.AtomicReference
 import org.slf4j.Logger
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 object Elog {
     private val loggerFactory = AtomicReference<ELoggerFactory>(ELoggerFactory.Noop())
 

@@ -27,6 +27,10 @@ import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.time.Duration
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class UdpClient internal constructor(
     private val host: String,
     private val port: Int,

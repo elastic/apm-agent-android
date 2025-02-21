@@ -33,7 +33,6 @@ import co.elastic.otel.android.internal.utilities.cache.PreferencesCachedStringP
 import co.elastic.otel.android.processors.ProcessorFactory
 import co.elastic.otel.android.provider.StringProvider
 import co.elastic.otel.android.session.SessionProvider
-import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator
 import io.opentelemetry.context.propagation.ContextPropagators
@@ -55,6 +54,10 @@ import io.opentelemetry.semconv.incubating.ProcessIncubatingAttributes
 import java.util.UUID
 
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 class ElasticOpenTelemetry private constructor(
     val sdk: OpenTelemetrySdk,
     val serviceName: String,
@@ -65,7 +68,6 @@ class ElasticOpenTelemetry private constructor(
     internal class Builder {
         private var serviceName: String = "unknown"
         private var serviceVersion: String? = null
-        private var serviceBuild: Int? = null
         private var deploymentEnvironment: String? = null
         private var deviceIdProvider: StringProvider? = null
         private var resourceInterceptor: Interceptor<Resource>? = null
@@ -85,10 +87,6 @@ class ElasticOpenTelemetry private constructor(
 
         fun setServiceVersion(value: String) = apply {
             serviceVersion = value
-        }
-
-        fun setServiceBuild(value: Int) = apply {
-            serviceBuild = value
         }
 
         fun setDeploymentEnvironment(value: String) = apply {
@@ -159,10 +157,6 @@ class ElasticOpenTelemetry private constructor(
                     ServiceAttributes.SERVICE_VERSION,
                     serviceVersion ?: serviceManager.getAppInfoService().getVersionName()
                     ?: "unknown"
-                )
-                .put(
-                    AttributeKey.longKey("service.build"),
-                    serviceBuild ?: serviceManager.getAppInfoService().getVersionCode()
                 )
                 .put(DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT, deploymentEnvironment)
                 .put(DeviceIncubatingAttributes.DEVICE_ID, deviceIdProvider!!.get())

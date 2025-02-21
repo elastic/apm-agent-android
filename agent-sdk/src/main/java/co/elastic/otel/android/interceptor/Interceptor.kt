@@ -21,6 +21,9 @@ package co.elastic.otel.android.interceptor
 import co.elastic.otel.android.internal.utilities.interceptor.MultiInterceptor
 import co.elastic.otel.android.internal.utilities.interceptor.NoopInterceptor
 
+/**
+ * Generic interface that allows to intercept an object.
+ */
 fun interface Interceptor<T> {
 
     companion object {
@@ -43,5 +46,12 @@ fun interface Interceptor<T> {
         }
     }
 
+    /**
+     * Intercepts an object of type [T].
+     *
+     * @param item The intercepted object.
+     *
+     * @return An object of type [T], it doesn't have to be the one received as parameter.
+     */
     fun intercept(item: T): T
 }

@@ -21,6 +21,10 @@ package co.elastic.otel.android.internal.utilities
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.sdk.logs.data.LogRecordData
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal open class AttributesOverrideLogRecordData(
     delegate: LogRecordData,
     private val attributes: Attributes,

@@ -24,6 +24,10 @@ import io.opentelemetry.context.Context
 import io.opentelemetry.sdk.logs.LogRecordProcessor
 import io.opentelemetry.sdk.logs.ReadWriteLogRecord
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class LogRecordAttributesProcessor(private val interceptor: Interceptor<Attributes>) :
     LogRecordProcessor {
 

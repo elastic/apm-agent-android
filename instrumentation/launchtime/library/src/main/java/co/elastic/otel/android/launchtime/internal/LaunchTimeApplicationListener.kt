@@ -22,6 +22,10 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import java.util.concurrent.TimeUnit
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class LaunchTimeApplicationListener(private val callback: Callback) :
     DefaultLifecycleObserver {
 

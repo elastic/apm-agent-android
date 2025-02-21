@@ -30,6 +30,10 @@ import co.elastic.otel.android.session.SessionProvider
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class SessionManager private constructor(
     private val cachedSessionId: CacheHandler<String>,
     private val cachedSessionIdExpireTime: CacheHandler<Long>,

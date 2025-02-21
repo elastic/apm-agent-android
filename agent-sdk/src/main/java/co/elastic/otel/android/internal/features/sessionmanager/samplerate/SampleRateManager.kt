@@ -29,6 +29,10 @@ import co.elastic.otel.android.internal.utilities.cache.PreferencesIntegerCacheH
 import co.elastic.otel.android.provider.Provider
 import java.util.concurrent.atomic.AtomicBoolean
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class SampleRateManager private constructor(
     private val sampleRateCentralConfigurationProvider: Provider<Double>,
     private val enabledExportingCache: CacheHandler<Int>,

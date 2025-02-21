@@ -22,6 +22,10 @@ import co.elastic.otel.android.internal.time.SystemTimeProvider
 import io.opentelemetry.sdk.common.Clock
 import java.util.concurrent.TimeUnit
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class SystemTimeClock(private val systemTimeProvider: SystemTimeProvider) : Clock {
 
     override fun now(): Long {

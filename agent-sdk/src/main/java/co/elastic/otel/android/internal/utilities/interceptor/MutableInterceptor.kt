@@ -21,6 +21,10 @@ package co.elastic.otel.android.internal.utilities.interceptor
 import co.elastic.otel.android.interceptor.Interceptor
 import java.util.concurrent.atomic.AtomicReference
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class MutableInterceptor<T>(initialValue: Interceptor<T>) : Interceptor<T> {
     private val delegate = AtomicReference(initialValue)
 

@@ -18,6 +18,14 @@
  */
 package co.elastic.otel.android.features.session
 
+/**
+ * Generates a session id to be sent as a [session.id](https://opentelemetry.io/docs/specs/semconv/attributes-registry/session/#session-id) attribute.
+ */
 fun interface SessionIdGenerator {
+    /**
+     * Called every time a span or log record is created to set its [session.id](https://opentelemetry.io/docs/specs/semconv/attributes-registry/session/#session-id) attribute.
+     *
+     * @return The generated session id, or null if no session id is needed.
+     */
     fun generate(): String?
 }

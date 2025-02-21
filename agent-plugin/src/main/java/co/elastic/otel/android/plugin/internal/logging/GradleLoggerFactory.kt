@@ -22,6 +22,10 @@ import co.elastic.otel.android.common.internal.logging.ELoggerFactory
 import org.gradle.api.logging.Logging
 import org.slf4j.Logger
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 class GradleLoggerFactory : ELoggerFactory() {
 
     override fun getLogger(name: String): Logger {

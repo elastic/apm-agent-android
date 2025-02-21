@@ -26,6 +26,10 @@ import co.elastic.otel.android.internal.time.ntp.SntpClient
 import io.opentelemetry.sdk.common.Clock
 import java.util.concurrent.atomic.AtomicBoolean
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class ElasticClockManager private constructor(
     systemTimeProvider: SystemTimeProvider,
     private val timeOffsetManager: RemoteTimeOffsetManager,

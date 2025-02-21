@@ -25,6 +25,10 @@ import io.opentelemetry.sdk.trace.ReadWriteSpan
 import io.opentelemetry.sdk.trace.ReadableSpan
 import io.opentelemetry.sdk.trace.SpanProcessor
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class SpanAttributesProcessor(private val interceptor: Interceptor<Attributes>) :
     SpanProcessor {
 

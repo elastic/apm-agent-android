@@ -23,6 +23,10 @@ import io.opentelemetry.sdk.trace.data.SpanData
 import io.opentelemetry.sdk.trace.export.SpanExporter
 import java.util.function.Predicate
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class ConditionalDropSpanExporter(
     private val delegate: SpanExporter,
     private val drop: Predicate<SignalType>

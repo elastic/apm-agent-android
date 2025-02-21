@@ -18,6 +18,9 @@
  */
 package co.elastic.otel.android.exporters.configuration
 
+/**
+ * The protocol used to contact the Elastic APM server.
+ */
 enum class ExportProtocol {
     HTTP,
     GRPC

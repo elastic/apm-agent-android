@@ -23,6 +23,10 @@ import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.trace.export.SpanExporter
 import java.util.function.Predicate
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class ConditionalDropManager(private var dropCondition: Predicate<SignalType>? = null) {
 
     fun dropWhen(condition: Predicate<SignalType>) {

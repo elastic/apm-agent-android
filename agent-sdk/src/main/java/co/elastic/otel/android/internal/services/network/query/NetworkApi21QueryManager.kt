@@ -27,6 +27,10 @@ import android.telephony.TelephonyManager
 import androidx.annotation.GuardedBy
 import co.elastic.otel.android.internal.services.network.listener.NetworkChangeListener
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class NetworkApi21QueryManager(
     private val connectivityManager: ConnectivityManager,
     private val telephonyManager: TelephonyManager

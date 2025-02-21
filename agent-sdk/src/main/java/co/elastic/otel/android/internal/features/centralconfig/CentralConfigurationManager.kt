@@ -32,6 +32,10 @@ import java.util.concurrent.TimeUnit
 import org.slf4j.Logger
 import org.stagemonitor.configuration.ConfigurationRegistry
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class CentralConfigurationManager private constructor(
     serviceManager: ServiceManager,
     private val configurationRegistry: ConfigurationRegistry,

@@ -20,6 +20,10 @@ package co.elastic.otel.android.internal.time
 
 import android.os.SystemClock
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 class SystemTimeProvider {
 
     fun getCurrentTimeMillis(): Long = System.currentTimeMillis()

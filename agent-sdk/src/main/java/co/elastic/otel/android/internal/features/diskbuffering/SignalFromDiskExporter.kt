@@ -28,6 +28,9 @@ import java.util.concurrent.TimeUnit
 
 /**
  * Entrypoint to read and export previously cached signals.
+ *
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
  */
 internal class SignalFromDiskExporter internal constructor(
     private val spanDiskExporter: SpanFromDiskExporter?,

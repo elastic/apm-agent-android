@@ -22,6 +22,10 @@ import co.elastic.otel.android.session.Session
 import co.elastic.otel.android.session.SessionProvider
 import java.util.UUID
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class DefaultSessionProvider : SessionProvider {
     private val providedSession by lazy {
         Session.create(UUID.randomUUID().toString())

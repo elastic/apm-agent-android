@@ -20,6 +20,10 @@ package co.elastic.otel.android.internal.utilities.cache
 
 import co.elastic.otel.android.internal.services.preferences.PreferencesService
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class PreferencesLongCacheHandler(
     private val key: String,
     private val preferencesService: PreferencesService

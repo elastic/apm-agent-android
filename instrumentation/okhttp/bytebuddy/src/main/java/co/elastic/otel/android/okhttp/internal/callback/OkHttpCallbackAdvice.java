@@ -26,6 +26,10 @@ import io.opentelemetry.context.Context;
 import okhttp3.Call;
 import okhttp3.Callback;
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 public class OkHttpCallbackAdvice {
 
     @Advice.OnMethodEnter

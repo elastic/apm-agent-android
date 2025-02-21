@@ -18,6 +18,10 @@
  */
 package co.elastic.otel.android.internal.services.network.data
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal sealed class NetworkType(val name: String) {
     data class Cell(val subTypeName: String?) : NetworkType("cell")
     data object Wifi : NetworkType("wifi")

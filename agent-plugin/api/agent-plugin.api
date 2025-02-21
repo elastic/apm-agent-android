@@ -1,0 +1,17 @@
+public final class co/elastic/otel/android/plugin/ElasticAgentPlugin : org/gradle/api/Plugin {
+	public fun <init> ()V
+	public final fun addBuildVariantListener (Lco/elastic/otel/android/plugin/internal/BuildVariantListener;)V
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun apply (Lorg/gradle/api/Project;)V
+}
+
+public abstract interface class co/elastic/otel/android/plugin/extensions/BytecodeInstrumentation {
+	public abstract fun getDisableForBuildTypes ()Lorg/gradle/api/provider/ListProperty;
+}
+
+public abstract class co/elastic/otel/android/plugin/extensions/ElasticApmExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun bytecodeInstrumentation (Lorg/gradle/api/Action;)V
+	public final fun getBytecodeInstrumentation ()Lco/elastic/otel/android/plugin/extensions/BytecodeInstrumentation;
+}
+

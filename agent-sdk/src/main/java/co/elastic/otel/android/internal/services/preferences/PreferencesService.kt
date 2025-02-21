@@ -23,6 +23,10 @@ import android.content.SharedPreferences
 import co.elastic.otel.android.BuildConfig
 import co.elastic.otel.android.internal.services.Service
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class PreferencesService(context: Context) : Service {
     private val preferences: SharedPreferences by lazy {
         context.getSharedPreferences(

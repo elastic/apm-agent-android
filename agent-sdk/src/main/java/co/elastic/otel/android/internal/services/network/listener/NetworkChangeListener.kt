@@ -20,6 +20,10 @@ package co.elastic.otel.android.internal.services.network.listener
 
 import android.net.NetworkCapabilities
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal interface NetworkChangeListener {
     fun onNewNetwork(capabilities: NetworkCapabilities)
 

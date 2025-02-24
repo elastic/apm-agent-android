@@ -146,15 +146,16 @@ class ElasticApmAgentTest {
     fun `Validate initial apm server params`() {
         wireMockRule.stubAllHttpResponses { withStatus(500) }
         agent = simpleAgentBuilder(wireMockRule.url("/"))
+            .setRemoteManagementUrl(wireMockRule.url("/remote/"))
             .setServiceName("my-app")
             .setExtraRequestHeaders(mapOf("Extra-header" to "extra value"))
             .build()
 
         val centralConfigRequest = wireMockRule.takeRequest()
-        assertThat(centralConfigRequest.url).isEqualTo("/config/v1/agents?service.name=my-app")
+        assertThat(centralConfigRequest.url).isEqualTo("/remote/config/v1/agents?service.name=my-app")
         assertThat(
-            centralConfigRequest.headers.getHeader("Extra-header").firstValue()
-        ).isEqualTo("extra value")
+            centralConfigRequest.headers.getHeader("Extra-header").isPresent
+        ).isFalse()
 
         // OTel requests
         sendSpan()
@@ -298,12 +299,12 @@ class ElasticApmAgentTest {
         ).isEqualTo("Bearer $secretToken")
 
         // Setting central config value manually
-        agent.getCentralConfigurationManager().setConnectivityConfiguration(
+        agent.getCentralConfigurationManager()!!.setConnectivityConfiguration(
             CentralConfigurationConnectivity(
                 initialUrl,
+                mapOf("Custom-Header" to "Example"),
                 "other-name",
-                null,
-                mapOf("Custom-Header" to "Example")
+                null
             )
         )
 

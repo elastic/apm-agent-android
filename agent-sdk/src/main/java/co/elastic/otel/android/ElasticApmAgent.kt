@@ -31,7 +31,6 @@ import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
 import co.elastic.otel.android.internal.api.ManagedElasticOtelAgentContract
 import co.elastic.otel.android.internal.features.apmserver.ApmServerConnectivityManager
 import co.elastic.otel.android.internal.features.apmserver.ApmServerExporterProvider
-import co.elastic.otel.android.internal.features.centralconfig.CentralConfigurationConnectivity
 import co.elastic.otel.android.internal.features.centralconfig.CentralConfigurationManager
 import co.elastic.otel.android.internal.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.otel.android.internal.features.exportergate.ExporterGateManager
@@ -65,13 +64,13 @@ import io.opentelemetry.sdk.trace.export.SpanExporter
 class ElasticApmAgent internal constructor(
     private val delegate: ManagedElasticOtelAgent,
     private val apmServerConnectivityManager: ApmServerConnectivityManager,
-    private val centralConfigurationManager: CentralConfigurationManager,
-    private val sampleRateManager: SampleRateManager
+    private val centralConfigurationManager: CentralConfigurationManager?,
+    private val sampleRateManager: SampleRateManager?
 ) : ManagedElasticOtelAgentContract {
 
     init {
-        centralConfigurationManager.initialize(delegate.openTelemetry)
-        sampleRateManager.initialize()
+        centralConfigurationManager?.initialize(delegate.openTelemetry)
+        sampleRateManager?.initialize()
     }
 
     override fun getOpenTelemetry(): OpenTelemetry {
@@ -102,15 +101,6 @@ class ElasticApmAgent internal constructor(
      */
     fun setApmServerConnectivity(connectivity: ApmServerConnectivity) {
         apmServerConnectivityManager.setConnectivityConfiguration(connectivity)
-        val currentCentralConnectivityConfig =
-            centralConfigurationManager.getConnectivityConfiguration()
-        centralConfigurationManager.setConnectivityConfiguration(
-            CentralConfigurationConnectivity.fromApmServerConfig(
-                currentCentralConnectivityConfig.serviceName,
-                currentCentralConnectivityConfig.serviceDeployment,
-                connectivity
-            )
-        )
     }
 
     internal fun getApmServerConnectivityManager(): ApmServerConnectivityManager {
@@ -121,7 +111,7 @@ class ElasticApmAgent internal constructor(
         return delegate.features.exporterGateManager
     }
 
-    internal fun getCentralConfigurationManager(): CentralConfigurationManager {
+    internal fun getCentralConfigurationManager(): CentralConfigurationManager? {
         return centralConfigurationManager
     }
 
@@ -141,6 +131,7 @@ class ElasticApmAgent internal constructor(
      */
     class Builder internal constructor(private val application: Application) {
         private var url: String? = null
+        private var remoteManagementUrl: String? = null
         private var authentication: ApmServerAuthentication = ApmServerAuthentication.None
         private var exportProtocol: ExportProtocol = ExportProtocol.HTTP
         private var extraRequestHeaders: Map<String, String> = emptyMap()
@@ -187,6 +178,13 @@ class ElasticApmAgent internal constructor(
          */
         fun setUrl(value: String) = apply {
             url = value
+        }
+
+        /**
+         * This is the URL where the remote configuration is polled from.
+         */
+        fun setRemoteManagementUrl(value: String) = apply {
+            remoteManagementUrl = value
         }
 
         /**
@@ -322,24 +320,16 @@ class ElasticApmAgent internal constructor(
             val managedFeatures =
                 createManagedConfiguration(serviceManager, systemTimeProvider)
 
-            val centralConfigurationManager = CentralConfigurationManager.create(
+            val centralConfigurationManager = configureCentralConfigurationManager(
                 serviceManager,
                 systemTimeProvider,
-                managedFeatures.exporterGateManager,
-                apmServerConnectivityHolder
+                managedFeatures
             )
-            val sampleRateManager = SampleRateManager.create(
+            val sampleRateManager = configureSampleRateManager(
                 serviceManager,
-                managedFeatures.exporterGateManager,
-                centralConfigurationManager.getCentralConfiguration()
+                centralConfigurationManager,
+                managedFeatures
             )
-            managedFeatures.sessionManager.addListener(sampleRateManager)
-            managedFeatures.conditionalDropManager.dropWhen {
-                !centralConfigurationManager.getCentralConfiguration().isRecording()
-            }
-            managedFeatures.conditionalDropManager.dropWhen {
-                !sampleRateManager.allowSignalExporting()
-            }
 
             managedAgentBuilder.setExporterProvider(
                 internalExporterProviderInterceptor.intercept(
@@ -357,6 +347,44 @@ class ElasticApmAgent internal constructor(
                 centralConfigurationManager,
                 sampleRateManager
             )
+        }
+
+        private fun configureSampleRateManager(
+            serviceManager: ServiceManager,
+            centralConfigurationManager: CentralConfigurationManager?,
+            managedFeatures: ManagedElasticOtelAgent.ManagedFeatures
+        ): SampleRateManager? {
+            return centralConfigurationManager?.let {
+                val manager = SampleRateManager.create(
+                    serviceManager,
+                    managedFeatures.exporterGateManager,
+                    it.getCentralConfiguration()
+                )
+                managedFeatures.sessionManager.addListener(manager)
+                managedFeatures.conditionalDropManager.dropWhen {
+                    !manager.allowSignalExporting()
+                }
+                manager
+            }
+        }
+
+        private fun configureCentralConfigurationManager(
+            serviceManager: ServiceManager,
+            systemTimeProvider: SystemTimeProvider,
+            managedFeatures: ManagedElasticOtelAgent.ManagedFeatures
+        ): CentralConfigurationManager? {
+            return remoteManagementUrl?.let {
+                val manager = CentralConfigurationManager.create(
+                    serviceManager,
+                    CentralConfigurationManager.EndpointParameters(it, emptyMap()),
+                    systemTimeProvider,
+                    managedFeatures.exporterGateManager
+                )
+                managedFeatures.conditionalDropManager.dropWhen {
+                    !manager.getCentralConfiguration().isRecording()
+                }
+                manager
+            }
         }
 
         private fun createManagedConfiguration(

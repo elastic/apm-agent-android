@@ -19,32 +19,18 @@
 package co.elastic.otel.android.internal.features.centralconfig
 
 import co.elastic.otel.android.connectivity.ConnectivityConfiguration
-import co.elastic.otel.android.features.apmserver.ApmServerConnectivity
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
 internal data class CentralConfigurationConnectivity(
-    val apmServerUrl: String,
+    private val url: String,
+    private val headers: Map<String, String>,
     val serviceName: String,
-    val serviceDeployment: String?,
-    private val headers: Map<String, String>
+    val serviceDeployment: String?
 ) : ConnectivityConfiguration {
-    private val baseUrl by lazy { apmServerUrl.trimEnd('/') + "/config/v1/agents?service.name=$serviceName" }
-
-    companion object {
-        fun fromApmServerConfig(
-            serviceName: String,
-            serviceDeployment: String?,
-            configuration: ApmServerConnectivity
-        ): CentralConfigurationConnectivity {
-            return CentralConfigurationConnectivity(
-                configuration.getUrl(), serviceName, serviceDeployment,
-                configuration.getHeaders()
-            )
-        }
-    }
+    private val baseUrl by lazy { url.trimEnd('/') + "/config/v1/agents?service.name=$serviceName" }
 
     override fun getUrl(): String {
         return when (serviceDeployment) {

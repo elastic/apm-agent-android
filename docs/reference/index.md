@@ -1,13 +1,11 @@
 ---
+navigation_title: 'APM Android agent'
 mapped_pages:
   - https://www.elastic.co/guide/en/apm/agent/android/current/intro.html
   - https://www.elastic.co/guide/en/apm/agent/android/current/index.html
 ---
 
-% navigation_title: 'APM Android agent'
-% # Introduction
-
-# Reference
+# Introduction
 
 ::::{warning}
 This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.

@@ -32,7 +32,7 @@ internal data class CentralConfigurationConnectivity(
     val serviceName: String,
     val serviceDeployment: String?
 ) : ConnectivityConfiguration {
-    private val baseUrl by lazy { url.trimEnd('/') + "/config/v1/agents?service.name=$serviceName" }
+    private val baseUrl by lazy { "$url?service.name=$serviceName" }
 
     override fun getUrl(): String {
         return when (serviceDeployment) {

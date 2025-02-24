@@ -152,7 +152,7 @@ class ElasticApmAgentTest {
             .build()
 
         val centralConfigRequest = wireMockRule.takeRequest()
-        assertThat(centralConfigRequest.url).isEqualTo("/remote/config/v1/agents?service.name=my-app")
+        assertThat(centralConfigRequest.url).isEqualTo("/remote/?service.name=my-app")
         assertThat(
             centralConfigRequest.headers.getHeader("Extra-header").isPresent
         ).isFalse()
@@ -206,7 +206,7 @@ class ElasticApmAgentTest {
             .build()
 
         val centralConfigRequest = wireMockRule.takeRequest()
-        assertThat(centralConfigRequest.url).isEqualTo("/management/config/v1/agents?service.name=my-app&service.deployment=debug")
+        assertThat(centralConfigRequest.url).isEqualTo("/management/?service.name=my-app&service.deployment=debug")
         assertThat(
             centralConfigRequest.headers.getHeader("Authorization").firstValue()
         ).isEqualTo("ApiKey $apiKey")
@@ -243,7 +243,7 @@ class ElasticApmAgentTest {
         )
 
         val centralConfigRequest2 = wireMockRule.takeRequest()
-        assertThat(centralConfigRequest2.url).isEqualTo("/management/config/v1/agents?service.name=my-app&service.deployment=debug")
+        assertThat(centralConfigRequest2.url).isEqualTo("/management/?service.name=my-app&service.deployment=debug")
         assertThat(centralConfigRequest2.headers.getHeader("Authorization").firstValue()).isEqualTo(
             "ApiKey $apiKey"
         )
@@ -298,7 +298,7 @@ class ElasticApmAgentTest {
             .build()
 
         val centralConfigRequest = wireMockRule.takeRequest()
-        assertThat(centralConfigRequest.url).isEqualTo("/management/config/v1/agents?service.name=my-app&service.deployment=debug")
+        assertThat(centralConfigRequest.url).isEqualTo("/management/?service.name=my-app&service.deployment=debug")
         assertThat(
             centralConfigRequest.headers.getHeader("Authorization").firstValue()
         ).isEqualTo("Bearer $secretToken")
@@ -348,7 +348,7 @@ class ElasticApmAgentTest {
         )
 
         val centralConfigRequest2 = wireMockRule.takeRequest()
-        assertThat(centralConfigRequest2.url).isEqualTo("/management/config/v1/agents?service.name=other-name")
+        assertThat(centralConfigRequest2.url).isEqualTo("/management/?service.name=other-name")
         assertThat(centralConfigRequest2.headers.getHeader("Authorization").isPresent).isFalse()
 
         // OTel requests

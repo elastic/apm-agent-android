@@ -384,6 +384,21 @@ class ElasticApmAgentTest {
     }
 
     @Test
+    fun `Validate central configuration is disabled when the url is not provided`() {
+        agent = inMemoryAgentBuilder(wireMockRule.url("/"))
+            .build()
+
+        sendSpan()
+        sendLog()
+        sendMetric()
+
+        awaitForOpenGates()
+
+        assertThat(wireMockRule.getRequestSize()).isEqualTo(0)
+        assertThat(agent.getCentralConfigurationManager()).isNull()
+    }
+
+    @Test
     fun `Validate central configuration behavior`() {
         // First: Empty config
         wireMockRule.stubAllHttpResponses {

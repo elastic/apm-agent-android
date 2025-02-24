@@ -57,6 +57,8 @@ class WireMockRule : ExternalResource() {
         wireMock.stubFor(mappingBuilder)
     }
 
+    fun getRequestSize(): Int = wireMock.allServeEvents?.size ?: 0
+
     fun takeRequest(awaitSeconds: Int = 2): LoggedRequest {
         await.atMost(Duration.ofSeconds(awaitSeconds.toLong()))
             .until { wireMock.allServeEvents?.isNotEmpty() }

@@ -20,6 +20,7 @@ package co.elastic.otel.android.internal.features.centralconfig
 
 import androidx.annotation.WorkerThread
 import co.elastic.otel.android.common.internal.logging.Elog
+import co.elastic.otel.android.features.apmserver.ApmServerAuthentication
 import co.elastic.otel.android.internal.connectivity.ConnectivityConfigurationHolder
 import co.elastic.otel.android.internal.features.exportergate.ExporterGateManager
 import co.elastic.otel.android.internal.opentelemetry.ElasticOpenTelemetry
@@ -57,7 +58,8 @@ internal class CentralConfigurationManager private constructor(
         centralConnectivityHolder = CentralConnectivityHolder(
             CentralConfigurationConnectivity(
                 initialParameters.url,
-                initialParameters.headers,
+                initialParameters.auth,
+                initialParameters.extraHeaders,
                 openTelemetry.serviceName,
                 openTelemetry.deploymentEnvironment
             )
@@ -157,5 +159,9 @@ internal class CentralConfigurationManager private constructor(
     internal class CentralConnectivityHolder(connectivity: CentralConfigurationConnectivity) :
         ConnectivityConfigurationHolder(connectivity)
 
-    internal data class EndpointParameters(val url: String, val headers: Map<String, String>)
+    internal data class EndpointParameters(
+        val url: String,
+        val auth: ApmServerAuthentication,
+        val extraHeaders: Map<String, String>
+    )
 }

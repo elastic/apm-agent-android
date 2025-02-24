@@ -110,7 +110,7 @@ class ElasticApmAgentTest {
             ElasticApmAgent.builder(RuntimeEnvironment.getApplication()).build()
         }
 
-        assertThat(exception).hasMessage("The url must be set.")
+        assertThat(exception).hasMessage("The export URL must be set.")
     }
 
     @Test
@@ -196,9 +196,11 @@ class ElasticApmAgentTest {
                 .withHeader("Cache-Control", "max-age=1")// 1 second to wait for the next poll.
         }
         val secretToken = "secret-token"
+        val apiKey = "api-key"
         agent = simpleAgentBuilder(wireMockRule.url("/first/"))
             .setManagementUrl(wireMockRule.url("/management/"))
             .setExportAuthentication(ApmServerAuthentication.SecretToken(secretToken))
+            .setManagementAuthentication(ApmServerAuthentication.ApiKey(apiKey))
             .setServiceName("my-app")
             .setDeploymentEnvironment("debug")
             .build()
@@ -207,7 +209,7 @@ class ElasticApmAgentTest {
         assertThat(centralConfigRequest.url).isEqualTo("/management/config/v1/agents?service.name=my-app&service.deployment=debug")
         assertThat(
             centralConfigRequest.headers.getHeader("Authorization").firstValue()
-        ).isEqualTo("Bearer $secretToken")
+        ).isEqualTo("ApiKey $apiKey")
 
         wireMockRule.stubAllHttpResponses { withStatus(500) }
         sendSpan()
@@ -232,7 +234,6 @@ class ElasticApmAgentTest {
         ).isEqualTo("Bearer $secretToken")
 
         // Changing global config
-        val apiKey = "api-key"
         agent.setApmServerConnectivity(
             ApmServerConnectivity(
                 wireMockRule.url("/second/"),
@@ -287,14 +288,17 @@ class ElasticApmAgentTest {
         }// Central config poll
         val secretToken = "secret-token"
         val initialUrl = wireMockRule.url("/first/")
+        val initialManagementUrl = wireMockRule.url("/management/")
         agent = simpleAgentBuilder(initialUrl)
             .setExportAuthentication(ApmServerAuthentication.SecretToken(secretToken))
+            .setManagementUrl(initialManagementUrl)
+            .setManagementAuthentication(ApmServerAuthentication.SecretToken(secretToken))
             .setServiceName("my-app")
             .setDeploymentEnvironment("debug")
             .build()
 
         val centralConfigRequest = wireMockRule.takeRequest()
-        assertThat(centralConfigRequest.url).isEqualTo("/first/config/v1/agents?service.name=my-app&service.deployment=debug")
+        assertThat(centralConfigRequest.url).isEqualTo("/management/config/v1/agents?service.name=my-app&service.deployment=debug")
         assertThat(
             centralConfigRequest.headers.getHeader("Authorization").firstValue()
         ).isEqualTo("Bearer $secretToken")
@@ -302,8 +306,9 @@ class ElasticApmAgentTest {
         // Setting central config value manually
         agent.getCentralConfigurationManager()!!.setConnectivityConfiguration(
             CentralConfigurationConnectivity(
-                initialUrl,
-                mapOf("Custom-Header" to "Example"),
+                initialManagementUrl,
+                ApmServerAuthentication.None,
+                emptyMap(),
                 "other-name",
                 null
             )
@@ -343,11 +348,8 @@ class ElasticApmAgentTest {
         )
 
         val centralConfigRequest2 = wireMockRule.takeRequest()
-        assertThat(centralConfigRequest2.url).isEqualTo("/first/config/v1/agents?service.name=other-name")
+        assertThat(centralConfigRequest2.url).isEqualTo("/management/config/v1/agents?service.name=other-name")
         assertThat(centralConfigRequest2.headers.getHeader("Authorization").isPresent).isFalse()
-        assertThat(centralConfigRequest2.headers.getHeader("Custom-Header").firstValue()).isEqualTo(
-            "Example"
-        )
 
         // OTel requests
         sendSpan()

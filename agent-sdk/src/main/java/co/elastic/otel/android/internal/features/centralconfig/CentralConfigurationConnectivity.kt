@@ -19,6 +19,7 @@
 package co.elastic.otel.android.internal.features.centralconfig
 
 import co.elastic.otel.android.connectivity.ConnectivityConfiguration
+import co.elastic.otel.android.features.apmserver.ApmServerAuthentication
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
@@ -26,7 +27,8 @@ import co.elastic.otel.android.connectivity.ConnectivityConfiguration
  */
 internal data class CentralConfigurationConnectivity(
     private val url: String,
-    private val headers: Map<String, String>,
+    private val auth: ApmServerAuthentication,
+    private val extraHeaders: Map<String, String>,
     val serviceName: String,
     val serviceDeployment: String?
 ) : ConnectivityConfiguration {
@@ -40,6 +42,17 @@ internal data class CentralConfigurationConnectivity(
     }
 
     override fun getHeaders(): Map<String, String> {
+        val headers = mutableMapOf<String, String>()
+        headers.putAll(extraHeaders)
+        if (auth is ApmServerAuthentication.SecretToken) {
+            headers[AUTHORIZATION_HEADER_KEY] = "Bearer ${auth.token}"
+        } else if (auth is ApmServerAuthentication.ApiKey) {
+            headers[AUTHORIZATION_HEADER_KEY] = "ApiKey ${auth.key}"
+        }
         return headers
+    }
+
+    companion object {
+        private const val AUTHORIZATION_HEADER_KEY = "Authorization"
     }
 }

@@ -130,11 +130,11 @@ class ElasticApmAgent internal constructor(
      * Builds an instance of [ElasticApmAgent].
      */
     class Builder internal constructor(private val application: Application) {
-        private var url: String? = null
-        private var remoteManagementUrl: String? = null
-        private var authentication: ApmServerAuthentication = ApmServerAuthentication.None
+        private var exportUrl: String? = null
+        private var exportAuthentication: ApmServerAuthentication = ApmServerAuthentication.None
         private var exportProtocol: ExportProtocol = ExportProtocol.HTTP
-        private var extraRequestHeaders: Map<String, String> = emptyMap()
+        private var exportExtraHeaders: Map<String, String> = emptyMap()
+        private var managementUrl: String? = null
         private var sessionIdGenerator: SessionIdGenerator? = null
         private var diskBufferingConfiguration: DiskBufferingConfiguration? = null
         private var loggingPolicy: LoggingPolicy? = null
@@ -173,29 +173,31 @@ class ElasticApmAgent internal constructor(
         }
 
         /**
-         * This is the APM server URL where the telemetry is exported and is also where the central configuration
-         * is polled from.
+         * This is the APM server URL where the telemetry is exported.
          */
-        fun setUrl(value: String) = apply {
-            url = value
+        fun setExportUrl(value: String) = apply {
+            exportUrl = value
         }
 
         /**
          * This is the URL where the remote configuration is polled from.
+         *
+         * By default is null, if it's left unset then the remote configuration feature will not
+         * get enabled.
          */
-        fun setRemoteManagementUrl(value: String) = apply {
-            remoteManagementUrl = value
+        fun setManagementUrl(value: String) = apply {
+            managementUrl = value
         }
 
         /**
-         * This is the authentication method needed to connect to the value provided in [setUrl].
+         * This is the authentication method needed to connect to the value provided in [setExportUrl].
          */
-        fun setAuthentication(value: ApmServerAuthentication) = apply {
-            authentication = value
+        fun setExportAuthentication(value: ApmServerAuthentication) = apply {
+            exportAuthentication = value
         }
 
         /**
-         * This is the protocol used to connect to the server provided in [setUrl], it can be either
+         * This is the protocol used to connect to the server provided in [setExportUrl], it can be either
          * HTTP or gRPC.
          *
          * Its default value is HTTP.
@@ -207,8 +209,8 @@ class ElasticApmAgent internal constructor(
         /**
          * Allows to set extra network request headers to the exporting requests, as well as the central configuration ones.
          */
-        fun setExtraRequestHeaders(value: Map<String, String>) = apply {
-            extraRequestHeaders = value
+        fun setExportExtraHeaders(value: Map<String, String>) = apply {
+            exportExtraHeaders = value
         }
 
         /**
@@ -296,7 +298,8 @@ class ElasticApmAgent internal constructor(
          * Builds an [ElasticApmAgent] instance by using the provided configuration within this builder.
          */
         fun build(): ElasticApmAgent {
-            val finalUrl = url ?: throw NullPointerException("The url must be set.")
+            val finalExportUrl =
+                exportUrl ?: throw NullPointerException("The export URL must be set.")
 
             val serviceManager = ServiceManager.create(application)
 
@@ -306,9 +309,9 @@ class ElasticApmAgent internal constructor(
 
             val systemTimeProvider = SystemTimeProvider()
             val apmServerConfiguration = ApmServerConnectivity(
-                finalUrl,
-                authentication,
-                extraRequestHeaders,
+                finalExportUrl,
+                exportAuthentication,
+                exportExtraHeaders,
                 exportProtocol
             )
             val apmServerConnectivityHolder =
@@ -373,7 +376,7 @@ class ElasticApmAgent internal constructor(
             systemTimeProvider: SystemTimeProvider,
             managedFeatures: ManagedElasticOtelAgent.ManagedFeatures
         ): CentralConfigurationManager? {
-            return remoteManagementUrl?.let {
+            return managementUrl?.let {
                 val manager = CentralConfigurationManager.create(
                     serviceManager,
                     CentralConfigurationManager.EndpointParameters(it, emptyMap()),

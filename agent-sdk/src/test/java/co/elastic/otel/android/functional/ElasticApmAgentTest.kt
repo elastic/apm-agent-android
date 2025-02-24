@@ -146,9 +146,9 @@ class ElasticApmAgentTest {
     fun `Validate initial apm server params`() {
         wireMockRule.stubAllHttpResponses { withStatus(500) }
         agent = simpleAgentBuilder(wireMockRule.url("/"))
-            .setRemoteManagementUrl(wireMockRule.url("/remote/"))
+            .setManagementUrl(wireMockRule.url("/remote/"))
             .setServiceName("my-app")
-            .setExtraRequestHeaders(mapOf("Extra-header" to "extra value"))
+            .setExportExtraHeaders(mapOf("Extra-header" to "extra value"))
             .build()
 
         val centralConfigRequest = wireMockRule.takeRequest()
@@ -197,13 +197,14 @@ class ElasticApmAgentTest {
         }
         val secretToken = "secret-token"
         agent = simpleAgentBuilder(wireMockRule.url("/first/"))
-            .setAuthentication(ApmServerAuthentication.SecretToken(secretToken))
+            .setManagementUrl(wireMockRule.url("/management/"))
+            .setExportAuthentication(ApmServerAuthentication.SecretToken(secretToken))
             .setServiceName("my-app")
             .setDeploymentEnvironment("debug")
             .build()
 
         val centralConfigRequest = wireMockRule.takeRequest()
-        assertThat(centralConfigRequest.url).isEqualTo("/first/config/v1/agents?service.name=my-app&service.deployment=debug")
+        assertThat(centralConfigRequest.url).isEqualTo("/management/config/v1/agents?service.name=my-app&service.deployment=debug")
         assertThat(
             centralConfigRequest.headers.getHeader("Authorization").firstValue()
         ).isEqualTo("Bearer $secretToken")
@@ -241,7 +242,7 @@ class ElasticApmAgentTest {
         )
 
         val centralConfigRequest2 = wireMockRule.takeRequest()
-        assertThat(centralConfigRequest2.url).isEqualTo("/second/config/v1/agents?service.name=my-app&service.deployment=debug")
+        assertThat(centralConfigRequest2.url).isEqualTo("/management/config/v1/agents?service.name=my-app&service.deployment=debug")
         assertThat(centralConfigRequest2.headers.getHeader("Authorization").firstValue()).isEqualTo(
             "ApiKey $apiKey"
         )
@@ -287,7 +288,7 @@ class ElasticApmAgentTest {
         val secretToken = "secret-token"
         val initialUrl = wireMockRule.url("/first/")
         agent = simpleAgentBuilder(initialUrl)
-            .setAuthentication(ApmServerAuthentication.SecretToken(secretToken))
+            .setExportAuthentication(ApmServerAuthentication.SecretToken(secretToken))
             .setServiceName("my-app")
             .setDeploymentEnvironment("debug")
             .build()
@@ -390,6 +391,7 @@ class ElasticApmAgentTest {
         }
 
         agent = inMemoryAgentBuilder(wireMockRule.url("/"))
+            .setManagementUrl(wireMockRule.url("/management/"))
             .build()
 
         wireMockRule.takeRequest() // Await for empty central config response
@@ -431,6 +433,7 @@ class ElasticApmAgentTest {
                 .withHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
         }
         agent = inMemoryAgentBuilder(wireMockRule.url("/"))
+            .setManagementUrl(wireMockRule.url("/management/"))
             .build()
 
         sendSpan()
@@ -490,6 +493,7 @@ class ElasticApmAgentTest {
         }
 
         agent = inMemoryAgentBuilder(wireMockRule.url("/"))
+            .setManagementUrl(wireMockRule.url("/config/"))
             .build()
 
         wireMockRule.takeRequest() // Await for central config response
@@ -576,7 +580,9 @@ class ElasticApmAgentTest {
             withStatus(200)
             withBody("Not a json")
         }
-        agent = inMemoryAgentBuilder(wireMockRule.url("/")).build()
+        agent = inMemoryAgentBuilder(wireMockRule.url("/"))
+            .setManagementUrl(wireMockRule.url("/config/"))
+            .build()
 
         sendSpan()
         sendLog()
@@ -707,7 +713,7 @@ class ElasticApmAgentTest {
         return ElasticApmAgent.builder(RuntimeEnvironment.getApplication())
             .setProcessorFactory(simpleProcessorFactory)
             .setDiskBufferingConfiguration(diskBufferingConfiguration)
-            .setUrl(url)
+            .setExportUrl(url)
             .apply {
                 internalSntpClient = DummySntpClient()
             }

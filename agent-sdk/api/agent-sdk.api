@@ -16,18 +16,20 @@ public final class co/elastic/otel/android/ElasticApmAgent$Builder {
 	public final fun addSpanAttributesInterceptor (Lco/elastic/otel/android/interceptor/Interceptor;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
 	public final fun addSpanExporterInterceptor (Lco/elastic/otel/android/interceptor/Interceptor;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
 	public final fun build ()Lco/elastic/otel/android/ElasticApmAgent;
-	public final fun setAuthentication (Lco/elastic/otel/android/features/apmserver/ApmServerAuthentication;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
 	public final fun setDeploymentEnvironment (Ljava/lang/String;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
+	public final fun setExportAuthentication (Lco/elastic/otel/android/features/apmserver/ApmServerAuthentication;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
+	public final fun setExportExtraHeaders (Ljava/util/Map;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
 	public final fun setExportProtocol (Lco/elastic/otel/android/exporters/configuration/ExportProtocol;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
-	public final fun setExtraRequestHeaders (Ljava/util/Map;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
+	public final fun setExportUrl (Ljava/lang/String;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
 	public final fun setHttpSpanInterceptor (Lco/elastic/otel/android/interceptor/Interceptor;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
 	public final fun setLoggingPolicy (Lco/elastic/otel/android/logging/LoggingPolicy;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
+	public final fun setManagementAuthentication (Lco/elastic/otel/android/features/apmserver/ApmServerAuthentication;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
+	public final fun setManagementUrl (Ljava/lang/String;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
 	public final fun setProcessorFactory (Lco/elastic/otel/android/processors/ProcessorFactory;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
 	public final fun setResourceInterceptor (Lco/elastic/otel/android/interceptor/Interceptor;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
 	public final fun setServiceName (Ljava/lang/String;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
 	public final fun setServiceVersion (Ljava/lang/String;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
 	public final fun setSessionIdGenerator (Lco/elastic/otel/android/features/session/SessionIdGenerator;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
-	public final fun setUrl (Ljava/lang/String;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
 }
 
 public final class co/elastic/otel/android/ElasticApmAgent$Companion {

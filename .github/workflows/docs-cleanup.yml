@@ -6,7 +6,7 @@ on:
       - closed
 
 jobs:
-  preview:
+  docs-preview:
     uses: elastic/docs-builder/.github/workflows/preview-cleanup.yml@main
     permissions:
       contents: none

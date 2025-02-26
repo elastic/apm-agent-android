@@ -1,0 +1,7 @@
+toc:
+  - file: index.md
+  - file: setup.md
+  - file: supported-technologies.md
+  - file: configuration.md
+  - file: faq.md
+  - file: manual-instrumentation.md

@@ -19,32 +19,20 @@
 package co.elastic.otel.android.internal.features.centralconfig
 
 import co.elastic.otel.android.connectivity.ConnectivityConfiguration
-import co.elastic.otel.android.features.apmserver.ApmServerConnectivity
+import co.elastic.otel.android.features.apmserver.ApmServerAuthentication
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
 internal data class CentralConfigurationConnectivity(
-    val apmServerUrl: String,
+    private val url: String,
+    private val auth: ApmServerAuthentication,
+    private val extraHeaders: Map<String, String>,
     val serviceName: String,
-    val serviceDeployment: String?,
-    private val headers: Map<String, String>
+    val serviceDeployment: String?
 ) : ConnectivityConfiguration {
-    private val baseUrl by lazy { apmServerUrl.trimEnd('/') + "/config/v1/agents?service.name=$serviceName" }
-
-    companion object {
-        fun fromApmServerConfig(
-            serviceName: String,
-            serviceDeployment: String?,
-            configuration: ApmServerConnectivity
-        ): CentralConfigurationConnectivity {
-            return CentralConfigurationConnectivity(
-                configuration.getUrl(), serviceName, serviceDeployment,
-                configuration.getHeaders()
-            )
-        }
-    }
+    private val baseUrl by lazy { "$url?service.name=$serviceName" }
 
     override fun getUrl(): String {
         return when (serviceDeployment) {
@@ -54,6 +42,17 @@ internal data class CentralConfigurationConnectivity(
     }
 
     override fun getHeaders(): Map<String, String> {
+        val headers = mutableMapOf<String, String>()
+        headers.putAll(extraHeaders)
+        if (auth is ApmServerAuthentication.SecretToken) {
+            headers[AUTHORIZATION_HEADER_KEY] = "Bearer ${auth.token}"
+        } else if (auth is ApmServerAuthentication.ApiKey) {
+            headers[AUTHORIZATION_HEADER_KEY] = "ApiKey ${auth.key}"
+        }
         return headers
+    }
+
+    companion object {
+        private const val AUTHORIZATION_HEADER_KEY = "Authorization"
     }
 }

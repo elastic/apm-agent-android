@@ -20,9 +20,8 @@ package co.elastic.otel.android.internal.features.centralconfig
 
 import androidx.annotation.WorkerThread
 import co.elastic.otel.android.common.internal.logging.Elog
-import co.elastic.otel.android.features.apmserver.ApmServerConnectivity
+import co.elastic.otel.android.features.apmserver.ApmServerAuthentication
 import co.elastic.otel.android.internal.connectivity.ConnectivityConfigurationHolder
-import co.elastic.otel.android.internal.features.apmserver.ApmServerConnectivityManager
 import co.elastic.otel.android.internal.features.exportergate.ExporterGateManager
 import co.elastic.otel.android.internal.opentelemetry.ElasticOpenTelemetry
 import co.elastic.otel.android.internal.services.ServiceManager
@@ -40,8 +39,8 @@ internal class CentralConfigurationManager private constructor(
     serviceManager: ServiceManager,
     private val configurationRegistry: ConfigurationRegistry,
     private val centralConfigurationSource: CentralConfigurationSource,
-    private val apmServerConnectivityHolder: ApmServerConnectivityManager.ConnectivityHolder,
-    private val gateManager: ExporterGateManager
+    private val gateManager: ExporterGateManager,
+    private val initialParameters: EndpointParameters
 ) : CentralConfigurationSource.Listener {
     private lateinit var centralConnectivityHolder: CentralConnectivityHolder
     private val backgroundWorkService by lazy { serviceManager.getBackgroundWorkService() }
@@ -57,10 +56,12 @@ internal class CentralConfigurationManager private constructor(
 
     internal fun initialize(openTelemetry: ElasticOpenTelemetry) {
         centralConnectivityHolder = CentralConnectivityHolder(
-            CentralConfigurationConnectivity.fromApmServerConfig(
+            CentralConfigurationConnectivity(
+                initialParameters.url,
+                initialParameters.auth,
+                initialParameters.extraHeaders,
                 openTelemetry.serviceName,
-                openTelemetry.deploymentEnvironment,
-                apmServerConnectivityHolder.getConnectivityConfiguration()
+                openTelemetry.deploymentEnvironment
             )
         )
         centralConfigurationSource.listener = this
@@ -115,9 +116,9 @@ internal class CentralConfigurationManager private constructor(
 
         internal fun create(
             serviceManager: ServiceManager,
+            initialParameters: EndpointParameters,
             systemTimeProvider: SystemTimeProvider,
-            gateManager: ExporterGateManager,
-            apmServerConnectivityHolder: ApmServerConnectivityManager.ConnectivityHolder
+            gateManager: ExporterGateManager
         ): CentralConfigurationManager {
             val centralConfigurationSource = CentralConfigurationSource(
                 serviceManager,
@@ -134,8 +135,8 @@ internal class CentralConfigurationManager private constructor(
                 serviceManager,
                 registry.build(),
                 centralConfigurationSource,
-                apmServerConnectivityHolder,
-                gateManager
+                gateManager,
+                initialParameters
             )
         }
     }
@@ -151,27 +152,16 @@ internal class CentralConfigurationManager private constructor(
         }
     }
 
-    internal class CentralConnectivityHolder(
-        connectivity: CentralConfigurationConnectivity
-    ) : ConnectivityConfigurationHolder(connectivity) {
-        companion object {
-            fun fromApmServerConfig(
-                serviceName: String,
-                serviceDeployment: String?,
-                apmServerConnectivity: ApmServerConnectivity
-            ): CentralConnectivityHolder {
-                return CentralConnectivityHolder(
-                    CentralConfigurationConnectivity.fromApmServerConfig(
-                        serviceName,
-                        serviceDeployment,
-                        apmServerConnectivity
-                    )
-                )
-            }
-        }
-    }
-
     override fun onConfigChange() {
         configurationRegistry.reloadDynamicConfigurationOptions()
     }
+
+    internal class CentralConnectivityHolder(connectivity: CentralConfigurationConnectivity) :
+        ConnectivityConfigurationHolder(connectivity)
+
+    internal data class EndpointParameters(
+        val url: String,
+        val auth: ApmServerAuthentication,
+        val extraHeaders: Map<String, String>
+    )
 }

@@ -53,7 +53,7 @@ The Java version is for the supported JDK, which is aligned with the JDK version
 | Class | Notes | Since |
 | --- | --- | --- |
 | [Activity](https://developer.android.com/reference/android/app/Activity) | Comes from the Android SDK | 0.1.0 |
-| [Fragment](https://developer.android.com/reference/androidx/fragment/app/Fragment.md) | Comes from the [Android Jetpack tools](https://developer.android.com/jetpack) | 0.1.0 |
+| [Fragment](https://developer.android.com/reference/androidx/fragment/app/Fragment.html) | Comes from the [Android Jetpack tools](https://developer.android.com/jetpack) | 0.1.0 |
 
 
 ## Networking frameworks [supported-networking-frameworks]

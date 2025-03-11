@@ -179,8 +179,28 @@ public final class co/elastic/otel/android/extensions/ElasticOtelAgentExtensions
 	public static synthetic fun span$default (Lco/elastic/otel/android/api/ElasticOtelAgent;Ljava/lang/String;Lio/opentelemetry/api/common/Attributes;Lio/opentelemetry/api/trace/SpanKind;Lio/opentelemetry/context/Context;ZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 }
 
+public abstract interface class co/elastic/otel/android/features/session/Session {
+	public static final field Companion Lco/elastic/otel/android/features/session/Session$Companion;
+	public static fun create (Ljava/lang/String;)Lco/elastic/otel/android/features/session/Session;
+	public abstract fun getId ()Ljava/lang/String;
+}
+
+public final class co/elastic/otel/android/features/session/Session$Companion {
+	public final fun create (Ljava/lang/String;)Lco/elastic/otel/android/features/session/Session;
+}
+
 public abstract interface class co/elastic/otel/android/features/session/SessionIdGenerator {
 	public abstract fun generate ()Ljava/lang/String;
+}
+
+public abstract interface class co/elastic/otel/android/features/session/SessionProvider {
+	public static final field Companion Lco/elastic/otel/android/features/session/SessionProvider$Companion;
+	public static fun getDefault ()Lco/elastic/otel/android/features/session/SessionProvider;
+	public abstract fun getSession ()Lco/elastic/otel/android/features/session/Session;
+}
+
+public final class co/elastic/otel/android/features/session/SessionProvider$Companion {
+	public final fun getDefault ()Lco/elastic/otel/android/features/session/SessionProvider;
 }
 
 public abstract interface class co/elastic/otel/android/interceptor/Interceptor {
@@ -229,25 +249,5 @@ public abstract interface class co/elastic/otel/android/provider/Provider {
 }
 
 public abstract interface class co/elastic/otel/android/provider/StringProvider : co/elastic/otel/android/provider/Provider {
-}
-
-public abstract interface class co/elastic/otel/android/session/Session {
-	public static final field Companion Lco/elastic/otel/android/session/Session$Companion;
-	public static fun create (Ljava/lang/String;)Lco/elastic/otel/android/session/Session;
-	public abstract fun getId ()Ljava/lang/String;
-}
-
-public final class co/elastic/otel/android/session/Session$Companion {
-	public final fun create (Ljava/lang/String;)Lco/elastic/otel/android/session/Session;
-}
-
-public abstract interface class co/elastic/otel/android/session/SessionProvider {
-	public static final field Companion Lco/elastic/otel/android/session/SessionProvider$Companion;
-	public static fun getDefault ()Lco/elastic/otel/android/session/SessionProvider;
-	public abstract fun getSession ()Lco/elastic/otel/android/session/Session;
-}
-
-public final class co/elastic/otel/android/session/SessionProvider$Companion {
-	public final fun getDefault ()Lco/elastic/otel/android/session/SessionProvider;
 }
 

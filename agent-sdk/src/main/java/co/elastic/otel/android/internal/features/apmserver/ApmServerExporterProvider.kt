@@ -20,7 +20,7 @@ package co.elastic.otel.android.internal.features.apmserver
 
 import co.elastic.otel.android.exporters.ExporterProvider
 import co.elastic.otel.android.exporters.configuration.ExporterConfiguration
-import co.elastic.otel.android.features.apmserver.ApmServerConnectivity
+import co.elastic.otel.android.features.apmserver.ExportConnectivityConfiguration
 import co.elastic.otel.android.internal.connectivity.ConnectivityConfigurationHolder
 import co.elastic.otel.android.internal.opentelemetry.exporters.configurable.ConfigurableExporterProvider
 import co.elastic.otel.android.provider.Provider
@@ -33,7 +33,7 @@ import io.opentelemetry.sdk.trace.export.SpanExporter
  * any time.
  */
 internal class ApmServerExporterProvider internal constructor(
-    private val connectivityConfigurationProvider: Provider<ApmServerConnectivity>,
+    private val connectivityConfigurationProvider: Provider<ExportConnectivityConfiguration>,
     private val exporterProvider: ConfigurableExporterProvider
 ) : ExporterProvider, ConnectivityConfigurationHolder.Listener {
 
@@ -79,7 +79,7 @@ internal class ApmServerExporterProvider internal constructor(
         return exporterProvider.getMetricExporter()
     }
 
-    private fun setApmServerConfiguration(configuration: ApmServerConnectivity) {
+    private fun setApmServerConfiguration(configuration: ExportConnectivityConfiguration) {
         val spanConfiguration = ExporterConfiguration.Span(
             configuration.getTracesUrl(),
             configuration.getHeaders(),

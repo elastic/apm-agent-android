@@ -23,8 +23,8 @@ import co.elastic.otel.android.api.ElasticOtelAgent
 import co.elastic.otel.android.common.internal.logging.Elog
 import co.elastic.otel.android.exporters.ExporterProvider
 import co.elastic.otel.android.exporters.configuration.ExportProtocol
-import co.elastic.otel.android.features.apmserver.ApmServerConnectivity
 import co.elastic.otel.android.features.apmserver.Authentication
+import co.elastic.otel.android.features.apmserver.ExportConnectivityConfiguration
 import co.elastic.otel.android.features.session.SessionIdGenerator
 import co.elastic.otel.android.interceptor.Interceptor
 import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
@@ -99,7 +99,7 @@ class ElasticApmAgent internal constructor(
      *
      * @param connectivity The new server configuration.
      */
-    fun setApmServerConnectivity(connectivity: ApmServerConnectivity) {
+    fun setApmServerConnectivity(connectivity: ExportConnectivityConfiguration) {
         apmServerConnectivityManager.setConnectivityConfiguration(connectivity)
     }
 
@@ -316,7 +316,7 @@ class ElasticApmAgent internal constructor(
             )
 
             val systemTimeProvider = SystemTimeProvider()
-            val apmServerConfiguration = ApmServerConnectivity(
+            val apmServerConfiguration = ExportConnectivityConfiguration(
                 finalExportUrl,
                 exportAuthentication,
                 exportExtraHeaders,

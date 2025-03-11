@@ -18,7 +18,7 @@
  */
 package co.elastic.otel.android.internal.features.apmserver
 
-import co.elastic.otel.android.features.apmserver.ApmServerConnectivity
+import co.elastic.otel.android.features.apmserver.ExportConnectivityConfiguration
 import co.elastic.otel.android.internal.connectivity.ConnectivityConfigurationHolder
 
 /**
@@ -28,23 +28,23 @@ import co.elastic.otel.android.internal.connectivity.ConnectivityConfigurationHo
 internal class ApmServerConnectivityManager internal constructor(
     private val connectivityConfigurationHolder: ConnectivityHolder
 ) {
-    fun setConnectivityConfiguration(configuration: ApmServerConnectivity) {
+    fun setConnectivityConfiguration(configuration: ExportConnectivityConfiguration) {
         connectivityConfigurationHolder.setConnectivityConfiguration(configuration)
     }
 
-    fun getConnectivityConfiguration(): ApmServerConnectivity {
+    fun getConnectivityConfiguration(): ExportConnectivityConfiguration {
         return connectivityConfigurationHolder.getConnectivityConfiguration()
     }
 
-    internal class ConnectivityHolder(initialValue: ApmServerConnectivity) :
+    internal class ConnectivityHolder(initialValue: ExportConnectivityConfiguration) :
         ConnectivityConfigurationHolder(initialValue) {
 
-        fun setConnectivityConfiguration(value: ApmServerConnectivity) {
+        fun setConnectivityConfiguration(value: ExportConnectivityConfiguration) {
             set(value)
         }
 
-        fun getConnectivityConfiguration(): ApmServerConnectivity {
-            return get() as ApmServerConnectivity
+        fun getConnectivityConfiguration(): ExportConnectivityConfiguration {
+            return get() as ExportConnectivityConfiguration
         }
     }
 }

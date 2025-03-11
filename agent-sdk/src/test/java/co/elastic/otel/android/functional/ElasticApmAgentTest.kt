@@ -20,8 +20,8 @@ package co.elastic.otel.android.functional
 
 import co.elastic.otel.android.ElasticApmAgent
 import co.elastic.otel.android.exporters.ExporterProvider
-import co.elastic.otel.android.features.apmserver.ApmServerConnectivity
 import co.elastic.otel.android.features.apmserver.Authentication
+import co.elastic.otel.android.features.apmserver.ExportConnectivityConfiguration
 import co.elastic.otel.android.interceptor.Interceptor
 import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
 import co.elastic.otel.android.internal.features.centralconfig.CentralConfigurationConnectivity
@@ -235,7 +235,7 @@ class ElasticApmAgentTest {
 
         // Changing global config
         agent.setApmServerConnectivity(
-            ApmServerConnectivity(
+            ExportConnectivityConfiguration(
                 wireMockRule.url("/second/"),
                 Authentication.ApiKey(apiKey),
                 mapOf("Custom-Header" to "custom value")
@@ -340,7 +340,7 @@ class ElasticApmAgentTest {
         // Changing config
         val apiKey = "api-key"
         agent.getApmServerConnectivityManager().setConnectivityConfiguration(
-            ApmServerConnectivity(
+            ExportConnectivityConfiguration(
                 wireMockRule.url("/second/"),
                 Authentication.ApiKey(apiKey),
                 mapOf("Custom-Header" to "custom value")

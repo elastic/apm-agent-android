@@ -19,21 +19,21 @@
 package co.elastic.otel.android.exporters.apmserver
 
 import co.elastic.otel.android.exporters.configuration.ExportProtocol
-import co.elastic.otel.android.features.apmserver.ApmServerConnectivity
 import co.elastic.otel.android.features.apmserver.Authentication
+import co.elastic.otel.android.features.apmserver.ExportConnectivityConfiguration
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class ApmServerConnectivityTest {
+class ExportConnectivityConfigurationTest {
 
     @Test
     fun `Verify default values`() {
         val url = "http://my.server.url"
 
-        val instance = ApmServerConnectivity(url)
+        val instance = ExportConnectivityConfiguration(url)
 
         assertThat(instance).isEqualTo(
-            ApmServerConnectivity(
+            ExportConnectivityConfiguration(
                 url,
                 Authentication.None,
                 emptyMap(), ExportProtocol.HTTP
@@ -51,7 +51,7 @@ class ApmServerConnectivityTest {
         val url = "http://my.server.url"
         val providedUrl = "http://my.server.url/"
 
-        val instance = ApmServerConnectivity(providedUrl)
+        val instance = ExportConnectivityConfiguration(providedUrl)
 
         assertThat(instance.getUrl()).isEqualTo(providedUrl)
         assertThat(instance.getTracesUrl()).isEqualTo("$url/v1/traces")
@@ -64,7 +64,7 @@ class ApmServerConnectivityTest {
     fun `Verify initialization with grpc protocol`() {
         val url = "http://my.server.url"
 
-        val instance = ApmServerConnectivity(url, exportProtocol = ExportProtocol.GRPC)
+        val instance = ExportConnectivityConfiguration(url, exportProtocol = ExportProtocol.GRPC)
 
         assertThat(instance.getUrl()).isEqualTo(url)
         assertThat(instance.getTracesUrl()).isEqualTo(url)
@@ -78,7 +78,7 @@ class ApmServerConnectivityTest {
         val url = "http://my.server.url"
         val token = "the-token"
 
-        val instance = ApmServerConnectivity(
+        val instance = ExportConnectivityConfiguration(
             url,
             Authentication.SecretToken(token)
         )
@@ -95,7 +95,7 @@ class ApmServerConnectivityTest {
         val url = "http://my.server.url"
         val key = "the-key"
 
-        val instance = ApmServerConnectivity(
+        val instance = ExportConnectivityConfiguration(
             url,
             Authentication.ApiKey(key)
         )

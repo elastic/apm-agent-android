@@ -24,7 +24,7 @@ import co.elastic.otel.android.exporters.configuration.ExportProtocol
 /**
  * Configuration to connect to the Elastic APM server for data exporting.
  */
-data class ApmServerConnectivity(
+data class ExportConnectivityConfiguration(
     private val url: String,
     val auth: Authentication = Authentication.None,
     val extraHeaders: Map<String, String> = emptyMap(),

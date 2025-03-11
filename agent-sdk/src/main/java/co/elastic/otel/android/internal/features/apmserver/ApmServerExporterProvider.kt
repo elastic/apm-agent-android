@@ -38,7 +38,7 @@ internal class ApmServerExporterProvider internal constructor(
 ) : ExporterProvider, ConnectivityConfigurationHolder.Listener {
 
     companion object {
-        internal fun create(connectivityConfigurationManager: ApmServerConnectivityManager.ConnectivityHolder): ApmServerExporterProvider {
+        internal fun create(connectivityConfigurationManager: ExportConnectivityManager.ConnectivityHolder): ApmServerExporterProvider {
             val configuration =
                 connectivityConfigurationManager.getConnectivityConfiguration()
             val exporterProvider = ConfigurableExporterProvider.create(

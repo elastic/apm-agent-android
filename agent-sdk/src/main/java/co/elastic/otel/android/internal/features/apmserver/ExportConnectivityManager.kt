@@ -25,7 +25,7 @@ import co.elastic.otel.android.internal.connectivity.ConnectivityConfigurationHo
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-internal class ApmServerConnectivityManager internal constructor(
+internal class ExportConnectivityManager internal constructor(
     private val connectivityConfigurationHolder: ConnectivityHolder
 ) {
     fun setConnectivityConfiguration(configuration: ExportConnectivityConfiguration) {

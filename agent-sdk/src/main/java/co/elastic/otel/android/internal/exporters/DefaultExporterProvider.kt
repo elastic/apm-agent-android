@@ -80,7 +80,7 @@ internal class DefaultExporterProvider internal constructor(
         return exporterProvider.getMetricExporter()
     }
 
-    private fun setApmServerConfiguration(configuration: ExportConnectivityConfiguration) {
+    private fun setConnectivityConfiguration(configuration: ExportConnectivityConfiguration) {
         val spanConfiguration = ExporterConfiguration.Span(
             configuration.getTracesUrl(),
             configuration.getHeaders(),
@@ -104,6 +104,6 @@ internal class DefaultExporterProvider internal constructor(
     }
 
     override fun onConnectivityConfigurationChange() {
-        setApmServerConfiguration(connectivityConfigurationProvider.get())
+        setConnectivityConfiguration(connectivityConfigurationProvider.get())
     }
 }

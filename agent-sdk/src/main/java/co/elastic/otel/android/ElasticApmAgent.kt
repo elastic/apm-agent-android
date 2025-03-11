@@ -97,13 +97,13 @@ class ElasticApmAgent internal constructor(
      * Updates the server connectivity parameters, this changes where the telemetry is sent to and
      * also where the central configuration is polled from.
      *
-     * @param connectivity The new server configuration.
+     * @param configuration The new server configuration.
      */
-    fun setApmServerConnectivity(connectivity: ExportConnectivityConfiguration) {
-        exportConnectivityManager.setConnectivityConfiguration(connectivity)
+    fun setExportConnectivityConfiguration(configuration: ExportConnectivityConfiguration) {
+        exportConnectivityManager.setConnectivityConfiguration(configuration)
     }
 
-    internal fun getApmServerConnectivityManager(): ExportConnectivityManager {
+    internal fun getExportConnectivityManager(): ExportConnectivityManager {
         return exportConnectivityManager
     }
 
@@ -316,17 +316,17 @@ class ElasticApmAgent internal constructor(
             )
 
             val systemTimeProvider = SystemTimeProvider()
-            val apmServerConfiguration = ExportConnectivityConfiguration(
+            val connectivityConfiguration = ExportConnectivityConfiguration(
                 finalExportUrl,
                 exportAuthentication,
                 exportExtraHeaders,
                 exportProtocol
             )
-            val apmServerConnectivityHolder =
-                ExportConnectivityManager.ConnectivityHolder(apmServerConfiguration)
+            val connectivityHolder =
+                ExportConnectivityManager.ConnectivityHolder(connectivityConfiguration)
             val exportConnectivityManager =
-                ExportConnectivityManager(apmServerConnectivityHolder)
-            val exporterProvider = DefaultExporterProvider.create(apmServerConnectivityHolder)
+                ExportConnectivityManager(connectivityHolder)
+            val exporterProvider = DefaultExporterProvider.create(connectivityHolder)
 
             val managedFeatures =
                 createManagedConfiguration(serviceManager, systemTimeProvider)

@@ -234,7 +234,7 @@ class ElasticApmAgentTest {
         ).isEqualTo("Bearer $secretToken")
 
         // Changing global config
-        agent.setApmServerConnectivity(
+        agent.setExportConnectivityConfiguration(
             ExportConnectivityConfiguration(
                 wireMockRule.url("/second/"),
                 Authentication.ApiKey(apiKey),
@@ -339,7 +339,7 @@ class ElasticApmAgentTest {
 
         // Changing config
         val apiKey = "api-key"
-        agent.getApmServerConnectivityManager().setConnectivityConfiguration(
+        agent.getExportConnectivityManager().setConnectivityConfiguration(
             ExportConnectivityConfiguration(
                 wireMockRule.url("/second/"),
                 Authentication.ApiKey(apiKey),

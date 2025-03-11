@@ -16,26 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.impl
+package co.elastic.otel.android.internal.logging
 
-import co.elastic.otel.android.internal.logging.DefaultLoggingPolicy
 import co.elastic.otel.android.logging.LogLevel
-import org.assertj.core.api.Assertions.assertThat
+import co.elastic.otel.android.logging.LoggingPolicy
+import org.junit.Assert
 import org.junit.Test
 
-class DefaultLoggingPolicyTest {
-
+class SimpleLoggingPolicyTest {
     @Test
-    fun `Validate minimum level on debuggable app`() {
-        assertThat(getInstance(true).getMinimumLevel()).isEqualTo(LogLevel.DEBUG)
-    }
+    fun verifyProvidedValues() {
+        val policy: LoggingPolicy = SimpleLoggingPolicy(true, LogLevel.INFO)
+        val policy2: LoggingPolicy = SimpleLoggingPolicy(false, LogLevel.ERROR)
 
-    @Test
-    fun `Validate minimum level on non-debuggable app`() {
-        assertThat(getInstance(false).getMinimumLevel()).isEqualTo(LogLevel.INFO)
-    }
-
-    private fun getInstance(appIsDebuggable: Boolean): DefaultLoggingPolicy {
-        return DefaultLoggingPolicy(appIsDebuggable)
+        Assert.assertTrue(policy.isEnabled())
+        Assert.assertEquals(LogLevel.INFO, policy.getMinimumLevel())
+        Assert.assertFalse(policy2.isEnabled())
+        Assert.assertEquals(LogLevel.ERROR, policy2.getMinimumLevel())
     }
 }

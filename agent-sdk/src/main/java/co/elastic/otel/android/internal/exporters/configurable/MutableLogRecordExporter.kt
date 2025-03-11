@@ -16,31 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.internal.opentelemetry.exporters.configurable
+package co.elastic.otel.android.internal.exporters.configurable
 
 import io.opentelemetry.sdk.common.CompletableResultCode
-import io.opentelemetry.sdk.metrics.InstrumentType
-import io.opentelemetry.sdk.metrics.data.AggregationTemporality
-import io.opentelemetry.sdk.metrics.data.MetricData
-import io.opentelemetry.sdk.metrics.export.AggregationTemporalitySelector
-import io.opentelemetry.sdk.metrics.export.MetricExporter
+import io.opentelemetry.sdk.logs.data.LogRecordData
+import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import java.util.concurrent.atomic.AtomicReference
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-internal class MutableMetricExporter : MetricExporter {
-    private val delegate = AtomicReference<MetricExporter?>()
-    private val defaultAggregationSelector = AggregationTemporalitySelector.deltaPreferred()
+internal class MutableLogRecordExporter : LogRecordExporter {
+    private val delegate = AtomicReference<LogRecordExporter?>()
 
-    override fun getAggregationTemporality(instrumentType: InstrumentType): AggregationTemporality {
-        return delegate.get()?.getAggregationTemporality(instrumentType)
-            ?: defaultAggregationSelector.getAggregationTemporality(instrumentType)
-    }
-
-    override fun export(metrics: MutableCollection<MetricData>): CompletableResultCode {
-        return delegate.get()?.export(metrics) ?: CompletableResultCode.ofSuccess()
+    override fun export(logs: MutableCollection<LogRecordData>): CompletableResultCode {
+        return delegate.get()?.export(logs) ?: CompletableResultCode.ofSuccess()
     }
 
     override fun flush(): CompletableResultCode {
@@ -51,11 +42,11 @@ internal class MutableMetricExporter : MetricExporter {
         return delegate.get()?.shutdown() ?: CompletableResultCode.ofSuccess()
     }
 
-    fun getDelegate(): MetricExporter? {
+    fun getDelegate(): LogRecordExporter? {
         return delegate.get()
     }
 
-    fun setDelegate(value: MetricExporter?) {
+    fun setDelegate(value: LogRecordExporter?) {
         delegate.set(value)
     }
 }

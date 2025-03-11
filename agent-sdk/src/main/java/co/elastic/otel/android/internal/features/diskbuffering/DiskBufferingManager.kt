@@ -19,12 +19,12 @@
 package co.elastic.otel.android.internal.features.diskbuffering
 
 import co.elastic.otel.android.common.internal.logging.Elog
+import co.elastic.otel.android.internal.exporters.configurable.MutableLogRecordExporter
+import co.elastic.otel.android.internal.exporters.configurable.MutableMetricExporter
+import co.elastic.otel.android.internal.exporters.configurable.MutableSpanExporter
 import co.elastic.otel.android.internal.features.diskbuffering.tools.DiskManager
 import co.elastic.otel.android.internal.features.exportergate.ExporterGateManager
 import co.elastic.otel.android.internal.features.persistence.SimpleTemporaryFileProvider
-import co.elastic.otel.android.internal.opentelemetry.exporters.configurable.MutableLogRecordExporter
-import co.elastic.otel.android.internal.opentelemetry.exporters.configurable.MutableMetricExporter
-import co.elastic.otel.android.internal.opentelemetry.exporters.configurable.MutableSpanExporter
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.time.SystemTimeProvider
 import io.opentelemetry.contrib.disk.buffering.LogRecordFromDiskExporter

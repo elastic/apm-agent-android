@@ -16,10 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.internal.features.apmserver
+package co.elastic.otel.android.internal.connectivity
 
 import co.elastic.otel.android.connectivity.ExportConnectivityConfiguration
-import co.elastic.otel.android.internal.connectivity.ConnectivityConfigurationHolder
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at

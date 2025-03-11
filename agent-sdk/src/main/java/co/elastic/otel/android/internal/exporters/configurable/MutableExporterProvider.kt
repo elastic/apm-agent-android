@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.internal.opentelemetry.exporters.configurable
+package co.elastic.otel.android.internal.exporters.configurable
 
 import androidx.annotation.GuardedBy
 import co.elastic.otel.android.exporters.ExporterProvider

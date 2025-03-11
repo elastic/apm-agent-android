@@ -16,22 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.internal.opentelemetry.exporters.configurable
+package co.elastic.otel.android.internal.exporters.configurable
 
 import io.opentelemetry.sdk.common.CompletableResultCode
-import io.opentelemetry.sdk.trace.data.SpanData
-import io.opentelemetry.sdk.trace.export.SpanExporter
+import io.opentelemetry.sdk.metrics.InstrumentType
+import io.opentelemetry.sdk.metrics.data.AggregationTemporality
+import io.opentelemetry.sdk.metrics.data.MetricData
+import io.opentelemetry.sdk.metrics.export.AggregationTemporalitySelector
+import io.opentelemetry.sdk.metrics.export.MetricExporter
 import java.util.concurrent.atomic.AtomicReference
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-internal class MutableSpanExporter : SpanExporter {
-    private val delegate = AtomicReference<SpanExporter?>()
+internal class MutableMetricExporter : MetricExporter {
+    private val delegate = AtomicReference<MetricExporter?>()
+    private val defaultAggregationSelector = AggregationTemporalitySelector.deltaPreferred()
 
-    override fun export(spans: MutableCollection<SpanData>): CompletableResultCode {
-        return delegate.get()?.export(spans) ?: CompletableResultCode.ofSuccess()
+    override fun getAggregationTemporality(instrumentType: InstrumentType): AggregationTemporality {
+        return delegate.get()?.getAggregationTemporality(instrumentType)
+            ?: defaultAggregationSelector.getAggregationTemporality(instrumentType)
+    }
+
+    override fun export(metrics: MutableCollection<MetricData>): CompletableResultCode {
+        return delegate.get()?.export(metrics) ?: CompletableResultCode.ofSuccess()
     }
 
     override fun flush(): CompletableResultCode {
@@ -42,11 +51,11 @@ internal class MutableSpanExporter : SpanExporter {
         return delegate.get()?.shutdown() ?: CompletableResultCode.ofSuccess()
     }
 
-    fun getDelegate(): SpanExporter? {
+    fun getDelegate(): MetricExporter? {
         return delegate.get()
     }
 
-    fun setDelegate(value: SpanExporter?) {
+    fun setDelegate(value: MetricExporter?) {
         delegate.set(value)
     }
 }

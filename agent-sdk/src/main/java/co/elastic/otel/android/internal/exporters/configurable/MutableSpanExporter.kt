@@ -16,22 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.internal.opentelemetry.exporters.configurable
+package co.elastic.otel.android.internal.exporters.configurable
 
 import io.opentelemetry.sdk.common.CompletableResultCode
-import io.opentelemetry.sdk.logs.data.LogRecordData
-import io.opentelemetry.sdk.logs.export.LogRecordExporter
+import io.opentelemetry.sdk.trace.data.SpanData
+import io.opentelemetry.sdk.trace.export.SpanExporter
 import java.util.concurrent.atomic.AtomicReference
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-internal class MutableLogRecordExporter : LogRecordExporter {
-    private val delegate = AtomicReference<LogRecordExporter?>()
+internal class MutableSpanExporter : SpanExporter {
+    private val delegate = AtomicReference<SpanExporter?>()
 
-    override fun export(logs: MutableCollection<LogRecordData>): CompletableResultCode {
-        return delegate.get()?.export(logs) ?: CompletableResultCode.ofSuccess()
+    override fun export(spans: MutableCollection<SpanData>): CompletableResultCode {
+        return delegate.get()?.export(spans) ?: CompletableResultCode.ofSuccess()
     }
 
     override fun flush(): CompletableResultCode {
@@ -42,11 +42,11 @@ internal class MutableLogRecordExporter : LogRecordExporter {
         return delegate.get()?.shutdown() ?: CompletableResultCode.ofSuccess()
     }
 
-    fun getDelegate(): LogRecordExporter? {
+    fun getDelegate(): SpanExporter? {
         return delegate.get()
     }
 
-    fun setDelegate(value: LogRecordExporter?) {
+    fun setDelegate(value: SpanExporter?) {
         delegate.set(value)
     }
 }

@@ -18,7 +18,7 @@
  */
 package co.elastic.otel.android.exporters.configurable
 
-import co.elastic.otel.android.internal.opentelemetry.exporters.configurable.MutableLogRecordExporter
+import co.elastic.otel.android.internal.exporters.configurable.MutableLogRecordExporter
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify

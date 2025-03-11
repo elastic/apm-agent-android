@@ -18,10 +18,10 @@
  */
 package co.elastic.otel.android.internal.features.exportergate
 
+import co.elastic.otel.android.internal.exporters.configurable.MutableLogRecordExporter
+import co.elastic.otel.android.internal.exporters.configurable.MutableMetricExporter
+import co.elastic.otel.android.internal.exporters.configurable.MutableSpanExporter
 import co.elastic.otel.android.internal.features.exportergate.latch.Latch
-import co.elastic.otel.android.internal.opentelemetry.exporters.configurable.MutableLogRecordExporter
-import co.elastic.otel.android.internal.opentelemetry.exporters.configurable.MutableMetricExporter
-import co.elastic.otel.android.internal.opentelemetry.exporters.configurable.MutableSpanExporter
 import co.elastic.otel.android.internal.services.ServiceManager
 import io.opentelemetry.sdk.logs.data.LogRecordData
 import io.opentelemetry.sdk.logs.export.LogRecordExporter

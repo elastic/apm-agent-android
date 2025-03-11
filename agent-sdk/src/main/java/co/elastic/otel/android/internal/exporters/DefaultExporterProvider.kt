@@ -16,13 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.internal.features.apmserver
+package co.elastic.otel.android.internal.exporters
 
 import co.elastic.otel.android.connectivity.ExportConnectivityConfiguration
 import co.elastic.otel.android.exporters.ExporterProvider
 import co.elastic.otel.android.exporters.configuration.ExporterConfiguration
 import co.elastic.otel.android.internal.connectivity.ConnectivityConfigurationHolder
-import co.elastic.otel.android.internal.opentelemetry.exporters.configurable.MutableExporterProvider
+import co.elastic.otel.android.internal.connectivity.ExportConnectivityManager
+import co.elastic.otel.android.internal.exporters.configurable.MutableExporterProvider
 import co.elastic.otel.android.provider.Provider
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.metrics.export.MetricExporter

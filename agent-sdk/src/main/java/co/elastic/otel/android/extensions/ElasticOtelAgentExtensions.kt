@@ -28,7 +28,7 @@ import io.opentelemetry.context.Context
 import io.opentelemetry.context.Scope
 import java.time.Instant
 
-private const val SCOPE_NAME = "ElasticAgentExtension"
+private const val SCOPE_NAME = "co.elastic.otel.android.extensions"
 
 fun ElasticOtelAgent.log(
     body: String,

@@ -37,7 +37,7 @@ import io.opentelemetry.sdk.trace.export.SpanExporter
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-internal class ConfigurableExporterProvider(
+internal class MutableExporterProvider(
     private val spanExporter: MutableSpanExporter,
     private val logRecordExporter: MutableLogRecordExporter,
     private val metricExporter: MutableMetricExporter
@@ -59,8 +59,8 @@ internal class ConfigurableExporterProvider(
             spanExporterConfiguration: ExporterConfiguration.Span?,
             logRecordExporterConfiguration: ExporterConfiguration.LogRecord?,
             metricExporterConfiguration: ExporterConfiguration.Metric?
-        ): ConfigurableExporterProvider {
-            val provider = ConfigurableExporterProvider(
+        ): MutableExporterProvider {
+            val provider = MutableExporterProvider(
                 MutableSpanExporter(),
                 MutableLogRecordExporter(),
                 MutableMetricExporter()

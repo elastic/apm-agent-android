@@ -22,7 +22,7 @@ import co.elastic.otel.android.exporters.ExporterProvider
 import co.elastic.otel.android.exporters.configuration.ExporterConfiguration
 import co.elastic.otel.android.features.apmserver.ExportConnectivityConfiguration
 import co.elastic.otel.android.internal.connectivity.ConnectivityConfigurationHolder
-import co.elastic.otel.android.internal.opentelemetry.exporters.configurable.ConfigurableExporterProvider
+import co.elastic.otel.android.internal.opentelemetry.exporters.configurable.MutableExporterProvider
 import co.elastic.otel.android.provider.Provider
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.metrics.export.MetricExporter
@@ -32,16 +32,16 @@ import io.opentelemetry.sdk.trace.export.SpanExporter
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-internal class ApmServerExporterProvider internal constructor(
+internal class DefaultExporterProvider internal constructor(
     private val connectivityConfigurationProvider: Provider<ExportConnectivityConfiguration>,
-    private val exporterProvider: ConfigurableExporterProvider
+    private val exporterProvider: MutableExporterProvider
 ) : ExporterProvider, ConnectivityConfigurationHolder.Listener {
 
     companion object {
-        internal fun create(connectivityConfigurationManager: ExportConnectivityManager.ConnectivityHolder): ApmServerExporterProvider {
+        internal fun create(connectivityConfigurationManager: ExportConnectivityManager.ConnectivityHolder): DefaultExporterProvider {
             val configuration =
                 connectivityConfigurationManager.getConnectivityConfiguration()
-            val exporterProvider = ConfigurableExporterProvider.create(
+            val exporterProvider = MutableExporterProvider.create(
                 ExporterConfiguration.Span(
                     configuration.getTracesUrl(),
                     configuration.getHeaders(),
@@ -58,12 +58,12 @@ internal class ApmServerExporterProvider internal constructor(
                     configuration.exportProtocol
                 )
             )
-            val apmServerExporterProvider = ApmServerExporterProvider(
+            val defaultExporterProvider = DefaultExporterProvider(
                 connectivityConfigurationManager::getConnectivityConfiguration,
                 exporterProvider
             )
-            connectivityConfigurationManager.addListener(apmServerExporterProvider)
-            return apmServerExporterProvider
+            connectivityConfigurationManager.addListener(defaultExporterProvider)
+            return defaultExporterProvider
         }
     }
 

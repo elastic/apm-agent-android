@@ -27,6 +27,7 @@ import android.net.NetworkInfo
 import android.os.Build
 import android.telephony.TelephonyManager
 import co.elastic.otel.android.exporters.ExporterProvider
+import co.elastic.otel.android.features.session.Session
 import co.elastic.otel.android.interceptor.Interceptor
 import co.elastic.otel.android.internal.opentelemetry.ElasticOpenTelemetry
 import co.elastic.otel.android.internal.services.ServiceManager
@@ -34,7 +35,6 @@ import co.elastic.otel.android.internal.services.network.query.NetworkApi21Query
 import co.elastic.otel.android.internal.services.network.query.NetworkApi23QueryManager
 import co.elastic.otel.android.internal.services.network.query.NetworkApi24QueryManager
 import co.elastic.otel.android.processors.ProcessorFactory
-import co.elastic.otel.android.session.Session
 import co.elastic.otel.android.test.common.ElasticAttributes.getLogRecordDefaultAttributes
 import co.elastic.otel.android.test.common.ElasticAttributes.getSpanDefaultAttributes
 import io.mockk.every

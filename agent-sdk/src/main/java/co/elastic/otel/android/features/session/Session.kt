@@ -16,17 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.session
+package co.elastic.otel.android.features.session
 
-import co.elastic.otel.android.internal.session.DefaultSessionProvider
+import co.elastic.otel.android.internal.session.DefaultSession
 
-fun interface SessionProvider {
-    fun getSession(): Session?
+interface Session {
+    fun getId(): String
 
     companion object {
         @JvmStatic
-        fun getDefault(): SessionProvider {
-            return DefaultSessionProvider()
+        fun create(id: String): Session {
+            return DefaultSession(id)
         }
     }
 }

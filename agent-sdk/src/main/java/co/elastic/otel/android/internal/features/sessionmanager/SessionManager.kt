@@ -19,14 +19,14 @@
 package co.elastic.otel.android.internal.features.sessionmanager
 
 import androidx.annotation.GuardedBy
+import co.elastic.otel.android.features.session.Session
 import co.elastic.otel.android.features.session.SessionIdGenerator
+import co.elastic.otel.android.features.session.SessionProvider
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.time.SystemTimeProvider
 import co.elastic.otel.android.internal.utilities.cache.CacheHandler
 import co.elastic.otel.android.internal.utilities.cache.PreferencesLongCacheHandler
 import co.elastic.otel.android.internal.utilities.cache.PreferencesStringCacheHandler
-import co.elastic.otel.android.session.Session
-import co.elastic.otel.android.session.SessionProvider
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
 

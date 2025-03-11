@@ -18,8 +18,8 @@
  */
 package co.elastic.otel.android.internal.session
 
-import co.elastic.otel.android.session.Session
-import co.elastic.otel.android.session.SessionProvider
+import co.elastic.otel.android.features.session.Session
+import co.elastic.otel.android.features.session.SessionProvider
 import java.util.UUID
 
 /**

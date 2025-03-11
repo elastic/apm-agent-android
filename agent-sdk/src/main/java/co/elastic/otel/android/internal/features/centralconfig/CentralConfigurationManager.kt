@@ -20,7 +20,7 @@ package co.elastic.otel.android.internal.features.centralconfig
 
 import androidx.annotation.WorkerThread
 import co.elastic.otel.android.common.internal.logging.Elog
-import co.elastic.otel.android.features.apmserver.Authentication
+import co.elastic.otel.android.connectivity.Authentication
 import co.elastic.otel.android.internal.connectivity.ConnectivityConfigurationHolder
 import co.elastic.otel.android.internal.features.exportergate.ExporterGateManager
 import co.elastic.otel.android.internal.opentelemetry.ElasticOpenTelemetry

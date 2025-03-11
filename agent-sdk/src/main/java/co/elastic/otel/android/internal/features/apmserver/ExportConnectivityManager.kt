@@ -18,7 +18,7 @@
  */
 package co.elastic.otel.android.internal.features.apmserver
 
-import co.elastic.otel.android.features.apmserver.ExportConnectivityConfiguration
+import co.elastic.otel.android.connectivity.ExportConnectivityConfiguration
 import co.elastic.otel.android.internal.connectivity.ConnectivityConfigurationHolder
 
 /**

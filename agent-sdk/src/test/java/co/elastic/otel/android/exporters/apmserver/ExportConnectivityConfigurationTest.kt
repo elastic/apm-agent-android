@@ -18,9 +18,9 @@
  */
 package co.elastic.otel.android.exporters.apmserver
 
+import co.elastic.otel.android.connectivity.Authentication
+import co.elastic.otel.android.connectivity.ExportConnectivityConfiguration
 import co.elastic.otel.android.exporters.configuration.ExportProtocol
-import co.elastic.otel.android.features.apmserver.Authentication
-import co.elastic.otel.android.features.apmserver.ExportConnectivityConfiguration
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

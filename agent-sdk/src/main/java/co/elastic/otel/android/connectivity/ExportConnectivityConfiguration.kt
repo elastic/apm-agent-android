@@ -16,9 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.features.apmserver
+package co.elastic.otel.android.connectivity
 
-import co.elastic.otel.android.connectivity.ConnectivityConfiguration
 import co.elastic.otel.android.exporters.configuration.ExportProtocol
 
 /**

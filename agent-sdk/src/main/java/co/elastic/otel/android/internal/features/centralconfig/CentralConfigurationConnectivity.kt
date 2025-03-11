@@ -18,8 +18,8 @@
  */
 package co.elastic.otel.android.internal.features.centralconfig
 
+import co.elastic.otel.android.connectivity.Authentication
 import co.elastic.otel.android.connectivity.ConnectivityConfiguration
-import co.elastic.otel.android.features.apmserver.Authentication
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at

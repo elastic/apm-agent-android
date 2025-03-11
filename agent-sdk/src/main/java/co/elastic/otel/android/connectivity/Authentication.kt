@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.features.apmserver
+package co.elastic.otel.android.connectivity
 
 /**
  * Authentication strategies to connect to Elastic.

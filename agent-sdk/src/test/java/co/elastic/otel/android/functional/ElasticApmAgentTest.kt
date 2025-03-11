@@ -19,9 +19,9 @@
 package co.elastic.otel.android.functional
 
 import co.elastic.otel.android.ElasticApmAgent
+import co.elastic.otel.android.connectivity.Authentication
+import co.elastic.otel.android.connectivity.ExportConnectivityConfiguration
 import co.elastic.otel.android.exporters.ExporterProvider
-import co.elastic.otel.android.features.apmserver.Authentication
-import co.elastic.otel.android.features.apmserver.ExportConnectivityConfiguration
 import co.elastic.otel.android.interceptor.Interceptor
 import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
 import co.elastic.otel.android.internal.features.centralconfig.CentralConfigurationConnectivity

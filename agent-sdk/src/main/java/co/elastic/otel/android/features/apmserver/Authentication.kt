@@ -19,21 +19,21 @@
 package co.elastic.otel.android.features.apmserver
 
 /**
- * Authentication strategies to connect to the Elastic APM server.
+ * Authentication strategies to connect to Elastic.
  */
-sealed class ApmServerAuthentication {
+sealed class Authentication {
     /**
      * Represents an [API Key](https://www.elastic.co/guide/en/observability/current/apm-api-key.html) auth method.
      */
-    data class ApiKey(val key: String) : ApmServerAuthentication()
+    data class ApiKey(val key: String) : Authentication()
 
     /**
      * Represent a [Secret token](https://www.elastic.co/guide/en/observability/current/apm-secret-token.html) auth method.
      */
-    data class SecretToken(val token: String) : ApmServerAuthentication()
+    data class SecretToken(val token: String) : Authentication()
 
     /**
      * No auth method.
      */
-    data object None : ApmServerAuthentication()
+    data object None : Authentication()
 }

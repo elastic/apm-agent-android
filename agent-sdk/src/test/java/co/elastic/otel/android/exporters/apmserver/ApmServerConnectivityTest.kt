@@ -19,8 +19,8 @@
 package co.elastic.otel.android.exporters.apmserver
 
 import co.elastic.otel.android.exporters.configuration.ExportProtocol
-import co.elastic.otel.android.features.apmserver.ApmServerAuthentication
 import co.elastic.otel.android.features.apmserver.ApmServerConnectivity
+import co.elastic.otel.android.features.apmserver.Authentication
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -35,7 +35,7 @@ class ApmServerConnectivityTest {
         assertThat(instance).isEqualTo(
             ApmServerConnectivity(
                 url,
-                ApmServerAuthentication.None,
+                Authentication.None,
                 emptyMap(), ExportProtocol.HTTP
             )
         )
@@ -80,7 +80,7 @@ class ApmServerConnectivityTest {
 
         val instance = ApmServerConnectivity(
             url,
-            ApmServerAuthentication.SecretToken(token)
+            Authentication.SecretToken(token)
         )
 
         assertThat(instance.getUrl()).isEqualTo(url)
@@ -97,7 +97,7 @@ class ApmServerConnectivityTest {
 
         val instance = ApmServerConnectivity(
             url,
-            ApmServerAuthentication.ApiKey(key)
+            Authentication.ApiKey(key)
         )
 
         assertThat(instance.getUrl()).isEqualTo(url)

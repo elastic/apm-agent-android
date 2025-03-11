@@ -26,7 +26,7 @@ import co.elastic.otel.android.exporters.configuration.ExportProtocol
  */
 data class ApmServerConnectivity(
     private val url: String,
-    val auth: ApmServerAuthentication = ApmServerAuthentication.None,
+    val auth: Authentication = Authentication.None,
     val extraHeaders: Map<String, String> = emptyMap(),
     val exportProtocol: ExportProtocol = ExportProtocol.HTTP
 ) : ConnectivityConfiguration {
@@ -37,9 +37,9 @@ data class ApmServerConnectivity(
     override fun getHeaders(): Map<String, String> {
         val headers = mutableMapOf<String, String>()
         headers.putAll(extraHeaders)
-        if (auth is ApmServerAuthentication.SecretToken) {
+        if (auth is Authentication.SecretToken) {
             headers[AUTHORIZATION_HEADER_KEY] = "Bearer ${auth.token}"
-        } else if (auth is ApmServerAuthentication.ApiKey) {
+        } else if (auth is Authentication.ApiKey) {
             headers[AUTHORIZATION_HEADER_KEY] = "ApiKey ${auth.key}"
         }
         return headers

@@ -23,8 +23,8 @@ import co.elastic.otel.android.api.ElasticOtelAgent
 import co.elastic.otel.android.common.internal.logging.Elog
 import co.elastic.otel.android.exporters.ExporterProvider
 import co.elastic.otel.android.exporters.configuration.ExportProtocol
-import co.elastic.otel.android.features.apmserver.ApmServerAuthentication
 import co.elastic.otel.android.features.apmserver.ApmServerConnectivity
+import co.elastic.otel.android.features.apmserver.Authentication
 import co.elastic.otel.android.features.session.SessionIdGenerator
 import co.elastic.otel.android.interceptor.Interceptor
 import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
@@ -131,11 +131,11 @@ class ElasticApmAgent internal constructor(
      */
     class Builder internal constructor(private val application: Application) {
         private var exportUrl: String? = null
-        private var exportAuthentication: ApmServerAuthentication = ApmServerAuthentication.None
+        private var exportAuthentication: Authentication = Authentication.None
         private var exportProtocol: ExportProtocol = ExportProtocol.HTTP
         private var exportExtraHeaders: Map<String, String> = emptyMap()
         private var managementUrl: String? = null
-        private var managementAuthentication: ApmServerAuthentication = ApmServerAuthentication.None
+        private var managementAuthentication: Authentication = Authentication.None
         private var sessionIdGenerator: SessionIdGenerator? = null
         private var diskBufferingConfiguration: DiskBufferingConfiguration? = null
         private var loggingPolicy: LoggingPolicy? = null
@@ -183,7 +183,7 @@ class ElasticApmAgent internal constructor(
         /**
          * This is the authentication method needed to connect to the value provided in [setExportUrl].
          */
-        fun setExportAuthentication(value: ApmServerAuthentication) = apply {
+        fun setExportAuthentication(value: Authentication) = apply {
             exportAuthentication = value
         }
 
@@ -217,7 +217,7 @@ class ElasticApmAgent internal constructor(
         /**
          * This is the authentication method needed to connect to the value provided in [setManagementUrl].
          */
-        fun setManagementAuthentication(value: ApmServerAuthentication) = apply {
+        fun setManagementAuthentication(value: Authentication) = apply {
             managementAuthentication = value
         }
 

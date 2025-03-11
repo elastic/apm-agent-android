@@ -174,7 +174,7 @@ class ElasticApmAgent internal constructor(
         }
 
         /**
-         * This is the APM server URL where the telemetry is exported.
+         * This is the server URL where the telemetry is exported.
          */
         fun setExportUrl(value: String) = apply {
             exportUrl = value

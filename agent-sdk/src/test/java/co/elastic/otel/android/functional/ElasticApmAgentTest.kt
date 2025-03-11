@@ -143,7 +143,7 @@ class ElasticApmAgentTest {
     }
 
     @Test
-    fun `Validate initial apm server params`() {
+    fun `Validate initial export server params`() {
         wireMockRule.stubAllHttpResponses { withStatus(500) }
         agent = simpleAgentBuilder(wireMockRule.url("/"))
             .setManagementUrl(wireMockRule.url("/remote/"))

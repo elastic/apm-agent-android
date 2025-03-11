@@ -56,6 +56,7 @@ public class ApmPublisherRootPlugin implements Plugin<Project> {
     private static void configureBinaryValidator(Project subproject) {
         ApiValidationExtension binaryValidatorExtension = subproject.getExtensions().getByType(ApiValidationExtension.class);
         binaryValidatorExtension.getNonPublicMarkers().add("co.elastic.otel.android.common.internal.annotations.InternalApi");
+        binaryValidatorExtension.setApiDumpDirectory("metadata");
     }
 
     private void configureVersion(Project project) {

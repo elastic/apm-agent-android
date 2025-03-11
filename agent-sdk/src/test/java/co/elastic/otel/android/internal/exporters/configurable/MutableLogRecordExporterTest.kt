@@ -16,9 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.exporters.configurable
+package co.elastic.otel.android.internal.exporters.configurable
 
-import co.elastic.otel.android.internal.exporters.configurable.MutableLogRecordExporter
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify

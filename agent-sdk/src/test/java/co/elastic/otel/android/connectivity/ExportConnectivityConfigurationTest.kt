@@ -16,10 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.exporters.apmserver
+package co.elastic.otel.android.connectivity
 
-import co.elastic.otel.android.connectivity.Authentication
-import co.elastic.otel.android.connectivity.ExportConnectivityConfiguration
 import co.elastic.otel.android.exporters.configuration.ExportProtocol
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

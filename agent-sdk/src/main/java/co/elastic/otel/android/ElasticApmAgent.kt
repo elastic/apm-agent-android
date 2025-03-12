@@ -21,16 +21,16 @@ package co.elastic.otel.android
 import android.app.Application
 import co.elastic.otel.android.api.ElasticOtelAgent
 import co.elastic.otel.android.common.internal.logging.Elog
+import co.elastic.otel.android.connectivity.Authentication
+import co.elastic.otel.android.connectivity.ExportConnectivityConfiguration
 import co.elastic.otel.android.exporters.ExporterProvider
 import co.elastic.otel.android.exporters.configuration.ExportProtocol
-import co.elastic.otel.android.features.apmserver.ApmServerAuthentication
-import co.elastic.otel.android.features.apmserver.ApmServerConnectivity
 import co.elastic.otel.android.features.session.SessionIdGenerator
 import co.elastic.otel.android.interceptor.Interceptor
 import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
 import co.elastic.otel.android.internal.api.ManagedElasticOtelAgentContract
-import co.elastic.otel.android.internal.features.apmserver.ApmServerConnectivityManager
-import co.elastic.otel.android.internal.features.apmserver.ApmServerExporterProvider
+import co.elastic.otel.android.internal.connectivity.ExportConnectivityManager
+import co.elastic.otel.android.internal.exporters.DefaultExporterProvider
 import co.elastic.otel.android.internal.features.centralconfig.CentralConfigurationManager
 import co.elastic.otel.android.internal.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.otel.android.internal.features.exportergate.ExporterGateManager
@@ -63,7 +63,7 @@ import io.opentelemetry.sdk.trace.export.SpanExporter
 @Suppress("CanBeParameter")
 class ElasticApmAgent internal constructor(
     private val delegate: ManagedElasticOtelAgent,
-    private val apmServerConnectivityManager: ApmServerConnectivityManager,
+    private val exportConnectivityManager: ExportConnectivityManager,
     private val centralConfigurationManager: CentralConfigurationManager?,
     private val sampleRateManager: SampleRateManager?
 ) : ManagedElasticOtelAgentContract {
@@ -97,14 +97,14 @@ class ElasticApmAgent internal constructor(
      * Updates the server connectivity parameters, this changes where the telemetry is sent to and
      * also where the central configuration is polled from.
      *
-     * @param connectivity The new server configuration.
+     * @param configuration The new server configuration.
      */
-    fun setApmServerConnectivity(connectivity: ApmServerConnectivity) {
-        apmServerConnectivityManager.setConnectivityConfiguration(connectivity)
+    fun setExportConnectivityConfiguration(configuration: ExportConnectivityConfiguration) {
+        exportConnectivityManager.setConnectivityConfiguration(configuration)
     }
 
-    internal fun getApmServerConnectivityManager(): ApmServerConnectivityManager {
-        return apmServerConnectivityManager
+    internal fun getExportConnectivityManager(): ExportConnectivityManager {
+        return exportConnectivityManager
     }
 
     internal fun getExporterGateManager(): ExporterGateManager {
@@ -131,11 +131,11 @@ class ElasticApmAgent internal constructor(
      */
     class Builder internal constructor(private val application: Application) {
         private var exportUrl: String? = null
-        private var exportAuthentication: ApmServerAuthentication = ApmServerAuthentication.None
+        private var exportAuthentication: Authentication = Authentication.None
         private var exportProtocol: ExportProtocol = ExportProtocol.HTTP
         private var exportExtraHeaders: Map<String, String> = emptyMap()
         private var managementUrl: String? = null
-        private var managementAuthentication: ApmServerAuthentication = ApmServerAuthentication.None
+        private var managementAuthentication: Authentication = Authentication.None
         private var sessionIdGenerator: SessionIdGenerator? = null
         private var diskBufferingConfiguration: DiskBufferingConfiguration? = null
         private var loggingPolicy: LoggingPolicy? = null
@@ -174,7 +174,7 @@ class ElasticApmAgent internal constructor(
         }
 
         /**
-         * This is the APM server URL where the telemetry is exported.
+         * This is the server URL where the telemetry is exported.
          */
         fun setExportUrl(value: String) = apply {
             exportUrl = value
@@ -183,7 +183,7 @@ class ElasticApmAgent internal constructor(
         /**
          * This is the authentication method needed to connect to the value provided in [setExportUrl].
          */
-        fun setExportAuthentication(value: ApmServerAuthentication) = apply {
+        fun setExportAuthentication(value: Authentication) = apply {
             exportAuthentication = value
         }
 
@@ -217,7 +217,7 @@ class ElasticApmAgent internal constructor(
         /**
          * This is the authentication method needed to connect to the value provided in [setManagementUrl].
          */
-        fun setManagementAuthentication(value: ApmServerAuthentication) = apply {
+        fun setManagementAuthentication(value: Authentication) = apply {
             managementAuthentication = value
         }
 
@@ -316,17 +316,17 @@ class ElasticApmAgent internal constructor(
             )
 
             val systemTimeProvider = SystemTimeProvider()
-            val apmServerConfiguration = ApmServerConnectivity(
+            val connectivityConfiguration = ExportConnectivityConfiguration(
                 finalExportUrl,
                 exportAuthentication,
                 exportExtraHeaders,
                 exportProtocol
             )
-            val apmServerConnectivityHolder =
-                ApmServerConnectivityManager.ConnectivityHolder(apmServerConfiguration)
-            val apmServerConnectivityManager =
-                ApmServerConnectivityManager(apmServerConnectivityHolder)
-            val exporterProvider = ApmServerExporterProvider.create(apmServerConnectivityHolder)
+            val connectivityHolder =
+                ExportConnectivityManager.ConnectivityHolder(connectivityConfiguration)
+            val exportConnectivityManager =
+                ExportConnectivityManager(connectivityHolder)
+            val exporterProvider = DefaultExporterProvider.create(connectivityHolder)
 
             val managedFeatures =
                 createManagedConfiguration(serviceManager, systemTimeProvider)
@@ -354,7 +354,7 @@ class ElasticApmAgent internal constructor(
 
             return ElasticApmAgent(
                 managedAgentBuilder.build(serviceManager, managedFeatures),
-                apmServerConnectivityManager,
+                exportConnectivityManager,
                 centralConfigurationManager,
                 sampleRateManager
             )

@@ -16,22 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.internal.session
+package co.elastic.otel.android.features.session
 
-import co.elastic.otel.android.features.session.Session
-import co.elastic.otel.android.features.session.SessionProvider
-import java.util.UUID
+import co.elastic.otel.android.internal.session.DefaultSession
 
-/**
- * This class is internal and is hence not for public use. Its APIs are unstable and can change at
- * any time.
- */
-internal class DefaultSessionProvider : SessionProvider {
-    private val providedSession by lazy {
-        Session.create(UUID.randomUUID().toString())
-    }
+interface Session {
+    fun getId(): String
 
-    override fun getSession(): Session {
-        return providedSession
+    companion object {
+        @JvmStatic
+        fun create(id: String): Session {
+            return DefaultSession(id)
+        }
     }
 }

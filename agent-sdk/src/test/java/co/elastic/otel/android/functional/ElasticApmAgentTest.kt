@@ -19,9 +19,9 @@
 package co.elastic.otel.android.functional
 
 import co.elastic.otel.android.ElasticApmAgent
+import co.elastic.otel.android.connectivity.Authentication
+import co.elastic.otel.android.connectivity.ExportConnectivityConfiguration
 import co.elastic.otel.android.exporters.ExporterProvider
-import co.elastic.otel.android.features.apmserver.ApmServerAuthentication
-import co.elastic.otel.android.features.apmserver.ApmServerConnectivity
 import co.elastic.otel.android.interceptor.Interceptor
 import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
 import co.elastic.otel.android.internal.features.centralconfig.CentralConfigurationConnectivity
@@ -143,7 +143,7 @@ class ElasticApmAgentTest {
     }
 
     @Test
-    fun `Validate initial apm server params`() {
+    fun `Validate initial export server params`() {
         wireMockRule.stubAllHttpResponses { withStatus(500) }
         agent = simpleAgentBuilder(wireMockRule.url("/"))
             .setManagementUrl(wireMockRule.url("/remote/"))
@@ -199,8 +199,8 @@ class ElasticApmAgentTest {
         val apiKey = "api-key"
         agent = simpleAgentBuilder(wireMockRule.url("/first/"))
             .setManagementUrl(wireMockRule.url("/management/"))
-            .setExportAuthentication(ApmServerAuthentication.SecretToken(secretToken))
-            .setManagementAuthentication(ApmServerAuthentication.ApiKey(apiKey))
+            .setExportAuthentication(Authentication.SecretToken(secretToken))
+            .setManagementAuthentication(Authentication.ApiKey(apiKey))
             .setServiceName("my-app")
             .setDeploymentEnvironment("debug")
             .build()
@@ -234,10 +234,10 @@ class ElasticApmAgentTest {
         ).isEqualTo("Bearer $secretToken")
 
         // Changing global config
-        agent.setApmServerConnectivity(
-            ApmServerConnectivity(
+        agent.setExportConnectivityConfiguration(
+            ExportConnectivityConfiguration(
                 wireMockRule.url("/second/"),
-                ApmServerAuthentication.ApiKey(apiKey),
+                Authentication.ApiKey(apiKey),
                 mapOf("Custom-Header" to "custom value")
             )
         )
@@ -290,9 +290,9 @@ class ElasticApmAgentTest {
         val initialUrl = wireMockRule.url("/first/")
         val initialManagementUrl = wireMockRule.url("/management/")
         agent = simpleAgentBuilder(initialUrl)
-            .setExportAuthentication(ApmServerAuthentication.SecretToken(secretToken))
+            .setExportAuthentication(Authentication.SecretToken(secretToken))
             .setManagementUrl(initialManagementUrl)
-            .setManagementAuthentication(ApmServerAuthentication.SecretToken(secretToken))
+            .setManagementAuthentication(Authentication.SecretToken(secretToken))
             .setServiceName("my-app")
             .setDeploymentEnvironment("debug")
             .build()
@@ -307,7 +307,7 @@ class ElasticApmAgentTest {
         agent.getCentralConfigurationManager()!!.setConnectivityConfiguration(
             CentralConfigurationConnectivity(
                 initialManagementUrl,
-                ApmServerAuthentication.None,
+                Authentication.None,
                 emptyMap(),
                 "other-name",
                 null
@@ -339,10 +339,10 @@ class ElasticApmAgentTest {
 
         // Changing config
         val apiKey = "api-key"
-        agent.getApmServerConnectivityManager().setConnectivityConfiguration(
-            ApmServerConnectivity(
+        agent.getExportConnectivityManager().setConnectivityConfiguration(
+            ExportConnectivityConfiguration(
                 wireMockRule.url("/second/"),
-                ApmServerAuthentication.ApiKey(apiKey),
+                Authentication.ApiKey(apiKey),
                 mapOf("Custom-Header" to "custom value")
             )
         )

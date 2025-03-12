@@ -16,22 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.internal.session
+package co.elastic.otel.android.internal.logging
 
-import co.elastic.otel.android.features.session.Session
-import co.elastic.otel.android.features.session.SessionProvider
-import java.util.UUID
+import co.elastic.otel.android.logging.LogLevel
+import co.elastic.otel.android.logging.LoggingPolicy
+import org.junit.Assert
+import org.junit.Test
 
-/**
- * This class is internal and is hence not for public use. Its APIs are unstable and can change at
- * any time.
- */
-internal class DefaultSessionProvider : SessionProvider {
-    private val providedSession by lazy {
-        Session.create(UUID.randomUUID().toString())
-    }
+class SimpleLoggingPolicyTest {
+    @Test
+    fun verifyProvidedValues() {
+        val policy: LoggingPolicy = SimpleLoggingPolicy(true, LogLevel.INFO)
+        val policy2: LoggingPolicy = SimpleLoggingPolicy(false, LogLevel.ERROR)
 
-    override fun getSession(): Session {
-        return providedSession
+        Assert.assertTrue(policy.isEnabled())
+        Assert.assertEquals(LogLevel.INFO, policy.getMinimumLevel())
+        Assert.assertFalse(policy2.isEnabled())
+        Assert.assertEquals(LogLevel.ERROR, policy2.getMinimumLevel())
     }
 }

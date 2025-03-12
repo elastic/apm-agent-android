@@ -25,7 +25,10 @@ import co.elastic.otel.android.logging.LoggingPolicy
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-internal class SimpleLoggingPolicy(private val isEnabled: Boolean, private val minimumLevel: LogLevel) :
+internal class SimpleLoggingPolicy(
+    private val isEnabled: Boolean,
+    private val minimumLevel: LogLevel
+) :
     LoggingPolicy {
 
     override fun isEnabled(): Boolean {

@@ -16,22 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.internal.session
-
-import co.elastic.otel.android.features.session.Session
-import co.elastic.otel.android.features.session.SessionProvider
-import java.util.UUID
+package co.elastic.otel.android.connectivity
 
 /**
- * This class is internal and is hence not for public use. Its APIs are unstable and can change at
- * any time.
+ * Authentication strategies to connect to Elastic.
  */
-internal class DefaultSessionProvider : SessionProvider {
-    private val providedSession by lazy {
-        Session.create(UUID.randomUUID().toString())
-    }
+sealed class Authentication {
+    /**
+     * Represents an [API Key](https://www.elastic.co/guide/en/observability/current/apm-api-key.html) auth method.
+     */
+    data class ApiKey(val key: String) : Authentication()
 
-    override fun getSession(): Session {
-        return providedSession
-    }
+    /**
+     * Represent a [Secret token](https://www.elastic.co/guide/en/observability/current/apm-secret-token.html) auth method.
+     */
+    data class SecretToken(val token: String) : Authentication()
+
+    /**
+     * No auth method.
+     */
+    data object None : Authentication()
 }

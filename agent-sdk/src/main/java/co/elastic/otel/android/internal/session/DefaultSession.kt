@@ -18,7 +18,7 @@
  */
 package co.elastic.otel.android.internal.session
 
-import co.elastic.otel.android.session.Session
+import co.elastic.otel.android.features.session.Session
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at

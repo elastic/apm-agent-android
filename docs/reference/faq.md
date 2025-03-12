@@ -9,7 +9,11 @@ mapped_pages:
 This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
 ::::
 
+## Why is needed to enable desugaring support on apps with minSdk below 26? [why-desugaring]
 
+Due to Android’s limited support for Java 8 features on devices with an API level < 26, or in other words, older than Android 8.0, you must add [Java 8+ desugaring support](https://developer.android.com/studio/write/java8-support#library-desugaring) to apps with a `minSdk` value of less than 26. If you don’t, your app can crash when running on devices using Android OS versions older than 8.0. 
+
+This requirement is inherited from the [OpenTelemetry Java SDK](https://github.com/open-telemetry/opentelemetry-java/blob/main/VERSIONING.md#language-version-compatibility), which this project is built upon.
 
 ## How does the agent work? [faq-how-does-it-work]
 

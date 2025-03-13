@@ -25,3 +25,14 @@ plugins {
 ```
 
 1. You can find the latest version [here](https://plugins.gradle.org/plugin/co.elastic.otel.android.agent).
+
+## Agent setup
+
+Once the gradle setup is done, you'll need to initialize the agent within your app's code, as shown below:
+
+```kotlin
+val agent = ElasticApmAgent.builder(application)
+    .setServiceName("My app name")
+    .setExportUrl("http://10.0.2.2:4318")
+    .build()
+```

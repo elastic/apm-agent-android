@@ -1,4 +1,4 @@
-# Quick start
+# Getting started
 
 ## Requirements [gradle-requirements]
 

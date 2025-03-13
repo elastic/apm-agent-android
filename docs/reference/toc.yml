@@ -1,6 +1,6 @@
 toc:
   - file: index.md
-  - file: quick-start.md
+  - file: getting-started.md
   - file: setup.md
   - file: supported-technologies.md
   - file: configuration.md

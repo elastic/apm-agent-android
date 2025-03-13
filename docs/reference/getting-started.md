@@ -4,6 +4,7 @@
 
 | Requirement           | Minimum version                                                                                           |
 |-----------------------|-----------------------------------------------------------------------------------------------------------|
+| {{stack}}             | 8.18                                                                                                      |
 | Android Gradle plugin | 7.4.0                                                                                                     |
 | Android API level     | 26 (or 21 with [desugaring](https://developer.android.com/studio/write/java8-support#library-desugaring)) |
 
@@ -33,10 +34,11 @@ Once the gradle setup is done, you'll need to initialize the agent within your a
 ```kotlin
 val agent = ElasticApmAgent.builder(application) // <1>
     .setServiceName("My app name") // <2>
-    .setExportUrl("http://10.0.2.2:4318")
+    .setExportUrl("http://10.0.2.2:4318") // <3>
     .setExportAuthentication(Authentication.ApiKey("my-api-key"))
     .build()
 ```
 
 1. You need to pass your application's instance. Check out [how to get it](how-to.md#get-application).
 2. "Service" is OpenTelemetry's jargon for "entity that produces telemetry", so here's where your application name should go. More info on [FAQs](faq.md#why-service-name).
+3. This is the Elastic endpoint where all your telemetry will be exported to.

@@ -31,8 +31,12 @@ plugins {
 Once the gradle setup is done, you'll need to initialize the agent within your app's code, as shown below:
 
 ```kotlin
-val agent = ElasticApmAgent.builder(application)
-    .setServiceName("My app name")
+val agent = ElasticApmAgent.builder(application) // <1>
+    .setServiceName("My app name") // <2>
     .setExportUrl("http://10.0.2.2:4318")
+    .setExportAuthentication(Authentication.ApiKey("my-api-key"))
     .build()
 ```
+
+1. You need to pass your application's instance.
+2. 

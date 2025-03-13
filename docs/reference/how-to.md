@@ -48,30 +48,30 @@ From within a [Fragment](https://developer.android.com/reference/androidx/fragme
 
 The export endpoint where your app's telemetry is sent to, so it's a requirement to initialize the agent. To find it in your {{stack}}, you need to **open {{kib}}'s left pane menu and click on "Add data"**, as shown below:
 
-:::{image} ../images/add-data/kibana-add-data-1.png
+:::{image} ../images/find-export-endpoint/1.png
 :screenshot:
 :::
 
 Then **click on "Application"** on the next page, as shown below:
 
-:::{image} ../images/add-data/kibana-add-data-2.png
+:::{image} ../images/find-export-endpoint/2.png
 :screenshot:
 :::
 
 Followed next by **choosing "OpenTelemetry"**:
 
-:::{image} ../images/add-data/kibana-add-data-3.png
+:::{image} ../images/find-export-endpoint/3.png
 :screenshot:
 :::
 
 Lastly, on the next page, **scroll down to the "APM Agents" pane, and select the "OpenTelemetry" tab**:
 
-:::{image} ../images/add-data/kibana-add-data-4.png
+:::{image} ../images/find-export-endpoint/4.png
 :screenshot:
 :::
 
 You'll find your export endpoint URL as **the value for the `OTEL_EXPORTER_OTLP_ENDPOINT` configuration setting**:
 
-:::{image} ../images/add-data/kibana-add-data-5.png
+:::{image} ../images/find-export-endpoint/5.png
 :screenshot:
 :::

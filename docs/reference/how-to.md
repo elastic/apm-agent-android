@@ -44,7 +44,7 @@ You can get your application from within any of your activities by calling the [
 ### From within a Fragment instance
 From within a [Fragment](https://developer.android.com/reference/androidx/fragment/app/Fragment.html) instance you can get the [Activity](https://developer.android.com/reference/android/app/Activity) that it is associated to, by calling its [requireActivity()](https://developer.android.com/reference/androidx/fragment/app/Fragment.html#requireActivity()) method. Once you get the Activity object, you can get your application from it as explained above.
 
-## How to get my {{stack}} export endpoint
+## How to get my {{stack}} export endpoint [get-export-endpoint]
 
 The export endpoint where your app's telemetry is sent to, so it's a requirement to initialize the agent. To find it in your {{stack}}, you need to **open {{kib}}'s left pane menu and click on "Add data"**, as shown below:
 

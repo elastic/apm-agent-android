@@ -15,7 +15,7 @@ More info on [FAQs](faq.md#why-desugaring).
 
 ## Gradle setup
 
-Add the [Elastic OTel agent plugin](https://plugins.gradle.org/plugin/co.elastic.otel.android.agent) to your application’s `build.gradle[.kts]` file as shown below:
+Add the [Elastic OTel agent plugin](https://plugins.gradle.org/plugin/co.elastic.otel.android.agent) to your application’s `build.gradle[.kts]` file, as shown below:
 
 ```kotlin
 plugins {

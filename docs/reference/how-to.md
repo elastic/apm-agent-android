@@ -37,7 +37,7 @@ For it to work, you **must** register your custom application in your `AndroidMa
 :::
 
 ### From within an Activity instance
-You can get your application from within any of your activities by calling the [Activity#getApplication()](https://developer.android.com/reference/android/app/Activity#getApplication()) method from it.
+You can get your application from within any of your activities by calling the [getApplication()](https://developer.android.com/reference/android/app/Activity#getApplication()) method from it.
 
 ### From within a Fragment instance
-From within a [Fragment](https://developer.android.com/reference/androidx/fragment/app/Fragment.html) instance you can get the [Activity](https://developer.android.com/reference/android/app/Activity) that it is associated to, by calling the [Fragment#requireActivity()](https://developer.android.com/reference/androidx/fragment/app/Fragment.html#requireActivity()) method. Once you get the Activity object, you can get your application from it as explained above.
+From within a [Fragment](https://developer.android.com/reference/androidx/fragment/app/Fragment.html) instance you can get the [Activity](https://developer.android.com/reference/android/app/Activity) that it is associated to, by calling its [requireActivity()](https://developer.android.com/reference/androidx/fragment/app/Fragment.html#requireActivity()) method. Once you get the Activity object, you can get your application from it as explained above.

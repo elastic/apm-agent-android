@@ -1,6 +1,6 @@
 # Getting started
 
-## Requirements [gradle-requirements]
+## Requirements
 
 | Requirement           | Minimum version                                                                                           |
 |-----------------------|-----------------------------------------------------------------------------------------------------------|
@@ -15,3 +15,13 @@ More info on [FAQs](faq.md#why-desugaring).
 
 ## Gradle setup
 
+Add the [Elastic OTel agent plugin](https://plugins.gradle.org/plugin/co.elastic.otel.android.agent) to your application’s `build.gradle[.kts]` file as shown below:
+
+```kotlin
+plugins {
+    id("com.android.application")
+    id("co.elastic.otel.android.agent") version "[latest_version]" // <1>
+}
+```
+
+1. You can find the latest version [here](https://plugins.gradle.org/plugin/co.elastic.otel.android.agent).

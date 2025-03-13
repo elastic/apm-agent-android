@@ -11,9 +11,9 @@ This functionality is in technical preview and may be changed or removed in a fu
 
 ## Why is needed to enable desugaring support on apps with minSdk below 26? [why-desugaring]
 
-Due to Android’s limited support for Java 8 features on devices with an API level < 26, or in other words, older than Android 8.0, you must add [Java 8 desugaring support](https://developer.android.com/studio/write/java8-support#library-desugaring) for apps with a [minSdk](https://developer.android.com/studio/publish/versioning#minsdk) value of less than 26. If you don’t, your app can crash when running on devices using Android OS versions older than 8.0. 
+Android devices with an API level < 26 (older than [Android 8.0](https://developer.android.com/about/versions/oreo/android-8.0)) have limited support for Java 8 features and types, meaning that, if for example, your app or one of your app's dependencies uses the [Stream](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html) type ([added in API level 24](https://developer.android.com/reference/java/util/stream/Stream)) and it's installed on an Android device with OS version 6 ([API level 23](https://developer.android.com/about/versions/marshmallow/android-6.0)) then a crash will happen when the code that uses said type is executed due to a "class not found" error.
 
-This requirement is inherited from the [OpenTelemetry Java SDK](https://github.com/open-telemetry/opentelemetry-java/blob/main/VERSIONING.md#language-version-compatibility), which this project is built upon.
+To prevent these kinds of issues on devices using Android OS older than 8.0, you must add [Java 8 desugaring support](https://developer.android.com/studio/write/java8-support#library-desugaring) to your app. This requirement is inherited from the [OpenTelemetry Java SDK](https://github.com/open-telemetry/opentelemetry-java/blob/main/VERSIONING.md#language-version-compatibility), which this project is built upon, where several of the unsupported types for Android < 8.0 are used.
 
 ## How does the agent work? [faq-how-does-it-work]
 

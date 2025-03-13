@@ -69,3 +69,9 @@ Lastly, on the next page, **scroll down to the "APM Agents" pane, and select the
 :::{image} ../images/add-data/kibana-add-data-4.png
 :screenshot:
 :::
+
+You'll find your export endpoint URL as **the value for the `OTEL_EXPORTER_OTLP_ENDPOINT` configuration setting**:
+
+:::{image} ../images/add-data/kibana-add-data-5.png
+:screenshot:
+:::

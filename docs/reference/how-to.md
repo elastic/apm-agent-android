@@ -1,6 +1,6 @@
 # How-to
 
-## How to get my Android application instance
+## How to get my Android application instance [get-application]
 
 Your Android application is needed to initialize the agent. There are a couple of ways you can get yours:
 

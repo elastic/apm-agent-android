@@ -38,5 +38,5 @@ val agent = ElasticApmAgent.builder(application) // <1>
     .build()
 ```
 
-1. You need to pass your application's instance.
-2. 
+1. You need to pass your application's instance. Check out [how to get it](how-to.md#get-application).
+2. "Service" is OpenTelemetry's jargon for "entity that produces telemetry", so even though it might sound strange, here's where your application name should go. More info on [FAQs](faq.md#why-service-name).

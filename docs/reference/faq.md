@@ -15,6 +15,12 @@ Android devices with an API level < 26 (older than [Android 8.0](https://develop
 
 To prevent these kinds of issues on devices using Android OS older than 8.0, you must add [Java 8 desugaring support](https://developer.android.com/studio/write/java8-support#library-desugaring) to your app. This requirement is inherited from the [OpenTelemetry Java SDK](https://github.com/open-telemetry/opentelemetry-java/blob/main/VERSIONING.md#language-version-compatibility), which this project is built upon, where several of the unsupported types for Android < 8.0 are used.
 
+## Why does my app name have to be set as "service name"? [why-service-name]
+
+TL;DR: It's complicated to change it to another name because of its widespread adoption within the OpenTelemetry community.
+
+For historic reasons, `service` has been the default way of referring to "an entity that produces telemetry". This term made its way into OpenTelemetry to a point where it was marked as one of the first "stable" resource names, meaning that it was no longer possible/feasible to make a change to another name that would better represent any kind of telemetry source. It has been debated several times within the community, with one of the latest ones being an attempt to [explain in the `service` description](https://github.com/open-telemetry/semantic-conventions/pull/630) what it should represent, as an effort to reduce the confusion it may cause, but so far there doesn't seem to be a consensus.
+
 ## How does the agent work? [faq-how-does-it-work]
 
 The agent auto-instruments known frameworks and libraries and records interesting events, like HTTP requests. To do this, it leverages the capability of the JVM to instrument the bytecode of classes. This means that no code changes are required for supported technologies.

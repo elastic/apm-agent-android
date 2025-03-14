@@ -74,4 +74,12 @@ You'll find your export endpoint URL as **the value for the `OTEL_EXPORTER_OTLP_
 
 ## How to create an API Key
 
-API Keys are the recommended way of authenticating the agent with your {{stack}}. 
+API Keys are the recommended way of authenticating the agent with your {{stack}}. There's a couple of ways you can create one:
+
+### Via {{kib}}'s Applications UI
+
+This is the most straightforward approach, you'll need to follow [this quick guide](https://www.elastic.co/guide/en/observability/current/apm-api-key.html#apm-create-an-api-key) on it and leave all the settings with their default values.
+
+### Via REST APIs
+
+[This guide](https://www.elastic.co/guide/en/observability/current/apm-agent-key-api.html#apm-create-agent-key) will help you create an API Key with a set of privileges that are scoped for the APM Agent use case only.

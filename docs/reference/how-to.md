@@ -72,7 +72,7 @@ You'll find your export endpoint URL as **the value for the `OTEL_EXPORTER_OTLP_
 :screenshot:
 :::
 
-## How to create an API Key
+## How to create an API Key [create-api-key]
 
 API Keys are the recommended way of authenticating the agent with your {{stack}}. There's a couple of ways you can create one:
 

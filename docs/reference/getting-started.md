@@ -46,10 +46,46 @@ val agent = ElasticApmAgent.builder(application) // <1>
 
 ## Hello World!
 
-The agent is fully initialized, so now you can start sending telemetry to your {{stack}}! Here's a quick example of manually creating a [Span](https://opentelemetry.io/docs/concepts/signals/traces/#spans) and finding it in {{kib}}:
+The agent is fully initialized, so now you can start sending telemetry to your {{stack}}! Here's a quick example of manually creating a [span](https://opentelemetry.io/docs/concepts/signals/traces/#spans) and finding it in {{kib}}:
+
+### Generate telemetry
 
 ```kotlin
 val agent = ElasticApmAgent.builder(application)
     //...
     .build()
+
+
+agent.span("My Span") {
+    Thread.sleep(500) // <1>
+    agent.span("My nested Span") { // <2>
+        Thread.sleep(500) 
+    }
+}
 ```
+1. This is to simulate some code execution for which we want to measure the time it takes to complete.
+2. This is to demonstrate how does span hierarchies look like in {{kib}}.
+
+### Visualize telemetry
+
+Once your app has sent telemetry data, either manually or automatically, you should be able to visualize it in {{kib}} by navigating to **Applications -> Service Inventory** in the main menu, or alternatively, searching for "Service Inventory" in the [global search field](https://www.elastic.co/guide/en/kibana/current/introduction.html#kibana-navigation-search).
+
+You should find your application listed there, as shown below:
+
+:::{image} ../images/span-visualization/1.png
+:screenshot:
+:width: 350px
+:::
+
+When you open it, **go to the "Transactions" tab** where you should see our "outermost" span listed, as shown below:
+
+:::{image} ../images/span-visualization/2.png
+:screenshot:
+:width: 350px
+:::
+
+And after clicking on our span, we should see it in detail:
+
+:::{image} ../images/span-visualization/3.png
+:screenshot:
+:::

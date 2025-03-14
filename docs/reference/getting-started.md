@@ -43,3 +43,13 @@ val agent = ElasticApmAgent.builder(application) // <1>
 2. "Service" is OpenTelemetry's jargon for "entity that produces telemetry", so here's where your application name should go. More info on [FAQs](faq.md#why-service-name).
 3. This is the Elastic endpoint where all your telemetry will be exported to. If you don't have one yet, check out [how to get it](how-to.md#get-export-endpoint).
 4. Using an API Key is the recommended authentication method for the agent to connect to your {{stack}}. If you don't have one yet, check out [how to create one](how-to.md#create-api-key).
+
+## Hello World!
+
+The agent is fully initialized, so now you can start sending telemetry to your {{stack}}! Here's a quick example of manually creating a [Span](https://opentelemetry.io/docs/concepts/signals/traces/#spans) and finding it in {{kib}}:
+
+```kotlin
+val agent = ElasticApmAgent.builder(application)
+    //...
+    .build()
+```

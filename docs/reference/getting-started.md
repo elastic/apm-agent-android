@@ -2,11 +2,11 @@
 
 ## Requirements
 
-| Requirement           | Minimum version                                                                                           |
-|-----------------------|-----------------------------------------------------------------------------------------------------------|
-| {{stack}}             | 8.18                                                                                                      |
-| Android Gradle plugin | 7.4.0                                                                                                     |
-| Android API level     | 26 (or 21 with [desugaring](https://developer.android.com/studio/write/java8-support#library-desugaring)) |
+| Requirement                                       | Minimum version                                                                                           |
+|---------------------------------------------------|-----------------------------------------------------------------------------------------------------------|
+| [{{stack}}](https://www.elastic.co/elastic-stack) | 8.18                                                                                                      |
+| Android Gradle plugin                             | 7.4.0                                                                                                     |
+| Android API level                                 | 26 (or 21 with [desugaring](https://developer.android.com/studio/write/java8-support#library-desugaring)) |
 
 :::{important} - Apps with minSdk below 26
 If your application's [minSdk](https://developer.android.com/studio/publish/versioning#minsdk) value is lower than 26, you **must** add [Java 8 desugaring support](https://developer.android.com/studio/write/java8-support#library-desugaring).

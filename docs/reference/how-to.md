@@ -46,7 +46,7 @@ From within a [Fragment](https://developer.android.com/reference/androidx/fragme
 
 ## How to get my {{stack}} export endpoint [get-export-endpoint]
 
-The export endpoint where your app's telemetry is sent to, so it's a requirement to initialize the agent. To find it in your {{stack}}, you need to **open {{kib}} and find "Add data" in the main menu**, alternatively, you can use the [global search field](https://www.elastic.co/guide/en/kibana/current/introduction.html#kibana-navigation-search) and search for "Observability Onboarding".
+The export endpoint where your app's telemetry is sent to, so it's a requirement to initialize the agent. To find it in your {{stack}}, you'll need to **open {{kib}} and find "Add data" in the main menu**, alternatively, you can use the [global search field](https://www.elastic.co/guide/en/kibana/current/introduction.html#kibana-navigation-search) and search for "Observability Onboarding".
 
 Then **select "Application"**, as shown below:
 
@@ -54,7 +54,7 @@ Then **select "Application"**, as shown below:
 :screenshot:
 :::
 
-Followed next by **choosing "OpenTelemetry"**:
+Followed by **choosing "OpenTelemetry"**:
 
 :::{image} ../images/find-export-endpoint/2.png
 :screenshot:

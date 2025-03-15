@@ -77,7 +77,7 @@ You should find your application listed there, as shown below:
 :width: 350px
 :::
 
-When you open it, **go to the "Transactions" tab** where you should see your app's "outermost" span listed, as shown below:
+When you open it, **go to the "Transactions" tab** where you should see your app's "outermost" spans listed, as shown below:
 
 :::{image} ../images/span-visualization/2.png
 :screenshot:

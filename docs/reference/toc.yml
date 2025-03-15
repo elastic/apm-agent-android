@@ -1,7 +1,6 @@
 toc:
   - file: index.md
   - file: getting-started.md
-  - file: setup.md
   - file: configuration.md
   - file: automatic-instrumentation.md
   - file: manual-instrumentation.md

@@ -15,7 +15,7 @@ The Elastic APM Android Agent automatically instruments [*Supported technologies
 
 ## OpenTelemetry Entrypoint [opentelemetry-entrypoint]
 
-After completing the [setup](/reference/setup.md) process, the Agent will have configured the OpenTelemetry entrypoint for you and made it globally accessible. In order to access to the configured OpenTelemetry instance you need to use the `GlobalOpenTelemetry` class as shown below.
+After completing the [setup](/reference/getting-started.md) process, the Agent will have configured the OpenTelemetry entrypoint for you and made it globally accessible. In order to access to the configured OpenTelemetry instance you need to use the `GlobalOpenTelemetry` class as shown below.
 
 ```java
 class MyClass {

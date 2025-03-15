@@ -1,3 +1,8 @@
+---
+mapped_pages:
+  - https://www.elastic.co/guide/en/apm/agent/android/current/setup.html
+---
+
 # Getting started
 
 ## Requirements

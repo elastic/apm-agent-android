@@ -263,7 +263,7 @@ You can add multiple filters per signal which will be iterated over (in the orde
 
 ### Automatic instrumentation enabling/disabling [_automatic_instrumentation_enablingdisabling]
 
-The agent provides automatic instrumentation for its [*Supported technologies*](/reference/supported-technologies.md) which are all enabled by default. You can choose which ones to keep enabled, as well as and disabling those you don’t need, at runtime, like so:
+The agent provides automatic instrumentation for its [*Supported technologies*](/reference/automatic-instrumentation.md) which are all enabled by default. You can choose which ones to keep enabled, as well as and disabling those you don’t need, at runtime, like so:
 
 ```java
 class MyApp extends android.app.Application {

@@ -10,7 +10,7 @@ This functionality is in technical preview and may be changed or removed in a fu
 ::::
 
 
-The Elastic APM Android Agent automatically instruments [*Supported technologies*](/reference/supported-technologies.md), creating spans for interesting events for each case, and some of those automated spans can be [configured](/reference/configuration.md) to better suit different app’s needs. However, if you need to create your own, custom spans, metrics and logs, you can do so by accessing the [OpenTelemetry Java SDK APIs](https://opentelemetry.io/docs/instrumentation/java/manual/) that this agent is built on top.
+The Elastic APM Android Agent automatically instruments [*Supported technologies*](/reference/automatic-instrumentation.md), creating spans for interesting events for each case, and some of those automated spans can be [configured](/reference/configuration.md) to better suit different app’s needs. However, if you need to create your own, custom spans, metrics and logs, you can do so by accessing the [OpenTelemetry Java SDK APIs](https://opentelemetry.io/docs/instrumentation/java/manual/) that this agent is built on top.
 
 
 ## OpenTelemetry Entrypoint [opentelemetry-entrypoint]

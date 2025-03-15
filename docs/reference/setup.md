@@ -38,7 +38,7 @@ You can skip this step if your `minSdkVersion` is 26 or higher.
 
 ### Add the Elastic Agent Gradle plugin [adding-gradle-plugin]
 
-To automatically instrument [Supported Technologies](/reference/supported-technologies.md), add the [Elastic APM agent plugin](https://plugins.gradle.org/plugin/co.elastic.apm.android/0.20.0) to your application’s `build.gradle` file as shown below:
+To automatically instrument [Supported Technologies](/reference/automatic-instrumentation.md), add the [Elastic APM agent plugin](https://plugins.gradle.org/plugin/co.elastic.apm.android/0.20.0) to your application’s `build.gradle` file as shown below:
 
 ```groovy
 // Android app's build.gradle file
@@ -126,7 +126,7 @@ dependencies {
 * Set your server connectivity parameters, as explained [here](/reference/configuration.md#app-server-connectivity).
 
 ::::{note}
-Without the Gradle plugin, the Elastic SDK won’t be able to provide automatic instrumentations for its [*Supported technologies*](/reference/supported-technologies.md).
+Without the Gradle plugin, the Elastic SDK won’t be able to provide automatic instrumentations for its [*Supported technologies*](/reference/automatic-instrumentation.md).
 ::::
 
 

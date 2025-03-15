@@ -2,13 +2,13 @@
 
 ## How to get my Android application instance [get-application]
 
-Your Android application is needed to initialize the agent. There are a couple of ways you can get yours:
+Your [Application](https://developer.android.com/reference/android/app/Application) instance is needed to initialize the agent. There are a couple of ways you can get yours:
 
 ### From within your custom Application implementation (recommended)
 
 Ideally, the agent should get initialized as soon as your application is launched, to make sure that it can start collecting telemetry from the very beginning.
 
-Because of the above, an ideal place to do so is from within your own, custom [Application#onCreate](https://developer.android.com/reference/android/app/Application#onCreate()) method implementation, as shown below:
+Based on the above, an ideal place to do so is from within your own, custom [Application#onCreate](https://developer.android.com/reference/android/app/Application#onCreate()) method implementation, as shown below:
 
 ```kotlin
 package my.app
@@ -37,12 +37,12 @@ For it to work, you **must** register your custom application in your `AndroidMa
 ```
 :::
 
-### From within an Activity instance
+### From an Activity
 
-You can get your application from within any of your activities by calling the [getApplication()](https://developer.android.com/reference/android/app/Activity#getApplication()) method from it.
+You can get your application from an activity by calling its [getApplication()](https://developer.android.com/reference/android/app/Activity#getApplication()) method.
 
-### From within a Fragment instance
-From within a [Fragment](https://developer.android.com/reference/androidx/fragment/app/Fragment.html) instance you can get the [Activity](https://developer.android.com/reference/android/app/Activity) that it is associated to, by calling its [requireActivity()](https://developer.android.com/reference/androidx/fragment/app/Fragment.html#requireActivity()) method. Once you get the Activity object, you can get your application from it as explained above.
+### From a Fragment
+From a [Fragment](https://developer.android.com/reference/androidx/fragment/app/Fragment.html) instance, you can get the [Activity](https://developer.android.com/reference/android/app/Activity) that it is associated to by calling its [requireActivity()](https://developer.android.com/reference/androidx/fragment/app/Fragment.html#requireActivity()) method. Once you get the Activity object, you can get your application from it as explained above.
 
 ## How to get my {{stack}} export endpoint [get-export-endpoint]
 

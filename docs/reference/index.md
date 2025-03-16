@@ -9,7 +9,7 @@ mapped_pages:
 
 ## What it is
 
-The Elastic OTel Android agent is an [APM](https://en.wikipedia.org/wiki/Application_performance_management) agent based on [OpenTelemetry](https://opentelemetry.io/) ![alt](../images/opentelemetry-logo.png "OpenTelemetry =16x16") which provides built-in tools and configurations to make [OpenTelemetry Java](https://github.com/open-telemetry/opentelemetry-java) work with your {{stack}} with as little code as possible while fully harnessing the combined forces of [Elasticsearch](docs-content://get-started/index.md) and [Kibana](docs-content://get-started/the-stack.md) for your Android application.
+The Elastic OTel Android agent is an [APM](https://en.wikipedia.org/wiki/Application_performance_management) agent based on [OpenTelemetry](https://opentelemetry.io/) ![alt](../images/opentelemetry-logo.png "OpenTelemetry =16x16") which provides built-in tools and configurations to make the [OpenTelemetry SDK](https://github.com/open-telemetry/opentelemetry-java) work with your {{stack}} with as little code as possible while fully harnessing the combined forces of [Elasticsearch](docs-content://get-started/index.md) and [Kibana](docs-content://get-started/the-stack.md) for your Android application.
 
 ## What can I do with it?
 

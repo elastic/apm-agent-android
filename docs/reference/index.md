@@ -1,5 +1,5 @@
 ---
-navigation_title: 'APM Android agent'
+navigation_title: 'OTel Android agent'
 mapped_pages:
   - https://www.elastic.co/guide/en/apm/agent/android/current/intro.html
   - https://www.elastic.co/guide/en/apm/agent/android/current/index.html
@@ -7,18 +7,13 @@ mapped_pages:
 
 # Introduction
 
-::::{warning}
-This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
-::::
+## What it is
 
+The Elastic OTel Android agent is an [APM](https://en.wikipedia.org/wiki/Application_performance_management) agent based on [OpenTelemetry](https://opentelemetry.io/) ![alt](../images/opentelemetry-logo.png "OpenTelemetry =16x16") which provides built-in tools and configurations to make [OpenTelemetry Java](https://github.com/open-telemetry/opentelemetry-java) work with the {{stack}} with as little code as possible while fully harnessing the combined forces of [Elasticsearch](docs-content://get-started/index.md) and [Kibana](docs-content://get-started/the-stack.md) for your Android application.
+
+## What can I do with it?
 
 The Elastic APM Android Agent automatically measures the performance of your application and tracks errors. It has a default configuration that suits most common use cases and built-in support for popular frameworks and technologies. The agent is built on top of [OpenTelemetry](https://opentelemetry.io/), enabling you to add custom instrumentation with the [OpenTelemetry Java API](https://opentelemetry.io/docs/instrumentation/java/manual/).
-
-::::{note}
-The Elastic APM Android Agent is not compatible with [{{serverless-full}}](docs-content://deploy-manage/deploy/elastic-cloud/serverless.md).
-
-::::
-
 
 ## How does the Agent work? [how-it-works]
 

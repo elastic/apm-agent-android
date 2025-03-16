@@ -25,7 +25,7 @@ Allows you to see the full picture of **how long does your application have to w
 
 In the image above we can see **3 spans** from {{kib}}:
 
-- The first one was created in your application, either [manually](manual-instrumentation.md) or [automatically](automatic-instrumentation.md), to track an HTTP request to your backend service.
+- The first one was created in your application to track an HTTP request to your backend service.
 - The second one was created within your backend service, and it shows how long it took between receiving that client request and providing a response for it.
 - The last one was also created within your backend service for when it had to query other resources internally. In this case, it had to make an HTTP request to another service, in other cases it could be querying from a database as well.
 

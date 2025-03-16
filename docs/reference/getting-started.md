@@ -44,10 +44,10 @@ val agent = ElasticApmAgent.builder(application) // <1>
     .build()
 ```
 
-1. Your [Application](https://developer.android.com/reference/android/app/Application) object. Check out [how to get it](how-to.md#get-application).
+1. Your [Application](https://developer.android.com/reference/android/app/Application) object. Check out [how to get it](how-tos.md#get-application).
 2. "Service" is OpenTelemetry's jargon for "entity that produces telemetry", so here's where your application name should go. More info on [FAQs](faq.md#why-service-name).
-3. This is the Elastic endpoint where all your telemetry will be exported to. If you don't have one yet, check out [how to get it](how-to.md#get-export-endpoint).
-4. Using an API Key is the recommended authentication method for the agent to connect to your {{stack}}. If you don't have one yet, check out [how to create one](how-to.md#create-api-key).
+3. This is the Elastic endpoint where all your telemetry will be exported to. If you don't have one yet, check out [how to get it](how-tos.md#get-export-endpoint).
+4. Using an API Key is the recommended authentication method for the agent to connect to your {{stack}}. If you don't have one yet, check out [how to create one](how-tos.md#create-api-key).
 
 ## Hello World!
 

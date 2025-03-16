@@ -1,4 +1,4 @@
-# How-to
+# How-tos
 
 ## How to get my Android application instance [get-application]
 

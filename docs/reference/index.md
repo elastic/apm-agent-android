@@ -45,6 +45,16 @@ For example, let's say you have a screen "A" in your app that can be opened from
 
 The examples above show a couple of use-cases that you can achieve with the agent and the {{stack}}, however, since the agent not only configures the [OpenTelemetry SDK](https://opentelemetry.io/docs/languages/java/) but also gives you [direct access](manual-instrumentation.md) to its features, it means that you can combine them in ways that better suit your needs and take advantage of {{stack}}'s tools, such as [creating alerts](https://www.elastic.co/guide/en/kibana/current/alerting-getting-started.html) for when something interesting for you happens (maybe when an error is recorded), as well as [custom dashboards](https://www.elastic.co/guide/en/kibana/current/dashboard.html) to display your data the way you need to see it, and [much more](https://www.elastic.co/guide/en/kibana/current/introduction.html).
 
+## Features
+
+### Disk buffering
+
+### Session
+
+### Real time
+
+### Dynamic endpoint
+
 ## How does the Agent work? [how-it-works]
 
 The Agent auto-instruments [*Supported technologies*](/reference/automatic-instrumentation.md) and records interesting events, like spans for outgoing HTTP requests and UI rendering processes. To do this, it leverages the capability of the Android Gradle plugin API to instrument the bytecode of classes. This means that for supported technologies, there are no code changes required.

@@ -13,6 +13,28 @@ The Elastic OTel Android agent is an [APM](https://en.wikipedia.org/wiki/Applica
 
 ## What can I do with it?
 
+All the features provided by the [OpenTelemetry SDK](https://github.com/open-telemetry/opentelemetry-java) are available for you to use and are configured by the agent to work properly out of the box. Some of the most interesting ones are:
+
+### Distributed tracing
+
+Allows you to see the full picture of **how long does your application have to wait for your backend** services to provide an answer (and why), as shown in the example below:
+
+:::{image} ../images/intro/distributed-tracing.png
+:screenshot:
+:::
+
+In the image above we can see **3 spans** from {{kib}}:
+
+- The first one was created in your application, either [manually](manual-instrumentation.md) or [automatically](automatic-instrumentation.md), to track an HTTP request to your backend service.
+- The second one was created within your backend service, and it shows how long it took between receiving that client request and providing a response for it.
+- The last one was also created within your backend service for when it had to query other resources internally. In this case, it had to make an HTTP request to another service, in other cases it could be querying from a database as well.
+
+You may click on any of those spans to see their full details and attributes, in case you need more contextual information from each.
+
+:::{note}
+For distributed tracing to work properly, your backend services have to be configured to send telemetry to the {{stack}} as well.
+:::
+
 The Elastic APM Android Agent automatically measures the performance of your application and tracks errors. It has a default configuration that suits most common use cases and built-in support for popular frameworks and technologies. The agent is built on top of [OpenTelemetry](https://opentelemetry.io/), enabling you to add custom instrumentation with the [OpenTelemetry Java API](https://opentelemetry.io/docs/instrumentation/java/manual/).
 
 ## How does the Agent work? [how-it-works]

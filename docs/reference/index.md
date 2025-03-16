@@ -13,7 +13,7 @@ The Elastic OTel Android agent is an [APM](https://en.wikipedia.org/wiki/Applica
 
 ## What can I do with it?
 
-All the features provided by the [OpenTelemetry SDK](https://github.com/open-telemetry/opentelemetry-java) are available for you to use and are configured by the agent to work properly out of the box. Some of the most interesting ones are:
+All the features provided by the [OpenTelemetry SDK](https://github.com/open-telemetry/opentelemetry-java) are available for you to use and are configured by the agent to work properly out of the box. Some of them are:
 
 ### Distributed tracing
 

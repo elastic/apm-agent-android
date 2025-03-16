@@ -55,6 +55,8 @@ The examples above show a couple of use-cases that you can achieve with the agen
 
 ### Dynamic endpoint
 
+### Automatic instrumentation
+
 ## How does the Agent work? [how-it-works]
 
 The Agent auto-instruments [*Supported technologies*](/reference/automatic-instrumentation.md) and records interesting events, like spans for outgoing HTTP requests and UI rendering processes. To do this, it leverages the capability of the Android Gradle plugin API to instrument the bytecode of classes. This means that for supported technologies, there are no code changes required.

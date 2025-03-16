@@ -9,7 +9,7 @@ mapped_pages:
 
 ## What it is
 
-The Elastic OTel Android agent is an [APM](https://en.wikipedia.org/wiki/Application_performance_management) agent based on [OpenTelemetry](https://opentelemetry.io/) ![alt](../images/opentelemetry-logo.png "OpenTelemetry =16x16") which provides built-in tools and configurations to make the [OpenTelemetry SDK](https://github.com/open-telemetry/opentelemetry-java) work with your {{stack}} with as little code as possible while fully harnessing the combined forces of [Elasticsearch](docs-content://get-started/index.md) and [Kibana](docs-content://get-started/the-stack.md) for your Android application.
+The Elastic OTel Android agent is an [APM](https://en.wikipedia.org/wiki/Application_performance_management) agent based on [OpenTelemetry](https://opentelemetry.io/) ![alt](../images/opentelemetry-logo.png "OpenTelemetry =16x16") which provides built-in tools and configurations to make the [OpenTelemetry SDK](https://opentelemetry.io/docs/languages/java/) work with your {{stack}} with as little code as possible while fully harnessing the combined forces of [Elasticsearch](docs-content://get-started/index.md) and [Kibana](docs-content://get-started/the-stack.md) for your Android application.
 
 ## What can I do with it?
 
@@ -35,7 +35,15 @@ You may click on any of those spans to see their full details and attributes, in
 For distributed tracing to work properly, your backend services have to be configured to send telemetry to the {{stack}} as well.
 :::
 
-The Elastic APM Android Agent automatically measures the performance of your application and tracks errors. It has a default configuration that suits most common use cases and built-in support for popular frameworks and technologies. The agent is built on top of [OpenTelemetry](https://opentelemetry.io/), enabling you to add custom instrumentation with the [OpenTelemetry Java API](https://opentelemetry.io/docs/instrumentation/java/manual/).
+### Session trail
+
+The agent attaches session attributes to each span and log generated from your application, allowing you to create queries where you can group all the telemetry that belongs to a session and form a session event timeline, useful for understanding what are the most common actions performed by your users, as well as tracing their steps towards errors that they might encounter.
+
+For example, let's say you have a screen "A" in your app that can be opened from other screens, such as "B", and let's say you've created a log event for when the user clicks on a button from screen "B" that takes them to screen "A", with the message "clicked on button \[name\]", and then you have a [log created](manual-instrumentation.md#create-logs) when screen "A" is opened (or maybe [a span](manual-instrumentation.md#create-span) instead, in case you'd like to measure how long it takes for screen "A" to fully load). Both items will contain an attribute named `session.id` with the same value per session. This can let you create {{es}} queries, say in {{kib}}'s [discover tool](https://www.elastic.co/guide/en/kibana/current/discover.html) for example, to list all the events that happened during that session and to better understand your user's journey within your application.
+
+### More
+
+The examples above show a couple of use-cases that you can achieve with the agent and the {{stack}}, however, since the agent not only configures the [OpenTelemetry SDK](https://opentelemetry.io/docs/languages/java/) but also gives you [direct access](manual-instrumentation.md) to its features, it means that you can combine them in ways that better suit your needs and take advantage of {{stack}}'s tools, such as [creating alerts](https://www.elastic.co/guide/en/kibana/current/alerting-getting-started.html) for when something interesting for you happens (maybe when an error is recorded), as well as [custom dashboards](https://www.elastic.co/guide/en/kibana/current/dashboard.html) to display your data the way you need to see it, and [much more](https://www.elastic.co/guide/en/kibana/current/introduction.html).
 
 ## How does the Agent work? [how-it-works]
 

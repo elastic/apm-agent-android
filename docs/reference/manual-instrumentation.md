@@ -41,3 +41,6 @@ class MyClass {
 
 You can find more details on how to create and customize all kinds of [signals](https://opentelemetry.io/docs/concepts/signals/) by following [OpenTelemetry’s Java SDK guide](https://opentelemetry.io/docs/languages/java/instrumentation/) on manually creating signals.
 
+## Create spans [create-spans]
+
+## Create logs [create-logs]

@@ -63,9 +63,13 @@ A session aims to group telemetry data into a timeframe where your application w
 
 A session is created when there's no previous one, or when the previous one has expired. They expire after 30 minutes of idle time (meaning that for those 30 minutes there was no telemetry generated), which can be extended up to 4 hours in case that there's always telemetry data getting generated during that time.
 
-### Dynamic endpoint
+### Dynamic configuration
+
+The agent allows you to modify some values, provided during initialization, after the initialization has finished. More info on the [configuration](configuration.md) page.
 
 ### Automatic instrumentation
+
+The agent provides extensions that generate telemetry automatically for common tools and use-cases. More info on the [automatic instrumentation](automatic-instrumentation.md) page.
 
 ## How does the Agent work? [how-it-works]
 

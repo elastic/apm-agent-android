@@ -29,7 +29,7 @@ In the image above we can see **3 spans** from {{kib}}:
 - The second one was created within your backend service, and it shows how long it took between receiving that client request and providing a response for it.
 - The last one was also created within your backend service for when it had to query other resources internally. In this case, it had to make an HTTP request to another service, in other cases it could be querying from a database as well.
 
-You may click on any of those spans to see their full details and attributes, in case you need more contextual information from each.
+You may click on any of those spans to see their full details, in case you need more contextual information from each.
 
 :::{note}
 For distributed tracing to work properly, your backend services have to be configured to send telemetry to the {{stack}} as well.

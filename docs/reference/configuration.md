@@ -22,6 +22,7 @@ class MyApp : android.app.Application {
             .setServiceName("My app name") // <1>
             .setServiceVersion("1.0.0") // <2>
             .setDeploymentEnvironment("prod") // <3>
+            // ...
             .build()
     }
 }
@@ -41,6 +42,7 @@ class MyApp : android.app.Application {
     override fun onCreate() {
         super.onCreate()
         val agent = ElasticApmAgent.builder(this)
+            // ...
             .setExportUrl("https://my-elastic-apm-collector.endpoint") // <1>
             .setExportAuthentication(Authentication.ApiKey("my-api-key")) // <2>
             .setExportProtocol(ExportProtocol.HTTP) // <3>
@@ -52,6 +54,43 @@ class MyApp : android.app.Application {
 1. Your endpoint URL. If you don't have one yet, check out [how to find it](how-tos.md#get-export-endpoint).
 2. Your authentication method. You can use either an [API Key](https://www.elastic.co/guide/en/observability/current/apm-api-key.html), a [Secret token](https://www.elastic.co/guide/en/observability/current/apm-secret-token.html), or none; defaults to `None`. API Keys are the recommended method, if you don't have one yet, check out [how to create one](how-tos.md#create-api-key).
 3. The protocol used to communicate with your endpoint. It can be either `HTTP` or `gRPC`, defaults to `HTTP`.
+
+### Intercepting attributes
+
+You can provide global interceptors for all spans and logs [attributes](https://opentelemetry.io/docs/specs/otel/common/#attribute), where you can read/modify them if needed.
+
+```kotlin
+class MyApp : android.app.Application {
+
+    override fun onCreate() {
+        super.onCreate()
+        val agent = ElasticApmAgent.builder(this)
+            // ...
+            .addSpanAttributesInterceptor(interceptor)
+            .addLogRecordAttributesInterceptor(interceptor)
+            .build()
+    }
+}
+```
+
+### Intercepting exporters
+
+The agent configures exporters for each signal ([spans](https://opentelemetry.io/docs/languages/java/sdk/#spanexporter), [logs](https://opentelemetry.io/docs/languages/java/sdk/#logrecordexporter) and [metrics](https://opentelemetry.io/docs/languages/java/sdk/#metricexporter)), to manage features like [disk buffering](index.md#disk-buffering) and also to establish a connection with the Elastic export endpoint based on the provided [export connectivity](#export-connectivity) values. You can intercept these to add your own logic on top, such as logging each signal that gets exported, or filtering some items that don't make sense for you to export.
+
+```kotlin
+class MyApp : android.app.Application {
+
+    override fun onCreate() {
+        super.onCreate()
+        val agent = ElasticApmAgent.builder(this)
+            // ...
+            .addSpanExporterInterceptor(interceptor)
+            .addLogRecordExporterInterceptor(interceptor)
+            .addMetricExporterInterceptor(interceptor)
+            .build()
+    }
+}
+```
 
 ### OpenTelemetry resource [opentelemetry-resource]
 

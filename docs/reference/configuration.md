@@ -5,27 +5,33 @@ mapped_pages:
 
 # Configuration [configuration]
 
-## Runtime configuration [_runtime_configuration]
+## Initialization configuration [_runtime_configuration]
 
-The runtime configuration is provided within your [Application](https://developer.android.com/reference/android/app/Application) class when initializing the Elastic agent. This configuration overrides any previously-set compile time configuration.
+Available from the Elastic agent builder shown in [Agent setup](getting-started.md#agent-setup), the following are its available parameters.
 
-Runtime configuration works by providing your own instance of the `ElasticApmConfiguration` class as shown below:
+### Application info [application-info]
 
-```java
-// Application class
+Providing your application name, version, and environment:
 
-class MyApp extends android.app.Application {
+```kotlin
+class MyApp : android.app.Application {
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        ElasticApmAgent.initialize(this, ElasticApmConfiguration.builder().build());
+    override fun onCreate() {
+        super.onCreate()
+        val agent = ElasticApmAgent.builder(this)
+            .setServiceName("My app name") // <1>
+            .setServiceVersion("1.0.0") // <2>
+            .setDeploymentEnvironment("prod") // <3>
+            .build()
     }
 }
 ```
 
+1. This will be the name used by {{kib}} when listing your application on the [Services](https://www.elastic.co/guide/en/observability/current/apm-services.html) page, defaults to `unknown`. See, [why your app is referred to as a "service"](faq.md#why-service-name).
+2. Your app's version name, defaults to the version provided [here](https://developer.android.com/reference/android/content/pm/PackageInfo#versionName).
+3. Typically your app's build type, flavor, backend environment it points to, or maybe a combination of them. Any helpful distinction for you to better analyze your app's data later on in {{kib}}.
 
-### APM Server connectivity [app-server-connectivity]
+### Export connectivity [export-connectivity]
 
 The APM Server connectivity parameters can be provided at compile time, either by using the Gradle DSL configuration or by providing the APM Server connectivity-related environment variables as mentioned above. Later on, when the app is running, the connectivity parameters can be overridden by providing a custom `Connectivity` instance when initializing the Elastic agent.
 
@@ -88,12 +94,9 @@ class MyApp extends android.app.Application {
 
 1. Note that this configuration may not work if a [custom signal configuration](#custom-signal-configuration) is set.
 
-
 ::::{note}
 OTLP over HTTP is supported in APM server versions 8.3.0+. OTLP over gRPC is supported in APM Server versions 7.12.0+.
 ::::
-
-
 
 ### Persistence configuration [persistence-configuration]
 
@@ -123,28 +126,6 @@ class MyApp extends android.app.Application {
 1. Defaults to `false`.
 2. Defaults to 60 MB.
 3. Defaults to one minute. The default `ExportScheduler` will run only when the host app is running, though you can create your own implementation of it in order to provide a better-suited scheduler for your app.
-
-
-
-### Application ID configuration [app-id-configuration]
-
-You can provide your application name, version, and environment dynamically when building your `ElasticApmConfiguration` instance as shown below:
-
-```java
-class MyApp extends android.app.Application {
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        ElasticApmConfiguration configuration = ElasticApmConfiguration.builder()
-                .setServiceName("my-custom-name")
-                .setServiceVersion("1.0.0")
-                .setDeploymentEnvironment("debug")
-                .build();
-        ElasticApmAgent.initialize(this, configuration);
-    }
-}
-```
 
 
 ### Sample rate configuration [sample-rate-configuration]

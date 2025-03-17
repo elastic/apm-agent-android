@@ -5,58 +5,6 @@ mapped_pages:
 
 # Configuration [configuration]
 
-::::{warning}
-This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
-::::
-
-
-
-## Gradle configuration [_gradle_configuration]
-
-Configure your application at compile time within your application’s `build.gradle` file:
-
-```groovy
-// Android app's build.gradle file
-plugins {
-    //...
-    id "co.elastic.apm.android" version "[latest_version]" <1>
-}
-
-elasticApm {
-    // Minimal configuration
-    serverUrl = "https://your.elastic.server"
-
-    // Optional
-    serviceName = "your app name" <2>
-    serviceVersion = "0.0.0" <3>
-    apiKey = "your server api key" <4>
-    secretToken = "your server auth token" <5>
-}
-```
-
-1. You can find the latest version in the [Gradle plugin portal](https://plugins.gradle.org/plugin/co.elastic.apm.android).
-2. Defaults to your `android.defaultConfig.applicationId` value.
-3. Defaults to your `android.defaultConfig.versionName` value.
-4. Defaults to null. More info on API Keys [here](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-create-api-key).
-5. Defaults to null.
-
-
-::::{note}
-When both `secretToken` and `apiKey` are provided, apiKey has priority and secretToken is ignored.
-::::
-
-
-All of the values provided in the Gradle configuration can be overridden with the following environment variables:
-
-| Config | Associated Environment variable |
-| --- | --- |
-| serviceName | `ELASTIC_APM_SERVICE_NAME` |
-| serviceVersion | `ELASTIC_APM_SERVICE_VERSION` |
-| serverUrl | `ELASTIC_APM_SERVER_URL` |
-| apiKey | `ELASTIC_APM_API_KEY` |
-| secretToken | `ELASTIC_APM_SECRET_TOKEN` |
-
-
 ## Runtime configuration [_runtime_configuration]
 
 The runtime configuration is provided within your [Application](https://developer.android.com/reference/android/app/Application) class when initializing the Elastic agent. This configuration overrides any previously-set compile time configuration.
@@ -205,7 +153,7 @@ Sample rates are applied to [sessions](https://opentelemetry.io/docs/specs/semco
 
 When the time’s up, a new session ID will be generated and the sample rate will be evaluated to determine whether the new session’s signals will get exported or ignored.
 
-You can set the sample rate value at runtime either programmatically, as shown below, or remotely through the [Central configuration](#configuration-dynamic). Values set through Central configuration will override the ones set programmatically.
+You can set the sample rate value at runtime either programmatically, as shown below, or remotely through the [Central configuration](#dynamic-configuration). Values set through Central configuration will override the ones set programmatically.
 
 ```java
 class MyApp extends android.app.Application {
@@ -426,43 +374,6 @@ class MyApp extends android.app.Application {
 
 1. You can either create your own implementation for the SignalConfiguration interface, or you can use the `SignalConfiguration.custom` function and pass your implementations for OpenTelemetry’s processors and/or exporters.
 
-
-
-### Further configurations from the OpenTelemetry SDK. [opentelemetry-sdk-configuration]
-
-The configurable parameters provided by the Elastic APM agent aim to help configuring common use cases in an easy way, in most of the cases it means to act as a facade between your application and the OpenTelemetry Java SDK that this agent is built on top. If your project requires to configure more advanced aspects of the overall APM processes, you could directly apply that configuration using the [OpenTelemetry SDK](https://opentelemetry.io/docs/instrumentation/java/getting-started/), which becomes available for you to use within your project by adding the Elastic agent plugin, as explained in [the agent setup guide](/reference/getting-started.md). Said configuration will be used by the Elastic agent for the [signals](https://opentelemetry.io/docs/concepts/signals/) it sends out of the box.
-
-
-## Dynamic configuration ![dynamic config](../images/dynamic-config.svg "") [configuration-dynamic]
+## Dynamic configuration [dynamic-configuration]
 
 Configuration options marked with Dynamic true can be changed at runtime when set from Kibana’s [central configuration](docs-content://solutions/observability/apps/apm-agent-central-configuration.md).
-
-
-## Option reference [_option_reference]
-
-This is a list of all configuration options.
-
-
-### `recording` ([0.4.0]) [config-recording]
-
-A boolean specifying if the agent should be recording or not. When recording, the agent instruments incoming HTTP requests, tracks errors and collects and sends metrics. When not recording, the agent works as a noop, not collecting data and not communicating with the APM sever, except for polling the central configuration endpoint. As this is a reversible switch, agent threads are not being killed when inactivated, but they will be mostly idle in this state, so the overhead should be negligible.
-
-You can use this setting to dynamically disable Elastic APM at runtime.
-
-[![dynamic config](../images/dynamic-config.svg "") ](#configuration-dynamic)
-
-| Default | Type | Dynamic |
-| --- | --- | --- |
-| `true` | Boolean | true |
-
-
-### `session_sample_rate` ([0.9.0]) [config-session-sample-rate]
-
-By default, the agent will sample all signals generated by your application (e.g. spans, metrics, and logs). To reduce overhead and storage requirements, you can set the sample rate to a value between 0.0 and 1.0. When reduced below 1.0, data will be sampled per session. This is so context in a given session isn’t lost. You can use this setting to dynamically disable Elastic APM at runtime by setting the sample rate to `0`.
-
-[![dynamic config](../images/dynamic-config.svg "") ](#configuration-dynamic)
-
-| Default | Type | Dynamic |
-| --- | --- | --- |
-| `1.0` | Float | true |
-

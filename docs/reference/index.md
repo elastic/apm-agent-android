@@ -68,22 +68,3 @@ The agent allows you to modify some values, provided during initialization, afte
 ### Automatic instrumentation
 
 The agent provides extensions that generate telemetry automatically for common tools and use-cases. More info on the [automatic instrumentation](automatic-instrumentation.md) page.
-
-## How does the Agent work? [how-it-works]
-
-The Agent auto-instruments [*Supported technologies*](/reference/automatic-instrumentation.md) and records interesting events, like spans for outgoing HTTP requests and UI rendering processes. To do this, it leverages the capability of the Android Gradle plugin API to instrument the bytecode of classes. This means that for supported technologies, there are no code changes required.
-
-Spans are grouped in transactions — by default, one for each outgoing HTTP request or UI rendering process. It’s also possible to create custom transactions, as well as logs and metrics, with the [OpenTelemetry Java API](https://opentelemetry.io/docs/instrumentation/java/manual/), which is automatically provided to the Agent’s host app. Spans, Logs and Metrics are sent to the APM Server, where they’re converted to a format suitable for Elasticsearch. You can then use the APM app in Kibana to gain insight into latency issues and error culprits within your application.
-
-::::{note}
-The metrics aggregation strategy used by the agent is [DELTA](https://github.com/open-telemetry/opentelemetry-java/blob/976edfde504193f84d19936b97e2eb8d8cf060e2/sdk/metrics/src/main/java/io/opentelemetry/sdk/metrics/data/AggregationTemporality.java#L15).
-::::
-
-
-More detailed information on how the Agent works can be found in the [FAQ](/reference/faq.md#faq-how-does-it-work).
-
-
-## Additional components [additional-components]
-
-APM Agents work in conjunction with the [APM Server](docs-content://solutions/observability/apps/application-performance-monitoring-apm.md), [Elasticsearch](docs-content://get-started/index.md), and [Kibana](docs-content://get-started/the-stack.md). The [APM Guide](docs-content://solutions/observability/apps/application-performance-monitoring-apm.md) provides details on how these components work together, and provides a matrix outlining [Agent and Server compatibility](docs-content://solutions/observability/apps/apm-agent-compatibility.md).
-

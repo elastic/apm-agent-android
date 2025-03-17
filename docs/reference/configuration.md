@@ -33,25 +33,25 @@ class MyApp : android.app.Application {
 
 ### Export connectivity [export-connectivity]
 
-The APM Server connectivity parameters can be provided at compile time, either by using the Gradle DSL configuration or by providing the APM Server connectivity-related environment variables as mentioned above. Later on, when the app is running, the connectivity parameters can be overridden by providing a custom `Connectivity` instance when initializing the Elastic agent.
+Configuring where your app's telemetry will be exported to.
 
-Once you’ve created your `Connectivity` instance, you can set it into the agent’s initialization as show below:
+```kotlin
+class MyApp : android.app.Application {
 
-```java
-class MyApp extends android.app.Application {
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        Connectivity myCustomConnectivity = Connectivity.simple(/*params*/);
-        ElasticApmAgent.initialize(this, myCustomConnectivity);
-
-        // Optionally if you also define a custom configuration:
-        // ElasticApmAgent.initialize(this, ElasticApmConfiguration.builder().build(), myCustomConnectivity);
+    override fun onCreate() {
+        super.onCreate()
+        val agent = ElasticApmAgent.builder(this)
+            .setExportUrl("https://my-elastic-apm-collector.endpoint") // <1>
+            .setExportAuthentication(Authentication.ApiKey("my-api-key")) // <2>
+            .setExportProtocol(ExportProtocol.HTTP) // <3>
+            .build()
     }
 }
 ```
 
+1. Your endpoint URL. If you don't have one yet, check out [how to find it](how-tos.md#get-export-endpoint).
+2. Your authentication method. You can use either an [API Key](https://www.elastic.co/guide/en/observability/current/apm-api-key.html), a [Secret token](https://www.elastic.co/guide/en/observability/current/apm-secret-token.html), or none; defaults to `NONE`. API Keys are the recommended method, if you don't have one yet, check out [how to create one](how-tos.md#create-api-key).
+3. The protocol used to communicate with your endpoint. It can be either `HTTP` or `gRPC`, defaults to `HTTP`.
 
 ### OpenTelemetry resource [opentelemetry-resource]
 

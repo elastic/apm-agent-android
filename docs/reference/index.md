@@ -35,9 +35,9 @@ You may click on any of those spans to see their full details, in case you need 
 For distributed tracing to work properly, your backend services have to be configured to send telemetry to the {{stack}} as well.
 :::
 
-### Session trail
+### Session review
 
-The agent attaches session attributes to each span and log generated from your application, allowing you to create queries where you can group all the telemetry that belongs to a session and form a session event timeline, useful for understanding what are the most common actions performed by your users, as well as tracing their steps towards errors that they might encounter.
+The agent attaches [session](#session) info to each span and log generated from your application, allowing you to create queries where you can group all the telemetry that belongs to a session and form a session event timeline, useful for understanding what are the most common actions performed by your users, as well as tracing their steps towards errors that they might encounter.
 
 For example, let's say you have a screen "A" in your app that can be opened from other screens, such as "B", and let's say you've created a log event for when the user clicks on a button from screen "B" that takes them to screen "A", as well as a log created when screen "A" is opened (or maybe a span instead, in case you'd like to measure how long it takes for screen "A" to fully load). Both items will contain an attribute named `session.id` with the same value per session. This can let you create {{es}} queries, say in {{kib}}'s [Discover tool](https://www.elastic.co/guide/en/kibana/current/discover.html) for example, to list all the events that happened during that session and to better understand your user's journey within your application.
 
@@ -47,11 +47,17 @@ The examples above show a couple of use-cases that you can achieve with the agen
 
 ## Features
 
+On top of the features that come with the [OpenTelemetry SDK](https://opentelemetry.io/docs/languages/java/), the agent also adds the following ones.
+
 ### Disk buffering
 
-### Session
+Your application's telemetry data is stored locally before getting sent to your {{stack}} and removed once it's successfully exported, or to make room for new telemetry data, if needed. This is done to minimize the risk of losing data due to internet connectivity issues.
 
 ### Real time
+
+For [distributed tracing](#distributed-tracing) to work properly, your application's time should be in sync with the [coordinated universal time](https://en.wikipedia.org/wiki/Coordinated_Universal_Time). This is sometimes an issue for Android applications, as the time provided by the OS is often not accurate enough. The agent aims to synchronize telemetry timestamps with the universal time to ensure a reliable view of event timelines.
+
+### Session
 
 ### Dynamic endpoint
 

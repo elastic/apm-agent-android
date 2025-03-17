@@ -59,6 +59,10 @@ For [distributed tracing](#distributed-tracing) to work properly, your applicati
 
 ### Session
 
+A session aims to group telemetry data into a timeframe where your application was active, presumably to carry out a single task/operation/goal at a given time, by adding a `session.id` attribute to all the spans and logs that come out of your application. This is useful to be able of narrowing down the amount of data that you should take a look at for cases in which you'd want to investigate the steps that ended up in an error within your app, or just to know what are the common actions that are performed within your app on each use.
+
+A session is created when there's no previous one, or when the previous one has expired. They expire after 30 minutes of idle time (meaning that for those 30 minutes there was no telemetry generated), which can be extended up to 4 hours in case that there's always telemetry data getting generated during that time.
+
 ### Dynamic endpoint
 
 ### Automatic instrumentation

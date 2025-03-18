@@ -119,7 +119,7 @@ class MyApp : android.app.Application {
 
 ### Intercepting HTTP Spans
 
-This is a convenience tool to intercept HTTP-related spans. The agent, by default, sets an interceptor that enhances the span names to provide info such as domain:port, when only an HTTP verb is set, which is [often the case](https://opentelemetry.io/docs/specs/semconv/http/http-spans/#name) for HTTP span names.
+This is a convenience tool to intercept HTTP-related spans. The agent, by default, sets an interceptor that enhances the span names to provide info such as domain:port, for when only an HTTP verb is set, which is [often the case](https://opentelemetry.io/docs/specs/semconv/http/http-spans/#name) for HTTP client span names.
 
 You can override this behavior by setting your own interceptor (or you can choose to set it to `null` to just disable it all).
 

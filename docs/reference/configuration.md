@@ -75,25 +75,6 @@ class MyApp : android.app.Application {
 }
 ```
 
-### Intercepting exporters
-
-The agent configures exporters for each signal ([spans](https://opentelemetry.io/docs/languages/java/sdk/#spanexporter), [logs](https://opentelemetry.io/docs/languages/java/sdk/#logrecordexporter) and [metrics](https://opentelemetry.io/docs/languages/java/sdk/#metricexporter)), to manage features like [disk buffering](index.md#disk-buffering) and also to establish a connection with the Elastic export endpoint based on the provided [export connectivity](#export-connectivity) values. You can intercept these to add your own logic on top, such as logging each signal that gets exported, or filtering some items that don't make sense for you to export.
-
-```kotlin
-class MyApp : android.app.Application {
-
-    override fun onCreate() {
-        super.onCreate()
-        val agent = ElasticApmAgent.builder(this)
-            // ...
-            .addSpanExporterInterceptor(interceptor)
-            .addLogRecordExporterInterceptor(interceptor)
-            .addMetricExporterInterceptor(interceptor)
-            .build()
-    }
-}
-```
-
 ### Intercepting resources
 
 The agent creates a [resource](https://opentelemetry.io/docs/specs/otel/overview/#resources) for your signals, which is essentially a set of static global attributes, to provide key attributes that are later queried by {{kib}} to properly display your application's data.
@@ -112,6 +93,25 @@ class MyApp : android.app.Application {
         val agent = ElasticApmAgent.builder(this)
             // ...
             .setResourceInterceptor(interceptor)
+            .build()
+    }
+}
+```
+
+### Intercepting exporters
+
+The agent configures exporters for each signal ([spans](https://opentelemetry.io/docs/languages/java/sdk/#spanexporter), [logs](https://opentelemetry.io/docs/languages/java/sdk/#logrecordexporter) and [metrics](https://opentelemetry.io/docs/languages/java/sdk/#metricexporter)), to manage features like [disk buffering](index.md#disk-buffering) and also to establish a connection with the Elastic export endpoint based on the provided [export connectivity](#export-connectivity) values. You can intercept these to add your own logic on top, such as logging each signal that gets exported, or filtering some items that don't make sense for you to export.
+
+```kotlin
+class MyApp : android.app.Application {
+
+    override fun onCreate() {
+        super.onCreate()
+        val agent = ElasticApmAgent.builder(this)
+            // ...
+            .addSpanExporterInterceptor(interceptor)
+            .addLogRecordExporterInterceptor(interceptor)
+            .addMetricExporterInterceptor(interceptor)
             .build()
     }
 }

@@ -5,11 +5,11 @@ mapped_pages:
 
 # Configuration [configuration]
 
-## Initialization configuration [_runtime_configuration]
+## Initialization configuration 
 
 Available from the Elastic agent builder shown in [Agent setup](getting-started.md#agent-setup), the following are its available parameters.
 
-### Application info [application-info]
+### Application info
 
 Providing your application name, version, and environment:
 
@@ -32,7 +32,7 @@ class MyApp : android.app.Application {
 2. Your app's version name, defaults to the version provided [here](https://developer.android.com/reference/android/content/pm/PackageInfo#versionName).
 3. Typically your app's build type, flavor, backend environment it points to, or maybe a combination of them. Any helpful distinction for you to better analyze your app's data later on in {{kib}}.
 
-### Export connectivity [export-connectivity]
+### Export connectivity
 
 Configuring where your app's telemetry will be exported to.
 
@@ -117,7 +117,7 @@ class MyApp : android.app.Application {
 }
 ```
 
-### Internal logging policy [internal-logging-policy]
+### Internal logging policy
 
 :::{note}
 Not to be confused with OpenTelemetry's [log signals](https://opentelemetry.io/docs/concepts/signals/logs/). The internal logging policy is about the agent's internal logs that you should see in [logcat](https://developer.android.com/studio/debug/logcat) only.

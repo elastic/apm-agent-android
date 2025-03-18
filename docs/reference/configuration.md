@@ -59,7 +59,7 @@ class MyApp : android.app.Application {
 
 You can provide global interceptors for all spans and logs [attributes](https://opentelemetry.io/docs/specs/otel/common/#attribute), which will be executed on every span or log creation, where you can read/modify them if needed.
 
-This is useful for setting dynamic global attributes.
+This is useful for setting dynamic global attributes. If you'd like to set static global attributes (which are also applied to metrics) take a look at [intercepting resources](#intercepting-resources).
 
 ```kotlin
 class MyApp : android.app.Application {

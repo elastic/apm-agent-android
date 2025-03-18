@@ -92,6 +92,26 @@ class MyApp : android.app.Application {
 }
 ```
 
+### Internal logging policy [internal-logging-policy]
+
+All of the logs created by the agent are printed for a debuggable app build. In the case of non-debuggable builds, only logs at the INFO level and above are printed.
+
+If you would like to show some specific logs from the agent, or even disable them altogether, you can do so by providing your own `LoggingPolicy` configuration. The following example shows how to allow all logs of level WARN and higher to be printed, whereas those below WARN will be ignored.
+
+```kotlin
+class MyApp : android.app.Application {
+
+    override fun onCreate() {
+        super.onCreate()
+        val agent = ElasticApmAgent.builder(this)
+            // ...
+            .setLoggingPolicy(LoggingPolicy.enabled(LogLevel.WARN))
+            .build()
+    }
+}
+```
+
+
 ### OpenTelemetry resource [opentelemetry-resource]
 
 You can provide your own [resource](https://opentelemetry.io/docs/languages/java/resources/) object which will be used for all of the OpenTelemetry signals (Spans, Metrics and Logs) as shown below:
@@ -338,30 +358,6 @@ There are [common attributes](https://github.com/elastic/apm/tree/main/specs/age
 | Attribute | Used in | Requires permission |
 | --- | --- | --- |
 | `net.host.connection.subtype` | All Spans | [READ_PHONE_STATE](https://developer.android.com/reference/android/Manifest.permission#READ_PHONE_STATE) |
-
-
-### Internal logging policy [_internal_logging_policy]
-
-By default, all logs created by this library are printed for a debuggable app build. In the case of non-debuggable builds, only logs at the INFO level and above are printed.
-
-If you would like to create a custom log policy or even disable all of the logs from this library altogether, you can do so by providing your own `LoggingPolicy` configuration. The below example policy will allow all logs of level WARN and higher to be printed. Levels below WARN will be ignored.
-
-```java
-class MyApp extends android.app.Application {
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        // This example policy will allow all logs of level WARN and higher to get printed, ignoring levels below it.
-        LoggingPolicy loggingPolicy = LoggingPolicy.enabled(LogLevel.WARN);
-
-        ElasticApmConfiguration.builder()
-                .setLibraryLoggingPolicy(loggingPolicy)
-                .build();
-        ElasticApmAgent.initialize(this, configuration);
-    }
-}
-```
 
 
 ## Advanced configurable options [_advanced_configurable_options]

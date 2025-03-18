@@ -15,7 +15,7 @@ Android devices with an API level < 26 (older than [Android 8.0](https://develop
 
 To prevent these kinds of issues on devices using Android OS older than 8.0, you must add [Java 8 desugaring support](https://developer.android.com/studio/write/java8-support#library-desugaring) to your app. This requirement is inherited from the [OpenTelemetry Java SDK](https://github.com/open-telemetry/opentelemetry-java/blob/main/VERSIONING.md#language-version-compatibility), which this project is built upon, where several of the unsupported types for Android < 8.0 are used.
 
-## Why does my app name have to be set as "service name"? [why-service-name]
+## Why does my app have to be referred to as "service"? [why-service]
 
 TL;DR: It's complicated to change it to another name because of its widespread adoption within the OpenTelemetry community.
 

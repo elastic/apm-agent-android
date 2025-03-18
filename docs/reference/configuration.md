@@ -109,7 +109,7 @@ class MyApp : android.app.Application {
         super.onCreate()
         val agent = ElasticApmAgent.builder(this)
             // ...
-            .setLoggingPolicy(LoggingPolicy.enabled(LogLevel.WARN))
+            .setInternalLoggingPolicy(LoggingPolicy.enabled(LogLevel.WARN))
             .build()
     }
 }

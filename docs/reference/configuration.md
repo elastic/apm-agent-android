@@ -101,7 +101,7 @@ The agent creates a [resource](https://opentelemetry.io/docs/specs/otel/overview
 You can intercept these resources and read/modify them as shown below.
 
 :::{note}
-The resource interceptor is only queried during initialization, as this is the only place where it can be modified. If you'd like to set global _dynamic_ attributes instead, take a look at [intercepting attributes](#intercepting-attributes).
+The resource interceptor is only queried during initialization, as this is the only place where it can be modified. If you'd like to set _dynamic_ global attributes instead, take a look at [intercepting attributes](#intercepting-attributes).
 :::
 
 ```kotlin

@@ -140,10 +140,10 @@ class MyApp : android.app.Application {
 }
 ```
 
-### HTTP Configuration [_http_configuration]
+### HTTP Configuration
 
 The agent provides a configuration object for HTTP-related spans named `HttpTraceConfiguration`. You can pass an instance of it to the `ElasticApmConfiguration` object when initializing the agent in order to customize how the HTTP spans should be handled.
 
-## Dynamic configuration [dynamic-configuration]
+## Dynamic configuration
 
 Configuration options marked with Dynamic true can be changed at runtime when set from Kibana’s [central configuration](docs-content://solutions/observability/apps/apm-agent-central-configuration.md).

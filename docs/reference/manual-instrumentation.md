@@ -42,7 +42,7 @@ To find more details on how to create signals using the OpenTelemetry APIs, you 
 For common use-cases, in regards to spans and logs creation, the agent provides a couple of Kotlin extension methods to allow you to create telemetry in a less verbose way.
 
 :::{note}
-The convenience methods make use of the same [OpenTelemetry APIs](#opentelemetry-apis) to create telemetry. So they are not the only way to create the following signals, they are only making them more straightforward to create.
+The convenience methods make use of the same [OpenTelemetry APIs](#opentelemetry-apis) internally to create telemetry. So they are not the only way to create the following signals, they are only making them more straightforward to create.
 :::
 
 ### Spans

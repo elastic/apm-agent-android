@@ -180,4 +180,21 @@ class MyApp : android.app.Application {
 
 ## Dynamic configuration
 
-Configuration options marked with Dynamic true can be changed at runtime when set from Kibana’s [central configuration](docs-content://solutions/observability/apps/apm-agent-central-configuration.md).
+These are available from an already built [agent](https://github.com/elastic/apm-agent-android/blob/main/agent-sdk/src/main/java/co/elastic/otel/android/ElasticApmAgent.kt).
+
+### Update export connectivity
+
+You can change any of the configuration values provided as part of the [export connectivity](#export-connectivity) setters, at any time, by setting a new [ExportConnectivityConfiguration](https://github.com/elastic/apm-agent-android/blob/main/agent-sdk/src/main/java/co/elastic/otel/android/connectivity/ExportConnectivityConfiguration.kt) object, which will override them all.
+
+```kotlin
+class MyApp : android.app.Application {
+
+    override fun onCreate() {
+        super.onCreate()
+        val agent = ElasticApmAgent.builder(this)
+            // ...
+            .build()
+        agent.setExportConnectivityConfiguration(configuration)
+    }
+}
+```

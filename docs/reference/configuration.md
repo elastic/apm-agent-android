@@ -57,7 +57,9 @@ class MyApp : android.app.Application {
 
 ### Intercepting attributes
 
-You can provide global interceptors for all spans and logs [attributes](https://opentelemetry.io/docs/specs/otel/common/#attribute), where you can read/modify them if needed.
+You can provide global interceptors for all spans and logs [attributes](https://opentelemetry.io/docs/specs/otel/common/#attribute), which will be executed on every span or log creation, where you can read/modify them if needed.
+
+This is useful for setting dynamic global attributes.
 
 ```kotlin
 class MyApp : android.app.Application {
@@ -94,9 +96,9 @@ class MyApp : android.app.Application {
 
 ### Internal logging policy [internal-logging-policy]
 
-::::{note}
+:::{note}
 Not to be confused with OpenTelemetry's [log signals](https://opentelemetry.io/docs/concepts/signals/logs/). The internal logging policy is about the agent's internal logs that you should see in [logcat](https://developer.android.com/studio/debug/logcat) only.
-::::
+:::
 
 The agent creates logs, by using [Android's Log](https://developer.android.com/reference/android/util/Log) type, to notify about its internal events so that you can check them out in [logcat](https://developer.android.com/studio/debug/logcat) for debugging purposes. By default, all of the logs are printed for a debuggable app build, however, in the case of non-debuggable builds, only logs at the INFO level and above are printed.
 
@@ -117,24 +119,26 @@ class MyApp : android.app.Application {
 
 ### Intercepting resources
 
-You can provide your own [resource](https://opentelemetry.io/docs/languages/java/resources/) object which will be used for all of the OpenTelemetry signals (Spans, Metrics and Logs) as shown below:
+The agent creates a [resource](https://opentelemetry.io/docs/specs/otel/overview/#resources), which is essentially a set of static global attributes, for your signals to provide key attributes that are later queried by {{kib}} to properly display your application's data.
 
-```java
-class MyApp extends android.app.Application {
+You can intercept these resources and read/modify them as shown below.
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
+:::{note}
+The resource interceptor is only queried during initialization, as this is the only place where it can be modified. If you'd like to set global _dynamic_ attributes instead, take a look at [intercepting attributes](#intercepting-attributes).
+:::
 
-        Resource myResource = Resource.create(Attributes.builder().put(RESOURCE_KEY, RESOURCE_VALUE).build());
-        ElasticApmConfiguration configuration = ElasticApmConfiguration.builder()
-                .setResource(myResource)
-                .build();
-        ElasticApmAgent.initialize(this, configuration);
+```kotlin
+class MyApp : android.app.Application {
+
+    override fun onCreate() {
+        super.onCreate()
+        val agent = ElasticApmAgent.builder(this)
+            // ...
+            .setResourceInterceptor(interceptor)
+            .build()
     }
 }
 ```
-
 
 ### APM Server export protocol [server-export-protocol]
 

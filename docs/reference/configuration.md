@@ -119,7 +119,7 @@ class MyApp : android.app.Application {
 
 ### Intercepting resources
 
-The agent creates a [resource](https://opentelemetry.io/docs/specs/otel/overview/#resources), which is essentially a set of static global attributes, for your signals to provide key attributes that are later queried by {{kib}} to properly display your application's data.
+The agent creates a [resource](https://opentelemetry.io/docs/specs/otel/overview/#resources) for your signals, which is essentially a set of static global attributes, to provide key attributes that are later queried by {{kib}} to properly display your application's data.
 
 You can intercept these resources and read/modify them as shown below.
 

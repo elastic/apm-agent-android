@@ -18,7 +18,7 @@ class MyApp : android.app.Application {
 
     override fun onCreate() {
         super.onCreate()
-        agent = ElasticApmAgent.builder(this)
+        val agent = ElasticApmAgent.builder(this)
             .setServiceName("My app name") // <1>
             .setServiceVersion("1.0.0") // <2>
             .setDeploymentEnvironment("prod") // <3>

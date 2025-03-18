@@ -117,6 +117,25 @@ class MyApp : android.app.Application {
 }
 ```
 
+### Intercepting HTTP Spans
+
+This is a convenience tool to intercept HTTP-related spans. The agent, by default, sets an interceptor that enhances the span names to provide info such as domain:port, when only an HTTP verb is set, which is [often the case](https://opentelemetry.io/docs/specs/semconv/http/http-spans/#name) for HTTP span names.
+
+You can override this behavior by setting your own interceptor (or you can choose to set it to `null` to just disable it all).
+
+```kotlin
+class MyApp : android.app.Application {
+
+    override fun onCreate() {
+        super.onCreate()
+        val agent = ElasticApmAgent.builder(this)
+            // ...
+            .setHttpSpanInterceptor(interceptor)
+            .build()
+    }
+}
+```
+
 ### Providing processors
 
 Part of the work that the agent does when configuring the [OpenTelemetry SDK](https://github.com/open-telemetry/opentelemetry-java) on your behalf, is to provide processors, which are needed to delegate data to the exporters. For spans, the agent provides a [BatchSpanProcessor](https://www.javadoc.io/doc/io.opentelemetry/opentelemetry-sdk-trace/latest/io/opentelemetry/sdk/trace/export/BatchSpanProcessor.html); for logs, a [BatchLogRecordProcessor](https://www.javadoc.io/doc/io.opentelemetry/opentelemetry-sdk-logs/latest/io/opentelemetry/sdk/logs/export/BatchLogRecordProcessor.html); whereas for metrics, it's a [PeriodicMetricReader](https://www.javadoc.io/doc/io.opentelemetry/opentelemetry-sdk-metrics/latest/io/opentelemetry/sdk/metrics/export/PeriodicMetricReader.html) (which is analogous to a processor, despite not having that word included on its name).

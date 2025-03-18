@@ -117,6 +117,25 @@ class MyApp : android.app.Application {
 }
 ```
 
+### Providing processors
+
+Part of the work that the agent does when configuring the [OpenTelemetry SDK](https://github.com/open-telemetry/opentelemetry-java) on your behalf, is to provide processors, which are needed to delegate data to the exporters. For spans, the agent provides a [BatchSpanProcessor](https://www.javadoc.io/doc/io.opentelemetry/opentelemetry-sdk-trace/latest/io/opentelemetry/sdk/trace/export/BatchSpanProcessor.html); for logs, a [BatchLogRecordProcessor](https://www.javadoc.io/doc/io.opentelemetry/opentelemetry-sdk-logs/latest/io/opentelemetry/sdk/logs/export/BatchLogRecordProcessor.html); whereas for metrics, it's a [PeriodicMetricReader](https://www.javadoc.io/doc/io.opentelemetry/opentelemetry-sdk-metrics/latest/io/opentelemetry/sdk/metrics/export/PeriodicMetricReader.html) (which is analogous to a processor, despite not having that word included on its name).
+
+In case you wanted to provide your own ones, you can do so by setting a custom [ProcessorFactory](https://github.com/elastic/apm-agent-android/blob/main/agent-sdk/src/main/java/co/elastic/otel/android/processors/ProcessorFactory.kt), as shown below. The factory will be called once during initialization and will need to provide a processor per signal. Each processor-provider-method within the factory will contain the pre-configured exporter for that signal as an argument so that it's included into the processor as its delegate exporter.
+
+```kotlin
+class MyApp : android.app.Application {
+
+   override fun onCreate() {
+      super.onCreate()
+      val agent = ElasticApmAgent.builder(this)
+         // ...
+         .setProcessorFactory(factory)
+         .build()
+   }
+}
+```
+
 ### Internal logging policy
 
 :::{note}

@@ -18,7 +18,7 @@ class MyApp : android.app.Application {
 
     override fun onCreate() {
         super.onCreate()
-        val agent = ElasticApmAgent.builder(this)
+        agent = ElasticApmAgent.builder(this)
             .setServiceName("My app name") // <1>
             .setServiceVersion("1.0.0") // <2>
             .setDeploymentEnvironment("prod") // <3>
@@ -94,7 +94,11 @@ class MyApp : android.app.Application {
 
 ### Internal logging policy [internal-logging-policy]
 
-All of the logs created by the agent are printed for a debuggable app build. In the case of non-debuggable builds, only logs at the INFO level and above are printed.
+::::{note}
+Not to be confused with OpenTelemetry's [log signals](https://opentelemetry.io/docs/concepts/signals/logs/). The internal logging policy is about the agent's internal logs that you should see in [logcat](https://developer.android.com/studio/debug/logcat) only.
+::::
+
+The agent creates logs, by using [Android's Log](https://developer.android.com/reference/android/util/Log) type, to notify about its internal events so that you can check them out in [logcat](https://developer.android.com/studio/debug/logcat) for debugging purposes. By default, all of the logs are printed for a debuggable app build, however, in the case of non-debuggable builds, only logs at the INFO level and above are printed.
 
 If you would like to show some specific logs from the agent, or even disable them altogether, you can do so by providing your own `LoggingPolicy` configuration. The following example shows how to allow all logs of level WARN and higher to be printed, whereas those below WARN will be ignored.
 
@@ -111,8 +115,7 @@ class MyApp : android.app.Application {
 }
 ```
 
-
-### OpenTelemetry resource [opentelemetry-resource]
+### Intercepting resources
 
 You can provide your own [resource](https://opentelemetry.io/docs/languages/java/resources/) object which will be used for all of the OpenTelemetry signals (Spans, Metrics and Logs) as shown below:
 

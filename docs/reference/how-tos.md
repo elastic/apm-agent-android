@@ -8,7 +8,7 @@ Your [Application](https://developer.android.com/reference/android/app/Applicati
 
 Ideally, the agent should get initialized as soon as your application is launched, to make sure that it can start collecting telemetry from the very beginning.
 
-Based on the above, an ideal place to do so is from within your own, custom [Application#onCreate](https://developer.android.com/reference/android/app/Application#onCreate()) method implementation, as shown below:
+Based on the above, an ideal place to do so is from within your own, custom [Application.onCreate](https://developer.android.com/reference/android/app/Application#onCreate()) method implementation, as shown below:
 
 ```kotlin
 package my.app

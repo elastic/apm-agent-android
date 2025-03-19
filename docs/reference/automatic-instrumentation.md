@@ -9,13 +9,21 @@ The agent has an opt-in functionality that automatically generates telemetry on 
 
 ## How it works
 
+### Installation
+
 You need to **install** the automatic instrumentations you'd like to use.
 
 There are specific targets that are supported for automatic instrumentation, each one has its own Gradle plugin for it to be installed. Based on that, the overall steps to install a supported automatic instrumentation, are as follows:
 
 1. Choose a [supported instrumentation](#supported-instrumentations).
-2. Add its Gradle plugin to your project (the same where the [agent](getting-started.md#gradle-setup) is added too).
+2. Add its Gradle plugin to your project (the same where the [agent](getting-started.md#gradle-setup) is added).
 3. [Initialize the agent](getting-started.md#agent-setup), the same way you would without having any automatic instrumentation. There are no special steps needed during the agent initialization to make the automatic instrumentations work.
+
+### Compilation behavior
+
+Some automatic instrumentations perform byte code weaving, where essentially your application's code (including code from the libraries it uses) is modified **at compile-time**. This is needed in many cases to be able of providing a solution for which you don't need to write code to make it work, as the otherwise "manual code changes" would be done on your behalf.
+
+Byte code weaving is a common technique which is probably already used in your project for other use-cases, such as for [code optimization](https://developer.android.com/build/shrink-code#optimization) via R8, for example. It's a very useful technique, although there's one problem with it (which you've probably spotted with R8 optimizations) which is that **it can make the compilation take longer**.
 
 ## Supported instrumentations
 

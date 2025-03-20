@@ -9,7 +9,7 @@ You can create your custom spans, metrics, and logs, via the [OpenTelemetry SDK 
 
 ## OpenTelemetry APIs
 
-After completing the [setup](/reference/getting-started.md) process, the agent will have configured an [OpenTelemetry](https://www.javadoc.io/doc/io.opentelemetry/opentelemetry-api/latest/io/opentelemetry/api/OpenTelemetry.html) object for you, which is available via its `getOpenTelemetry()` method. Here's an example of how to create manual telemetry with it.
+After completing the [setup](/reference/getting-started.md) process, the agent will have configured an [OpenTelemetry](https://www.javadoc.io/doc/io.opentelemetry/opentelemetry-api/latest/io/opentelemetry/api/OpenTelemetry.html) object for you, which is available via its `getOpenTelemetry()` method. Here's an example of how to create telemetry with it.
 
 ```kotlin
 fun myMethod() {
@@ -39,7 +39,7 @@ To find more details on how to create signals using the OpenTelemetry APIs, you 
 
 ## Convenience extensions
 
-For common use-cases, in regards to spans and logs creation, the agent provides a couple of Kotlin extension methods to allow you to create telemetry in a less verbose way.
+For common use cases, in regards to spans and logs creation, the agent provides a couple of Kotlin extension methods to allow you to create telemetry in a less verbose way.
 
 :::{note}
 The convenience methods make use of the same [OpenTelemetry APIs](#opentelemetry-apis) internally to create telemetry. So they are not the only way to create the following signals, they are only making them more straightforward to create.

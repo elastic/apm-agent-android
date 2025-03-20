@@ -5,6 +5,8 @@ mapped_pages:
 
 # Configuration [configuration]
 
+This page is meant to complement the [Getting started](getting-started.md) one. Here you'll find a comprehensive list of all the configurable parameters available for the agent, including those you can set during initialization and those you can adjust dynamically afterward.
+
 ## Initialization configuration 
 
 Available from the Elastic agent builder shown in [Agent setup](getting-started.md#agent-setup), the following are its available parameters.

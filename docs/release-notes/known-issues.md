@@ -1,7 +1,8 @@
-% navigation_title: "Elastic APM Android Agent"
-% # Elastic APM Android Agent known issues
+---
+navigation_title: "Known issues"
+---
 
-# Known issues
+# Elastic APM Android Agent known issues
 
 % Use the following template to add entries to this page.
 

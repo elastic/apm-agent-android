@@ -84,6 +84,63 @@ This is the most straightforward approach, you'll need to follow [this quick gui
 
 [This guide](https://www.elastic.co/guide/en/observability/current/apm-agent-key-api.html#apm-create-agent-key) will help you create an API Key with a set of privileges that are scoped for the APM Agent use case only.
 
+## How to provide config values from outside of my code?
+
+Oftentimes we'd like to get values such as an endpoint URL; API Key/Secret Token; and so on, from places such as a local file in our project dir, or from an environment variable (or both).
+
+Luckily for us, the Android Gradle plugin has us covered with its [build config fields](https://developer.android.com/build/gradle-tips#share-custom-fields-and-resource-values-with-your-app-code), which provide a way for us to share Gradle info with our app's Kotlin/Java code. And given that Gradle has access to our project directory and to the compilation's host environment, there's a lot we can share from it with our code, some of the possible use-case are shown below.
+
+### Providing data from an environment variable
+
+```kotlin
+// Your app's build.gradle.kts file
+plugins {
+// ...
+}
+
+val url = System.getenv("MY_ENV_WITH_MY_URL") // <1>
+val apiKey = System.getenv("MY_ENV_WITH_MY_KEY")
+
+android {
+    // ...
+    buildFeatures.buildConfig = true // <2>
+
+    defaultConfig { // <3>
+        // ...
+        buildConfigField("String", "MY_EXPORT_URL", "\"$url\"") // <4>
+        buildConfigField("String", "MY_EXPORT_API_KEY", "\"$apiKey\"")
+    }
+}
+```
+
+1. Since our `build.gradle.kts` files are written using [Kotlin](https://kotlinlang.org/) code, we can get our environment variables the same way we would with regular Kotlin sources. The same applies to `build.gradle` files, which work with [Groovy](https://groovy-lang.org/) instead.
+2. We must ensure we have Android's `buildConfig` feature enabled.
+3. By adding our build config fields to the `android.defaultConfig` block, we ensure that they are available for all of your app's build variants. You could also, if needed, create fields with the same name but different values for each of your build variants, as shown in Android's [official docs](https://developer.android.com/build/gradle-tips#share-custom-fields-and-resource-values-with-your-app-code), to provide different values per variant.
+
+You've properly created build config fields from environment variables. To use them in code, take a look at how to [read build config fields](#read-build-config-fields) in code.
+
+### Read build config fields in code [read-build-config-fields]
+
+After adding [build config fields](https://developer.android.com/build/gradle-tips#share-custom-fields-and-resource-values-with-your-app-code) in your `build.gradle.kts` file, you may now use them within your app's Kotlin/Java code, by following these steps:
+
+1. Compile your project. The build config fields are generated during compilation, so this step is required so that you can find them in your code later.
+2. Find them within your app's `BuildConfig` generated type, as shown below.
+
+```kotlin
+import my.app.namespace.BuildConfig // <1>
+// ...
+
+fun myMethod() {
+    val agent = ElasticApmAgent.builder(application)
+        // ...
+        .setExportUrl(BuildConfig.MY_EXPORT_URL)
+        .setExportAuthentication(Authentication.ApiKey(BuildConfig.MY_EXPORT_API_KEY))
+        .build()
+}
+```
+
+1. There might be multiple `BuildConfig` types available to use in your code. The one that belongs to your app has a package name equal to your [app's namespace](https://developer.android.com/build/configure-app-module#set-namespace) value. So for example, if your app's namespace is set to `com.my.app`, then the `BuildConfig` type you must use would be `com.my.app.BuildType`.
+
 ## How to configure SSL/TLS? [faq-ssl]
 
 Please note that the Elastic Agent does not handle SSL/TLS configs internally, therefore, the recommended way to manage these types of configurations is by doing so as part of your app’s network security configurations, as explained in Android’s official [security guidelines](https://developer.android.com/privacy-and-security/security-ssl). Below we show a set of common use-cases and quick tips on what could be done on each one, however, each case might be different, so please refer to Android’s [official docs](https://developer.android.com/privacy-and-security/security-config) on this topic in case you need more details.

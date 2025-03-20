@@ -83,3 +83,35 @@ This is the most straightforward approach, you'll need to follow [this quick gui
 ### Via REST APIs
 
 [This guide](https://www.elastic.co/guide/en/observability/current/apm-agent-key-api.html#apm-create-agent-key) will help you create an API Key with a set of privileges that are scoped for the APM Agent use case only.
+
+## How to configure SSL/TLS? [faq-ssl]
+
+Please note that the Elastic Agent does not handle SSL/TLS configs internally, therefore, the recommended way to manage these types of configurations is by doing so as part of your app’s network security configurations, as explained in Android’s official [security guidelines](https://developer.android.com/privacy-and-security/security-ssl). Below we show a set of common use-cases and quick tips on what could be done on each one, however, each case might be different, so please refer to Android’s [official docs](https://developer.android.com/privacy-and-security/security-config) on this topic in case you need more details.
+
+### Connecting to Elastic Cloud [faq-ssl-elastic-cloud]
+
+If your {{stack}} is hosted in {{ecloud}}, you shouldn’t need to add any SSL/TLS config changes in your app, it should work out of the box.
+
+### Connecting to an on-prem server [faq-ssl-on-prem]
+
+If your {{stack}} is hosted on-prem, then it depends on the type of CA your host uses to sign its certificates, if it’s a commonly trusted CA, then you shouldn’t have to worry about changing your app’s SSL/TLS configuration as it all should work well out of the box, however, if your CAs are unknown/private or your server uses a self-signed certificate, then you would need to configure your app to trust custom CAs by following [Android’s guide on it](https://developer.android.com/privacy-and-security/security-config).
+
+### Debugging purposes [faq-ssl-debug]
+
+If you’re running a local server and need to connect to it without using https in order to run a quick test, then you could temporarily [enable cleartext traffic](https://developer.android.com/guide/topics/manifest/application-element#usesCleartextTraffic) within your `AndroidManifest.xml` file, inside the `<application>` tag. As shown below:
+
+```xml
+<application
+    ...
+    android:usesCleartextTraffic="true">
+    ...
+</application>
+```
+
+::::{note}
+You should only enable cleartext traffic for debugging purposes and not for production code.
+::::
+
+If enabling cleartext traffic isn’t a valid option for your debugging use-case, you should refer to Android’s guide on [configuring CAs for debugging](https://developer.android.com/privacy-and-security/security-config#TrustingDebugCa).
+
+For more information on how Android handles network security, please refer to the official [Android docs on it](https://developer.android.com/privacy-and-security/security-ssl).

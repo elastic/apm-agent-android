@@ -21,7 +21,7 @@ More info on [FAQs](faq.md#why-desugaring).
 
 ## Gradle setup
 
-Add the [Elastic OTel agent plugin](https://plugins.gradle.org/plugin/co.elastic.otel.android.agent) to your application’s `build.gradle[.kts]` file, as shown below:
+Add the [Elastic OTel Agent plugin](https://plugins.gradle.org/plugin/co.elastic.otel.android.agent) to your application’s `build.gradle[.kts]` file, as shown below:
 
 ```kotlin
 plugins {
@@ -34,7 +34,7 @@ plugins {
 
 ## Agent setup
 
-Once the gradle setup is done, you'll need to initialize the agent within your app's code, as shown below:
+Once the gradle setup is done, you need to initialize the agent within your app's code, as shown below:
 
 ```kotlin
 val agent = ElasticApmAgent.builder(application) // <1>
@@ -45,8 +45,8 @@ val agent = ElasticApmAgent.builder(application) // <1>
 ```
 
 1. Your [Application](https://developer.android.com/reference/android/app/Application) object. Check out [how to get it](how-tos.md#get-application).
-2. "Service" is OpenTelemetry's jargon for "entity that produces telemetry", so here's where your application name should go. More info on [FAQs](faq.md#why-service).
-3. This is the Elastic endpoint where all your telemetry will be exported to. If you don't have one yet, check out [how to get it](how-tos.md#get-export-endpoint).
+2. "Service" is OpenTelemetry's jargon for an "entity that produces telemetry", so here's where your application name should go. More info on [FAQs](faq.md#why-service).
+3. This is the Elastic endpoint where all your telemetry will be exported. If you don't have one yet, check out [how to get it](how-tos.md#get-export-endpoint).
 4. Using an API Key is the recommended authentication method for the agent to connect to your {{stack}}. If you don't have one yet, check out [how to create one](how-tos.md#create-api-key).
 
 :::{include} _snippets/tip-provide-values-from-outside.md
@@ -73,7 +73,7 @@ agent.span("My Span") {
 }
 ```
 1. This is to simulate some code execution for which we want to measure the time it takes to complete.
-2. This is to demonstrate how does span hierarchies look like in {{kib}}.
+2. This is to demonstrate how span hierarchies look like in {{kib}}.
 
 ### Visualize telemetry
 
@@ -86,7 +86,7 @@ You should find your application listed there, as shown below:
 :width: 350px
 :::
 
-When you open it, **go to the "Transactions" tab** where you should see your app's "outermost" spans listed:
+When you open it, **go to the "Transactions" tab**, where you should see your app's "outermost" spans listed:
 
 :::{image} ../images/span-visualization/2.png
 :screenshot:
@@ -101,8 +101,8 @@ And after clicking on our span, we should see it in detail:
 
 ## What’s next? [whats-next]
 
-- So far, we've used the bare minimum configuration options to initialize the agent, which might be enough for you, however, if you'd like to see what else you can customize, take a look at the [configuration page](configuration.md).
+- So far, we've used the bare minimum configuration options to initialize the agent, which might be enough for you, however, if you'd like to explore what else you can customize, take a look at the [configuration page](configuration.md).
 
 - In our [simple example](#hello-world), we've _manually_ sent a span, so we essentially created some [manual instrumentation](manual-instrumentation.md) for our app. That's quite helpful (and flexible), however, the agent can create _automatic instrumentations_ as well! Meaning that, only by initializing the agent, it will start sending telemetry data on your behalf without you having to write code to send anything. Take a look at the [automatic instrumentation](automatic-instrumentation.md) page for more details.
 
-- [Spans](https://opentelemetry.io/docs/concepts/signals/traces/#spans) are a great way to measure how long some method/part-of-a-method or even some broader transaction that involves multiple methods, takes to complete. However, **spans aren't the only type** of [signal](https://opentelemetry.io/docs/concepts/signals/) that you can send using the agent, you can send [logs](https://opentelemetry.io/docs/concepts/signals/logs/) and [metrics](https://opentelemetry.io/docs/concepts/signals/metrics/) too! Take a look at [manual instrumentation](manual-instrumentation.md) for more details.
+- [Spans](https://opentelemetry.io/docs/concepts/signals/traces/#spans) are a great way to measure how long some method/part-of-a-method or even some broader transaction that involves multiple methods takes to complete. However, **spans aren't the only type** of [signal](https://opentelemetry.io/docs/concepts/signals/) that you can send using the agent, you can send [logs](https://opentelemetry.io/docs/concepts/signals/logs/) and [metrics](https://opentelemetry.io/docs/concepts/signals/metrics/) too! Take a look at [manual instrumentation](manual-instrumentation.md) for more details.

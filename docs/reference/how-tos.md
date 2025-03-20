@@ -121,7 +121,7 @@ You've properly created build config fields from environment variables. To use t
 
 ### Providing data from a properties file
 
-[Properties](https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html) are a common way to provide values to JVM apps through files (they're even mentioned for Android cases such as [storing keystore info](https://developer.android.com/studio/publish/app-signing#secure-shared-keystore)), which typically have a `.properties` suffix on their name.
+[Properties](https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html) are a common way to provide values to JVM apps through files (they're even mentioned for Android cases such as [storing keystore info](https://developer.android.com/studio/publish/app-signing#secure-shared-keystore)). Here's an example of how you could use them to provide config values to the agent.
 
 Given the following example properties file:
 

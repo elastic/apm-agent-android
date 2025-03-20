@@ -35,7 +35,7 @@ For distributed tracing to work properly, your backend services must be configur
 
 ### Session review
 
-The agent attaches [session](#session) info to each span and log generated from your application, allowing you to create queries where you can group all the telemetry that belongs to a session and form a session event timeline, useful for understanding what are the most common actions performed by your users, as well as tracing their steps towards errors they may encounter.
+The agent attaches [session](#session) info to each span and log generated from your application, allowing you to create queries where you can group all the telemetry that belongs to a session and form a session event timeline. This us useful to understand what are the most common actions performed by your users, as well as tracing their steps towards errors they may encounter.
 
 For example, let's say you have a screen "A" in your app that can be opened from other screens, such as "B". If you create a log event for when the user clicks on a button on screen "B" that takes them to screen "A", along with a log when screen "A" opens (or maybe a span instead, in case you'd like to measure how long it takes for screen "A" to fully load), both items will contain a `session.id` attribute with the same value per session. This enables you to create {{es}} queries, say in {{kib}}'s [Discover tool](https://www.elastic.co/guide/en/kibana/current/discover.html) for example, to list all events during that session and better understand your user's journey within your application.
 
@@ -49,7 +49,7 @@ On top of the features that come with the [OpenTelemetry SDK](https://openteleme
 
 ### Disk buffering
 
-Your application's telemetry data is stored locally before being sent to your {{stack}}. Data is removed once successfully exported or to make room for new telemetry data, if needed. This minimizes the risk of data loss due to internet connectivity issues.
+Your application's telemetry data is stored locally before being sent to your {{stack}} and then removed once successfully exported, or to make room for new telemetry data, if needed. This minimizes the risk of data loss due to internet connectivity issues.
 
 ### Real time
 

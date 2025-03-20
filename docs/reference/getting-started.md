@@ -5,6 +5,8 @@ mapped_pages:
 
 # Getting started
 
+By the time you finish this guide, you'll have a fully set-up agent in your app and know how to create and explore your app's data in {{kib}}!
+
 ## Requirements
 
 | Requirement                                       | Minimum version                                                                                           |

@@ -95,7 +95,7 @@ Luckily for us, the Android Gradle plugin has us covered with its [build config 
 ```kotlin
 // Your app's build.gradle.kts file
 plugins {
-// ...
+    // ...
 }
 
 val url = System.getenv("MY_ENV_WITH_MY_URL") // <1>
@@ -118,6 +118,53 @@ android {
 3. By adding our build config fields to the `android.defaultConfig` block, we ensure that they are available for all of your app's build variants. You could also, if needed, create fields with the same name but different values for each of your build variants, as shown in Android's [official docs](https://developer.android.com/build/gradle-tips#share-custom-fields-and-resource-values-with-your-app-code), to provide different values per variant.
 
 You've properly created build config fields from environment variables. To use them in code, take a look at how to [read build config fields](#reading-build-config-fields) in code.
+
+### Providing data from a properties file
+
+[Properties](https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html) are a common way to provide values to JVM apps through files (they're even mentioned for Android cases such as [storing keystore info](https://developer.android.com/studio/publish/app-signing#secure-shared-keystore)), which typically have a `.properties` suffix on their name.
+
+Given the following example properties file:
+
+```properties
+my.url=http://localhost
+my.api.key=somekey
+```
+
+This is what your `build.gradle.kts` configuration should look like:
+
+```kotlin
+// Your app's build.gradle.kts file
+import java.util.Properties
+
+plugins {
+    // ...
+}
+
+val myPropertiesFile = project.file("myfile.properties") // <1>
+val myProperties = Properties().apply {
+    myPropertiesFile.inputStream().use { load(it) }
+}
+
+val url = myProperties["my.url"]
+val apiKey = myProperties["my.api.key"]
+
+android {
+    // ...
+    buildFeatures.buildConfig = true // <2>
+
+    defaultConfig { // <3>
+        // ...
+        buildConfigField("String", "MY_EXPORT_URL", "\"$url\"")
+        buildConfigField("String", "MY_EXPORT_API_KEY", "\"$apiKey\"")
+    }
+}
+```
+
+1. Our file path, provided here, is relative to our `build.gradle.kts` file (where this code is written). So in this example, both files (our `build.gradle.kts` and `myfile.properties`) are located in the same directory.
+2. We must ensure we have Android's `buildConfig` feature enabled.
+3. By adding our build config fields to the `android.defaultConfig` block, we ensure that they are available for all of your app's build variants. You could also, if needed, create fields with the same name but different values for each of your build variants, as shown in Android's [official docs](https://developer.android.com/build/gradle-tips#share-custom-fields-and-resource-values-with-your-app-code), to provide different values per variant.
+
+You've properly created build config fields from a properties file. To use them in code, take a look at how to [read build config fields](#reading-build-config-fields) in code.
 
 ### Reading build config fields in code [reading-build-config-fields]
 

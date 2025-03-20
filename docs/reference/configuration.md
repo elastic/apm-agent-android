@@ -55,6 +55,9 @@ class MyApp : android.app.Application {
 2. Your authentication method. You can use either an [API Key](https://www.elastic.co/guide/en/observability/current/apm-api-key.html), a [Secret token](https://www.elastic.co/guide/en/observability/current/apm-secret-token.html), or none; defaults to `None`. API Keys are the recommended method, if you don't have one yet, check out [how to create one](how-tos.md#create-api-key).
 3. The protocol used to communicate with your endpoint. It can be either `HTTP` or `gRPC`, defaults to `HTTP`.
 
+:::{include} _snippets/tip-provide-values-from-outside.md
+:::
+
 ### Intercepting attributes
 
 You can provide global interceptors for all spans and logs [attributes](https://opentelemetry.io/docs/specs/otel/common/#attribute), which will be executed on every span or log creation, where you can read/modify them if needed.

@@ -49,6 +49,9 @@ val agent = ElasticApmAgent.builder(application) // <1>
 3. This is the Elastic endpoint where all your telemetry will be exported to. If you don't have one yet, check out [how to get it](how-tos.md#get-export-endpoint).
 4. Using an API Key is the recommended authentication method for the agent to connect to your {{stack}}. If you don't have one yet, check out [how to create one](how-tos.md#create-api-key).
 
+:::{include} _snippets/tip-provide-values-from-outside.md
+:::
+
 ## Hello World!
 
 The agent is fully initialized, so now you can start sending telemetry to your {{stack}}! Here's a quick example of manually creating a [span](https://opentelemetry.io/docs/concepts/signals/traces/#spans) and finding it in {{kib}}:

@@ -1,11 +1,11 @@
 ---
-navigation_title: "Elastic APM Android Agent"
+navigation_title: "Release notes"
 mapped_pages:
   - https://www.elastic.co/guide/en/apm/agent/android/current/release-notes.html
   - https://www.elastic.co/guide/en/apm/agent/android/current/release-notes-0.x.html
 ---
 
-# Elastic APM Android Agent release notes
+# Elastic OTel Android Agent release notes
 
 Review the changes, fixes, and more in each version of Elastic APM Android Agent.
 

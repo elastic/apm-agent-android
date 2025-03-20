@@ -261,7 +261,7 @@ class ElasticApmAgent internal constructor(
          *
          * By default it will be [LogLevel.DEBUG] for debuggable builds, [LogLevel.INFO] otherwise.
          */
-        fun setLoggingPolicy(value: LoggingPolicy) = apply {
+        fun setInternalLoggingPolicy(value: LoggingPolicy) = apply {
             loggingPolicy = value
         }
 

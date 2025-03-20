@@ -107,7 +107,7 @@ android {
 
     defaultConfig { // <3>
         // ...
-        buildConfigField("String", "MY_EXPORT_URL", "\"$url\"") // <4>
+        buildConfigField("String", "MY_EXPORT_URL", "\"$url\"")
         buildConfigField("String", "MY_EXPORT_API_KEY", "\"$apiKey\"")
     }
 }
@@ -117,9 +117,9 @@ android {
 2. We must ensure we have Android's `buildConfig` feature enabled.
 3. By adding our build config fields to the `android.defaultConfig` block, we ensure that they are available for all of your app's build variants. You could also, if needed, create fields with the same name but different values for each of your build variants, as shown in Android's [official docs](https://developer.android.com/build/gradle-tips#share-custom-fields-and-resource-values-with-your-app-code), to provide different values per variant.
 
-You've properly created build config fields from environment variables. To use them in code, take a look at how to [read build config fields](#read-build-config-fields) in code.
+You've properly created build config fields from environment variables. To use them in code, take a look at how to [read build config fields](#reading-build-config-fields) in code.
 
-### Read build config fields in code [read-build-config-fields]
+### Reading build config fields in code [reading-build-config-fields]
 
 After adding [build config fields](https://developer.android.com/build/gradle-tips#share-custom-fields-and-resource-values-with-your-app-code) in your `build.gradle.kts` file, you may now use them within your app's Kotlin/Java code, by following these steps:
 

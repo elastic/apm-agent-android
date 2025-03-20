@@ -28,13 +28,13 @@ class MyApp : android.app.Application {
 }
 ```
 
-1. This will be the name used by {{kib}} when listing your application on the [Services](https://www.elastic.co/guide/en/observability/current/apm-services.html) page, defaults to `unknown`. See, [why your app is referred to as a "service"](faq.md#why-service).
-2. Your app's version name, defaults to the version provided [here](https://developer.android.com/reference/android/content/pm/PackageInfo#versionName).
-3. Typically your app's build type, flavor, backend environment it points to, or maybe a combination of them. Any helpful distinction for you to better analyze your app's data later on in {{kib}}.
+1. This will be the name used by {{kib}} when listing your application on the [Services](https://www.elastic.co/guide/en/observability/current/apm-services.html) page. Defaults to `unknown`. See [why your app is referred to as a "service"](faq.md#why-service).
+2. Your app's version name. Defaults to the version provided [here](https://developer.android.com/reference/android/content/pm/PackageInfo#versionName).
+3. Typically your app's build type, flavor, backend environment, or maybe a combination of these. Any helpful distinction for you to better analyze your app's data later in {{kib}}.
 
 ### Export connectivity
 
-Configuring where your app's telemetry will be exported to.
+Configuring where your app's telemetry will be exported.
 
 ```kotlin
 class MyApp : android.app.Application {
@@ -53,7 +53,7 @@ class MyApp : android.app.Application {
 
 1. Your endpoint URL. If you don't have one yet, check out [how to find it](how-tos.md#get-export-endpoint).
 2. Your authentication method. You can use either an [API Key](https://www.elastic.co/guide/en/observability/current/apm-api-key.html), a [Secret token](https://www.elastic.co/guide/en/observability/current/apm-secret-token.html), or none; defaults to `None`. API Keys are the recommended method, if you don't have one yet, check out [how to create one](how-tos.md#create-api-key).
-3. The protocol used to communicate with your endpoint. It can be either `HTTP` or `gRPC`, defaults to `HTTP`.
+3. The protocol used to communicate with your endpoint. It can be either `HTTP` or `gRPC`. Defaults to `HTTP`.
 
 :::{include} _snippets/tip-provide-values-from-outside.md
 :::
@@ -80,12 +80,12 @@ class MyApp : android.app.Application {
 
 ### Intercepting resources
 
-The agent creates a [resource](https://opentelemetry.io/docs/specs/otel/overview/#resources) for your signals, which is essentially a set of static global attributes, to provide key attributes that are later queried by {{kib}} to properly display your application's data.
+The agent creates a [resource](https://opentelemetry.io/docs/specs/otel/overview/#resources) for your signals, which is essentially a set of static global attributes. These attributes help {{kib}} properly display your application's data.
 
 You can intercept these resources and read/modify them as shown below.
 
 :::{note}
-The resource interceptor is only queried during initialization, as this is the only place where it can be modified. If you'd like to set _dynamic_ global attributes instead, take a look at [intercepting attributes](#intercepting-attributes).
+The resource interceptor is only applied during initialization, as this is the only time where resource attributes can be modified. If you'd like to set _dynamic_ global attributes instead, take a look at [intercepting attributes](#intercepting-attributes).
 :::
 
 ```kotlin
@@ -103,7 +103,7 @@ class MyApp : android.app.Application {
 
 ### Intercepting exporters
 
-The agent configures exporters for each signal ([spans](https://opentelemetry.io/docs/languages/java/sdk/#spanexporter), [logs](https://opentelemetry.io/docs/languages/java/sdk/#logrecordexporter) and [metrics](https://opentelemetry.io/docs/languages/java/sdk/#metricexporter)), to manage features like [disk buffering](index.md#disk-buffering) and also to establish a connection with the Elastic export endpoint based on the provided [export connectivity](#export-connectivity) values. You can intercept these to add your own logic on top, such as logging each signal that gets exported, or filtering some items that don't make sense for you to export.
+The agent configures exporters for each signal ([spans](https://opentelemetry.io/docs/languages/java/sdk/#spanexporter), [logs](https://opentelemetry.io/docs/languages/java/sdk/#logrecordexporter), and [metrics](https://opentelemetry.io/docs/languages/java/sdk/#metricexporter)), to manage features like [disk buffering](index.md#disk-buffering) and also to establish a connection with the Elastic export endpoint based on the provided [export connectivity](#export-connectivity) values. You can intercept these to add your own logic on top, such as logging each signal that gets exported, or filtering some items that don't make sense for you to export.
 
 ```kotlin
 class MyApp : android.app.Application {
@@ -122,7 +122,7 @@ class MyApp : android.app.Application {
 
 ### Intercepting HTTP spans
 
-This is a convenience tool to intercept HTTP-related spans. The agent, by default, sets an interceptor that enhances the span names to provide info such as domain:port, for when only an HTTP verb is set, which is [often the case](https://opentelemetry.io/docs/specs/semconv/http/http-spans/#name) for HTTP client span names.
+This is a convenience tool to intercept HTTP-related spans. By default, the agent enhances HTTP span names to include domain:port when only an HTTP verb is set, which is [often the case](https://opentelemetry.io/docs/specs/semconv/http/http-spans/#name) for HTTP client span names.
 
 You can override this behavior by setting your own interceptor (or you can choose to set it to `null` to just disable it all).
 

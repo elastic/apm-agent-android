@@ -21,6 +21,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            isMinifyEnabled = true
+            testProguardFiles(file("test-rules.pro"), rootProject.file("../shared-rules.pro"))
+        }
         release {
             isMinifyEnabled = true
             signingConfig = signingConfigs["debug"]

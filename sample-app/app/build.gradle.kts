@@ -22,13 +22,16 @@ android {
 
     buildTypes {
         debug {
-            isMinifyEnabled = true
-            isDebuggable = false
-            testProguardFiles(
-                file("androidtest-rules.pro"),
-                rootProject.file("../shared-rules.pro")
-            )
-            proguardFiles(file("test-rules.pro"))
+            if (project.hasProperty("elastic.testing.automated")) {
+                logger.warn("Building debug with minify enabled for instrumentation tests")
+                isMinifyEnabled = true
+                isDebuggable = false
+                testProguardFiles(
+                    file("androidtest-rules.pro"),
+                    rootProject.file("../shared-rules.pro")
+                )
+                proguardFiles(file("test-rules.pro"))
+            }
         }
         release {
             isMinifyEnabled = true

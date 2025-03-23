@@ -55,6 +55,25 @@ class OtelApisTest {
         assertEquals(1, inMemoryExporterProvider.getFinishedSpans().size)
     }
 
+    @Test
+    fun checkLogs() {
+        openTelemetry.logsBridge.get("logscope").logRecordBuilder().setBody("log body").emit()
+
+        flushLogs()
+
+        assertEquals(1, inMemoryExporterProvider.getFinishedLogRecords().size)
+    }
+
+    @Test
+    fun checkMetrics() {
+        val counter = openTelemetry.getMeter("metricscope").counterBuilder("counter").build()
+        counter.add(1)
+
+        flushMetrics()
+
+        assertEquals(1, inMemoryExporterProvider.getFinishedMetrics().size)
+    }
+
     private fun flushSpans() {
         spanProcessor.forceFlush().join(1, TimeUnit.SECONDS)
     }

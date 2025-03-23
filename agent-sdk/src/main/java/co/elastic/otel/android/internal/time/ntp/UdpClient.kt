@@ -25,7 +25,9 @@ import java.net.InetAddress
 import java.net.SocketException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
-import java.time.Duration
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.DurationUnit
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
@@ -40,13 +42,13 @@ internal class UdpClient internal constructor(
     private var address: InetAddress? = null
 
     @Throws(UnknownHostException::class, SocketTimeoutException::class, SocketException::class)
-    fun send(bytes: ByteArray, timeout: Duration = Duration.ofSeconds(5)): ByteArray =
+    fun send(bytes: ByteArray, timeout: Duration = 5.seconds): ByteArray =
         synchronized(this) {
             if (address == null) {
                 address = InetAddress.getByName(host)
             }
 
-            socket.soTimeout = timeout.toMillis().toInt()
+            socket.soTimeout = timeout.toInt(DurationUnit.MILLISECONDS)
 
             val packet = DatagramPacket(bytes, bytes.size, address, port)
             socket.send(packet)

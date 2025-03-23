@@ -1,5 +1,3 @@
-import org.gradle.api.initialization.resolve.RepositoriesMode
-
 pluginManagement {
     repositories {
         mavenCentral()
@@ -11,6 +9,9 @@ dependencyResolutionManagement {
     versionCatalogs {
         create("rootLibs") {
             from(files("../gradle/libs.versions.toml"))
+        }
+        create("instrumentationLibs") {
+            from(files("../gradle/instrumentation.versions.toml"))
         }
     }
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)

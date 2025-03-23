@@ -17,13 +17,18 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "co.elastic.otel.android.sample.tools.SampleAppJunitRunner"
     }
 
     buildTypes {
         debug {
             isMinifyEnabled = true
-            testProguardFiles(file("test-rules.pro"), rootProject.file("../shared-rules.pro"))
+            isDebuggable = false
+            testProguardFiles(
+                file("androidtest-rules.pro"),
+                rootProject.file("../shared-rules.pro")
+            )
+            proguardFiles(file("test-rules.pro"))
         }
         release {
             isMinifyEnabled = true

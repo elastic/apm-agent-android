@@ -4,6 +4,7 @@ import android.app.Application
 import co.elastic.otel.android.ElasticApmAgent
 import co.elastic.otel.android.api.ElasticOtelAgent
 import co.elastic.otel.android.extensions.log
+import co.elastic.otel.android.extensions.span
 
 class MyApp : Application() {
     companion object {
@@ -18,6 +19,8 @@ class MyApp : Application() {
             .setServiceName("weather-sample-app")
             .build()
 
-        agent.log("App created")
+        agent.span("Creating app") {
+            agent.log("During app creation")
+        }
     }
 }

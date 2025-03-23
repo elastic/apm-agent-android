@@ -1,7 +1,21 @@
-# Keep everything from open telemetry testing
--keep class io.opentelemetry.sdk.testing.** { *; }
-
--dontwarn org.assertj.core.**.*
--dontwarn org.junit.jupiter.**.*
--dontwarn javax.annotation.*
--dontwarn javax.annotation.**.*
+-keepnames class io.opentelemetry.sdk.metrics.export.PeriodicMetricReader { builder(io.opentelemetry.sdk.metrics.export.MetricExporter); }
+-keepnames class io.opentelemetry.sdk.metrics.export.PeriodicMetricReaderBuilder { build(); }
+-keepnames class io.opentelemetry.sdk.trace.export.BatchSpanProcessor { builder(io.opentelemetry.sdk.trace.export.SpanExporter); }
+-keepnames class io.opentelemetry.sdk.trace.export.BatchSpanProcessorBuilder { build(); }
+-keepnames class io.opentelemetry.sdk.logs.export.BatchLogRecordProcessor { builder(io.opentelemetry.sdk.logs.export.LogRecordExporter); }
+-keepnames class io.opentelemetry.sdk.logs.export.BatchLogRecordProcessorBuilder { build(); }
+-keepnames class io.opentelemetry.sdk.OpenTelemetrySdk { builder(); }
+-keepnames class io.opentelemetry.sdk.OpenTelemetrySdkBuilder { build();setTracerProvider(io.opentelemetry.sdk.trace.SdkTracerProvider);setLoggerProvider(io.opentelemetry.sdk.logs.SdkLoggerProvider);setMeterProvider(io.opentelemetry.sdk.metrics.SdkMeterProvider); }
+-keepnames class io.opentelemetry.sdk.trace.SdkTracerProvider { builder(); }
+-keepnames class io.opentelemetry.sdk.trace.SdkTracerProviderBuilder { addSpanProcessor(io.opentelemetry.sdk.trace.SpanProcessor);build(); }
+-keepnames class io.opentelemetry.sdk.metrics.SdkMeterProvider { builder(); }
+-keepnames class io.opentelemetry.sdk.metrics.SdkMeterProviderBuilder { build();registerMetricReader(io.opentelemetry.sdk.metrics.export.MetricReader); }
+-keepnames class io.opentelemetry.sdk.logs.SdkLoggerProvider { builder(); }
+-keepnames class io.opentelemetry.sdk.logs.SdkLoggerProviderBuilder { build();addLogRecordProcessor(io.opentelemetry.sdk.logs.LogRecordProcessor); }
+-keepnames class io.opentelemetry.api.OpenTelemetry { getTracer(java.lang.String); }
+-keepnames class io.opentelemetry.api.common.Attributes { builder(); }
+-keepnames class io.opentelemetry.api.common.AttributesBuilder { put(java.lang.String,java.lang.String); }
+-keepnames class io.opentelemetry.context.ImplicitContextKeyed { makeCurrent(); }
+-keepclassmembers class io.opentelemetry.sdk.common.CompletableResultCode { join(long,java.util.concurrent.TimeUnit);ofSuccess(); }
+-keep class kotlin.** { *; }
+-keep class androidx.tracing.** { *; }

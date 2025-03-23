@@ -2,7 +2,6 @@ package co.elastic.otel.android.sample
 
 import co.elastic.otel.android.test.exporter.InMemoryExporterProvider
 import io.opentelemetry.api.OpenTelemetry
-import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.sdk.OpenTelemetrySdk
 import io.opentelemetry.sdk.logs.SdkLoggerProvider
@@ -28,7 +27,8 @@ class OtelApisTest {
         inMemoryExporterProvider = InMemoryExporterProvider()
         spanProcessor =
             BatchSpanProcessor.builder(inMemoryExporterProvider.getSpanExporter()).build()
-        metricReader = PeriodicMetricReader.create(inMemoryExporterProvider.getMetricExporter())
+        metricReader =
+            PeriodicMetricReader.builder(inMemoryExporterProvider.getMetricExporter()).build()
         logRecordProcessor =
             BatchLogRecordProcessor.builder(inMemoryExporterProvider.getLogRecordExporter()).build()
 
@@ -44,7 +44,7 @@ class OtelApisTest {
     @Test
     fun checkSpans() {
         val span = openTelemetry.getTracer("spanscope").spanBuilder("mySpan")
-            .setAllAttributes(Attributes.of(AttributeKey.stringKey("stringAttr"), "string value"))
+            .setAllAttributes(Attributes.builder().put("attrkey", "attr value").build())
             .startSpan()
         val scope = span.makeCurrent()
         scope.close()

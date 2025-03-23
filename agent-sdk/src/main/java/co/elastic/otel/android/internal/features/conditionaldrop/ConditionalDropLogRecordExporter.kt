@@ -21,7 +21,6 @@ package co.elastic.otel.android.internal.features.conditionaldrop
 import io.opentelemetry.sdk.common.CompletableResultCode
 import io.opentelemetry.sdk.logs.data.LogRecordData
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
-import java.util.function.Predicate
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
@@ -29,11 +28,11 @@ import java.util.function.Predicate
  */
 internal class ConditionalDropLogRecordExporter(
     private val delegate: LogRecordExporter,
-    private val drop: Predicate<SignalType>
+    private val drop: (SignalType) -> Boolean
 ) : LogRecordExporter {
 
     override fun export(logs: MutableCollection<LogRecordData>): CompletableResultCode {
-        if (drop.test(SignalType.LOG)) {
+        if (drop(SignalType.LOG)) {
             return CompletableResultCode.ofSuccess()
         }
         return delegate.export(logs)

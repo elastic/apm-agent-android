@@ -1,6 +1,9 @@
-# Keep everything from open telemetry
--keep class io.opentelemetry.** { *; }
-
+-keepclassmembers enum io.opentelemetry.** {
+    public static **[] values();
+}
+-keepclassmembers enum co.elastic.otel.android.** {
+    public static **[] values();
+}
 -dontwarn com.fasterxml.jackson.**
 -dontwarn com.google.auto.value.**
 -dontwarn com.google.common.io.ByteStreams

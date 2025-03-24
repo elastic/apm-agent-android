@@ -49,7 +49,7 @@ Since the agent not only configures the [OpenTelemetry SDK](https://opentelemetr
 
 ## Features
 
-On top of the features that come with the [OpenTelemetry SDK](https://opentelemetry.io/docs/languages/java/), the agent also adds the following ones.
+The agent offers additional features on top of those that come with the [OpenTelemetry SDK](https://opentelemetry.io/docs/languages/java/).
 
 ### Disk buffering
 

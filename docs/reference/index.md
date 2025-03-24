@@ -53,7 +53,7 @@ The agent offers additional features on top of those that come with the [OpenTel
 
 ### Disk buffering
 
-Your application's telemetry data is stored locally before being sent to your {{stack}} and then removed once successfully exported, or to make room for new telemetry data, if needed. This minimizes the risk of data loss due to internet connectivity issues.
+Your application's telemetry data is stored locally before being sent to the {{stack}}. Then it is removed either after being successfully exported or to make room for new telemetry data if needed. This minimizes the risk of data loss due to internet connectivity issues.
 
 ### Real time
 

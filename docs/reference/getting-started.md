@@ -36,7 +36,7 @@ plugins {
 
 ## Agent setup
 
-Once the gradle setup is done, you need to initialize the agent within your app's code, as shown below:
+After Gradle setup is done, initialize the agent within your app's code:
 
 ```kotlin
 val agent = ElasticApmAgent.builder(application) // <1>

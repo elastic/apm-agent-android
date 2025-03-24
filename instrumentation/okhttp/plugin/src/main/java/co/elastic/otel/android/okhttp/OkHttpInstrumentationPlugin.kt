@@ -34,7 +34,7 @@ class OkHttpInstrumentationPlugin : InstrumentationPlugin() {
         agentPlugin.addBuildVariantListener(
             ByteBuddyDependencyAttacher(
                 target,
-                BuildConfig.BYTEBUDDY_PLUGIN
+                BuildConfig.BYTEBUDDY_PLUGIN_URI
             )
         )
     }

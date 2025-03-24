@@ -7,8 +7,9 @@ plugins {
 val instrumentationGroupId = "${rootProject.group}.instrumentation"
 
 buildConfig {
-    packageName("${instrumentationGroupId}.generated")
-    buildConfigField("INSTRUMENTATION_ID", "${instrumentationGroupId}.${project.parent!!.name}")
+    val name = project.parent!!.name
+    packageName("${instrumentationGroupId}.generated.$name")
+    buildConfigField("INSTRUMENTATION_ID", "${instrumentationGroupId}.$name")
     buildConfigField("INSTRUMENTATION_VERSION", "$version")
 }
 

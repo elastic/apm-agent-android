@@ -22,7 +22,7 @@ import android.app.Application
 import androidx.lifecycle.ProcessLifecycleOwner
 import co.elastic.otel.android.api.ElasticOtelAgent
 import co.elastic.otel.android.api.flusher.MetricFlusher
-import co.elastic.otel.android.instrumentation.generated.BuildConfig
+import co.elastic.otel.android.instrumentation.generated.launchtime.BuildConfig
 import co.elastic.otel.android.instrumentation.internal.Instrumentation
 import com.google.auto.service.AutoService
 

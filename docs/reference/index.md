@@ -41,7 +41,11 @@ For example, let's say you have a screen "A" in your app that can be opened from
 
 ### More
 
-The examples above highlight a couple of use cases that you can achieve with the agent and the {{stack}}. However, since the agent not only configures the [OpenTelemetry SDK](https://opentelemetry.io/docs/languages/java/) but also provides [direct access](manual-instrumentation.md) to its features, you can generate your own data in ways that best suit your needs and take advantage of {{stack}}'s tools, such as [creating alerts](https://www.elastic.co/guide/en/kibana/current/alerting-getting-started.html) for when something interesting for you happens (maybe when an error is recorded), as well as [custom dashboards](https://www.elastic.co/guide/en/kibana/current/dashboard.html) to display your data the way you need to see it, and [much more](https://www.elastic.co/kibana/features).
+Since the agent not only configures the [OpenTelemetry SDK](https://opentelemetry.io/docs/languages/java/) but also provides [direct access](manual-instrumentation.md) to its features, you can generate your own data in ways that best suit your needs and take advantage of {{stack}}'s tools, such as:
+
+ * [Creating alerts](https://www.elastic.co/guide/en/kibana/current/alerting-getting-started.html) when something interesting happens (for example, when an error is recorded)
+ * [Building custom dashboards](https://www.elastic.co/guide/en/kibana/current/dashboard.html) to display your data the way you need to see it
+ * [Much more](https://www.elastic.co/kibana/features)
 
 ## Features
 

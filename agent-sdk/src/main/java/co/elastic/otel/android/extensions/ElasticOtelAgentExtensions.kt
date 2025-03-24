@@ -28,7 +28,7 @@ import io.opentelemetry.context.Context
 import io.opentelemetry.context.Scope
 import java.time.Instant
 
-private const val SCOPE_NAME = "co.elastic.otel.android.extensions"
+private const val DEFAULT_SCOPE_NAME = "co.elastic.otel.android.extensions"
 
 fun ElasticOtelAgent.log(
     body: String,
@@ -37,9 +37,10 @@ fun ElasticOtelAgent.log(
     attributes: Attributes? = null,
     context: Context? = null,
     observedTimestamp: Instant? = null,
-    timestamp: Instant? = null
+    timestamp: Instant? = null,
+    scopeName: String = DEFAULT_SCOPE_NAME
 ) {
-    val logger = getOpenTelemetry().logsBridge.get(SCOPE_NAME).logRecordBuilder()
+    val logger = getOpenTelemetry().logsBridge.get(scopeName).logRecordBuilder()
         .setBody(body)
     severity?.let { logger.setSeverity(it) }
     severityText?.let { logger.setSeverityText(it) }
@@ -56,9 +57,11 @@ fun ElasticOtelAgent.span(
     kind: SpanKind? = null,
     parentContext: Context? = null,
     makeCurrent: Boolean = true,
+    recordException: Boolean = true,
+    scopeName: String = DEFAULT_SCOPE_NAME,
     body: (Span) -> Unit
 ) {
-    val builder = getOpenTelemetry().getTracer(SCOPE_NAME).spanBuilder(name)
+    val builder = getOpenTelemetry().getTracer(scopeName).spanBuilder(name)
     attributes?.let { builder.setAllAttributes(it) }
     kind?.let { builder.setSpanKind(it) }
     parentContext?.let { builder.setParent(it) }
@@ -69,7 +72,9 @@ fun ElasticOtelAgent.span(
         body(span)
     } catch (e: Throwable) {
         span.setStatus(StatusCode.ERROR)
-        span.recordException(e)
+        if (recordException) {
+            span.recordException(e)
+        }
     } finally {
         scope?.close()
         span.end()

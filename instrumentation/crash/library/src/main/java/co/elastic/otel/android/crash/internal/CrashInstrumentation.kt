@@ -21,6 +21,7 @@ package co.elastic.otel.android.crash.internal
 import android.app.Application
 import co.elastic.otel.android.api.ElasticOtelAgent
 import co.elastic.otel.android.crash.internal.handler.ElasticExceptionHandler
+import co.elastic.otel.android.instrumentation.generated.BuildConfig
 import co.elastic.otel.android.instrumentation.internal.Instrumentation
 import com.google.auto.service.AutoService
 
@@ -33,5 +34,13 @@ class CrashInstrumentation : Instrumentation {
 
     override fun install(application: Application, agent: ElasticOtelAgent) {
         Thread.setDefaultUncaughtExceptionHandler(ElasticExceptionHandler.create(agent))
+    }
+
+    override fun getId(): String {
+        return BuildConfig.INSTRUMENTATION_ID
+    }
+
+    override fun getVersion(): String {
+        return BuildConfig.INSTRUMENTATION_VERSION
     }
 }

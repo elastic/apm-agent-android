@@ -20,6 +20,7 @@ package co.elastic.otel.android.okhttp.internal
 
 import android.app.Application
 import co.elastic.otel.android.api.ElasticOtelAgent
+import co.elastic.otel.android.instrumentation.generated.BuildConfig
 import co.elastic.otel.android.instrumentation.internal.Instrumentation
 import co.elastic.otel.android.okhttp.internal.plugin.OkHttp3Singletons
 import com.google.auto.service.AutoService
@@ -33,5 +34,13 @@ class OkHttpInstrumentation : Instrumentation {
 
     override fun install(application: Application, agent: ElasticOtelAgent) {
         OkHttp3Singletons.configure(agent.getOpenTelemetry())
+    }
+
+    override fun getId(): String {
+        return BuildConfig.INSTRUMENTATION_ID
+    }
+
+    override fun getVersion(): String {
+        return BuildConfig.INSTRUMENTATION_VERSION
     }
 }

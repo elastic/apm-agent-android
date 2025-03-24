@@ -71,4 +71,4 @@ The agent allows you to modify some values after the initialization has finished
 
 ### Automatic instrumentation
 
-The agent provides extensions that automatically generate telemetry for common tools and use cases. More info on the [automatic instrumentation](automatic-instrumentation.md) page.
+The agent provides extensions that automatically generate telemetry for common tools and use cases. Find more information in [Automatic Instrumentation](automatic-instrumentation.md).

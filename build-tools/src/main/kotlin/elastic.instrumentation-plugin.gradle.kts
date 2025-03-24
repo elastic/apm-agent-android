@@ -7,9 +7,10 @@ plugins {
 }
 
 val instrumentationGroupId = "${rootProject.group}.instrumentation"
+val parentName = project.parent!!.name
 
 buildConfig {
-    packageName("${instrumentationGroupId}.generated")
+    packageName("${instrumentationGroupId}.generated.$parentName")
 }
 
 abstract class ElasticBuildConfig @Inject constructor(
@@ -60,7 +61,7 @@ project.extensions.create(
     ElasticBuildConfig::class,
     buildConfig,
     instrumentationGroupId,
-    project.parent!!.name,
+    parentName,
     version
 )
 
@@ -69,7 +70,7 @@ project.extensions.create(
     InstrumentationPluginConfig::class,
     gradlePlugin,
     project.description!!,
-    project.parent!!.name
+    parentName
 )
 
 dependencies {

@@ -67,7 +67,7 @@ A session is created when no previous session exists or when the previous one ha
 
 ### Dynamic configuration
 
-The agent allows you to modify some values, provided during initialization, after the initialization has finished. More info on the [configuration](configuration.md) page.
+The agent allows you to modify some values after the initialization has finished. More info on the [configuration](configuration.md) page.
 
 ### Automatic instrumentation
 

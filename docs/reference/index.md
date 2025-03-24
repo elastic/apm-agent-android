@@ -15,7 +15,7 @@ All the features provided by the [OpenTelemetry SDK](https://github.com/open-tel
 
 ### Distributed tracing
 
-Allows you to see the full picture of **how long your application has to wait for your backend** services to provide a response (and why), as shown in the example below:
+Distributed tracing allows you to see the full picture of **how long your application has to wait for your backend services** to provide a response (and why), as shown in the example below:
 
 :::{image} ../images/intro/distributed-tracing.png
 :screenshot:

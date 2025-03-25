@@ -28,4 +28,8 @@ import co.elastic.otel.android.api.ElasticOtelAgent
 interface Instrumentation {
 
     fun install(application: Application, agent: ElasticOtelAgent)
+
+    fun getId(): String
+
+    fun getVersion(): String
 }

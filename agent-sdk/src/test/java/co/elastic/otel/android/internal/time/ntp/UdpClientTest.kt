@@ -25,6 +25,7 @@ import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.time.Duration
 import java.util.concurrent.CountDownLatch
+import kotlin.time.Duration.Companion.seconds
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -91,7 +92,7 @@ class UdpClientTest {
         assertThrows<SocketTimeoutException> {
             client.send(
                 "Example".toByteArray(),
-                Duration.ofSeconds(1)
+                1.seconds
             )
         }
     }
@@ -101,7 +102,7 @@ class UdpClientTest {
         client = UdpClient(SERVER_HOST, server.getPort() + 1, 256)
 
         assertThrows<SocketTimeoutException> {
-            client.send("Example".toByteArray(), Duration.ofSeconds(1))
+            client.send("Example".toByteArray(), 1.seconds)
         }
     }
 
@@ -110,7 +111,7 @@ class UdpClientTest {
         server.close()
 
         assertThrows<SocketTimeoutException> {
-            client.send("Example".toByteArray(), Duration.ofSeconds(1))
+            client.send("Example".toByteArray(), 1.seconds)
         }
     }
 
@@ -137,7 +138,7 @@ class UdpClientTest {
 
         assertThrows<SocketException> {
             latch.countDown()
-            client.send("Example".toByteArray(), Duration.ofSeconds(60))
+            client.send("Example".toByteArray(), 60.seconds)
         }
     }
 }

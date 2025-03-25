@@ -3,11 +3,11 @@ plugins {
 }
 
 elasticBuildConfig {
-    projectUri("LIBRARY_URI", "launchtime-library")
+    libraryUri()
 }
 
 elasticInstrumentationPlugins {
-    create("launchtime") {
+    create {
         implementationClass = "co.elastic.otel.android.launchtime.LaunchTimeInstrumentationPlugin"
         displayName = "Elastic OTel Android instrumentation for tracking app launch time"
     }

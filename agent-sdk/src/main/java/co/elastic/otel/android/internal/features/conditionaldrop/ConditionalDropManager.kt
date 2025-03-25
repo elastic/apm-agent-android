@@ -21,16 +21,19 @@ package co.elastic.otel.android.internal.features.conditionaldrop
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.trace.export.SpanExporter
-import java.util.function.Predicate
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-internal class ConditionalDropManager(private var dropCondition: Predicate<SignalType>? = null) {
+internal class ConditionalDropManager(private var dropCondition: ((SignalType) -> Boolean)? = null) {
 
-    fun dropWhen(condition: Predicate<SignalType>) {
-        dropCondition = dropCondition?.or(condition) ?: condition
+    fun dropWhen(condition: (SignalType) -> Boolean) {
+        dropCondition = dropCondition?.let {
+            { type ->
+                it(type) || condition(type)
+            }
+        } ?: condition
     }
 
     fun createConditionalDropSpanExporter(delegate: SpanExporter): SpanExporter {

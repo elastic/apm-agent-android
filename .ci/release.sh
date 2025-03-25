@@ -2,7 +2,6 @@
 ## This script runs the release given the different environment variables
 ##  branch_specifier
 ##  target_specifier
-##  version_override_specifier
 ##  dry_run
 ##
 ##  NOTE: *_SECRET env variables are masked, hence if you'd like to avoid any
@@ -17,7 +16,7 @@ git checkout -f "${branch_specifier}"
 
 set +x
 # Setting up common deploy params in env var
-export COMMON_GRADLE_DEPLOY_PARAMS="-Prelease=true -Pversion_override=${version_override_specifier} --stacktrace"
+export COMMON_GRADLE_DEPLOY_PARAMS="-Prelease=true --stacktrace"
 
 if [[ "$target_specifier" == "all" ||  "$target_specifier" == "mavenCentral" ]]; then
   if [[ "$dry_run" == "false" ]] ; then

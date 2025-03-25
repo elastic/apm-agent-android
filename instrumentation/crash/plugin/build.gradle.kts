@@ -3,11 +3,11 @@ plugins {
 }
 
 elasticBuildConfig {
-    projectUri("LIBRARY_URI", "crash-library")
+    libraryUri()
 }
 
 elasticInstrumentationPlugins {
-    create("crash") {
+    create {
         implementationClass = "co.elastic.otel.android.crash.CrashInstrumentationPlugin"
         displayName = "Elastic OTel Android instrumentation for tracking app crashes"
     }

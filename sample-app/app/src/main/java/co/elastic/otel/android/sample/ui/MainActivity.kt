@@ -5,11 +5,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
-import co.elastic.otel.android.sample.MyApp.Companion.agent
 import co.elastic.otel.android.extensions.log
 import co.elastic.otel.android.extensions.span
+import co.elastic.otel.android.sample.MyApp.Companion.agent
 import co.elastic.otel.android.sample.R
 import co.elastic.otel.android.sample.databinding.ActivityMainBinding
+import io.opentelemetry.api.common.Attributes
 
 class MainActivity : AppCompatActivity() {
 
@@ -29,7 +30,10 @@ class MainActivity : AppCompatActivity() {
             setupActionBarWithNavController(navController, appBarConfiguration)
 
             binding.fab.setOnClickListener { view ->
-                agent.log("Button click")
+                agent.log(
+                    "Button click",
+                    attributes = Attributes.builder().put("activity.name", "MainActivity").build()
+                )
             }
         }
     }

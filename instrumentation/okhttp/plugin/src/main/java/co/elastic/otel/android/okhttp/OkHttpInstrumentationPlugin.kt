@@ -18,7 +18,7 @@
  */
 package co.elastic.otel.android.okhttp
 
-import co.elastic.otel.android.instrumentation.generated.BuildConfig
+import co.elastic.otel.android.instrumentation.generated.okhttp.BuildConfig
 import co.elastic.otel.android.plugin.ElasticAgentPlugin
 import co.elastic.otel.android.plugin.internal.ByteBuddyDependencyAttacher
 import co.elastic.otel.android.plugin.internal.InstrumentationPlugin
@@ -34,7 +34,7 @@ class OkHttpInstrumentationPlugin : InstrumentationPlugin() {
         agentPlugin.addBuildVariantListener(
             ByteBuddyDependencyAttacher(
                 target,
-                BuildConfig.BYTEBUDDY_PLUGIN
+                BuildConfig.BYTEBUDDY_PLUGIN_URI
             )
         )
     }

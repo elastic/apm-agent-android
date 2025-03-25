@@ -21,7 +21,6 @@ package co.elastic.otel.android.internal.features.conditionaldrop
 import io.opentelemetry.sdk.common.CompletableResultCode
 import io.opentelemetry.sdk.trace.data.SpanData
 import io.opentelemetry.sdk.trace.export.SpanExporter
-import java.util.function.Predicate
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
@@ -29,11 +28,11 @@ import java.util.function.Predicate
  */
 internal class ConditionalDropSpanExporter(
     private val delegate: SpanExporter,
-    private val drop: Predicate<SignalType>
+    private val drop: (SignalType) -> Boolean
 ) : SpanExporter {
 
     override fun export(spans: MutableCollection<SpanData>): CompletableResultCode {
-        if (drop.test(SignalType.SPAN)) {
+        if (drop(SignalType.SPAN)) {
             return CompletableResultCode.ofSuccess()
         }
         return delegate.export(spans)

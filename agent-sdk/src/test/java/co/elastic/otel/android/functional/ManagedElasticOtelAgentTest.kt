@@ -20,7 +20,6 @@ package co.elastic.otel.android.functional
 
 import android.app.Application
 import android.content.Intent
-import co.elastic.otel.android.exporters.ExporterProvider
 import co.elastic.otel.android.features.session.SessionIdGenerator
 import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
 import co.elastic.otel.android.internal.features.clock.ElasticClockBroadcastReceiver
@@ -32,6 +31,8 @@ import co.elastic.otel.android.internal.time.ntp.SntpClient
 import co.elastic.otel.android.processors.ProcessorFactory
 import co.elastic.otel.android.test.common.ElasticAttributes.getLogRecordDefaultAttributes
 import co.elastic.otel.android.test.common.ElasticAttributes.getSpanDefaultAttributes
+import co.elastic.otel.android.test.exporter.InMemoryExporterProvider
+import co.elastic.otel.android.test.processor.SimpleProcessorFactory
 import co.elastic.otel.android.testutils.DummySntpClient
 import co.elastic.otel.android.testutils.WireMockRule
 import io.mockk.Runs
@@ -44,29 +45,20 @@ import io.mockk.verify
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.sdk.logs.LogRecordProcessor
-import io.opentelemetry.sdk.logs.data.LogRecordData
 import io.opentelemetry.sdk.logs.export.BatchLogRecordProcessor
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
-import io.opentelemetry.sdk.logs.export.SimpleLogRecordProcessor
-import io.opentelemetry.sdk.metrics.data.MetricData
 import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.metrics.export.MetricReader
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader
 import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat
-import io.opentelemetry.sdk.testing.exporter.InMemoryLogRecordExporter
-import io.opentelemetry.sdk.testing.exporter.InMemoryMetricExporter
-import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter
 import io.opentelemetry.sdk.trace.SpanProcessor
-import io.opentelemetry.sdk.trace.data.SpanData
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor
-import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor
 import io.opentelemetry.sdk.trace.export.SpanExporter
 import java.io.File
 import java.io.IOException
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
-import java.util.concurrent.atomic.AtomicReference
 import org.awaitility.core.ConditionTimeoutException
 import org.awaitility.kotlin.await
 import org.junit.After
@@ -804,7 +796,7 @@ class ManagedElasticOtelAgentTest {
             .counterBuilder("counter")
             .build()
             .add(1)
-        simpleProcessorFactory.flush()
+        simpleProcessorFactory.flushMetrics().join(1, TimeUnit.SECONDS)
     }
 
     private fun awaitAndTrackTimeMillis(condition: () -> Boolean): Long {
@@ -840,73 +832,6 @@ class ManagedElasticOtelAgentTest {
                 }"
             )
             throw e
-        }
-    }
-
-    private interface FlushableProcessorFactory : ProcessorFactory {
-        fun flush()
-    }
-
-    private class SimpleProcessorFactory : FlushableProcessorFactory {
-        private lateinit var metricReader: PeriodicMetricReader
-
-        override fun createSpanProcessor(exporter: SpanExporter?): SpanProcessor? {
-            return SimpleSpanProcessor.create(exporter)
-        }
-
-        override fun createLogRecordProcessor(exporter: LogRecordExporter?): LogRecordProcessor? {
-            return SimpleLogRecordProcessor.create(exporter)
-        }
-
-        override fun createMetricReader(exporter: MetricExporter?): MetricReader {
-            metricReader = PeriodicMetricReader.create(exporter)
-            return metricReader
-        }
-
-        override fun flush() {
-            metricReader.forceFlush()
-        }
-    }
-
-    private class InMemoryExporterProvider : ExporterProvider {
-        private var spanExporter = AtomicReference(InMemorySpanExporter.create())
-        private var logRecordExporter = AtomicReference(InMemoryLogRecordExporter.create())
-        private var metricExporter = AtomicReference(InMemoryMetricExporter.create())
-
-        fun reset() {
-            spanExporter.set(InMemorySpanExporter.create())
-            logRecordExporter.set(InMemoryLogRecordExporter.create())
-            metricExporter.set(InMemoryMetricExporter.create())
-        }
-
-        fun resetExporters() {
-            spanExporter.get().reset()
-            logRecordExporter.get().reset()
-            metricExporter.get().reset()
-        }
-
-        fun getFinishedSpans(): List<SpanData> {
-            return spanExporter.get().finishedSpanItems
-        }
-
-        fun getFinishedLogRecords(): List<LogRecordData> {
-            return logRecordExporter.get().finishedLogRecordItems
-        }
-
-        fun getFinishedMetrics(): List<MetricData> {
-            return metricExporter.get().finishedMetricItems
-        }
-
-        override fun getSpanExporter(): SpanExporter? {
-            return spanExporter.get()
-        }
-
-        override fun getLogRecordExporter(): LogRecordExporter? {
-            return logRecordExporter.get()
-        }
-
-        override fun getMetricExporter(): MetricExporter? {
-            return metricExporter.get()
         }
     }
 

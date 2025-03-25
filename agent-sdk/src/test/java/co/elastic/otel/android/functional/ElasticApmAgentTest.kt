@@ -26,9 +26,8 @@ import co.elastic.otel.android.interceptor.Interceptor
 import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
 import co.elastic.otel.android.internal.features.centralconfig.CentralConfigurationConnectivity
 import co.elastic.otel.android.internal.features.diskbuffering.DiskBufferingConfiguration
-import co.elastic.otel.android.processors.ProcessorFactory
-import co.elastic.otel.android.test.common.ElasticAttributes.getLogRecordDefaultAttributes
-import co.elastic.otel.android.test.common.ElasticAttributes.getSpanDefaultAttributes
+import co.elastic.otel.android.test.exporter.InMemoryExporterProvider
+import co.elastic.otel.android.test.processor.SimpleProcessorFactory
 import co.elastic.otel.android.testutils.DummySntpClient
 import co.elastic.otel.android.testutils.WireMockRule
 import io.mockk.Runs
@@ -40,26 +39,9 @@ import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.sdk.common.CompletableResultCode
-import io.opentelemetry.sdk.logs.LogRecordProcessor
-import io.opentelemetry.sdk.logs.data.LogRecordData
-import io.opentelemetry.sdk.logs.export.LogRecordExporter
-import io.opentelemetry.sdk.logs.export.SimpleLogRecordProcessor
-import io.opentelemetry.sdk.metrics.data.MetricData
-import io.opentelemetry.sdk.metrics.export.MetricExporter
-import io.opentelemetry.sdk.metrics.export.MetricReader
-import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader
 import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat
-import io.opentelemetry.sdk.testing.exporter.InMemoryLogRecordExporter
-import io.opentelemetry.sdk.testing.exporter.InMemoryMetricExporter
-import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter
-import io.opentelemetry.sdk.trace.SpanProcessor
-import io.opentelemetry.sdk.trace.data.SpanData
-import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor
-import io.opentelemetry.sdk.trace.export.SpanExporter
-import java.io.File
 import java.time.Duration
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicReference
 import org.awaitility.core.ConditionTimeoutException
 import org.awaitility.kotlin.await
 import org.junit.After
@@ -77,11 +59,6 @@ class ElasticApmAgentTest {
     private lateinit var simpleProcessorFactory: SimpleProcessorFactory
     private val inMemoryExporters = InMemoryExporterProvider()
     private val inMemoryExportersInterceptor = Interceptor<ExporterProvider> { inMemoryExporters }
-
-    companion object {
-        private val SPAN_DEFAULT_ATTRIBUTES = getSpanDefaultAttributes()
-        private val LOG_DEFAULT_ATTRIBUTES = getLogRecordDefaultAttributes()
-    }
 
     @get:Rule
     val wireMockRule = WireMockRule()
@@ -746,10 +723,6 @@ class ElasticApmAgentTest {
             }
     }
 
-    private fun verifySessionId(attributes: Attributes, value: String) {
-        assertThat(attributes.get(AttributeKey.stringKey("session.id"))).isEqualTo(value)
-    }
-
     private fun sendSpan(name: String = "span-name", attributes: Attributes = Attributes.empty()) {
         agent.getOpenTelemetry().getTracer("TestTracer")
             .spanBuilder(name)
@@ -768,28 +741,7 @@ class ElasticApmAgentTest {
             .counterBuilder("counter")
             .build()
             .add(1)
-        simpleProcessorFactory.flush()
-    }
-
-    private fun awaitAndTrackTimeMillis(condition: () -> Boolean): Long {
-        val waitStart = System.nanoTime()
-        await.until(condition)
-        val waitTimeMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - waitStart)
-        return waitTimeMillis
-    }
-
-    private fun awaitForCacheFileCreation(dirNames: List<String>) {
-        val signalsDir = File(RuntimeEnvironment.getApplication().cacheDir, "opentelemetry/signals")
-        val dirs = dirNames.map { File(signalsDir, it) }
-        await.until {
-            var dirsNotEmpty = 0
-            dirs.forEach {
-                if (it.list().isNotEmpty()) {
-                    dirsNotEmpty++
-                }
-            }
-            dirsNotEmpty == dirs.size
-        }
+        simpleProcessorFactory.flushMetrics().join(1, TimeUnit.SECONDS)
     }
 
     private fun awaitForOpenGates(maxSecondsToWait: Int = 1) {
@@ -804,73 +756,6 @@ class ElasticApmAgentTest {
                 }"
             )
             throw e
-        }
-    }
-
-    private interface FlushableProcessorFactory : ProcessorFactory {
-        fun flush()
-    }
-
-    private class SimpleProcessorFactory : FlushableProcessorFactory {
-        private lateinit var metricReader: PeriodicMetricReader
-
-        override fun createSpanProcessor(exporter: SpanExporter?): SpanProcessor? {
-            return SimpleSpanProcessor.create(exporter)
-        }
-
-        override fun createLogRecordProcessor(exporter: LogRecordExporter?): LogRecordProcessor? {
-            return SimpleLogRecordProcessor.create(exporter)
-        }
-
-        override fun createMetricReader(exporter: MetricExporter?): MetricReader {
-            metricReader = PeriodicMetricReader.create(exporter)
-            return metricReader
-        }
-
-        override fun flush() {
-            metricReader.forceFlush()
-        }
-    }
-
-    private class InMemoryExporterProvider : ExporterProvider {
-        private var spanExporter = AtomicReference(InMemorySpanExporter.create())
-        private var logRecordExporter = AtomicReference(InMemoryLogRecordExporter.create())
-        private var metricExporter = AtomicReference(InMemoryMetricExporter.create())
-
-        fun reset() {
-            spanExporter.set(InMemorySpanExporter.create())
-            logRecordExporter.set(InMemoryLogRecordExporter.create())
-            metricExporter.set(InMemoryMetricExporter.create())
-        }
-
-        fun resetExporters() {
-            spanExporter.get().reset()
-            logRecordExporter.get().reset()
-            metricExporter.get().reset()
-        }
-
-        fun getFinishedSpans(): List<SpanData> {
-            return spanExporter.get().finishedSpanItems
-        }
-
-        fun getFinishedLogRecords(): List<LogRecordData> {
-            return logRecordExporter.get().finishedLogRecordItems
-        }
-
-        fun getFinishedMetrics(): List<MetricData> {
-            return metricExporter.get().finishedMetricItems
-        }
-
-        override fun getSpanExporter(): SpanExporter? {
-            return spanExporter.get()
-        }
-
-        override fun getLogRecordExporter(): LogRecordExporter? {
-            return logRecordExporter.get()
-        }
-
-        override fun getMetricExporter(): MetricExporter? {
-            return metricExporter.get()
         }
     }
 }

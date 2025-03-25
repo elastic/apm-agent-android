@@ -38,6 +38,7 @@ class GenerateReleaseNotesCommand : CliktCommand() {
         val versionNumbers = version.replace(".", "")
         val textBuilder = StringBuilder(
             """
+                
             ## $version [elastic-apm-android-agent-$versionNumbers-release-notes]
             **Release date:** ${SimpleDateFormat("MMMM d, yyyy", Locale.US).format(Date())}
         """.trimIndent()

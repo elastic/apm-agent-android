@@ -5,7 +5,7 @@ mapped_pages:
 
 # Getting started
 
-By the time you finish this guide, you'll have a fully set-up agent in your app and know how to create and explore your app's data in {{kib}}!
+Learn how to set up an agent in your app and explore data from your app in {{kib}}!
 
 ## Requirements
 
@@ -23,7 +23,7 @@ More info on [FAQs](faq.md#why-desugaring).
 
 ## Gradle setup
 
-Add the [Elastic OTel Agent plugin](https://plugins.gradle.org/plugin/co.elastic.otel.android.agent) to your application’s `build.gradle[.kts]` file, as shown below:
+Add the [Elastic OTel Agent plugin](https://plugins.gradle.org/plugin/co.elastic.otel.android.agent) to your application’s `build.gradle[.kts]` file:
 
 ```kotlin
 plugins {
@@ -36,7 +36,7 @@ plugins {
 
 ## Agent setup
 
-Once the gradle setup is done, you need to initialize the agent within your app's code, as shown below:
+After Gradle setup is done, initialize the agent within your app's code:
 
 ```kotlin
 val agent = ElasticApmAgent.builder(application) // <1>
@@ -47,9 +47,9 @@ val agent = ElasticApmAgent.builder(application) // <1>
 ```
 
 1. Your [Application](https://developer.android.com/reference/android/app/Application) object. Check out [how to get it](how-tos.md#get-application).
-2. "Service" is OpenTelemetry's jargon for an "entity that produces telemetry", so here's where your application name should go. More info on [FAQs](faq.md#why-service).
+2. In OpenTelemetry, _service_ means _an entity that produces telemetry_, so this is where your application name should go. For more information, go to [FAQs](faq.md#why-service).
 3. This is the Elastic endpoint where all your telemetry will be exported. If you don't have one yet, check out [how to get it](how-tos.md#get-export-endpoint).
-4. Using an API Key is the recommended authentication method for the agent to connect to your {{stack}}. If you don't have one yet, check out [how to create one](how-tos.md#create-api-key).
+4. Use an API key to connect the agent to the {{stack}}. If you don't have an API key yet, check out [how to create one](how-tos.md#create-api-key).
 
 :::{include} _snippets/tip-provide-values-from-outside.md
 :::
@@ -81,21 +81,21 @@ agent.span("My Span") {
 
 Once your app has sent telemetry data, either [manually](manual-instrumentation.md) or [automatically](automatic-instrumentation.md), you should be able to visualize it in {{kib}} by navigating to **Applications -> Service Inventory** in the main menu, or alternatively, searching for "Service Inventory" in the [global search field](https://www.elastic.co/guide/en/kibana/current/introduction.html#kibana-navigation-search).
 
-You should find your application listed there, as shown below:
+You should find your application listed there.
 
 :::{image} ../images/span-visualization/1.png
 :screenshot:
 :width: 350px
 :::
 
-When you open it, **go to the "Transactions" tab**, where you should see your app's "outermost" spans listed:
+When you open it, go to the **Transactions** tab, where you should see your app's "outermost" spans listed.
 
 :::{image} ../images/span-visualization/2.png
 :screenshot:
 :width: 350px
 :::
 
-And after clicking on our span, we should see it in detail:
+And after clicking on the span, you should see it in detail.
 
 :::{image} ../images/span-visualization/3.png
 :screenshot:
@@ -103,8 +103,8 @@ And after clicking on our span, we should see it in detail:
 
 ## What’s next? [whats-next]
 
-- So far, we've used the bare minimum configuration options to initialize the agent, which might be enough for you, however, if you'd like to explore what else you can customize, take a look at the [configuration page](configuration.md).
+- This guide uses the minimum configuration options needed to initialize the agent. If you'd like to explore what else you can customize, take a look at the [configuration page](configuration.md).
 
-- In our [simple example](#hello-world), we've _manually_ sent a span, so we essentially created some [manual instrumentation](manual-instrumentation.md) for our app. That's quite helpful (and flexible), however, the agent can create _automatic instrumentations_ as well! Meaning that, only by initializing the agent, it will start sending telemetry data on your behalf without you having to write code to send anything. Take a look at the [automatic instrumentation](automatic-instrumentation.md) page for more details.
+- In our [simple example](#hello-world), we've _manually_ sent a span, so we essentially created some [manual instrumentation](manual-instrumentation.md) for our app. That's quite helpful (and flexible), however, the agent can create _automatic instrumentations_ as well! Meaning that, only by initializing the agent, it will start sending telemetry data on your behalf without you having to write code. For more details, refer to [Automatic instrumentation](automatic-instrumentation.md).
 
-- [Spans](https://opentelemetry.io/docs/concepts/signals/traces/#spans) are a great way to measure how long some method/part-of-a-method or even some broader transaction that involves multiple methods takes to complete. However, **spans aren't the only type** of [signal](https://opentelemetry.io/docs/concepts/signals/) that you can send using the agent, you can send [logs](https://opentelemetry.io/docs/concepts/signals/logs/) and [metrics](https://opentelemetry.io/docs/concepts/signals/metrics/) too! Take a look at [manual instrumentation](manual-instrumentation.md) for more details.
+- [Spans](https://opentelemetry.io/docs/concepts/signals/traces/#spans) are a great way to measure how long some method, _part_ of a method, or even some broader transaction that involves multiple methods takes to complete. However, **spans aren't the only type** of [signal](https://opentelemetry.io/docs/concepts/signals/) that you can send using the agent. You can send [logs](https://opentelemetry.io/docs/concepts/signals/logs/) and [metrics](https://opentelemetry.io/docs/concepts/signals/metrics/) too! For more details, refer to [Manual instrumentation](manual-instrumentation.md).

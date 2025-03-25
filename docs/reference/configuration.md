@@ -5,7 +5,9 @@ mapped_pages:
 
 # Configuration [configuration]
 
-This page is meant to complement the [Getting started](getting-started.md) one. Here you'll find a comprehensive list of all the configurable parameters available for the agent, including those you can set during initialization and those you can adjust dynamically afterward.
+This page includes a comprehensive list of all the configurable parameters available for the agent, including those you can set during initialization and those you can adjust dynamically afterward.
+
+**Just getting started?** Start with [Getting started](getting-started.md). 
 
 ## Initialization configuration 
 

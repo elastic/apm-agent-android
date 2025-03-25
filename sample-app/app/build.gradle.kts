@@ -17,10 +17,22 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "co.elastic.otel.android.sample.tools.SampleAppJunitRunner"
     }
 
     buildTypes {
+        debug {
+            if (project.hasProperty("elastic.testing.automated")) {
+                logger.warn("Building debug with minify enabled for instrumentation tests")
+                isMinifyEnabled = true
+                isDebuggable = false
+                testProguardFiles(
+                    file("androidtest-rules.pro"),
+                    rootProject.file("../shared-rules.pro")
+                )
+                proguardFiles(file("test-rules.pro"))
+            }
+        }
         release {
             isMinifyEnabled = true
             signingConfig = signingConfigs["debug"]
@@ -44,4 +56,6 @@ dependencies {
     implementation("androidx.navigation:navigation-ui-ktx:2.8.7")
     implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
     implementation("com.squareup.retrofit2:converter-gson:$retrofitVersion")
+    androidTestImplementation("co.elastic.otel.android:otel-test-common")
+    androidTestImplementation(instrumentationLibs.bundles.androidTest)
 }

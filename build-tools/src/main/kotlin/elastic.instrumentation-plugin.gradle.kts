@@ -7,18 +7,30 @@ plugins {
 }
 
 val instrumentationGroupId = "${rootProject.group}.instrumentation"
+val parentName = project.parent!!.name
 
 buildConfig {
-    packageName("${instrumentationGroupId}.generated")
+    packageName("${instrumentationGroupId}.generated.$parentName")
 }
 
 abstract class ElasticBuildConfig @Inject constructor(
     private val buildConfigExtension: BuildConfigExtension,
     private val buildConfigGroupId: String,
+    private val parentProjectName: String,
     private val projectVersion: String
 ) {
-    fun projectUri(fieldName: String, artifactName: String) {
-        dependencyUri(fieldName, "${buildConfigGroupId}:$artifactName:$projectVersion")
+    fun libraryUri() {
+        dependencyUri(
+            "LIBRARY_URI",
+            "${buildConfigGroupId}:${parentProjectName}-library:$projectVersion"
+        )
+    }
+
+    fun byteBuddyPluginUri() {
+        dependencyUri(
+            "BYTEBUDDY_PLUGIN_URI",
+            "${buildConfigGroupId}:${parentProjectName}-bytebuddy:$projectVersion"
+        )
     }
 
     fun dependencyUri(fieldName: String, dependencyUri: String) {
@@ -32,9 +44,10 @@ abstract class ElasticBuildConfig @Inject constructor(
 
 abstract class InstrumentationPluginConfig @Inject constructor(
     private val gradlePlugin: GradlePluginDevelopmentExtension,
-    private val projectDescription: String
+    private val projectDescription: String,
+    private val parentProjectName: String
 ) {
-    fun create(id: String, action: Action<PluginDeclaration>) {
+    fun create(id: String = parentProjectName, action: Action<PluginDeclaration>) {
         val pluginDeclaration = gradlePlugin.plugins.create("${id}Instrumentation")
         pluginDeclaration.id = "co.elastic.otel.android.instrumentation-$id"
         pluginDeclaration.description = projectDescription
@@ -48,6 +61,7 @@ project.extensions.create(
     ElasticBuildConfig::class,
     buildConfig,
     instrumentationGroupId,
+    parentName,
     version
 )
 
@@ -55,7 +69,8 @@ project.extensions.create(
     "elasticInstrumentationPlugins",
     InstrumentationPluginConfig::class,
     gradlePlugin,
-    project.description!!
+    project.description!!,
+    parentName
 )
 
 dependencies {

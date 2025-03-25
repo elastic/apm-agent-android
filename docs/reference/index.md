@@ -1,5 +1,5 @@
 ---
-navigation_title: 'Elastic OTel Android Agent'
+navigation_title: 'APM Android agent'
 mapped_pages:
   - https://www.elastic.co/guide/en/apm/agent/android/current/intro.html
   - https://www.elastic.co/guide/en/apm/agent/android/current/index.html

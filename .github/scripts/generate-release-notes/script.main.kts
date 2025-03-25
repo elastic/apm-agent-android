@@ -42,9 +42,10 @@ class GenerateReleaseNotesCommand : CliktCommand() {
             **Release date:** ${SimpleDateFormat("MMMM d, yyyy", Locale.US).format(Date())}
         """.trimIndent()
         )
+        textBuilder.appendLine()
 
         if (updates.featuresEnhancements != null) {
-            textBuilder.appendLine().appendLine()
+            textBuilder.appendLine()
             textBuilder.append(
                 """
             ### Features and enhancements [elastic-apm-android-agent-$versionNumbers-features-enhancements]
@@ -52,10 +53,11 @@ class GenerateReleaseNotesCommand : CliktCommand() {
             )
 
             appendItems(textBuilder, updates.featuresEnhancements)
+            textBuilder.appendLine()
         }
 
         if (updates.fixes != null) {
-            textBuilder.appendLine().appendLine()
+            textBuilder.appendLine()
             textBuilder.append(
                 """
             ### Fixes [elastic-apm-android-agent-$versionNumbers-fixes]
@@ -63,6 +65,7 @@ class GenerateReleaseNotesCommand : CliktCommand() {
             )
 
             appendItems(textBuilder, updates.fixes)
+            textBuilder.appendLine()
         }
 
         return textBuilder.toString()

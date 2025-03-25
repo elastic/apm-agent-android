@@ -39,6 +39,12 @@ jobs:
       contents: write
       id-token: write
     steps:
+      - name: Verify prerequisites
+        run: |
+          if [[ $GITHUB_REF_NAME != release/* ]]; then
+            echo This workflow should only be run against release branches
+            exit 1
+          fi
       - id: notification
         name: Notify that a release will start
         uses: elastic/oblt-actions/slack/send@v1

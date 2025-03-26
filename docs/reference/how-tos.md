@@ -54,7 +54,7 @@ Then select **Application**, as shown below:
 :screenshot:
 :::
 
-Followed by **choosing "OpenTelemetry"**:
+Choose **OpenTelemetry**:
 
 :::{image} ../images/find-export-endpoint/2.png
 :screenshot:

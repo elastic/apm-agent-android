@@ -5,7 +5,7 @@ mapped_pages:
 
 # Getting started
 
-Learn how to set up an agent in your app and explore data from your app in {{kib}}!
+Set up an agent in your app and explore your app's data in {{kib}}.
 
 ## Requirements
 

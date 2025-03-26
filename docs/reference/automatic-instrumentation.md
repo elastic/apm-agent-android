@@ -53,7 +53,7 @@ Disabling byte code instrumentation will cause the [automatic instrumentations](
 
 ### OkHttp
 
-Creates spans for outgoing HTTP requests that are made via the [OkHttp](https://square.github.io/okhttp/) library, this also includes tools that rely on OkHttp to work, such as [Retrofit](https://square.github.io/retrofit/), for example.
+Creates spans for outgoing HTTP requests that are made using the [OkHttp](https://square.github.io/okhttp/) library. This also includes tools that rely on OkHttp to work, such as [Retrofit](https://square.github.io/retrofit/).
 
 #### Gradle plugin
 

@@ -198,7 +198,7 @@ If your {{stack}} is hosted in {{ecloud}}, you shouldn’t need to add any SSL/T
 
 ### Connecting to an on-prem server [faq-ssl-on-prem]
 
-If your {{stack}} is hosted on-prem, then it depends on the type of CA your host uses to sign its certificates, if it’s a commonly trusted CA, then you shouldn’t have to worry about changing your app’s SSL/TLS configuration as it all should work well out of the box, however, if your CAs are unknown/private or your server uses a self-signed certificate, then you would need to configure your app to trust custom CAs by following [Android’s guide on it](https://developer.android.com/privacy-and-security/security-config).
+If your {{stack}} is hosted on-prem, then it depends on the type of CA your host uses to sign its certificates. If it’s a commonly trusted CA, you shouldn’t have to worry about changing your app’s SSL/TLS configuration as it all should work well out of the box. However, if your CAs are unknown/private or your server uses a self-signed certificate, then you would need to configure your app to trust custom CAs by following [Android’s guide](https://developer.android.com/privacy-and-security/security-config).
 
 ### Debugging purposes [faq-ssl-debug]
 

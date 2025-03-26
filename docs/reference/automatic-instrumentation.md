@@ -13,7 +13,7 @@ The agent has an opt-in functionality that automatically generates telemetry on 
 
 You need to **install** the automatic instrumentations you'd like to use.
 
-There are specific targets that are supported for automatic instrumentation, each one has its own Gradle plugin for it to be installed. The overall steps to install a supported automatic instrumentation, are as follows:
+Specific targets are supported for automatic instrumentation, each with its own Gradle plugin for installation. To install a supported automatic instrumentation, follow these steps:
 
 1. Choose a [supported instrumentation](#supported-instrumentations).
 2. Add its Gradle plugin to your project (the same where the [agent](getting-started.md#gradle-setup) is added).

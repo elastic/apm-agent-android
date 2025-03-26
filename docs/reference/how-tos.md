@@ -80,7 +80,7 @@ API Keys are the recommended way of authenticating the agent with your {{stack}}
 
 This is the most straightforward approach. Follow [this quick guide](https://www.elastic.co/guide/en/observability/current/apm-api-key.html#apm-create-an-api-key) and leave all the settings with their default values.
 
-### Via REST APIs
+### Use REST APIs
 
 [This guide](https://www.elastic.co/guide/en/observability/current/apm-agent-key-api.html#apm-create-agent-key) will help you create an API Key with a set of privileges that are scoped for the APM Agent use case only.
 

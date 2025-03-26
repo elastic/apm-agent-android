@@ -88,7 +88,7 @@ Follow [this guide](https://www.elastic.co/guide/en/observability/current/apm-ag
 
 You many want to get values such as an endpoint URL or API Key/Secret Token from a local file in your project directory or an environment variable (or both).
 
-Luckily for us, the Android Gradle plugin has us covered with its [build config fields](https://developer.android.com/build/gradle-tips#share-custom-fields-and-resource-values-with-your-app-code), which provide a way for us to share Gradle info with our app's Kotlin/Java code. And given that Gradle has access to our project directory and to the compilation's host environment, there's a lot we can share from it with our code, some of the possible use cases are shown below.
+The Android Gradle plugin has you covered with its [build config fields](https://developer.android.com/build/gradle-tips#share-custom-fields-and-resource-values-with-your-app-code), which provide a way to share Gradle info with your app's Kotlin/Java code. Since Gradle has access to your project directory and to the compilation's host environment, you can share a lot with it from your code. The following are some possible use cases.
 
 ### Providing data from an environment variable
 

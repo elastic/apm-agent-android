@@ -31,7 +31,7 @@ fun myMethod() {
 }
 ```
 
-To find more details on how to create signals using the OpenTelemetry APIs, you can have a look at the following pages:
+For more details on creating signals using the OpenTelemetry APIs, refer to the following pages:
 
 - [This is the guide](https://opentelemetry.io/docs/languages/java/api/#span) for manually creating **spans**.
 - [This is the guide](https://opentelemetry.io/docs/languages/java/api/#meter) for manually creating **metrics**.

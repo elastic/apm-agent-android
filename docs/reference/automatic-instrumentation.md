@@ -27,7 +27,7 @@ Byte code instrumentation is a common technique which may already be used in you
 
 ### Configuration [automatic-instrumentation-configuration]
 
-For some projects (and depending on their size, including dependencies) the side effects of the [compilation behavior](#compilation-behavior) explained above are something that they'd like to avoid on certain types of builds for which said functionality is not needed. You can use the following configuration to do so:
+For some large projects (including dependencies), you can avoid the added compilation time caused by the [compilation behavior](#compilation-behavior) by excluding build types that don't need the functionality. Use the following configuration to do so:
 
 ```kotlin
 // Your app's build.gradle.kts file

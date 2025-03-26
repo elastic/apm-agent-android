@@ -82,7 +82,7 @@ This is the most straightforward approach. Follow [this quick guide](https://www
 
 ### Use REST APIs
 
-[This guide](https://www.elastic.co/guide/en/observability/current/apm-agent-key-api.html#apm-create-agent-key) will help you create an API Key with a set of privileges that are scoped for the APM Agent use case only.
+Follow [this guide](https://www.elastic.co/guide/en/observability/current/apm-agent-key-api.html#apm-create-agent-key) to create an API Key with a set of privileges that are scoped for the APM Agent use case only.
 
 ## How to provide config values from outside of my code?
 

@@ -5,7 +5,7 @@ mapped_pages:
 
 # Automatic instrumentation
 
-The agent has an opt-in functionality that automatically generates telemetry on your behalf, which allows you to get telemetry data (for the supported targets) without having to write [manual instrumentation](manual-instrumentation.md).
+The agent has an opt-in functionality that automatically generates telemetry on your behalf. This allows you to get telemetry data for supported targets without having to write [manual instrumentation](manual-instrumentation.md).
 
 ## How it works
 

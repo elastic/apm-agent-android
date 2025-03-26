@@ -194,7 +194,7 @@ Note that the Elastic Agent does not handle SSL/TLS configs internally. Therefor
 
 ### Connecting to Elastic Cloud [faq-ssl-elastic-cloud]
 
-If your {{stack}} is hosted in {{ecloud}}, you shouldn’t need to add any SSL/TLS config changes in your app, it should work out of the box.
+If your {{stack}} is hosted in {{ecloud}}, you shouldn’t need to add any SSL/TLS config changes in your app. It should work out of the box.
 
 ### Connecting to an on-prem server [faq-ssl-on-prem]
 

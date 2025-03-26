@@ -21,7 +21,7 @@ Distributed tracing allows you to see the full picture of **how long your applic
 :screenshot:
 :::
 
-In the image above we can see **3 spans** from {{kib}}:
+The previous image shows **3 spans** from {{kib}}:
 
 - The first span is created in your application to track an HTTP request to your backend service.
 - The second span is created within your backend service and shows how long it took to receive the client request and provide a response.

@@ -56,7 +56,7 @@ val agent = ElasticApmAgent.builder(application) // <1>
 
 ## Hello World!
 
-The agent is fully initialized, so now you can start sending telemetry to your {{stack}}! Here's a quick example of manually creating a [span](https://opentelemetry.io/docs/concepts/signals/traces/#spans) and finding it in {{kib}}:
+The agent is fully initialized, so now you can start sending telemetry to your {{stack}}! Here's a quick example of manually creating a [span](https://opentelemetry.io/docs/concepts/signals/traces/#spans) and viewing it in {{kib}}:
 
 ### Generate telemetry
 

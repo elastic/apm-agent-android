@@ -40,6 +40,7 @@ jobs:
             echo This workflow should only be run against release branches
             exit 1
           fi
+
       - id: notification
         name: Notify that a release will start
         uses: elastic/oblt-actions/slack/send@v1
@@ -127,6 +128,44 @@ jobs:
         with:
           github-token: ${{ steps.get_token.outputs.token }}
 
-      - uses: ./.github/actions/setup
+      - name: Setting variables
+        id: variables
+        run: |
+          version=$(cat gradle.properties | grep -Po "(?<=version=)\d+\.\d+\.\d+")
+          { 
+            echo "version=$version"
+            echo "post_release_branch=post-release/$version"
+          } >> "$GITHUB_OUTPUT"
+
       - if: ${{ ! inputs.dry_run }}
-        run: ./gradlew postDeploy -Prelease=true
+        name: Creating GitHub release
+        run: |
+          release_tag=v$VERSION
+          git tag $release_tag
+          git push origin tag $release_tag
+          
+          version_without_dots=$(echo $VERSION | sed 's/\.//g')
+          release_notes="[Release Notes for $VERSION](https://www.elastic.co/guide/en/apm/agent/android/current/release-notes-1.x.html#elastic-apm-android-agent-$version_without_dots-release-notes)"
+          
+          gh release create $release_tag --title "Release $VERSION" --notes "$release_notes"
+        env:
+          VERSION: ${{ steps.variables.outputs.version }}
+
+      - if: ${{ ! inputs.dry_run }}
+        name: Prepare for the next release
+        run: |
+          echo "Creating branch $POST_RELEASE_BRANCH"
+          git checkout -b $POST_RELEASE_BRANCH
+          
+          echo "Bumping version"
+          sed -i "s,version=$VERSION,version=$(./.github/scripts/bump-minor-version/main.sh $VERSION)," gradle.properties
+          git commit -a -m "Bumping version"
+          
+          echo "Pushing changes"
+          git push origin $POST_RELEASE_BRANCH
+          
+          echo "Creating PR"
+          gh pr create --title "Prepare for the next release" --base main --reviewer elastic/apm-agent-android --repo elastic/apm-agent-android
+        env:
+          VERSION: ${{ steps.variables.outputs.version }}
+          POST_RELEASE_BRANCH: ${{ steps.variables.outputs.post_release_branch }}

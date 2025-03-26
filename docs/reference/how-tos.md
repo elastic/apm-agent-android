@@ -76,7 +76,7 @@ Your export endpoint URL is the value for the **`OTEL_EXPORTER_OTLP_ENDPOINT`** 
 
 API Keys are the recommended way of authenticating the agent with your {{stack}}. There's a couple of ways you can create one:
 
-### Via {{kib}}'s Applications UI
+### Use {{kib}}'s Applications UI
 
 This is the most straightforward approach, you'll need to follow [this quick guide](https://www.elastic.co/guide/en/observability/current/apm-api-key.html#apm-create-an-api-key) on it and leave all the settings with their default values.
 

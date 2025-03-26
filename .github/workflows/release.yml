@@ -150,6 +150,7 @@ jobs:
           gh release create $release_tag --title "Release $VERSION" --notes "$release_notes"
         env:
           VERSION: ${{ steps.variables.outputs.version }}
+          GH_TOKEN: ${{ steps.get_token.outputs.token }}
 
       - if: ${{ ! inputs.dry_run }}
         name: Prepare for the next release
@@ -169,3 +170,4 @@ jobs:
         env:
           VERSION: ${{ steps.variables.outputs.version }}
           POST_RELEASE_BRANCH: ${{ steps.variables.outputs.post_release_branch }}
+          GH_TOKEN: ${{ steps.get_token.outputs.token }}

@@ -17,7 +17,7 @@ Specific targets are supported for automatic instrumentation, each with its own 
 
 1. Choose a [supported instrumentation](#supported-instrumentations).
 2. Add its Gradle plugin to your project in the same location where the [agent](getting-started.md#gradle-setup) is added.
-3. [Initialize the agent](getting-started.md#agent-setup), the same way you would without having any automatic instrumentation. There are no special steps needed during the agent initialization to make the automatic instrumentations work.
+3. [Initialize the agent](getting-started.md#agent-setup) the same way you would without using automatic instrumentation. Automatic instrumentations will get installed during the agent initialization without having to write extra code.
 
 ### Compilation behavior
 

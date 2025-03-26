@@ -23,7 +23,7 @@ Specific targets are supported for automatic instrumentation, each with its own 
 
 Some automatic instrumentations perform "byte code instrumentation" (also called byte code weaving), where your application's code (including code from the libraries it uses) is modified **at compile-time**. This automates code changes that you would otherwise need to make manually.
 
-Byte code instrumentation is a common technique which is probably already used in your project for other use cases, such as for [code optimization](https://developer.android.com/build/shrink-code#optimization) via R8, for example. It's a very useful technique, although there's one problem with it (which you've probably spotted with R8 optimizations) which is that **it can make the compilation take longer** to complete. Because of it, the agent provides [a way to select](#automatic-instrumentation-configuration) which build types of your app to exclude from getting these byte code changes, similarly to what [isMinifyEnabled](https://developer.android.com/build/shrink-code#enable) does in the case of R8 functionalities.
+Byte code instrumentation is a common technique which may already be used in your project for use cases such as [code optimization](https://developer.android.com/build/shrink-code#optimization) through R8. While useful, code instrumentation can make compilation take longer to complete. Because of this, the agent provides [a way to exclude](#automatic-instrumentation-configuration) specific build types in your app from byte code changes, similar to what [isMinifyEnabled](https://developer.android.com/build/shrink-code#enable) does with R8 functionalities.
 
 ### Configuration [automatic-instrumentation-configuration]
 

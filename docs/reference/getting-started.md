@@ -75,7 +75,7 @@ agent.span("My Span") {
 }
 ```
 1. This is to simulate some code execution for which we want to measure the time it takes to complete.
-2. This is to demonstrate how span hierarchies look like in {{kib}}.
+2. This is to demonstrate what span hierarchies look like in {{kib}}.
 
 ### Visualize telemetry
 

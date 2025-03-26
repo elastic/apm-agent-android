@@ -113,7 +113,7 @@ android {
 }
 ```
 
-1. Since our `build.gradle.kts` files are written using [Kotlin](https://kotlinlang.org/) code, we can get our environment variables the same way we would with regular Kotlin sources. The same applies to `build.gradle` files, which work with [Groovy](https://groovy-lang.org/) instead.
+1. Since the `build.gradle.kts` files are written using [Kotlin](https://kotlinlang.org/) code, you can get your environment variables the same way you would with regular Kotlin sources. The same applies to `build.gradle` files, which work with [Groovy](https://groovy-lang.org/) instead.
 2. We must ensure we have Android's `buildConfig` feature enabled.
 3. By adding our build config fields to the `android.defaultConfig` block, we ensure that they are available for all of your app's build variants. You could also, if needed, create fields with the same name but different values for each of your build variants, as shown in Android's [official docs](https://developer.android.com/build/gradle-tips#share-custom-fields-and-resource-values-with-your-app-code), to provide different values per variant.
 

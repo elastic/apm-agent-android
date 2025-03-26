@@ -58,7 +58,7 @@ fun myMethod() {
 }
 ```
 
-1. The span name and its body are the only mandatory parameters from this method, however, there are other, optional ones (such as one to set custom `attributes`), that you can provide if needed. Take a look at the [method definition](https://github.com/elastic/apm-agent-android/blob/main/agent-sdk/src/main/java/co/elastic/otel/android/extensions/ElasticOtelAgentExtensions.kt) to find out more.
+1. The span name and its body are the only mandatory parameters from this method. However, there are other optional parameters (such as one to set custom `attributes`) that you can provide if needed. Take a look at the [method definition](https://github.com/elastic/apm-agent-android/blob/main/agent-sdk/src/main/java/co/elastic/otel/android/extensions/ElasticOtelAgentExtensions.kt) to find out more.
 
 ### Logs
 

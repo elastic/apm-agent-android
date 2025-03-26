@@ -46,7 +46,7 @@ elasticAgent {
 1. By default, the `disableForBuildTypes` list is empty. Add any [build type](https://developer.android.com/build/build-variants#build-types) names for which you want to disable byte code instrumentation.
 
 :::{note}
-Disabling byte code instrumentation will cause that the [automatic instrumentations](#supported-instrumentations) that need it won't be able to work properly on the affected build type. This shouldn't cause issues to your app's functionality in general, it will only affect the agent's ability to automatically collect telemetry.
+Disabling byte code instrumentation will cause the [automatic instrumentations](#supported-instrumentations) that need it to not work properly on the affected build type. This shouldn't cause issues to your app's functionality in general, it will only affect the agent's ability to automatically collect telemetry.
 :::
 
 ## Supported instrumentations

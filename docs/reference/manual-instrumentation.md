@@ -33,9 +33,9 @@ fun myMethod() {
 
 For more details on creating signals using the OpenTelemetry APIs, refer to the following pages:
 
-- [This is the guide](https://opentelemetry.io/docs/languages/java/api/#span) for manually creating **spans**.
-- [This is the guide](https://opentelemetry.io/docs/languages/java/api/#meter) for manually creating **metrics**.
-- [This is the guide](https://opentelemetry.io/docs/languages/java/api/#logger) for manually creating **logs**.
+- [Manually create **spans**](https://opentelemetry.io/docs/languages/java/api/#span).
+- [Manually create **metrics**](https://opentelemetry.io/docs/languages/java/api/#meter).
+- [Manually create **logs**](https://opentelemetry.io/docs/languages/java/api/#logger).
 
 ## Convenience extensions
 

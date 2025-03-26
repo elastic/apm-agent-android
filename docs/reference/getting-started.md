@@ -95,7 +95,7 @@ When you open it, go to the **Transactions** tab, where you should see your app'
 :width: 350px
 :::
 
-And after clicking on the span, you should see it in detail.
+After clicking on the span, you should see it in detail.
 
 :::{image} ../images/span-visualization/3.png
 :screenshot:

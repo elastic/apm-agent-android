@@ -160,7 +160,7 @@ android {
 }
 ```
 
-1. Our file path, provided here, is relative to our `build.gradle.kts` file (where this code is written). So in this example, both files (our `build.gradle.kts` and `myfile.properties`) are located in the same directory.
+1. Your file path, provided here, is relative to your `build.gradle.kts` file (where this code is written). So in this example, both files (our `build.gradle.kts` and `myfile.properties`) are located in the same directory.
 2. We must ensure we have Android's `buildConfig` feature enabled.
 3. By adding our build config fields to the `android.defaultConfig` block, we ensure that they are available for all of your app's build variants. You could also, if needed, create fields with the same name but different values for each of your build variants, as shown in Android's [official docs](https://developer.android.com/build/gradle-tips#share-custom-fields-and-resource-values-with-your-app-code), to provide different values per variant.
 

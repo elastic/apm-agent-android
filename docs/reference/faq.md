@@ -5,7 +5,7 @@ mapped_pages:
 
 # Frequently asked questions [faq]
 
-## Why is needed to enable desugaring support on apps with minSdk below 26? [why-desugaring]
+## Why is enabling desugaring support on apps with minSdk below 26 necessary? [why-desugaring]
 
 Android devices with an API level < 26 (older than [Android 8.0](https://developer.android.com/about/versions/oreo/android-8.0)) have limited support for Java 8 features and types, which can cause your app to crash when using those types while running on those older-than-8.0 devices. For example, if one of your app's dependencies uses the [Base64](https://docs.oracle.com/javase/8/docs/api/java/util/Base64.html) type ([added in API level 26](https://developer.android.com/reference/java/util/Base64)) and then your app is installed on an Android device with OS version 7.0 ([API level 24](https://developer.android.com/about/versions/nougat/android-7.0)) then a crash will happen when the code that uses said type is executed due to a "class not found" error.
 

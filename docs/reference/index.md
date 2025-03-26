@@ -27,7 +27,7 @@ The previous image shows **3 spans** from {{kib}}:
 - The second span is created within your backend service and shows how long it took to receive the client request and provide a response.
 - The last span is also created within your backend service when it queries other resources internally. In this case, it makes an HTTP request to another service, but in other cases, it could involve querying a database.
 
-You can click on any of these spans to view their full details, in case you need more contextual information from each.
+You can click on any of these spans to view their full details if you need more contextual information from each.
 
 :::{note}
 For distributed tracing to work properly, your backend services must be configured to send telemetry to the {{stack}} as well.

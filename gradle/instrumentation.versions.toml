@@ -2,11 +2,9 @@
 opentelemetry-instrumentation-alpha = "2.12.0-alpha"
 
 [libraries]
-androidx-lifecycle-process = "androidx.lifecycle:lifecycle-process:2.8.7"
 opentelemetry-instrumentation-api = "io.opentelemetry.instrumentation:opentelemetry-instrumentation-api:2.12.0"
 opentelemetry-instrumentation-api-incubator = { module = "io.opentelemetry.instrumentation:opentelemetry-instrumentation-api-incubator", version.ref = "opentelemetry-instrumentation-alpha" }
 opentelemetry-instrumentation-okhttp = { module = "io.opentelemetry.instrumentation:opentelemetry-okhttp-3.0", version.ref = "opentelemetry-instrumentation-alpha" }
-opentelemetry-api-incubator = "io.opentelemetry:opentelemetry-api-incubator:1.46.0-alpha"
 okhttp = "com.squareup.okhttp3:okhttp:4.12.0"
 
 # Testing

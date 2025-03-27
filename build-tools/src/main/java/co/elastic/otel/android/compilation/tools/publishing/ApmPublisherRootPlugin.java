@@ -14,7 +14,6 @@ import java.util.regex.Pattern;
 
 import co.elastic.otel.android.compilation.tools.NoticeProviderPlugin;
 import co.elastic.otel.android.compilation.tools.plugins.RootNoticeProviderPlugin;
-import co.elastic.otel.android.compilation.tools.publishing.tasks.PostDeployTask;
 import co.elastic.otel.android.compilation.tools.sourceheader.ApmSourceHeaderPlugin;
 import io.github.gradlenexus.publishplugin.NexusPublishExtension;
 import io.github.gradlenexus.publishplugin.NexusPublishPlugin;
@@ -31,7 +30,6 @@ public class ApmPublisherRootPlugin implements Plugin<Project> {
     public void apply(Project project) {
         configureVersion(project);
         applyRootPlugins(project.getPlugins());
-        addPostDeployTask(project);
         configureMavenCentral(project);
         project.subprojects(subproject -> {
             if (!subproject.getPath().startsWith(":internal-tools")) {
@@ -98,10 +96,6 @@ public class ApmPublisherRootPlugin implements Plugin<Project> {
             return null;
         }
         return property;
-    }
-
-    private void addPostDeployTask(Project project) {
-        project.getTasks().register("postDeploy", PostDeployTask.class);
     }
 
     private void applySubprojectPlugins(PluginContainer subprojectPlugins) {

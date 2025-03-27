@@ -150,8 +150,8 @@ internal class ExporterGateManager(
                 delegateSpanExporter.export(items)
             }
             gateSpanExporter = null
+            spanGateOpen.set(true)
         }
-        spanGateOpen.set(true)
     }
 
     private fun onLogRecordGateOpen() {
@@ -164,8 +164,8 @@ internal class ExporterGateManager(
                 delegateLogRecordExporter.export(items)
             }
             gateLogRecordExporter = null
+            logGateOpen.set(true)
         }
-        logGateOpen.set(true)
     }
 
     private fun onMetricGateOpen() {
@@ -178,8 +178,8 @@ internal class ExporterGateManager(
                 delegateMetricExporter.export(items)
             }
             gateMetricExporter = null
+            metricGateOpen.set(true)
         }
-        metricGateOpen.set(true)
     }
 
     private fun onSpanQueueStarted() {

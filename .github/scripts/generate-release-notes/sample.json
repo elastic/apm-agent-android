@@ -1,0 +1,17 @@
+{
+  "features_enhancements": [
+    {
+      "prId": 340,
+      "message": "Bumping upstream libs"
+    },
+    {
+      "message": "Adding consumer R8 rules"
+    }
+  ],
+  "fixes": [
+    {
+      "prId": 319,
+      "message": "HTTP exporting"
+    }
+  ]
+}

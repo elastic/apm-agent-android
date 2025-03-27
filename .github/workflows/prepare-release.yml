@@ -1,0 +1,98 @@
+---
+name: Prepare release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_notes:
+        description: The release note items to add, in JSON format. See scripts/generate-release-notes/sample.json.
+        required: true
+        type: string
+
+jobs:
+  prepare_release:
+    name: Prepare release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Verify prerequisites
+        run: |
+          if [[ $GITHUB_REF_NAME != main ]]; then
+            echo This workflow should only be run against main
+            exit 1
+          fi
+
+      - name: Get token
+        id: get_token
+        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
+        with:
+          app_id: ${{ secrets.OBS_AUTOMATION_APP_ID }}
+          private_key: ${{ secrets.OBS_AUTOMATION_APP_PEM }}
+          permissions: >-
+            {
+              "contents": "write",
+              "pull_requests": "write"
+            }
+          repositories: >-
+            ["apm-agent-android"]
+
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ steps.get_token.outputs.token }}
+
+      - uses: elastic/oblt-actions/git/setup@v1
+        with:
+          github-token: ${{ steps.get_token.outputs.token }}
+
+      - name: Setting variables
+        id: variables
+        run: |
+          version=$(cat gradle.properties | grep -Po "(?<=version=)\d+\.\d+\.\d+")
+          echo "The version is $version"
+          { 
+            echo "version=$version"
+            echo "release_branch=release/$version"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Creating release branch
+        env:
+          RELEASE_BRANCH: ${{ steps.variables.outputs.release_branch }}
+        run: |
+          git checkout -b $RELEASE_BRANCH
+          git push --set-upstream origin $RELEASE_BRANCH
+
+      - name: Updating the release notes
+        env:
+          VERSION: ${{ steps.variables.outputs.version }}
+          RELEASE_NOTES: ${{ inputs.release_notes }}
+        run: |
+          tempdir="build/actions/prepare-release"
+          mkdir -p $tempdir
+          
+          source_file_path=$tempdir/source.json
+          dest_file_path=$tempdir/dest.md
+          
+          echo $RELEASE_NOTES > $source_file_path
+          
+          ./.github/scripts/generate-release-notes/script.main.kts --source=$source_file_path --version=$VERSION > $dest_file_path
+          
+          sed -i '/next_release_notes/r $dest_file_path' docs/release-notes/index.md
+
+      - name: Creating release branch PR
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          VERSION: ${{ steps.variables.outputs.version }}
+          RELEASE_BRANCH: ${{ steps.variables.outputs.release_branch }}
+        run: |
+          message="Prepare release $VERSION"
+          branch="pre-release/$VERSION"
+          
+          git checkout -b $branch
+          git commit -a -m "$message"
+          git push --set-upstream origin $branch
+          gh pr create --title "[$RELEASE_BRANCH] $message" \
+                       --body "$message." \
+                       --base $RELEASE_BRANCH

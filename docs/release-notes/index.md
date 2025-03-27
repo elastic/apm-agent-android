@@ -20,6 +20,8 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 % ### Fixes [elastic-apm-android-agent-versionext-fixes]
 
+% next_release_notes
+    
 ## 0.20.0 [elastic-apm-android-agent-0200-release-notes]
 **Release date:** July 29, 2024
 

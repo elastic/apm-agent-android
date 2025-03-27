@@ -11,10 +11,6 @@ Review the changes, fixes, and more in each version of Elastic APM Android Agent
 
 To check for security updates, go to [Security announcements for the Elastic stack](https://discuss.elastic.co/c/announcements/security-announcements/31).
 
-::::{warning}
-This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
-::::
-
 % Release notes includes only features, enhancements, and fixes. Add breaking changes, deprecations, and known issues to the applicable release notes sections.
 
 % ## version.next [elastic-apm-android-agent-versionext-release-notes]
@@ -24,6 +20,8 @@ This functionality is in technical preview and may be changed or removed in a fu
 
 % ### Fixes [elastic-apm-android-agent-versionext-fixes]
 
+% next_release_notes
+    
 ## 0.20.0 [elastic-apm-android-agent-0200-release-notes]
 **Release date:** July 29, 2024
 

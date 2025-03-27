@@ -249,15 +249,6 @@ class ElasticApmAgent internal constructor(
         }
 
         /**
-         * It allows to set a custom [SessionIdGenerator], for providing a value that will be set as
-         * [session.id](https://opentelemetry.io/docs/specs/semconv/attributes-registry/session/#session-id) on
-         * every span and log record.
-         */
-        fun setSessionIdGenerator(value: SessionIdGenerator) = apply {
-            sessionIdGenerator = value
-        }
-
-        /**
          * It allows to set a custom [ProcessorFactory] where you can decide which [SpanProcessor], [LogRecordProcessor] and [MetricReader]
          * implementation you'd like to use.
          *
@@ -279,6 +270,10 @@ class ElasticApmAgent internal constructor(
          */
         fun setHttpSpanInterceptor(value: Interceptor<SpanData>?) = apply {
             httpSpanInterceptor = value
+        }
+
+        internal fun setSessionIdGenerator(value: SessionIdGenerator) = apply {
+            sessionIdGenerator = value
         }
 
         internal fun setManagementUrl(value: String) = apply {

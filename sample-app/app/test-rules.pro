@@ -1,4 +1,3 @@
--keepnames class io.opentelemetry.sdk.metrics.export.PeriodicMetricReader { builder(io.opentelemetry.sdk.metrics.export.MetricExporter);forceFlush(); }
 -keepnames class io.opentelemetry.sdk.metrics.export.PeriodicMetricReaderBuilder { build(); }
 -keepnames class io.opentelemetry.sdk.trace.export.BatchSpanProcessor { builder(io.opentelemetry.sdk.trace.export.SpanExporter); }
 -keepnames class io.opentelemetry.sdk.trace.export.BatchSpanProcessorBuilder { build(); }
@@ -15,6 +14,7 @@
 -keepnames class io.opentelemetry.api.common.Attributes { builder(); }
 -keepnames class io.opentelemetry.api.common.AttributesBuilder { put(java.lang.String,java.lang.String); }
 -keepnames class io.opentelemetry.context.ImplicitContextKeyed { makeCurrent(); }
+-keepclassmembers class io.opentelemetry.sdk.metrics.export.PeriodicMetricReader { builder(io.opentelemetry.sdk.metrics.export.MetricExporter);forceFlush(); }
 -keepclassmembers class io.opentelemetry.api.metrics.LongCounter { add(long); }
 -keepclassmembers class io.opentelemetry.api.OpenTelemetry { getTracer(java.lang.String);getLogsBridge();getMeter(java.lang.String); }
 -keepclassmembers class io.opentelemetry.sdk.common.CompletableResultCode { join(long,java.util.concurrent.TimeUnit);ofSuccess(); }

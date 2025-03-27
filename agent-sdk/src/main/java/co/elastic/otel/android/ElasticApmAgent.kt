@@ -94,8 +94,7 @@ class ElasticApmAgent internal constructor(
     }
 
     /**
-     * Updates the server connectivity parameters, this changes where the telemetry is sent to and
-     * also where the central configuration is polled from.
+     * Updates the server connectivity parameters, this changes where the telemetry is sent.
      *
      * @param configuration The new server configuration.
      */
@@ -205,23 +204,6 @@ class ElasticApmAgent internal constructor(
         }
 
         /**
-         * This is the URL where the remote configuration is polled from.
-         *
-         * By default is null, if it's left unset then the remote configuration feature will not
-         * get enabled.
-         */
-        fun setManagementUrl(value: String) = apply {
-            managementUrl = value
-        }
-
-        /**
-         * This is the authentication method needed to connect to the value provided in [setManagementUrl].
-         */
-        fun setManagementAuthentication(value: Authentication) = apply {
-            managementAuthentication = value
-        }
-
-        /**
          * Allows to set an interceptor for attributes sent for each span.
          */
         fun addSpanAttributesInterceptor(value: Interceptor<Attributes>) = apply {
@@ -266,15 +248,6 @@ class ElasticApmAgent internal constructor(
         }
 
         /**
-         * It allows to set a custom [SessionIdGenerator], for providing a value that will be set as
-         * [session.id](https://opentelemetry.io/docs/specs/semconv/attributes-registry/session/#session-id) on
-         * every span and log record.
-         */
-        fun setSessionIdGenerator(value: SessionIdGenerator) = apply {
-            sessionIdGenerator = value
-        }
-
-        /**
          * It allows to set a custom [ProcessorFactory] where you can decide which [SpanProcessor], [LogRecordProcessor] and [MetricReader]
          * implementation you'd like to use.
          *
@@ -296,6 +269,18 @@ class ElasticApmAgent internal constructor(
          */
         fun setHttpSpanInterceptor(value: Interceptor<SpanData>?) = apply {
             httpSpanInterceptor = value
+        }
+
+        internal fun setSessionIdGenerator(value: SessionIdGenerator) = apply {
+            sessionIdGenerator = value
+        }
+
+        internal fun setManagementUrl(value: String) = apply {
+            managementUrl = value
+        }
+
+        internal fun setManagementAuthentication(value: Authentication) = apply {
+            managementAuthentication = value
         }
 
         internal fun setDiskBufferingConfiguration(value: DiskBufferingConfiguration) = apply {

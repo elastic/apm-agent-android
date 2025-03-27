@@ -2,10 +2,6 @@ public abstract interface class co/elastic/otel/android/api/ElasticOtelAgent : j
 	public abstract fun getOpenTelemetry ()Lio/opentelemetry/api/OpenTelemetry;
 }
 
-public abstract interface class co/elastic/otel/android/api/clock/ClockProvider {
-	public abstract fun getClock ()Lio/opentelemetry/sdk/common/Clock;
-}
-
 public abstract interface class co/elastic/otel/android/api/flusher/LogRecordFlusher {
 	public abstract fun flushLogRecords ()Lio/opentelemetry/sdk/common/CompletableResultCode;
 }

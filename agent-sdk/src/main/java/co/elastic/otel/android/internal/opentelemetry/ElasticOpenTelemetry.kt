@@ -28,7 +28,6 @@ import co.elastic.otel.android.internal.attributes.SpanAttributesInterceptor
 import co.elastic.otel.android.internal.opentelemetry.processors.DefaultProcessorFactory
 import co.elastic.otel.android.internal.opentelemetry.processors.logs.LogRecordAttributesProcessor
 import co.elastic.otel.android.internal.opentelemetry.processors.spans.SpanAttributesProcessor
-import co.elastic.otel.android.internal.opentelemetry.processors.spans.SpanInterceptorProcessor
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.utilities.cache.PreferencesCachedStringProvider
 import co.elastic.otel.android.processors.ProcessorFactory
@@ -197,7 +196,6 @@ class ElasticOpenTelemetry private constructor(
                                 )
                             )
                         )
-                        .addSpanProcessor(SpanInterceptorProcessor())
                         .addSpanProcessor(it)
                         .build()
                 )

@@ -94,8 +94,7 @@ class ElasticApmAgent internal constructor(
     }
 
     /**
-     * Updates the server connectivity parameters, this changes where the telemetry is sent to and
-     * also where the central configuration is polled from.
+     * Updates the server connectivity parameters, this changes where the telemetry is sent.
      *
      * @param configuration The new server configuration.
      */

@@ -1,5 +1,5 @@
 ---
-navigation_title: "Release notes"
+navigation_title: "Elastic APM Android Agent"
 mapped_pages:
   - https://www.elastic.co/guide/en/apm/agent/android/current/release-notes.html
   - https://www.elastic.co/guide/en/apm/agent/android/current/release-notes-0.x.html
@@ -21,7 +21,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [elastic-apm-android-agent-versionext-fixes]
 
 % next_release_notes
-    
+
 ## 0.20.0 [elastic-apm-android-agent-0200-release-notes]
 **Release date:** July 29, 2024
 

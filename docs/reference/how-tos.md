@@ -50,25 +50,25 @@ The export endpoint is where your app's telemetry is sent, so it's required to i
 
 Then select **Application**, as shown below:
 
-:::{image} ../images/find-export-endpoint/1.png
+:::{image} /reference/images/find-export-endpoint/1.png
 :screenshot:
 :::
 
 Choose **OpenTelemetry**:
 
-:::{image} ../images/find-export-endpoint/2.png
+:::{image} /reference/images/find-export-endpoint/2.png
 :screenshot:
 :::
 
 On the next page, scroll down to the **APM Agents** pane, and select the **OpenTelemetry** tab:
 
-:::{image} ../images/find-export-endpoint/3.png
+:::{image} /reference/images/find-export-endpoint/3.png
 :screenshot:
 :::
 
 Your export endpoint URL is the value for the **`OTEL_EXPORTER_OTLP_ENDPOINT`** configuration setting:
 
-:::{image} ../images/find-export-endpoint/4.png
+:::{image} /reference/images/find-export-endpoint/4.png
 :screenshot:
 :::
 

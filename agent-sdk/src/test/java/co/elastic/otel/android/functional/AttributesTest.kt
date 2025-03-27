@@ -262,7 +262,7 @@ internal class AttributesTest : ExporterProvider, ProcessorFactory {
         assertThat(spanItems).hasSize(1)
         assertThat(logItems).hasSize(1)
         assertThat(spanItems.first()).hasAttributes(getSpanDefaultAttributes())
-            .hasStatus(StatusData.ok())
+            .hasStatus(StatusData.unset())
         assertThat(logItems.first()).hasAttributes(getLogRecordDefaultAttributes())
     }
 

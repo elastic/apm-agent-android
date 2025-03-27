@@ -15,7 +15,6 @@ class MyApp : Application() {
         super.onCreate()
         agent = ElasticApmAgent.builder(this)
             .setExportUrl("http://10.0.2.2:8200")
-            .setManagementUrl("http://10.0.2.2:8200/config/v1/agents")
             .setServiceName("weather-sample-app")
             .build()
 

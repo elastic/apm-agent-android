@@ -70,7 +70,7 @@ val agent = ElasticApmAgent.builder(application)
 agent.span("My Span") {
     Thread.sleep(500) // <1>
     agent.span("My nested Span") { // <2>
-        Thread.sleep(500) 
+        Thread.sleep(500)
     }
 }
 ```
@@ -83,21 +83,21 @@ Once your app has sent telemetry data, either [manually](manual-instrumentation.
 
 You should find your application listed there.
 
-:::{image} ../images/span-visualization/1.png
+:::{image} /reference/images/span-visualization/1.png
 :screenshot:
 :width: 350px
 :::
 
 When you open it, go to the **Transactions** tab, where you should see your app's "outermost" spans listed.
 
-:::{image} ../images/span-visualization/2.png
+:::{image} /reference/images/span-visualization/2.png
 :screenshot:
 :width: 350px
 :::
 
 After clicking on the span, you should see it in detail.
 
-:::{image} ../images/span-visualization/3.png
+:::{image} /reference/images/span-visualization/3.png
 :screenshot:
 :::
 

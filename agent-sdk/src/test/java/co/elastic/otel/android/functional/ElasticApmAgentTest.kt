@@ -496,6 +496,8 @@ class ElasticApmAgentTest {
             .build()
 
         wireMockRule.takeRequest() // Await for central config response
+        awaitForCentralConfigurationValues(ExpectedCentralConfiguration(false, 0.0))
+
         agent.getSessionManager().clearSession()
 
         sendSpan()
@@ -516,6 +518,8 @@ class ElasticApmAgentTest {
         }
 
         wireMockRule.takeRequest() // Await for central config response
+        awaitForCentralConfigurationValues(ExpectedCentralConfiguration(false, 1.0))
+
         agent.getSessionManager().clearSession()
 
         sendSpan()
@@ -534,6 +538,8 @@ class ElasticApmAgentTest {
         }
 
         wireMockRule.takeRequest() // Await for central config response
+        awaitForCentralConfigurationValues(ExpectedCentralConfiguration(true, 1.0))
+
         agent.getSessionManager().clearSession()
 
         sendSpan()
@@ -554,6 +560,7 @@ class ElasticApmAgentTest {
         }
 
         wireMockRule.takeRequest() // Await for central config response
+        awaitForCentralConfigurationValues(ExpectedCentralConfiguration(true, 0.0))
 
         sendSpan()
         sendLog()
@@ -599,6 +606,8 @@ class ElasticApmAgentTest {
 
         // When central config fails and the session gets reset, go with default behavior.
         wireMockRule.takeRequest()
+        awaitForCentralConfigurationValues(ExpectedCentralConfiguration(true, 1.0))
+
         agent.getSessionManager().clearSession()
         inMemoryExporters.resetExporters()
 
@@ -784,4 +793,22 @@ class ElasticApmAgentTest {
             throw e
         }
     }
+
+    private fun awaitForCentralConfigurationValues(
+        expectedValue: ExpectedCentralConfiguration,
+        waitSeconds: Int = 1
+    ) {
+        val centralConfiguration =
+            agent.getCentralConfigurationManager()!!.getCentralConfiguration()
+
+        await.atMost(Duration.ofSeconds(waitSeconds.toLong())).until {
+            centralConfiguration.getSessionSampleRate() == expectedValue.sessionSampleRate &&
+                    centralConfiguration.isRecording() == expectedValue.recording
+        }
+    }
+
+    private data class ExpectedCentralConfiguration(
+        val recording: Boolean,
+        val sessionSampleRate: Double
+    )
 }

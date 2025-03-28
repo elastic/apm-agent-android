@@ -62,6 +62,23 @@ class MyApp : android.app.Application {
 :::{include} _snippets/tip-provide-values-from-outside.md
 :::
 
+### Intercepting export request headers
+
+You can provide an interceptor for the signals' export request headers, where you can read/modify them if needed.
+
+```kotlin
+class MyApp : android.app.Application {
+
+    override fun onCreate() {
+        super.onCreate()
+        val agent = ElasticApmAgent.builder(this)
+            // ...
+            .setExportHeadersInterceptor(interceptor)
+            .build()
+    }
+}
+```
+
 ### Intercepting attributes
 
 You can provide global interceptors for all spans and logs [attributes](https://opentelemetry.io/docs/specs/otel/common/#attribute), which will be executed on every span or log creation, where you can read/modify them if needed.

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.connectivity
+package co.elastic.otel.android.internal.connectivity
 
 interface ConnectivityConfiguration {
     fun getUrl(): String

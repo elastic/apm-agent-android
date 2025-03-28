@@ -21,6 +21,7 @@ package co.elastic.otel.android.internal.exporters.configurable
 import androidx.annotation.GuardedBy
 import co.elastic.otel.android.exporters.ExporterProvider
 import co.elastic.otel.android.exporters.configuration.ExportProtocol
+import co.elastic.otel.android.internal.connectivity.ExportConnectivityConfiguration
 import io.opentelemetry.exporter.otlp.http.logs.OtlpHttpLogRecordExporter
 import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter
 import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter
@@ -42,22 +43,22 @@ internal class MutableExporterProvider(
     private val metricExporter: MutableMetricExporter
 ) : ExporterProvider {
     @GuardedBy("spanConfigurationLock")
-    private var spanExporterConfiguration: ExporterConfiguration.Span? = null
+    private var spanExporterConfiguration: ExportConnectivityConfiguration? = null
 
     @GuardedBy("logRecordConfigurationLock")
-    private var logRecordExporterConfiguration: ExporterConfiguration.LogRecord? = null
+    private var logRecordExporterConfiguration: ExportConnectivityConfiguration? = null
 
     @GuardedBy("metricConfigurationLock")
-    private var metricExporterConfiguration: ExporterConfiguration.Metric? = null
+    private var metricExporterConfiguration: ExportConnectivityConfiguration? = null
     private val spanConfigurationLock = Any()
     private val logRecordConfigurationLock = Any()
     private val metricConfigurationLock = Any()
 
     companion object {
         fun create(
-            spanExporterConfiguration: ExporterConfiguration.Span?,
-            logRecordExporterConfiguration: ExporterConfiguration.LogRecord?,
-            metricExporterConfiguration: ExporterConfiguration.Metric?
+            spanExporterConfiguration: ExportConnectivityConfiguration?,
+            logRecordExporterConfiguration: ExportConnectivityConfiguration?,
+            metricExporterConfiguration: ExportConnectivityConfiguration?
         ): MutableExporterProvider {
             val provider = MutableExporterProvider(
                 MutableSpanExporter(),
@@ -83,22 +84,22 @@ internal class MutableExporterProvider(
         return metricExporter
     }
 
-    fun getSpanExporterConfiguration(): ExporterConfiguration.Span? =
+    fun getSpanExporterConfiguration(): ExportConnectivityConfiguration? =
         synchronized(spanConfigurationLock) {
             spanExporterConfiguration
         }
 
-    fun getLogRecordExporterConfiguration(): ExporterConfiguration.LogRecord? =
+    fun getLogRecordExporterConfiguration(): ExportConnectivityConfiguration? =
         synchronized(logRecordConfigurationLock) {
             logRecordExporterConfiguration
         }
 
-    fun getMetricExporterConfiguration(): ExporterConfiguration.Metric? =
+    fun getMetricExporterConfiguration(): ExportConnectivityConfiguration? =
         synchronized(metricConfigurationLock) {
             metricExporterConfiguration
         }
 
-    fun setSpanExporterConfiguration(configuration: ExporterConfiguration.Span?): Unit =
+    fun setSpanExporterConfiguration(configuration: ExportConnectivityConfiguration?): Unit =
         synchronized(spanConfigurationLock) {
             if (spanExporterConfiguration != configuration) {
                 spanExporterConfiguration = configuration
@@ -110,7 +111,7 @@ internal class MutableExporterProvider(
             }
         }
 
-    fun setLogRecordExporterConfiguration(configuration: ExporterConfiguration.LogRecord?): Unit =
+    fun setLogRecordExporterConfiguration(configuration: ExportConnectivityConfiguration?): Unit =
         synchronized(logRecordConfigurationLock) {
             if (logRecordExporterConfiguration != configuration) {
                 logRecordExporterConfiguration = configuration
@@ -122,7 +123,7 @@ internal class MutableExporterProvider(
             }
         }
 
-    fun setMetricExporterConfiguration(configuration: ExporterConfiguration.Metric?): Unit =
+    fun setMetricExporterConfiguration(configuration: ExportConnectivityConfiguration?): Unit =
         synchronized(metricConfigurationLock) {
             if (metricExporterConfiguration != configuration) {
                 metricExporterConfiguration = configuration
@@ -134,45 +135,45 @@ internal class MutableExporterProvider(
             }
         }
 
-    private fun createSpanExporter(configuration: ExporterConfiguration.Span): SpanExporter {
+    private fun createSpanExporter(configuration: ExportConnectivityConfiguration): SpanExporter {
         return when (configuration.protocol) {
             ExportProtocol.HTTP -> OtlpHttpSpanExporter.builder()
-                .setEndpoint(configuration.url)
-                .setHeaders { configuration.headers }
+                .setEndpoint(configuration.getUrl())
+                .setHeaders { configuration.getHeaders() }
                 .build()
 
             ExportProtocol.GRPC -> OtlpGrpcSpanExporter.builder()
-                .setEndpoint(configuration.url)
-                .setHeaders { configuration.headers }
+                .setEndpoint(configuration.getUrl())
+                .setHeaders { configuration.getHeaders() }
                 .build()
         }
     }
 
-    private fun createLogRecordExporter(configuration: ExporterConfiguration.LogRecord): LogRecordExporter {
+    private fun createLogRecordExporter(configuration: ExportConnectivityConfiguration): LogRecordExporter {
         return when (configuration.protocol) {
             ExportProtocol.HTTP -> OtlpHttpLogRecordExporter.builder()
-                .setEndpoint(configuration.url)
-                .setHeaders { configuration.headers }
+                .setEndpoint(configuration.getUrl())
+                .setHeaders { configuration.getHeaders() }
                 .build()
 
             ExportProtocol.GRPC -> OtlpGrpcLogRecordExporter.builder()
-                .setEndpoint(configuration.url)
-                .setHeaders { configuration.headers }
+                .setEndpoint(configuration.getUrl())
+                .setHeaders { configuration.getHeaders() }
                 .build()
         }
     }
 
-    private fun createMetricExporter(configuration: ExporterConfiguration.Metric): MetricExporter {
+    private fun createMetricExporter(configuration: ExportConnectivityConfiguration): MetricExporter {
         return when (configuration.protocol) {
             ExportProtocol.HTTP -> OtlpHttpMetricExporter.builder()
-                .setEndpoint(configuration.url)
-                .setHeaders { configuration.headers }
+                .setEndpoint(configuration.getUrl())
+                .setHeaders { configuration.getHeaders() }
                 .setAggregationTemporalitySelector(AggregationTemporalitySelector.deltaPreferred())
                 .build()
 
             ExportProtocol.GRPC -> OtlpGrpcMetricExporter.builder()
-                .setEndpoint(configuration.url)
-                .setHeaders { configuration.headers }
+                .setEndpoint(configuration.getUrl())
+                .setHeaders { configuration.getHeaders() }
                 .setAggregationTemporalitySelector(AggregationTemporalitySelector.deltaPreferred())
                 .build()
         }

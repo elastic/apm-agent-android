@@ -18,6 +18,7 @@
  */
 package co.elastic.otel.android.internal.connectivity
 
+import co.elastic.otel.android.common.internal.logging.Elog
 import co.elastic.otel.android.connectivity.ExportEndpointConfiguration
 import co.elastic.otel.android.exporters.configuration.ExportProtocol
 import co.elastic.otel.android.interceptor.Interceptor
@@ -35,6 +36,7 @@ internal class ExportConnectivityManager private constructor(
 ) {
 
     fun setEndpointConfiguration(configuration: ExportEndpointConfiguration) {
+        Elog.getLogger().debug("Updating endpoint configuration: {}", configuration)
         spansConnectivityHolder.setConnectivityConfiguration(
             createSpansExportConnectivityConfiguration(configuration, defaultHeadersInterceptor)
         )
@@ -106,6 +108,11 @@ internal class ExportConnectivityManager private constructor(
             configuration: ExportEndpointConfiguration,
             headersInterceptor: Interceptor<Map<String, String>>
         ): ExportConnectivityManager {
+            Elog.getLogger().debug(
+                "Initializing connectivity with config {} and interceptor {}",
+                configuration,
+                headersInterceptor
+            )
             return ExportConnectivityManager(
                 ConnectivityHolder(
                     createSpansExportConnectivityConfiguration(

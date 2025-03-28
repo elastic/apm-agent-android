@@ -21,7 +21,6 @@ package co.elastic.otel.android.internal.exporters.configurable
 import androidx.annotation.GuardedBy
 import co.elastic.otel.android.exporters.ExporterProvider
 import co.elastic.otel.android.exporters.configuration.ExportProtocol
-import co.elastic.otel.android.exporters.configuration.ExporterConfiguration
 import io.opentelemetry.exporter.otlp.http.logs.OtlpHttpLogRecordExporter
 import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter
 import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter

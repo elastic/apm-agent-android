@@ -307,11 +307,9 @@ class ElasticApmAgent internal constructor(
                 exportExtraHeaders,
                 exportProtocol
             )
-            val connectivityHolder =
-                ExportConnectivityManager.ConnectivityHolder(connectivityConfiguration)
             val exportConnectivityManager =
-                ExportConnectivityManager(connectivityHolder)
-            val exporterProvider = DefaultExporterProvider.create(connectivityHolder)
+                ExportConnectivityManager.create(connectivityConfiguration)
+            val exporterProvider = DefaultExporterProvider.create(exportConnectivityManager)
 
             val managedFeatures =
                 createManagedConfiguration(serviceManager, systemTimeProvider)

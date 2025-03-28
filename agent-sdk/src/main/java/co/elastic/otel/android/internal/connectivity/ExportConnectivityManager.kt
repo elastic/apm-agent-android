@@ -24,18 +24,28 @@ import co.elastic.otel.android.connectivity.ExportConnectivityConfiguration
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-internal class ExportConnectivityManager internal constructor(
-    private val connectivityConfigurationHolder: ConnectivityHolder
+internal class ExportConnectivityManager private constructor(
+    private val connectivityHolder: ConnectivityHolder
 ) {
+    companion object {
+        fun create(connectivityConfiguration: ExportConnectivityConfiguration): ExportConnectivityManager {
+            return ExportConnectivityManager(ConnectivityHolder(connectivityConfiguration))
+        }
+    }
+
+    fun addChangeListener(listener: ConnectivityConfigurationHolder.Listener) {
+        connectivityHolder.addListener(listener)
+    }
+
     fun setConnectivityConfiguration(configuration: ExportConnectivityConfiguration) {
-        connectivityConfigurationHolder.setConnectivityConfiguration(configuration)
+        connectivityHolder.setConnectivityConfiguration(configuration)
     }
 
     fun getConnectivityConfiguration(): ExportConnectivityConfiguration {
-        return connectivityConfigurationHolder.getConnectivityConfiguration()
+        return connectivityHolder.getConnectivityConfiguration()
     }
 
-    internal class ConnectivityHolder(initialValue: ExportConnectivityConfiguration) :
+    private class ConnectivityHolder(initialValue: ExportConnectivityConfiguration) :
         ConnectivityConfigurationHolder(initialValue) {
 
         fun setConnectivityConfiguration(value: ExportConnectivityConfiguration) {

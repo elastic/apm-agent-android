@@ -20,11 +20,10 @@ package co.elastic.otel.android.internal.exporters
 
 import co.elastic.otel.android.connectivity.ExportConnectivityConfiguration
 import co.elastic.otel.android.exporters.ExporterProvider
-import co.elastic.otel.android.exporters.configuration.ExporterConfiguration
 import co.elastic.otel.android.internal.connectivity.ConnectivityConfigurationHolder
 import co.elastic.otel.android.internal.connectivity.ExportConnectivityManager
+import co.elastic.otel.android.internal.exporters.configurable.ExporterConfiguration
 import co.elastic.otel.android.internal.exporters.configurable.MutableExporterProvider
-import co.elastic.otel.android.provider.Provider
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.trace.export.SpanExporter
@@ -34,14 +33,13 @@ import io.opentelemetry.sdk.trace.export.SpanExporter
  * any time.
  */
 internal class DefaultExporterProvider internal constructor(
-    private val connectivityConfigurationProvider: Provider<ExportConnectivityConfiguration>,
+    private val connectivityManager: ExportConnectivityManager,
     private val exporterProvider: MutableExporterProvider
 ) : ExporterProvider, ConnectivityConfigurationHolder.Listener {
 
     companion object {
-        internal fun create(connectivityConfigurationManager: ExportConnectivityManager.ConnectivityHolder): DefaultExporterProvider {
-            val configuration =
-                connectivityConfigurationManager.getConnectivityConfiguration()
+        internal fun create(connectivityManager: ExportConnectivityManager): DefaultExporterProvider {
+            val configuration = connectivityManager.getConnectivityConfiguration()
             val exporterProvider = MutableExporterProvider.create(
                 ExporterConfiguration.Span(
                     configuration.getTracesUrl(),
@@ -59,13 +57,12 @@ internal class DefaultExporterProvider internal constructor(
                     configuration.exportProtocol
                 )
             )
-            val defaultExporterProvider = DefaultExporterProvider(
-                connectivityConfigurationManager::getConnectivityConfiguration,
-                exporterProvider
-            )
-            connectivityConfigurationManager.addListener(defaultExporterProvider)
-            return defaultExporterProvider
+            return DefaultExporterProvider(connectivityManager, exporterProvider)
         }
+    }
+
+    init {
+        connectivityManager.addChangeListener(this)
     }
 
     override fun getSpanExporter(): SpanExporter {
@@ -104,6 +101,6 @@ internal class DefaultExporterProvider internal constructor(
     }
 
     override fun onConnectivityConfigurationChange() {
-        setConnectivityConfiguration(connectivityConfigurationProvider.get())
+        setConnectivityConfiguration(connectivityManager.getConnectivityConfiguration())
     }
 }

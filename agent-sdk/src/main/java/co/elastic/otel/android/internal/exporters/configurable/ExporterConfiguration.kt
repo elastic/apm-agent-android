@@ -16,9 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.exporters.configuration
+package co.elastic.otel.android.internal.exporters.configurable
 
-sealed class ExporterConfiguration(
+import co.elastic.otel.android.exporters.configuration.ExportProtocol
+
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
+internal sealed class ExporterConfiguration(
     open val url: String,
     open val headers: Map<String, String>,
     open val protocol: ExportProtocol

@@ -460,6 +460,8 @@ class ElasticApmAgentTest {
         sendLog()
         sendMetric()
 
+        awaitForNonEmptyInMemorySignals()
+
         assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
@@ -471,6 +473,8 @@ class ElasticApmAgentTest {
         sendSpan()
         sendLog()
         sendMetric()
+
+        awaitForNonEmptyInMemorySignals()
 
         assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
@@ -755,6 +759,21 @@ class ElasticApmAgentTest {
                     agent.getExporterGateManager().getAllOpenLatches().joinToString("\n")
                 }"
             )
+            throw e
+        }
+    }
+
+    private fun awaitForNonEmptyInMemorySignals(maxSecondsToWait: Int = 1) {
+        try {
+            await.atMost(Duration.ofSeconds(maxSecondsToWait.toLong())).until {
+                inMemoryExporters.getFinishedSpans().isNotEmpty()
+                        && inMemoryExporters.getFinishedLogRecords().isNotEmpty()
+                        && inMemoryExporters.getFinishedMetrics().isNotEmpty()
+            }
+        } catch (e: ConditionTimeoutException) {
+            println("Spans size: ${inMemoryExporters.getFinishedSpans().size}")
+            println("Logs size: ${inMemoryExporters.getFinishedLogRecords().size}")
+            println("Metrics size: ${inMemoryExporters.getFinishedMetrics().size}")
             throw e
         }
     }

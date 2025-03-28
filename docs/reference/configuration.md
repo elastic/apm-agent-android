@@ -191,7 +191,7 @@ These are available from an already built [agent](https://github.com/elastic/apm
 
 ### Update export connectivity
 
-You can change any of the configuration values provided as part of the [export connectivity](#export-connectivity) setters, at any time, by setting a new [ExportConnectivityConfiguration](https://github.com/elastic/apm-agent-android/blob/main/agent-sdk/src/main/java/co/elastic/otel/android/connectivity/ExportConnectivityConfiguration.kt) object, which will override them all.
+You can change any of the configuration values provided as part of the [export connectivity](#export-connectivity) setters, at any time, by setting a new [ExportEndpointConfiguration](https://github.com/elastic/apm-agent-android/blob/main/agent-sdk/src/main/java/co/elastic/otel/android/connectivity/ExportEndpointConfiguration.kt) object, which will override them all.
 
 ```kotlin
 class MyApp : android.app.Application {
@@ -201,7 +201,7 @@ class MyApp : android.app.Application {
         val agent = ElasticApmAgent.builder(this)
             // ...
             .build()
-        agent.setExportConnectivityConfiguration(configuration)
+        agent.setExportEndpointConfiguration(configuration)
     }
 }
 ```

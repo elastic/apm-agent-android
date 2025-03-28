@@ -22,6 +22,6 @@ import co.elastic.otel.android.exporters.configuration.ExportProtocol
 
 data class ExportEndpointConfiguration(
     val url: String,
-    val authentication: Authentication,
-    val protocol: ExportProtocol
+    val authentication: Authentication = Authentication.None,
+    val protocol: ExportProtocol = ExportProtocol.HTTP
 )

@@ -28,7 +28,7 @@ junit5-vintage = { module = "org.junit.vintage:junit-vintage-engine", version.re
 opentelemetry-testing = { module = "io.opentelemetry:opentelemetry-sdk-testing", version.ref = "opentelemetry" }
 robolectric = "org.robolectric:robolectric:4.14.1"
 assertj = "org.assertj:assertj-core:3.27.3"
-mockk = "io.mockk:mockk:1.13.16"
+mockk = "io.mockk:mockk:1.13.17"
 awaitility = "org.awaitility:awaitility-kotlin:4.2.2"
 wireMock = "org.wiremock:wiremock:3.10.0"
 

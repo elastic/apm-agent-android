@@ -128,7 +128,7 @@ internal class AttributesTest : ExporterProvider, ProcessorFactory {
         initialize()
         val expectedResource = Resource.builder()
             .put("deployment.environment", "test")
-            .put("device.id", "device-id")
+            .put("app.installation.id", "installation-id")
             .put("device.manufacturer", DEVICE_MANUFACTURER)
             .put("device.model.identifier", DEVICE_MODEL_NAME)
             .put(
@@ -175,7 +175,7 @@ internal class AttributesTest : ExporterProvider, ProcessorFactory {
         })
         val expectedResource = Resource.builder()
             .put("deployment.environment", "test")
-            .put("device.id", "device-id")
+            .put("app.installation.id", "installation-id")
             .put("device.manufacturer", DEVICE_MANUFACTURER)
             .put("device.model.identifier", DEVICE_MODEL_NAME)
             .put(
@@ -216,7 +216,7 @@ internal class AttributesTest : ExporterProvider, ProcessorFactory {
         initialize(serviceVersion = null)
         val expectedResource = Resource.builder()
             .put("deployment.environment", "test")
-            .put("device.id", "device-id")
+            .put("app.installation.id", "installation-id")
             .put("device.manufacturer", DEVICE_MANUFACTURER)
             .put("device.model.identifier", DEVICE_MODEL_NAME)
             .put(
@@ -454,7 +454,7 @@ internal class AttributesTest : ExporterProvider, ProcessorFactory {
             .setDeploymentEnvironment(deploymentEnvironment)
             .setClock(clock)
             .setSessionProvider { Session.create("session-id") }
-            .setDeviceIdProvider { "device-id" }
+            .setAppInstallationIdProvider { "installation-id" }
         serviceVersion?.let { builder.setServiceVersion(it) }
         resourceInterceptor?.let { builder.setResourceInterceptor(it) }
 

@@ -32,6 +32,7 @@ import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.utilities.cache.PreferencesCachedStringProvider
 import co.elastic.otel.android.processors.ProcessorFactory
 import co.elastic.otel.android.provider.StringProvider
+import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator
 import io.opentelemetry.context.propagation.ContextPropagators
@@ -68,7 +69,7 @@ class ElasticOpenTelemetry private constructor(
         private var serviceName: String = "unknown"
         private var serviceVersion: String? = null
         private var deploymentEnvironment: String? = null
-        private var deviceIdProvider: StringProvider? = null
+        private var appInstallationIdProvider: StringProvider? = null
         private var resourceInterceptor: Interceptor<Resource>? = null
         private var spanAttributesInterceptors = mutableListOf<Interceptor<Attributes>>()
         private var logRecordAttributesInterceptors = mutableListOf<Interceptor<Attributes>>()
@@ -92,8 +93,8 @@ class ElasticOpenTelemetry private constructor(
             deploymentEnvironment = value
         }
 
-        fun setDeviceIdProvider(value: StringProvider) = apply {
-            deviceIdProvider = value
+        fun setAppInstallationIdProvider(value: StringProvider) = apply {
+            appInstallationIdProvider = value
         }
 
         fun setResourceInterceptor(value: Interceptor<Resource>) = apply {
@@ -142,10 +143,10 @@ class ElasticOpenTelemetry private constructor(
             addSpanAttributesInterceptor(commonAttributesInterceptor)
             addSpanAttributesInterceptor(SpanAttributesInterceptor(serviceManager))
             addLogRecordAttributesInterceptor(commonAttributesInterceptor)
-            if (deviceIdProvider == null) {
-                deviceIdProvider = PreferencesCachedStringProvider(
+            if (appInstallationIdProvider == null) {
+                appInstallationIdProvider = PreferencesCachedStringProvider(
                     serviceManager,
-                    "device_id"
+                    "app_installation_id"
                 ) { UUID.randomUUID().toString() }
             }
             val finalProcessorFactory = processorFactory
@@ -158,7 +159,10 @@ class ElasticOpenTelemetry private constructor(
                     ?: "unknown"
                 )
                 .put(DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT, deploymentEnvironment)
-                .put(DeviceIncubatingAttributes.DEVICE_ID, deviceIdProvider!!.get())
+                .put(
+                    AttributeKey.stringKey("app.installation.id"),
+                    appInstallationIdProvider!!.get()
+                )
                 .put(DeviceIncubatingAttributes.DEVICE_MODEL_IDENTIFIER, Build.MODEL)
                 .put(DeviceIncubatingAttributes.DEVICE_MANUFACTURER, Build.MANUFACTURER)
                 .put(OsIncubatingAttributes.OS_DESCRIPTION, getOsDescription())

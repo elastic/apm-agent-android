@@ -16,18 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.connectivity
+package co.elastic.otel.android.internal.connectivity
 
+import co.elastic.otel.android.connectivity.Authentication
 import co.elastic.otel.android.exporters.configuration.ExportProtocol
+import co.elastic.otel.android.interceptor.Interceptor
 
-/**
- * Configuration to connect to the Elastic server for data exporting.
- */
-data class ExportConnectivityConfiguration(
+internal class ExportConnectivityConfiguration(
     private val url: String,
-    val auth: Authentication = Authentication.None,
-    val extraHeaders: Map<String, String> = emptyMap(),
-    val exportProtocol: ExportProtocol = ExportProtocol.HTTP
+    private val auth: Authentication,
+    private val protocol: ExportProtocol,
+    private val headersInterceptor: Interceptor<Map<String, String>> = Interceptor.noop()
 ) : ConnectivityConfiguration {
     private val baseUrl by lazy { url.trimEnd('/') }
 
@@ -35,40 +34,16 @@ data class ExportConnectivityConfiguration(
 
     override fun getHeaders(): Map<String, String> {
         val headers = mutableMapOf<String, String>()
-        headers.putAll(extraHeaders)
         if (auth is Authentication.SecretToken) {
             headers[AUTHORIZATION_HEADER_KEY] = "Bearer ${auth.token}"
         } else if (auth is Authentication.ApiKey) {
             headers[AUTHORIZATION_HEADER_KEY] = "ApiKey ${auth.key}"
         }
-        return headers
+        return headersInterceptor.intercept(headers)
     }
 
-    fun getTracesUrl(): String {
-        return getSignalUrl(baseUrl, "traces", exportProtocol)
-    }
-
-    fun getLogsUrl(): String {
-        return getSignalUrl(baseUrl, "logs", exportProtocol)
-    }
-
-    fun getMetricsUrl(): String {
-        return getSignalUrl(baseUrl, "metrics", exportProtocol)
-    }
-
-    private fun getSignalUrl(
-        baseUrl: String,
-        signalId: String,
-        exportProtocol: ExportProtocol
-    ): String {
-        return when (exportProtocol) {
-            ExportProtocol.GRPC -> baseUrl
-            ExportProtocol.HTTP -> getHttpUrl(baseUrl, signalId)
-        }
-    }
-
-    private fun getHttpUrl(url: String, signalId: String): String {
-        return String.format("%s/v1/%s", url, signalId)
+    fun getProtocol(): ExportProtocol {
+        return protocol
     }
 
     companion object {

@@ -136,7 +136,7 @@ internal class MutableExporterProvider(
         }
 
     private fun createSpanExporter(configuration: ExportConnectivityConfiguration): SpanExporter {
-        return when (configuration.protocol) {
+        return when (configuration.getProtocol()) {
             ExportProtocol.HTTP -> OtlpHttpSpanExporter.builder()
                 .setEndpoint(configuration.getUrl())
                 .setHeaders { configuration.getHeaders() }
@@ -150,7 +150,7 @@ internal class MutableExporterProvider(
     }
 
     private fun createLogRecordExporter(configuration: ExportConnectivityConfiguration): LogRecordExporter {
-        return when (configuration.protocol) {
+        return when (configuration.getProtocol()) {
             ExportProtocol.HTTP -> OtlpHttpLogRecordExporter.builder()
                 .setEndpoint(configuration.getUrl())
                 .setHeaders { configuration.getHeaders() }
@@ -164,7 +164,7 @@ internal class MutableExporterProvider(
     }
 
     private fun createMetricExporter(configuration: ExportConnectivityConfiguration): MetricExporter {
-        return when (configuration.protocol) {
+        return when (configuration.getProtocol()) {
             ExportProtocol.HTTP -> OtlpHttpMetricExporter.builder()
                 .setEndpoint(configuration.getUrl())
                 .setHeaders { configuration.getHeaders() }

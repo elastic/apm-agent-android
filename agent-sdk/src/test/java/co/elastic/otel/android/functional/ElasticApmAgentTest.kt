@@ -633,6 +633,8 @@ class ElasticApmAgentTest {
     fun `Validate http span name change`() {
         agent = inMemoryAgentBuilder().build()
 
+        awaitForOpenGates()
+
         sendSpan("Normal Span")
         sendSpan(
             "GET",
@@ -662,10 +664,6 @@ class ElasticApmAgentTest {
                 "https://anotherhost.net:8080/some/path?q=elastic"
             )
         )
-
-        await.atMost(Duration.ofSeconds(1)).until {
-            inMemoryExporters.getFinishedSpans().size == 5
-        }
 
         val finishedSpanNames = inMemoryExporters.getFinishedSpans().map { it.name }
         assertThat(finishedSpanNames).containsExactlyInAnyOrder(
@@ -683,6 +681,8 @@ class ElasticApmAgentTest {
             .setHttpSpanInterceptor(null)
             .build()
 
+        awaitForOpenGates()
+
         sendSpan("Normal Span")
         sendSpan(
             "GET",
@@ -712,10 +712,6 @@ class ElasticApmAgentTest {
                 "https://anotherhost.net:8080/some/path?q=elastic"
             )
         )
-
-        await.atMost(Duration.ofSeconds(1)).until {
-            inMemoryExporters.getFinishedSpans().size == 5
-        }
 
         val finishedSpanNames = inMemoryExporters.getFinishedSpans().map { it.name }
         assertThat(finishedSpanNames).containsExactlyInAnyOrder(

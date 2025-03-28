@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.provider
+package co.elastic.otel.android.internal.provider
 
 fun interface Provider<T> {
     fun get(): T

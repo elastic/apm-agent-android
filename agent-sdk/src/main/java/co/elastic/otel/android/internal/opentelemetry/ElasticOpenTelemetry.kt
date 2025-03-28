@@ -28,10 +28,10 @@ import co.elastic.otel.android.internal.attributes.SpanAttributesInterceptor
 import co.elastic.otel.android.internal.opentelemetry.processors.DefaultProcessorFactory
 import co.elastic.otel.android.internal.opentelemetry.processors.logs.LogRecordAttributesProcessor
 import co.elastic.otel.android.internal.opentelemetry.processors.spans.SpanAttributesProcessor
+import co.elastic.otel.android.internal.provider.StringProvider
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.utilities.cache.PreferencesCachedStringProvider
 import co.elastic.otel.android.processors.ProcessorFactory
-import co.elastic.otel.android.provider.StringProvider
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator

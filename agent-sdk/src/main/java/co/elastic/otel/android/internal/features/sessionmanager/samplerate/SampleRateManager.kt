@@ -21,12 +21,12 @@ package co.elastic.otel.android.internal.features.sessionmanager.samplerate
 import co.elastic.otel.android.internal.features.centralconfig.CentralConfiguration
 import co.elastic.otel.android.internal.features.exportergate.ExporterGateManager
 import co.elastic.otel.android.internal.features.sessionmanager.SessionManager
+import co.elastic.otel.android.internal.provider.Provider
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.services.backgroundwork.BackgroundWorkService
 import co.elastic.otel.android.internal.utilities.NumberTools
 import co.elastic.otel.android.internal.utilities.cache.CacheHandler
 import co.elastic.otel.android.internal.utilities.cache.PreferencesIntegerCacheHandler
-import co.elastic.otel.android.provider.Provider
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**

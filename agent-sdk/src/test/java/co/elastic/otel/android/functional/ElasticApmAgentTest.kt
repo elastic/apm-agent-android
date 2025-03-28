@@ -389,6 +389,7 @@ class ElasticApmAgentTest {
             .build()
 
         wireMockRule.takeRequest() // Await for empty central config response
+        awaitForCentralConfigurationValues(ExpectedCentralConfiguration())
 
         sendSpan()
         sendLog()
@@ -410,6 +411,7 @@ class ElasticApmAgentTest {
         inMemoryExporters.resetExporters()
 
         wireMockRule.takeRequest() // Await for central config response with recording=false
+        awaitForCentralConfigurationValues(ExpectedCentralConfiguration(recording = false))
 
         awaitForOpenGates()
 
@@ -437,6 +439,8 @@ class ElasticApmAgentTest {
 
         // Await for request and stub the next one
         wireMockRule.takeRequest()
+        awaitForCentralConfigurationValues(ExpectedCentralConfiguration(recording = false))
+
         wireMockRule.stubAllHttpResponses {
             withStatus(200)
                 .withHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
@@ -451,6 +455,8 @@ class ElasticApmAgentTest {
 
         // Verify recording true value
         wireMockRule.takeRequest() // Await for recording: true request.
+        awaitForCentralConfigurationValues(ExpectedCentralConfiguration(recording = true))
+
         // Stub for invalid config
         wireMockRule.stubAllHttpResponses {
             withStatus(200)
@@ -470,6 +476,7 @@ class ElasticApmAgentTest {
         // Verify invalid config
         inMemoryExporters.resetExporters()
         wireMockRule.takeRequest() // Await for invalid config.
+        awaitForCentralConfigurationValues(ExpectedCentralConfiguration())
 
         sendSpan()
         sendLog()
@@ -801,14 +808,26 @@ class ElasticApmAgentTest {
         val centralConfiguration =
             agent.getCentralConfigurationManager()!!.getCentralConfiguration()
 
-        await.atMost(Duration.ofSeconds(waitSeconds.toLong())).until {
-            centralConfiguration.getSessionSampleRate() == expectedValue.sessionSampleRate &&
-                    centralConfiguration.isRecording() == expectedValue.recording
+        try {
+            await.atMost(Duration.ofSeconds(waitSeconds.toLong())).until {
+                centralConfiguration.getSessionSampleRate() == expectedValue.sessionSampleRate &&
+                        centralConfiguration.isRecording() == expectedValue.recording
+            }
+        } catch (e: ConditionTimeoutException) {
+            println(
+                "Configuration: ${
+                    ExpectedCentralConfiguration(
+                        centralConfiguration.isRecording(),
+                        centralConfiguration.getSessionSampleRate()
+                    )
+                }"
+            )
+            throw e
         }
     }
 
     private data class ExpectedCentralConfiguration(
-        val recording: Boolean,
-        val sessionSampleRate: Double
+        val recording: Boolean = true,
+        val sessionSampleRate: Double = 1.0
     )
 }

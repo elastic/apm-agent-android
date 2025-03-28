@@ -105,6 +105,7 @@ internal class DiskBufferingManager private constructor(
     }
 
     internal fun initialize() {
+        logger.debug("Initializing disk buffering with configuration: {}", configuration)
         if (configuration.enabled) {
             doInitialize()
         } else {

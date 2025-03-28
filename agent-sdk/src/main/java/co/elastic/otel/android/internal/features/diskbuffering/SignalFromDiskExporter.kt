@@ -19,11 +19,11 @@
 package co.elastic.otel.android.internal.features.diskbuffering
 
 import androidx.annotation.WorkerThread
+import co.elastic.otel.android.common.internal.logging.Elog
 import io.opentelemetry.contrib.disk.buffering.LogRecordFromDiskExporter
 import io.opentelemetry.contrib.disk.buffering.MetricFromDiskExporter
 import io.opentelemetry.contrib.disk.buffering.SpanFromDiskExporter
 import java.io.Closeable
-import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 /**
@@ -38,30 +38,43 @@ internal class SignalFromDiskExporter internal constructor(
     private val logRecordDiskExporter: LogRecordFromDiskExporter?,
     private val exportTimeoutInMillis: Long
 ) : Closeable {
-    @Throws(IOException::class)
+    private val logger = Elog.getLogger()
+
     @WorkerThread
     fun exportBatchOfSpans(): Boolean {
-        return spanDiskExporter?.exportStoredBatch(exportTimeoutInMillis, TimeUnit.MILLISECONDS)
-            ?: false
+        return try {
+            spanDiskExporter?.exportStoredBatch(exportTimeoutInMillis, TimeUnit.MILLISECONDS)
+                ?: false
+        } catch (t: Throwable) {
+            logger.error("Error while trying to export spans from disk", t)
+            false
+        }
     }
 
-    @Throws(IOException::class)
     @WorkerThread
     fun exportBatchOfMetrics(): Boolean {
-        return metricDiskExporter?.exportStoredBatch(exportTimeoutInMillis, TimeUnit.MILLISECONDS)
-            ?: false
+        return try {
+            metricDiskExporter?.exportStoredBatch(exportTimeoutInMillis, TimeUnit.MILLISECONDS)
+                ?: false
+        } catch (t: Throwable) {
+            logger.error("Error while trying to export metrics from disk", t)
+            false
+        }
     }
 
-    @Throws(IOException::class)
     @WorkerThread
     fun exportBatchOfLogs(): Boolean {
-        return logRecordDiskExporter?.exportStoredBatch(
-            exportTimeoutInMillis,
-            TimeUnit.MILLISECONDS
-        ) ?: false
+        return try {
+            logRecordDiskExporter?.exportStoredBatch(
+                exportTimeoutInMillis,
+                TimeUnit.MILLISECONDS
+            ) ?: false
+        } catch (t: Throwable) {
+            logger.error("Error while trying to export logs from disk", t)
+            false
+        }
     }
 
-    @Throws(IOException::class)
     @WorkerThread
     fun exportBatchOfEach(): Boolean {
         var atLeastOneWorked = exportBatchOfSpans()

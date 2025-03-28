@@ -18,6 +18,10 @@
  */
 package co.elastic.otel.android.internal.provider
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 fun interface Provider<T> {
     fun get(): T
 }

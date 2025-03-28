@@ -22,6 +22,10 @@ import co.elastic.otel.android.connectivity.Authentication
 import co.elastic.otel.android.exporters.configuration.ExportProtocol
 import co.elastic.otel.android.interceptor.Interceptor
 
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
 internal class ExportConnectivityConfiguration(
     private val url: String,
     private val auth: Authentication,

@@ -22,7 +22,7 @@ import android.app.Application
 import co.elastic.otel.android.api.ElasticOtelAgent
 import co.elastic.otel.android.common.internal.logging.Elog
 import co.elastic.otel.android.connectivity.Authentication
-import co.elastic.otel.android.connectivity.ExportConnectivityConfiguration
+import co.elastic.otel.android.connectivity.ExportEndpointConfiguration
 import co.elastic.otel.android.exporters.ExporterProvider
 import co.elastic.otel.android.exporters.configuration.ExportProtocol
 import co.elastic.otel.android.features.session.SessionIdGenerator
@@ -98,8 +98,8 @@ class ElasticApmAgent internal constructor(
      *
      * @param configuration The new server configuration.
      */
-    fun setExportConnectivityConfiguration(configuration: ExportConnectivityConfiguration) {
-        exportConnectivityManager.setConnectivityConfiguration(configuration)
+    fun setExportEndpointConfiguration(configuration: ExportEndpointConfiguration) {
+        exportConnectivityManager.setEndpointConfiguration(configuration)
     }
 
     internal fun getExportConnectivityManager(): ExportConnectivityManager {
@@ -132,7 +132,7 @@ class ElasticApmAgent internal constructor(
         private var exportUrl: String? = null
         private var exportAuthentication: Authentication = Authentication.None
         private var exportProtocol: ExportProtocol = ExportProtocol.HTTP
-        private var exportExtraHeaders: Map<String, String> = emptyMap()
+        private var exportHeadersInterceptor: Interceptor<Map<String, String>> = Interceptor.noop()
         private var managementUrl: String? = null
         private var managementAuthentication: Authentication = Authentication.None
         private var sessionIdGenerator: SessionIdGenerator? = null
@@ -197,10 +197,10 @@ class ElasticApmAgent internal constructor(
         }
 
         /**
-         * Allows to set extra network request headers to the exporting requests, as well as the central configuration ones.
+         * Allows to intercept the headers of the exporting requests.
          */
-        fun setExportExtraHeaders(value: Map<String, String>) = apply {
-            exportExtraHeaders = value
+        fun setExportHeadersInterceptor(value: Interceptor<Map<String, String>>) = apply {
+            exportHeadersInterceptor = value
         }
 
         /**
@@ -301,14 +301,15 @@ class ElasticApmAgent internal constructor(
             )
 
             val systemTimeProvider = SystemTimeProvider()
-            val connectivityConfiguration = ExportConnectivityConfiguration(
+            val connectivityConfiguration = ExportEndpointConfiguration(
                 finalExportUrl,
                 exportAuthentication,
-                exportExtraHeaders,
                 exportProtocol
             )
-            val exportConnectivityManager =
-                ExportConnectivityManager.create(connectivityConfiguration)
+            val exportConnectivityManager = ExportConnectivityManager.create(
+                connectivityConfiguration,
+                exportHeadersInterceptor
+            )
             val exporterProvider = DefaultExporterProvider.create(exportConnectivityManager)
 
             val managedFeatures =

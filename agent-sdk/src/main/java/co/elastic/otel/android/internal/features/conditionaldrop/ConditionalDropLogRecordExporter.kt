@@ -18,6 +18,7 @@
  */
 package co.elastic.otel.android.internal.features.conditionaldrop
 
+import co.elastic.otel.android.internal.opentelemetry.SignalType
 import io.opentelemetry.sdk.common.CompletableResultCode
 import io.opentelemetry.sdk.logs.data.LogRecordData
 import io.opentelemetry.sdk.logs.export.LogRecordExporter

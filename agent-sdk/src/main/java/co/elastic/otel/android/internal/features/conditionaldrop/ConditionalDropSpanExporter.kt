@@ -18,6 +18,7 @@
  */
 package co.elastic.otel.android.internal.features.conditionaldrop
 
+import co.elastic.otel.android.internal.opentelemetry.SignalType
 import io.opentelemetry.sdk.common.CompletableResultCode
 import io.opentelemetry.sdk.trace.data.SpanData
 import io.opentelemetry.sdk.trace.export.SpanExporter
@@ -32,7 +33,7 @@ internal class ConditionalDropSpanExporter(
 ) : SpanExporter {
 
     override fun export(spans: MutableCollection<SpanData>): CompletableResultCode {
-        if (drop(SignalType.SPAN)) {
+        if (drop(SignalType.TRACE)) {
             return CompletableResultCode.ofSuccess()
         }
         return delegate.export(spans)

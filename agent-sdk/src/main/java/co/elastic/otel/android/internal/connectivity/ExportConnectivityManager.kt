@@ -20,6 +20,7 @@ package co.elastic.otel.android.internal.connectivity
 
 import co.elastic.otel.android.connectivity.ExportEndpointConfiguration
 import co.elastic.otel.android.exporters.configuration.ExportProtocol
+import co.elastic.otel.android.interceptor.Interceptor
 import co.elastic.otel.android.internal.opentelemetry.SignalType
 
 /**
@@ -29,18 +30,19 @@ import co.elastic.otel.android.internal.opentelemetry.SignalType
 internal class ExportConnectivityManager private constructor(
     private val spansConnectivityHolder: ConnectivityHolder,
     private val logsConnectivityHolder: ConnectivityHolder,
-    private val metricsConnectivityHolder: ConnectivityHolder
+    private val metricsConnectivityHolder: ConnectivityHolder,
+    private val defaultHeadersInterceptor: Interceptor<Map<String, String>>
 ) {
 
     fun setEndpointConfiguration(configuration: ExportEndpointConfiguration) {
         spansConnectivityHolder.setConnectivityConfiguration(
-            createSpansExportConnectivityConfiguration(configuration)
+            createSpansExportConnectivityConfiguration(configuration, defaultHeadersInterceptor)
         )
         logsConnectivityHolder.setConnectivityConfiguration(
-            createLogsExportConnectivityConfiguration(configuration)
+            createLogsExportConnectivityConfiguration(configuration, defaultHeadersInterceptor)
         )
         metricsConnectivityHolder.setConnectivityConfiguration(
-            createMetricsExportConnectivityConfiguration(configuration)
+            createMetricsExportConnectivityConfiguration(configuration, defaultHeadersInterceptor)
         )
     }
 
@@ -100,35 +102,66 @@ internal class ExportConnectivityManager private constructor(
     }
 
     companion object {
-        fun create(configuration: ExportEndpointConfiguration): ExportConnectivityManager {
+        fun create(
+            configuration: ExportEndpointConfiguration,
+            headersInterceptor: Interceptor<Map<String, String>>
+        ): ExportConnectivityManager {
             return ExportConnectivityManager(
-                ConnectivityHolder(createSpansExportConnectivityConfiguration(configuration)),
-                ConnectivityHolder(createLogsExportConnectivityConfiguration(configuration)),
-                ConnectivityHolder(createMetricsExportConnectivityConfiguration(configuration))
+                ConnectivityHolder(
+                    createSpansExportConnectivityConfiguration(
+                        configuration,
+                        headersInterceptor
+                    )
+                ),
+                ConnectivityHolder(
+                    createLogsExportConnectivityConfiguration(
+                        configuration,
+                        headersInterceptor
+                    )
+                ),
+                ConnectivityHolder(
+                    createMetricsExportConnectivityConfiguration(
+                        configuration,
+                        headersInterceptor
+                    )
+                ),
+                headersInterceptor
             )
         }
 
-        private fun createMetricsExportConnectivityConfiguration(configuration: ExportEndpointConfiguration): ExportConnectivityConfiguration {
+        private fun createMetricsExportConnectivityConfiguration(
+            configuration: ExportEndpointConfiguration,
+            headersInterceptor: Interceptor<Map<String, String>>
+        ): ExportConnectivityConfiguration {
             return ExportConnectivityConfiguration(
                 getMetricsUrl(configuration.url, configuration.protocol),
                 configuration.authentication,
-                configuration.protocol
+                configuration.protocol,
+                headersInterceptor
             )
         }
 
-        private fun createLogsExportConnectivityConfiguration(configuration: ExportEndpointConfiguration): ExportConnectivityConfiguration {
+        private fun createLogsExportConnectivityConfiguration(
+            configuration: ExportEndpointConfiguration,
+            headersInterceptor: Interceptor<Map<String, String>>
+        ): ExportConnectivityConfiguration {
             return ExportConnectivityConfiguration(
                 getLogsUrl(configuration.url, configuration.protocol),
                 configuration.authentication,
-                configuration.protocol
+                configuration.protocol,
+                headersInterceptor
             )
         }
 
-        private fun createSpansExportConnectivityConfiguration(configuration: ExportEndpointConfiguration): ExportConnectivityConfiguration {
+        private fun createSpansExportConnectivityConfiguration(
+            configuration: ExportEndpointConfiguration,
+            headersInterceptor: Interceptor<Map<String, String>>
+        ): ExportConnectivityConfiguration {
             return ExportConnectivityConfiguration(
                 getTracesUrl(configuration.url, configuration.protocol),
                 configuration.authentication,
-                configuration.protocol
+                configuration.protocol,
+                headersInterceptor
             )
         }
 

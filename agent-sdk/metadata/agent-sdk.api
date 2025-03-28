@@ -67,6 +67,7 @@ public final class co/elastic/otel/android/connectivity/Authentication$SecretTok
 
 public final class co/elastic/otel/android/connectivity/ExportEndpointConfiguration {
 	public fun <init> (Ljava/lang/String;Lco/elastic/otel/android/connectivity/Authentication;Lco/elastic/otel/android/exporters/configuration/ExportProtocol;)V
+	public synthetic fun <init> (Ljava/lang/String;Lco/elastic/otel/android/connectivity/Authentication;Lco/elastic/otel/android/exporters/configuration/ExportProtocol;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lco/elastic/otel/android/connectivity/Authentication;
 	public final fun component3 ()Lco/elastic/otel/android/exporters/configuration/ExportProtocol;

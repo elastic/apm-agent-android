@@ -394,12 +394,14 @@ class ElasticApmAgentTest {
             .build()
 
         wireMockRule.takeRequest() // Await for empty central config response
+        awaitForCentralConfigurationValues(ExpectedCentralConfiguration())
 
         sendSpan()
         sendLog()
         sendMetric()
 
         awaitForOpenGates()
+        awaitForNonEmptyInMemorySignals()
 
         assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
@@ -414,6 +416,7 @@ class ElasticApmAgentTest {
         inMemoryExporters.resetExporters()
 
         wireMockRule.takeRequest() // Await for central config response with recording=false
+        awaitForCentralConfigurationValues(ExpectedCentralConfiguration(recording = false))
 
         awaitForOpenGates()
 
@@ -441,6 +444,8 @@ class ElasticApmAgentTest {
 
         // Await for request and stub the next one
         wireMockRule.takeRequest()
+        awaitForCentralConfigurationValues(ExpectedCentralConfiguration(recording = false))
+
         wireMockRule.stubAllHttpResponses {
             withStatus(200)
                 .withHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
@@ -455,6 +460,8 @@ class ElasticApmAgentTest {
 
         // Verify recording true value
         wireMockRule.takeRequest() // Await for recording: true request.
+        awaitForCentralConfigurationValues(ExpectedCentralConfiguration(recording = true))
+
         // Stub for invalid config
         wireMockRule.stubAllHttpResponses {
             withStatus(200)
@@ -465,6 +472,8 @@ class ElasticApmAgentTest {
         sendLog()
         sendMetric()
 
+        awaitForNonEmptyInMemorySignals()
+
         assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
@@ -472,10 +481,13 @@ class ElasticApmAgentTest {
         // Verify invalid config
         inMemoryExporters.resetExporters()
         wireMockRule.takeRequest() // Await for invalid config.
+        awaitForCentralConfigurationValues(ExpectedCentralConfiguration())
 
         sendSpan()
         sendLog()
         sendMetric()
+
+        awaitForNonEmptyInMemorySignals()
 
         assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
@@ -496,6 +508,8 @@ class ElasticApmAgentTest {
             .build()
 
         wireMockRule.takeRequest() // Await for central config response
+        awaitForCentralConfigurationValues(ExpectedCentralConfiguration(false, 0.0))
+
         agent.getSessionManager().clearSession()
 
         sendSpan()
@@ -516,6 +530,8 @@ class ElasticApmAgentTest {
         }
 
         wireMockRule.takeRequest() // Await for central config response
+        awaitForCentralConfigurationValues(ExpectedCentralConfiguration(false, 1.0))
+
         agent.getSessionManager().clearSession()
 
         sendSpan()
@@ -534,11 +550,15 @@ class ElasticApmAgentTest {
         }
 
         wireMockRule.takeRequest() // Await for central config response
+        awaitForCentralConfigurationValues(ExpectedCentralConfiguration(true, 1.0))
+
         agent.getSessionManager().clearSession()
 
         sendSpan()
         sendLog()
         sendMetric()
+
+        awaitForNonEmptyInMemorySignals()
 
         assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
@@ -552,10 +572,13 @@ class ElasticApmAgentTest {
         }
 
         wireMockRule.takeRequest() // Await for central config response
+        awaitForCentralConfigurationValues(ExpectedCentralConfiguration(true, 0.0))
 
         sendSpan()
         sendLog()
         sendMetric()
+
+        awaitForNonEmptyInMemorySignals()
 
         assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
@@ -595,12 +618,16 @@ class ElasticApmAgentTest {
 
         // When central config fails and the session gets reset, go with default behavior.
         wireMockRule.takeRequest()
+        awaitForCentralConfigurationValues(ExpectedCentralConfiguration(true, 1.0))
+
         agent.getSessionManager().clearSession()
         inMemoryExporters.resetExporters()
 
         sendSpan()
         sendLog()
         sendMetric()
+
+        awaitForNonEmptyInMemorySignals()
 
         assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
@@ -610,6 +637,8 @@ class ElasticApmAgentTest {
     @Test
     fun `Validate http span name change`() {
         agent = inMemoryAgentBuilder().build()
+
+        awaitForOpenGates()
 
         sendSpan("Normal Span")
         sendSpan(
@@ -640,10 +669,6 @@ class ElasticApmAgentTest {
                 "https://anotherhost.net:8080/some/path?q=elastic"
             )
         )
-
-        await.atMost(Duration.ofSeconds(1)).until {
-            agent.getExporterGateManager().spanGateIsOpen()
-        }
 
         val finishedSpanNames = inMemoryExporters.getFinishedSpans().map { it.name }
         assertThat(finishedSpanNames).containsExactlyInAnyOrder(
@@ -661,6 +686,8 @@ class ElasticApmAgentTest {
             .setHttpSpanInterceptor(null)
             .build()
 
+        awaitForOpenGates()
+
         sendSpan("Normal Span")
         sendSpan(
             "GET",
@@ -690,10 +717,6 @@ class ElasticApmAgentTest {
                 "https://anotherhost.net:8080/some/path?q=elastic"
             )
         )
-
-        await.atMost(Duration.ofSeconds(1)).until {
-            agent.getExporterGateManager().spanGateIsOpen()
-        }
 
         val finishedSpanNames = inMemoryExporters.getFinishedSpans().map { it.name }
         assertThat(finishedSpanNames).containsExactlyInAnyOrder(
@@ -763,4 +786,49 @@ class ElasticApmAgentTest {
             throw e
         }
     }
+
+    private fun awaitForNonEmptyInMemorySignals(maxSecondsToWait: Int = 1) {
+        try {
+            await.atMost(Duration.ofSeconds(maxSecondsToWait.toLong())).until {
+                inMemoryExporters.getFinishedSpans().isNotEmpty()
+                        && inMemoryExporters.getFinishedLogRecords().isNotEmpty()
+                        && inMemoryExporters.getFinishedMetrics().isNotEmpty()
+            }
+        } catch (e: ConditionTimeoutException) {
+            println("Spans size: ${inMemoryExporters.getFinishedSpans().size}")
+            println("Logs size: ${inMemoryExporters.getFinishedLogRecords().size}")
+            println("Metrics size: ${inMemoryExporters.getFinishedMetrics().size}")
+            throw e
+        }
+    }
+
+    private fun awaitForCentralConfigurationValues(
+        expectedValue: ExpectedCentralConfiguration,
+        waitSeconds: Int = 1
+    ) {
+        val centralConfiguration =
+            agent.getCentralConfigurationManager()!!.getCentralConfiguration()
+
+        try {
+            await.atMost(Duration.ofSeconds(waitSeconds.toLong())).until {
+                centralConfiguration.getSessionSampleRate() == expectedValue.sessionSampleRate &&
+                        centralConfiguration.isRecording() == expectedValue.recording
+            }
+        } catch (e: ConditionTimeoutException) {
+            println(
+                "Configuration: ${
+                    ExpectedCentralConfiguration(
+                        centralConfiguration.isRecording(),
+                        centralConfiguration.getSessionSampleRate()
+                    )
+                }"
+            )
+            throw e
+        }
+    }
+
+    private data class ExpectedCentralConfiguration(
+        val recording: Boolean = true,
+        val sessionSampleRate: Double = 1.0
+    )
 }

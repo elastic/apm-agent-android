@@ -1,0 +1,14 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "local>elastic/renovate-config"
+  ],
+  "ignorePaths": [
+    ".ci/**",
+    ".buildkite/**",
+    ".github/*",
+    ".github/actions/**",
+    ".github/workflows/*",
+    "sample-app/backend/**"
+  ]
+}

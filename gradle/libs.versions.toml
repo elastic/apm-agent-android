@@ -28,7 +28,7 @@ junit5-vintage = { module = "org.junit.vintage:junit-vintage-engine", version.re
 opentelemetry-testing = { module = "io.opentelemetry:opentelemetry-sdk-testing", version.ref = "opentelemetry" }
 robolectric = "org.robolectric:robolectric:4.14.1"
 assertj = "org.assertj:assertj-core:3.27.3"
-mockk = "io.mockk:mockk:1.13.16"
+mockk = "io.mockk:mockk:1.13.17"
 awaitility = "org.awaitility:awaitility-kotlin:4.2.2"
 wireMock = "org.wiremock:wiremock:3.10.0"
 
@@ -48,7 +48,7 @@ autoService-compiler = { module = "com.google.auto.service:auto-service", versio
 buildconfig-plugin = "com.github.gmazzo.buildconfig:com.github.gmazzo.buildconfig.gradle.plugin:5.5.1"
 animalsniffer-plugin = "ru.vyarus:gradle-animalsniffer-plugin:2.0.0"
 kotlin-binaryCompatibility = "org.jetbrains.kotlinx.binary-compatibility-validator:org.jetbrains.kotlinx.binary-compatibility-validator.gradle.plugin:0.17.0"
-coreLib = "com.android.tools:desugar_jdk_libs:2.1.4"
+coreLib = "com.android.tools:desugar_jdk_libs:2.1.5"
 
 [bundles]
 mocking = ["mockk"]

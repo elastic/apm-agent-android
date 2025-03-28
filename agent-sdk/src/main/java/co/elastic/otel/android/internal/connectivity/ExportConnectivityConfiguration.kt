@@ -32,8 +32,6 @@ internal class ExportConnectivityConfiguration(
     private val protocol: ExportProtocol,
     private val headersInterceptor: Interceptor<Map<String, String>> = Interceptor.noop()
 ) : ConnectivityConfiguration {
-    private val baseUrl by lazy { url.trimEnd('/') }
-
     override fun getUrl(): String = url
 
     override fun getHeaders(): Map<String, String> {

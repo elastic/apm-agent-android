@@ -165,23 +165,24 @@ internal class ExportConnectivityManager private constructor(
             )
         }
 
-        private fun getTracesUrl(baseUrl: String, protocol: ExportProtocol): String {
-            return getSignalUrl(baseUrl, "traces", protocol)
+        private fun getTracesUrl(url: String, protocol: ExportProtocol): String {
+            return getSignalUrl(url, "traces", protocol)
         }
 
-        private fun getLogsUrl(baseUrl: String, protocol: ExportProtocol): String {
-            return getSignalUrl(baseUrl, "logs", protocol)
+        private fun getLogsUrl(url: String, protocol: ExportProtocol): String {
+            return getSignalUrl(url, "logs", protocol)
         }
 
-        private fun getMetricsUrl(baseUrl: String, protocol: ExportProtocol): String {
-            return getSignalUrl(baseUrl, "metrics", protocol)
+        private fun getMetricsUrl(url: String, protocol: ExportProtocol): String {
+            return getSignalUrl(url, "metrics", protocol)
         }
 
         private fun getSignalUrl(
-            baseUrl: String,
+            url: String,
             signalId: String,
             exportProtocol: ExportProtocol
         ): String {
+            val baseUrl by lazy { url.trimEnd('/') }
             return when (exportProtocol) {
                 ExportProtocol.GRPC -> baseUrl
                 ExportProtocol.HTTP -> getHttpUrl(baseUrl, signalId)

@@ -641,7 +641,7 @@ class ElasticApmAgentTest {
         )
 
         await.atMost(Duration.ofSeconds(1)).until {
-            agent.getExporterGateManager().spanGateIsOpen()
+            inMemoryExporters.getFinishedSpans().size == 5
         }
 
         val finishedSpanNames = inMemoryExporters.getFinishedSpans().map { it.name }
@@ -691,7 +691,7 @@ class ElasticApmAgentTest {
         )
 
         await.atMost(Duration.ofSeconds(1)).until {
-            agent.getExporterGateManager().spanGateIsOpen()
+            inMemoryExporters.getFinishedSpans().size == 5
         }
 
         val finishedSpanNames = inMemoryExporters.getFinishedSpans().map { it.name }

@@ -395,6 +395,7 @@ class ElasticApmAgentTest {
         sendMetric()
 
         awaitForOpenGates()
+        awaitForNonEmptyInMemorySignals()
 
         assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
@@ -539,6 +540,8 @@ class ElasticApmAgentTest {
         sendLog()
         sendMetric()
 
+        awaitForNonEmptyInMemorySignals()
+
         assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
@@ -555,6 +558,8 @@ class ElasticApmAgentTest {
         sendSpan()
         sendLog()
         sendMetric()
+
+        awaitForNonEmptyInMemorySignals()
 
         assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
@@ -600,6 +605,8 @@ class ElasticApmAgentTest {
         sendSpan()
         sendLog()
         sendMetric()
+
+        awaitForNonEmptyInMemorySignals()
 
         assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)

@@ -16,34 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.internal.features.conditionaldrop
-
-import co.elastic.otel.android.internal.opentelemetry.SignalType
-import io.opentelemetry.sdk.common.CompletableResultCode
-import io.opentelemetry.sdk.trace.data.SpanData
-import io.opentelemetry.sdk.trace.export.SpanExporter
+package co.elastic.otel.android.internal.opentelemetry
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-internal class ConditionalDropSpanExporter(
-    private val delegate: SpanExporter,
-    private val drop: (SignalType) -> Boolean
-) : SpanExporter {
-
-    override fun export(spans: MutableCollection<SpanData>): CompletableResultCode {
-        if (drop(SignalType.TRACE)) {
-            return CompletableResultCode.ofSuccess()
-        }
-        return delegate.export(spans)
-    }
-
-    override fun flush(): CompletableResultCode {
-        return delegate.flush()
-    }
-
-    override fun shutdown(): CompletableResultCode {
-        return delegate.shutdown()
-    }
+internal enum class SignalType {
+    TRACE,
+    METRIC,
+    LOG
 }

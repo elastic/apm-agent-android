@@ -20,8 +20,9 @@ package co.elastic.otel.android.functional
 
 import co.elastic.otel.android.ElasticApmAgent
 import co.elastic.otel.android.connectivity.Authentication
-import co.elastic.otel.android.connectivity.ExportConnectivityConfiguration
+import co.elastic.otel.android.connectivity.ExportEndpointConfiguration
 import co.elastic.otel.android.exporters.ExporterProvider
+import co.elastic.otel.android.exporters.configuration.ExportProtocol
 import co.elastic.otel.android.interceptor.Interceptor
 import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
 import co.elastic.otel.android.internal.features.centralconfig.CentralConfigurationConnectivity
@@ -42,6 +43,7 @@ import io.opentelemetry.sdk.common.CompletableResultCode
 import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat
 import java.time.Duration
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicReference
 import org.awaitility.core.ConditionTimeoutException
 import org.awaitility.kotlin.await
 import org.junit.After
@@ -125,7 +127,11 @@ class ElasticApmAgentTest {
         agent = simpleAgentBuilder(wireMockRule.url("/"))
             .setManagementUrl(wireMockRule.url("/remote/"))
             .setServiceName("my-app")
-            .setExportExtraHeaders(mapOf("Extra-header" to "extra value"))
+            .setExportHeadersInterceptor {
+                mutableMapOf("Extra-header" to "extra value").apply {
+                    putAll(it)
+                }
+            }
             .build()
 
         val centralConfigRequest = wireMockRule.takeRequest()
@@ -174,9 +180,12 @@ class ElasticApmAgentTest {
         }
         val secretToken = "secret-token"
         val apiKey = "api-key"
+        val headersInterceptorProvider =
+            AtomicReference<Interceptor<Map<String, String>>>(Interceptor.noop())
         agent = simpleAgentBuilder(wireMockRule.url("/first/"))
             .setManagementUrl(wireMockRule.url("/management/"))
             .setExportAuthentication(Authentication.SecretToken(secretToken))
+            .setExportHeadersInterceptor { headersInterceptorProvider.get().intercept(it) }
             .setManagementAuthentication(Authentication.ApiKey(apiKey))
             .setServiceName("my-app")
             .setDeploymentEnvironment("debug")
@@ -211,11 +220,16 @@ class ElasticApmAgentTest {
         ).isEqualTo("Bearer $secretToken")
 
         // Changing global config
-        agent.setExportConnectivityConfiguration(
-            ExportConnectivityConfiguration(
+        headersInterceptorProvider.set(Interceptor {
+            mutableMapOf("Custom-Header" to "custom value").apply {
+                putAll(it)
+            }
+        })
+        agent.setExportEndpointConfiguration(
+            ExportEndpointConfiguration(
                 wireMockRule.url("/second/"),
                 Authentication.ApiKey(apiKey),
-                mapOf("Custom-Header" to "custom value")
+                ExportProtocol.HTTP
             )
         )
 
@@ -316,11 +330,11 @@ class ElasticApmAgentTest {
 
         // Changing config
         val apiKey = "api-key"
-        agent.getExportConnectivityManager().setConnectivityConfiguration(
-            ExportConnectivityConfiguration(
+        agent.getExportConnectivityManager().setEndpointConfiguration(
+            ExportEndpointConfiguration(
                 wireMockRule.url("/second/"),
                 Authentication.ApiKey(apiKey),
-                mapOf("Custom-Header" to "custom value")
+                ExportProtocol.HTTP
             )
         )
 
@@ -335,9 +349,6 @@ class ElasticApmAgentTest {
         assertThat(
             tracesRequest2.headers.getHeader("Authorization").firstValue()
         ).isEqualTo("ApiKey $apiKey")
-        assertThat(
-            tracesRequest2.headers.getHeader("Custom-Header").firstValue()
-        ).isEqualTo("custom value")
 
         sendLog()
         val logsRequest2 = wireMockRule.takeRequest()
@@ -345,9 +356,6 @@ class ElasticApmAgentTest {
         assertThat(
             logsRequest2.headers.getHeader("Authorization").firstValue()
         ).isEqualTo("ApiKey $apiKey")
-        assertThat(
-            logsRequest2.headers.getHeader("Custom-Header").firstValue()
-        ).isEqualTo("custom value")
 
         sendMetric()
         val metricsRequest2 = wireMockRule.takeRequest()
@@ -355,9 +363,6 @@ class ElasticApmAgentTest {
         assertThat(
             metricsRequest2.headers.getHeader("Authorization").firstValue()
         ).isEqualTo("ApiKey $apiKey")
-        assertThat(
-            metricsRequest2.headers.getHeader("Custom-Header").firstValue()
-        ).isEqualTo("custom value")
     }
 
     @Test

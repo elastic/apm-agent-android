@@ -1,7 +1,7 @@
 plugins {
     id("elastic.instrumentation-test-app")
     id("co.elastic.otel.android.agent")
-    id("co.elastic.otel.android.instrumentation-okhttp")
+    id("co.elastic.otel.android.instrumentation.okhttp")
 }
 
 android {

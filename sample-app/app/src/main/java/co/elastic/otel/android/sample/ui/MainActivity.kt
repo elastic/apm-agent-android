@@ -29,7 +29,9 @@ class MainActivity : AppCompatActivity() {
             appBarConfiguration = AppBarConfiguration(navController.graph)
             setupActionBarWithNavController(navController, appBarConfiguration)
 
+            val counter = agent.getOpenTelemetry().getMeter("metricscope").counterBuilder("button click count").build()
             binding.fab.setOnClickListener { view ->
+                counter.add(1)
                 agent.log(
                     "Button click",
                     attributes = Attributes.builder().put("activity.name", "MainActivity").build()

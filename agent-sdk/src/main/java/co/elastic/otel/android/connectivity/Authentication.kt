@@ -25,12 +25,20 @@ sealed class Authentication {
     /**
      * Represents an [API Key](https://www.elastic.co/guide/en/observability/current/apm-api-key.html) auth method.
      */
-    data class ApiKey(val key: String) : Authentication()
+    data class ApiKey(val key: String) : Authentication() {
+        override fun toString(): String {
+            return "ApiKey(key.length=${key.length})"
+        }
+    }
 
     /**
      * Represent a [Secret token](https://www.elastic.co/guide/en/observability/current/apm-secret-token.html) auth method.
      */
-    data class SecretToken(val token: String) : Authentication()
+    data class SecretToken(val token: String) : Authentication() {
+        override fun toString(): String {
+            return "SecretToken(token.length=${token.length})"
+        }
+    }
 
     /**
      * No auth method.

@@ -13,6 +13,7 @@ import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -21,9 +22,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import co.elastic.otel.android.compilation.tools.data.ArtifactLicense;
@@ -173,7 +177,13 @@ public abstract class CreateNoticeTask extends BaseTask {
     }
 
     private InputStream getNoticeHeaderInputStream() {
-        return getResourceInputStream("/notice_header.txt");
+        try {
+            String noticeHeader = new String(getResourceInputStream("/notice_header.txt").readAllBytes());
+            String headerWithYear = noticeHeader.replace("{year}", new SimpleDateFormat("yyyy", Locale.US).format(new Date()));
+            return new ByteArrayInputStream(headerWithYear.getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private InputStream getResourceInputStream(String path) {

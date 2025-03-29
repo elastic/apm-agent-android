@@ -16,10 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.connectivity
+package co.elastic.otel.android.internal.provider
 
-interface ConnectivityConfiguration {
-    fun getUrl(): String
-
-    fun getHeaders(): Map<String, String>
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
+fun interface Provider<T> {
+    fun get(): T
 }

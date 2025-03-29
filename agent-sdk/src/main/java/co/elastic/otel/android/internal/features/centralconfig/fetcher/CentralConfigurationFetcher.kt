@@ -19,7 +19,7 @@
 package co.elastic.otel.android.internal.features.centralconfig.fetcher
 
 import co.elastic.otel.android.common.internal.logging.Elog
-import co.elastic.otel.android.connectivity.ConnectivityConfiguration
+import co.elastic.otel.android.internal.connectivity.ConnectivityConfiguration
 import co.elastic.otel.android.internal.services.preferences.PreferencesService
 import java.io.File
 import java.io.IOException

@@ -27,7 +27,7 @@ sealed class Authentication {
      */
     data class ApiKey(val key: String) : Authentication() {
         override fun toString(): String {
-            return "ApiKey{key.length=${key.length}}"
+            return "ApiKey(key.length=${key.length})"
         }
     }
 
@@ -36,7 +36,7 @@ sealed class Authentication {
      */
     data class SecretToken(val token: String) : Authentication() {
         override fun toString(): String {
-            return "SecretToken{token.length=${token.length}}"
+            return "SecretToken(token.length=${token.length})"
         }
     }
 

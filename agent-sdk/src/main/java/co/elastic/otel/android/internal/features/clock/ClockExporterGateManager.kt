@@ -121,7 +121,7 @@ internal class ClockExporterGateManager private constructor(
 
         private fun intercept(spans: Collection<SpanData>): Collection<SpanData> {
             if (spanAttrIntercepted.get() == 0) {
-                logger.debug("Skipping span attr intercept.")
+                logger.debug("[Clock] Skipping span attr intercept.")
                 return spans
             }
             val intercepted = mutableListOf<SpanData>()
@@ -140,7 +140,7 @@ internal class ClockExporterGateManager private constructor(
                     timeOffsetNanosProvider.get()
                 )
                 spanAttrIntercepted.decrementAndGet()
-                logger.debug("Decrementing intercepted span attrs.")
+                logger.debug("[Clock] Decrementing intercepted span attrs.")
                 return updatedSpanData
             }
             return span
@@ -163,7 +163,7 @@ internal class ClockExporterGateManager private constructor(
 
         private fun intercept(logs: Collection<LogRecordData>): Collection<LogRecordData> {
             if (logRecordAttrIntercepted.get() == 0) {
-                logger.debug("Skipping log attr intercept.")
+                logger.debug("[Clock] Skipping log attr intercept.")
                 return logs
             }
             val intercepted = mutableListOf<LogRecordData>()
@@ -182,7 +182,7 @@ internal class ClockExporterGateManager private constructor(
                     timeOffsetNanosProvider.get()
                 )
                 logRecordAttrIntercepted.decrementAndGet()
-                logger.debug("Decrementing intercepted log attrs.")
+                logger.debug("[Clock] Decrementing intercepted log attrs.")
                 return updatedLogRecordData
             }
             return log

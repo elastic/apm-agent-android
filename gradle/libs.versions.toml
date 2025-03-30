@@ -4,7 +4,7 @@ opentelemetry-semconv = "1.29.0-alpha"
 opentelemetry-contrib = "1.43.0-alpha"
 byteBuddy = "1.16.1"
 kotlin = "2.1.0"
-android = "8.7.3"
+android = "8.9.1"
 junit5 = "5.11.4"
 autoService = "1.1.1"
 

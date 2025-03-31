@@ -16,6 +16,7 @@ dependencies {
     implementation(rootLibs.animalsniffer.plugin)
     implementation(rootLibs.android.plugin)
     implementation(rootLibs.kotlin.binaryCompatibility)
+    implementation(rootLibs.mavenModel)
     testImplementation(rootLibs.junit4)
 }
 

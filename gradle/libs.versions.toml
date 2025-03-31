@@ -2,7 +2,7 @@
 opentelemetry = "1.46.0"
 opentelemetry-semconv = "1.29.0-alpha"
 opentelemetry-contrib = "1.43.0-alpha"
-byteBuddy = "1.16.1"
+byteBuddy = "1.17.5"
 kotlin = "2.1.0"
 android = "8.7.3"
 junit5 = "5.11.4"

@@ -188,19 +188,19 @@ fun myMethod() {
 
 1. There might be multiple `BuildConfig` types available to use in your code. The one that belongs to your app has a package name equal to your [app's namespace](https://developer.android.com/build/configure-app-module#set-namespace) value. So, for example, if your app's namespace is set to `com.my.app`, then the `BuildConfig` type you must use would be `com.my.app.BuildType`.
 
-## How to configure SSL/TLS? [faq-ssl]
+## How to configure SSL/TLS? [how-ssl]
 
 Note that the Elastic Agent does not handle SSL/TLS configs internally. Therefore, you should manage these types of configurations as part of your app’s network security configurations, as explained in Android’s official [security guidelines](https://developer.android.com/privacy-and-security/security-ssl). Below we show a set of common use cases and quick tips on what could be done on each one. However, each case might be different, so please refer to Android’s [official docs](https://developer.android.com/privacy-and-security/security-config) on this topic if you need more details.
 
-### Connecting to Elastic Cloud [faq-ssl-elastic-cloud]
+### Connecting to Elastic Cloud [how-ssl-elastic-cloud]
 
 If your {{stack}} is hosted in {{ecloud}}, you shouldn’t need to add any SSL/TLS config changes in your app. It should work out of the box.
 
-### Connecting to an on-prem server [faq-ssl-on-prem]
+### Connecting to an on-prem server [how-ssl-on-prem]
 
 If your {{stack}} is hosted on-prem, then it depends on the type of CA your host uses to sign its certificates. If it’s a commonly trusted CA, you shouldn’t have to worry about changing your app’s SSL/TLS configuration as it all should work well out of the box. However, if your CAs are unknown/private or your server uses a self-signed certificate, then you would need to configure your app to trust custom CAs by following [Android’s guide](https://developer.android.com/privacy-and-security/security-config).
 
-### Debugging purposes [faq-ssl-debug]
+### Debugging purposes [how-ssl-debug]
 
 If you’re running a local server and need to connect to it without using https in order to run a quick test, then you could temporarily [enable cleartext traffic](https://developer.android.com/guide/topics/manifest/application-element#usesCleartextTraffic) within your `AndroidManifest.xml` file, inside the `<application>` tag. As shown below:
 

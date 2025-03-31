@@ -106,16 +106,16 @@ public abstract class PomLicensesCollectorTask extends BasePomTask {
 
         for (ResolvedArtifactResult pomArtifact : pomArtifacts) {
             String displayName = pomArtifact.getId().getComponentIdentifier().getDisplayName();
-            String licenseName;
+            System.out.println("Searching license for " + displayName);
+            String licenseId;
             if (manualMappedLicenses.containsKey(displayName)) {
-                licenseName = manualMappedLicenses.get(displayName);
+                licenseId = manualMappedLicenses.get(displayName);
             } else {
-                File pomFile = pomArtifact.getFile();
-                PomReader reader = new PomReader(pomFile);
-                licenseName = reader.getLicenseId();
+                licenseId = findLicenseId(pomArtifact.getFile());
             }
-            if (licenseName != null) {
-                artifactLicenses.add(new ArtifactLicense(displayName, licenseName));
+            System.out.println("Finished searching license for " + displayName + ", found: " + licenseId);
+            if (licenseId != null) {
+                artifactLicenses.add(new ArtifactLicense(displayName, licenseId));
             } else {
                 notFoundLicenses.add(displayName);
             }
@@ -126,5 +126,20 @@ public abstract class PomLicensesCollectorTask extends BasePomTask {
         }
 
         return artifactLicenses;
+    }
+
+    private String findLicenseId(File pom) {
+        PomReader reader = new PomReader(pom);
+        String licenseId = reader.getLicenseId();
+
+        if (licenseId == null) {
+            System.out.println("Will look for parent pom");
+            ResolvedArtifactResult parentPomArtifact = getPomArtifactsForGav(reader.getParentGav());
+            if (parentPomArtifact != null) {
+                return findLicenseId(parentPomArtifact.getFile());
+            }
+        }
+
+        return licenseId;
     }
 }

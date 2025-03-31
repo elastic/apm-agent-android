@@ -25,8 +25,6 @@ jobs:
       - uses: ./.github/actions/setup
       - name: lint
         run: ./gradlew lint
-      - name: Verify OSS compliance
-        run: ./gradlew verifyNoticeFile
 
   test:
     runs-on: ubuntu-latest

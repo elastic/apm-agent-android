@@ -1,6 +1,5 @@
 [versions]
 opentelemetry = "1.46.0"
-opentelemetry-semconv = "1.29.0-alpha"
 opentelemetry-contrib = "1.43.0-alpha"
 byteBuddy = "1.17.5"
 kotlin = "2.1.20"
@@ -16,8 +15,8 @@ androidx-core = "androidx.core:core:1.15.0"
 dsl-json = "com.dslplatform:dsl-json-java8:1.10.0"
 slf4j-api = "org.slf4j:slf4j-api:2.0.17"
 byteBuddy = { module = "net.bytebuddy:byte-buddy", version.ref = "byteBuddy" }
-opentelemetry-semconv = { module = "io.opentelemetry.semconv:opentelemetry-semconv", version.ref = "opentelemetry-semconv" }
-opentelemetry-semconv-incubating = { module = "io.opentelemetry.semconv:opentelemetry-semconv-incubating", version.ref = "opentelemetry-semconv" }
+opentelemetry-semconv = "io.opentelemetry.semconv:opentelemetry-semconv:1.30.0"
+opentelemetry-semconv-incubating = "io.opentelemetry.semconv:opentelemetry-semconv-incubating:1.30.0-alpha"
 opentelemetry-diskBuffering = { module = "io.opentelemetry.contrib:opentelemetry-disk-buffering", version.ref = "opentelemetry-contrib" }
 opentelemetry-exporter-otlp = { module = "io.opentelemetry:opentelemetry-exporter-otlp", version.ref = "opentelemetry" }
 

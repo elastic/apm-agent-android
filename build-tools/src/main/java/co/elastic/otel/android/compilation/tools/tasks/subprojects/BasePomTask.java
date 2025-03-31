@@ -38,6 +38,22 @@ public class BasePomTask extends BaseTask {
         return getPomArtifacts(pomQuery);
     }
 
+    protected ResolvedArtifactResult getPomArtifactsForGav(Gav forGav) {
+        if (forGav == null) {
+            return null;
+        }
+
+        ArtifactResolutionQuery pomQuery = getPomBaseQuery();
+
+        pomQuery.forModule(forGav.group, forGav.artifactName, forGav.version);
+
+        List<ResolvedArtifactResult> pomArtifacts = getPomArtifacts(pomQuery);
+        if (pomArtifacts.isEmpty()) {
+            return null;
+        }
+        return pomArtifacts.get(0);
+    }
+
     protected List<ResolvedArtifactResult> getPomArtifacts(ArtifactResolutionQuery query) {
         List<ResolvedArtifactResult> results = new ArrayList<>();
 

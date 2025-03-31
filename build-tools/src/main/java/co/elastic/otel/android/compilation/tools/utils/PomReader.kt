@@ -1,5 +1,6 @@
 package co.elastic.otel.android.compilation.tools.utils
 
+import co.elastic.otel.android.compilation.tools.data.Gav
 import java.io.File
 import org.apache.maven.model.Model
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
@@ -24,4 +25,10 @@ class PomReader(pomFile: File) {
     fun getName(): String? = model.name
 
     fun getUrl(): String? = model.url
+
+    fun getParentGav(): Gav? {
+        return model.parent?.let {
+            Gav(it.groupId, it.artifactId, it.version)
+        }
+    }
 }

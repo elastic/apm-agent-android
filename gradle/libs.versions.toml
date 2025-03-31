@@ -1,6 +1,6 @@
 [versions]
 opentelemetry = "1.46.0"
-opentelemetry-semconv = "1.29.0-alpha"
+opentelemetry-semconv = "1.30.0"
 opentelemetry-contrib = "1.43.0-alpha"
 byteBuddy = "1.17.5"
 kotlin = "2.1.0"

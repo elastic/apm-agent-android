@@ -60,7 +60,7 @@ Choose **OpenTelemetry**:
 :screenshot:
 :::
 
-On the next page, scroll down to the **APM Agents** pane, and select the **OpenTelemetry** tab:
+On the next page, select the **OpenTelemetry** tab, followed by **Managed OTLP Endpoint** under "Configure the OpenTelemetry SDK":
 
 :::{image} /reference/images/find-export-endpoint/3.png
 :screenshot:

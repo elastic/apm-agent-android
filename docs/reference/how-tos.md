@@ -46,7 +46,11 @@ From a [Fragment](https://developer.android.com/reference/androidx/fragment/app/
 
 ## How to get my {{stack}} export endpoint [get-export-endpoint]
 
-The export endpoint is where your app's telemetry is sent, so it's required to initialize the agent. To find it in your {{stack}}, open {{kib}} and find **Add data** in the main menu. Alternatively, you can use the [global search field](https://www.elastic.co/guide/en/kibana/current/introduction.html#kibana-navigation-search) and search for "Observability Onboarding".
+The export endpoint is where your app's telemetry is sent, so it's required to initialize the agent. The way to find it in your {{stack}} will depend on the type of deployment you use, as explained below.
+
+### For Serverless deployments
+
+On a [Serverless deployment](https://www.elastic.co/guide/en/serverless/current/intro.html), open {{kib}} and find **Add data** in the main menu. Alternatively, you can use the [global search field](https://www.elastic.co/guide/en/kibana/current/introduction.html#kibana-navigation-search) and search for "Observability Onboarding".
 
 Then select **Application**, as shown below:
 
@@ -71,6 +75,10 @@ Your export endpoint URL is the value for the **`OTEL_EXPORTER_OTLP_ENDPOINT`** 
 :::{image} /reference/images/find-export-endpoint/4.png
 :screenshot:
 :::
+
+### For Cloud Hosted and self-managed deployments
+
+For [Cloud Hosted](https://www.elastic.co/guide/en/cloud/current/ec-getting-started.html) and [self-managed](https://www.elastic.co/guide/en/elastic-stack/current/overview.html) deployments, the export endpoint (also known as [EDOT Collector](https://elastic.github.io/opentelemetry/edot-collector/index.html)) is not available out of the box at the moment. You can still create your own service by following [creating and configuring a standalone EDOT Collector](https://elastic.github.io/opentelemetry/edot-collector/config/default-config-standalone.html).
 
 ## How to create an API Key [create-api-key]
 

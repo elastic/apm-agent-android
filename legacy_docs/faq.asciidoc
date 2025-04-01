@@ -1,4 +1,4 @@
-== Frequently asked questions ++[++faq++]++
+== Frequently asked questions
 
 === Why is enabling desugaring support on apps with minSdk below 26 necessary?
 

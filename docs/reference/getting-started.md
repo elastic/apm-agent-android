@@ -15,11 +15,9 @@ Set up an agent in your app and explore your app's data in {{kib}}.
 | Android Gradle plugin                             | 7.4.0                                                                                                     |
 | Android API level                                 | 26 (or 21 with [desugaring](https://developer.android.com/studio/write/java8-support#library-desugaring)) |
 
-:::{important} - Apps with minSdk below 26
-If your application's [minSdk](https://developer.android.com/studio/publish/versioning#minsdk) value is lower than 26, you **must** add [Java 8 desugaring support](https://developer.android.com/studio/write/java8-support#library-desugaring).
-
-Refer to the [FAQ](faq.md#why-desugaring) for more information.
-:::
+> [!IMPORTANT]
+> If your application's [minSdk](https://developer.android.com/studio/publish/versioning#minsdk) value is lower than 26, you **must** add [Java 8 desugaring support](https://developer.android.com/studio/write/java8-support#library-desugaring).
+> Refer to the [FAQ](faq.md#why-desugaring) for more information.
 
 ## Gradle setup
 
@@ -51,8 +49,8 @@ val agent = ElasticApmAgent.builder(application) // <1>
 3. This is the Elastic endpoint where all your telemetry will be exported. [Get your Elastic endpoint](how-tos.md#get-export-endpoint).
 4. Use an API key to connect the agent to the {{stack}}. [Create an API key](how-tos.md#create-api-key).
 
-:::{include} _snippets/tip-provide-values-from-outside.md
-:::
+> [!TIP]
+> If you'd like to provide these values from outside of your code, using an environment variable or a properties file for example, refer to [Provide config values outside of your code](../how-tos.md#how-to-provide-config-values-from-outside-of-my-code).
 
 ## Hello World!
 
@@ -83,23 +81,15 @@ Once your app has sent telemetry data, either [manually](manual-instrumentation.
 
 You should find your application listed there.
 
-:::{image} /reference/images/span-visualization/1.png
-:screenshot:
-:width: 350px
-:::
+![image](images/span-visualization/1.png)
 
 When you open it, go to the **Transactions** tab, where you should see your app's "outermost" spans listed.
 
-:::{image} /reference/images/span-visualization/2.png
-:screenshot:
-:width: 350px
-:::
+![image](images/span-visualization/2.png)
 
 After clicking on the span, you should see it in detail.
 
-:::{image} /reference/images/span-visualization/3.png
-:screenshot:
-:::
+![image](images/span-visualization/3.png)
 
 ## What’s next? [whats-next]
 

@@ -24,8 +24,8 @@ class MyApp : Application() {
 ```
 1. `this` is your application.
 
-:::{important}
-For it to work, you **must** register your custom application in your `AndroidManifest.xml` file, like so:
+> [!IMPORTANT]
+> For it to work, you **must** register your custom application in your `AndroidManifest.xml` file, like so:
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
@@ -35,7 +35,6 @@ For it to work, you **must** register your custom application in your `AndroidMa
     </application>
 </manifest>
 ```
-:::
 
 ### From an Activity
 
@@ -54,27 +53,19 @@ On a [Serverless deployment](https://www.elastic.co/guide/en/serverless/current/
 
 Then select **Application**, as shown below:
 
-:::{image} /reference/images/find-export-endpoint/1.png
-:screenshot:
-:::
+![image](images/find-export-endpoint/1.png)
 
 Choose **OpenTelemetry**:
 
-:::{image} /reference/images/find-export-endpoint/2.png
-:screenshot:
-:::
+![image](images/find-export-endpoint/2.png)
 
 On the next page, select the **OpenTelemetry** tab, followed by **Managed OTLP Endpoint** under "Configure the OpenTelemetry SDK":
 
-:::{image} /reference/images/find-export-endpoint/3.png
-:screenshot:
-:::
+![image](images/find-export-endpoint/3.png)
 
 Your export endpoint URL is the value for the **`OTEL_EXPORTER_OTLP_ENDPOINT`** configuration setting:
 
-:::{image} /reference/images/find-export-endpoint/4.png
-:screenshot:
-:::
+![image](images/find-export-endpoint/4.png)
 
 ### For Cloud Hosted and self-managed deployments
 
@@ -220,9 +211,8 @@ If you’re running a local server and need to connect to it without using https
 </application>
 ```
 
-::::{note}
-You should only enable cleartext traffic for debugging purposes and not for production code.
-::::
+> [!NOTE]
+> You should only enable cleartext traffic for debugging purposes and not for production code.
 
 If enabling cleartext traffic isn’t a valid option for your debugging use case, you should refer to Android’s guide on [configuring CAs for debugging](https://developer.android.com/privacy-and-security/security-config#TrustingDebugCa).
 

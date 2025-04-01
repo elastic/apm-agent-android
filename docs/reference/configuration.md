@@ -59,8 +59,8 @@ class MyApp : android.app.Application {
 2. Your authentication method. You can use either an [API Key](https://www.elastic.co/guide/en/observability/current/apm-api-key.html), a [Secret token](https://www.elastic.co/guide/en/observability/current/apm-secret-token.html), or none; defaults to `None`. API Keys are the recommended method, if you don't have one yet, check out [how to create one](how-tos.md#create-api-key).
 3. The protocol used to communicate with your endpoint. It can be either `HTTP` or `gRPC`. Defaults to `HTTP`.
 
-:::{include} _snippets/tip-provide-values-from-outside.md
-:::
+> [!TIP]
+> If you'd like to provide these values from outside of your code, using an environment variable or a properties file for example, refer to [Provide config values outside of your code](../how-tos.md#how-to-provide-config-values-from-outside-of-my-code).
 
 ### Intercepting export request headers
 
@@ -105,9 +105,8 @@ The agent creates a [resource](https://opentelemetry.io/docs/specs/otel/overview
 
 You can intercept these resources and read/modify them as shown below.
 
-:::{note}
-The resource interceptor is only applied during initialization, as this is the only time where resource attributes can be modified. If you'd like to set _dynamic_ global attributes instead, take a look at [intercepting attributes](#intercepting-attributes).
-:::
+> [!NOTE]
+> The resource interceptor is only applied during initialization, as this is the only time where resource attributes can be modified. If you'd like to set _dynamic_ global attributes instead, take a look at [intercepting attributes](#intercepting-attributes).
 
 ```kotlin
 class MyApp : android.app.Application {
@@ -181,9 +180,8 @@ class MyApp : android.app.Application {
 
 ### Internal logging policy
 
-:::{note}
-Not to be confused with OpenTelemetry's [log signals](https://opentelemetry.io/docs/concepts/signals/logs/). The internal logging policy is about the agent's internal logs that you should see in [logcat](https://developer.android.com/studio/debug/logcat) only.
-:::
+> [!NOTE]
+> Not to be confused with OpenTelemetry's [log signals](https://opentelemetry.io/docs/concepts/signals/logs/). The internal logging policy is about the agent's internal logs that you should see in [logcat](https://developer.android.com/studio/debug/logcat) only.
 
 The agent creates logs, by using [Android's Log](https://developer.android.com/reference/android/util/Log) type, to notify about its internal events so that you can check them out in [logcat](https://developer.android.com/studio/debug/logcat) for debugging purposes. By default, all of the logs are printed for a debuggable app build, however, in the case of non-debuggable builds, only logs at the INFO level and above are printed.
 

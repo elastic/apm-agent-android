@@ -17,9 +17,7 @@ All the features provided by the [OpenTelemetry SDK](https://github.com/open-tel
 
 Distributed tracing allows you to see the full picture of **how long your application has to wait for your backend services** to provide a response (and why), as shown in the example below:
 
-:::{image} /reference/images/intro/distributed-tracing.png
-:screenshot:
-:::
+![image](images/intro/distributed-tracing.png)
 
 The previous image shows **3 spans** from {{kib}}:
 
@@ -29,9 +27,8 @@ The previous image shows **3 spans** from {{kib}}:
 
 You can click on any of these spans to view their full details if you need more contextual information from each.
 
-:::{note}
-For distributed tracing to work properly, your backend services must be configured to send telemetry to the {{stack}} as well.
-:::
+> [!NOTE]
+> For distributed tracing to work properly, your backend services must be configured to send telemetry to the {{stack}} as well.
 
 ### Session review
 

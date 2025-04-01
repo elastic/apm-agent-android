@@ -84,7 +84,7 @@ link:how-tos.asciidoc#how-to-create-an-api-key[how to create one].
 ====
 If you'd like to provide these values from outside of your code, using
 an environment variable or a properties file for example, refer to
-link:../how-tos.asciidoc#how-to-provide-config-values-from-outside-of-my-code[Provide
+link:how-tos.asciidoc#how-to-provide-config-values-from-outside-of-my-code[Provide
 config values outside of your code].
 ====
 

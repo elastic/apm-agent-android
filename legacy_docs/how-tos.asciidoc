@@ -188,7 +188,7 @@ docs], to provide different values per variant.
 
 You've properly created build config fields from environment variables.
 To use them in code, take a look at how to
-link:#eading-build-config-fields-in-code[read build config fields] in
+link:#reading-build-config-fields-in-code[read build config fields] in
 code.
 
 ==== Providing data from a properties file
@@ -253,8 +253,9 @@ https://developer.android.com/build/gradle-tips#share-custom-fields-and-resource
 docs], to provide different values per variant.
 
 You've properly created build config fields from a properties file. To
-use them in code, refer to link:#eading-build-config-fields-in-code[read
-build config fields] in code.
+use them in code, refer to
+link:#reading-build-config-fields-in-code[read build config fields] in
+code.
 
 ==== Reading build config fields in code
 

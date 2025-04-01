@@ -3,7 +3,7 @@ mapped_pages:
   - https://www.elastic.co/guide/en/apm/agent/android/current/faq.html
 ---
 
-# Frequently asked questions [faq]
+# Frequently asked questions
 
 ## Why is enabling desugaring support on apps with minSdk below 26 necessary?
 

@@ -3,7 +3,7 @@ mapped_pages:
   - https://www.elastic.co/guide/en/apm/agent/android/current/configuration.html
 ---
 
-# Configuration [configuration]
+# Configuration
 
 This page includes a comprehensive list of all the configurable parameters available for the agent, including those you can set during initialization and those you can adjust dynamically afterward.
 

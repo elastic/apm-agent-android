@@ -1,0 +1,15 @@
+[[release-notes]]
+== Release notes
+
+Review the changes, fixes, and more in each version of Elastic APM Android Agent.
+
+To check for security updates, go to https://discuss.elastic.co/c/announcements/security-announcements/31[Security announcements for the Elastic stack].
+
+[discrete]
+=== 1.0.0
+
+[discrete]
+==== Features and enhancements
+
+[discrete]
+==== Fixes

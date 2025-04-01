@@ -116,7 +116,7 @@ android {
 2. Ensure Android's `buildConfig` feature is enabled.
 3. Adding our build config fields to the `android.defaultConfig` block ensures they're available for all of your app's build variants. You could also, if needed, create fields with the same name but different values for each of your build variants, as shown in Android's [official docs](https://developer.android.com/build/gradle-tips#share-custom-fields-and-resource-values-with-your-app-code), to provide different values per variant.
 
-You've properly created build config fields from environment variables. To use them in code, take a look at how to [read build config fields](#eading-build-config-fields-in-code) in code.
+You've properly created build config fields from environment variables. To use them in code, take a look at how to [read build config fields](#reading-build-config-fields-in-code) in code.
 
 ### Providing data from a properties file
 
@@ -163,7 +163,7 @@ android {
 2. Ensure Android's `buildConfig` feature is enabled.
 3. Adding your build config fields to the `android.defaultConfig` block ensures they're available for all of your app's build variants. You could also, if needed, create fields with the same name but different values for each of your build variants, as shown in Android's [official docs](https://developer.android.com/build/gradle-tips#share-custom-fields-and-resource-values-with-your-app-code), to provide different values per variant.
 
-You've properly created build config fields from a properties file. To use them in code, refer to [read build config fields](#eading-build-config-fields-in-code) in code.
+You've properly created build config fields from a properties file. To use them in code, refer to [read build config fields](#reading-build-config-fields-in-code) in code.
 
 ### Reading build config fields in code
 

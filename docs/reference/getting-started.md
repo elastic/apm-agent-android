@@ -50,7 +50,7 @@ val agent = ElasticApmAgent.builder(application) // <1>
 4. Use an API key to connect the agent to the Elastic Stack. [Create an API key](how-tos.md#how-to-create-an-api-key).
 
 > [!TIP]
-> If you'd like to provide these values from outside of your code, using an environment variable or a properties file for example, refer to [Provide config values outside of your code](../how-tos.md#how-to-provide-config-values-from-outside-of-my-code).
+> If you'd like to provide these values from outside of your code, using an environment variable or a properties file for example, refer to [Provide config values outside of your code](how-tos.md#how-to-provide-config-values-from-outside-of-my-code).
 
 ## Hello World!
 

@@ -32,7 +32,7 @@ class MyApp : android.app.Application {
 }
 ```
 
-1. This will be the name used by {{kib}} when listing your application on the [Services](https://www.elastic.co/guide/en/observability/current/apm-services.html) page. Defaults to `unknown`. See [why your app is referred to as a "service"](faq.md#why-service).
+1. This will be the name used by {{kib}} when listing your application on the [Services](https://www.elastic.co/guide/en/observability/current/apm-services.html) page. Defaults to `unknown`. See [why your app is referred to as a "service"](faq.md#why-does-my-app-have-to-be-referred-to-as-service).
 2. Your app's version name. Defaults to the version provided [here](https://developer.android.com/reference/android/content/pm/PackageInfo#versionName).
 3. Typically your app's build type, flavor, backend environment, or maybe a combination of these. Any helpful distinction for you to better analyze your app's data later in {{kib}}.
 
@@ -55,8 +55,8 @@ class MyApp : android.app.Application {
 }
 ```
 
-1. Your endpoint URL. If you don't have one yet, check out [how to find it](how-tos.md#get-export-endpoint).
-2. Your authentication method. You can use either an [API Key](https://www.elastic.co/guide/en/observability/current/apm-api-key.html), a [Secret token](https://www.elastic.co/guide/en/observability/current/apm-secret-token.html), or none; defaults to `None`. API Keys are the recommended method, if you don't have one yet, check out [how to create one](how-tos.md#create-api-key).
+1. Your endpoint URL. If you don't have one yet, check out [how to find it](how-tos.md#how-to-get-my-elastic-stack-export-endpoint).
+2. Your authentication method. You can use either an [API Key](https://www.elastic.co/guide/en/observability/current/apm-api-key.html), a [Secret token](https://www.elastic.co/guide/en/observability/current/apm-secret-token.html), or none; defaults to `None`. API Keys are the recommended method, if you don't have one yet, check out [how to create one](how-tos.md#how-to-create-an-api-key).
 3. The protocol used to communicate with your endpoint. It can be either `HTTP` or `gRPC`. Defaults to `HTTP`.
 
 > [!TIP]

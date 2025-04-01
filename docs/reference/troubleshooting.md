@@ -20,4 +20,4 @@ You can take a look at your app's outgoing network requests via Android Studio's
 
 ### SSL/TLS error
 
-Sometimes the request to the {{stack}} endpoint won't show up in the [network inspector](#inspecting-network-traffic). A common issue when this happens is that there is an SSL/TLS error that occurs when the agent tries to contact your {{stack}} endpoint. This is often the case when you work with an on-prem {{stack}} that doesn't have trusted CAs, for which you'd need to add custom security configurations to your app to make the export work. Take a look at [how to configure SSL/TLS](how-tos.md#how-ssl) for more information.
+Sometimes the request to the {{stack}} endpoint won't show up in the [network inspector](#inspecting-network-traffic). A common issue when this happens is that there is an SSL/TLS error that occurs when the agent tries to contact your {{stack}} endpoint. This is often the case when you work with an on-prem {{stack}} that doesn't have trusted CAs, for which you'd need to add custom security configurations to your app to make the export work. Take a look at [how to configure SSL/TLS](how-tos.md#how-to-configure-ssltls) for more information.

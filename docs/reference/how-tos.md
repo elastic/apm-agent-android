@@ -1,6 +1,6 @@
 # How-tos
 
-## How to get my Android application instance [get-application]
+## How to get my Android application instance
 
 Your [Application](https://developer.android.com/reference/android/app/Application) instance is needed to initialize the agent. There are a couple of ways you can get yours:
 
@@ -43,7 +43,7 @@ You can get your application from an [Activity](https://developer.android.com/re
 ### From a Fragment
 From a [Fragment](https://developer.android.com/reference/androidx/fragment/app/Fragment.html) instance, you can get the [Activity](https://developer.android.com/reference/android/app/Activity) that it is associated to by calling its [requireActivity()](https://developer.android.com/reference/androidx/fragment/app/Fragment.html#requireActivity()) method. Once you get the Activity object, you can get your application from it as [explained above](#from-an-activity).
 
-## How to get my {{stack}} export endpoint [get-export-endpoint]
+## How to get my Elastic Stack export endpoint
 
 The export endpoint is where your app's telemetry is sent, so it's required to initialize the agent. The way to find it in your {{stack}} will depend on the type of deployment you use, as explained below.
 
@@ -71,7 +71,7 @@ Your export endpoint URL is the value for the **`OTEL_EXPORTER_OTLP_ENDPOINT`** 
 
 For [Cloud Hosted](https://www.elastic.co/guide/en/cloud/current/ec-getting-started.html) and [self-managed](https://www.elastic.co/guide/en/elastic-stack/current/overview.html) deployments, the export endpoint (also known as [EDOT Collector](https://elastic.github.io/opentelemetry/edot-collector/index.html)) is not available out of the box at the moment. You can still create your own service by following [creating and configuring a standalone EDOT Collector](https://elastic.github.io/opentelemetry/edot-collector/config/default-config-standalone.html).
 
-## How to create an API Key [create-api-key]
+## How to create an API Key
 
 API Keys are the recommended way of authenticating the agent with your {{stack}}. There's a couple of ways you can create one:
 
@@ -116,7 +116,7 @@ android {
 2. Ensure Android's `buildConfig` feature is enabled.
 3. Adding our build config fields to the `android.defaultConfig` block ensures they're available for all of your app's build variants. You could also, if needed, create fields with the same name but different values for each of your build variants, as shown in Android's [official docs](https://developer.android.com/build/gradle-tips#share-custom-fields-and-resource-values-with-your-app-code), to provide different values per variant.
 
-You've properly created build config fields from environment variables. To use them in code, take a look at how to [read build config fields](#reading-build-config-fields) in code.
+You've properly created build config fields from environment variables. To use them in code, take a look at how to [read build config fields](#eading-build-config-fields-in-code) in code.
 
 ### Providing data from a properties file
 
@@ -163,9 +163,9 @@ android {
 2. Ensure Android's `buildConfig` feature is enabled.
 3. Adding your build config fields to the `android.defaultConfig` block ensures they're available for all of your app's build variants. You could also, if needed, create fields with the same name but different values for each of your build variants, as shown in Android's [official docs](https://developer.android.com/build/gradle-tips#share-custom-fields-and-resource-values-with-your-app-code), to provide different values per variant.
 
-You've properly created build config fields from a properties file. To use them in code, refer to [read build config fields](#reading-build-config-fields) in code.
+You've properly created build config fields from a properties file. To use them in code, refer to [read build config fields](#eading-build-config-fields-in-code) in code.
 
-### Reading build config fields in code [reading-build-config-fields]
+### Reading build config fields in code
 
 After adding [build config fields](https://developer.android.com/build/gradle-tips#share-custom-fields-and-resource-values-with-your-app-code) in your `build.gradle.kts` file, you may now use them within your app's Kotlin/Java code, by following these steps:
 
@@ -187,19 +187,19 @@ fun myMethod() {
 
 1. There might be multiple `BuildConfig` types available to use in your code. The one that belongs to your app has a package name equal to your [app's namespace](https://developer.android.com/build/configure-app-module#set-namespace) value. So, for example, if your app's namespace is set to `com.my.app`, then the `BuildConfig` type you must use would be `com.my.app.BuildType`.
 
-## How to configure SSL/TLS? [how-ssl]
+## How to configure SSL/TLS?
 
 Note that the Elastic Agent does not handle SSL/TLS configs internally. Therefore, you should manage these types of configurations as part of your app’s network security configurations, as explained in Android’s official [security guidelines](https://developer.android.com/privacy-and-security/security-ssl). Below we show a set of common use cases and quick tips on what could be done on each one. However, each case might be different, so please refer to Android’s [official docs](https://developer.android.com/privacy-and-security/security-config) on this topic if you need more details.
 
-### Connecting to Elastic Cloud [how-ssl-elastic-cloud]
+### Connecting to Elastic Cloud
 
 If your {{stack}} is hosted in {{ecloud}}, you shouldn’t need to add any SSL/TLS config changes in your app. It should work out of the box.
 
-### Connecting to an on-prem server [how-ssl-on-prem]
+### Connecting to an on-prem server
 
 If your {{stack}} is hosted on-prem, then it depends on the type of CA your host uses to sign its certificates. If it’s a commonly trusted CA, you shouldn’t have to worry about changing your app’s SSL/TLS configuration as it all should work well out of the box. However, if your CAs are unknown/private or your server uses a self-signed certificate, then you would need to configure your app to trust custom CAs by following [Android’s guide](https://developer.android.com/privacy-and-security/security-config).
 
-### Debugging purposes [how-ssl-debug]
+### Debugging purposes
 
 If you’re running a local server and need to connect to it without using https in order to run a quick test, then you could temporarily [enable cleartext traffic](https://developer.android.com/guide/topics/manifest/application-element#usesCleartextTraffic) within your `AndroidManifest.xml` file, inside the `<application>` tag. As shown below:
 

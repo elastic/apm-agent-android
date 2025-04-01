@@ -17,7 +17,7 @@ Set up an agent in your app and explore your app's data in {{kib}}.
 
 > [!IMPORTANT]
 > If your application's [minSdk](https://developer.android.com/studio/publish/versioning#minsdk) value is lower than 26, you **must** add [Java 8 desugaring support](https://developer.android.com/studio/write/java8-support#library-desugaring).
-> Refer to the [FAQ](faq.md#why-desugaring) for more information.
+> Refer to the [FAQ](faq.md#why-is-enabling-desugaring-support-on-apps-with-minsdk-below-26-necessary) for more information.
 
 ## Gradle setup
 
@@ -44,10 +44,10 @@ val agent = ElasticApmAgent.builder(application) // <1>
     .build()
 ```
 
-1. Your [Application](https://developer.android.com/reference/android/app/Application) object. [Get your application object](how-tos.md#get-application).
-2. In OpenTelemetry, _service_ means _an entity that produces telemetry_, so this is where your application name should go. Refer to the [FAQ](faq.md#why-service) for more information.
-3. This is the Elastic endpoint where all your telemetry will be exported. [Get your Elastic endpoint](how-tos.md#get-export-endpoint).
-4. Use an API key to connect the agent to the {{stack}}. [Create an API key](how-tos.md#create-api-key).
+1. Your [Application](https://developer.android.com/reference/android/app/Application) object. [Get your application object](how-tos.md#how-to-get-my-android-application-instance).
+2. In OpenTelemetry, _service_ means _an entity that produces telemetry_, so this is where your application name should go. Refer to the [FAQ](faq.md#why-does-my-app-have-to-be-referred-to-as-service) for more information.
+3. This is the Elastic endpoint where all your telemetry will be exported. [Get your Elastic endpoint](how-tos.md#how-to-get-my-elastic-stack-export-endpoint).
+4. Use an API key to connect the agent to the {{stack}}. [Create an API key](how-tos.md#how-to-create-an-api-key).
 
 > [!TIP]
 > If you'd like to provide these values from outside of your code, using an environment variable or a properties file for example, refer to [Provide config values outside of your code](../how-tos.md#how-to-provide-config-values-from-outside-of-my-code).
@@ -91,7 +91,7 @@ After clicking on the span, you should see it in detail.
 
 ![image](images/span-visualization/3.png)
 
-## What’s next? [whats-next]
+## What’s next?
 
 - This guide uses the minimum configuration options needed to initialize the agent. If you'd like to explore what else you can customize, take a look at the [configuration page](configuration.md).
 

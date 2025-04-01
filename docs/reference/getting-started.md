@@ -5,13 +5,13 @@ mapped_pages:
 
 # Getting started
 
-Set up an agent in your app and explore your app's data in {{kib}}.
+Set up an agent in your app and explore your app's data in Kibana.
 
 ## Requirements
 
 | Requirement                                       | Minimum version                                                                                           |
 |---------------------------------------------------|-----------------------------------------------------------------------------------------------------------|
-| [{{stack}}](https://www.elastic.co/elastic-stack) | 8.18                                                                                                      |
+| [Elastic Stack](https://www.elastic.co/elastic-stack) | 8.18                                                                                                      |
 | Android Gradle plugin                             | 7.4.0                                                                                                     |
 | Android API level                                 | 26 (or 21 with [desugaring](https://developer.android.com/studio/write/java8-support#library-desugaring)) |
 
@@ -47,14 +47,14 @@ val agent = ElasticApmAgent.builder(application) // <1>
 1. Your [Application](https://developer.android.com/reference/android/app/Application) object. [Get your application object](how-tos.md#how-to-get-my-android-application-instance).
 2. In OpenTelemetry, _service_ means _an entity that produces telemetry_, so this is where your application name should go. Refer to the [FAQ](faq.md#why-does-my-app-have-to-be-referred-to-as-service) for more information.
 3. This is the Elastic endpoint where all your telemetry will be exported. [Get your Elastic endpoint](how-tos.md#how-to-get-my-elastic-stack-export-endpoint).
-4. Use an API key to connect the agent to the {{stack}}. [Create an API key](how-tos.md#how-to-create-an-api-key).
+4. Use an API key to connect the agent to the Elastic Stack. [Create an API key](how-tos.md#how-to-create-an-api-key).
 
 > [!TIP]
 > If you'd like to provide these values from outside of your code, using an environment variable or a properties file for example, refer to [Provide config values outside of your code](../how-tos.md#how-to-provide-config-values-from-outside-of-my-code).
 
 ## Hello World!
 
-The agent is fully initialized, so now you can start sending telemetry to your {{stack}}! Here's a quick example of manually creating a [span](https://opentelemetry.io/docs/concepts/signals/traces/#spans) and viewing it in {{kib}}:
+The agent is fully initialized, so now you can start sending telemetry to your Elastic Stack! Here's a quick example of manually creating a [span](https://opentelemetry.io/docs/concepts/signals/traces/#spans) and viewing it in Kibana:
 
 ### Generate telemetry
 
@@ -73,11 +73,11 @@ agent.span("My Span") {
 }
 ```
 1. This is to simulate some code execution for which we want to measure the time it takes to complete.
-2. This is to demonstrate what span hierarchies look like in {{kib}}.
+2. This is to demonstrate what span hierarchies look like in Kibana.
 
 ### Visualize telemetry
 
-Once your app has sent telemetry data, either [manually](manual-instrumentation.md) or [automatically](automatic-instrumentation.md), view it in {{kib}} by navigating to **Applications** → **Service Inventory** in the main menu, or alternatively, searching for "Service Inventory" in the [global search field](https://www.elastic.co/guide/en/kibana/current/introduction.html#kibana-navigation-search).
+Once your app has sent telemetry data, either [manually](manual-instrumentation.md) or [automatically](automatic-instrumentation.md), view it in Kibana by navigating to **Applications** → **Service Inventory** in the main menu, or alternatively, searching for "Service Inventory" in the [global search field](https://www.elastic.co/guide/en/kibana/current/introduction.html#kibana-navigation-search).
 
 You should find your application listed there.
 

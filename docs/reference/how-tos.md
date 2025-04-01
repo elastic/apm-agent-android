@@ -45,11 +45,11 @@ From a [Fragment](https://developer.android.com/reference/androidx/fragment/app/
 
 ## How to get my Elastic Stack export endpoint
 
-The export endpoint is where your app's telemetry is sent, so it's required to initialize the agent. The way to find it in your {{stack}} will depend on the type of deployment you use, as explained below.
+The export endpoint is where your app's telemetry is sent, so it's required to initialize the agent. The way to find it in your Elastic Stack will depend on the type of deployment you use, as explained below.
 
 ### For Serverless deployments
 
-On a [Serverless deployment](https://www.elastic.co/guide/en/serverless/current/intro.html), open {{kib}} and find **Add data** in the main menu. Alternatively, you can use the [global search field](https://www.elastic.co/guide/en/kibana/current/introduction.html#kibana-navigation-search) and search for "Observability Onboarding".
+On a [Serverless deployment](https://www.elastic.co/guide/en/serverless/current/intro.html), open Kibana and find **Add data** in the main menu. Alternatively, you can use the [global search field](https://www.elastic.co/guide/en/kibana/current/introduction.html#kibana-navigation-search) and search for "Observability Onboarding".
 
 Then select **Application**, as shown below:
 
@@ -73,9 +73,9 @@ For [Cloud Hosted](https://www.elastic.co/guide/en/cloud/current/ec-getting-star
 
 ## How to create an API Key
 
-API Keys are the recommended way of authenticating the agent with your {{stack}}. There's a couple of ways you can create one:
+API Keys are the recommended way of authenticating the agent with your Elastic Stack. There's a couple of ways you can create one:
 
-### Use {{kib}}'s Applications UI
+### Use Kibana's Applications UI
 
 This is the most straightforward approach. Follow [this quick guide](https://www.elastic.co/guide/en/observability/current/apm-api-key.html#apm-create-an-api-key) and leave all the settings with their default values.
 
@@ -193,11 +193,11 @@ Note that the Elastic Agent does not handle SSL/TLS configs internally. Therefor
 
 ### Connecting to Elastic Cloud
 
-If your {{stack}} is hosted in {{ecloud}}, you shouldn’t need to add any SSL/TLS config changes in your app. It should work out of the box.
+If your Elastic Stack is hosted in Elastic Cloud, you shouldn’t need to add any SSL/TLS config changes in your app. It should work out of the box.
 
 ### Connecting to an on-prem server
 
-If your {{stack}} is hosted on-prem, then it depends on the type of CA your host uses to sign its certificates. If it’s a commonly trusted CA, you shouldn’t have to worry about changing your app’s SSL/TLS configuration as it all should work well out of the box. However, if your CAs are unknown/private or your server uses a self-signed certificate, then you would need to configure your app to trust custom CAs by following [Android’s guide](https://developer.android.com/privacy-and-security/security-config).
+If your Elastic Stack is hosted on-prem, then it depends on the type of CA your host uses to sign its certificates. If it’s a commonly trusted CA, you shouldn’t have to worry about changing your app’s SSL/TLS configuration as it all should work well out of the box. However, if your CAs are unknown/private or your server uses a self-signed certificate, then you would need to configure your app to trust custom CAs by following [Android’s guide](https://developer.android.com/privacy-and-security/security-config).
 
 ### Debugging purposes
 

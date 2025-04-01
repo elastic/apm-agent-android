@@ -32,9 +32,9 @@ class MyApp : android.app.Application {
 }
 ```
 
-1. This will be the name used by {{kib}} when listing your application on the [Services](https://www.elastic.co/guide/en/observability/current/apm-services.html) page. Defaults to `unknown`. See [why your app is referred to as a "service"](faq.md#why-does-my-app-have-to-be-referred-to-as-service).
+1. This will be the name used by Kibana when listing your application on the [Services](https://www.elastic.co/guide/en/observability/current/apm-services.html) page. Defaults to `unknown`. See [why your app is referred to as a "service"](faq.md#why-does-my-app-have-to-be-referred-to-as-service).
 2. Your app's version name. Defaults to the version provided [here](https://developer.android.com/reference/android/content/pm/PackageInfo#versionName).
-3. Typically your app's build type, flavor, backend environment, or maybe a combination of these. Any helpful distinction for you to better analyze your app's data later in {{kib}}.
+3. Typically your app's build type, flavor, backend environment, or maybe a combination of these. Any helpful distinction for you to better analyze your app's data later in Kibana.
 
 ### Export connectivity
 
@@ -101,7 +101,7 @@ class MyApp : android.app.Application {
 
 ### Intercepting resources
 
-The agent creates a [resource](https://opentelemetry.io/docs/specs/otel/overview/#resources) for your signals, which is essentially a set of static global attributes. These attributes help {{kib}} properly display your application's data.
+The agent creates a [resource](https://opentelemetry.io/docs/specs/otel/overview/#resources) for your signals, which is essentially a set of static global attributes. These attributes help Kibana properly display your application's data.
 
 You can intercept these resources and read/modify them as shown below.
 

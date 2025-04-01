@@ -39,7 +39,7 @@ spotless-plugin = "com.diffplug.spotless:spotless-plugin-gradle:7.0.2"
 dokka = "org.jetbrains.dokka:dokka-gradle-plugin:1.9.20"
 nexus-publish-plugin = "io.github.gradle-nexus:publish-plugin:2.0.0"
 gradle-publish-plugin = "com.gradle.publish:plugin-publish-plugin:1.3.1"
-gradle-shadow-plugin = "gradle.plugin.com.github.johnrengelman:shadow:7.1.2"
+gradle-shadow-plugin = "gradle.plugin.com.github.johnrengelman:shadow:8.0.0"
 byteBuddy-plugin = { module = "net.bytebuddy:byte-buddy-gradle-plugin", version.ref = "byteBuddy" }
 kotlin-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 autoService-annotations = { module = "com.google.auto.service:auto-service-annotations", version.ref = "autoService" }

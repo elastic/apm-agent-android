@@ -1,3 +1,4 @@
+[[intro]]
 == Introduction
 
 The Elastic OTel Android Agent is an
@@ -10,6 +11,7 @@ leveraging the combined forces of
 https://www.elastic.co/elasticsearch[Elasticsearch] and
 https://www.elastic.co/kibana[Kibana] for your Android application.
 
+[discrete]
 === What can I do with it?
 
 All the features provided by the
@@ -18,6 +20,7 @@ are available for you to use and are pre-configured by the agent to work
 properly out of the box. This enables you to fulfill various use cases
 to better understand your app's performance, such as:
 
+[discrete]
 ==== Distributed tracing
 
 Distributed tracing allows you to see the full picture of *how long your
@@ -46,6 +49,7 @@ For distributed tracing to work properly, your backend services must be
 configured to send telemetry to the Elastic Stack as well.
 ====
 
+[discrete]
 ==== Session review
 
 The agent attaches link:#session[session] information to each span and
@@ -66,6 +70,7 @@ https://www.elastic.co/guide/en/kibana/current/discover.html[Discover
 tool], to list all events during that session and better understand a
 user's journey within your application.
 
+[discrete]
 ==== More
 
 Since the agent not only configures the
@@ -81,11 +86,13 @@ is recorded)
 custom dashboards] to display your data the way you need to see it
 * https://www.elastic.co/kibana/features[Much more]
 
+[discrete]
 === Features
 
 The agent offers additional features on top of those that come with the
 https://opentelemetry.io/docs/languages/java/[OpenTelemetry SDK].
 
+[discrete]
 ==== Disk buffering
 
 Your application's telemetry data is stored locally before being sent to
@@ -93,6 +100,7 @@ the Elastic Stack. Then it is removed either after being successfully
 exported or to make room for new telemetry data if needed. This
 minimizes the risk of data loss due to internet connectivity issues.
 
+[discrete]
 ==== Real time
 
 For link:#distributed-tracing[distributed tracing] to work properly,
@@ -103,6 +111,7 @@ the time provided by the OS is often not accurate enough. The agent aims
 to synchronize telemetry timestamps with the universal time to ensure a
 reliable view of event timelines.
 
+[discrete]
 ==== Session
 
 A session groups telemetry data within a time frame when your
@@ -119,11 +128,13 @@ previous one has expired. Sessions expire after 30 minutes of inactivity
 which can be extended up to 4 hours in case that there's always
 telemetry data getting generated during that time.
 
+[discrete]
 ==== Dynamic configuration
 
 The agent allows you to modify some values after the initialization has
 finished. More info on the link:configuration.asciidoc[configuration] page.
 
+[discrete]
 ==== Automatic instrumentation
 
 The agent provides extensions that automatically generate telemetry for

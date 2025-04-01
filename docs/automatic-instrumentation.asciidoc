@@ -1,3 +1,4 @@
+[[automatic-instrumentation]]
 == Automatic instrumentation
 
 The agent has an opt-in functionality that automatically generates
@@ -5,8 +6,10 @@ telemetry on your behalf. This allows you to get telemetry data for
 supported targets without having to write
 link:manual-instrumentation.asciidoc[manual instrumentation].
 
+[discrete]
 === How it works
 
+[discrete]
 ==== Installation
 
 Install the automatic instrumentations you'd like to use.
@@ -24,6 +27,7 @@ you would without using automatic instrumentation. Automatic
 instrumentations will get installed during the agent initialization
 without having to write extra code.
 
+[discrete]
 ==== Compilation behavior
 
 Some automatic instrumentations perform "byte code instrumentation"
@@ -42,6 +46,7 @@ from byte code changes, similar to what
 https://developer.android.com/build/shrink-code#enable[isMinifyEnabled]
 does with R8 functionalities.
 
+[discrete]
 ==== Configuration
 
 For some large projects (including dependencies), you can avoid the
@@ -79,8 +84,10 @@ issues to your app's functionality in general, it will only affect the
 agent's ability to automatically collect telemetry.
 ====
 
+[discrete]
 === Supported instrumentations
 
+[discrete]
 ==== OkHttp
 
 Creates spans for outgoing HTTP requests that are made using the
@@ -88,6 +95,7 @@ https://square.github.io/okhttp/[OkHttp] library. This also includes
 tools that rely on OkHttp to work, such as
 https://square.github.io/retrofit/[Retrofit].
 
+[discrete]
 ===== Gradle plugin
 
 [source,kotlin]

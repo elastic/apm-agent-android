@@ -1,3 +1,4 @@
+[[manual-instrumentation]]
 == Manual instrumentation
 
 You can create your custom spans, metrics, and logs, via the
@@ -9,6 +10,7 @@ Alternatively, for common operations, you might be able to take
 advantage of the link:#convenience-extensions[convenience agent
 extensions] to create telemetry in a less verbose way.
 
+[discrete]
 === OpenTelemetry APIs
 
 After completing the link:/reference/getting-started.asciidoc[setup] process,
@@ -48,6 +50,7 @@ create *metrics*].
 * https://opentelemetry.io/docs/languages/java/api/#logger[Manually
 create *logs*].
 
+[discrete]
 === Convenience extensions
 
 For common use cases, in regards to spans and logs creation, the agent
@@ -62,6 +65,7 @@ telemetry. So they are not the only way to create the following signals,
 they are only making them more straightforward to create.
 ====
 
+[discrete]
 ==== Spans
 
 [source,kotlin]
@@ -83,6 +87,7 @@ custom `attributes`) that you can provide if needed. Take a look at the
 https://github.com/elastic/apm-agent-android/blob/main/agent-sdk/src/main/java/co/elastic/otel/android/extensions/ElasticOtelAgentExtensions.kt[method
 definition] to find out more.
 
+[discrete]
 ==== Logs
 
 [source,kotlin]

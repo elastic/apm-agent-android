@@ -1,3 +1,4 @@
+[[configuration]]
 == Configuration
 
 This page includes a comprehensive list of all the configurable
@@ -7,12 +8,14 @@ initialization and those you can adjust dynamically afterward.
 *Just getting started?* Start with link:getting-started.asciidoc[Getting
 started].
 
+[discrete]
 === Initialization configuration
 
 Available from the Elastic agent builder shown in
 link:getting-started.asciidoc#agent-setup[Agent setup], the following are its
 available parameters.
 
+[discrete]
 ==== Application info
 
 Providing your application name, version, and environment:
@@ -46,6 +49,7 @@ https://developer.android.com/reference/android/content/pm/PackageInfo#versionNa
 a combination of these. Any helpful distinction for you to better
 analyze your app's data later in Kibana.
 
+[discrete]
 ==== Export connectivity
 
 Configuring where your app's telemetry will be exported.
@@ -88,6 +92,7 @@ link:how-tos.asciidoc#how-to-provide-config-values-from-outside-of-my-code[Provi
 config values outside of your code].
 ====
 
+[discrete]
 ==== Intercepting export request headers
 
 You can provide an interceptor for the signals' export request headers,
@@ -107,6 +112,7 @@ class MyApp : android.app.Application {
 }
 ----
 
+[discrete]
 ==== Intercepting attributes
 
 You can provide global interceptors for all spans and logs
@@ -133,6 +139,7 @@ class MyApp : android.app.Application {
 }
 ----
 
+[discrete]
 ==== Intercepting resources
 
 The agent creates a
@@ -165,6 +172,7 @@ class MyApp : android.app.Application {
 }
 ----
 
+[discrete]
 ==== Intercepting exporters
 
 The agent configures exporters for each signal
@@ -195,6 +203,7 @@ class MyApp : android.app.Application {
 }
 ----
 
+[discrete]
 ==== Intercepting HTTP spans
 
 This is a convenience tool to intercept HTTP-related spans. By default,
@@ -220,6 +229,7 @@ class MyApp : android.app.Application {
 }
 ----
 
+[discrete]
 ==== Providing processors
 
 Part of the work that the agent does when configuring the
@@ -257,6 +267,7 @@ class MyApp : android.app.Application {
 }
 ----
 
+[discrete]
 ==== Internal logging policy
 
 [NOTE]
@@ -296,11 +307,13 @@ class MyApp : android.app.Application {
 }
 ----
 
+[discrete]
 === Dynamic configuration
 
 These are available from an already built
 https://github.com/elastic/apm-agent-android/blob/main/agent-sdk/src/main/java/co/elastic/otel/android/ElasticApmAgent.kt[agent].
 
+[discrete]
 ==== Update export connectivity
 
 You can change any of the configuration values provided as part of the

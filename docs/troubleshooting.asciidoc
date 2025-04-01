@@ -1,5 +1,7 @@
+[[troubleshooting]]
 == Troubleshooting
 
+[discrete]
 === General
 
 The agent creates logs that enable you to see what it is working on and
@@ -12,6 +14,7 @@ configure them, refer to the
 link:configuration.asciidoc#internal-logging-policy[internal logging policy]
 configuration.
 
+[discrete]
 === Connectivity to the Elastic Stack
 
 If after following the link:getting-started.asciidoc[getting started] guide
@@ -20,6 +23,7 @@ link:configuration.asciidoc#export-connectivity[endpoint parameters], you
 can't see your application's data in Kibana, you can follow the
 following tips to try and figure out what could be wrong.
 
+[discrete]
 ==== Checking out logs
 
 The agent prints debug logs, which can be seen in
@@ -30,6 +34,7 @@ connectivity with config ++[++your endpoint configuration++]++"_. Take a
 look at those and make sure that the provided configuration matches your
 Elastic Stack endpoint parameters.
 
+[discrete]
 ==== Inspecting network traffic
 
 You can take a look at your app's outgoing network requests via Android
@@ -42,6 +47,7 @@ of the whole process. Apart from that, this tool also provides a way to
 export a file with the information of all of your app's HTTP requests,
 which you could share with our support team if needed.
 
+[discrete]
 ==== SSL/TLS error
 
 Sometimes the request to the Elastic Stack endpoint won't show up in the

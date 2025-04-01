@@ -1,8 +1,10 @@
+[[setup]]
 == Getting started
 
 Set up an agent in your app and explore your app's data in Kibana.
 
-=== Requirements
+[discrete]
+== Requirements
 
 [cols=",",options="header",]
 |===
@@ -26,7 +28,8 @@ link:faq.asciidoc#why-is-enabling-desugaring-support-on-apps-with-minsdk-below-2
 for more information.
 ====
 
-=== Gradle setup
+[discrete]
+== Gradle setup
 
 Add the
 https://plugins.gradle.org/plugin/co.elastic.otel.android.agent[Elastic
@@ -45,7 +48,8 @@ plugins {
 . You can find the latest version
 https://plugins.gradle.org/plugin/co.elastic.otel.android.agent[here].
 
-=== Agent setup
+[discrete]
+== Agent setup
 
 After Gradle setup is done, initialize the agent within your app's code:
 
@@ -82,14 +86,16 @@ link:how-tos.asciidoc#how-to-provide-config-values-from-outside-of-my-code[Provi
 config values outside of your code].
 ====
 
-=== Hello World!
+[discrete]
+== Hello World!
 
 The agent is fully initialized, so now you can start sending telemetry
 to your Elastic Stack! Here's a quick example of manually creating a
 https://opentelemetry.io/docs/concepts/signals/traces/#spans[span] and
 viewing it in Kibana:
 
-==== Generate telemetry
+[discrete]
+=== Generate telemetry
 
 [source,kotlin]
 ----
@@ -112,7 +118,8 @@ agent.span("My Span") {
 the time it takes to complete.
 . This is to demonstrate what span hierarchies look like in Kibana.
 
-==== Visualize telemetry
+[discrete]
+=== Visualize telemetry
 
 Once your app has sent telemetry data, either
 link:manual-instrumentation.asciidoc[manually] or
@@ -135,7 +142,8 @@ After clicking on the span, you should see it in detail.
 
 image:images/span-visualization/3.png[image]
 
-=== What’s next?
+[discrete]
+== What’s next?
 
 * This guide uses the minimum configuration options needed to initialize
 the agent. If you'd like to explore what else you can customize, take a

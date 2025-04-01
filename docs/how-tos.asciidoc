@@ -1,5 +1,7 @@
+[[how-tos]]
 == How-tos
 
+[discrete]
 === How to get my Android application instance
 
 Your
@@ -7,6 +9,7 @@ https://developer.android.com/reference/android/app/Application[Application]
 instance is needed to initialize the agent. There are a couple of ways
 you can get yours:
 
+[discrete]
 ==== From within your custom Application implementation (recommended)
 
 Ideally, the agent should get initialized as soon as your application is
@@ -52,6 +55,7 @@ For it to work, you *must* register your custom application in your
 </manifest>
 ----
 
+[discrete]
 ==== From an Activity
 
 You can get your application from an
@@ -60,6 +64,7 @@ by calling its
 https://developer.android.com/reference/android/app/Activity#getApplication()[getApplication()]
 method.
 
+[discrete]
 ==== From a Fragment
 
 From a
@@ -71,12 +76,14 @@ https://developer.android.com/reference/androidx/fragment/app/Fragment.html#requ
 method. Once you get the Activity object, you can get your application
 from it as link:#from-an-activity[explained above].
 
+[discrete]
 === How to get my Elastic Stack export endpoint
 
 The export endpoint is where your app's telemetry is sent, so it's
 required to initialize the agent. The way to find it in your Elastic
 Stack will depend on the type of deployment you use, as explained below.
 
+[discrete]
 ==== For Serverless deployments
 
 On a
@@ -104,6 +111,7 @@ Your export endpoint URL is the value for the
 
 image:images/find-export-endpoint/4.png[image]
 
+[discrete]
 ==== For Cloud Hosted and self-managed deployments
 
 For
@@ -117,17 +125,20 @@ create your own service by following
 https://elastic.github.io/opentelemetry/edot-collector/config/default-config-standalone.html[creating
 and configuring a standalone EDOT Collector].
 
+[discrete]
 === How to create an API Key
 
 API Keys are the recommended way of authenticating the agent with your
 Elastic Stack. There's a couple of ways you can create one:
 
+[discrete]
 ==== Use Kibana's Applications UI
 
 This is the most straightforward approach. Follow
 https://www.elastic.co/guide/en/observability/current/apm-api-key.html#apm-create-an-api-key[this
 quick guide] and leave all the settings with their default values.
 
+[discrete]
 ==== Use REST APIs
 
 Follow
@@ -135,6 +146,7 @@ https://www.elastic.co/guide/en/observability/current/apm-agent-key-api.html#apm
 guide] to create an API Key with a set of privileges that are scoped for
 the APM Agent use case only.
 
+[discrete]
 === How to provide config values from outside of my code?
 
 You many want to get values such as an endpoint URL or API Key/Secret
@@ -148,6 +160,7 @@ Kotlin/Java code. Since Gradle has access to your project directory and
 to the compilation's host environment, you can share a lot with it from
 your code. The following are some possible use cases.
 
+[discrete]
 ==== Providing data from an environment variable
 
 [source,kotlin]
@@ -191,6 +204,7 @@ To use them in code, take a look at how to
 link:#reading-build-config-fields-in-code[read build config fields] in
 code.
 
+[discrete]
 ==== Providing data from a properties file
 
 https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html[Properties]
@@ -257,6 +271,7 @@ use them in code, refer to
 link:#reading-build-config-fields-in-code[read build config fields] in
 code.
 
+[discrete]
 ==== Reading build config fields in code
 
 After adding
@@ -293,6 +308,7 @@ namespace] value. So, for example, if your app's namespace is set to
 `com.my.app`, then the `BuildConfig` type you must use would be
 `com.my.app.BuildType`.
 
+[discrete]
 === How to configure SSL/TLS?
 
 Note that the Elastic Agent does not handle SSL/TLS configs internally.
@@ -306,12 +322,14 @@ so please refer to Android’s
 https://developer.android.com/privacy-and-security/security-config[official
 docs] on this topic if you need more details.
 
+[discrete]
 ==== Connecting to Elastic Cloud
 
 If your Elastic Stack is hosted in Elastic Cloud, you shouldn’t need to
 add any SSL/TLS config changes in your app. It should work out of the
 box.
 
+[discrete]
 ==== Connecting to an on-prem server
 
 If your Elastic Stack is hosted on-prem, then it depends on the type of
@@ -324,6 +342,7 @@ CAs by following
 https://developer.android.com/privacy-and-security/security-config[Android’s
 guide].
 
+[discrete]
 ==== Debugging purposes
 
 If you’re running a local server and need to connect to it without using

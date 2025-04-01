@@ -34,7 +34,6 @@ import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.time.SystemTimeProvider
 import co.elastic.otel.android.internal.time.ntp.SntpClient
 import co.elastic.otel.android.processors.ProcessorFactory
-import co.elastic.otel.android.provider.StringProvider
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.sdk.common.CompletableResultCode
@@ -176,10 +175,6 @@ class ManagedElasticOtelAgent private constructor(
 
         fun setDeploymentEnvironment(value: String) = apply {
             elasticOpenTelemetryBuilder.setDeploymentEnvironment(value)
-        }
-
-        fun setDeviceIdProvider(value: StringProvider) = apply {
-            elasticOpenTelemetryBuilder.setDeviceIdProvider(value)
         }
 
         fun setResourceInterceptor(value: Interceptor<Resource>) = apply {

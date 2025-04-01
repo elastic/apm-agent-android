@@ -18,24 +18,70 @@
  */
 package co.elastic.otel.android.internal.connectivity
 
-import co.elastic.otel.android.connectivity.ExportConnectivityConfiguration
+import co.elastic.otel.android.common.internal.logging.Elog
+import co.elastic.otel.android.connectivity.ExportEndpointConfiguration
+import co.elastic.otel.android.exporters.configuration.ExportProtocol
+import co.elastic.otel.android.interceptor.Interceptor
+import co.elastic.otel.android.internal.opentelemetry.SignalType
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-internal class ExportConnectivityManager internal constructor(
-    private val connectivityConfigurationHolder: ConnectivityHolder
+internal class ExportConnectivityManager private constructor(
+    private val spansConnectivityHolder: ConnectivityHolder,
+    private val logsConnectivityHolder: ConnectivityHolder,
+    private val metricsConnectivityHolder: ConnectivityHolder,
+    private val defaultHeadersInterceptor: Interceptor<Map<String, String>>
 ) {
-    fun setConnectivityConfiguration(configuration: ExportConnectivityConfiguration) {
-        connectivityConfigurationHolder.setConnectivityConfiguration(configuration)
+
+    fun setEndpointConfiguration(configuration: ExportEndpointConfiguration) {
+        Elog.getLogger().debug("Updating endpoint configuration: {}", configuration)
+        spansConnectivityHolder.setConnectivityConfiguration(
+            createSpansExportConnectivityConfiguration(configuration, defaultHeadersInterceptor)
+        )
+        logsConnectivityHolder.setConnectivityConfiguration(
+            createLogsExportConnectivityConfiguration(configuration, defaultHeadersInterceptor)
+        )
+        metricsConnectivityHolder.setConnectivityConfiguration(
+            createMetricsExportConnectivityConfiguration(configuration, defaultHeadersInterceptor)
+        )
     }
 
-    fun getConnectivityConfiguration(): ExportConnectivityConfiguration {
-        return connectivityConfigurationHolder.getConnectivityConfiguration()
+    fun getSpansConnectivityConfiguration(): ExportConnectivityConfiguration {
+        return spansConnectivityHolder.getConnectivityConfiguration()
     }
 
-    internal class ConnectivityHolder(initialValue: ExportConnectivityConfiguration) :
+    fun getLogsConnectivityConfiguration(): ExportConnectivityConfiguration {
+        return logsConnectivityHolder.getConnectivityConfiguration()
+    }
+
+    fun getMetricsConnectivityConfiguration(): ExportConnectivityConfiguration {
+        return metricsConnectivityHolder.getConnectivityConfiguration()
+    }
+
+    fun addChangeListener(listener: SignalConnectivityChangeListener) {
+        spansConnectivityHolder.addListener(
+            SignalConnectivityListenerAdapter(
+                SignalType.TRACE,
+                listener
+            )
+        )
+        logsConnectivityHolder.addListener(
+            SignalConnectivityListenerAdapter(
+                SignalType.LOG,
+                listener
+            )
+        )
+        metricsConnectivityHolder.addListener(
+            SignalConnectivityListenerAdapter(
+                SignalType.METRIC,
+                listener
+            )
+        )
+    }
+
+    private class ConnectivityHolder(initialValue: ExportConnectivityConfiguration) :
         ConnectivityConfigurationHolder(initialValue) {
 
         fun setConnectivityConfiguration(value: ExportConnectivityConfiguration) {
@@ -44,6 +90,114 @@ internal class ExportConnectivityManager internal constructor(
 
         fun getConnectivityConfiguration(): ExportConnectivityConfiguration {
             return get() as ExportConnectivityConfiguration
+        }
+    }
+
+    private class SignalConnectivityListenerAdapter(
+        private val signalType: SignalType,
+        private val listener: SignalConnectivityChangeListener
+    ) : ConnectivityConfigurationHolder.Listener {
+
+        override fun onConnectivityConfigurationChange() {
+            listener.onConnectivityConfigurationChange(signalType)
+        }
+    }
+
+    companion object {
+        fun create(
+            configuration: ExportEndpointConfiguration,
+            headersInterceptor: Interceptor<Map<String, String>>
+        ): ExportConnectivityManager {
+            Elog.getLogger().debug(
+                "Initializing connectivity with config {} and interceptor {}",
+                configuration,
+                headersInterceptor
+            )
+            return ExportConnectivityManager(
+                ConnectivityHolder(
+                    createSpansExportConnectivityConfiguration(
+                        configuration,
+                        headersInterceptor
+                    )
+                ),
+                ConnectivityHolder(
+                    createLogsExportConnectivityConfiguration(
+                        configuration,
+                        headersInterceptor
+                    )
+                ),
+                ConnectivityHolder(
+                    createMetricsExportConnectivityConfiguration(
+                        configuration,
+                        headersInterceptor
+                    )
+                ),
+                headersInterceptor
+            )
+        }
+
+        private fun createMetricsExportConnectivityConfiguration(
+            configuration: ExportEndpointConfiguration,
+            headersInterceptor: Interceptor<Map<String, String>>
+        ): ExportConnectivityConfiguration {
+            return ExportConnectivityConfiguration(
+                getMetricsUrl(configuration.url, configuration.protocol),
+                configuration.authentication,
+                configuration.protocol,
+                headersInterceptor
+            )
+        }
+
+        private fun createLogsExportConnectivityConfiguration(
+            configuration: ExportEndpointConfiguration,
+            headersInterceptor: Interceptor<Map<String, String>>
+        ): ExportConnectivityConfiguration {
+            return ExportConnectivityConfiguration(
+                getLogsUrl(configuration.url, configuration.protocol),
+                configuration.authentication,
+                configuration.protocol,
+                headersInterceptor
+            )
+        }
+
+        private fun createSpansExportConnectivityConfiguration(
+            configuration: ExportEndpointConfiguration,
+            headersInterceptor: Interceptor<Map<String, String>>
+        ): ExportConnectivityConfiguration {
+            return ExportConnectivityConfiguration(
+                getTracesUrl(configuration.url, configuration.protocol),
+                configuration.authentication,
+                configuration.protocol,
+                headersInterceptor
+            )
+        }
+
+        private fun getTracesUrl(url: String, protocol: ExportProtocol): String {
+            return getSignalUrl(url, "traces", protocol)
+        }
+
+        private fun getLogsUrl(url: String, protocol: ExportProtocol): String {
+            return getSignalUrl(url, "logs", protocol)
+        }
+
+        private fun getMetricsUrl(url: String, protocol: ExportProtocol): String {
+            return getSignalUrl(url, "metrics", protocol)
+        }
+
+        private fun getSignalUrl(
+            url: String,
+            signalId: String,
+            exportProtocol: ExportProtocol
+        ): String {
+            val baseUrl by lazy { url.trimEnd('/') }
+            return when (exportProtocol) {
+                ExportProtocol.GRPC -> baseUrl
+                ExportProtocol.HTTP -> getHttpUrl(baseUrl, signalId)
+            }
+        }
+
+        private fun getHttpUrl(url: String, signalId: String): String {
+            return String.format("%s/v1/%s", url, signalId)
         }
     }
 }

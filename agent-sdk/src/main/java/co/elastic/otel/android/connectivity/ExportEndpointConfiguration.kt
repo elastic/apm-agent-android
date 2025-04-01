@@ -16,6 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.provider
+package co.elastic.otel.android.connectivity
 
-fun interface StringProvider : Provider<String>
+import co.elastic.otel.android.exporters.configuration.ExportProtocol
+
+data class ExportEndpointConfiguration(
+    val url: String,
+    val authentication: Authentication,
+    val protocol: ExportProtocol
+)

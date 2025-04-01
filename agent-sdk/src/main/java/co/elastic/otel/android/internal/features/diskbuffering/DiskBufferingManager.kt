@@ -64,8 +64,14 @@ internal class DiskBufferingManager private constructor(
     private val logger = Elog.getLogger()
 
     private fun exportFromDisk() {
-        val exported = signalFromDiskExporter?.exportBatchOfEach()
-        logger.debug("Signals exported from disk: {}", exported)
+        logger.debug("About to start exporting from disk")
+        signalFromDiskExporter?.let {
+            var exportedTimes = 0
+            while (it.exportBatchOfEach()) {
+                exportedTimes++
+            }
+            logger.debug("Times signals exported from disk: {}", exportedTimes)
+        } ?: logger.debug("Signal from disk exporter is null")
     }
 
     internal fun close() {
@@ -105,6 +111,7 @@ internal class DiskBufferingManager private constructor(
     }
 
     internal fun initialize() {
+        logger.debug("Initializing disk buffering with configuration: {}", configuration)
         if (configuration.enabled) {
             doInitialize()
         } else {

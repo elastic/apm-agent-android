@@ -16,8 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.provider
+package co.elastic.otel.android.internal.connectivity
 
-fun interface Provider<T> {
-    fun get(): T
+import co.elastic.otel.android.internal.opentelemetry.SignalType
+
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
+internal interface SignalConnectivityChangeListener {
+    fun onConnectivityConfigurationChange(signalType: SignalType)
 }

@@ -16,14 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.internal.features.conditionaldrop
+package co.elastic.otel.android.internal.connectivity
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-internal enum class SignalType {
-    SPAN,
-    METRIC,
-    LOG
+interface ConnectivityConfiguration {
+    fun getUrl(): String
+
+    fun getHeaders(): Map<String, String>
 }

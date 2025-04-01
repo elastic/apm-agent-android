@@ -1,39 +1,103 @@
-[[manual-instrumentation]]
-== Manual Instrumentation
+== Manual instrumentation
 
-preview::[]
+You can create your custom spans, metrics, and logs, via the
+https://opentelemetry.io/docs/languages/java/api/#opentelemetry-api[OpenTelemetry
+SDK APIs], which you can find in the
+https://www.javadoc.io/doc/io.opentelemetry/opentelemetry-api/latest/io/opentelemetry/api/OpenTelemetry.html[OpenTelemetry]
+object provided by the agent via its `getOpenTelemetry()` method.
+Alternatively, for common operations, you might be able to take
+advantage of the link:#convenience-extensions[convenience agent
+extensions] to create telemetry in a less verbose way.
 
-The Elastic APM Android Agent automatically instruments <<supported-technologies>>, creating spans for interesting events for each case, and some of those automated spans can be <<configuration,configured>> to better suit different app's needs.
-However, if you need to create your own, custom spans, metrics and logs, you can do so by accessing the https://opentelemetry.io/docs/instrumentation/java/manual/[OpenTelemetry Java SDK APIs] that this agent is built on top.
+=== OpenTelemetry APIs
 
-[float]
-[[opentelemetry-entrypoint]]
-=== OpenTelemetry Entrypoint
+After completing the link:/reference/getting-started.asciidoc[setup] process,
+the agent will have configured an
+https://www.javadoc.io/doc/io.opentelemetry/opentelemetry-api/latest/io/opentelemetry/api/OpenTelemetry.html[OpenTelemetry]
+object for you, which is available via its `getOpenTelemetry()` method.
+Here's an example of how to create telemetry with it.
 
-After completing the <<setup,setup>> process, the Agent will have configured the OpenTelemetry entrypoint for you and made it globally accessible.
-In order to access to the configured OpenTelemetry instance you need to use the `GlobalOpenTelemetry` class as shown below.
-
-[source,java]
+[source,kotlin]
 ----
-class MyClass {
+fun myMethod() {
+    val agent: ElasticApmAgent
 
-    // Example of how to obtain an OpenTelemetry tracer, meter, and logger to create custom Spans, Metrics and Logs.
-    public void myMethod() {
-        // Span example
-        Tracer tracer = GlobalOpenTelemetry.getTracer("my-tracer-scope-name");
-        Span span = tracer.spanBuilder("spanName").startSpan();
-        //...
-        span.end();
+    // Span example
+    val tracer = agent.getOpenTelemetry().getTracer("my-tracer-scope")
+    val span = tracer.spanBuilder("spanName").startSpan()
+    // ...
+    span.end()
 
-        // Metric example
-        LongCounter counter = GlobalOpenTelemetry.meterBuilder("meterScope").build().counterBuilder("myCounter").build();
-        counter.add(1);
+    // Metric example
+    val counter = agent.getOpenTelemetry().meterBuilder("meterScope").build().counterBuilder("myCounter").build()
+    counter.add(1)
 
-        // Logs example
-        Logger logger = GlobalOpenTelemetry.get().getLogsBridge().get("logScope");
-        logger.logRecordBuilder().setBody("Log body").emit();
+    // Logs example
+    val logger = agent.getOpenTelemetry().logsBridge["logScope"]
+    logger.logRecordBuilder().setBody("Log body").emit()
+}
+----
+
+For more details on creating signals using the OpenTelemetry APIs, refer
+to the following pages:
+
+* https://opentelemetry.io/docs/languages/java/api/#span[Manually create
+*spans*].
+* https://opentelemetry.io/docs/languages/java/api/#meter[Manually
+create *metrics*].
+* https://opentelemetry.io/docs/languages/java/api/#logger[Manually
+create *logs*].
+
+=== Convenience extensions
+
+For common use cases, in regards to spans and logs creation, the agent
+provides a couple of Kotlin extension methods to allow you to create
+telemetry in a less verbose way.
+
+[NOTE]
+====
+The convenience methods make use of the same
+link:#opentelemetry-apis[OpenTelemetry APIs] internally to create
+telemetry. So they are not the only way to create the following signals,
+they are only making them more straightforward to create.
+====
+
+==== Spans
+
+[source,kotlin]
+----
+
+fun myMethod() {
+    val agent: ElasticApmAgent
+
+    agent.span("spanName") { // <1>
+        // The span body.
     }
 }
 ----
 
-You can find more details on how to create and customize all kinds of https://opentelemetry.io/docs/concepts/signals/[signals] by following https://opentelemetry.io/docs/languages/java/instrumentation/[OpenTelemetry's Java SDK guide] on manually creating signals.
+[arabic]
+. The span name and its body are the only mandatory parameters from this
+method. However, there are other optional parameters (such as one to set
+custom `attributes`) that you can provide if needed. Take a look at the
+https://github.com/elastic/apm-agent-android/blob/main/agent-sdk/src/main/java/co/elastic/otel/android/extensions/ElasticOtelAgentExtensions.kt[method
+definition] to find out more.
+
+==== Logs
+
+[source,kotlin]
+----
+
+fun myMethod() {
+    val agent: ElasticApmAgent
+
+    agent.log("My log body") // <1>
+}
+----
+
+[arabic]
+. The log record body is the only mandatory parameter from this method.
+However, there are other optional parameters (such as one to set custom
+`attributes`), that you can provide if needed. Take a look at the
+https://github.com/elastic/apm-agent-android/blob/main/agent-sdk/src/main/java/co/elastic/otel/android/extensions/ElasticOtelAgentExtensions.kt[method
+definition] to find out more.

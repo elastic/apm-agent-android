@@ -1,0 +1,159 @@
+== Getting started
+
+Set up an agent in your app and explore your app's data in Kibana.
+
+=== Requirements
+
+[cols=",",options="header",]
+|===
+|Requirement |Minimum version
+|https://www.elastic.co/elastic-stack[Elastic Stack] |8.18
+
+|Android Gradle plugin |7.4.0
+
+|Android API level |26 (or 21 with
+https://developer.android.com/studio/write/java8-support#library-desugaring[desugaring])
+|===
+
+[IMPORTANT]
+====
+If your application's
+https://developer.android.com/studio/publish/versioning#minsdk[minSdk]
+value is lower than 26, you *must* add
+https://developer.android.com/studio/write/java8-support#library-desugaring[Java
+8 desugaring support]. Refer to the
+link:faq.asciidoc#why-is-enabling-desugaring-support-on-apps-with-minsdk-below-26-necessary[FAQ]
+for more information.
+====
+
+=== Gradle setup
+
+Add the
+https://plugins.gradle.org/plugin/co.elastic.otel.android.agent[Elastic
+OTel Agent plugin] to your application’s `build.gradle++[++.kts++]++`
+file:
+
+[source,kotlin]
+----
+plugins {
+    id("com.android.application")
+    id("co.elastic.otel.android.agent") version "[latest_version]" // <1>
+}
+----
+
+[arabic]
+. You can find the latest version
+https://plugins.gradle.org/plugin/co.elastic.otel.android.agent[here].
+
+=== Agent setup
+
+After Gradle setup is done, initialize the agent within your app's code:
+
+[source,kotlin]
+----
+val agent = ElasticApmAgent.builder(application) // <1>
+    .setServiceName("My app name") // <2>
+    .setExportUrl("http://10.0.2.2:4318") // <3>
+    .setExportAuthentication(Authentication.ApiKey("my-api-key")) // <4>
+    .build()
+----
+
+[arabic]
+. Your
+https://developer.android.com/reference/android/app/Application[Application]
+object. link:how-tos.asciidoc#how-to-get-my-android-application-instance[Get
+your application object].
+. In OpenTelemetry, _service_ means _an entity that produces telemetry_,
+so this is where your application name should go. Refer to the
+link:faq.asciidoc#why-does-my-app-have-to-be-referred-to-as-service[FAQ] for
+more information.
+. This is the Elastic endpoint where all your telemetry will be
+exported.
+link:how-tos.asciidoc#how-to-get-my-elastic-stack-export-endpoint[Get your
+Elastic endpoint].
+. Use an API key to connect the agent to the Elastic Stack.
+link:how-tos.asciidoc#how-to-create-an-api-key[Create an API key].
+
+[TIP]
+====
+If you'd like to provide these values from outside of your code, using
+an environment variable or a properties file for example, refer to
+link:how-tos.asciidoc#how-to-provide-config-values-from-outside-of-my-code[Provide
+config values outside of your code].
+====
+
+=== Hello World!
+
+The agent is fully initialized, so now you can start sending telemetry
+to your Elastic Stack! Here's a quick example of manually creating a
+https://opentelemetry.io/docs/concepts/signals/traces/#spans[span] and
+viewing it in Kibana:
+
+==== Generate telemetry
+
+[source,kotlin]
+----
+val agent = ElasticApmAgent.builder(application)
+    .setServiceName("My app name")
+    //...
+    .build()
+
+
+agent.span("My Span") {
+    Thread.sleep(500) // <1>
+    agent.span("My nested Span") { // <2>
+        Thread.sleep(500)
+    }
+}
+----
+
+[arabic]
+. This is to simulate some code execution for which we want to measure
+the time it takes to complete.
+. This is to demonstrate what span hierarchies look like in Kibana.
+
+==== Visualize telemetry
+
+Once your app has sent telemetry data, either
+link:manual-instrumentation.asciidoc[manually] or
+link:automatic-instrumentation.asciidoc[automatically], view it in Kibana by
+navigating to *Applications* → *Service Inventory* in the main menu, or
+alternatively, searching for "Service Inventory" in the
+https://www.elastic.co/guide/en/kibana/current/introduction.html#kibana-navigation-search[global
+search field].
+
+You should find your application listed there.
+
+image:images/span-visualization/1.png[image]
+
+When you open it, go to the *Transactions* tab, where you should see
+your app's "outermost" spans listed.
+
+image:images/span-visualization/2.png[image]
+
+After clicking on the span, you should see it in detail.
+
+image:images/span-visualization/3.png[image]
+
+=== What’s next?
+
+* This guide uses the minimum configuration options needed to initialize
+the agent. If you'd like to explore what else you can customize, take a
+look at the link:configuration.asciidoc[configuration page].
+* In the link:#hello-world[simple example], you've _manually_ sent a
+span, so you've created some link:manual-instrumentation.asciidoc[manual
+instrumentation] for your app. While helpful and flexible, the agent can
+also create _automatic instrumentations_. This means that by simply
+initializing the agent, it will start sending telemetry data on your
+behalf without you having to write code. For more details, refer to
+link:automatic-instrumentation.asciidoc[Automatic instrumentation].
+* https://opentelemetry.io/docs/concepts/signals/traces/#spans[Spans]
+are a great way to measure how long some method, _part_ of a method, or
+even some broader transaction that involves multiple methods takes to
+complete. However, *spans aren't the only type* of
+https://opentelemetry.io/docs/concepts/signals/[signal] that you can
+send using the agent. You can send
+https://opentelemetry.io/docs/concepts/signals/logs/[logs] and
+https://opentelemetry.io/docs/concepts/signals/metrics/[metrics] too!
+For more details, refer to link:manual-instrumentation.asciidoc[Manual
+instrumentation].

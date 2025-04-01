@@ -21,7 +21,7 @@ To prevent these kinds of issues on devices using Android OS older than
 https://developer.android.com/studio/write/java8-support#library-desugaring[Java
 8 desugaring support] to your app. This requirement is inherited from
 the
-https://github.com/open-telemetry/opentelemetry-java/blob/main/VERSIONING.md#language-version-compatibility[OpenTelemetry
+https://github.com/open-telemetry/opentelemetry-java/blob/main/VERSIONING.asciidoc#language-version-compatibility[OpenTelemetry
 Java SDK], which this project is built upon, where several of the
 unsupported types for Android versions older than 8.0 are used.
 

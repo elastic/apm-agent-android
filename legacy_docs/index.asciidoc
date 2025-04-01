@@ -70,7 +70,7 @@ user's journey within your application.
 
 Since the agent not only configures the
 https://opentelemetry.io/docs/languages/java/[OpenTelemetry SDK] but
-also provides link:manual-instrumentation.md[direct access] to its
+also provides link:manual-instrumentation.asciidoc[direct access] to its
 features, you can generate your own data in ways that best suit your
 needs and take advantage of Elastic Stack's tools, such as:
 
@@ -122,10 +122,10 @@ telemetry data getting generated during that time.
 ==== Dynamic configuration
 
 The agent allows you to modify some values after the initialization has
-finished. More info on the link:configuration.md[configuration] page.
+finished. More info on the link:configuration.asciidoc[configuration] page.
 
 ==== Automatic instrumentation
 
 The agent provides extensions that automatically generate telemetry for
 common tools and use cases. Find more information in
-link:automatic-instrumentation.md[Automatic Instrumentation].
+link:automatic-instrumentation.asciidoc[Automatic Instrumentation].

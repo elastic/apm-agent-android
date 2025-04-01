@@ -4,13 +4,13 @@ This page includes a comprehensive list of all the configurable
 parameters available for the agent, including those you can set during
 initialization and those you can adjust dynamically afterward.
 
-*Just getting started?* Start with link:getting-started.md[Getting
+*Just getting started?* Start with link:getting-started.asciidoc[Getting
 started].
 
 === Initialization configuration
 
 Available from the Elastic agent builder shown in
-link:getting-started.md#agent-setup[Agent setup], the following are its
+link:getting-started.asciidoc#agent-setup[Agent setup], the following are its
 available parameters.
 
 ==== Application info
@@ -38,7 +38,7 @@ class MyApp : android.app.Application {
 the
 https://www.elastic.co/guide/en/observability/current/apm-services.html[Services]
 page. Defaults to `unknown`. See
-link:faq.md#why-does-my-app-have-to-be-referred-to-as-service[why your
+link:faq.asciidoc#why-does-my-app-have-to-be-referred-to-as-service[why your
 app is referred to as a "service"].
 . Your app's version name. Defaults to the version provided
 https://developer.android.com/reference/android/content/pm/PackageInfo#versionName[here].
@@ -68,7 +68,7 @@ class MyApp : android.app.Application {
 
 [arabic]
 . Your endpoint URL. If you don't have one yet, check out
-link:how-tos.md#how-to-get-my-elastic-stack-export-endpoint[how to find
+link:how-tos.asciidoc#how-to-get-my-elastic-stack-export-endpoint[how to find
 it].
 . Your authentication method. You can use either an
 https://www.elastic.co/guide/en/observability/current/apm-api-key.html[API
@@ -76,7 +76,7 @@ Key], a
 https://www.elastic.co/guide/en/observability/current/apm-secret-token.html[Secret
 token], or none; defaults to `None`. API Keys are the recommended
 method, if you don't have one yet, check out
-link:how-tos.md#how-to-create-an-api-key[how to create one].
+link:how-tos.asciidoc#how-to-create-an-api-key[how to create one].
 . The protocol used to communicate with your endpoint. It can be either
 `HTTP` or `gRPC`. Defaults to `HTTP`.
 
@@ -84,7 +84,7 @@ link:how-tos.md#how-to-create-an-api-key[how to create one].
 ====
 If you'd like to provide these values from outside of your code, using
 an environment variable or a properties file for example, refer to
-link:../how-tos.md#how-to-provide-config-values-from-outside-of-my-code[Provide
+link:../how-tos.asciidoc#how-to-provide-config-values-from-outside-of-my-code[Provide
 config values outside of your code].
 ====
 
@@ -172,7 +172,7 @@ The agent configures exporters for each signal
 https://opentelemetry.io/docs/languages/java/sdk/#logrecordexporter[logs],
 and
 https://opentelemetry.io/docs/languages/java/sdk/#metricexporter[metrics]),
-to manage features like link:index.md#disk-buffering[disk buffering] and
+to manage features like link:index.asciidoc#disk-buffering[disk buffering] and
 also to establish a connection with the Elastic export endpoint based on
 the provided link:#export-connectivity[export connectivity] values. You
 can intercept these to add your own logic on top, such as logging each

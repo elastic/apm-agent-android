@@ -11,7 +11,7 @@ extensions] to create telemetry in a less verbose way.
 
 === OpenTelemetry APIs
 
-After completing the link:/reference/getting-started.md[setup] process,
+After completing the link:/reference/getting-started.asciidoc[setup] process,
 the agent will have configured an
 https://www.javadoc.io/doc/io.opentelemetry/opentelemetry-api/latest/io/opentelemetry/api/OpenTelemetry.html[OpenTelemetry]
 object for you, which is available via its `getOpenTelemetry()` method.

@@ -1,12 +1,15 @@
-:pull: https://github.com/elastic/apm-agent-android/pull/
-:issues: https://github.com/elastic/apm-agent-android/issues/
-
 [[release-notes]]
 == Release notes
 
-preview::[]
+Review the changes, fixes, and more in each version of Elastic APM Android Agent.
 
-// new major versions go here
-* <<release-notes-0.x>>
+To check for security updates, go to https://discuss.elastic.co/c/announcements/security-announcements/31[Security announcements for the Elastic stack].
 
-include::../CHANGELOG.asciidoc[]
+[discrete]
+=== 1.0.0
+
+[discrete]
+==== Features and enhancements
+
+[discrete]
+==== Fixes

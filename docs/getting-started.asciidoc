@@ -33,7 +33,7 @@ for more information.
 
 Add the
 https://plugins.gradle.org/plugin/co.elastic.otel.android.agent[Elastic
-OTel Agent plugin] to your application’s `build.gradle++[++.kts++]++`
+OTel Agent plugin] to your application’s `build.gradle[.kts]`
 file:
 
 [source,kotlin]

@@ -107,7 +107,7 @@ OTLP Endpoint* under "Configure the OpenTelemetry SDK":
 image:images/find-export-endpoint/3.png[image]
 
 Your export endpoint URL is the value for the
-*`OTEL++_++EXPORTER++_++OTLP++_++ENDPOINT`* configuration setting:
+*`OTEL_EXPORTER_OTLP_ENDPOINT`* configuration setting:
 
 image:images/find-export-endpoint/4.png[image]
 
@@ -349,7 +349,7 @@ If you’re running a local server and need to connect to it without using
 https in order to run a quick test, then you could temporarily
 https://developer.android.com/guide/topics/manifest/application-element#usesCleartextTraffic[enable
 cleartext traffic] within your `AndroidManifest.xml` file, inside the
-`++<++application++>++` tag. As shown below:
+`<application>` tag. As shown below:
 
 [source,xml]
 ----

@@ -7,7 +7,7 @@
 The agent creates logs that enable you to see what it is working on and
 what might have failed at some point. You can find those in
 https://developer.android.com/studio/debug/logcat[logcat], filtered by
-the tag `ELASTIC++_++AGENT`.
+the tag `ELASTIC_AGENT`.
 
 For more information about the agent's internal logs, as well as how to
 configure them, refer to the
@@ -28,7 +28,7 @@ following tips to try and figure out what could be wrong.
 
 The agent prints debug logs, which can be seen in
 https://developer.android.com/studio/debug/logcat[logcat], using the tag
-`ELASTIC++_++AGENT`, where you can have a look at your endpoint
+`ELASTIC_AGENT`, where you can have a look at your endpoint
 configuration parameters with a log that reads: _"Initializing
 connectivity with config ++[++your endpoint configuration++]++"_. Take a
 look at those and make sure that the provided configuration matches your

@@ -58,12 +58,20 @@ jobs:
             echo "release_branch=release/$version"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Creating release branch
-        env:
-          RELEASE_BRANCH: ${{ steps.variables.outputs.release_branch }}
+      - name: Switching to release branch
         run: |
-          git checkout -b $RELEASE_BRANCH
-          git push --set-upstream origin $RELEASE_BRANCH
+          if git ls-remote --heads $REMOTE $RELEASE_BRANCH | grep -q $RELEASE_BRANCH; then
+            echo "Branch '$RELEASE_BRANCH' exists remotely. Checking out..."
+            git switch $RELEASE_BRANCH
+            git pull
+          else
+            echo "Branch '$RELEASE_BRANCH' does not exist remotely. Creating..."
+            git checkout -b $RELEASE_BRANCH
+            git push -u $REMOTE $RELEASE_BRANCH
+          fi
+        env:
+          REMOTE: "origin"
+          RELEASE_BRANCH: ${{ steps.variables.outputs.release_branch }}
 
       - name: Updating notice files
         run: ./gradlew createNoticeFile

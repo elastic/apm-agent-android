@@ -7,8 +7,7 @@ SDK APIs], which you can find in the
 https://www.javadoc.io/doc/io.opentelemetry/opentelemetry-api/latest/io/opentelemetry/api/OpenTelemetry.html[OpenTelemetry]
 object provided by the agent via its `getOpenTelemetry()` method.
 Alternatively, for common operations, you might be able to take
-advantage of the xref:#convenience-extensions[convenience agent
-extensions] to create telemetry in a less verbose way.
+advantage of the <<convenience-extensions,convenience agent extensions>> to create telemetry in a less verbose way.
 
 [discrete]
 [[opentelemetry-apis]]
@@ -62,7 +61,7 @@ telemetry in a less verbose way.
 [NOTE]
 ====
 The convenience methods make use of the same
-xref:#opentelemetry-apis[OpenTelemetry APIs] internally to create
+<<opentelemetry-apis,OpenTelemetry APIs>> internally to create
 telemetry. So they are not the only way to create the following signals,
 they are only making them more straightforward to create.
 ====

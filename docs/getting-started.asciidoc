@@ -151,7 +151,7 @@ image:images/span-visualization/3.png[image]
 * This guide uses the minimum configuration options needed to initialize
 the agent. If you'd like to explore what else you can customize, take a
 look at the xref:configuration.asciidoc[configuration page].
-* In the xref:#hello-world[simple example], you've _manually_ sent a
+* In the <<hello-world,simple example>>, you've _manually_ sent a
 span, so you've created some xref:manual-instrumentation.asciidoc[manual
 instrumentation] for your app. While helpful and flexible, the agent can
 also create _automatic instrumentations_. This means that by simply

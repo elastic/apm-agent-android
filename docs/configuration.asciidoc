@@ -124,7 +124,7 @@ read/modify them if needed.
 
 This is useful for setting dynamic global attributes. If you'd like to
 set static global attributes (which are also applied to metrics) take a
-look at xref:#intercepting-resources[intercepting resources].
+look at <<intercepting-resources,intercepting resources>>.
 
 [source,kotlin]
 ----
@@ -158,7 +158,7 @@ You can intercept these resources and read/modify them as shown below.
 The resource interceptor is only applied during initialization, as this
 is the only time where resource attributes can be modified. If you'd
 like to set _dynamic_ global attributes instead, take a look at
-xref:#intercepting-attributes[intercepting attributes].
+<<intercepting-attributes,intercepting attributes>>.
 ====
 
 [source,kotlin]
@@ -185,7 +185,7 @@ and
 https://opentelemetry.io/docs/languages/java/sdk/#metricexporter[metrics]),
 to manage features like xref:intro.asciidoc#disk-buffering[disk buffering] and
 also to establish a connection with the Elastic export endpoint based on
-the provided xref:#export-connectivity[export connectivity] values. You
+the provided <<export-connectivity,export connectivity>> values. You
 can intercept these to add your own logic on top, such as logging each
 signal that gets exported, or filtering some items that don't make sense
 for you to export.
@@ -321,7 +321,7 @@ https://github.com/elastic/apm-agent-android/blob/main/agent-sdk/src/main/java/c
 ==== Update export connectivity
 
 You can change any of the configuration values provided as part of the
-xref:#export-connectivity[export connectivity] setters, at any time, by
+<<export-connectivity,export connectivity>> setters, at any time, by
 setting a new
 https://github.com/elastic/apm-agent-android/blob/main/agent-sdk/src/main/java/co/elastic/otel/android/connectivity/ExportEndpointConfiguration.kt[ExportEndpointConfiguration]
 object, which will override them all.

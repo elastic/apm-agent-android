@@ -19,7 +19,7 @@ its own Gradle plugin for installation. To install a supported automatic
 instrumentation, follow these steps:
 
 [arabic]
-. Choose a xref:#supported-instrumentations[supported instrumentation].
+. Choose a <<supported-instrumentations,supported instrumentation>>.
 . Add its Gradle plugin to your project in the same location where the
 xref:getting-started.asciidoc#gradle-setup[agent] is added.
 . xref:getting-started.asciidoc#agent-setup[Initialize the agent] the same way
@@ -42,7 +42,7 @@ used in your project for use cases such as
 https://developer.android.com/build/shrink-code#optimization[code
 optimization] through R8. While useful, code instrumentation can make
 compilation take longer to complete. Because of this, the agent provides
-xref:#automatic-build-configuration[a way to exclude] specific build types in your app
+<<automatic-build-configuration,a way to exclude>> specific build types in your app
 from byte code changes, similar to what
 https://developer.android.com/build/shrink-code#enable[isMinifyEnabled]
 does with R8 functionalities.
@@ -53,7 +53,7 @@ does with R8 functionalities.
 
 For some large projects (including dependencies), you can avoid the
 added compilation time caused by the
-xref:#compilation-behavior[compilation behavior] by excluding build
+<<compilation-behavior,compilation behavior>> by excluding build
 types that don't need the functionality. Use the following configuration
 to do so:
 
@@ -80,7 +80,7 @@ type] names for which you want to disable byte code instrumentation.
 [NOTE]
 ====
 Disabling byte code instrumentation will cause the
-xref:#supported-instrumentations[automatic instrumentations] that need
+<<supported-instrumentations,automatic instrumentations>> that need
 it to not work properly on the affected build type. This shouldn't cause
 issues to your app's functionality in general, it will only affect the
 agent's ability to automatically collect telemetry.

@@ -52,7 +52,7 @@ which you could share with our support team if needed.
 ==== SSL/TLS error
 
 Sometimes the request to the Elastic Stack endpoint won't show up in the
-xref:#inspecting-network-traffic[network inspector]. A common issue when
+<<inspecting-network-traffic,network inspector>>. A common issue when
 this happens is that there is an SSL/TLS error that occurs when the
 agent tries to contact your Elastic Stack endpoint. This is often the
 case when you work with an on-prem Elastic Stack that doesn't have

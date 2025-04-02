@@ -166,7 +166,7 @@ jobs:
           git push origin $POST_RELEASE_BRANCH
           
           echo "Creating PR"
-          gh pr create --title "Prepare for the next release" --base main --reviewer elastic/apm-agent-android --repo ${{ github.repository }}
+          gh pr create --title "Prepare for the next release" --body "Prepare for the next release" --base main --reviewer elastic/apm-agent-android --repo ${{ github.repository }}
         env:
           VERSION: ${{ steps.variables.outputs.version }}
           POST_RELEASE_BRANCH: ${{ steps.variables.outputs.post_release_branch }}

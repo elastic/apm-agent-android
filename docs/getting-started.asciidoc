@@ -87,6 +87,7 @@ config values outside of your code].
 ====
 
 [discrete]
+[[hello-world]]
 == Hello World!
 
 The agent is fully initialized, so now you can start sending telemetry

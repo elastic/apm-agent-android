@@ -56,6 +56,7 @@ For it to work, you *must* register your custom application in your
 ----
 
 [discrete]
+[[from-an-activity]]
 ==== From an Activity
 
 You can get your application from an
@@ -272,6 +273,7 @@ xref:#reading-build-config-fields-in-code[read build config fields] in
 code.
 
 [discrete]
+[[reading-build-config-fields-in-code]]
 ==== Reading build config fields in code
 
 After adding

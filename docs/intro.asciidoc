@@ -21,6 +21,7 @@ properly out of the box. This enables you to fulfill various use cases
 to better understand your app's performance, such as:
 
 [discrete]
+[[distributed-tracing]]
 ==== Distributed tracing
 
 Distributed tracing allows you to see the full picture of *how long your
@@ -112,6 +113,7 @@ to synchronize telemetry timestamps with the universal time to ensure a
 reliable view of event timelines.
 
 [discrete]
+[[session]]
 ==== Session
 
 A session groups telemetry data within a time frame when your

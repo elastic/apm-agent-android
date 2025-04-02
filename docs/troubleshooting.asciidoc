@@ -35,6 +35,7 @@ look at those and make sure that the provided configuration matches your
 Elastic Stack endpoint parameters.
 
 [discrete]
+[[inspecting-network-traffic]]
 ==== Inspecting network traffic
 
 You can take a look at your app's outgoing network requests via Android

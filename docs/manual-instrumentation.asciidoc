@@ -11,6 +11,7 @@ advantage of the xref:#convenience-extensions[convenience agent
 extensions] to create telemetry in a less verbose way.
 
 [discrete]
+[[opentelemetry-apis]]
 === OpenTelemetry APIs
 
 After completing the xref:/reference/getting-started.asciidoc[setup] process,
@@ -51,6 +52,7 @@ create *metrics*].
 create *logs*].
 
 [discrete]
+[[convenience-extensions]]
 === Convenience extensions
 
 For common use cases, in regards to spans and logs creation, the agent

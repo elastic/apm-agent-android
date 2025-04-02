@@ -28,6 +28,7 @@ instrumentations will get installed during the agent initialization
 without having to write extra code.
 
 [discrete]
+[[compilation-behavior]]
 ==== Compilation behavior
 
 Some automatic instrumentations perform "byte code instrumentation"
@@ -47,6 +48,7 @@ https://developer.android.com/build/shrink-code#enable[isMinifyEnabled]
 does with R8 functionalities.
 
 [discrete]
+[[configuration]]
 ==== Configuration
 
 For some large projects (including dependencies), you can avoid the
@@ -85,6 +87,7 @@ agent's ability to automatically collect telemetry.
 ====
 
 [discrete]
+[[supported-instrumentations]]
 === Supported instrumentations
 
 [discrete]

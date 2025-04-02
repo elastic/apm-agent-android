@@ -50,6 +50,7 @@ a combination of these. Any helpful distinction for you to better
 analyze your app's data later in Kibana.
 
 [discrete]
+[[export-connectivity]]
 ==== Export connectivity
 
 Configuring where your app's telemetry will be exported.
@@ -113,6 +114,7 @@ class MyApp : android.app.Application {
 ----
 
 [discrete]
+[[intercepting-attributes]]
 ==== Intercepting attributes
 
 You can provide global interceptors for all spans and logs
@@ -140,6 +142,7 @@ class MyApp : android.app.Application {
 ----
 
 [discrete]
+[[intercepting-resources]]
 ==== Intercepting resources
 
 The agent creates a

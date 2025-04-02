@@ -27,6 +27,7 @@ tasks.withType(Javadoc::class).configureEach {
 val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 dependencies {
     testImplementation(libs.findBundle("mocking").get())
+    testImplementation(platform(libs.findLibrary("junit-bom").get()))
     testImplementation(libs.findBundle("junit").get())
     testImplementation(libs.findLibrary("assertj").get())
     testRuntimeOnly(libs.findLibrary("junit5-vintage").get())

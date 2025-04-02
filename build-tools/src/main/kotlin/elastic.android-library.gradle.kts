@@ -44,6 +44,7 @@ val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 dependencies {
     implementation(project(":agent-common"))
     testImplementation(libs.findBundle("mocking").get())
+    testImplementation(platform(libs.findLibrary("junit-bom").get()))
     testImplementation(libs.findBundle("junit").get())
     testImplementation(libs.findLibrary("assertj").get())
     testImplementation(project(":internal-tools:test-common"))

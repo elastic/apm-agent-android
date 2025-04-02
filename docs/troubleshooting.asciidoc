@@ -11,15 +11,15 @@ the tag `ELASTIC++_++AGENT`.
 
 For more information about the agent's internal logs, as well as how to
 configure them, refer to the
-link:configuration.asciidoc#internal-logging-policy[internal logging policy]
+xref:configuration.asciidoc#internal-logging-policy[internal logging policy]
 configuration.
 
 [discrete]
 === Connectivity to the Elastic Stack
 
-If after following the link:getting-started.asciidoc[getting started] guide
+If after following the xref:getting-started.asciidoc[getting started] guide
 and configuring your Elastic Stack
-link:configuration.asciidoc#export-connectivity[endpoint parameters], you
+xref:configuration.asciidoc#export-connectivity[endpoint parameters], you
 can't see your application's data in Kibana, you can follow the
 following tips to try and figure out what could be wrong.
 
@@ -51,11 +51,11 @@ which you could share with our support team if needed.
 ==== SSL/TLS error
 
 Sometimes the request to the Elastic Stack endpoint won't show up in the
-link:#inspecting-network-traffic[network inspector]. A common issue when
+xref:#inspecting-network-traffic[network inspector]. A common issue when
 this happens is that there is an SSL/TLS error that occurs when the
 agent tries to contact your Elastic Stack endpoint. This is often the
 case when you work with an on-prem Elastic Stack that doesn't have
 trusted CAs, for which you'd need to add custom security configurations
 to your app to make the export work. Take a look at
-link:how-tos.asciidoc#how-to-configure-ssltls[how to configure SSL/TLS] for
+xref:how-tos.asciidoc#how-to-configure-ssltls[how to configure SSL/TLS] for
 more information.

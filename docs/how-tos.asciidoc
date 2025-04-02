@@ -74,7 +74,7 @@ https://developer.android.com/reference/android/app/Activity[Activity]
 that it is associated to by calling its
 https://developer.android.com/reference/androidx/fragment/app/Fragment.html#requireActivity()[requireActivity()]
 method. Once you get the Activity object, you can get your application
-from it as link:#from-an-activity[explained above].
+from it as xref:#from-an-activity[explained above].
 
 [discrete]
 === How to get my Elastic Stack export endpoint
@@ -201,7 +201,7 @@ docs], to provide different values per variant.
 
 You've properly created build config fields from environment variables.
 To use them in code, take a look at how to
-link:#reading-build-config-fields-in-code[read build config fields] in
+xref:#reading-build-config-fields-in-code[read build config fields] in
 code.
 
 [discrete]
@@ -268,7 +268,7 @@ docs], to provide different values per variant.
 
 You've properly created build config fields from a properties file. To
 use them in code, refer to
-link:#reading-build-config-fields-in-code[read build config fields] in
+xref:#reading-build-config-fields-in-code[read build config fields] in
 code.
 
 [discrete]

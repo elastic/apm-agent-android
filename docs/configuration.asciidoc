@@ -5,14 +5,14 @@ This page includes a comprehensive list of all the configurable
 parameters available for the agent, including those you can set during
 initialization and those you can adjust dynamically afterward.
 
-*Just getting started?* Start with link:getting-started.asciidoc[Getting
+*Just getting started?* Start with xref:getting-started.asciidoc[Getting
 started].
 
 [discrete]
 === Initialization configuration
 
 Available from the Elastic agent builder shown in
-link:getting-started.asciidoc#agent-setup[Agent setup], the following are its
+xref:getting-started.asciidoc#agent-setup[Agent setup], the following are its
 available parameters.
 
 [discrete]
@@ -41,7 +41,7 @@ class MyApp : android.app.Application {
 the
 https://www.elastic.co/guide/en/observability/current/apm-services.html[Services]
 page. Defaults to `unknown`. See
-link:faq.asciidoc#why-does-my-app-have-to-be-referred-to-as-service[why your
+xref:faq.asciidoc#why-does-my-app-have-to-be-referred-to-as-service[why your
 app is referred to as a "service"].
 . Your app's version name. Defaults to the version provided
 https://developer.android.com/reference/android/content/pm/PackageInfo#versionName[here].
@@ -72,7 +72,7 @@ class MyApp : android.app.Application {
 
 [arabic]
 . Your endpoint URL. If you don't have one yet, check out
-link:how-tos.asciidoc#how-to-get-my-elastic-stack-export-endpoint[how to find
+xref:how-tos.asciidoc#how-to-get-my-elastic-stack-export-endpoint[how to find
 it].
 . Your authentication method. You can use either an
 https://www.elastic.co/guide/en/observability/current/apm-api-key.html[API
@@ -80,7 +80,7 @@ Key], a
 https://www.elastic.co/guide/en/observability/current/apm-secret-token.html[Secret
 token], or none; defaults to `None`. API Keys are the recommended
 method, if you don't have one yet, check out
-link:how-tos.asciidoc#how-to-create-an-api-key[how to create one].
+xref:how-tos.asciidoc#how-to-create-an-api-key[how to create one].
 . The protocol used to communicate with your endpoint. It can be either
 `HTTP` or `gRPC`. Defaults to `HTTP`.
 
@@ -88,7 +88,7 @@ link:how-tos.asciidoc#how-to-create-an-api-key[how to create one].
 ====
 If you'd like to provide these values from outside of your code, using
 an environment variable or a properties file for example, refer to
-link:how-tos.asciidoc#how-to-provide-config-values-from-outside-of-my-code[Provide
+xref:how-tos.asciidoc#how-to-provide-config-values-from-outside-of-my-code[Provide
 config values outside of your code].
 ====
 
@@ -122,7 +122,7 @@ read/modify them if needed.
 
 This is useful for setting dynamic global attributes. If you'd like to
 set static global attributes (which are also applied to metrics) take a
-look at link:#intercepting-resources[intercepting resources].
+look at xref:#intercepting-resources[intercepting resources].
 
 [source,kotlin]
 ----
@@ -155,7 +155,7 @@ You can intercept these resources and read/modify them as shown below.
 The resource interceptor is only applied during initialization, as this
 is the only time where resource attributes can be modified. If you'd
 like to set _dynamic_ global attributes instead, take a look at
-link:#intercepting-attributes[intercepting attributes].
+xref:#intercepting-attributes[intercepting attributes].
 ====
 
 [source,kotlin]
@@ -180,9 +180,9 @@ The agent configures exporters for each signal
 https://opentelemetry.io/docs/languages/java/sdk/#logrecordexporter[logs],
 and
 https://opentelemetry.io/docs/languages/java/sdk/#metricexporter[metrics]),
-to manage features like link:index.asciidoc#disk-buffering[disk buffering] and
+to manage features like xref:index.asciidoc#disk-buffering[disk buffering] and
 also to establish a connection with the Elastic export endpoint based on
-the provided link:#export-connectivity[export connectivity] values. You
+the provided xref:#export-connectivity[export connectivity] values. You
 can intercept these to add your own logic on top, such as logging each
 signal that gets exported, or filtering some items that don't make sense
 for you to export.
@@ -317,7 +317,7 @@ https://github.com/elastic/apm-agent-android/blob/main/agent-sdk/src/main/java/c
 ==== Update export connectivity
 
 You can change any of the configuration values provided as part of the
-link:#export-connectivity[export connectivity] setters, at any time, by
+xref:#export-connectivity[export connectivity] setters, at any time, by
 setting a new
 https://github.com/elastic/apm-agent-android/blob/main/agent-sdk/src/main/java/co/elastic/otel/android/connectivity/ExportEndpointConfiguration.kt[ExportEndpointConfiguration]
 object, which will override them all.

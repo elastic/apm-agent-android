@@ -42,13 +42,13 @@ used in your project for use cases such as
 https://developer.android.com/build/shrink-code#optimization[code
 optimization] through R8. While useful, code instrumentation can make
 compilation take longer to complete. Because of this, the agent provides
-xref:#configuration[a way to exclude] specific build types in your app
+xref:#automatic-build-configuration[a way to exclude] specific build types in your app
 from byte code changes, similar to what
 https://developer.android.com/build/shrink-code#enable[isMinifyEnabled]
 does with R8 functionalities.
 
 [discrete]
-[[configuration]]
+[[automatic-build-configuration]]
 ==== Configuration
 
 For some large projects (including dependencies), you can avoid the

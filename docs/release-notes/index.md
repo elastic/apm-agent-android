@@ -21,6 +21,17 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [elastic-apm-android-agent-versionext-fixes]
 
 % next_release_notes
+    
+## 1.0.0 [elastic-apm-android-agent-100-release-notes]
+**Release date:** April 2, 2025
+
+### Features and enhancements [elastic-apm-android-agent-100-features-enhancements]
+
+* [Breaking] New SDK API
+* [Breaking] New artifact coordinates for libs and plugins
+* [Breaking] Kibana android dashboard has changed
+* Improved stability
+* Support for exporting to the EDOT Collector
 
 ## 0.20.0 [elastic-apm-android-agent-0200-release-notes]
 **Release date:** July 29, 2024

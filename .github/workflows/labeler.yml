@@ -54,8 +54,8 @@ jobs:
         repo-token: "${{ secrets.GITHUB_TOKEN }}"
         configuration-path: .github/community-label.yml
         enable-versioned-regex: 0
-    - if: (steps.checkUserMember.outputs.isTeamMember == 'true' || steps.checkUserMember.outputs.isExcluded == 'true') && github.event.pull_request
-      name: Assign new internal pull requests to project
+    - name: Assign new internal pull requests to project
+      if: (steps.checkUserMember.outputs.isTeamMember == 'true' || steps.checkUserMember.outputs.isExcluded == 'true') && github.event_name == 'pull_request'
       run: |
         item_id=$(gh project item-add 1674 --url https://github.com/elastic/apm-agent-android/pull/$PR_NUMBER --owner elastic --format json --jq .id)
         gh project item-edit --id "$item_id" --project-id "$PROJECT_ID" --field-id "$FIELD_ID" --single-select-option-id "$OPTION_ID"

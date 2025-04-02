@@ -94,6 +94,7 @@ The agent offers additional features on top of those that come with the
 https://opentelemetry.io/docs/languages/java/[OpenTelemetry SDK].
 
 [discrete]
+[[disk-buffering]]
 ==== Disk buffering
 
 Your application's telemetry data is stored locally before being sent to

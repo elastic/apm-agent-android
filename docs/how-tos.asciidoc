@@ -2,6 +2,7 @@
 == How-tos
 
 [discrete]
+[[how-to-get-my-android-application-instance]]
 === How to get my Android application instance
 
 Your
@@ -78,6 +79,7 @@ method. Once you get the Activity object, you can get your application
 from it as xref:#from-an-activity[explained above].
 
 [discrete]
+[[how-to-get-my-elastic-stack-export-endpoint]]
 === How to get my Elastic Stack export endpoint
 
 The export endpoint is where your app's telemetry is sent, so it's
@@ -127,6 +129,7 @@ https://elastic.github.io/opentelemetry/edot-collector/config/default-config-sta
 and configuring a standalone EDOT Collector].
 
 [discrete]
+[[how-to-create-an-api-key]]
 === How to create an API Key
 
 API Keys are the recommended way of authenticating the agent with your
@@ -148,6 +151,7 @@ guide] to create an API Key with a set of privileges that are scoped for
 the APM Agent use case only.
 
 [discrete]
+[[how-to-provide-config-values-from-outside-of-my-code]]
 === How to provide config values from outside of my code?
 
 You many want to get values such as an endpoint URL or API Key/Secret
@@ -311,6 +315,7 @@ namespace] value. So, for example, if your app's namespace is set to
 `com.my.app.BuildType`.
 
 [discrete]
+[[how-to-configure-ssltls]]
 === How to configure SSL/TLS?
 
 Note that the Elastic Agent does not handle SSL/TLS configs internally.

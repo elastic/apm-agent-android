@@ -183,7 +183,7 @@ The agent configures exporters for each signal
 https://opentelemetry.io/docs/languages/java/sdk/#logrecordexporter[logs],
 and
 https://opentelemetry.io/docs/languages/java/sdk/#metricexporter[metrics]),
-to manage features like xref:index.asciidoc#disk-buffering[disk buffering] and
+to manage features like xref:intro.asciidoc#disk-buffering[disk buffering] and
 also to establish a connection with the Elastic export endpoint based on
 the provided xref:#export-connectivity[export connectivity] values. You
 can intercept these to add your own logic on top, such as logging each
@@ -271,6 +271,7 @@ class MyApp : android.app.Application {
 ----
 
 [discrete]
+[[internal-logging-policy]]
 ==== Internal logging policy
 
 [NOTE]

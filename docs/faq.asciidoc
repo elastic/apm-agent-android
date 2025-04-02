@@ -2,6 +2,7 @@
 == Frequently asked questions
 
 [discrete]
+[[why-is-enabling-desugaring-support-on-apps-with-minsdk-below-26-necessary]]
 === Why is enabling desugaring support on apps with minSdk below 26 necessary?
 
 Android devices with an API level below 26 (older than
@@ -28,6 +29,7 @@ Java SDK], which this project is built upon, where several of the
 unsupported types for Android versions older than 8.0 are used.
 
 [discrete]
+[[why-does-my-app-have-to-be-referred-to-as-service]]
 === Why does my app have to be referred to as "service"?
 
 TL;DR: It's complicated to change it to another name because of its

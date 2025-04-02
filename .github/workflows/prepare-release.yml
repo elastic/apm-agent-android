@@ -91,7 +91,7 @@ jobs:
           echo "Generated notes:"
           cat $dest_file_path
           
-          sed -i '/next_release_notes/r $dest_file_path' docs/release-notes/index.md
+          sed -i "/next_release_notes/r $dest_file_path" docs/release-notes/index.md
         env:
           VERSION: ${{ steps.variables.outputs.version }}
           RELEASE_NOTES: ${{ inputs.release_notes }}

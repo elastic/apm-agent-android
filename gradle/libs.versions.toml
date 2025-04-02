@@ -4,7 +4,6 @@ opentelemetry-contrib = "1.43.0-alpha"
 byteBuddy = "1.17.5"
 kotlin = "2.1.20"
 android = "8.9.1"
-junit5 = "5.11.4"
 autoService = "1.1.1"
 
 [libraries]
@@ -22,8 +21,11 @@ opentelemetry-exporter-otlp = { module = "io.opentelemetry:opentelemetry-exporte
 
 #Test tools
 junit4 = "junit:junit:4.13.2"
-junit5 = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit5" }
-junit5-vintage = { module = "org.junit.vintage:junit-vintage-engine", version.ref = "junit5" }
+junit-bom = "org.junit:junit-bom:5.12.1"
+junit5-vintage = { module = "org.junit.vintage:junit-vintage-engine" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine" }
 opentelemetry-testing = { module = "io.opentelemetry:opentelemetry-sdk-testing", version.ref = "opentelemetry" }
 robolectric = "org.robolectric:robolectric:4.14.1"
 assertj = "org.assertj:assertj-core:3.27.3"
@@ -52,7 +54,7 @@ mavenModel = "org.apache.maven:maven-model:3.9.9"
 
 [bundles]
 mocking = ["mockk"]
-junit = ["junit4", "junit5"]
+junit = ["junit4", "junit-jupiter", "junit-launcher", "junit-engine", "junit5-vintage", ]
 opentelemetry-semconv = ["opentelemetry-semconv", "opentelemetry-semconv-incubating"]
 
 [plugins]

@@ -4,7 +4,7 @@
 The agent has an opt-in functionality that automatically generates
 telemetry on your behalf. This allows you to get telemetry data for
 supported targets without having to write
-xref:manual-instrumentation.asciidoc[manual instrumentation].
+<<manual-instrumentation,manual instrumentation>>.
 
 [discrete]
 === How it works
@@ -21,8 +21,8 @@ instrumentation, follow these steps:
 [arabic]
 . Choose a <<supported-instrumentations,supported instrumentation>>.
 . Add its Gradle plugin to your project in the same location where the
-xref:getting-started.asciidoc#gradle-setup[agent] is added.
-. xref:getting-started.asciidoc#agent-setup[Initialize the agent] the same way
+<<gradle-setup,agent>> is added.
+. <<agent-setup,Initialize the agent>> the same way
 you would without using automatic instrumentation. Automatic
 instrumentations will get installed during the agent initialization
 without having to write extra code.

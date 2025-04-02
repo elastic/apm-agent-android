@@ -5,14 +5,13 @@ This page includes a comprehensive list of all the configurable
 parameters available for the agent, including those you can set during
 initialization and those you can adjust dynamically afterward.
 
-*Just getting started?* Start with xref:getting-started.asciidoc[Getting
-started].
+*Just getting started?* Start with <<setup,Getting started>>.
 
 [discrete]
 === Initialization configuration
 
 Available from the Elastic agent builder shown in
-xref:getting-started.asciidoc#agent-setup[Agent setup], the following are its
+<<agent-setup,Agent setup>>, the following are its
 available parameters.
 
 [discrete]
@@ -41,8 +40,7 @@ class MyApp : android.app.Application {
 the
 https://www.elastic.co/guide/en/observability/current/apm-services.html[Services]
 page. Defaults to `unknown`. See
-xref:faq.asciidoc#why-does-my-app-have-to-be-referred-to-as-service[why your
-app is referred to as a "service"].
+<<why-does-my-app-have-to-be-referred-to-as-service,why your app is referred to as a "service">>.
 . Your app's version name. Defaults to the version provided
 https://developer.android.com/reference/android/content/pm/PackageInfo#versionName[here].
 . Typically your app's build type, flavor, backend environment, or maybe
@@ -73,15 +71,14 @@ class MyApp : android.app.Application {
 
 [arabic]
 . Your endpoint URL. If you don't have one yet, check out
-xref:how-tos.asciidoc#how-to-get-my-elastic-stack-export-endpoint[how to find
-it].
+<<how-to-get-my-elastic-stack-export-endpoint,how to find it>>.
 . Your authentication method. You can use either an
 https://www.elastic.co/guide/en/observability/current/apm-api-key.html[API
 Key], a
 https://www.elastic.co/guide/en/observability/current/apm-secret-token.html[Secret
 token], or none; defaults to `None`. API Keys are the recommended
 method, if you don't have one yet, check out
-xref:how-tos.asciidoc#how-to-create-an-api-key[how to create one].
+<<how-to-create-an-api-key,how to create one>>.
 . The protocol used to communicate with your endpoint. It can be either
 `HTTP` or `gRPC`. Defaults to `HTTP`.
 
@@ -89,8 +86,7 @@ xref:how-tos.asciidoc#how-to-create-an-api-key[how to create one].
 ====
 If you'd like to provide these values from outside of your code, using
 an environment variable or a properties file for example, refer to
-xref:how-tos.asciidoc#how-to-provide-config-values-from-outside-of-my-code[Provide
-config values outside of your code].
+<<how-to-provide-config-values-from-outside-of-my-code,Provide config values outside of your code>>.
 ====
 
 [discrete]
@@ -183,7 +179,7 @@ The agent configures exporters for each signal
 https://opentelemetry.io/docs/languages/java/sdk/#logrecordexporter[logs],
 and
 https://opentelemetry.io/docs/languages/java/sdk/#metricexporter[metrics]),
-to manage features like xref:intro.asciidoc#disk-buffering[disk buffering] and
+to manage features like <<disk-buffering,disk buffering>> and
 also to establish a connection with the Elastic export endpoint based on
 the provided <<export-connectivity,export connectivity>> values. You
 can intercept these to add your own logic on top, such as logging each

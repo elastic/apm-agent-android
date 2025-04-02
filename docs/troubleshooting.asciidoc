@@ -11,15 +11,15 @@ the tag `ELASTIC_AGENT`.
 
 For more information about the agent's internal logs, as well as how to
 configure them, refer to the
-xref:configuration.asciidoc#internal-logging-policy[internal logging policy]
+<<internal-logging-policy,internal logging policy>>
 configuration.
 
 [discrete]
 === Connectivity to the Elastic Stack
 
-If after following the xref:getting-started.asciidoc[getting started] guide
+If after following the <<setup,getting started>> guide
 and configuring your Elastic Stack
-xref:configuration.asciidoc#export-connectivity[endpoint parameters], you
+<<export-connectivity,endpoint parameters>>, you
 can't see your application's data in Kibana, you can follow the
 following tips to try and figure out what could be wrong.
 
@@ -58,5 +58,5 @@ agent tries to contact your Elastic Stack endpoint. This is often the
 case when you work with an on-prem Elastic Stack that doesn't have
 trusted CAs, for which you'd need to add custom security configurations
 to your app to make the export work. Take a look at
-xref:how-tos.asciidoc#how-to-configure-ssltls[how to configure SSL/TLS] for
+<<how-to-configure-ssltls,how to configure SSL/TLS>> for
 more information.

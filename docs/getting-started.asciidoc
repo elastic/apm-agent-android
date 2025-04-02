@@ -24,7 +24,7 @@ https://developer.android.com/studio/publish/versioning#minsdk[minSdk]
 value is lower than 26, you *must* add
 https://developer.android.com/studio/write/java8-support#library-desugaring[Java
 8 desugaring support]. Refer to the
-xref:faq.asciidoc#why-is-enabling-desugaring-support-on-apps-with-minsdk-below-26-necessary[FAQ]
+<<why-is-enabling-desugaring-support-on-apps-with-minsdk-below-26-necessary,FAQ>>
 for more information.
 ====
 
@@ -67,25 +67,22 @@ val agent = ElasticApmAgent.builder(application) // <1>
 [arabic]
 . Your
 https://developer.android.com/reference/android/app/Application[Application]
-object. xref:how-tos.asciidoc#how-to-get-my-android-application-instance[Get
-your application object].
+object. <<how-to-get-my-android-application-instance,Get your application object>>.
 . In OpenTelemetry, _service_ means _an entity that produces telemetry_,
 so this is where your application name should go. Refer to the
-xref:faq.asciidoc#why-does-my-app-have-to-be-referred-to-as-service[FAQ] for
+<<why-does-my-app-have-to-be-referred-to-as-service,FAQ>> for
 more information.
 . This is the Elastic endpoint where all your telemetry will be
 exported.
-xref:how-tos.asciidoc#how-to-get-my-elastic-stack-export-endpoint[Get your
-Elastic endpoint].
+<<how-to-get-my-elastic-stack-export-endpoint,Get your Elastic endpoint>>.
 . Use an API key to connect the agent to the Elastic Stack.
-xref:how-tos.asciidoc#how-to-create-an-api-key[Create an API key].
+<<how-to-create-an-api-key,Create an API key>>.
 
 [TIP]
 ====
 If you'd like to provide these values from outside of your code, using
 an environment variable or a properties file for example, refer to
-xref:how-tos.asciidoc#how-to-provide-config-values-from-outside-of-my-code[Provide
-config values outside of your code].
+<<how-to-provide-config-values-from-outside-of-my-code,Provide config values outside of your code>>.
 ====
 
 [discrete]
@@ -125,8 +122,8 @@ the time it takes to complete.
 === Visualize telemetry
 
 Once your app has sent telemetry data, either
-xref:manual-instrumentation.asciidoc[manually] or
-xref:automatic-instrumentation.asciidoc[automatically], view it in Kibana by
+<<manual-instrumentation,manually>> or
+<<automatic-instrumentation,automatically>>, view it in Kibana by
 navigating to *Applications* → *Service Inventory* in the main menu, or
 alternatively, searching for "Service Inventory" in the
 https://www.elastic.co/guide/en/kibana/current/introduction.html#kibana-navigation-search[global
@@ -150,14 +147,14 @@ image:images/span-visualization/3.png[image]
 
 * This guide uses the minimum configuration options needed to initialize
 the agent. If you'd like to explore what else you can customize, take a
-look at the xref:configuration.asciidoc[configuration page].
+look at the <<configuration,configuration page>>.
 * In the <<hello-world,simple example>>, you've _manually_ sent a
-span, so you've created some xref:manual-instrumentation.asciidoc[manual
-instrumentation] for your app. While helpful and flexible, the agent can
+span, so you've created some <<manual-instrumentation,manual instrumentation>>
+for your app. While helpful and flexible, the agent can
 also create _automatic instrumentations_. This means that by simply
 initializing the agent, it will start sending telemetry data on your
 behalf without you having to write code. For more details, refer to
-xref:automatic-instrumentation.asciidoc[Automatic instrumentation].
+<<automatic-instrumentation,Automatic instrumentation>>.
 * https://opentelemetry.io/docs/concepts/signals/traces/#spans[Spans]
 are a great way to measure how long some method, _part_ of a method, or
 even some broader transaction that involves multiple methods takes to
@@ -166,5 +163,4 @@ https://opentelemetry.io/docs/concepts/signals/[signal] that you can
 send using the agent. You can send
 https://opentelemetry.io/docs/concepts/signals/logs/[logs] and
 https://opentelemetry.io/docs/concepts/signals/metrics/[metrics] too!
-For more details, refer to xref:manual-instrumentation.asciidoc[Manual
-instrumentation].
+For more details, refer to <<manual-instrumentation,Manual instrumentation>>.

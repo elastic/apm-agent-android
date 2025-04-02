@@ -13,7 +13,7 @@ advantage of the <<convenience-extensions,convenience agent extensions>> to crea
 [[opentelemetry-apis]]
 === OpenTelemetry APIs
 
-After completing the xref:/reference/getting-started.asciidoc[setup] process,
+After completing the <<setup,setup>> process,
 the agent will have configured an
 https://www.javadoc.io/doc/io.opentelemetry/opentelemetry-api/latest/io/opentelemetry/api/OpenTelemetry.html[OpenTelemetry]
 object for you, which is available via its `getOpenTelemetry()` method.

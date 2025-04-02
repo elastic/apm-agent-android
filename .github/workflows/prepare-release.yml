@@ -68,9 +68,6 @@ jobs:
         run: ./gradlew createNoticeFile
 
       - name: Updating the release notes
-        env:
-          VERSION: ${{ steps.variables.outputs.version }}
-          RELEASE_NOTES: ${{ inputs.release_notes }}
         run: |
           tempdir="build/actions/prepare-release"
           mkdir -p $tempdir
@@ -80,15 +77,17 @@ jobs:
           
           echo $RELEASE_NOTES > $source_file_path
           
-          ./.github/scripts/generate-release-notes/script.main.kts --source=$source_file_path --version=$VERSION > $dest_file_path
+          ./.github/scripts/generate-release-notes/script.main.kts --source="$source_file_path" --version="$VERSION" > $dest_file_path
+          
+          echo "Generated notes:"
+          cat $dest_file_path
           
           sed -i '/next_release_notes/r $dest_file_path' docs/release-notes/index.md
+        env:
+          VERSION: ${{ steps.variables.outputs.version }}
+          RELEASE_NOTES: ${{ inputs.release_notes }}
 
       - name: Creating release branch PR
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          VERSION: ${{ steps.variables.outputs.version }}
-          RELEASE_BRANCH: ${{ steps.variables.outputs.release_branch }}
         run: |
           message="Prepare release $VERSION"
           branch="pre-release/$VERSION"
@@ -96,6 +95,13 @@ jobs:
           git checkout -b $branch
           git commit -a -m "$message"
           git push --set-upstream origin $branch
+          
+          echo "About to create PR"
+          
           gh pr create --title "[$RELEASE_BRANCH] $message" \
                        --body "$message." \
                        --base $RELEASE_BRANCH
+        env:
+          GH_TOKEN: ${{ steps.get_token.outputs.token }}
+          VERSION: ${{ steps.variables.outputs.version }}
+          RELEASE_BRANCH: ${{ steps.variables.outputs.release_branch }}

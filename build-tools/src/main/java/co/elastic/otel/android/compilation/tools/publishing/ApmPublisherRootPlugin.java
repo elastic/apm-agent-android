@@ -32,10 +32,13 @@ public class ApmPublisherRootPlugin implements Plugin<Project> {
         applyRootPlugins(project.getPlugins());
         configureMavenCentral(project);
         project.subprojects(subproject -> {
-            if (!subproject.getPath().startsWith(":internal-tools")) {
-                Matcher instrumentationMatcher = INSTRUMENTATION_PROJECT_PATTERN.matcher(subproject.getPath());
-                if (instrumentationMatcher.matches()) {
+            String path = subproject.getPath();
+            if (!path.startsWith(":internal-tools")) {
+                if (path.startsWith(":instrumentation:")) {
                     setGroupId(subproject, subproject.getGroup() + ".instrumentation");
+                }
+                Matcher instrumentationMatcher = INSTRUMENTATION_PROJECT_PATTERN.matcher(path);
+                if (instrumentationMatcher.matches()) {
                     setArtifactId(subproject, instrumentationMatcher.group(1) + "-" + instrumentationMatcher.group(2));
                     subproject.setGroup(subproject.getGroup() + "." + instrumentationMatcher.group(1));
                 }

@@ -14,7 +14,7 @@ androidx-core = "androidx.core:core:1.15.0"
 dsl-json = "com.dslplatform:dsl-json-java8:1.10.0"
 slf4j-api = "org.slf4j:slf4j-api:2.0.17"
 byteBuddy = { module = "net.bytebuddy:byte-buddy", version.ref = "byteBuddy" }
-opentelemetry-semconv = "io.opentelemetry.semconv:opentelemetry-semconv:1.31.0"
+opentelemetry-semconv = "io.opentelemetry.semconv:opentelemetry-semconv:1.32.0"
 opentelemetry-semconv-incubating = "io.opentelemetry.semconv:opentelemetry-semconv-incubating:1.30.0-alpha"
 opentelemetry-diskBuffering = { module = "io.opentelemetry.contrib:opentelemetry-disk-buffering", version.ref = "opentelemetry-contrib" }
 opentelemetry-exporter-otlp = { module = "io.opentelemetry:opentelemetry-exporter-otlp", version.ref = "opentelemetry" }

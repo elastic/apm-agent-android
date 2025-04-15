@@ -9,7 +9,7 @@ You can create your custom spans, metrics, and logs, via the [OpenTelemetry SDK 
 
 ## OpenTelemetry APIs
 
-After completing the [setup](/reference/getting-started.md) process, the agent will have configured an [OpenTelemetry](https://www.javadoc.io/doc/io.opentelemetry/opentelemetry-api/latest/io/opentelemetry/api/OpenTelemetry.html) object for you, which is available via its `getOpenTelemetry()` method. Here's an example of how to create telemetry with it.
+After completing the [setup](getting-started.md) process, the agent will have configured an [OpenTelemetry](https://www.javadoc.io/doc/io.opentelemetry/opentelemetry-api/latest/io/opentelemetry/api/OpenTelemetry.html) object for you, which is available via its `getOpenTelemetry()` method. Here's an example of how to create telemetry with it.
 
 ```kotlin
 fun myMethod() {

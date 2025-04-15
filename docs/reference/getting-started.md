@@ -83,21 +83,21 @@ Once your app has sent telemetry data, either [manually](manual-instrumentation.
 
 You should find your application listed there.
 
-:::{image} /reference/images/span-visualization/1.png
+:::{image} images/span-visualization/1.png
 :screenshot:
 :width: 350px
 :::
 
 When you open it, go to the **Transactions** tab, where you should see your app's "outermost" spans listed.
 
-:::{image} /reference/images/span-visualization/2.png
+:::{image} images/span-visualization/2.png
 :screenshot:
 :width: 350px
 :::
 
 After clicking on the span, you should see it in detail.
 
-:::{image} /reference/images/span-visualization/3.png
+:::{image} images/span-visualization/3.png
 :screenshot:
 :::
 

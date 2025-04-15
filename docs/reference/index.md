@@ -7,7 +7,7 @@ mapped_pages:
 
 # Introduction
 
-The Elastic OTel Android Agent is an [APM](https://en.wikipedia.org/wiki/Application_performance_management) agent based on [OpenTelemetry](https://opentelemetry.io/) ![alt](/reference/images/opentelemetry-logo.png "OpenTelemetry =16x16"). It provides built-in tools and configurations to make the [OpenTelemetry SDK](https://opentelemetry.io/docs/languages/java/) work with your {{stack}} using as little code as possible while fully leveraging the combined forces of [Elasticsearch](docs-content://get-started/index.md) and [Kibana](docs-content://get-started/the-stack.md) for your Android application.
+The Elastic OTel Android Agent is an [APM](https://en.wikipedia.org/wiki/Application_performance_management) agent based on [OpenTelemetry](https://opentelemetry.io/) ![alt](images/opentelemetry-logo.png "OpenTelemetry =16x16"). It provides built-in tools and configurations to make the [OpenTelemetry SDK](https://opentelemetry.io/docs/languages/java/) work with your {{stack}} using as little code as possible while fully leveraging the combined forces of [Elasticsearch](docs-content://get-started/index.md) and [Kibana](docs-content://get-started/the-stack.md) for your Android application.
 
 ## What can I do with it?
 
@@ -17,7 +17,7 @@ All the features provided by the [OpenTelemetry SDK](https://github.com/open-tel
 
 Distributed tracing allows you to see the full picture of **how long your application has to wait for your backend services** to provide a response (and why), as shown in the example below:
 
-:::{image} /reference/images/intro/distributed-tracing.png
+:::{image} images/intro/distributed-tracing.png
 :screenshot:
 :::
 

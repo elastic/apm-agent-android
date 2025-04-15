@@ -50,7 +50,7 @@ The export endpoint is where your app's telemetry is sent, so it's required to i
 
 ### For Serverless deployments
 
-On a [Serverless deployment](https://www.elastic.co/guide/en/serverless/current/intro.html), open {{kib}} and find **Add data** in the main menu. Alternatively, you can use the [global search field](https://www.elastic.co/docs/explore-analyze/find-and-organize/find-apps-and-objects) and search for "Observability Onboarding".
+On a [Serverless deployment](https://www.elastic.co/guide/en/serverless/current/intro.html), open {{kib}} and find **Add data** in the main menu. Alternatively, you can use the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md) and search for "Observability Onboarding".
 
 Then select **Application**, as shown below:
 

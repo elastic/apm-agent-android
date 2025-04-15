@@ -54,27 +54,23 @@ On a [Serverless deployment](https://www.elastic.co/guide/en/serverless/current/
 
 Then select **Application**, as shown below:
 
-:::{image} images/find-export-endpoint/1.png
-:screenshot:
-:::
+% TO DO: Use `:class: screenshot`
+![Add Observability data](images/find-export-endpoint/1.png)
 
 Choose **OpenTelemetry**:
 
-:::{image} images/find-export-endpoint/2.png
-:screenshot:
-:::
+% TO DO: Use `:class: screenshot`
+![Monitor with OpenTelemetry](images/find-export-endpoint/2.png)
 
 On the next page, select the **OpenTelemetry** tab, followed by **Managed OTLP Endpoint** under "Configure the OpenTelemetry SDK":
 
-:::{image} images/find-export-endpoint/3.png
-:screenshot:
-:::
+% TO DO: Use `:class: screenshot`
+![Configure the OpenTelemetry SDK](images/find-export-endpoint/3.png)
 
 Your export endpoint URL is the value for the **`OTEL_EXPORTER_OTLP_ENDPOINT`** configuration setting:
 
-:::{image} images/find-export-endpoint/4.png
-:screenshot:
-:::
+% TO DO: Use `:class: screenshot`
+![Set the OTEL_EXPORTER_OTLP_ENDPOINT](images/find-export-endpoint/4.png)
 
 ### For Cloud Hosted and self-managed deployments
 

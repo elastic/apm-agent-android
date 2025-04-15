@@ -79,25 +79,25 @@ agent.span("My Span") {
 
 ### Visualize telemetry
 
-Once your app has sent telemetry data, either [manually](manual-instrumentation.md) or [automatically](automatic-instrumentation.md), view it in {{kib}} by navigating to **Applications** → **Service Inventory** in the main menu, or alternatively, searching for "Service Inventory" in the [global search field](https://www.elastic.co/guide/en/kibana/current/introduction.html#kibana-navigation-search).
+Once your app has sent telemetry data, either [manually](manual-instrumentation.md) or [automatically](automatic-instrumentation.md), view it in {{kib}} by navigating to **Applications** → **Service Inventory** in the main menu, or alternatively, searching for "Service Inventory" in the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md).
 
 You should find your application listed there.
 
-:::{image} /reference/images/span-visualization/1.png
+:::{image} images/span-visualization/1.png
 :screenshot:
 :width: 350px
 :::
 
 When you open it, go to the **Transactions** tab, where you should see your app's "outermost" spans listed.
 
-:::{image} /reference/images/span-visualization/2.png
+:::{image} images/span-visualization/2.png
 :screenshot:
 :width: 350px
 :::
 
 After clicking on the span, you should see it in detail.
 
-:::{image} /reference/images/span-visualization/3.png
+:::{image} images/span-visualization/3.png
 :screenshot:
 :::
 

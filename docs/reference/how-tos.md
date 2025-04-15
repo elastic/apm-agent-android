@@ -50,7 +50,7 @@ The export endpoint is where your app's telemetry is sent, so it's required to i
 
 ### For Serverless deployments
 
-On a [Serverless deployment](https://www.elastic.co/guide/en/serverless/current/intro.html), open {{kib}} and find **Add data** in the main menu. Alternatively, you can use the [global search field](https://www.elastic.co/guide/en/kibana/current/introduction.html#kibana-navigation-search) and search for "Observability Onboarding".
+On a [Serverless deployment](https://www.elastic.co/guide/en/serverless/current/intro.html), open {{kib}} and find **Add data** in the main menu. Alternatively, you can use the [global search field](https://www.elastic.co/docs/explore-analyze/find-and-organize/find-apps-and-objects) and search for "Observability Onboarding".
 
 Then select **Application**, as shown below:
 
@@ -86,11 +86,11 @@ API Keys are the recommended way of authenticating the agent with your {{stack}}
 
 ### Use {{kib}}'s Applications UI
 
-This is the most straightforward approach. Follow [this quick guide](https://www.elastic.co/guide/en/observability/current/apm-api-key.html#apm-create-an-api-key) and leave all the settings with their default values.
+This is the most straightforward approach. Follow [this quick guide](https://www.elastic.co/docs/solutions/observability/apm/api-keys#apm-create-an-api-key) and leave all the settings with their default values.
 
 ### Use REST APIs
 
-Follow [this guide](https://www.elastic.co/guide/en/observability/current/apm-agent-key-api.html#apm-create-agent-key) to create an API Key with a set of privileges that are scoped for the APM Agent use case only.
+Follow [this guide](https://www.elastic.co/docs/api/doc/kibana/operation/operation-createagentkey) to create an API Key with a set of privileges that are scoped for the APM Agent use case only.
 
 ## How to provide config values from outside of my code?
 

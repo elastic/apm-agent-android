@@ -86,7 +86,7 @@ API Keys are the recommended way of authenticating the agent with your {{stack}}
 
 ### Use {{kib}}'s Applications UI
 
-This is the most straightforward approach. Follow [this quick guide](https://www.elastic.co/docs/solutions/observability/apm/api-keys#apm-create-an-api-key) and leave all the settings with their default values.
+This is the most straightforward approach. Follow [this quick guide](docs-content://solutions/observability/apm/api-keys.md#apm-create-an-api-key) and leave all the settings with their default values.
 
 ### Use REST APIs
 

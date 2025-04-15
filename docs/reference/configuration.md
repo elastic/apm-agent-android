@@ -32,7 +32,7 @@ class MyApp : android.app.Application {
 }
 ```
 
-1. This will be the name used by {{kib}} when listing your application on the [Services](https://www.elastic.co/docs/solutions/observability/apm/services) page. Defaults to `unknown`. See [why your app is referred to as a "service"](faq.md#why-service).
+1. This will be the name used by {{kib}} when listing your application on the [Services](docs-content://solutions/observability/apm/services.md) page. Defaults to `unknown`. See [why your app is referred to as a "service"](faq.md#why-service).
 2. Your app's version name. Defaults to the version provided [here](https://developer.android.com/reference/android/content/pm/PackageInfo#versionName).
 3. Typically your app's build type, flavor, backend environment, or maybe a combination of these. Any helpful distinction for you to better analyze your app's data later in {{kib}}.
 

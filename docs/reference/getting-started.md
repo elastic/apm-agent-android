@@ -79,7 +79,7 @@ agent.span("My Span") {
 
 ### Visualize telemetry
 
-Once your app has sent telemetry data, either [manually](manual-instrumentation.md) or [automatically](automatic-instrumentation.md), view it in {{kib}} by navigating to **Applications** → **Service Inventory** in the main menu, or alternatively, searching for "Service Inventory" in the [global search field](https://www.elastic.co/docs/explore-analyze/find-and-organize/find-apps-and-objects).
+Once your app has sent telemetry data, either [manually](manual-instrumentation.md) or [automatically](automatic-instrumentation.md), view it in {{kib}} by navigating to **Applications** → **Service Inventory** in the main menu, or alternatively, searching for "Service Inventory" in the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md).
 
 You should find your application listed there.
 

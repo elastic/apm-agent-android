@@ -56,7 +56,7 @@ class MyApp : android.app.Application {
 ```
 
 1. Your endpoint URL. If you don't have one yet, check out [how to find it](how-tos.md#get-export-endpoint).
-2. Your authentication method. You can use either an [API Key](https://www.elastic.co/docs/solutions/observability/apm/api-keys), a [Secret token](https://www.elastic.co/docs/solutions/observability/apm/secret-token), or none; defaults to `None`. API Keys are the recommended method, if you don't have one yet, check out [how to create one](how-tos.md#create-api-key).
+2. Your authentication method. You can use either an [API Key](docs-content://solutions/observability/apm/api-keys.md), a [Secret token](docs-content://solutions/observability/apm/secret-token.md), or none; defaults to `None`. API Keys are the recommended method, if you don't have one yet, check out [how to create one](how-tos.md#create-api-key).
 3. The protocol used to communicate with your endpoint. It can be either `HTTP` or `gRPC`. Defaults to `HTTP`.
 
 :::{include} _snippets/tip-provide-values-from-outside.md

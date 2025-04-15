@@ -83,23 +83,20 @@ Once your app has sent telemetry data, either [manually](manual-instrumentation.
 
 You should find your application listed there.
 
-:::{image} images/span-visualization/1.png
-:screenshot:
-:width: 350px
-:::
+% TO DO: Use `:class: screenshot`
+% TO DO: Use `:width: 350px`
+![Services](images/span-visualization/1.png)
 
 When you open it, go to the **Transactions** tab, where you should see your app's "outermost" spans listed.
 
-:::{image} images/span-visualization/2.png
-:screenshot:
-:width: 350px
-:::
+% TO DO: Use `:class: screenshot`
+% TO DO: Use `:width: 350px`
+![Transactions tab](images/span-visualization/2.png)
 
 After clicking on the span, you should see it in detail.
 
-:::{image} images/span-visualization/3.png
-:screenshot:
-:::
+% TO DO: Use `:class: screenshot`
+![Trace sample](images/span-visualization/3.png)
 
 ## What’s next? [whats-next]
 

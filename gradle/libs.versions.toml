@@ -3,7 +3,7 @@ opentelemetry = "1.49.0"
 opentelemetry-contrib = "1.43.0-alpha"
 byteBuddy = "1.17.5"
 kotlin = "2.1.20"
-android = "8.9.2"
+android = "8.10.0"
 autoService = "1.1.1"
 
 [libraries]

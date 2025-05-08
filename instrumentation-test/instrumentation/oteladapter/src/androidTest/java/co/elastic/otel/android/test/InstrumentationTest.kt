@@ -1,7 +1,8 @@
 package co.elastic.otel.android.test
 
-import android.util.Log
+import androidx.test.core.app.launchActivity
 import co.elastic.otel.android.test.rule.AndroidTestAgentRule
+import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat
 import java.util.concurrent.TimeUnit
 import org.junit.Rule
@@ -14,10 +15,16 @@ class InstrumentationTest {
 
     @Test
     fun verifyAndroidLogsAreInstrumented() {
-        Log.d("elastic", "My log")
+        launchActivity<MainActivity>().onActivity {
+            agentRule.flushLogs().join(5, TimeUnit.SECONDS)
 
-        agentRule.flushLogs().join(5, TimeUnit.SECONDS)
-
-        assertThat(agentRule.getFinishedLogRecords()).hasSize(1)
+            val finishedLogRecords = agentRule.getFinishedLogRecords()
+            assertThat(finishedLogRecords).hasSize(1)
+            assertThat(finishedLogRecords.first())
+                .hasBody("My log")
+                .hasAttributesSatisfying {
+                    assertThat(it.get(AttributeKey.stringKey("android.log.tag"))).isEqualTo("elastic")
+                }
+        }
     }
 }

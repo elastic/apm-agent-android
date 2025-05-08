@@ -18,6 +18,7 @@
  */
 package co.elastic.otel.android.oteladapter
 
+import co.elastic.otel.android.instrumentation.generated.oteladapter.BuildConfig
 import co.elastic.otel.android.plugin.ElasticAgentPlugin
 import co.elastic.otel.android.plugin.internal.InstrumentationPlugin
 import org.gradle.api.Project
@@ -25,6 +26,9 @@ import org.gradle.api.Project
 class ExperimentalOtelAdapterPlugin : InstrumentationPlugin() {
 
     override fun onApply(target: Project, agentPlugin: ElasticAgentPlugin) {
-
+        target.dependencies.add(
+            "implementation",
+            target.dependencies.create(BuildConfig.LIBRARY_URI)
+        )
     }
 }

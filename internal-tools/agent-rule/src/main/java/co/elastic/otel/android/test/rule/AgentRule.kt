@@ -67,6 +67,10 @@ abstract class AgentRule : TestRule {
         return agent!!.flushSpans()
     }
 
+    fun flushLogs(): CompletableResultCode {
+        return agent!!.flushLogRecords()
+    }
+
     private fun createAgent(application: Application): ManagedElasticOtelAgent {
         val serviceManager = ServiceManager.create(application)
         val features = ManagedElasticOtelAgent.ManagedFeatures.Builder(application)

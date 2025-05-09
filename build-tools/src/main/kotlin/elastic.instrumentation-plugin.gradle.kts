@@ -47,11 +47,16 @@ abstract class InstrumentationPluginConfig @Inject constructor(
     private val projectDescription: String,
     private val parentProjectName: String
 ) {
-    fun create(id: String = parentProjectName, action: Action<PluginDeclaration>) {
+    fun create(
+        id: String = parentProjectName,
+        extraTags: List<String> = emptyList(),
+        action: Action<PluginDeclaration>
+    ) {
         val pluginDeclaration = gradlePlugin.plugins.create("${id}Instrumentation")
         pluginDeclaration.id = "co.elastic.otel.android.instrumentation.$id"
         pluginDeclaration.description = projectDescription
         pluginDeclaration.tags.addAll("Android", "APM", "Elastic", "ELK", "opentelemetry")
+        pluginDeclaration.tags.addAll(extraTags)
         action.execute(pluginDeclaration)
     }
 }

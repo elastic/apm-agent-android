@@ -42,6 +42,10 @@ public class ApmPublisherRootPlugin implements Plugin<Project> {
                     setArtifactId(subproject, instrumentationMatcher.group(1) + "-" + instrumentationMatcher.group(2));
                     subproject.setGroup(subproject.getGroup() + "." + instrumentationMatcher.group(1));
                 }
+                if ("true".equals(subproject.findProperty("elastic.experimental"))) {
+                    subproject.setVersion(subproject.getVersion() + "-alpha");
+                }
+
                 subproject.getPluginManager().withPlugin("java-library", appliedPlugin -> configureProject(project, subproject));
                 subproject.getPluginManager().withPlugin("com.android.library", appliedPlugin -> configureProject(project, subproject));
             }

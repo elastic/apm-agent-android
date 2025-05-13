@@ -33,7 +33,7 @@ import io.opentelemetry.contrib.disk.buffering.MetricFromDiskExporter
 import io.opentelemetry.contrib.disk.buffering.MetricToDiskExporter
 import io.opentelemetry.contrib.disk.buffering.SpanFromDiskExporter
 import io.opentelemetry.contrib.disk.buffering.SpanToDiskExporter
-import io.opentelemetry.contrib.disk.buffering.StorageConfiguration
+import io.opentelemetry.contrib.disk.buffering.config.StorageConfiguration
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.trace.export.SpanExporter
@@ -133,8 +133,7 @@ internal class DiskBufferingManager private constructor(
                 toDiskMetricExporter = interceptedMetricExporter?.let {
                     MetricToDiskExporter.create(
                         it,
-                        storageConfiguration,
-                        it::getAggregationTemporality
+                        storageConfiguration
                     )
                 }
                 enableDiskBuffering(configuration.enabled)

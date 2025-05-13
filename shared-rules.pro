@@ -4,6 +4,7 @@
 -keepclassmembers enum co.elastic.otel.android.** {
     public static **[] values();
 }
+-keep class io.opentelemetry.api.incubator.** { *; }
 -dontwarn com.fasterxml.jackson.**
 -dontwarn com.google.auto.service.AutoService
 -dontwarn com.google.auto.value.**

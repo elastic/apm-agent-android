@@ -19,7 +19,7 @@
 package co.elastic.otel.android.internal.features.persistence
 
 import co.elastic.otel.android.internal.time.SystemTimeProvider
-import io.opentelemetry.contrib.disk.buffering.internal.files.TemporaryFileProvider
+import io.opentelemetry.contrib.disk.buffering.config.TemporaryFileProvider
 import java.io.File
 
 /**

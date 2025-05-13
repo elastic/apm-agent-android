@@ -10,5 +10,35 @@
     ".github/actions/**",
     ".github/workflows/*",
     "sample-app/backend/**"
+  ],
+  "packageRules": [
+    {
+      "matchPackageNames": [
+        "io.opentelemetry:**"
+      ],
+      "ignoreUnstable": false,
+      "groupName": "otel-core"
+    },
+    {
+      "matchPackageNames": [
+        "io.opentelemetry.contrib:**"
+      ],
+      "ignoreUnstable": false,
+      "groupName": "otel-contrib"
+    },
+    {
+      "matchPackageNames": [
+        "io.opentelemetry.semconv:**"
+      ],
+      "ignoreUnstable": false,
+      "groupName": "otel-semconv"
+    },
+    {
+      "matchPackageNames": [
+        "io.opentelemetry.instrumentation:**"
+      ],
+      "ignoreUnstable": false,
+      "groupName": "otel-instrumentation"
+    }
   ]
 }

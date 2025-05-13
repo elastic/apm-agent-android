@@ -7,14 +7,14 @@
 -keepnames class io.opentelemetry.sdk.OpenTelemetrySdkBuilder { build();setTracerProvider(io.opentelemetry.sdk.trace.SdkTracerProvider);setLoggerProvider(io.opentelemetry.sdk.logs.SdkLoggerProvider);setMeterProvider(io.opentelemetry.sdk.metrics.SdkMeterProvider); }
 -keepnames class io.opentelemetry.sdk.trace.SdkTracerProvider { builder(); }
 -keepnames class io.opentelemetry.sdk.trace.SdkTracerProviderBuilder { addSpanProcessor(io.opentelemetry.sdk.trace.SpanProcessor);build(); }
--keepnames class io.opentelemetry.api.trace.SpanBuilder { setAllAttributes(io.opentelemetry.api.common.Attributes); }
 -keepnames class io.opentelemetry.sdk.metrics.SdkMeterProvider { builder(); }
 -keepnames class io.opentelemetry.sdk.metrics.SdkMeterProviderBuilder { build();registerMetricReader(io.opentelemetry.sdk.metrics.export.MetricReader); }
 -keepnames class io.opentelemetry.sdk.logs.SdkLoggerProvider { builder(); }
 -keepnames class io.opentelemetry.sdk.logs.SdkLoggerProviderBuilder { build();addLogRecordProcessor(io.opentelemetry.sdk.logs.LogRecordProcessor); }
 -keepnames class io.opentelemetry.api.common.Attributes { builder(); }
--keepnames class io.opentelemetry.api.common.AttributesBuilder { put(java.lang.String,java.lang.String); }
 -keepnames class io.opentelemetry.context.ImplicitContextKeyed { makeCurrent(); }
+-keepclassmembers class io.opentelemetry.api.trace.SpanBuilder { setAllAttributes(io.opentelemetry.api.common.Attributes); }
+-keepclassmembers class io.opentelemetry.api.common.AttributesBuilder { put(java.lang.String,java.lang.String);build(); }
 -keepclassmembers class io.opentelemetry.sdk.metrics.export.PeriodicMetricReader { builder(io.opentelemetry.sdk.metrics.export.MetricExporter);forceFlush(); }
 -keepclassmembers class io.opentelemetry.api.metrics.LongCounter { add(long); }
 -keepclassmembers class io.opentelemetry.api.OpenTelemetry { getTracer(java.lang.String);getLogsBridge();getMeter(java.lang.String); }

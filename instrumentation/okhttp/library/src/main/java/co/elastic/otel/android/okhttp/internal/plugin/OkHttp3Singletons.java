@@ -58,7 +58,7 @@ public final class OkHttp3Singletons {
                                 PeerServiceAttributesExtractor.create(
                                         OkHttpAttributesGetter.INSTANCE,
                                         PeerServiceResolver.create(Collections.emptyMap())))
-                        .setEmitExperimentalHttpClientMetrics(false)
+                        .setEmitExperimentalHttpClientTelemetry(false)
                         .build();
         CONNECTION_ERROR_INTERCEPTOR = new ConnectionErrorSpanInterceptor(instrumenter);
         TRACING_INTERCEPTOR = new TracingInterceptor(instrumenter, openTelemetry.getPropagators());

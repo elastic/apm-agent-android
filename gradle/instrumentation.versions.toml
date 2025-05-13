@@ -1,5 +1,5 @@
 [versions]
-opentelemetry-instrumentation-alpha = "2.12.0-alpha"
+opentelemetry-instrumentation-alpha = "2.15.0-alpha"
 
 [libraries]
 opentelemetry-instrumentation-api = "io.opentelemetry.instrumentation:opentelemetry-instrumentation-api:2.15.0"

@@ -4,5 +4,4 @@ plugins {
 
 dependencies {
     api(libs.opentelemetry.sdk)
-    implementation(libs.opentelemetry.api.incubator)
 }

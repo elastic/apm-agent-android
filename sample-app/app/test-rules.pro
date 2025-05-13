@@ -1,3 +1,4 @@
+-dontoptimize
 -keepnames class io.opentelemetry.sdk.metrics.export.PeriodicMetricReaderBuilder { build(); }
 -keepnames class io.opentelemetry.sdk.trace.export.BatchSpanProcessor { builder(io.opentelemetry.sdk.trace.export.SpanExporter); }
 -keepnames class io.opentelemetry.sdk.trace.export.BatchSpanProcessorBuilder { build(); }

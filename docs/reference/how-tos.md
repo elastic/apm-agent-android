@@ -74,7 +74,7 @@ Your export endpoint URL is the value for the **`OTEL_EXPORTER_OTLP_ENDPOINT`** 
 
 ### For Cloud Hosted and self-managed deployments
 
-For [Cloud Hosted](https://www.elastic.co/guide/en/cloud/current/ec-getting-started.html) and [self-managed](https://www.elastic.co/guide/en/elastic-stack/current/overview.html) deployments, the export endpoint (also known as [EDOT Collector](https://elastic.github.io/opentelemetry/edot-collector/index.html)) is not available out of the box at the moment. You can still create your own service by following [creating and configuring a standalone EDOT Collector](https://elastic.github.io/opentelemetry/edot-collector/config/default-config-standalone.html).
+For [Cloud Hosted](https://www.elastic.co/guide/en/cloud/current/ec-getting-started.html) and [self-managed](https://www.elastic.co/guide/en/elastic-stack/current/overview.html) deployments, the export endpoint (also known as [EDOT Collector](https://www.elastic.co/docs/reference/opentelemetry/edot-collector/index.html)) is not available out of the box at the moment. You can still create your own service by following [creating and configuring a standalone EDOT Collector](https://www.elastic.co/docs/reference/opentelemetry/edot-collector/config/default-config-standalone.html).
 
 ## How to create an API Key [create-api-key]
 

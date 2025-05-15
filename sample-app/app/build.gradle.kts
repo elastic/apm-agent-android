@@ -49,7 +49,7 @@ android {
 }
 
 dependencies {
-    val retrofitVersion = "2.11.0"
+    val retrofitVersion = "2.12.0"
     implementation("androidx.navigation:navigation-fragment-ktx:2.9.0")
     implementation("androidx.navigation:navigation-ui-ktx:2.9.0")
     implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")

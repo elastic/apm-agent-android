@@ -4,7 +4,6 @@ products:
 cross_links:
   - docs-content
 toc:
-  - toc: reference
   - toc: release-notes
 subs:
   ecloud:   "Elastic Cloud"

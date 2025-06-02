@@ -34,7 +34,6 @@ import co.elastic.otel.android.test.common.ElasticAttributes.getSpanDefaultAttri
 import co.elastic.otel.android.test.exporter.InMemoryExporterProvider
 import co.elastic.otel.android.test.processor.SimpleProcessorFactory
 import co.elastic.otel.android.testutils.DummySntpClient
-import co.elastic.otel.android.testutils.WireMockRule
 import io.mockk.Runs
 import io.mockk.clearMocks
 import io.mockk.every
@@ -63,7 +62,6 @@ import org.awaitility.core.ConditionTimeoutException
 import org.awaitility.kotlin.await
 import org.junit.After
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -79,9 +77,6 @@ class ManagedElasticOtelAgentTest {
         private val SPAN_DEFAULT_ATTRIBUTES = getSpanDefaultAttributes()
         private val LOG_DEFAULT_ATTRIBUTES = getLogRecordDefaultAttributes()
     }
-
-    @get:Rule
-    val wireMockRule = WireMockRule()
 
     @Before
     fun setUp() {

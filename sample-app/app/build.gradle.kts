@@ -56,4 +56,5 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:$retrofitVersion")
     androidTestImplementation("co.elastic.otel.android:otel-test-common")
     androidTestImplementation(instrumentationLibs.bundles.androidTest)
+    androidTestImplementation(instrumentationLibs.mockWebServer)
 }

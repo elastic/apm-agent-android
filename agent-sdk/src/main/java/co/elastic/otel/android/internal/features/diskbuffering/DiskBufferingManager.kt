@@ -23,6 +23,7 @@ import co.elastic.otel.android.internal.exporters.configurable.MutableLogRecordE
 import co.elastic.otel.android.internal.exporters.configurable.MutableMetricExporter
 import co.elastic.otel.android.internal.exporters.configurable.MutableSpanExporter
 import co.elastic.otel.android.internal.features.diskbuffering.tools.DiskManager
+import co.elastic.otel.android.internal.features.diskbuffering.tools.ExtendedDelegateLogRecordExporter
 import co.elastic.otel.android.internal.features.exportergate.ExporterGateManager
 import co.elastic.otel.android.internal.features.persistence.SimpleTemporaryFileProvider
 import co.elastic.otel.android.internal.services.ServiceManager
@@ -190,7 +191,10 @@ internal class DiskBufferingManager private constructor(
         }
         interceptedLogRecordExporter?.let {
             builder.setLogRecordFromDiskExporter(
-                LogRecordFromDiskExporter.create(it, storageConfiguration)
+                LogRecordFromDiskExporter.create(
+                    ExtendedDelegateLogRecordExporter(it),
+                    storageConfiguration
+                )
             )
         }
         interceptedMetricExporter?.let {

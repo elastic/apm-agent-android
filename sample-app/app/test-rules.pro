@@ -21,4 +21,5 @@
 -keepclassmembers class io.opentelemetry.api.OpenTelemetry { getTracer(java.lang.String);getLogsBridge();getMeter(java.lang.String); }
 -keepclassmembers class io.opentelemetry.sdk.common.CompletableResultCode { join(long,java.util.concurrent.TimeUnit);ofSuccess(); }
 -keep class kotlin.** { *; }
+-keep class okhttp3.** { *; }
 -keep class androidx.tracing.** { *; }

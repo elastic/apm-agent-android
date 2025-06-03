@@ -728,24 +728,18 @@ class ElasticApmAgentTest {
         )
     }
 
-    private fun simpleAgentBuilder(
-        url: String,
-        diskBufferingConfiguration: DiskBufferingConfiguration = DiskBufferingConfiguration.disabled()
-    ): ElasticApmAgent.Builder {
+    private fun simpleAgentBuilder(url: String): ElasticApmAgent.Builder {
         return ElasticApmAgent.builder(RuntimeEnvironment.getApplication())
             .setProcessorFactory(simpleProcessorFactory)
-            .setDiskBufferingConfiguration(diskBufferingConfiguration)
+            .setDiskBufferingConfiguration(DiskBufferingConfiguration.disabled())
             .setExportUrl(url)
             .apply {
                 internalSntpClient = DummySntpClient()
             }
     }
 
-    private fun inMemoryAgentBuilder(
-        url: String = "http://none",
-        diskBufferingConfiguration: DiskBufferingConfiguration = DiskBufferingConfiguration.disabled()
-    ): ElasticApmAgent.Builder {
-        return simpleAgentBuilder(url, diskBufferingConfiguration)
+    private fun inMemoryAgentBuilder(url: String = "http://none"): ElasticApmAgent.Builder {
+        return simpleAgentBuilder(url)
             .apply {
                 internalExporterProviderInterceptor = inMemoryExportersInterceptor
             }

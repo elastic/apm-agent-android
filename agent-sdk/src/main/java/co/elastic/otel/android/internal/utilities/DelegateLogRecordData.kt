@@ -19,18 +19,22 @@
 package co.elastic.otel.android.internal.utilities
 
 import io.opentelemetry.api.common.Attributes
+import io.opentelemetry.api.incubator.common.ExtendedAttributes
 import io.opentelemetry.api.logs.Severity
 import io.opentelemetry.api.trace.SpanContext
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo
 import io.opentelemetry.sdk.logs.data.Body
 import io.opentelemetry.sdk.logs.data.LogRecordData
+import io.opentelemetry.sdk.logs.data.internal.ExtendedLogRecordData
 import io.opentelemetry.sdk.resources.Resource
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-internal open class DelegateLogRecordData(private val delegate: LogRecordData) : LogRecordData {
+internal open class DelegateLogRecordData(private val delegate: LogRecordData) :
+// TODO - Use LogRecordData after opentelemetry-java/issues/7363 is fixed.
+    ExtendedLogRecordData {
 
     override fun getResource(): Resource {
         return delegate.resource
@@ -70,5 +74,10 @@ internal open class DelegateLogRecordData(private val delegate: LogRecordData) :
 
     override fun getTotalAttributeCount(): Int {
         return delegate.totalAttributeCount
+    }
+
+    // TODO - Remove after opentelemetry-java/issues/7363 is fixed.
+    override fun getExtendedAttributes(): ExtendedAttributes {
+        return ExtendedAttributes.builder().putAll(attributes).build()
     }
 }

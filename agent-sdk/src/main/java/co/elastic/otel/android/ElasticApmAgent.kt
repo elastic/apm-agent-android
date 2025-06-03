@@ -139,6 +139,7 @@ class ElasticApmAgent internal constructor(
         private var diskBufferingConfiguration: DiskBufferingConfiguration? = null
         private var loggingPolicy: LoggingPolicy? = null
         private var httpSpanInterceptor: Interceptor<SpanData>? = HttpSpanNameInterceptor()
+        private var sessionSampleRate: Double = 1.0
         private val managedAgentBuilder = ManagedElasticOtelAgent.Builder()
         internal var internalExporterProviderInterceptor: Interceptor<ExporterProvider> =
             Interceptor.noop()
@@ -276,8 +277,8 @@ class ElasticApmAgent internal constructor(
          * whether the new session will be sampled or not. Only values between `0.0` and `1.0` are allowed.
          * Defaults to `1.0`.
          */
-        fun setSessionSampleRate(sampleRate: Double) = apply {
-
+        fun setSessionSampleRate(value: Double) = apply {
+            sessionSampleRate = value
         }
 
         internal fun setSessionIdGenerator(value: SessionIdGenerator) = apply {
@@ -358,18 +359,20 @@ class ElasticApmAgent internal constructor(
             centralConfigurationManager: CentralConfigurationManager?,
             managedFeatures: ManagedElasticOtelAgent.ManagedFeatures
         ): SampleRateManager? {
-            return centralConfigurationManager?.let {
-                val manager = SampleRateManager.create(
-                    serviceManager,
-                    managedFeatures.exporterGateManager,
-                    it.getCentralConfiguration()
-                )
-                managedFeatures.sessionManager.addListener(manager)
-                managedFeatures.conditionalDropManager.dropWhen {
-                    !manager.allowSignalExporting()
-                }
-                manager
+            if (centralConfigurationManager == null && sessionSampleRate == 1.0) {
+                return null
             }
+            val manager = SampleRateManager.create(
+                serviceManager,
+                managedFeatures.exporterGateManager,
+                centralConfigurationManager?.getCentralConfiguration(),
+                sessionSampleRate
+            )
+            managedFeatures.sessionManager.addListener(manager)
+            managedFeatures.conditionalDropManager.dropWhen {
+                !manager.allowSignalExporting()
+            }
+            return manager
         }
 
         private fun configureCentralConfigurationManager(

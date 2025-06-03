@@ -18,6 +18,7 @@
  */
 package co.elastic.otel.android.internal.configuration
 
+import java.util.Optional
 import org.stagemonitor.configuration.ConfigurationOptionProvider
 
 /**
@@ -27,18 +28,12 @@ import org.stagemonitor.configuration.ConfigurationOptionProvider
 internal abstract class Configuration : ConfigurationOptionProvider() {
     private val options by lazy { mutableListOf<ConfigurationOption<*>>() }
 
-    protected fun createBooleanOption(
-        key: String,
-        defaultValue: Boolean
-    ): ConfigurationOption<Boolean> {
-        return register(ConfigurationOption.booleanOption(key, defaultValue))
+    protected fun createBooleanOption(key: String): ConfigurationOption<Optional<Boolean>> {
+        return register(ConfigurationOption.booleanOption(key))
     }
 
-    protected fun createDoubleOption(
-        key: String,
-        defaultValue: Double
-    ): ConfigurationOption<Double> {
-        return register(ConfigurationOption.doubleOption(key, defaultValue))
+    protected fun createDoubleOption(key: String): ConfigurationOption<Optional<Double>> {
+        return register(ConfigurationOption.doubleOption(key))
     }
 
     private fun <T> register(option: ConfigurationOption<T>): ConfigurationOption<T> {

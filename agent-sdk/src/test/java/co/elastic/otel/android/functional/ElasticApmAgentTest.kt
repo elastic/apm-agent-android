@@ -632,6 +632,83 @@ class ElasticApmAgentTest {
         assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
+
+        // Next: Setting sample rate during initialization without central config
+        closeAgent()
+        agent = inMemoryAgentBuilder(wireMockRule.url("/"))
+            .setSessionSampleRate(0.0)
+            .build()
+
+        sendSpan()
+        sendLog()
+        sendMetric()
+
+        awaitForOpenGates()
+
+        assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
+
+        // Next: Setting sample rate during initialization with central config
+        closeAgent()
+        wireMockRule.stubAllHttpResponses {
+            withStatus(200)
+                .withBody("""{"session_sample_rate":"1.0"}""")
+                .withHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
+        }
+        agent = inMemoryAgentBuilder(wireMockRule.url("/"))
+            .setSessionSampleRate(0.0)
+            .setManagementUrl(wireMockRule.url("/config/"))
+            .build()
+
+        wireMockRule.takeRequest() // Await for first central config response
+        // Prepare next poll to fail
+        wireMockRule.stubAllHttpResponses {
+            withStatus(200)
+            withBody("Not a json")
+        }
+
+        sendSpan()
+        sendLog()
+        sendMetric()
+
+        awaitForOpenGates()
+
+        // These values reflect the provided config during initialization (0.0)
+        assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
+
+        // Force refresh session to trigger sampling rate evaluation
+        agent.getSessionManager().clearSession()
+        inMemoryExporters.resetExporters()
+
+        sendSpan()
+        sendLog()
+        sendMetric()
+
+        // These values reflect the central config.
+        assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
+
+        // When central config doesn't provide a sample rate value, check that the behaviour
+        // is based on the value provided in during initialization (0.0).
+        wireMockRule.takeRequest() // Await for central config response
+
+        // Force refresh session to trigger sampling rate evaluation
+        agent.getSessionManager().clearSession()
+        inMemoryExporters.resetExporters()
+
+        sendSpan()
+        sendLog()
+        sendMetric()
+
+        // These values reflect the provided config during initialization (0.0) which is used
+        // when no central config value is present.
+        assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
     }
 
     @Test

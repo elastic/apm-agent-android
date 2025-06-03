@@ -271,6 +271,15 @@ class ElasticApmAgent internal constructor(
             httpSpanInterceptor = value
         }
 
+        /**
+         * This value will get evaluated on every session creation to decide
+         * whether the new session will be sampled or not. Only values between `0.0` and `1.0` are allowed.
+         * Defaults to `1.0`.
+         */
+        fun setSessionSampleRate(sampleRate: Double) = apply {
+
+        }
+
         internal fun setSessionIdGenerator(value: SessionIdGenerator) = apply {
             sessionIdGenerator = value
         }

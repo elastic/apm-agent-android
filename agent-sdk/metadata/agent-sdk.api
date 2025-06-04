@@ -27,6 +27,7 @@ public final class co/elastic/otel/android/ElasticApmAgent$Builder {
 	public final fun setResourceInterceptor (Lco/elastic/otel/android/interceptor/Interceptor;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
 	public final fun setServiceName (Ljava/lang/String;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
 	public final fun setServiceVersion (Ljava/lang/String;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
+	public final fun setSessionSampleRate (D)Lco/elastic/otel/android/ElasticApmAgent$Builder;
 }
 
 public final class co/elastic/otel/android/ElasticApmAgent$Companion {

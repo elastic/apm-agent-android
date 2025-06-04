@@ -53,6 +53,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.fail
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
@@ -725,6 +726,28 @@ class ElasticApmAgentTest {
         assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
         assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()
         assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
+    }
+
+    @Test
+    fun `Validating session sample rate provided value`() {
+        val builder = inMemoryAgentBuilder()
+
+        // These should work fine
+        builder.setSessionSampleRate(0.0)
+        builder.setSessionSampleRate(0.5)
+        builder.setSessionSampleRate(1.0)
+
+        // These should fail
+        try {
+            builder.setSessionSampleRate(-0.1)
+            fail("The provided value is not valid, so it should fail.")
+        } catch (ignored: IllegalArgumentException) {
+        }
+        try {
+            builder.setSessionSampleRate(1.1)
+            fail("The provided value is not valid, so it should fail.")
+        } catch (ignored: IllegalArgumentException) {
+        }
     }
 
     @Test

@@ -278,6 +278,9 @@ class ElasticApmAgent internal constructor(
          * Defaults to `1.0`.
          */
         fun setSessionSampleRate(value: Double) = apply {
+            if (value < 0 || value > 1) {
+                throw IllegalArgumentException("Only values between 0.0 and 1.0 are allowed for the session sample rate. The provided value is: '$value'")
+            }
             sessionSampleRate = value
         }
 

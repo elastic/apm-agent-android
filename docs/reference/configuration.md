@@ -62,6 +62,25 @@ class MyApp : android.app.Application {
 :::{include} _snippets/tip-provide-values-from-outside.md
 :::
 
+### Session behavior
+
+You can configure how [sessions](index.md#session) work. For example:
+
+```kotlin
+class MyApp : android.app.Application {
+
+    override fun onCreate() {
+        super.onCreate()
+        val agent = ElasticApmAgent.builder(this)
+            .setSessionSampleRate(1.0) // <1>
+            // ...
+            .build()
+    }
+}
+```
+
+1. From version 1.1.0, you can provide your sample rate value. The value gets evaluated on every new session creation to determine whether the next session is sampled or not. When a session is not sampled, none of its signals are exported. Default value is `1.0`.
+
 ### Intercepting export request headers
 
 You can provide an interceptor for the signals' export request headers, where you can read/modify them if needed.

@@ -42,8 +42,10 @@ import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.sdk.common.CompletableResultCode
 import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat
 import java.time.Duration
+import java.util.Optional
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.jvm.optionals.getOrNull
 import org.awaitility.core.ConditionTimeoutException
 import org.awaitility.kotlin.await
 import org.junit.After
@@ -51,6 +53,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.fail
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
@@ -618,7 +621,7 @@ class ElasticApmAgentTest {
 
         // When central config fails and the session gets reset, go with default behavior.
         wireMockRule.takeRequest()
-        awaitForCentralConfigurationValues(ExpectedCentralConfiguration(true, 1.0))
+        awaitForCentralConfigurationValues(ExpectedCentralConfiguration())
 
         agent.getSessionManager().clearSession()
         inMemoryExporters.resetExporters()
@@ -632,6 +635,119 @@ class ElasticApmAgentTest {
         assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
+
+        // Next: Setting sample rate during initialization without central config
+        closeAgent()
+        agent = inMemoryAgentBuilder(wireMockRule.url("/"))
+            .setSessionSampleRate(0.0)
+            .build()
+
+        // Force refresh session to trigger sampling rate evaluation
+        agent.getSessionManager().clearSession()
+
+        sendSpan()
+        sendLog()
+        sendMetric()
+
+        awaitForOpenGates()
+
+        assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
+
+        // Next: Setting sample rate during initialization with central config
+        closeAgent()
+        wireMockRule.stubAllHttpResponses {
+            withStatus(200)
+                .withBody("{}")
+                .withHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
+        }
+        agent = inMemoryAgentBuilder(wireMockRule.url("/"))
+            .setSessionSampleRate(0.0)
+            .setManagementUrl(wireMockRule.url("/config/"))
+            .build()
+
+        wireMockRule.takeRequest() // Await for first central config response
+        // Prepare next poll to contain sample rate
+        wireMockRule.stubAllHttpResponses {
+            withStatus(200)
+                .withBody("""{"session_sample_rate":"1.0"}""")
+                .withHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
+        }
+
+        // Force refresh session to trigger sampling rate evaluation
+        agent.getSessionManager().clearSession()
+
+        sendSpan()
+        sendLog()
+        sendMetric()
+
+        awaitForOpenGates()
+
+        // These values reflect the provided config during initialization (0.0)
+        assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
+
+        wireMockRule.takeRequest() // Await for second central config response
+        // Prepare next poll to provide invalid config
+        wireMockRule.stubAllHttpResponses {
+            withStatus(200)
+                .withBody("Not a json")
+        }
+
+        // Force refresh session to trigger sampling rate evaluation
+        agent.getSessionManager().clearSession()
+        inMemoryExporters.resetExporters()
+
+        sendSpan()
+        sendLog()
+        sendMetric()
+
+        // These values reflect the central config.
+        assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
+
+        // When central config doesn't provide a sample rate value, check that the behaviour
+        // is based on the value provided in during initialization (0.0).
+        wireMockRule.takeRequest() // Await for central config response with invalid config
+
+        // Force refresh session to trigger sampling rate evaluation
+        agent.getSessionManager().clearSession()
+        inMemoryExporters.resetExporters()
+
+        sendSpan()
+        sendLog()
+        sendMetric()
+
+        // These values reflect the provided config during initialization (0.0) which is used
+        // when no central config value is present.
+        assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
+    }
+
+    @Test
+    fun `Validating session sample rate provided value`() {
+        val builder = inMemoryAgentBuilder()
+
+        // These should work fine
+        builder.setSessionSampleRate(0.0)
+        builder.setSessionSampleRate(0.5)
+        builder.setSessionSampleRate(1.0)
+
+        // These should fail
+        try {
+            builder.setSessionSampleRate(-0.1)
+            fail("The provided value is not valid, so it should fail.")
+        } catch (ignored: IllegalArgumentException) {
+        }
+        try {
+            builder.setSessionSampleRate(1.1)
+            fail("The provided value is not valid, so it should fail.")
+        } catch (ignored: IllegalArgumentException) {
+        }
     }
 
     @Test
@@ -804,8 +920,9 @@ class ElasticApmAgentTest {
             agent.getCentralConfigurationManager()!!.getCentralConfiguration()
 
         try {
+            val optionalSessionSampleRate = Optional.ofNullable(expectedValue.sessionSampleRate)
             await.atMost(Duration.ofSeconds(waitSeconds.toLong())).until {
-                centralConfiguration.getSessionSampleRate() == expectedValue.sessionSampleRate &&
+                centralConfiguration.getSessionSampleRate() == optionalSessionSampleRate &&
                         centralConfiguration.isRecording() == expectedValue.recording
             }
         } catch (e: ConditionTimeoutException) {
@@ -813,7 +930,7 @@ class ElasticApmAgentTest {
                 "Configuration: ${
                     ExpectedCentralConfiguration(
                         centralConfiguration.isRecording(),
-                        centralConfiguration.getSessionSampleRate()
+                        centralConfiguration.getSessionSampleRate().getOrNull()
                     )
                 }"
             )
@@ -823,6 +940,6 @@ class ElasticApmAgentTest {
 
     private data class ExpectedCentralConfiguration(
         val recording: Boolean = true,
-        val sessionSampleRate: Double = 1.0
+        val sessionSampleRate: Double? = null
     )
 }

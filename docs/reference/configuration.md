@@ -79,7 +79,7 @@ class MyApp : android.app.Application {
 }
 ```
 
-1. Since version `1.1.0` - Provide your sample rate value. This will get evaluated on every new session creation to determine whether the next session will be sampled or not. When a session is not sampled, none of its signals will get exported. Defaults to `1.0`.
+1. From version 1.1.0, you can provide your sample rate value. The value gets evaluated on every new session creation to determine whether the next session is sampled or not. When a session is not sampled, none of its signals are exported. Default value is `1.0`.
 
 ### Intercepting export request headers
 

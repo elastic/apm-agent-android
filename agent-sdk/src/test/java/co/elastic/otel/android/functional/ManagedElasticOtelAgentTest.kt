@@ -98,9 +98,8 @@ class ManagedElasticOtelAgentTest {
 
     @Test
     fun `Disk buffering enabled, happy path`() {
-        val configuration = DiskBufferingConfiguration.enabled()
-        configuration.maxFileAgeForWrite = 500
-        configuration.minFileAgeForRead = 501
+        val configuration =
+            DiskBufferingConfiguration.Enabled(maxFileAgeForWrite = 500, minFileAgeForRead = 501)
         agent = initialize(diskBufferingConfiguration = configuration)
 
         sendSpan()
@@ -133,9 +132,8 @@ class ManagedElasticOtelAgentTest {
 
     @Test
     fun `Disk buffering enabled, when signals come in before init is finished`() {
-        val configuration = DiskBufferingConfiguration.enabled()
-        configuration.maxFileAgeForWrite = 500
-        configuration.minFileAgeForRead = 501
+        val configuration =
+            DiskBufferingConfiguration.Enabled(maxFileAgeForWrite = 500, minFileAgeForRead = 501)
         agent = initialize(diskBufferingConfiguration = configuration)
 
         sendSpan()

@@ -30,7 +30,7 @@ import java.io.IOException
  */
 internal class DiskManager internal constructor(
     private val appInfoService: AppInfoService,
-    private val diskBufferingConfiguration: DiskBufferingConfiguration
+    private val diskBufferingConfiguration: DiskBufferingConfiguration.Enabled
 ) {
 
     @Throws(IOException::class)
@@ -71,7 +71,7 @@ internal class DiskManager internal constructor(
     companion object {
         fun create(
             serviceManager: ServiceManager,
-            diskBufferingConfiguration: DiskBufferingConfiguration
+            diskBufferingConfiguration: DiskBufferingConfiguration.Enabled
         ): DiskManager {
             return DiskManager(
                 serviceManager.getAppInfoService(),

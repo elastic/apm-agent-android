@@ -26,7 +26,8 @@ import io.mockk.mockk
 import java.io.File
 import java.util.Objects
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Assert
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -36,64 +37,68 @@ class DiskManagerTest {
     @get:Rule
     var temporaryFolder: TemporaryFolder = TemporaryFolder()
     private lateinit var appInfoService: AppInfoService
-    private lateinit var diskBufferingConfiguration: DiskBufferingConfiguration
-    private lateinit var diskManager: DiskManager
     private lateinit var cacheDir: File
 
     @Before
     fun setUp() {
         cacheDir = temporaryFolder.newFolder("app_cache")
         appInfoService = mockk()
-        diskBufferingConfiguration = DiskBufferingConfiguration.enabled()
         every { appInfoService.getCacheDir() }.returns(cacheDir)
-        diskManager = DiskManager(appInfoService, diskBufferingConfiguration)
     }
 
     @Test
     fun provideSignalCacheDir() {
         val expected = File(cacheDir, "opentelemetry/signals")
-        Assert.assertEquals(expected, diskManager.getSignalsCacheDir())
-        Assert.assertTrue(expected.exists())
+        assertEquals(expected, createInstance().getSignalsCacheDir())
+        assertTrue(expected.exists())
     }
 
     @Test
     fun provideTemporaryDir() {
         val expected = File(cacheDir, "opentelemetry/temp")
-        Assert.assertEquals(expected, diskManager.getTemporaryDir())
-        Assert.assertTrue(expected.exists())
+        assertEquals(expected, createInstance().getTemporaryDir())
+        assertTrue(expected.exists())
     }
 
     @Test
     fun cleanupTemporaryDirBeforeProvidingIt() {
         val dir = File(cacheDir, "opentelemetry/temp")
-        Assert.assertTrue(dir.mkdirs())
-        Assert.assertTrue(File(dir, "somefile.tmp").createNewFile())
-        Assert.assertTrue(File(dir, "some_other_file.tmp").createNewFile())
-        Assert.assertTrue(File(dir, "somedir").mkdirs())
-        Assert.assertTrue(File(dir, "somedir/some_other_file.tmp").createNewFile())
+        assertTrue(dir.mkdirs())
+        assertTrue(File(dir, "somefile.tmp").createNewFile())
+        assertTrue(File(dir, "some_other_file.tmp").createNewFile())
+        assertTrue(File(dir, "somedir").mkdirs())
+        assertTrue(File(dir, "somedir/some_other_file.tmp").createNewFile())
 
-        val temporaryDir = diskManager.getTemporaryDir()
+        val temporaryDir = createInstance().getTemporaryDir()
 
-        Assert.assertTrue(temporaryDir.exists())
-        Assert.assertEquals(0, Objects.requireNonNull(temporaryDir.listFiles()).size.toLong())
+        assertTrue(temporaryDir.exists())
+        assertEquals(0, Objects.requireNonNull(temporaryDir.listFiles()).size.toLong())
     }
 
     @Test
     fun getMaxCacheFileSize() {
         val persistenceSize = 1024 * 1024 * 2
-        diskBufferingConfiguration.maxCacheFileSize = persistenceSize
+
+        val diskManager =
+            createInstance(DiskBufferingConfiguration.Enabled(maxCacheFileSize = persistenceSize))
 
         assertThat(persistenceSize.toLong()).isEqualTo(diskManager.getMaxCacheFileSize().toLong())
     }
 
     @Test
     fun getMaxSignalFolderSize() {
-        val maxCacheSize = (15 * 1024 * 1024).toLong() // 15 MB
-        diskBufferingConfiguration.maxCacheSize = maxCacheSize.toInt()
+        val maxCacheSize = 15 * 1024 * 1024 // 15 MB
+
+        val diskManager =
+            createInstance(DiskBufferingConfiguration.Enabled(maxCacheSize = maxCacheSize))
 
         // Expects the size of a single signal type folder.
         val expected = 5242880L
         assertThat(expected).isEqualTo(diskManager.getMaxFolderSize().toLong())
+    }
+
+    private fun createInstance(configuration: DiskBufferingConfiguration.Enabled = DiskBufferingConfiguration.enabled() as DiskBufferingConfiguration.Enabled): DiskManager {
+        return DiskManager(appInfoService, configuration)
     }
 
     companion object {

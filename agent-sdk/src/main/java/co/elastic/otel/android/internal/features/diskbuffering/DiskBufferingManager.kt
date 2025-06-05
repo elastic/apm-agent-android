@@ -114,17 +114,17 @@ internal class DiskBufferingManager private constructor(
 
     internal fun initialize() {
         logger.debug("Initializing disk buffering with configuration: {}", configuration)
-        if (configuration.enabled) {
-            doInitialize()
+        if (configuration is DiskBufferingConfiguration.Enabled) {
+            doInitialize(configuration)
         } else {
             openLatch()
         }
     }
 
-    private fun doInitialize() {
+    private fun doInitialize(configuration: DiskBufferingConfiguration.Enabled) {
         serviceManager.getBackgroundWorkService().submit {
             try {
-                val storageConfiguration = createStorageConfiguration()
+                val storageConfiguration = createStorageConfiguration(configuration)
                 signalFromDiskExporter = createFromDiskExporter(storageConfiguration)
                 toDiskSpanExporter = interceptedSpanExporter?.let {
                     SpanToDiskExporter.create(it, storageConfiguration)
@@ -138,7 +138,7 @@ internal class DiskBufferingManager private constructor(
                         storageConfiguration
                     )
                 }
-                enableDiskBuffering(configuration.enabled)
+                enableDiskBuffering()
                 startExportSchedule()
             } catch (e: IOException) {
                 logger.error("Could not initialize disk buffering", e)
@@ -159,28 +159,16 @@ internal class DiskBufferingManager private constructor(
         gateManager.openLatches(DiskBufferingManager::class.java)
     }
 
-    private fun enableDiskBuffering(enabled: Boolean) {
-        logger.debug("Disk buffering enabled: {}", enabled)
-        if (enabled) {
-            toDiskSpanExporter?.let {
-                spanExporter!!.setDelegate(it)
-            }
-            toDiskLogRecordExporter?.let {
-                logRecordExporter!!.setDelegate(it)
-            }
-            toDiskMetricExporter?.let {
-                metricExporter!!.setDelegate(it)
-            }
-        } else {
-            interceptedSpanExporter?.let {
-                spanExporter!!.setDelegate(it)
-            }
-            interceptedLogRecordExporter?.let {
-                logRecordExporter!!.setDelegate(it)
-            }
-            interceptedMetricExporter?.let {
-                metricExporter!!.setDelegate(it)
-            }
+    private fun enableDiskBuffering() {
+        logger.debug("Disk buffering enabled: {}", configuration)
+        toDiskSpanExporter?.let {
+            spanExporter!!.setDelegate(it)
+        }
+        toDiskLogRecordExporter?.let {
+            logRecordExporter!!.setDelegate(it)
+        }
+        toDiskMetricExporter?.let {
+            metricExporter!!.setDelegate(it)
         }
     }
 
@@ -207,7 +195,7 @@ internal class DiskBufferingManager private constructor(
         return builder.build()
     }
 
-    private fun createStorageConfiguration(): StorageConfiguration {
+    private fun createStorageConfiguration(configuration: DiskBufferingConfiguration.Enabled): StorageConfiguration {
         val diskManager = DiskManager.create(serviceManager, configuration)
         val builder = StorageConfiguration.builder()
             .setMaxFileSize(diskManager.getMaxCacheFileSize())

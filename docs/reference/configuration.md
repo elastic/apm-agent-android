@@ -81,6 +81,25 @@ class MyApp : android.app.Application {
 
 1. From version 1.1.0, you can provide your sample rate value. The value gets evaluated on every new session creation to determine whether the next session is sampled or not. When a session is not sampled, none of its signals are exported. Default value is `1.0`.
 
+### Disk buffering behavior
+
+You can configure how [disk buffering](index.md#disk-buffering) works. For example:
+
+```kotlin
+class MyApp : android.app.Application {
+
+    override fun onCreate() {
+        super.onCreate()
+        val agent = ElasticApmAgent.builder(this)
+            .setDiskBufferingConfiguration(DiskBufferingConfiguration.enabled()) // <1>
+            // ...
+            .build()
+    }
+}
+```
+
+1. From version 1.1.0, you can configure whether the disk-buffering feature is enabled or disabled. Defaults to enabled.
+
 ### Intercepting export request headers
 
 You can provide an interceptor for the signals' export request headers, where you can read/modify them if needed.

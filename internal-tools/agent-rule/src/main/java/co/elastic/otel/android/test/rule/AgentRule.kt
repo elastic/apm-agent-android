@@ -3,8 +3,8 @@ package co.elastic.otel.android.test.rule
 import android.app.Application
 import co.elastic.otel.android.api.ElasticOtelAgent
 import co.elastic.otel.android.exporters.ExporterProvider
+import co.elastic.otel.android.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
-import co.elastic.otel.android.internal.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.time.SystemTimeProvider
 import co.elastic.otel.android.internal.time.ntp.SntpClient

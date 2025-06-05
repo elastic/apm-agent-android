@@ -25,6 +25,7 @@ import co.elastic.otel.android.connectivity.Authentication
 import co.elastic.otel.android.connectivity.ExportEndpointConfiguration
 import co.elastic.otel.android.exporters.ExporterProvider
 import co.elastic.otel.android.exporters.configuration.ExportProtocol
+import co.elastic.otel.android.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.otel.android.features.session.SessionIdGenerator
 import co.elastic.otel.android.interceptor.Interceptor
 import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
@@ -32,7 +33,6 @@ import co.elastic.otel.android.internal.api.ManagedElasticOtelAgentContract
 import co.elastic.otel.android.internal.connectivity.ExportConnectivityManager
 import co.elastic.otel.android.internal.exporters.DefaultExporterProvider
 import co.elastic.otel.android.internal.features.centralconfig.CentralConfigurationManager
-import co.elastic.otel.android.internal.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.otel.android.internal.features.exportergate.ExporterGateManager
 import co.elastic.otel.android.internal.features.httpinterceptor.HttpSpanExporterInterceptor
 import co.elastic.otel.android.internal.features.httpinterceptor.HttpSpanNameInterceptor

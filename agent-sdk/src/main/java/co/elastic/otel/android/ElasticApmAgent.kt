@@ -285,7 +285,7 @@ class ElasticApmAgent internal constructor(
         }
 
         /**
-         * Allows customizing the disk-buffering feature behavior or disabling it altogether.
+         * Allows customizing the disk buffering feature behavior or disabling it altogether.
          */
         fun setDiskBufferingConfiguration(value: DiskBufferingConfiguration) = apply {
             diskBufferingConfiguration = value

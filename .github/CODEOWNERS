@@ -1,0 +1,2 @@
+*.md @elastic/ingest-docs 
+/docs/ @elastic/ingest-docs

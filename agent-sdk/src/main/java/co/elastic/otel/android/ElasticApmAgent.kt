@@ -136,10 +136,10 @@ class ElasticApmAgent internal constructor(
         private var managementUrl: String? = null
         private var managementAuthentication: Authentication = Authentication.None
         private var sessionIdGenerator: SessionIdGenerator? = null
-        private var diskBufferingConfiguration: DiskBufferingConfiguration? = null
         private var loggingPolicy: LoggingPolicy? = null
         private var httpSpanInterceptor: Interceptor<SpanData>? = HttpSpanNameInterceptor()
         private var sessionSampleRate: Double = 1.0
+        private var diskBufferingConfiguration: DiskBufferingConfiguration? = null
         private val managedAgentBuilder = ManagedElasticOtelAgent.Builder()
         internal var internalExporterProviderInterceptor: Interceptor<ExporterProvider> =
             Interceptor.noop()
@@ -284,6 +284,13 @@ class ElasticApmAgent internal constructor(
             sessionSampleRate = value
         }
 
+        /**
+         * Allows customizing the disk-buffering feature behavior or disabling it altogether.
+         */
+        fun setDiskBufferingConfiguration(value: DiskBufferingConfiguration) = apply {
+            diskBufferingConfiguration = value
+        }
+
         internal fun setSessionIdGenerator(value: SessionIdGenerator) = apply {
             sessionIdGenerator = value
         }
@@ -294,10 +301,6 @@ class ElasticApmAgent internal constructor(
 
         internal fun setManagementAuthentication(value: Authentication) = apply {
             managementAuthentication = value
-        }
-
-        internal fun setDiskBufferingConfiguration(value: DiskBufferingConfiguration) = apply {
-            diskBufferingConfiguration = value
         }
 
         /**

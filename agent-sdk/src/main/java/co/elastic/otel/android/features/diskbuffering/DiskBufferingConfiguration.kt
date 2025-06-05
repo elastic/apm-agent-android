@@ -16,27 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.internal.features.diskbuffering
+package co.elastic.otel.android.features.diskbuffering
 
 /**
- * This class is internal and is hence not for public use. Its APIs are unstable and can change at
- * any time.
+ * Defines the disk-buffering behavior.
  */
-data class DiskBufferingConfiguration private constructor(val enabled: Boolean) {
-    internal var maxCacheFileSize = 1024 * 1024
-    internal var maxCacheSize = 15 * 1024 * 1024 // 15 MB
-    internal var maxFileAgeForWrite: Long? = null
-    internal var minFileAgeForRead: Long? = null
+sealed class DiskBufferingConfiguration {
+
+    internal data class Enabled(
+        val maxCacheFileSize: Int = 1024 * 1024,
+        val maxCacheSize: Int = 15 * 1024 * 1024,
+        val maxFileAgeForWrite: Long? = null,
+        val minFileAgeForRead: Long? = null
+    ) : DiskBufferingConfiguration()
+
+    internal data object Disabled : DiskBufferingConfiguration()
 
     companion object {
         @JvmStatic
         fun enabled(): DiskBufferingConfiguration {
-            return DiskBufferingConfiguration(true)
+            return Enabled()
         }
 
         @JvmStatic
         fun disabled(): DiskBufferingConfiguration {
-            return DiskBufferingConfiguration(false)
+            return Disabled
         }
     }
 }

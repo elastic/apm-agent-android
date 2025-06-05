@@ -25,6 +25,7 @@ import co.elastic.otel.android.connectivity.Authentication
 import co.elastic.otel.android.connectivity.ExportEndpointConfiguration
 import co.elastic.otel.android.exporters.ExporterProvider
 import co.elastic.otel.android.exporters.configuration.ExportProtocol
+import co.elastic.otel.android.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.otel.android.features.session.SessionIdGenerator
 import co.elastic.otel.android.interceptor.Interceptor
 import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
@@ -32,7 +33,6 @@ import co.elastic.otel.android.internal.api.ManagedElasticOtelAgentContract
 import co.elastic.otel.android.internal.connectivity.ExportConnectivityManager
 import co.elastic.otel.android.internal.exporters.DefaultExporterProvider
 import co.elastic.otel.android.internal.features.centralconfig.CentralConfigurationManager
-import co.elastic.otel.android.internal.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.otel.android.internal.features.exportergate.ExporterGateManager
 import co.elastic.otel.android.internal.features.httpinterceptor.HttpSpanExporterInterceptor
 import co.elastic.otel.android.internal.features.httpinterceptor.HttpSpanNameInterceptor
@@ -136,10 +136,10 @@ class ElasticApmAgent internal constructor(
         private var managementUrl: String? = null
         private var managementAuthentication: Authentication = Authentication.None
         private var sessionIdGenerator: SessionIdGenerator? = null
-        private var diskBufferingConfiguration: DiskBufferingConfiguration? = null
         private var loggingPolicy: LoggingPolicy? = null
         private var httpSpanInterceptor: Interceptor<SpanData>? = HttpSpanNameInterceptor()
         private var sessionSampleRate: Double = 1.0
+        private var diskBufferingConfiguration: DiskBufferingConfiguration? = null
         private val managedAgentBuilder = ManagedElasticOtelAgent.Builder()
         internal var internalExporterProviderInterceptor: Interceptor<ExporterProvider> =
             Interceptor.noop()
@@ -284,6 +284,13 @@ class ElasticApmAgent internal constructor(
             sessionSampleRate = value
         }
 
+        /**
+         * Allows customizing the disk buffering feature behavior.
+         */
+        fun setDiskBufferingConfiguration(value: DiskBufferingConfiguration) = apply {
+            diskBufferingConfiguration = value
+        }
+
         internal fun setSessionIdGenerator(value: SessionIdGenerator) = apply {
             sessionIdGenerator = value
         }
@@ -294,10 +301,6 @@ class ElasticApmAgent internal constructor(
 
         internal fun setManagementAuthentication(value: Authentication) = apply {
             managementAuthentication = value
-        }
-
-        internal fun setDiskBufferingConfiguration(value: DiskBufferingConfiguration) = apply {
-            diskBufferingConfiguration = value
         }
 
         /**

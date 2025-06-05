@@ -17,6 +17,7 @@ public final class co/elastic/otel/android/ElasticApmAgent$Builder {
 	public final fun addSpanExporterInterceptor (Lco/elastic/otel/android/interceptor/Interceptor;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
 	public final fun build ()Lco/elastic/otel/android/ElasticApmAgent;
 	public final fun setDeploymentEnvironment (Ljava/lang/String;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
+	public final fun setDiskBufferingConfiguration (Lco/elastic/otel/android/features/diskbuffering/DiskBufferingConfiguration;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
 	public final fun setExportAuthentication (Lco/elastic/otel/android/connectivity/Authentication;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
 	public final fun setExportHeadersInterceptor (Lco/elastic/otel/android/interceptor/Interceptor;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
 	public final fun setExportProtocol (Lco/elastic/otel/android/exporters/configuration/ExportProtocol;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
@@ -105,6 +106,17 @@ public final class co/elastic/otel/android/extensions/ElasticOtelAgentExtensions
 	public static synthetic fun log$default (Lco/elastic/otel/android/api/ElasticOtelAgent;Ljava/lang/String;Lio/opentelemetry/api/logs/Severity;Ljava/lang/String;Lio/opentelemetry/api/common/Attributes;Lio/opentelemetry/context/Context;Ljava/time/Instant;Ljava/time/Instant;Ljava/lang/String;ILjava/lang/Object;)V
 	public static final fun span (Lco/elastic/otel/android/api/ElasticOtelAgent;Ljava/lang/String;Lio/opentelemetry/api/common/Attributes;Lio/opentelemetry/api/trace/SpanKind;Lio/opentelemetry/context/Context;ZLjava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public static synthetic fun span$default (Lco/elastic/otel/android/api/ElasticOtelAgent;Ljava/lang/String;Lio/opentelemetry/api/common/Attributes;Lio/opentelemetry/api/trace/SpanKind;Lio/opentelemetry/context/Context;ZLjava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+}
+
+public abstract class co/elastic/otel/android/features/diskbuffering/DiskBufferingConfiguration {
+	public static final field Companion Lco/elastic/otel/android/features/diskbuffering/DiskBufferingConfiguration$Companion;
+	public static final fun disabled ()Lco/elastic/otel/android/features/diskbuffering/DiskBufferingConfiguration;
+	public static final fun enabled ()Lco/elastic/otel/android/features/diskbuffering/DiskBufferingConfiguration;
+}
+
+public final class co/elastic/otel/android/features/diskbuffering/DiskBufferingConfiguration$Companion {
+	public final fun disabled ()Lco/elastic/otel/android/features/diskbuffering/DiskBufferingConfiguration;
+	public final fun enabled ()Lco/elastic/otel/android/features/diskbuffering/DiskBufferingConfiguration;
 }
 
 public abstract interface class co/elastic/otel/android/features/session/Session {

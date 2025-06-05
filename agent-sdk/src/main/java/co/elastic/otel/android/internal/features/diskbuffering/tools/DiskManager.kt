@@ -18,7 +18,7 @@
  */
 package co.elastic.otel.android.internal.features.diskbuffering.tools
 
-import co.elastic.otel.android.internal.features.diskbuffering.DiskBufferingConfiguration
+import co.elastic.otel.android.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.services.appinfo.AppInfoService
 import java.io.File
@@ -30,7 +30,7 @@ import java.io.IOException
  */
 internal class DiskManager internal constructor(
     private val appInfoService: AppInfoService,
-    private val diskBufferingConfiguration: DiskBufferingConfiguration
+    private val diskBufferingConfiguration: DiskBufferingConfiguration.Enabled
 ) {
 
     @Throws(IOException::class)
@@ -71,7 +71,7 @@ internal class DiskManager internal constructor(
     companion object {
         fun create(
             serviceManager: ServiceManager,
-            diskBufferingConfiguration: DiskBufferingConfiguration
+            diskBufferingConfiguration: DiskBufferingConfiguration.Enabled
         ): DiskManager {
             return DiskManager(
                 serviceManager.getAppInfoService(),

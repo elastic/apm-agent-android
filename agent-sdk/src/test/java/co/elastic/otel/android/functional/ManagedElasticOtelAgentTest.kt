@@ -20,10 +20,10 @@ package co.elastic.otel.android.functional
 
 import android.app.Application
 import android.content.Intent
+import co.elastic.otel.android.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.otel.android.features.session.SessionIdGenerator
 import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
 import co.elastic.otel.android.internal.features.clock.ElasticClockBroadcastReceiver
-import co.elastic.otel.android.internal.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.services.appinfo.AppInfoService
 import co.elastic.otel.android.internal.time.SystemTimeProvider
@@ -98,9 +98,8 @@ class ManagedElasticOtelAgentTest {
 
     @Test
     fun `Disk buffering enabled, happy path`() {
-        val configuration = DiskBufferingConfiguration.enabled()
-        configuration.maxFileAgeForWrite = 500
-        configuration.minFileAgeForRead = 501
+        val configuration =
+            DiskBufferingConfiguration.Enabled(maxFileAgeForWrite = 500, minFileAgeForRead = 501)
         agent = initialize(diskBufferingConfiguration = configuration)
 
         sendSpan()
@@ -133,9 +132,8 @@ class ManagedElasticOtelAgentTest {
 
     @Test
     fun `Disk buffering enabled, when signals come in before init is finished`() {
-        val configuration = DiskBufferingConfiguration.enabled()
-        configuration.maxFileAgeForWrite = 500
-        configuration.minFileAgeForRead = 501
+        val configuration =
+            DiskBufferingConfiguration.Enabled(maxFileAgeForWrite = 500, minFileAgeForRead = 501)
         agent = initialize(diskBufferingConfiguration = configuration)
 
         sendSpan()

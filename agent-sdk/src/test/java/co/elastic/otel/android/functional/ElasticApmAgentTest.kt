@@ -700,6 +700,8 @@ class ElasticApmAgentTest {
         agent.getSessionManager().clearSession()
         inMemoryExporters.resetExporters()
 
+        awaitForSampleRateToAllowExporting()
+
         sendSpan()
         sendLog()
         sendMetric()
@@ -716,6 +718,8 @@ class ElasticApmAgentTest {
         // Force refresh session to trigger sampling rate evaluation
         agent.getSessionManager().clearSession()
         inMemoryExporters.resetExporters()
+
+        awaitForSampleRateNotToAllowExporting()
 
         sendSpan()
         sendLog()
@@ -910,6 +914,16 @@ class ElasticApmAgentTest {
             println("Metrics size: ${inMemoryExporters.getFinishedMetrics().size}")
             throw e
         }
+    }
+
+    private fun awaitForSampleRateToAllowExporting() {
+        await.atMost(Duration.ofSeconds(1))
+            .until { agent.getSampleRateManager()?.allowSignalExporting() == true }
+    }
+
+    private fun awaitForSampleRateNotToAllowExporting() {
+        await.atMost(Duration.ofSeconds(1))
+            .until { agent.getSampleRateManager()?.allowSignalExporting() == false }
     }
 
     private fun awaitForCentralConfigurationValues(

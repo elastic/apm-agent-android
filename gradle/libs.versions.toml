@@ -22,7 +22,7 @@ opentelemetry-exporter-otlp = { module = "io.opentelemetry:opentelemetry-exporte
 
 #Test tools
 junit4 = "junit:junit:4.13.2"
-junit-bom = "org.junit:junit-bom:5.13.0"
+junit-bom = "org.junit:junit-bom:5.13.1"
 junit5-vintage = { module = "org.junit.vintage:junit-vintage-engine" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junit-launcher = { module = "org.junit.platform:junit-platform-launcher" }

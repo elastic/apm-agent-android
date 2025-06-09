@@ -88,3 +88,40 @@ plugins {
 ```
 
 1. You can find the latest version [here](https://plugins.gradle.org/plugin/co.elastic.otel.android.instrumentation.oteladapter).
+
+### Use an OTel Android instrumentation
+
+[OTel Android instrumentations](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation) are structured in a way that they can work independently from the OTel Android agent, which is the reason why they can be used not only with the Elastic agent but also with and any other agent based on OpenTelemetry Java as well.
+
+Based on that, after [including the adapter](#add-the-adapter-to-your-project) in your project, you can install any OTel Android instrumentation by following its installation instructions from its README file, just as you would as if you were using the OTel Android agent.
+
+#### Example use case
+
+For example, let's install the [httpurlconnection instrumentation](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation/httpurlconnection), which automatically instruments HTTP requests made with [HttpURLConnection](https://developer.android.com/reference/java/net/HttpURLConnection).
+
+* First, we make sure we have [the adapter](#add-the-adapter-to-your-project) added into our project.
+* Then, we take a look at the httpurlconnection instrumentation README instructions on [how to include it in our project](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation/httpurlconnection#add-these-dependencies-to-your-project).
+* Lastly, we follow those instructions, which tend to involve adding one or more gradle dependencies into our project, and once those dependencies are in place, the adapter will take care of the rest.
+
+Based on the above, this is what our app's `build.gradle.kts` file should look like:
+
+```kotlin
+plugins {
+    // ...
+    id("co.elastic.otel.android.instrumentation.oteladapter") // <1>
+}
+
+// ...
+
+dependencies {
+    // ...
+    implementation("io.opentelemetry.android.instrumentation:httpurlconnection-library:AUTO_HTTP_URL_INSTRUMENTATION_VERSION") // <2>
+    byteBuddy("io.opentelemetry.android.instrumentation:httpurlconnection-agent:AUTO_HTTP_URL_INSTRUMENTATION_VERSION")
+}
+```
+
+1. More info [here](#add-the-adapter-to-your-project).
+2. You can find the latest versions in the official instructions for this instrumentation, [here](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation/httpurlconnection#add-these-dependencies-to-your-project).
+
+And that's it! Now the Elastic agent will use the httpurlconnection instrumentation to automatically instrument those kinds of HTTP requests on your behalf.
+

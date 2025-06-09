@@ -11,6 +11,8 @@ The agent has an opt-in functionality that automatically generates telemetry on 
 
 ### Installation
 
+#### Supported instrumentations [supported-instrumentations-installation]
+
 Install the automatic instrumentations you'd like to use.
 
 Specific targets are supported for automatic instrumentation, each with its own Gradle plugin for installation. To install a supported automatic instrumentation, follow these steps:
@@ -18,6 +20,10 @@ Specific targets are supported for automatic instrumentation, each with its own 
 1. Choose a [supported instrumentation](#supported-instrumentations).
 2. Add its Gradle plugin to your project in the same location where the [agent](getting-started.md#gradle-setup) is added.
 3. [Initialize the agent](getting-started.md#agent-setup) the same way you would without using automatic instrumentation. Automatic instrumentations will get installed during the agent initialization without having to write extra code.
+
+#### OpenTelemetry Android instrumentations (experimental)
+
+You can use instrumentations from [OpenTelemetry Android](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation) with the Elastic agent. Learn how to do so [here](#opentelemetry-android-instrumentation-adapter).
 
 ### Compilation behavior
 
@@ -64,3 +70,21 @@ plugins {
 ```
 
 1. You can find the latest version [here](https://plugins.gradle.org/plugin/co.elastic.otel.android.instrumentation.okhttp).
+
+## OpenTelemetry Android instrumentation adapter
+
+**Status**: experimental
+
+If there's an instrumentation that you can't find in [supported instrumentations](#supported-instrumentations), you could instead search for it in the OpenTelemetry Android [available instrumentations](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation) and use it with the Elastic agent via its OTel instrumentation adapter, by following the steps below.
+
+### Add the adapter to your project
+
+The OTel Android instrumentation adapter is a Gradle plugin, which you can find [here](https://plugins.gradle.org/plugin/co.elastic.otel.android.instrumentation.oteladapter). To add it to your project, you have to include it in your app's plugins block, the same where the [agent's plugin](getting-started.md#gradle-setup) should be added to, as shown below.
+
+```kotlin
+plugins {
+    id("co.elastic.otel.android.instrumentation.oteladapter") version "[latest_version]" // <1>
+}
+```
+
+1. You can find the latest version [here](https://plugins.gradle.org/plugin/co.elastic.otel.android.instrumentation.oteladapter).

@@ -668,12 +668,7 @@ class ElasticApmAgentTest {
             .build()
 
         wireMockRule.takeRequest() // Await for first central config response
-        // Prepare next poll to contain sample rate
-        wireMockRule.stubAllHttpResponses {
-            withStatus(200)
-                .withBody("""{"session_sample_rate":"1.0"}""")
-                .withHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
-        }
+        awaitForCentralConfigurationValues(ExpectedCentralConfiguration())
 
         // Force refresh session to trigger sampling rate evaluation
         agent.getSessionManager().clearSession()
@@ -689,12 +684,14 @@ class ElasticApmAgentTest {
         assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()
         assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
 
-        wireMockRule.takeRequest() // Await for second central config response
-        // Prepare next poll to provide invalid config
+        // Prepare next poll to contain sample rate
         wireMockRule.stubAllHttpResponses {
             withStatus(200)
-                .withBody("Not a json")
+                .withBody("""{"session_sample_rate":"1.0"}""")
+                .withHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
         }
+        wireMockRule.takeRequest()
+        awaitForCentralConfigurationValues(ExpectedCentralConfiguration(sessionSampleRate = 1.0))
 
         // Force refresh session to trigger sampling rate evaluation
         agent.getSessionManager().clearSession()
@@ -713,7 +710,12 @@ class ElasticApmAgentTest {
 
         // When central config doesn't provide a sample rate value, check that the behaviour
         // is based on the value provided in during initialization (0.0).
+        wireMockRule.stubAllHttpResponses {
+            withStatus(200)
+                .withBody("Not a json")
+        }
         wireMockRule.takeRequest() // Await for central config response with invalid config
+        awaitForCentralConfigurationValues(ExpectedCentralConfiguration())
 
         // Force refresh session to trigger sampling rate evaluation
         agent.getSessionManager().clearSession()

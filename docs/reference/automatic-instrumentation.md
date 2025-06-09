@@ -126,7 +126,7 @@ dependencies {
 And that's it! Now the Elastic agent will use the HttpURLConnection instrumentation to automatically instrument those kinds of HTTP requests on your behalf.
 
 :::{note}
-Notice that unusual `byteBuddy` dependency we added in our example? Some instrumentations require this in order to perform bytecode weaving, as mentioned earlier in [Compilation behavior](#compilation-behavior). This functionality is enabled by the [ByteBuddy Android Gradle plugin](https://github.com/raphw/byte-buddy/tree/master/byte-buddy-gradle-plugin/android-plugin), which must be present in your project for bytecode weaving to work.
+Notice that unusual `byteBuddy` dependency we added in our example? Some instrumentations require this in order to perform byte code weaving, as mentioned earlier in [Compilation behavior](#compilation-behavior). This functionality is enabled by the [ByteBuddy Android Gradle plugin](https://github.com/raphw/byte-buddy/tree/master/byte-buddy-gradle-plugin/android-plugin), which must be present in your project for byte code weaving to work.
 
 You don't need to worry about adding the ByteBuddy plugin manually though, as the Elastic agent takes care of that for you. So feel free to ignore any installation instructions that mention adding it, such as those in [the HttpURLConnection instructions](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation/httpurlconnection#byte-buddy-compilation-plugin), for example.
 :::

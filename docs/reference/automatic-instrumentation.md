@@ -91,7 +91,7 @@ plugins {
 
 ### Use an OTel Android instrumentation
 
-[OTel Android instrumentations](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation) are structured in a way that they can work independently from the OTel Android agent, which is the reason why they can be used not only with the Elastic agent but also with and any other agent based on OpenTelemetry Java as well.
+[OTel Android instrumentations](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation) are structured in a way that they can work independently from the OTel Android agent, which is the reason why they can be used not only with the Elastic agent but also with any other agent based on OpenTelemetry Java as well.
 
 Based on that, after [including the adapter](#add-the-adapter-to-your-project) in your project, you can install any OTel Android instrumentation by following its installation instructions from its README file, just as you would as if you were using the OTel Android agent.
 

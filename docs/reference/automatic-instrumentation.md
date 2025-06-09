@@ -71,15 +71,15 @@ plugins {
 
 1. You can find the latest version [here](https://plugins.gradle.org/plugin/co.elastic.otel.android.instrumentation.okhttp).
 
-## OpenTelemetry Android instrumentation adapter
+## OpenTelemetry Android Instrumentation Adapter
 
 **Status**: experimental
 
-If there's an instrumentation that you can't find in [supported instrumentations](#supported-instrumentations), you could instead search for it in the OpenTelemetry Android [available instrumentations](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation) and use it with the Elastic agent via its OTel instrumentation adapter, by following the steps below.
+If there's an instrumentation that you can't find in [supported instrumentations](#supported-instrumentations), you can instead search for it in the OpenTelemetry Android [available instrumentations](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation) and use it with the Elastic agent via its OTel instrumentation adapter by following the steps below.
 
 ### Add the adapter to your project
 
-The OTel Android instrumentation adapter is a Gradle plugin, which you can find [here](https://plugins.gradle.org/plugin/co.elastic.otel.android.instrumentation.oteladapter). To add it to your project, you have to include it in your app's plugins block, the same where the [agent's plugin](getting-started.md#gradle-setup) should be added to, as shown below.
+The OTel Android instrumentation adapter is a Gradle plugin, which you can find [here](https://plugins.gradle.org/plugin/co.elastic.otel.android.instrumentation.oteladapter). To add it to your project, include it in your app's `plugins` block—the same block where the [agent's plugin](getting-started.md#gradle-setup) should also be added, as shown below:
 
 ```kotlin
 plugins {
@@ -91,19 +91,19 @@ plugins {
 
 ### Use an OTel Android instrumentation
 
-[OTel Android instrumentations](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation) are structured in a way that they can work independently from the OTel Android agent, which is the reason why they can be used not only with the Elastic agent but also with any other agent based on OpenTelemetry Java as well.
+[OTel Android instrumentations](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation) are designed to work independently of the OTel Android agent. This is why they can be used not only with the Elastic agent but also with any other agent based on OpenTelemetry Java.
 
-Based on that, after [including the adapter](#add-the-adapter-to-your-project) in your project, you can install any OTel Android instrumentation by following its installation instructions from its README file, just as you would as if you were using the OTel Android agent.
+With that in mind, after [including the adapter](#add-the-adapter-to-your-project) in your project, you can install any OTel Android instrumentation by following its installation instructions from its README file, just as you would if you were using the OTel Android agent.
 
-#### Example use case
+#### Example Use Case
 
-For example, let's install the [httpurlconnection instrumentation](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation/httpurlconnection), which automatically instruments HTTP requests made with [HttpURLConnection](https://developer.android.com/reference/java/net/HttpURLConnection).
+For example, let's install the [HttpURLConnection instrumentation](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation/httpurlconnection), which automatically instruments HTTP requests made with [HttpURLConnection](https://developer.android.com/reference/java/net/HttpURLConnection).
 
-* First, we make sure we have [the adapter](#add-the-adapter-to-your-project) added into our project.
-* Then, we take a look at the httpurlconnection instrumentation README instructions on [how to include it in our project](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation/httpurlconnection#add-these-dependencies-to-your-project).
-* Lastly, we follow those instructions, which tend to involve adding one or more gradle dependencies into our project, and once those dependencies are in place, the adapter will take care of the rest.
+* First, ensure that [the adapter](#add-the-adapter-to-your-project) is added to your project.
+* Next, refer to the HttpURLConnection instrumentation README for instructions on [how to include it in your project](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation/httpurlconnection#add-these-dependencies-to-your-project).
+* Finally, follow those instructions, which usually involve adding one or more Gradle dependencies. Once those dependencies are in place, the adapter will take care of the rest.
 
-Based on the above, this is what our app's `build.gradle.kts` file should look like:
+Based on the above, your app's `build.gradle.kts` file should look like this:
 
 ```kotlin
 plugins {
@@ -121,12 +121,12 @@ dependencies {
 ```
 
 1. More info [here](#add-the-adapter-to-your-project).
-2. You can find the latest versions in the official instructions for this instrumentation, [here](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation/httpurlconnection#add-these-dependencies-to-your-project).
+2. You can find the latest versions in the official instructions for this instrumentation [here](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation/httpurlconnection#add-these-dependencies-to-your-project).
 
-And that's it! Now the Elastic agent will use the httpurlconnection instrumentation to automatically instrument those kinds of HTTP requests on your behalf.
+And that's it! Now the Elastic agent will use the HttpURLConnection instrumentation to automatically instrument those kinds of HTTP requests on your behalf.
 
-:::{note}
-Noticed that unusual `byteBuddy` type of dependency we added in our example? Some instrumentations will require one of those in order to do bytecode weaving, as mentioned earlier in [Compilation behavior](#compilation-behavior). Said functionality is enabled by the [ByteBuddy Android gradle plugin](https://github.com/raphw/byte-buddy/tree/master/byte-buddy-gradle-plugin/android-plugin), which has to be present in your project for it all to work.
+:::note
+Notice that unusual `byteBuddy` dependency we added in our example? Some instrumentations require this in order to perform bytecode weaving, as mentioned earlier in [Compilation behavior](#compilation-behavior). This functionality is enabled by the [ByteBuddy Android Gradle plugin](https://github.com/raphw/byte-buddy/tree/master/byte-buddy-gradle-plugin/android-plugin), which must be present in your project for bytecode weaving to work.
 
-You don't need to worry about adding the ByteBuddy plugin into your project though, as the Elastic agent does that on your behalf. So feel free to ignore the installation instruction part that requests adding it, like the one within [the httpurlconnection instructions](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation/httpurlconnection#byte-buddy-compilation-plugin), for example.
+You don't need to worry about adding the ByteBuddy plugin manually though, as the Elastic agent takes care of that for you. So feel free to ignore any installation instructions that mention adding it, such as those in [the HttpURLConnection instructions](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation/httpurlconnection#byte-buddy-compilation-plugin), for example.
 :::

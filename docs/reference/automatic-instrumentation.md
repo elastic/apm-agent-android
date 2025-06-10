@@ -24,7 +24,7 @@ Specific targets are supported for automatic instrumentation, each with its own 
 #### OpenTelemetry Android instrumentations
 
 ```{applies_to}
-product: beta
+product: technical preview
 ```
 
 You can use instrumentations from [OpenTelemetry Android](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation) with the Elastic agent. Learn how to do so [here](#opentelemetry-android-instrumentation-adapter).

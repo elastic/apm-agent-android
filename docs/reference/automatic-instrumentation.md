@@ -21,7 +21,10 @@ Specific targets are supported for automatic instrumentation, each with its own 
 2. Add its Gradle plugin to your project in the same location where the [agent](getting-started.md#gradle-setup) is added.
 3. [Initialize the agent](getting-started.md#agent-setup) the same way you would without using automatic instrumentation. Automatic instrumentations will get installed during the agent initialization without having to write extra code.
 
-#### OpenTelemetry Android instrumentations (experimental)
+#### OpenTelemetry Android instrumentations
+```{applies_to}
+product: experimental
+```
 
 You can use instrumentations from [OpenTelemetry Android](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation) with the Elastic agent. Learn how to do so [here](#opentelemetry-android-instrumentation-adapter).
 

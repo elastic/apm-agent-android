@@ -81,7 +81,9 @@ plugins {
 
 ## OpenTelemetry Android Instrumentation Adapter
 
-**Status**: [experimental](component-stability.md#experimental)
+```{applies_to}
+product: beta
+```
 
 If there's an instrumentation that you can't find in [supported instrumentations](#supported-instrumentations), you can instead search for it in the OpenTelemetry Android [available instrumentations](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation) and use it with the Elastic agent via its OTel instrumentation adapter by following the steps below.
 
@@ -96,6 +98,10 @@ plugins {
 ```
 
 1. You can find the latest version [here](https://plugins.gradle.org/plugin/co.elastic.otel.android.instrumentation.oteladapter).
+
+```{important}
+This is an [experimental](component-stability.md#experimental) feature.
+```
 
 ### Use an OTel Android instrumentation
 

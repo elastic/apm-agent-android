@@ -9,16 +9,16 @@ This page outlines the different stability levels assigned to the agent’s feat
 | Status level         | Description                                               |
 |----------------------|-----------------------------------------------------------|
 | No explicit "Status" | Equivalent to Stable                                      |
-| Experimental         | Breaking changes and even removal of features are allowed |
+| Technical Preview         | Breaking changes and even removal of features are allowed |
 | Stable               | Breaking changes are not allowed                          |
 
 ## Statuses
 
-### Experimental
+### Technical Preview
 
-Features and components classified as experimental are explicitly labeled with a _Status: experimental_ line beneath their title in this documentation. Additionally, standalone components at this level include an `-alpha` suffix in their version identifiers.
+Features and components classified as technical preview are explicitly labeled with a status line beneath their title in this documentation, which mentions it. Additionally, standalone components at this level include an `-alpha` suffix in their version identifiers.
 
-At this stability level, breaking changes may occur in any release. In some cases, development of an experimental feature may be discontinued, and the feature may be removed in a minor version update. For these reasons, experimental features are not recommended for use in production environments.
+At this stability level, breaking changes may occur in any release. In some cases, development of a technical preview feature may be discontinued, and the feature may be removed in a minor version update. For these reasons, technical preview features are not recommended for use in production environments.
 
 ### Stable
 

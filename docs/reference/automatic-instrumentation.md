@@ -30,7 +30,7 @@ product: technical preview
 You can use instrumentations from [OpenTelemetry Android](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation) with the Elastic agent. Learn how to do so [here](#opentelemetry-android-instrumentation-adapter).
 
 ```{important}
-This is an [experimental](component-stability.md#experimental) feature.
+This is a [technical preview](component-stability.md#technical-preview) feature.
 ```
 
 ### Compilation behavior
@@ -82,7 +82,7 @@ plugins {
 ## OpenTelemetry Android Instrumentation Adapter
 
 ```{applies_to}
-product: beta
+product: technical preview
 ```
 
 If there's an instrumentation that you can't find in [supported instrumentations](#supported-instrumentations), you can instead search for it in the OpenTelemetry Android [available instrumentations](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation) and use it with the Elastic agent via its OTel instrumentation adapter by following the steps below.

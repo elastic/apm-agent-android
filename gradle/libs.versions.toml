@@ -1,5 +1,5 @@
 [versions]
-opentelemetry = "1.50.0"
+opentelemetry = "1.51.0"
 opentelemetry-contrib = "1.46.0-alpha"
 byteBuddy = "1.17.5"
 kotlin = "2.1.21"
@@ -8,21 +8,21 @@ autoService = "1.1.1"
 
 [libraries]
 opentelemetry-sdk = { module = "io.opentelemetry:opentelemetry-sdk", version.ref = "opentelemetry" }
-opentelemetry-api-incubator = "io.opentelemetry:opentelemetry-api-incubator:1.50.0-alpha"
+opentelemetry-api-incubator = "io.opentelemetry:opentelemetry-api-incubator:1.51.0-alpha"
 stagemonitor-configuration = "org.stagemonitor:stagemonitor-configuration:0.89.1"
 androidx-annotations = "androidx.annotation:annotation:1.9.1"
 androidx-core = "androidx.core:core:1.16.0"
 dsl-json = "com.dslplatform:dsl-json-java8:1.10.0"
 slf4j-api = "org.slf4j:slf4j-api:2.0.17"
 byteBuddy = { module = "net.bytebuddy:byte-buddy", version.ref = "byteBuddy" }
-opentelemetry-semconv = "io.opentelemetry.semconv:opentelemetry-semconv:1.32.0"
-opentelemetry-semconv-incubating = "io.opentelemetry.semconv:opentelemetry-semconv-incubating:1.32.0-alpha"
+opentelemetry-semconv = "io.opentelemetry.semconv:opentelemetry-semconv:1.34.0"
+opentelemetry-semconv-incubating = "io.opentelemetry.semconv:opentelemetry-semconv-incubating:1.34.0-alpha"
 opentelemetry-diskBuffering = { module = "io.opentelemetry.contrib:opentelemetry-disk-buffering", version.ref = "opentelemetry-contrib" }
 opentelemetry-exporter-otlp = { module = "io.opentelemetry:opentelemetry-exporter-otlp", version.ref = "opentelemetry" }
 
 #Test tools
 junit4 = "junit:junit:4.13.2"
-junit-bom = "org.junit:junit-bom:5.13.0"
+junit-bom = "org.junit:junit-bom:5.13.1"
 junit5-vintage = { module = "org.junit.vintage:junit-vintage-engine" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junit-launcher = { module = "org.junit.platform:junit-platform-launcher" }
@@ -51,7 +51,7 @@ buildconfig-plugin = "com.github.gmazzo.buildconfig:com.github.gmazzo.buildconfi
 animalsniffer-plugin = "ru.vyarus:gradle-animalsniffer-plugin:2.0.1"
 kotlin-binaryCompatibility = "org.jetbrains.kotlinx.binary-compatibility-validator:org.jetbrains.kotlinx.binary-compatibility-validator.gradle.plugin:0.17.0"
 coreLib = "com.android.tools:desugar_jdk_libs:2.1.5"
-mavenModel = "org.apache.maven:maven-model:3.9.9"
+mavenModel = "org.apache.maven:maven-model:3.9.10"
 
 [bundles]
 mocking = ["mockk"]

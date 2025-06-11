@@ -21,9 +21,17 @@ Specific targets are supported for automatic instrumentation, each with its own 
 2. Add its Gradle plugin to your project in the same location where the [agent](getting-started.md#gradle-setup) is added.
 3. [Initialize the agent](getting-started.md#agent-setup) the same way you would without using automatic instrumentation. Automatic instrumentations will get installed during the agent initialization without having to write extra code.
 
-#### OpenTelemetry Android instrumentations (experimental)
+#### OpenTelemetry Android instrumentations
+
+```{applies_to}
+product: preview
+```
 
 You can use instrumentations from [OpenTelemetry Android](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation) with the Elastic agent. Learn how to do so [here](#opentelemetry-android-instrumentation-adapter).
+
+```{important}
+This is a [technical preview](component-stability.md#technical-preview) feature.
+```
 
 ### Compilation behavior
 
@@ -73,7 +81,9 @@ plugins {
 
 ## OpenTelemetry Android Instrumentation Adapter
 
-**Status**: [experimental](component-stability.md#experimental)
+```{applies_to}
+product: preview
+```
 
 If there's an instrumentation that you can't find in [supported instrumentations](#supported-instrumentations), you can instead search for it in the OpenTelemetry Android [available instrumentations](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation) and use it with the Elastic agent via its OTel instrumentation adapter by following the steps below.
 
@@ -88,6 +98,10 @@ plugins {
 ```
 
 1. You can find the latest version [here](https://plugins.gradle.org/plugin/co.elastic.otel.android.instrumentation.oteladapter).
+
+```{important}
+This is an [experimental](component-stability.md#experimental) feature.
+```
 
 ### Use an OTel Android instrumentation
 

@@ -60,7 +60,6 @@ import io.opentelemetry.sdk.trace.export.SpanExporter
 /**
  * Opinionated [ElasticOtelAgent] implementation.
  */
-@Suppress("CanBeParameter")
 class ElasticApmAgent internal constructor(
     private val delegate: ManagedElasticOtelAgent,
     private val exportConnectivityManager: ExportConnectivityManager,
@@ -116,6 +115,10 @@ class ElasticApmAgent internal constructor(
 
     internal fun getSessionManager(): SessionManager {
         return delegate.features.sessionManager
+    }
+
+    internal fun getSampleRateManager(): SampleRateManager? {
+        return sampleRateManager
     }
 
     companion object {

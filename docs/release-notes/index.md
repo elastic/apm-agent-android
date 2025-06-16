@@ -22,6 +22,15 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 % next_release_notes
     
+## 1.1.0 [elastic-apm-android-agent-110-release-notes]
+**Release date:** June 16, 2025
+
+### Features and enhancements [elastic-apm-android-agent-110-features-enhancements]
+
+* Android instrumentation adapter: [#487](https://github.com/elastic/apm-agent-android/pull/487)
+* Adding session sample rate setter: [#507](https://github.com/elastic/apm-agent-android/pull/507)
+* Adding disk buffering config setter: [#509](https://github.com/elastic/apm-agent-android/pull/509)
+    
 ## 1.0.0 [elastic-apm-android-agent-100-release-notes]
 **Release date:** April 2, 2025
 

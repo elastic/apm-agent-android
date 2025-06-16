@@ -7,9 +7,10 @@ This product includes software licensed under the 'Apache License Version 2.0' l
 
  - Byte Buddy (without dependencies)
  - Byte Buddy Gradle plugin
- - Core (https://developer.android.com/jetpack/androidx/releases/core#1.15.0)
+ - Core (https://developer.android.com/jetpack/androidx/releases/core#1.16.0)
  - Kotlin Stdlib (https://kotlinlang.org/)
  - okhttp (https://square.github.io/okhttp/)
+ - OpenTelemetry Android (https://github.com/open-telemetry/opentelemetry-android)
  - OpenTelemetry Instrumentation for Java (https://github.com/open-telemetry/opentelemetry-java-instrumentation)
  - OpenTelemetry Java (https://github.com/open-telemetry/opentelemetry-java)
  - OpenTelemetry Java Contrib (https://github.com/open-telemetry/opentelemetry-java-contrib)

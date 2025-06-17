@@ -1,6 +1,5 @@
 package co.elastic.otel.android.compilation.tools.plugins.subprojects;
 
-import com.android.build.api.component.impl.ComponentImpl;
 import com.android.build.api.variant.AndroidComponentsExtension;
 import com.android.build.api.variant.Variant;
 
@@ -32,8 +31,7 @@ public class AarNoticeProviderPlugin extends BaseSubprojectPlugin {
 
         AndroidComponentsExtension<?, ?, Variant> componentsExtension = project.getExtensions().getByType(AndroidComponentsExtension.class);
         componentsExtension.onVariants(componentsExtension.selector().all(), variant -> {
-            ComponentImpl component = (ComponentImpl) variant;
-            Configuration runtimeClasspath = component.getVariantDependencies().getRuntimeClasspath();
+            Configuration runtimeClasspath = variant.getRuntimeConfiguration();
             Configuration apmToolsClasspath = wrapConfiguration(project, variant, runtimeClasspath);
             List<Configuration> runtimeConfigs = getRuntimeConfigurations(project, apmToolsClasspath);
             TaskProvider<PomLicensesCollectorTask> pomLicensesFinder = project.getTasks().register(variant.getName() + "DependenciesLicencesFinder", PomLicensesCollectorTask.class, task -> {
@@ -60,7 +58,7 @@ public class AarNoticeProviderPlugin extends BaseSubprojectPlugin {
                 task.getOutputDir().set(project.getLayout().getBuildDirectory().dir(task.getName()));
             });
             if (apmExtension.variantName.get().equals(variant.getName())) {
-                component.getSources().getResources().addGeneratedSourceDirectory(createNotice, CreateNoticeTask::getOutputDir);
+                variant.getSources().getResources().addGeneratedSourceDirectory(createNotice, CreateNoticeTask::getOutputDir);
                 project.getTasks().register(TASK_CREATE_NOTICE_FILE_NAME, CopySingleFileTask.class, task -> {
                     task.getInputFile().set(createNotice.get().getOutputDir().file("META-INF/NOTICE"));
                     task.getOutputFile().set(project.getLayout().getProjectDirectory().file("src/main/resources/META-INF/NOTICE"));

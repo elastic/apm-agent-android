@@ -34,13 +34,6 @@ jobs:
       contents: write
       id-token: write
     steps:
-      - name: Verify prerequisites
-        run: |
-          if [[ $GITHUB_REF_NAME != release/* ]]; then
-            echo This workflow should only be run against release branches
-            exit 1
-          fi
-
       - id: notification
         name: Notify that a release will start
         uses: elastic/oblt-actions/slack/send@v1
@@ -101,73 +94,3 @@ jobs:
           message: |
             :ghost: [${{ github.repository }}] Release *${{ github.ref_name }}* didn't get triggered in Buildkite.
             Build: (<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|here>)
-  post_release:
-    name: Post Release
-    needs: release
-    runs-on: ubuntu-latest
-    steps:
-      - name: Get token
-        id: get_token
-        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
-        with:
-          app_id: ${{ secrets.OBS_AUTOMATION_APP_ID }}
-          private_key: ${{ secrets.OBS_AUTOMATION_APP_PEM }}
-          permissions: >-
-            {
-              "contents": "write",
-              "pull_requests": "write"
-            }
-          repositories: >-
-            ["apm-agent-android"]
-
-      - uses: actions/checkout@v4
-        with:
-          token: ${{ steps.get_token.outputs.token }}
-
-      - uses: elastic/oblt-actions/git/setup@v1
-        with:
-          github-token: ${{ steps.get_token.outputs.token }}
-
-      - name: Setting variables
-        id: variables
-        run: |
-          version=$(cat gradle.properties | grep -Po "(?<=version=)\d+\.\d+\.\d+")
-          { 
-            echo "version=$version"
-            echo "post_release_branch=post-release/$version"
-          } >> "$GITHUB_OUTPUT"
-
-      - if: ${{ ! inputs.dry_run }}
-        name: Creating GitHub release
-        run: |
-          release_tag=v$VERSION
-          git tag $release_tag
-          git push origin tag $release_tag
-          
-          version_without_dots=$(echo $VERSION | sed 's/\.//g')
-          release_notes="[Release Notes for $VERSION](https://www.elastic.co/guide/en/apm/agent/android/current/release-notes-1.x.html#elastic-apm-android-agent-$version_without_dots-release-notes)"
-          
-          gh release create $release_tag --title "Release $VERSION" --notes "$release_notes"
-        env:
-          VERSION: ${{ steps.variables.outputs.version }}
-          GH_TOKEN: ${{ steps.get_token.outputs.token }}
-
-      - if: ${{ ! inputs.dry_run }}
-        name: Prepare for the next release
-        run: |
-          echo "Creating branch $POST_RELEASE_BRANCH"
-          git checkout -b $POST_RELEASE_BRANCH
-          
-          echo "Bumping version"
-          sed -i "s,version=$VERSION,version=$(./.github/scripts/bump-minor-version/main.sh $VERSION)," gradle.properties
-          git commit -a -m "Bumping version"
-          
-          echo "Pushing changes"
-          git push origin $POST_RELEASE_BRANCH
-          
-          echo "Creating PR"
-          gh pr create --title "Prepare for the next release" --body "Prepare for the next release" --base main --reviewer elastic/apm-agent-android --repo ${{ github.repository }}
-        env:
-          VERSION: ${{ steps.variables.outputs.version }}
-          POST_RELEASE_BRANCH: ${{ steps.variables.outputs.post_release_branch }}
-          GH_TOKEN: ${{ steps.get_token.outputs.token }}

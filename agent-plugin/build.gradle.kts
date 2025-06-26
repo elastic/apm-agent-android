@@ -12,7 +12,7 @@ dependencies {
 }
 
 buildConfig {
-    packageName("co.elastic.otel.android.generated")
+    packageName("${group}.generated")
     buildConfigField("String", "SDK_DEPENDENCY_URI", "\"$group:agent-sdk:$version\"")
 }
 

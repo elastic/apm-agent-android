@@ -4,7 +4,7 @@ plugins {
     id("com.github.gmazzo.buildconfig")
 }
 
-val instrumentationGroupId = "co.elastic.otel.android.instrumentation"
+val instrumentationGroupId = "${rootProject.group}.instrumentation"
 
 buildConfig {
     val name = project.parent!!.name

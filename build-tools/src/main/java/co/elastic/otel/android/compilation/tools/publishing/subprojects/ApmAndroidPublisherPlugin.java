@@ -18,6 +18,9 @@ public class ApmAndroidPublisherPlugin extends BaseApmPublisherPlugin {
             return Unit.INSTANCE;
         });
 
-        project.afterEvaluate(self -> addMavenPublication(componentName));
+        project.afterEvaluate(self -> {
+            addMavenPublication(componentName);
+            enableMavenCentralPublishing();
+        });
     }
 }

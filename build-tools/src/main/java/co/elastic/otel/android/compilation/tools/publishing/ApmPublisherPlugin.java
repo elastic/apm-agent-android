@@ -1,6 +1,5 @@
 package co.elastic.otel.android.compilation.tools.publishing;
 
-import com.vanniktech.maven.publish.MavenPublishBaseExtension;
 import com.vanniktech.maven.publish.MavenPublishBasePlugin;
 
 import org.gradle.api.plugins.PluginContainer;
@@ -32,7 +31,6 @@ public class ApmPublisherPlugin extends BaseProjectTypePlugin {
         PluginContainer plugins = project.getPlugins();
         applyCommonPlugins(plugins);
         configureSigning(plugins);
-        configureMavenCentral();
     }
 
     private void applyCommonPlugins(PluginContainer plugins) {
@@ -46,15 +44,5 @@ public class ApmPublisherPlugin extends BaseProjectTypePlugin {
             SigningExtension signing = project.getExtensions().getByType(SigningExtension.class);
             signing.useInMemoryPgpKeys(System.getenv("SECRING_ASC"), System.getenv("KEYPASS_SECRET"));
         }
-    }
-
-    private void configureMavenCentral() {
-        MavenPublishBaseExtension extension = project.getExtensions().getByType(MavenPublishBaseExtension.class);
-        extension.publishToMavenCentral();
-        project.getTasks().register("publishAndReleaseElasticToMavenCentral", task -> {
-            task.setGroup("release");
-            task.dependsOn("publishElasticPublicationToMavenCentralRepository");
-            task.dependsOn("releaseRepository");
-        });
     }
 }

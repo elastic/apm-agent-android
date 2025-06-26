@@ -44,11 +44,10 @@ public abstract class BaseApmPublisherPlugin implements Plugin<Project> {
 
     protected void enableMavenCentralPublishing() {
         MavenPublishBaseExtension extension = project.getExtensions().getByType(MavenPublishBaseExtension.class);
-        extension.publishToMavenCentral();
+        extension.publishToMavenCentral(true);
         project.getTasks().register("publishAndReleaseElasticToMavenCentral", task -> {
             task.setGroup("release");
             task.dependsOn("publishElasticPublicationToMavenCentralRepository");
-            task.dependsOn("releaseRepository");
         });
     }
 

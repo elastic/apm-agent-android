@@ -20,6 +20,7 @@ public class ApmJavaPublisherPlugin extends BaseApmPublisherPlugin {
                     java.withSourcesJar();
                 }
                 addMavenPublication("java");
+                enableMavenCentralPublishing();
             }
         });
     }

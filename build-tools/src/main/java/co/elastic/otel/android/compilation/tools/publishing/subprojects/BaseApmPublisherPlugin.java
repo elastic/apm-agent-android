@@ -3,6 +3,8 @@ package co.elastic.otel.android.compilation.tools.publishing.subprojects;
 import static co.elastic.otel.android.compilation.tools.publishing.PublishingUtils.getArtifactId;
 import static co.elastic.otel.android.compilation.tools.publishing.PublishingUtils.getGroupId;
 
+import com.vanniktech.maven.publish.MavenPublishBaseExtension;
+
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.publish.PublishingExtension;
@@ -37,6 +39,15 @@ public abstract class BaseApmPublisherPlugin implements Plugin<Project> {
             if (isRelease()) {
                 signPublication(publication);
             }
+        });
+    }
+
+    protected void enableMavenCentralPublishing() {
+        MavenPublishBaseExtension extension = project.getExtensions().getByType(MavenPublishBaseExtension.class);
+        extension.publishToMavenCentral(true);
+        project.getTasks().register("publishAndReleaseElasticToMavenCentral", task -> {
+            task.setGroup("release");
+            task.dependsOn("publishElasticPublicationToMavenCentralRepository");
         });
     }
 

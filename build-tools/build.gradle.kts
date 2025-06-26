@@ -8,7 +8,7 @@ dependencies {
     implementation(rootLibs.commons.io)
     implementation(rootLibs.spotless.plugin)
     implementation(rootLibs.dokka)
-    implementation(rootLibs.nexus.publish.plugin)
+    implementation(rootLibs.mavenCentral.publish.plugin)
     implementation(rootLibs.gradle.publish.plugin)
     implementation(rootLibs.gradle.shadow.plugin)
     implementation(rootLibs.kotlin.plugin)

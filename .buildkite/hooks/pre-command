@@ -35,10 +35,10 @@ set +x
 # Nexus credentials (they cannot use the _SECRET pattern since they are in-memory based)
 # See https://docs.gradle.org/current/userguide/signing_plugin.html#sec:in-memory-keys
 NEXUS_SECRET=kv/ci-shared/release-eng/team-release-secrets/apm/maven_central
-ORG_GRADLE_PROJECT_sonatypeUsername=$(vault kv get --field="username" $NEXUS_SECRET)
-export ORG_GRADLE_PROJECT_sonatypeUsername
-ORG_GRADLE_PROJECT_sonatypePassword=$(vault kv get --field="password" $NEXUS_SECRET)
-export ORG_GRADLE_PROJECT_sonatypePassword
+ORG_GRADLE_PROJECT_mavenCentralUsername=$(vault kv get --field="username" $NEXUS_SECRET)
+export ORG_GRADLE_PROJECT_mavenCentralUsername
+ORG_GRADLE_PROJECT_mavenCentralPassword=$(vault kv get --field="password" $NEXUS_SECRET)
+export ORG_GRADLE_PROJECT_mavenCentralPassword
 
 # Gradle Plugin portal credentials
 GRADLE_SECRET=kv/ci-shared/release-eng/team-release-secrets/apm/gradle_plugin_portal

@@ -21,7 +21,7 @@ export COMMON_GRADLE_DEPLOY_PARAMS="-Prelease=true --stacktrace"
 if [[ "$target_specifier" == "all" ||  "$target_specifier" == "mavenCentral" ]]; then
   if [[ "$dry_run" == "false" ]] ; then
     echo "--- Release the binaries to Maven Central"
-    ./gradlew publishElasticPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository $COMMON_GRADLE_DEPLOY_PARAMS
+    ./gradlew publishAndReleaseElasticToMavenCentral $COMMON_GRADLE_DEPLOY_PARAMS
   else
     echo "--- Release the binaries to Maven Central :package: (dry-run)"
     ./gradlew assemble

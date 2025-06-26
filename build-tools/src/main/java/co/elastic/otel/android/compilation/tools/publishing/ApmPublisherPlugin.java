@@ -1,5 +1,8 @@
 package co.elastic.otel.android.compilation.tools.publishing;
 
+import com.vanniktech.maven.publish.MavenPublishBaseExtension;
+import com.vanniktech.maven.publish.MavenPublishBasePlugin;
+
 import org.gradle.api.plugins.PluginContainer;
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
 import org.gradle.plugins.signing.SigningExtension;
@@ -14,23 +17,44 @@ public class ApmPublisherPlugin extends BaseProjectTypePlugin {
     @Override
     protected void onAndroidLibraryFound() {
         PluginContainer plugins = project.getPlugins();
-        applyCommonPlugins(plugins);
+        configurePublishing();
         plugins.apply(ApmAndroidPublisherPlugin.class);
     }
 
     @Override
     protected void onJavaLibraryFound() {
         PluginContainer plugins = project.getPlugins();
-        applyCommonPlugins(plugins);
+        configurePublishing();
         plugins.apply(ApmJavaPublisherPlugin.class);
+    }
+
+    private void configurePublishing() {
+        PluginContainer plugins = project.getPlugins();
+        applyCommonPlugins(plugins);
+        configureSigning(plugins);
+        configureMavenCentral();
     }
 
     private void applyCommonPlugins(PluginContainer plugins) {
         plugins.apply(MavenPublishPlugin.class);
+        plugins.apply(MavenPublishBasePlugin.class);
+    }
+
+    private void configureSigning(PluginContainer plugins) {
         if (PublishingUtils.isRelease(project)) {
             plugins.apply(SigningPlugin.class);
             SigningExtension signing = project.getExtensions().getByType(SigningExtension.class);
             signing.useInMemoryPgpKeys(System.getenv("SECRING_ASC"), System.getenv("KEYPASS_SECRET"));
         }
+    }
+
+    private void configureMavenCentral() {
+        MavenPublishBaseExtension extension = project.getExtensions().getByType(MavenPublishBaseExtension.class);
+        extension.publishToMavenCentral();
+        project.getTasks().register("publishAndReleaseElasticToMavenCentral", task -> {
+            task.setGroup("release");
+            task.dependsOn("publishElasticPublicationToMavenCentralRepository");
+            task.dependsOn("releaseRepository");
+        });
     }
 }

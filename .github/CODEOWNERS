@@ -1,2 +1,4 @@
 *.md @elastic/ingest-docs 
 /docs/ @elastic/ingest-docs
+
+/.github @elastic/observablt-ci

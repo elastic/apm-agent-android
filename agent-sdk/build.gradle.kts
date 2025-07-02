@@ -53,6 +53,9 @@ dependencies {
     // For opamp:
     implementation("com.github.spotbugs:spotbugs-annotations:4.9.3")
     implementation(instrumentation.okhttp)
+    testImplementation("org.mockito:mockito-core:4.11.0")
+    testImplementation("org.mockito:mockito-inline:4.11.0")
+    testImplementation("org.mockito:mockito-junit-jupiter:4.11.0")
     kapt("com.google.auto.value:auto-value:1.11.0")
     compileOnly("com.google.auto.value:auto-value-annotations:1.11.0")
 }

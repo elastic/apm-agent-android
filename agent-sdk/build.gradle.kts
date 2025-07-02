@@ -52,6 +52,7 @@ dependencies {
 
     // For opamp:
     implementation("com.github.spotbugs:spotbugs-annotations:4.9.3")
+    implementation(instrumentation.okhttp)
     kapt("com.google.auto.value:auto-value:1.11.0")
     compileOnly("com.google.auto.value:auto-value-annotations:1.11.0")
 }

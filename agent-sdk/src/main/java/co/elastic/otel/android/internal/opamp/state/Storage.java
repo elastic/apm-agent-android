@@ -16,30 +16,42 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.internal.opamp.impl.state;
+package co.elastic.otel.android.internal.opamp.state;
 
-import co.elastic.otel.android.internal.opamp.state.InMemoryState;
-import opamp.proto.AgentCapabilities;
+import java.util.function.BiFunction;
+
+import javax.annotation.Nonnull;
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-public final class CapabilitiesState extends InMemoryState<Long> {
+public interface Storage<T> {
+    @Nonnull
+    T get();
 
-    public static CapabilitiesState create() {
-        return new CapabilitiesState(AgentCapabilities.AgentCapabilities_ReportsStatus.getValue());
+    boolean set(@Nonnull T value);
+
+    static <T> Storage<T> inMemory(@Nonnull T initialState) {
+        return inMemory(initialState, Object::equals);
     }
 
-    public void add(long capabilities) {
-        set(get() | capabilities);
+    static <T> Storage<T> inMemory(@Nonnull T initialState, @Nonnull BiFunction<T, T, Boolean> equalsPredicate) {
+        return new InMemoryStorage<>(initialState, equalsPredicate);
     }
 
-    public void remove(long capabilities) {
-        set(get() & ~capabilities);
-    }
+    static <T> Storage<T> noop() {
+        return new Storage<>() {
+            @Nonnull
+            @Override
+            public T get() {
+                throw new UnsupportedOperationException();
+            }
 
-    private CapabilitiesState(long initialState) {
-        super(initialState);
+            @Override
+            public boolean set(@Nonnull T value) {
+                return false;
+            }
+        };
     }
 }

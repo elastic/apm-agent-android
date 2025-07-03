@@ -138,12 +138,12 @@ public abstract class State<T> implements Supplier<T> {
         }
     }
 
-    public static final class Capabilities extends State<Integer> {
-        public static Capabilities createInMemory(int value) {
+    public static final class Capabilities extends State<Long> {
+        public static Capabilities createInMemory(long value) {
             return new Capabilities(Storage.inMemory(value));
         }
 
-        public Capabilities(Storage<Integer> storage) {
+        public Capabilities(Storage<Long> storage) {
             super(storage);
         }
 
@@ -161,8 +161,8 @@ public abstract class State<T> implements Supplier<T> {
         }
     }
 
-    public static final class EffectiveConfig extends State<EffectiveConfig> {
-        public EffectiveConfig(Storage<EffectiveConfig> storage) {
+    public static final class EffectiveConfig extends State<opamp.proto.EffectiveConfig> {
+        public EffectiveConfig(Storage<opamp.proto.EffectiveConfig> storage) {
             super(storage);
         }
 

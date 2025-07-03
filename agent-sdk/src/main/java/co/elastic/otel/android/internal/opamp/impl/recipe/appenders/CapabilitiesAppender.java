@@ -27,13 +27,13 @@ import opamp.proto.AgentToServer;
  * any time.
  */
 public final class CapabilitiesAppender implements AgentToServerAppender {
-    private final Supplier<Integer> capabilities;
+    private final Supplier<Long> capabilities;
 
-    public static CapabilitiesAppender create(Supplier<Integer> capabilities) {
+    public static CapabilitiesAppender create(Supplier<Long> capabilities) {
         return new CapabilitiesAppender(capabilities);
     }
 
-    private CapabilitiesAppender(Supplier<Integer> capabilities) {
+    private CapabilitiesAppender(Supplier<Long> capabilities) {
         this.capabilities = capabilities;
     }
 

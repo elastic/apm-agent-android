@@ -26,16 +26,22 @@ import co.elastic.otel.android.internal.opamp.state.State;
  */
 public final class OpampClientState {
     public final State.RemoteConfigStatus remoteConfigStatus;
-    public final State.SequenceNum sequenceNumber;
+    public final State.SequenceNum sequenceNum;
     public final State.AgentDescription agentDescription;
     public final State.Capabilities capabilities;
     public final State.InstanceUid instanceUid;
     public final State.EffectiveConfig effectiveConfig;
     public final State.Flags flags;
 
-    public OpampClientState(State.RemoteConfigStatus remoteConfigStatus, State.SequenceNum sequenceNumber, State.AgentDescription agentDescription, State.Capabilities capabilities, State.InstanceUid instanceUid, State.EffectiveConfig effectiveConfig, State.Flags flags) {
+    public OpampClientState(State.RemoteConfigStatus remoteConfigStatus,
+                            State.SequenceNum sequenceNum,
+                            State.AgentDescription agentDescription,
+                            State.Capabilities capabilities,
+                            State.InstanceUid instanceUid,
+                            State.EffectiveConfig effectiveConfig,
+                            State.Flags flags) {
         this.remoteConfigStatus = remoteConfigStatus;
-        this.sequenceNumber = sequenceNumber;
+        this.sequenceNum = sequenceNum;
         this.agentDescription = agentDescription;
         this.capabilities = capabilities;
         this.instanceUid = instanceUid;

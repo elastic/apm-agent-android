@@ -3,6 +3,7 @@ products:
   - id: apm-agent
 cross_links:
   - docs-content
+  - opentelemetry
 toc:
   - toc: release-notes
 subs:

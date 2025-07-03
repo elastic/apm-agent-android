@@ -1,0 +1,63 @@
+{
+  "origin": {
+    "branch": "remove-reference-docs",
+    "remote": " git@github.com:elastic/apm-agent-android",
+    "ref": "3abbd52dfdaaf0a791400ca7fc6da8cb4487856f",
+    "name": "apm-agent-android"
+  },
+  "url_path_prefix": "",
+  "links": {
+    "release-notes/known-issues.md": {},
+    "release-notes/index.md": {
+      "anchors": [
+        "elastic-apm-android-agent-110-release-notes",
+        "elastic-apm-android-agent-110-features-enhancements",
+        "elastic-apm-android-agent-100-release-notes",
+        "elastic-apm-android-agent-100-features-enhancements",
+        "elastic-apm-android-agent-0200-release-notes",
+        "elastic-apm-android-agent-0200-features-enhancements",
+        "elastic-apm-android-agent-0200-fixes",
+        "elastic-apm-android-agent-0190-release-notes",
+        "elastic-apm-android-agent-0190-fixes",
+        "elastic-apm-android-agent-0180-release-notes",
+        "elastic-apm-android-agent-0180-fixes",
+        "elastic-apm-android-agent-0170-release-notes",
+        "elastic-apm-android-agent-0170-features-enhancements",
+        "elastic-apm-android-agent-0160-release-notes",
+        "elastic-apm-android-agent-0160-fixes",
+        "elastic-apm-android-agent-0150-release-notes",
+        "elastic-apm-android-agent-0150-features-enhancements",
+        "elastic-apm-android-agent-0140-release-notes",
+        "elastic-apm-android-agent-0140-features-enhancements",
+        "elastic-apm-android-agent-0131-release-notes",
+        "elastic-apm-android-agent-0131-fixes",
+        "elastic-apm-android-agent-0130-release-notes",
+        "elastic-apm-android-agent-0130-features-enhancements",
+        "elastic-apm-android-agent-0130-fixes",
+        "elastic-apm-android-agent-0120-release-notes",
+        "elastic-apm-android-agent-0120-features-enhancements",
+        "elastic-apm-android-agent-0110-release-notes",
+        "elastic-apm-android-agent-0110-fixes",
+        "elastic-apm-android-agent-0100-release-notes",
+        "elastic-apm-android-agent-0100-features-enhancements",
+        "elastic-apm-android-agent-090-release-notes",
+        "elastic-apm-android-agent-090-features-enhancements",
+        "elastic-apm-android-agent-080-release-notes",
+        "elastic-apm-android-agent-080-features-enhancements",
+        "elastic-apm-android-agent-070-release-notes",
+        "elastic-apm-android-agent-070-features-enhancements",
+        "elastic-apm-android-agent-070-fixes",
+        "elastic-apm-android-agent-060-release-notes",
+        "elastic-apm-android-agent-060-features-enhancements",
+        "elastic-apm-android-agent-050-release-notes",
+        "elastic-apm-android-agent-050-features-enhancements",
+        "elastic-apm-android-agent-040-release-notes",
+        "elastic-apm-android-agent-040-features-enhancements",
+        "elastic-apm-android-agent-010-release-notes",
+        "elastic-apm-android-agent-010-features-enhancements"
+      ]
+    }
+  },
+  "cross_links": [],
+  "redirects": null
+}

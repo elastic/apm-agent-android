@@ -80,3 +80,5 @@ lint/tmp/
 
 # built documentation
 html_docs
+.artifacts
+docs/.artifacts

@@ -53,6 +53,7 @@ dependencies {
     // For opamp:
     implementation("com.github.spotbugs:spotbugs-annotations:4.9.3")
     implementation(instrumentation.okhttp)
+    implementation("com.github.f4b6a3:uuid-creator:6.0.0")
     testImplementation("org.mockito:mockito-core:4.11.0")
     testImplementation("org.mockito:mockito-inline:4.11.0")
     testImplementation("org.mockito:mockito-junit-jupiter:4.11.0")

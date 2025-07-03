@@ -1,0 +1,386 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *	http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package co.elastic.otel.android.internal.opamp.impl;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Map;
+
+import co.elastic.otel.android.internal.opamp.OpampClient;
+import co.elastic.otel.android.internal.opamp.request.Request;
+import co.elastic.otel.android.internal.opamp.request.service.RequestService;
+import co.elastic.otel.android.internal.opamp.response.MessageData;
+import co.elastic.otel.android.internal.opamp.response.Response;
+import co.elastic.otel.android.internal.opamp.state.State;
+import co.elastic.otel.android.internal.opamp.state.Storage;
+import okio.ByteString;
+import opamp.proto.AgentCapabilities;
+import opamp.proto.AgentConfigFile;
+import opamp.proto.AgentConfigMap;
+import opamp.proto.AgentDescription;
+import opamp.proto.AgentIdentification;
+import opamp.proto.AgentRemoteConfig;
+import opamp.proto.AgentToServer;
+import opamp.proto.AgentToServerFlags;
+import opamp.proto.RemoteConfigStatus;
+import opamp.proto.RemoteConfigStatuses;
+import opamp.proto.ServerErrorResponse;
+import opamp.proto.ServerToAgent;
+import opamp.proto.ServerToAgentFlags;
+
+@ExtendWith(MockitoExtension.class)
+class OpampClientImplTest {
+    @Mock
+    private RequestService requestService;
+    @Mock
+    private OpampClient.Callbacks callbacks;
+    private OpampClientState state;
+    private OpampClientImpl client;
+
+    @BeforeEach
+    void setUp() {
+        state =
+                new OpampClientState(
+                        State.RemoteConfigStatus.createInMemory(getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_UNSET)),
+                        State.SequenceNum.createInMemory(1),
+                        State.AgentDescription.createInMemory(new AgentDescription.Builder().build()),
+                        State.Capabilities.createInMemory(AgentCapabilities.AgentCapabilities_Unspecified.getValue()),
+                        State.InstanceUid.createRandomInMemory(),
+                        new State.EffectiveConfig(Storage.noop()),
+                        State.Flags.createInMemory(AgentToServerFlags.AgentToServerFlags_Unspecified.getValue()));
+        client = OpampClientImpl.create(requestService, state);
+    }
+
+    @Test
+    void verifyStart() {
+        client.start(callbacks);
+
+        verify(requestService).start(client, client);
+    }
+
+    @Test
+    void verifyStop() {
+        client.start(callbacks);
+        verify(requestService).start(client, client);
+
+        client.stop();
+        verify(requestService).stop();
+    }
+
+    @Test
+    void verifyStartOnlyOnce() {
+        client.start(callbacks);
+
+        try {
+            client.start(callbacks);
+            fail("Should have thrown an exception");
+        } catch (IllegalStateException e) {
+            assertThat(e).hasMessage("The client has already been started");
+        }
+    }
+
+    @Test
+    void verifyStopOnlyOnce() {
+        client.start(callbacks);
+
+        client.stop();
+
+        try {
+            client.stop();
+            fail("Should have thrown an exception");
+        } catch (IllegalStateException e) {
+            assertThat(e).hasMessage("The client has already been stopped");
+        }
+    }
+
+    @Test
+    void verifyStopOnlyAfterStart() {
+        try {
+            client.stop();
+            fail("Should have thrown an exception");
+        } catch (IllegalStateException e) {
+            assertThat(e).hasMessage("The client has not been started");
+        }
+    }
+
+    @Test
+    void checkRequestFields() {
+        client.start(callbacks);
+
+        AgentToServer firstRequest = client.get().getAgentToServer();
+
+        assertThat(firstRequest.instance_uid.toByteArray()).isEqualTo(state.instanceUid.get());
+        assertThat(firstRequest.sequence_num).isEqualTo(1);
+        assertThat(firstRequest.capabilities).isEqualTo(state.capabilities.get());
+        assertThat(firstRequest.agent_description).isNotNull();
+        assertThat(firstRequest.effective_config).isNotNull();
+        assertThat(firstRequest.remote_config_status).isNotNull();
+
+        client.onRequestSuccess(null);
+
+        // Second request
+        AgentToServer secondRequest = client.get().getAgentToServer();
+
+        assertThat(secondRequest.instance_uid.toByteArray())
+                .isEqualTo(state.instanceUid.get());
+        assertThat(secondRequest.sequence_num).isEqualTo(2);
+        assertThat(secondRequest.capabilities).isEqualTo(state.capabilities.get());
+        assertThat(secondRequest.agent_description).isNull();
+        assertThat(secondRequest.effective_config).isNull();
+        assertThat(secondRequest.remote_config_status).isNull();
+    }
+
+    @Test
+    void verifyRequestBuildingAfterStopIsCalled() {
+        client.start(callbacks);
+
+        client.stop();
+
+        Request request = client.get();
+        assertThat(request.getAgentToServer().agent_disconnect).isNotNull();
+    }
+
+    @Test
+    void onSuccess_withNoChangesToReport_doNotNotifyCallbackOnMessage() {
+        ServerToAgent serverToAgent = new ServerToAgent.Builder().build();
+        client.start(callbacks);
+
+        client.onRequestSuccess(Response.create(serverToAgent));
+
+        verify(callbacks, never()).onMessage(any(), any());
+    }
+
+    @Test
+    void onSuccessfulResponse_withRemoteConfigStatusUpdate_notifyServerImmediately() {
+        ServerToAgent response =
+                new ServerToAgent.Builder()
+                        .remote_config(
+                                new AgentRemoteConfig.Builder().config(getAgentConfigMap("fileName", "{}")).build())
+                        .build();
+        TestCallback testCallback =
+                new TestCallback() {
+                    @Override
+                    public void onMessage(OpampClient client, MessageData messageData) {
+                        client.setRemoteConfigStatus(
+                                getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_APPLYING));
+                    }
+                };
+        client.start(testCallback);
+        clearInvocations(requestService);
+
+        client.onRequestSuccess(Response.create(response));
+
+        verify(requestService).sendRequest();
+    }
+
+    @Test
+    void onSuccessfulResponse_withRemoteConfigStatus_withoutChange_doNotNotifyServerImmediately() {
+        ServerToAgent response =
+                new ServerToAgent.Builder()
+                        .remote_config(
+                                new AgentRemoteConfig.Builder().config(getAgentConfigMap("fileName", "{}")).build())
+                        .build();
+        TestCallback testCallback =
+                new TestCallback() {
+                    @Override
+                    public void onMessage(OpampClient client, MessageData messageData) {
+                        client.setRemoteConfigStatus(
+                                getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_APPLYING));
+                    }
+                };
+        client.setRemoteConfigStatus(
+                getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_APPLYING));
+        client.start(testCallback);
+        clearInvocations(requestService);
+
+        client.onRequestSuccess(Response.create(response));
+
+        verify(requestService, never()).sendRequest();
+    }
+
+    @Test
+    void onConnectionSuccessful_notifyCallback() {
+        client.start(callbacks);
+
+        client.onConnectionSuccess();
+
+        verify(callbacks).onConnect(client);
+        verify(callbacks, never()).onConnectFailed(any(), any());
+    }
+
+    @Test
+    void onSuccessfulResponse_withServerErrorData_notifyCallback() {
+        client.start(callbacks);
+        ServerErrorResponse errorResponse = new ServerErrorResponse.Builder().build();
+        ServerToAgent serverToAgent =
+                new ServerToAgent.Builder().error_response(errorResponse).build();
+
+        client.onRequestSuccess(Response.create(serverToAgent));
+
+        verify(callbacks).onErrorResponse(client, errorResponse);
+        verify(callbacks, never()).onMessage(any(), any());
+    }
+
+    @Test
+    void onConnectionFailed_notifyCallback() {
+        client.start(callbacks);
+        Throwable throwable = mock();
+
+        client.onConnectionFailed(throwable);
+
+        verify(callbacks).onConnectFailed(client, throwable);
+        verify(callbacks, never()).onConnect(any());
+    }
+
+    @Test
+    void verifyDisableCompressionWhenRequestedByServer() {
+        ServerToAgent serverToAgent =
+                new ServerToAgent.Builder()
+                        .flags(ServerToAgentFlags.ServerToAgentFlags_ReportFullState.getValue())
+                        .build();
+        client.start(callbacks);
+
+        // First payload contains compressable fields
+        AgentToServer firstRequest = client.get().getAgentToServer();
+        assertThat(firstRequest.agent_description).isNotNull();
+        assertThat(firstRequest.effective_config).isNotNull();
+        assertThat(firstRequest.remote_config_status).isNotNull();
+
+        // Second payload doesn't contain compressable fields
+        AgentToServer secondRequest = client.get().getAgentToServer();
+        assertThat(secondRequest.agent_description).isNull();
+        assertThat(secondRequest.effective_config).isNull();
+        assertThat(secondRequest.remote_config_status).isNull();
+
+        // When the server requests a full payload, send them again.
+        client.onRequestSuccess(Response.create(serverToAgent));
+
+        AgentToServer thirdRequest = client.get().getAgentToServer();
+        assertThat(thirdRequest.agent_description).isNotNull();
+        assertThat(thirdRequest.effective_config).isNotNull();
+        assertThat(thirdRequest.remote_config_status).isNotNull();
+    }
+
+    @Test
+    void verifySequenceNumberIncreasesOnServerResponseReceived() {
+        client.start(callbacks);
+        assertThat(state.sequenceNum.get()).isEqualTo(1);
+        ServerToAgent serverToAgent = new ServerToAgent.Builder().build();
+
+        client.onRequestSuccess(Response.create(serverToAgent));
+
+        assertThat(state.sequenceNum.get()).isEqualTo(2);
+    }
+
+    @Test
+    void verifySequenceNumberDoesNotIncreaseOnRequestError() {
+        client.start(callbacks);
+        assertThat(state.sequenceNum.get()).isEqualTo(1);
+
+        client.onRequestFailed(new Exception());
+
+        assertThat(state.sequenceNum.get()).isEqualTo(1);
+    }
+
+    @Test
+    void whenStatusIsUpdated_notifyServerImmediately() {
+        client.setRemoteConfigStatus(
+                getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_UNSET));
+        client.start(callbacks);
+        clearInvocations(requestService);
+
+        client.setRemoteConfigStatus(
+                getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_APPLYING));
+
+        verify(requestService).sendRequest();
+    }
+
+    @Test
+    void whenStatusIsNotUpdated_doNotNotifyServerImmediately() {
+        client.setRemoteConfigStatus(
+                getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_APPLYING));
+        client.start(callbacks);
+        clearInvocations(requestService);
+
+        client.setRemoteConfigStatus(
+                getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_APPLYING));
+
+        verify(requestService, never()).sendRequest();
+    }
+
+    @Test
+    void whenServerProvidesNewInstanceUid_useIt() {
+        client.start(callbacks);
+        byte[] serverProvidedUid = new byte[]{1, 2, 3};
+        ServerToAgent response =
+                new ServerToAgent.Builder()
+                        .agent_identification(
+                                new AgentIdentification.Builder()
+                                        .new_instance_uid(ByteString.of(serverProvidedUid))
+                                        .build())
+                        .build();
+
+        client.onRequestSuccess(Response.create(response));
+
+        assertThat(state.instanceUid.get()).isEqualTo(serverProvidedUid);
+    }
+
+    private static RemoteConfigStatus getRemoteConfigStatus(RemoteConfigStatuses status) {
+        return new RemoteConfigStatus.Builder().status(status).build();
+    }
+
+    private AgentConfigMap getAgentConfigMap(String configFileName, String content) {
+        AgentConfigMap.Builder builder = new AgentConfigMap.Builder();
+        builder.config_map(Map.of(
+                configFileName,
+                new AgentConfigFile.Builder().body(ByteString.encodeUtf8(content)).build()));
+        return builder.build();
+    }
+
+    private static class TestCallback implements OpampClient.Callbacks {
+
+        @Override
+        public void onConnect(OpampClient client) {
+        }
+
+        @Override
+        public void onConnectFailed(OpampClient client, Throwable throwable) {
+        }
+
+        @Override
+        public void onErrorResponse(OpampClient client, ServerErrorResponse errorResponse) {
+        }
+
+        @Override
+        public void onMessage(OpampClient client, MessageData messageData) {
+        }
+    }
+}

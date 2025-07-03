@@ -51,7 +51,7 @@ public abstract class State<T> implements Supplier<T> {
         listeners.remove(listener);
     }
 
-    protected final void notifyListeners() {
+    public final void notifyListeners() {
         synchronized (listeners) {
             for (Listener listener : listeners) {
                 listener.onUpdate(getType());
@@ -59,7 +59,7 @@ public abstract class State<T> implements Supplier<T> {
         }
     }
 
-    public void set(@Nonnull T value) {
+    public final void set(@Nonnull T value) {
         if (storage.set(value)) {
             notifyListeners();
         }
@@ -67,7 +67,7 @@ public abstract class State<T> implements Supplier<T> {
 
     @Nonnull
     @Override
-    public T get() {
+    public final T get() {
         return storage.get();
     }
 
@@ -81,7 +81,7 @@ public abstract class State<T> implements Supplier<T> {
         this.storage = storage;
     }
 
-    public static class InstanceUid extends State<byte[]> {
+    public static final class InstanceUid extends State<byte[]> {
         public static InstanceUid createRandomInMemory() {
             UUID uuid = UuidCreator.getTimeOrderedEpoch();
             ByteBuffer buffer = ByteBuffer.allocate(16);
@@ -99,12 +99,12 @@ public abstract class State<T> implements Supplier<T> {
         }
 
         @Override
-        public final FieldType getType() {
+        public FieldType getType() {
             return FieldType.INSTANCE_UID;
         }
     }
 
-    public static class SequenceNum extends State<Integer> {
+    public static final class SequenceNum extends State<Integer> {
         public static SequenceNum createInMemory(int value) {
             return new SequenceNum(Storage.inMemory(value));
         }
@@ -118,12 +118,12 @@ public abstract class State<T> implements Supplier<T> {
         }
 
         @Override
-        public final FieldType getType() {
+        public FieldType getType() {
             return FieldType.SEQUENCE_NUM;
         }
     }
 
-    public static class AgentDescription extends State<opamp.proto.AgentDescription> {
+    public static final class AgentDescription extends State<opamp.proto.AgentDescription> {
         public static AgentDescription createInMemory(opamp.proto.AgentDescription value) {
             return new AgentDescription(Storage.inMemory(value));
         }
@@ -133,12 +133,12 @@ public abstract class State<T> implements Supplier<T> {
         }
 
         @Override
-        public final FieldType getType() {
+        public FieldType getType() {
             return FieldType.AGENT_DESCRIPTION;
         }
     }
 
-    public static class Capabilities extends State<Integer> {
+    public static final class Capabilities extends State<Integer> {
         public static Capabilities createInMemory(int value) {
             return new Capabilities(Storage.inMemory(value));
         }
@@ -156,23 +156,23 @@ public abstract class State<T> implements Supplier<T> {
         }
 
         @Override
-        public final FieldType getType() {
+        public FieldType getType() {
             return FieldType.CAPABILITIES;
         }
     }
 
-    public static class EffectiveConfig extends State<EffectiveConfig> {
+    public static final class EffectiveConfig extends State<EffectiveConfig> {
         public EffectiveConfig(Storage<EffectiveConfig> storage) {
             super(storage);
         }
 
         @Override
-        public final FieldType getType() {
+        public FieldType getType() {
             return FieldType.EFFECTIVE_CONFIG;
         }
     }
 
-    public static class RemoteConfigStatus extends State<opamp.proto.RemoteConfigStatus> {
+    public static final class RemoteConfigStatus extends State<opamp.proto.RemoteConfigStatus> {
         public static RemoteConfigStatus createInMemory(opamp.proto.RemoteConfigStatus value) {
             return new RemoteConfigStatus(Storage.inMemory(value));
         }
@@ -182,12 +182,12 @@ public abstract class State<T> implements Supplier<T> {
         }
 
         @Override
-        public final FieldType getType() {
+        public FieldType getType() {
             return FieldType.REMOTE_CONFIG_STATUS;
         }
     }
 
-    public static class Flags extends State<Integer> {
+    public static final class Flags extends State<Integer> {
         public static Flags createInMemory(int value) {
             return new Flags(Storage.inMemory(value));
         }
@@ -197,7 +197,7 @@ public abstract class State<T> implements Supplier<T> {
         }
 
         @Override
-        public final FieldType getType() {
+        public FieldType getType() {
             return FieldType.FLAGS;
         }
     }

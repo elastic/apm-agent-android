@@ -21,6 +21,7 @@ package co.elastic.otel.android.internal.opamp.state;
 import com.github.f4b6a3.uuid.UuidCreator;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -28,10 +29,6 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
-
-import opamp.proto.AgentCapabilities;
-import opamp.proto.AgentToServerFlags;
-import opamp.proto.RemoteConfigStatuses;
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
@@ -94,7 +91,7 @@ public abstract class State<T> implements Supplier<T> {
         }
 
         public static InstanceUid createInMemory(byte[] value) {
-            return new InstanceUid(Storage.inMemory(value));
+            return new InstanceUid(Storage.inMemory(value, Arrays::equals));
         }
 
         public InstanceUid(Storage<byte[]> storage) {
@@ -108,8 +105,8 @@ public abstract class State<T> implements Supplier<T> {
     }
 
     public static class SequenceNum extends State<Integer> {
-        public static SequenceNum createInMemory() {
-            return new SequenceNum(Storage.inMemory(1));
+        public static SequenceNum createInMemory(int value) {
+            return new SequenceNum(Storage.inMemory(value));
         }
 
         public SequenceNum(Storage<Integer> storage) {
@@ -127,8 +124,8 @@ public abstract class State<T> implements Supplier<T> {
     }
 
     public static class AgentDescription extends State<opamp.proto.AgentDescription> {
-        public static AgentDescription createInMemory() {
-            return new AgentDescription(Storage.inMemory(new opamp.proto.AgentDescription.Builder().build()));
+        public static AgentDescription createInMemory(opamp.proto.AgentDescription value) {
+            return new AgentDescription(Storage.inMemory(value));
         }
 
         public AgentDescription(Storage<opamp.proto.AgentDescription> storage) {
@@ -142,8 +139,8 @@ public abstract class State<T> implements Supplier<T> {
     }
 
     public static class Capabilities extends State<Integer> {
-        public static Capabilities createInMemory() {
-            return new Capabilities(Storage.inMemory(AgentCapabilities.AgentCapabilities_ReportsStatus.getValue()));
+        public static Capabilities createInMemory(int value) {
+            return new Capabilities(Storage.inMemory(value));
         }
 
         public Capabilities(Storage<Integer> storage) {
@@ -176,11 +173,8 @@ public abstract class State<T> implements Supplier<T> {
     }
 
     public static class RemoteConfigStatus extends State<opamp.proto.RemoteConfigStatus> {
-        public static RemoteConfigStatus createInMemory() {
-            return new RemoteConfigStatus(Storage.inMemory(
-                    new opamp.proto.RemoteConfigStatus.Builder()
-                            .status(RemoteConfigStatuses.RemoteConfigStatuses_UNSET)
-                            .build()));
+        public static RemoteConfigStatus createInMemory(opamp.proto.RemoteConfigStatus value) {
+            return new RemoteConfigStatus(Storage.inMemory(value));
         }
 
         public RemoteConfigStatus(Storage<opamp.proto.RemoteConfigStatus> storage) {
@@ -194,8 +188,8 @@ public abstract class State<T> implements Supplier<T> {
     }
 
     public static class Flags extends State<Integer> {
-        public static Flags createInMemory() {
-            return new Flags(Storage.inMemory(AgentToServerFlags.AgentToServerFlags_Unspecified.getValue()));
+        public static Flags createInMemory(int value) {
+            return new Flags(Storage.inMemory(value));
         }
 
         public Flags(Storage<Integer> storage) {

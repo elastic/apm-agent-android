@@ -30,12 +30,7 @@ class CapabilitiesStateTest {
 
     @BeforeEach
     void setUp() {
-        capabilitiesState = State.Capabilities.createInMemory();
-    }
-
-    @Test
-    void verifyDefaultValue() {
-        assertThat(hasFlag(AgentCapabilities.AgentCapabilities_ReportsStatus.getValue())).isTrue();
+        capabilitiesState = State.Capabilities.createInMemory(AgentCapabilities.AgentCapabilities_ReportsStatus.getValue());
     }
 
     @Test

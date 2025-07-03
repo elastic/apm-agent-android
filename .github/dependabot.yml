@@ -7,8 +7,6 @@ updates:
     directories:
       - "/"
       - "/.github/actions/*"
-    reviewers:
-      - "elastic/observablt-ci"
     schedule:
       interval: "weekly"
       day: "sunday"

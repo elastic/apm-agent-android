@@ -76,14 +76,6 @@ licensesConfig {
 }
 ```
 
-## Verifying NOTICE files
-
-NOTICE files need to be kept updated on dependencies changes, for this purpose each will get a new
-gradle task named `verifyNoticeFile` which ideally should be run in a CI pipeline in order to
-confirm that the existing NOTICE files are valid in regards to their project's dependencies. If
-there's an issue, then the `createNoticeFile` task will have to be run so that the new NOTICE files
-can be tracked and pushed into the repo.
-
 ## Adding source headers
 
 This work is triggered when building this project so there's nothing manual to be done about it. The

@@ -8,16 +8,12 @@ import org.gradle.api.Project;
 import org.gradle.api.plugins.PluginContainer;
 import org.gradle.util.internal.VersionNumber;
 
-import java.time.Duration;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import co.elastic.otel.android.compilation.tools.NoticeProviderPlugin;
 import co.elastic.otel.android.compilation.tools.plugins.RootNoticeProviderPlugin;
 import co.elastic.otel.android.compilation.tools.sourceheader.ApmSourceHeaderPlugin;
-import io.github.gradlenexus.publishplugin.NexusPublishExtension;
-import io.github.gradlenexus.publishplugin.NexusPublishPlugin;
-import io.github.gradlenexus.publishplugin.NexusRepositoryContainer;
 import kotlinx.validation.ApiValidationExtension;
 import kotlinx.validation.BinaryCompatibilityValidatorPlugin;
 
@@ -30,7 +26,6 @@ public class ApmPublisherRootPlugin implements Plugin<Project> {
     public void apply(Project project) {
         configureVersion(project);
         applyRootPlugins(project.getPlugins());
-        configureMavenCentral(project);
         project.subprojects(subproject -> {
             String path = subproject.getPath();
             if (!path.startsWith(":internal-tools")) {
@@ -42,6 +37,10 @@ public class ApmPublisherRootPlugin implements Plugin<Project> {
                     setArtifactId(subproject, instrumentationMatcher.group(1) + "-" + instrumentationMatcher.group(2));
                     subproject.setGroup(subproject.getGroup() + "." + instrumentationMatcher.group(1));
                 }
+                if ("true".equals(subproject.findProperty("elastic.experimental"))) {
+                    subproject.setVersion(subproject.getVersion() + "-alpha");
+                }
+
                 subproject.getPluginManager().withPlugin("java-library", appliedPlugin -> configureProject(project, subproject));
                 subproject.getPluginManager().withPlugin("com.android.library", appliedPlugin -> configureProject(project, subproject));
             }
@@ -110,17 +109,5 @@ public class ApmPublisherRootPlugin implements Plugin<Project> {
 
     private void applyRootPlugins(PluginContainer plugins) {
         plugins.apply(RootNoticeProviderPlugin.class);
-        plugins.apply(NexusPublishPlugin.class);
-    }
-
-    private void configureMavenCentral(Project project) {
-        NexusPublishExtension nexusPublishExtension = project.getExtensions().getByType(NexusPublishExtension.class);
-        nexusPublishExtension.repositories(NexusRepositoryContainer::sonatype);
-        nexusPublishExtension.getClientTimeout().set(Duration.ofMinutes(10));
-        nexusPublishExtension.getConnectTimeout().set(Duration.ofMinutes(10));
-        nexusPublishExtension.transitionCheckOptions(transitionCheckOptions -> {
-            transitionCheckOptions.getMaxRetries().set(200);
-            transitionCheckOptions.getDelayBetween().set(Duration.ofSeconds(15));
-        });
     }
 }

@@ -19,10 +19,12 @@
 package co.elastic.otel.android.internal.features.diskbuffering
 
 import co.elastic.otel.android.common.internal.logging.Elog
+import co.elastic.otel.android.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.otel.android.internal.exporters.configurable.MutableLogRecordExporter
 import co.elastic.otel.android.internal.exporters.configurable.MutableMetricExporter
 import co.elastic.otel.android.internal.exporters.configurable.MutableSpanExporter
 import co.elastic.otel.android.internal.features.diskbuffering.tools.DiskManager
+import co.elastic.otel.android.internal.features.diskbuffering.tools.ExtendedDelegateLogRecordExporter
 import co.elastic.otel.android.internal.features.exportergate.ExporterGateManager
 import co.elastic.otel.android.internal.features.persistence.SimpleTemporaryFileProvider
 import co.elastic.otel.android.internal.services.ServiceManager
@@ -33,7 +35,7 @@ import io.opentelemetry.contrib.disk.buffering.MetricFromDiskExporter
 import io.opentelemetry.contrib.disk.buffering.MetricToDiskExporter
 import io.opentelemetry.contrib.disk.buffering.SpanFromDiskExporter
 import io.opentelemetry.contrib.disk.buffering.SpanToDiskExporter
-import io.opentelemetry.contrib.disk.buffering.StorageConfiguration
+import io.opentelemetry.contrib.disk.buffering.config.StorageConfiguration
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.trace.export.SpanExporter
@@ -112,17 +114,17 @@ internal class DiskBufferingManager private constructor(
 
     internal fun initialize() {
         logger.debug("Initializing disk buffering with configuration: {}", configuration)
-        if (configuration.enabled) {
-            doInitialize()
+        if (configuration is DiskBufferingConfiguration.Enabled) {
+            doInitialize(configuration)
         } else {
             openLatch()
         }
     }
 
-    private fun doInitialize() {
+    private fun doInitialize(configuration: DiskBufferingConfiguration.Enabled) {
         serviceManager.getBackgroundWorkService().submit {
             try {
-                val storageConfiguration = createStorageConfiguration()
+                val storageConfiguration = createStorageConfiguration(configuration)
                 signalFromDiskExporter = createFromDiskExporter(storageConfiguration)
                 toDiskSpanExporter = interceptedSpanExporter?.let {
                     SpanToDiskExporter.create(it, storageConfiguration)
@@ -133,11 +135,10 @@ internal class DiskBufferingManager private constructor(
                 toDiskMetricExporter = interceptedMetricExporter?.let {
                     MetricToDiskExporter.create(
                         it,
-                        storageConfiguration,
-                        it::getAggregationTemporality
+                        storageConfiguration
                     )
                 }
-                enableDiskBuffering(configuration.enabled)
+                enableDiskBuffering()
                 startExportSchedule()
             } catch (e: IOException) {
                 logger.error("Could not initialize disk buffering", e)
@@ -158,28 +159,16 @@ internal class DiskBufferingManager private constructor(
         gateManager.openLatches(DiskBufferingManager::class.java)
     }
 
-    private fun enableDiskBuffering(enabled: Boolean) {
-        logger.debug("Disk buffering enabled: {}", enabled)
-        if (enabled) {
-            toDiskSpanExporter?.let {
-                spanExporter!!.setDelegate(it)
-            }
-            toDiskLogRecordExporter?.let {
-                logRecordExporter!!.setDelegate(it)
-            }
-            toDiskMetricExporter?.let {
-                metricExporter!!.setDelegate(it)
-            }
-        } else {
-            interceptedSpanExporter?.let {
-                spanExporter!!.setDelegate(it)
-            }
-            interceptedLogRecordExporter?.let {
-                logRecordExporter!!.setDelegate(it)
-            }
-            interceptedMetricExporter?.let {
-                metricExporter!!.setDelegate(it)
-            }
+    private fun enableDiskBuffering() {
+        logger.debug("Disk buffering enabled: {}", configuration)
+        toDiskSpanExporter?.let {
+            spanExporter!!.setDelegate(it)
+        }
+        toDiskLogRecordExporter?.let {
+            logRecordExporter!!.setDelegate(it)
+        }
+        toDiskMetricExporter?.let {
+            metricExporter!!.setDelegate(it)
         }
     }
 
@@ -191,7 +180,10 @@ internal class DiskBufferingManager private constructor(
         }
         interceptedLogRecordExporter?.let {
             builder.setLogRecordFromDiskExporter(
-                LogRecordFromDiskExporter.create(it, storageConfiguration)
+                LogRecordFromDiskExporter.create(
+                    ExtendedDelegateLogRecordExporter(it),
+                    storageConfiguration
+                )
             )
         }
         interceptedMetricExporter?.let {
@@ -203,7 +195,7 @@ internal class DiskBufferingManager private constructor(
         return builder.build()
     }
 
-    private fun createStorageConfiguration(): StorageConfiguration {
+    private fun createStorageConfiguration(configuration: DiskBufferingConfiguration.Enabled): StorageConfiguration {
         val diskManager = DiskManager.create(serviceManager, configuration)
         val builder = StorageConfiguration.builder()
             .setMaxFileSize(diskManager.getMaxCacheFileSize())

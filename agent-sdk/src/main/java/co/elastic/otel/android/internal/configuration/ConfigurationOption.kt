@@ -18,6 +18,7 @@
  */
 package co.elastic.otel.android.internal.configuration
 
+import java.util.Optional
 import org.stagemonitor.configuration.ConfigurationOption.ConfigurationOptionBuilder
 
 /**
@@ -31,30 +32,28 @@ internal class ConfigurationOption<T>(internal val wrapped: org.stagemonitor.con
     }
 
     companion object {
-        fun booleanOption(key: String, defaultValue: Boolean): ConfigurationOption<Boolean> {
+        fun booleanOption(key: String): ConfigurationOption<Optional<Boolean>> {
             return configureAndBuild(
                 org.stagemonitor.configuration.ConfigurationOption.booleanOption(),
-                key,
-                defaultValue
+                key
             )
         }
 
-        fun doubleOption(key: String, defaultValue: Double): ConfigurationOption<Double> {
+        fun doubleOption(key: String): ConfigurationOption<Optional<Double>> {
             return configureAndBuild(
                 org.stagemonitor.configuration.ConfigurationOption.doubleOption(),
-                key,
-                defaultValue
+                key
             )
         }
 
         private fun <T> configureAndBuild(
             builder: ConfigurationOptionBuilder<T>,
-            key: String, defaultValue: T
-        ): ConfigurationOption<T> {
+            key: String
+        ): ConfigurationOption<Optional<T>> {
             return ConfigurationOption(
                 builder.key(key)
                     .dynamic(true)
-                    .buildWithDefault(defaultValue)
+                    .buildOptional()
             )
         }
     }

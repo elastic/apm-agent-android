@@ -20,10 +20,10 @@ package co.elastic.otel.android.functional
 
 import android.app.Application
 import android.content.Intent
+import co.elastic.otel.android.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.otel.android.features.session.SessionIdGenerator
 import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
 import co.elastic.otel.android.internal.features.clock.ElasticClockBroadcastReceiver
-import co.elastic.otel.android.internal.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.services.appinfo.AppInfoService
 import co.elastic.otel.android.internal.time.SystemTimeProvider
@@ -34,7 +34,6 @@ import co.elastic.otel.android.test.common.ElasticAttributes.getSpanDefaultAttri
 import co.elastic.otel.android.test.exporter.InMemoryExporterProvider
 import co.elastic.otel.android.test.processor.SimpleProcessorFactory
 import co.elastic.otel.android.testutils.DummySntpClient
-import co.elastic.otel.android.testutils.WireMockRule
 import io.mockk.Runs
 import io.mockk.clearMocks
 import io.mockk.every
@@ -63,7 +62,6 @@ import org.awaitility.core.ConditionTimeoutException
 import org.awaitility.kotlin.await
 import org.junit.After
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -79,9 +77,6 @@ class ManagedElasticOtelAgentTest {
         private val SPAN_DEFAULT_ATTRIBUTES = getSpanDefaultAttributes()
         private val LOG_DEFAULT_ATTRIBUTES = getLogRecordDefaultAttributes()
     }
-
-    @get:Rule
-    val wireMockRule = WireMockRule()
 
     @Before
     fun setUp() {
@@ -103,9 +98,8 @@ class ManagedElasticOtelAgentTest {
 
     @Test
     fun `Disk buffering enabled, happy path`() {
-        val configuration = DiskBufferingConfiguration.enabled()
-        configuration.maxFileAgeForWrite = 500
-        configuration.minFileAgeForRead = 501
+        val configuration =
+            DiskBufferingConfiguration.Enabled(maxFileAgeForWrite = 500, minFileAgeForRead = 501)
         agent = initialize(diskBufferingConfiguration = configuration)
 
         sendSpan()
@@ -138,9 +132,8 @@ class ManagedElasticOtelAgentTest {
 
     @Test
     fun `Disk buffering enabled, when signals come in before init is finished`() {
-        val configuration = DiskBufferingConfiguration.enabled()
-        configuration.maxFileAgeForWrite = 500
-        configuration.minFileAgeForRead = 501
+        val configuration =
+            DiskBufferingConfiguration.Enabled(maxFileAgeForWrite = 500, minFileAgeForRead = 501)
         agent = initialize(diskBufferingConfiguration = configuration)
 
         sendSpan()

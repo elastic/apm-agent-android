@@ -23,10 +23,10 @@ import co.elastic.otel.android.connectivity.Authentication
 import co.elastic.otel.android.connectivity.ExportEndpointConfiguration
 import co.elastic.otel.android.exporters.ExporterProvider
 import co.elastic.otel.android.exporters.configuration.ExportProtocol
+import co.elastic.otel.android.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.otel.android.interceptor.Interceptor
 import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
 import co.elastic.otel.android.internal.features.centralconfig.CentralConfigurationConnectivity
-import co.elastic.otel.android.internal.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.otel.android.test.exporter.InMemoryExporterProvider
 import co.elastic.otel.android.test.processor.SimpleProcessorFactory
 import co.elastic.otel.android.testutils.DummySntpClient
@@ -42,8 +42,10 @@ import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.sdk.common.CompletableResultCode
 import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat
 import java.time.Duration
+import java.util.Optional
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.jvm.optionals.getOrNull
 import org.awaitility.core.ConditionTimeoutException
 import org.awaitility.kotlin.await
 import org.junit.After
@@ -51,6 +53,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.fail
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
@@ -618,7 +621,7 @@ class ElasticApmAgentTest {
 
         // When central config fails and the session gets reset, go with default behavior.
         wireMockRule.takeRequest()
-        awaitForCentralConfigurationValues(ExpectedCentralConfiguration(true, 1.0))
+        awaitForCentralConfigurationValues(ExpectedCentralConfiguration())
 
         agent.getSessionManager().clearSession()
         inMemoryExporters.resetExporters()
@@ -632,6 +635,125 @@ class ElasticApmAgentTest {
         assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
+
+        // Next: Setting sample rate during initialization without central config
+        closeAgent()
+        agent = inMemoryAgentBuilder(wireMockRule.url("/"))
+            .setSessionSampleRate(0.0)
+            .build()
+
+        // Force refresh session to trigger sampling rate evaluation
+        agent.getSessionManager().clearSession()
+
+        sendSpan()
+        sendLog()
+        sendMetric()
+
+        awaitForOpenGates()
+
+        assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
+
+        // Next: Setting sample rate during initialization with central config
+        closeAgent()
+        wireMockRule.stubAllHttpResponses {
+            withStatus(200)
+                .withBody("{}")
+                .withHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
+        }
+        agent = inMemoryAgentBuilder(wireMockRule.url("/"))
+            .setSessionSampleRate(0.0)
+            .setManagementUrl(wireMockRule.url("/config/"))
+            .build()
+
+        wireMockRule.takeRequest() // Await for first central config response
+        awaitForCentralConfigurationValues(ExpectedCentralConfiguration())
+
+        // Force refresh session to trigger sampling rate evaluation
+        agent.getSessionManager().clearSession()
+
+        sendSpan()
+        sendLog()
+        sendMetric()
+
+        awaitForOpenGates()
+
+        // These values reflect the provided config during initialization (0.0)
+        assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
+
+        // Prepare next poll to contain sample rate
+        wireMockRule.stubAllHttpResponses {
+            withStatus(200)
+                .withBody("""{"session_sample_rate":"1.0"}""")
+                .withHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
+        }
+        wireMockRule.takeRequest()
+        awaitForCentralConfigurationValues(ExpectedCentralConfiguration(sessionSampleRate = 1.0))
+
+        // Force refresh session to trigger sampling rate evaluation
+        agent.getSessionManager().clearSession()
+        inMemoryExporters.resetExporters()
+
+        awaitForSampleRateToAllowExporting()
+
+        sendSpan()
+        sendLog()
+        sendMetric()
+
+        // These values reflect the central config.
+        assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
+
+        // When central config doesn't provide a sample rate value, check that the behaviour
+        // is based on the value provided in during initialization (0.0).
+        wireMockRule.stubAllHttpResponses {
+            withStatus(200)
+                .withBody("Not a json")
+        }
+        wireMockRule.takeRequest() // Await for central config response with invalid config
+        awaitForCentralConfigurationValues(ExpectedCentralConfiguration())
+
+        // Force refresh session to trigger sampling rate evaluation
+        agent.getSessionManager().clearSession()
+        inMemoryExporters.resetExporters()
+
+        awaitForSampleRateNotToAllowExporting()
+
+        sendSpan()
+        sendLog()
+        sendMetric()
+
+        // These values reflect the provided config during initialization (0.0) which is used
+        // when no central config value is present.
+        assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()
+        assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
+    }
+
+    @Test
+    fun `Validating session sample rate provided value`() {
+        val builder = inMemoryAgentBuilder()
+
+        // These should work fine
+        builder.setSessionSampleRate(0.0)
+        builder.setSessionSampleRate(0.5)
+        builder.setSessionSampleRate(1.0)
+
+        // These should fail
+        try {
+            builder.setSessionSampleRate(-0.1)
+            fail("The provided value is not valid, so it should fail.")
+        } catch (ignored: IllegalArgumentException) {
+        }
+        try {
+            builder.setSessionSampleRate(1.1)
+            fail("The provided value is not valid, so it should fail.")
+        } catch (ignored: IllegalArgumentException) {
+        }
     }
 
     @Test
@@ -728,24 +850,18 @@ class ElasticApmAgentTest {
         )
     }
 
-    private fun simpleAgentBuilder(
-        url: String,
-        diskBufferingConfiguration: DiskBufferingConfiguration = DiskBufferingConfiguration.disabled()
-    ): ElasticApmAgent.Builder {
+    private fun simpleAgentBuilder(url: String): ElasticApmAgent.Builder {
         return ElasticApmAgent.builder(RuntimeEnvironment.getApplication())
             .setProcessorFactory(simpleProcessorFactory)
-            .setDiskBufferingConfiguration(diskBufferingConfiguration)
+            .setDiskBufferingConfiguration(DiskBufferingConfiguration.disabled())
             .setExportUrl(url)
             .apply {
                 internalSntpClient = DummySntpClient()
             }
     }
 
-    private fun inMemoryAgentBuilder(
-        url: String = "http://none",
-        diskBufferingConfiguration: DiskBufferingConfiguration = DiskBufferingConfiguration.disabled()
-    ): ElasticApmAgent.Builder {
-        return simpleAgentBuilder(url, diskBufferingConfiguration)
+    private fun inMemoryAgentBuilder(url: String = "http://none"): ElasticApmAgent.Builder {
+        return simpleAgentBuilder(url)
             .apply {
                 internalExporterProviderInterceptor = inMemoryExportersInterceptor
             }
@@ -802,6 +918,16 @@ class ElasticApmAgentTest {
         }
     }
 
+    private fun awaitForSampleRateToAllowExporting() {
+        await.atMost(Duration.ofSeconds(1))
+            .until { agent.getSampleRateManager()?.allowSignalExporting() == true }
+    }
+
+    private fun awaitForSampleRateNotToAllowExporting() {
+        await.atMost(Duration.ofSeconds(1))
+            .until { agent.getSampleRateManager()?.allowSignalExporting() == false }
+    }
+
     private fun awaitForCentralConfigurationValues(
         expectedValue: ExpectedCentralConfiguration,
         waitSeconds: Int = 1
@@ -810,8 +936,9 @@ class ElasticApmAgentTest {
             agent.getCentralConfigurationManager()!!.getCentralConfiguration()
 
         try {
+            val optionalSessionSampleRate = Optional.ofNullable(expectedValue.sessionSampleRate)
             await.atMost(Duration.ofSeconds(waitSeconds.toLong())).until {
-                centralConfiguration.getSessionSampleRate() == expectedValue.sessionSampleRate &&
+                centralConfiguration.getSessionSampleRate() == optionalSessionSampleRate &&
                         centralConfiguration.isRecording() == expectedValue.recording
             }
         } catch (e: ConditionTimeoutException) {
@@ -819,7 +946,7 @@ class ElasticApmAgentTest {
                 "Configuration: ${
                     ExpectedCentralConfiguration(
                         centralConfiguration.isRecording(),
-                        centralConfiguration.getSessionSampleRate()
+                        centralConfiguration.getSessionSampleRate().getOrNull()
                     )
                 }"
             )
@@ -829,6 +956,6 @@ class ElasticApmAgentTest {
 
     private data class ExpectedCentralConfiguration(
         val recording: Boolean = true,
-        val sessionSampleRate: Double = 1.0
+        val sessionSampleRate: Double? = null
     )
 }

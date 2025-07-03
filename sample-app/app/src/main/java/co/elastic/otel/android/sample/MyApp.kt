@@ -14,7 +14,7 @@ class MyApp : Application() {
     override fun onCreate() {
         super.onCreate()
         agent = ElasticApmAgent.builder(this)
-            .setExportUrl("http://10.0.2.2:8200")
+            .setExportUrl("http://10.0.2.2:4318")
             .setServiceName("weather-sample-app")
             .build()
 

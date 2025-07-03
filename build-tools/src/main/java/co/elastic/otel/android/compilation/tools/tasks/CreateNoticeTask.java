@@ -1,15 +1,11 @@
 package co.elastic.otel.android.compilation.tools.tasks;
 
-import org.apache.commons.io.FileUtils;
-import org.gradle.api.Project;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.InputFiles;
-import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputDirectory;
-import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 
 import java.io.BufferedReader;
@@ -31,7 +27,6 @@ import java.util.Locale;
 import java.util.Set;
 
 import co.elastic.otel.android.compilation.tools.data.ArtifactLicense;
-import co.elastic.otel.android.compilation.tools.metadata.NoticeMetadataHandler;
 import co.elastic.otel.android.compilation.tools.utils.TextUtils;
 
 public abstract class CreateNoticeTask extends BaseTask {
@@ -45,19 +40,8 @@ public abstract class CreateNoticeTask extends BaseTask {
     @InputFile
     public abstract RegularFileProperty getFoundLicensesIds();
 
-    @InputFile
-    @Optional
-    public abstract RegularFileProperty getDependenciesHashFile();
-
     @OutputDirectory
     public abstract DirectoryProperty getOutputDir();
-
-    @OutputFile
-    public abstract RegularFileProperty getMetadataOutputFile();
-
-    public CreateNoticeTask() {
-        getMetadataOutputFile().set(NoticeMetadataHandler.getMetadataFile(getProject()));
-    }
 
     @TaskAction
     public void action() {
@@ -89,25 +73,6 @@ public abstract class CreateNoticeTask extends BaseTask {
                 addLicenses(outputStream, licenseIds);
             }
             outputStream.close();
-            saveMetadata();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void saveMetadata() {
-        if (!getDependenciesHashFile().isPresent()) {
-            Project project = getProject();
-            project.getLogger().lifecycle("Skipping metadata saving for project: " + project.getName());
-            return;
-        }
-        File dependenciesHashFile = getDependenciesHashFile().get().getAsFile();
-        File metadataFile = getMetadataOutputFile().get().getAsFile();
-        try {
-            String dependenciesHash = FileUtils.readFileToString(dependenciesHashFile, StandardCharsets.UTF_8);
-            NoticeMetadataHandler noticeMetadataHandler = NoticeMetadataHandler.create();
-            noticeMetadataHandler.setDependenciesHash(dependenciesHash);
-            noticeMetadataHandler.save(metadataFile);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

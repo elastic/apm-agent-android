@@ -7,6 +7,7 @@ toc:
   - toc: release-notes
 subs:
   ecloud:   "Elastic Cloud"
+  edot:   "Elastic Distribution of OpenTelemetry"
   stack:   "Elastic Stack"
   es:   "Elasticsearch"
   kib:   "Kibana"

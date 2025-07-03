@@ -20,11 +20,11 @@ package co.elastic.otel.android.internal.api
 
 import android.app.Application
 import co.elastic.otel.android.exporters.ExporterProvider
+import co.elastic.otel.android.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.otel.android.features.session.SessionIdGenerator
 import co.elastic.otel.android.interceptor.Interceptor
 import co.elastic.otel.android.internal.features.clock.ElasticClockManager
 import co.elastic.otel.android.internal.features.conditionaldrop.ConditionalDropManager
-import co.elastic.otel.android.internal.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.otel.android.internal.features.diskbuffering.DiskBufferingManager
 import co.elastic.otel.android.internal.features.exportergate.ExporterGateManager
 import co.elastic.otel.android.internal.features.instrumentation.InstrumentationManager

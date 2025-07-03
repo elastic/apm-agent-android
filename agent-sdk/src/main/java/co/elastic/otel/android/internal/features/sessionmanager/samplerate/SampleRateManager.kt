@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  * any time.
  */
 internal class SampleRateManager private constructor(
-    private val sampleRateCentralConfigurationProvider: Provider<Double>,
+    private val sampleRateProvider: Provider<Double>,
     private val enabledExportingCache: CacheHandler<Int>,
     private val backgroundWorkService: BackgroundWorkService,
     private val numberTools: NumberTools,
@@ -73,7 +73,7 @@ internal class SampleRateManager private constructor(
     }
 
     private fun shouldEnableSignalExporting(): Boolean {
-        val sampleRate = sampleRateCentralConfigurationProvider.get()
+        val sampleRate = sampleRateProvider.get()
         if (sampleRate == 0.0) {
             return false
         } else if (sampleRate == 1.0) {
@@ -91,14 +91,21 @@ internal class SampleRateManager private constructor(
         internal fun create(
             serviceManager: ServiceManager,
             gateManager: ExporterGateManager,
-            centralConfiguration: CentralConfiguration
+            centralConfiguration: CentralConfiguration?,
+            configuredSampleRate: Double
         ): SampleRateManager {
             val latchName = "Sample rate manager"
             gateManager.createSpanGateLatch(SampleRateManager::class.java, latchName)
             gateManager.createLogRecordLatch(SampleRateManager::class.java, latchName)
             gateManager.createMetricGateLatch(SampleRateManager::class.java, latchName)
             return SampleRateManager(
-                { centralConfiguration.getSessionSampleRate() },
+                {
+                    if (centralConfiguration != null && centralConfiguration.getSessionSampleRate().isPresent) {
+                        centralConfiguration.getSessionSampleRate().get()
+                    } else {
+                        configuredSampleRate
+                    }
+                },
                 PreferencesIntegerCacheHandler(
                     KEY_ENABLE_SIGNAL_EXPORTING,
                     serviceManager.getPreferencesService(),

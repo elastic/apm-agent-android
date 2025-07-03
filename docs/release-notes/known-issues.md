@@ -1,8 +1,17 @@
 ---
 navigation_title: "Known issues"
+description: Known issues for the Elastic Distribution of OpenTelemetry Android.
+applies_to:
+  stack:
+  serverless:
+    observability:
+products:
+  - id: cloud-serverless
+  - id: observability
+  - id: edot-sdk
 ---
 
-# Elastic APM Android Agent known issues
+# Elastic Distribution of OpenTelemetry Android known issues
 
 Known issues are significant defects or limitations that may impact your implementation. These issues are actively being worked on and will be addressed in a future release. Review known issues to help you make informed decisions, such as upgrading to a new version.
 

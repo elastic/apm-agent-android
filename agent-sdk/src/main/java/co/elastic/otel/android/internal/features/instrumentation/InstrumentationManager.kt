@@ -20,6 +20,7 @@ package co.elastic.otel.android.internal.features.instrumentation
 
 import android.app.Application
 import co.elastic.otel.android.api.ElasticOtelAgent
+import co.elastic.otel.android.common.internal.logging.Elog
 import co.elastic.otel.android.instrumentation.internal.Instrumentation
 import java.util.ServiceLoader
 
@@ -31,6 +32,7 @@ internal class InstrumentationManager(
     private val application: Application,
     private val instrumentations: List<Instrumentation>
 ) {
+    private val logger = Elog.getLogger()
 
     companion object {
         internal fun create(application: Application): InstrumentationManager {
@@ -42,8 +44,11 @@ internal class InstrumentationManager(
     }
 
     fun initialize(agent: ElasticOtelAgent) {
+        logger.debug("InstrumentationManager - Before installing instrumentations")
         instrumentations.forEach {
+            logger.debug("Installing '${it.getId()}' with version '${it.getVersion()}'")
             it.install(application, agent)
         }
+        logger.debug("InstrumentationManager - After installing instrumentations")
     }
 }

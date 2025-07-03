@@ -16,25 +16,37 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.internal.opamp.impl.state;
+package co.elastic.otel.android.internal.opamp.state;
 
-import co.elastic.otel.android.internal.opamp.state.InMemoryState;
+import java.util.function.BiFunction;
+
+import javax.annotation.Nonnull;
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-public final class SequenceNumberState extends InMemoryState<Integer> {
+final class InMemoryStorage<T> implements Storage<T> {
+    private T state;
+    private final BiFunction<T, T, Boolean> equalsPredicate;
 
-    public static SequenceNumberState create() {
-        return new SequenceNumberState(1);
+    InMemoryStorage(T initialState, BiFunction<T, T, Boolean> equalsPredicate) {
+        this.state = initialState;
+        this.equalsPredicate = equalsPredicate;
     }
 
-    private SequenceNumberState(Integer initialState) {
-        super(initialState);
+    @Override
+    public synchronized boolean set(@Nonnull T value) {
+        if (!equalsPredicate.apply(state, value)) {
+            state = value;
+            return true;
+        }
+        return false;
     }
 
-    public void increment() {
-        set(get() + 1);
+    @Nonnull
+    @Override
+    public synchronized T get() {
+        return state;
     }
 }

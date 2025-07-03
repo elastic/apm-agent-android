@@ -16,26 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.internal.opamp.impl.state;
+package co.elastic.otel.android.internal.opamp.impl.recipe.appenders;
 
-import co.elastic.otel.android.internal.opamp.state.InMemoryState;
-import opamp.proto.RemoteConfigStatus;
-import opamp.proto.RemoteConfigStatuses;
+import java.util.function.Supplier;
+
+import opamp.proto.AgentToServer;
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-public final class RemoteConfigStatusState extends InMemoryState<RemoteConfigStatus> {
+public final class CapabilitiesAppender implements AgentToServerAppender {
+    private final Supplier<Integer> capabilities;
 
-    public static RemoteConfigStatusState create() {
-        return new RemoteConfigStatusState(
-                new RemoteConfigStatus.Builder()
-                        .status(RemoteConfigStatuses.RemoteConfigStatuses_UNSET)
-                        .build());
+    public static CapabilitiesAppender create(Supplier<Integer> capabilities) {
+        return new CapabilitiesAppender(capabilities);
     }
 
-    private RemoteConfigStatusState(RemoteConfigStatus initialState) {
-        super(initialState);
+    private CapabilitiesAppender(Supplier<Integer> capabilities) {
+        this.capabilities = capabilities;
+    }
+
+    @Override
+    public void appendTo(AgentToServer.Builder builder) {
+        builder.capabilities(capabilities.get());
     }
 }

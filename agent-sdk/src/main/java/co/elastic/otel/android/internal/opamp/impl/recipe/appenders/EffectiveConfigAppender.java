@@ -16,32 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.internal.opamp.state;
+package co.elastic.otel.android.internal.opamp.impl.recipe.appenders;
+
+import java.util.function.Supplier;
+
+import opamp.proto.AgentToServer;
+import opamp.proto.EffectiveConfig;
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-public class InMemoryState<T> extends State<T> {
-    private T state;
+public final class EffectiveConfigAppender implements AgentToServerAppender {
+    private final Supplier<EffectiveConfig> effectiveConfig;
 
-    public InMemoryState(T initialState) {
-        this.state = initialState;
+    public static EffectiveConfigAppender create(Supplier<EffectiveConfig> effectiveConfig) {
+        return new EffectiveConfigAppender(effectiveConfig);
     }
 
-    public synchronized void set(T value) {
-        if (!areEqual(state, value)) {
-            state = value;
-            notifyObservers();
-        }
+    private EffectiveConfigAppender(Supplier<EffectiveConfig> effectiveConfig) {
+        this.effectiveConfig = effectiveConfig;
     }
 
     @Override
-    public synchronized T get() {
-        return state;
-    }
-
-    protected boolean areEqual(T first, T second) {
-        return first.equals(second);
+    public void appendTo(AgentToServer.Builder builder) {
+        builder.effective_config(effectiveConfig.get());
     }
 }

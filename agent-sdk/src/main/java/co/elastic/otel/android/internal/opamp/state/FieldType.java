@@ -16,12 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.internal.opamp.state.observer;
+package co.elastic.otel.android.internal.opamp.state;
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-public interface Observer {
-    void update(Observable observable);
+public enum FieldType {
+    INSTANCE_UID,
+    SEQUENCE_NUM,
+    AGENT_DESCRIPTION,
+    CAPABILITIES,
+    EFFECTIVE_CONFIG,
+    REMOTE_CONFIG_STATUS,
+    AGENT_DISCONNECT,
+    FLAGS
 }

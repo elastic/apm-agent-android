@@ -16,31 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.internal.opamp.state.observer;
+package co.elastic.otel.android.internal.opamp.impl.recipe.appenders;
 
-import java.util.ArrayList;
-import java.util.List;
+import opamp.proto.AgentDisconnect;
+import opamp.proto.AgentToServer;
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-public class Observable {
-    private final List<Observer> observers = new ArrayList<>();
+public final class AgentDisconnectAppender implements AgentToServerAppender {
 
-    public final synchronized void addObserver(Observer observer) {
-        if (!observers.contains(observer)) {
-            observers.add(observer);
-        }
+    public static AgentDisconnectAppender create() {
+        return new AgentDisconnectAppender();
     }
 
-    public final synchronized void removeObserver(Observer observer) {
-        observers.remove(observer);
+    private AgentDisconnectAppender() {
     }
 
-    protected final synchronized void notifyObservers() {
-        for (Observer observer : observers) {
-            observer.update(this);
-        }
+    @Override
+    public void appendTo(AgentToServer.Builder builder) {
+        builder.agent_disconnect(new AgentDisconnect.Builder().build());
     }
 }

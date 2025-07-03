@@ -16,22 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.internal.opamp.impl.state;
+package co.elastic.otel.android.internal.opamp.impl.recipe.appenders;
 
-import co.elastic.otel.android.internal.opamp.state.InMemoryState;
+import java.util.function.Supplier;
+
 import opamp.proto.AgentDescription;
+import opamp.proto.AgentToServer;
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-public final class AgentDescriptionState extends InMemoryState<AgentDescription> {
+public final class AgentDescriptionAppender implements AgentToServerAppender {
+    private final Supplier<AgentDescription> data;
 
-    public static AgentDescriptionState create() {
-        return new AgentDescriptionState(new AgentDescription.Builder().build());
+    public static AgentDescriptionAppender create(Supplier<AgentDescription> data) {
+        return new AgentDescriptionAppender(data);
     }
 
-    private AgentDescriptionState(AgentDescription initialState) {
-        super(initialState);
+    private AgentDescriptionAppender(Supplier<AgentDescription> data) {
+        this.data = data;
+    }
+
+    @Override
+    public void appendTo(AgentToServer.Builder builder) {
+        builder.agent_description(data.get());
     }
 }

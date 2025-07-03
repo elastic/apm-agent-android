@@ -18,38 +18,28 @@
  */
 package co.elastic.otel.android.internal.opamp.impl;
 
-import co.elastic.otel.android.internal.opamp.impl.state.AgentDescriptionState;
-import co.elastic.otel.android.internal.opamp.impl.state.CapabilitiesState;
-import co.elastic.otel.android.internal.opamp.impl.state.InstanceUidState;
-import co.elastic.otel.android.internal.opamp.impl.state.RemoteConfigStatusState;
-import co.elastic.otel.android.internal.opamp.impl.state.SequenceNumberState;
 import co.elastic.otel.android.internal.opamp.state.State;
-import opamp.proto.EffectiveConfig;
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
 public final class OpampClientState {
-    public final RemoteConfigStatusState remoteConfigStatusState;
-    public final SequenceNumberState sequenceNumberState;
-    public final AgentDescriptionState agentDescriptionState;
-    public final CapabilitiesState capabilitiesState;
-    public final InstanceUidState instanceUidState;
-    public final State<EffectiveConfig> effectiveConfigState;
+    public final State.RemoteConfigStatus remoteConfigStatus;
+    public final State.SequenceNum sequenceNumber;
+    public final State.AgentDescription agentDescription;
+    public final State.Capabilities capabilities;
+    public final State.InstanceUid instanceUid;
+    public final State.EffectiveConfig effectiveConfig;
+    public final State.Flags flags;
 
-    public OpampClientState(
-            RemoteConfigStatusState remoteConfigStatusState,
-            SequenceNumberState sequenceNumberState,
-            AgentDescriptionState agentDescriptionState,
-            CapabilitiesState capabilitiesState,
-            InstanceUidState instanceUidState,
-            State<EffectiveConfig> effectiveConfigState) {
-        this.remoteConfigStatusState = remoteConfigStatusState;
-        this.sequenceNumberState = sequenceNumberState;
-        this.agentDescriptionState = agentDescriptionState;
-        this.effectiveConfigState = effectiveConfigState;
-        this.capabilitiesState = capabilitiesState;
-        this.instanceUidState = instanceUidState;
+    public OpampClientState(State.RemoteConfigStatus remoteConfigStatus, State.SequenceNum sequenceNumber, State.AgentDescription agentDescription, State.Capabilities capabilities, State.InstanceUid instanceUid, State.EffectiveConfig effectiveConfig, State.Flags flags) {
+        this.remoteConfigStatus = remoteConfigStatus;
+        this.sequenceNumber = sequenceNumber;
+        this.agentDescription = agentDescription;
+        this.capabilities = capabilities;
+        this.instanceUid = instanceUid;
+        this.effectiveConfig = effectiveConfig;
+        this.flags = flags;
     }
 }

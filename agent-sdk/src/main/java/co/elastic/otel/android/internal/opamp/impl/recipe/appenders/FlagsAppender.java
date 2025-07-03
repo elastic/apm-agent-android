@@ -16,40 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.internal.opamp.impl.state;
+package co.elastic.otel.android.internal.opamp.impl.recipe.appenders;
 
-import com.github.f4b6a3.uuid.UuidCreator;
+import java.util.function.Supplier;
 
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.UUID;
-
-import co.elastic.otel.android.internal.opamp.state.InMemoryState;
+import opamp.proto.AgentToServer;
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-public final class InstanceUidState extends InMemoryState<byte[]> {
+public final class FlagsAppender implements AgentToServerAppender {
+    private final Supplier<Integer> flags;
 
-    public static InstanceUidState createRandom() {
-        UUID uuid = UuidCreator.getTimeOrderedEpoch();
-        ByteBuffer buffer = ByteBuffer.allocate(16);
-        buffer.putLong(uuid.getMostSignificantBits());
-        buffer.putLong(uuid.getLeastSignificantBits());
-        return create(buffer.array());
+    public static FlagsAppender create(Supplier<Integer> flags) {
+        return new FlagsAppender(flags);
     }
 
-    public static InstanceUidState create(byte[] uuid) {
-        return new InstanceUidState(uuid);
-    }
-
-    private InstanceUidState(byte[] initialState) {
-        super(initialState);
+    private FlagsAppender(Supplier<Integer> flags) {
+        this.flags = flags;
     }
 
     @Override
-    protected boolean areEqual(byte[] first, byte[] second) {
-        return Arrays.equals(first, second);
+    public void appendTo(AgentToServer.Builder builder) {
+        builder.flags(flags.get());
     }
 }

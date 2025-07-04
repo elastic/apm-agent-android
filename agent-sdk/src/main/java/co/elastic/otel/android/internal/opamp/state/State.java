@@ -24,11 +24,13 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
@@ -65,10 +67,15 @@ public abstract class State<T> implements Supplier<T> {
         }
     }
 
-    @Nonnull
+    @Nullable
     @Override
     public final T get() {
         return storage.get();
+    }
+
+    @Nonnull
+    public final T mustGet() {
+        return Objects.requireNonNull(get());
     }
 
     public abstract FieldType getType();
@@ -114,7 +121,7 @@ public abstract class State<T> implements Supplier<T> {
         }
 
         public void increment() {
-            set(get() + 1);
+            set(mustGet() + 1);
         }
 
         @Override
@@ -147,12 +154,12 @@ public abstract class State<T> implements Supplier<T> {
             super(storage);
         }
 
-        public void add(int capabilities) {
-            set(get() | capabilities);
+        public void add(long capabilities) {
+            set(mustGet() | capabilities);
         }
 
-        public void remove(int capabilities) {
-            set(get() & ~capabilities);
+        public void remove(long capabilities) {
+            set(mustGet() & ~capabilities);
         }
 
         @Override

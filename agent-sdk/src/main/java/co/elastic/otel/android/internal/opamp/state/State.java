@@ -37,7 +37,7 @@ import javax.annotation.Nullable;
  * any time.
  * <p>
  * Provides a request field value in its {@link #get()} method, and it also notifies the OpAMP
- * client when a new value is available by calling its own {@link #notifyListeners()} method.
+ * client when a new value is available by calling its own {@link #notifyUpdate()} method.
  *
  * @param <T> The type of value it provides.
  */
@@ -53,7 +53,7 @@ public abstract class State<T> implements Supplier<T> {
         listeners.remove(listener);
     }
 
-    public final void notifyListeners() {
+    public final void notifyUpdate() {
         synchronized (listeners) {
             for (Listener listener : listeners) {
                 listener.onUpdate(getType());
@@ -63,7 +63,7 @@ public abstract class State<T> implements Supplier<T> {
 
     public final void set(@Nonnull T value) {
         if (storage.set(value)) {
-            notifyListeners();
+            notifyUpdate();
         }
     }
 

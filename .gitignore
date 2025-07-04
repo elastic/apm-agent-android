@@ -82,3 +82,5 @@ lint/tmp/
 html_docs
 .artifacts
 docs/.artifacts
+
+.DS_Store

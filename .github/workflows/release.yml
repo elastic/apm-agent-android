@@ -145,7 +145,7 @@ jobs:
           git push origin tag $release_tag
           
           version_without_dots=$(echo $VERSION | sed 's/\.//g')
-          release_notes="[Release Notes for $VERSION](https://www.elastic.co/guide/en/apm/agent/android/current/release-notes-1.x.html#elastic-apm-android-agent-$version_without_dots-release-notes)"
+          release_notes="[Release Notes for $VERSION](https://www.elastic.co/docs/release-notes/edot/sdks/android#elastic-apm-android-agent-$version_without_dots-release-notes)"
           
           gh release create $release_tag --title "Release $VERSION" --notes "$release_notes"
         env:

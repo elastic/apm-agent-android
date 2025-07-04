@@ -48,6 +48,6 @@ class CapabilitiesStateTest {
     }
 
     private boolean hasFlag(long flag) {
-        return (capabilitiesState.get() & flag) == flag;
+        return (capabilitiesState.mustGet() & flag) == flag;
     }
 }

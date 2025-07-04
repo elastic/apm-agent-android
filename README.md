@@ -2,7 +2,7 @@
 
 Elastic OTel Android Agent
 
-See the [documentation](https://www.elastic.co/guide/en/apm/agent/android/current/index.html) to find out more about its features, how to setup, and configuration details.
+See the [documentation](https://www.elastic.co/docs/reference/opentelemetry/edot-sdks/android) to find out more about its features, how to setup, and configuration details.
 
 ## Local testing
 

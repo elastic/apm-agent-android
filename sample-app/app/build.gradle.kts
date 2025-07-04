@@ -51,7 +51,7 @@ android {
 dependencies {
     val retrofitVersion = "3.0.0"
     implementation("androidx.navigation:navigation-fragment-ktx:2.9.0")
-    implementation("androidx.navigation:navigation-ui-ktx:2.9.0")
+    implementation("androidx.navigation:navigation-ui-ktx:2.9.1")
     implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
     implementation("com.squareup.retrofit2:converter-gson:$retrofitVersion")
     androidTestImplementation("co.elastic.otel.android:otel-test-common")

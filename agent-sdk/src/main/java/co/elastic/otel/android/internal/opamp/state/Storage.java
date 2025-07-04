@@ -21,13 +21,15 @@ package co.elastic.otel.android.internal.opamp.state;
 import java.util.function.BiFunction;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
 public interface Storage<T> {
-    @Nonnull
+
+    @Nullable
     T get();
 
     boolean set(@Nonnull T value);
@@ -42,10 +44,10 @@ public interface Storage<T> {
 
     static <T> Storage<T> noop() {
         return new Storage<>() {
-            @Nonnull
+            @Nullable
             @Override
             public T get() {
-                throw new UnsupportedOperationException();
+                return null;
             }
 
             @Override

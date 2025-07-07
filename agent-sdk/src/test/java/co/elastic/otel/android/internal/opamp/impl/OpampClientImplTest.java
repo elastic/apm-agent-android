@@ -25,6 +25,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -51,6 +53,7 @@ import opamp.proto.AgentIdentification;
 import opamp.proto.AgentToServer;
 import opamp.proto.AgentToServerFlags;
 import opamp.proto.AnyValue;
+import opamp.proto.EffectiveConfig;
 import opamp.proto.KeyValue;
 import opamp.proto.RemoteConfigStatus;
 import opamp.proto.RemoteConfigStatuses;
@@ -66,9 +69,11 @@ class OpampClientImplTest {
     private OpampClient.Callbacks callbacks;
     private OpampClientState state;
     private OpampClientImpl client;
+    private TestEffectiveConfig effectiveConfig;
 
     @BeforeEach
     void setUp() {
+        effectiveConfig = new TestEffectiveConfig(createEffectiveConfigForMap(Map.of("first", "first content")));
         state =
                 new OpampClientState(
                         State.RemoteConfigStatus.create(getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_UNSET)),
@@ -77,12 +82,7 @@ class OpampClientImplTest {
                         State.Capabilities.create(AgentCapabilities.AgentCapabilities_Unspecified.getValue()),
                         State.InstanceUid.createRandom(),
                         State.Flags.create(AgentToServerFlags.AgentToServerFlags_Unspecified.getValue()),
-                        new State.EffectiveConfig() {
-                            @Override
-                            public opamp.proto.EffectiveConfig get() {
-                                return new opamp.proto.EffectiveConfig.Builder().build();
-                            }
-                        });
+                        effectiveConfig);
         client = OpampClientImpl.create(requestService, state);
     }
 
@@ -91,6 +91,15 @@ class OpampClientImplTest {
         client.start(callbacks);
 
         verify(requestService).start(client, client);
+
+        // Check state observing
+        clearInvocations(requestService);
+        EffectiveConfig otherConfig = createEffectiveConfigForMap(Map.of("other", "other value"));
+        effectiveConfig.config = otherConfig;
+        effectiveConfig.triggerNotifyUpdate();
+
+        verify(requestService).sendRequest();
+        assertThat(client.get().getAgentToServer().effective_config).isEqualTo(otherConfig);
     }
 
     @Test
@@ -100,6 +109,12 @@ class OpampClientImplTest {
 
         client.stop();
         verify(requestService).stop();
+
+        // Check state observing
+        clearInvocations(requestService);
+        effectiveConfig.triggerNotifyUpdate();
+
+        verifyNoInteractions(requestService);
     }
 
     @Test
@@ -331,6 +346,29 @@ class OpampClientImplTest {
 
         @Override
         public void onMessage(OpampClient client, MessageData messageData) {
+        }
+    }
+
+    private static EffectiveConfig createEffectiveConfigForMap(Map<String, String> configContent) {
+        Map<String, AgentConfigFile> files = new HashMap<>();
+        configContent.forEach((key, value) -> files.put(key, new AgentConfigFile.Builder().body(ByteString.encodeUtf8(value)).build()));
+        return new EffectiveConfig.Builder().config_map(new AgentConfigMap.Builder().config_map(files).build()).build();
+    }
+
+    private static class TestEffectiveConfig extends State.EffectiveConfig {
+        private opamp.proto.EffectiveConfig config;
+
+        public TestEffectiveConfig(opamp.proto.EffectiveConfig initialValue) {
+            config = initialValue;
+        }
+
+        public void triggerNotifyUpdate() {
+            notifyUpdate();
+        }
+
+        @Override
+        public opamp.proto.EffectiveConfig get() {
+            return config;
         }
     }
 }

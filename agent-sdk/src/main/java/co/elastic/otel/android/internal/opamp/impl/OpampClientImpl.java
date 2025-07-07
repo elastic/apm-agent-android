@@ -34,12 +34,13 @@ import co.elastic.otel.android.internal.opamp.impl.recipe.appenders.FlagsAppende
 import co.elastic.otel.android.internal.opamp.impl.recipe.appenders.InstanceUidAppender;
 import co.elastic.otel.android.internal.opamp.impl.recipe.appenders.RemoteConfigStatusAppender;
 import co.elastic.otel.android.internal.opamp.impl.recipe.appenders.SequenceNumberAppender;
+import co.elastic.otel.android.internal.opamp.request.Field;
 import co.elastic.otel.android.internal.opamp.request.Request;
 import co.elastic.otel.android.internal.opamp.request.service.RequestService;
 import co.elastic.otel.android.internal.opamp.response.MessageData;
 import co.elastic.otel.android.internal.opamp.response.OpampServerResponseException;
 import co.elastic.otel.android.internal.opamp.response.Response;
-import co.elastic.otel.android.internal.opamp.state.FieldType;
+import co.elastic.otel.android.internal.opamp.state.ObservableState;
 import co.elastic.otel.android.internal.opamp.state.State;
 import okio.ByteString;
 import opamp.proto.AgentDescription;
@@ -54,7 +55,7 @@ import opamp.proto.ServerToAgentFlags;
  * any time.
  */
 public final class OpampClientImpl
-        implements OpampClient, State.Listener, RequestService.Callback, Supplier<Request> {
+        implements OpampClient, ObservableState.Listener, RequestService.Callback, Supplier<Request> {
     private final RequestService requestService;
     private final AgentToServerAppenders appenders;
     private final OpampClientState state;
@@ -66,16 +67,16 @@ public final class OpampClientImpl
     /**
      * Fields that must always be sent.
      */
-    private static final List<FieldType> CONSTANT_FIELDS =
-            List.of(FieldType.INSTANCE_UID, FieldType.SEQUENCE_NUM, FieldType.CAPABILITIES);
+    private static final List<Field> CONSTANT_FIELDS =
+            List.of(Field.INSTANCE_UID, Field.SEQUENCE_NUM, Field.CAPABILITIES);
 
     /**
      * Fields that should only be sent in the first message and then omitted in following messages,
      * unless their value changes or the server requests a full message.
      */
-    private static final List<FieldType> COMPRESSABLE_FIELDS =
+    private static final List<Field> COMPRESSABLE_FIELDS =
             List.of(
-                    FieldType.AGENT_DESCRIPTION, FieldType.EFFECTIVE_CONFIG, FieldType.REMOTE_CONFIG_STATUS);
+                    Field.AGENT_DESCRIPTION, Field.EFFECTIVE_CONFIG, Field.REMOTE_CONFIG_STATUS);
 
     public static OpampClientImpl create(RequestService requestService, OpampClientState state) {
         AgentToServerAppenders appenders =
@@ -132,11 +133,19 @@ public final class OpampClientImpl
     @Override
     public void setAgentDescription(AgentDescription agentDescription) {
         state.agentDescription.set(agentDescription);
+        addFieldAndSend(Field.AGENT_DESCRIPTION);
     }
 
     @Override
     public void setRemoteConfigStatus(RemoteConfigStatus remoteConfigStatus) {
         state.remoteConfigStatus.set(remoteConfigStatus);
+        addFieldAndSend(Field.REMOTE_CONFIG_STATUS);
+    }
+
+    @Override
+    public void setCapabilities(long value) {
+        state.capabilities.set(value);
+        addFieldAndSend(Field.CAPABILITIES);
     }
 
     @Override
@@ -199,7 +208,7 @@ public final class OpampClientImpl
     }
 
     private void prepareDisconnectRequest() {
-        recipeManager.next().addField(FieldType.AGENT_DISCONNECT);
+        recipeManager.next().addField(Field.AGENT_DISCONNECT);
     }
 
     private void preserveFailedRequestRecipe() {
@@ -213,23 +222,27 @@ public final class OpampClientImpl
     public Request get() {
         state.sequenceNum.increment();
         AgentToServer.Builder builder = new AgentToServer.Builder();
-        for (FieldType field : recipeManager.next().build().getFields()) {
+        for (Field field : recipeManager.next().build().getFields()) {
             appenders.getForField(field).appendTo(builder);
         }
         return Request.create(builder.build());
     }
 
     private void observeStateChange() {
-        state.agentDescription.addListener(this);
-        state.effectiveConfig.addListener(this);
-        state.remoteConfigStatus.addListener(this);
-        state.capabilities.addListener(this);
-        state.instanceUid.addListener(this);
+        for (State<?> state : state.getAll()) {
+            if (state instanceof ObservableState) {
+                ((ObservableState<?>) state).addListener(this);
+            }
+        }
     }
 
     @Override
-    public void onUpdate(FieldType type) {
-        recipeManager.next().addField(type);
+    public void onStateUpdate(Field type) {
+        addFieldAndSend(type);
+    }
+
+    private void addFieldAndSend(Field field) {
+        recipeManager.next().addField(field);
         requestService.sendRequest();
     }
 }

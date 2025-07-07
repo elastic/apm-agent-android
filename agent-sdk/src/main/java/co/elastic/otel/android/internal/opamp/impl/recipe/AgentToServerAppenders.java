@@ -31,7 +31,7 @@ import co.elastic.otel.android.internal.opamp.impl.recipe.appenders.FlagsAppende
 import co.elastic.otel.android.internal.opamp.impl.recipe.appenders.InstanceUidAppender;
 import co.elastic.otel.android.internal.opamp.impl.recipe.appenders.RemoteConfigStatusAppender;
 import co.elastic.otel.android.internal.opamp.impl.recipe.appenders.SequenceNumberAppender;
-import co.elastic.otel.android.internal.opamp.state.FieldType;
+import co.elastic.otel.android.internal.opamp.request.Field;
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
@@ -46,7 +46,7 @@ public final class AgentToServerAppenders {
     public final InstanceUidAppender instanceUidAppender;
     public final FlagsAppender flagsAppender;
     public final AgentDisconnectAppender agentDisconnectAppender;
-    private final Map<FieldType, AgentToServerAppender> allAppenders;
+    private final Map<Field, AgentToServerAppender> allAppenders;
 
     public AgentToServerAppenders(
             AgentDescriptionAppender agentDescriptionAppender,
@@ -66,19 +66,19 @@ public final class AgentToServerAppenders {
         this.flagsAppender = flagsAppender;
         this.agentDisconnectAppender = agentDisconnectAppender;
 
-        Map<FieldType, AgentToServerAppender> appenders = new HashMap<>();
-        appenders.put(FieldType.AGENT_DESCRIPTION, agentDescriptionAppender);
-        appenders.put(FieldType.EFFECTIVE_CONFIG, effectiveConfigAppender);
-        appenders.put(FieldType.REMOTE_CONFIG_STATUS, remoteConfigStatusAppender);
-        appenders.put(FieldType.SEQUENCE_NUM, sequenceNumberAppender);
-        appenders.put(FieldType.CAPABILITIES, capabilitiesAppender);
-        appenders.put(FieldType.INSTANCE_UID, instanceUidAppender);
-        appenders.put(FieldType.FLAGS, flagsAppender);
-        appenders.put(FieldType.AGENT_DISCONNECT, agentDisconnectAppender);
+        Map<Field, AgentToServerAppender> appenders = new HashMap<>();
+        appenders.put(Field.AGENT_DESCRIPTION, agentDescriptionAppender);
+        appenders.put(Field.EFFECTIVE_CONFIG, effectiveConfigAppender);
+        appenders.put(Field.REMOTE_CONFIG_STATUS, remoteConfigStatusAppender);
+        appenders.put(Field.SEQUENCE_NUM, sequenceNumberAppender);
+        appenders.put(Field.CAPABILITIES, capabilitiesAppender);
+        appenders.put(Field.INSTANCE_UID, instanceUidAppender);
+        appenders.put(Field.FLAGS, flagsAppender);
+        appenders.put(Field.AGENT_DISCONNECT, agentDisconnectAppender);
         allAppenders = Collections.unmodifiableMap(appenders);
     }
 
-    public AgentToServerAppender getForField(FieldType type) {
+    public AgentToServerAppender getForField(Field type) {
         if (!allAppenders.containsKey(type)) {
             throw new IllegalArgumentException("Field type " + type + " is not supported");
         }

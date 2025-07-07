@@ -18,42 +18,36 @@
  */
 package co.elastic.otel.android.internal.opamp.state;
 
-import java.util.function.BiFunction;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import co.elastic.otel.android.internal.opamp.request.Field;
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-public interface Storage<T> {
+public abstract class ObservableState<T> implements State<T> {
+    private final Set<Listener> listeners = Collections.synchronizedSet(new HashSet<>());
 
-    @Nullable
-    T get();
-
-    boolean set(@Nonnull T value);
-
-    static <T> Storage<T> inMemory(@Nonnull T initialState) {
-        return inMemory(initialState, Object::equals);
+    public final void addListener(Listener listener) {
+        listeners.add(listener);
     }
 
-    static <T> Storage<T> inMemory(@Nonnull T initialState, @Nonnull BiFunction<T, T, Boolean> equalsPredicate) {
-        return new InMemoryStorage<>(initialState, equalsPredicate);
+    public final void removeListener(Listener listener) {
+        listeners.remove(listener);
     }
 
-    static <T> Storage<T> noop() {
-        return new Storage<>() {
-            @Nullable
-            @Override
-            public T get() {
-                return null;
+    protected final void notifyUpdate() {
+        synchronized (listeners) {
+            for (Listener listener : listeners) {
+                listener.onStateUpdate(getFieldType());
             }
+        }
+    }
 
-            @Override
-            public boolean set(@Nonnull T value) {
-                return false;
-            }
-        };
+    public interface Listener {
+        void onStateUpdate(Field type);
     }
 }

@@ -70,6 +70,14 @@ public interface OpampClient {
    */
   void setRemoteConfigStatus(RemoteConfigStatus remoteConfigStatus);
 
+  /**
+   * Updates the set of capabilities that the client supports.
+   * These capabilities will be communicated to the server in the next message.
+   *
+   * @param value The new capabilities.
+   */
+  void setCapabilities(long value);
+
   interface Callbacks {
     /**
      * Called when the connection is successfully established to the Server. May be called after

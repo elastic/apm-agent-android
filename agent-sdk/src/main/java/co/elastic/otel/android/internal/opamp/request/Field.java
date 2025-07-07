@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.internal.opamp.state;
+package co.elastic.otel.android.internal.opamp.request;
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-public enum FieldType {
+public enum Field {
     INSTANCE_UID,
     SEQUENCE_NUM,
     AGENT_DESCRIPTION,

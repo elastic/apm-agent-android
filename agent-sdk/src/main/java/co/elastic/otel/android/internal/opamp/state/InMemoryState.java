@@ -18,7 +18,7 @@
  */
 package co.elastic.otel.android.internal.opamp.state;
 
-import java.util.function.BiFunction;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nonnull;
 
@@ -26,27 +26,20 @@ import javax.annotation.Nonnull;
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-final class InMemoryStorage<T> implements Storage<T> {
-    private T state;
-    private final BiFunction<T, T, Boolean> equalsPredicate;
+abstract class InMemoryState<T> implements State<T> {
+    private final AtomicReference<T> state = new AtomicReference<>();
 
-    InMemoryStorage(T initialState, BiFunction<T, T, Boolean> equalsPredicate) {
-        this.state = initialState;
-        this.equalsPredicate = equalsPredicate;
+    InMemoryState(T initialValue) {
+        state.set(initialValue);
     }
 
-    @Override
-    public synchronized boolean set(@Nonnull T value) {
-        if (!equalsPredicate.apply(state, value)) {
-            state = value;
-            return true;
-        }
-        return false;
+    public void set(@Nonnull T value) {
+        state.set(value);
     }
 
     @Nonnull
     @Override
-    public synchronized T get() {
-        return state;
+    public T get() {
+        return state.get();
     }
 }

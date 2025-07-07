@@ -27,7 +27,7 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import co.elastic.otel.android.internal.opamp.state.FieldType;
+import co.elastic.otel.android.internal.opamp.request.Field;
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
@@ -36,7 +36,7 @@ import co.elastic.otel.android.internal.opamp.state.FieldType;
 public final class RecipeManager {
     private final Lock previousRecipeLock = new ReentrantLock();
     private final Lock recipeBuilderLock = new ReentrantLock();
-    private List<FieldType> constantFields = new ArrayList<>();
+    private List<Field> constantFields = new ArrayList<>();
     private RequestRecipe previousRecipe = null;
     private RecipeBuilder builder;
 
@@ -74,19 +74,19 @@ public final class RecipeManager {
         builder = null;
     }
 
-    public void setConstantFields(List<FieldType> constantFields) {
+    public void setConstantFields(List<Field> constantFields) {
         this.constantFields = Collections.unmodifiableList(constantFields);
     }
 
     public final class RecipeBuilder {
-        private final Set<FieldType> fields = new HashSet<>();
+        private final Set<Field> fields = new HashSet<>();
 
-        public RecipeBuilder addField(FieldType field) {
+        public RecipeBuilder addField(Field field) {
             fields.add(field);
             return this;
         }
 
-        public RecipeBuilder addAllFields(Collection<FieldType> fields) {
+        public RecipeBuilder addAllFields(Collection<Field> fields) {
             this.fields.addAll(fields);
             return this;
         }
@@ -107,7 +107,7 @@ public final class RecipeManager {
             }
         }
 
-        private RecipeBuilder(List<FieldType> initialFields) {
+        private RecipeBuilder(List<Field> initialFields) {
             fields.addAll(initialFields);
         }
     }

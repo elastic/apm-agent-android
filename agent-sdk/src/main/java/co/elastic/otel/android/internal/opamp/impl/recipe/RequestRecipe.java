@@ -20,20 +20,20 @@ package co.elastic.otel.android.internal.opamp.impl.recipe;
 
 import java.util.Collection;
 
-import co.elastic.otel.android.internal.opamp.state.FieldType;
+import co.elastic.otel.android.internal.opamp.request.Field;
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
 public final class RequestRecipe {
-    private final Collection<FieldType> fields;
+    private final Collection<Field> fields;
 
-    public RequestRecipe(Collection<FieldType> fields) {
+    public RequestRecipe(Collection<Field> fields) {
         this.fields = fields;
     }
 
-    public Collection<FieldType> getFields() {
+    public Collection<Field> getFields() {
         return fields;
     }
 }

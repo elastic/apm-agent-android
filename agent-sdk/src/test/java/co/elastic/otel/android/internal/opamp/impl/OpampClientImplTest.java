@@ -26,8 +26,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-import androidx.annotation.NonNull;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,7 +40,6 @@ import co.elastic.otel.android.internal.opamp.request.service.RequestService;
 import co.elastic.otel.android.internal.opamp.response.MessageData;
 import co.elastic.otel.android.internal.opamp.response.Response;
 import co.elastic.otel.android.internal.opamp.state.State;
-import co.elastic.otel.android.internal.opamp.state.Storage;
 import okio.ByteString;
 import opamp.proto.AgentCapabilities;
 import opamp.proto.AgentConfigFile;
@@ -52,7 +49,6 @@ import opamp.proto.AgentIdentification;
 import opamp.proto.AgentRemoteConfig;
 import opamp.proto.AgentToServer;
 import opamp.proto.AgentToServerFlags;
-import opamp.proto.EffectiveConfig;
 import opamp.proto.RemoteConfigStatus;
 import opamp.proto.RemoteConfigStatuses;
 import opamp.proto.ServerErrorResponse;
@@ -72,23 +68,18 @@ class OpampClientImplTest {
     void setUp() {
         state =
                 new OpampClientState(
-                        State.RemoteConfigStatus.createInMemory(getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_UNSET)),
-                        State.SequenceNum.createInMemory(1),
-                        State.AgentDescription.createInMemory(new AgentDescription.Builder().build()),
-                        State.Capabilities.createInMemory(AgentCapabilities.AgentCapabilities_Unspecified.getValue()),
-                        State.InstanceUid.createRandomInMemory(),
-                        new State.EffectiveConfig(new Storage<>() {
+                        State.RemoteConfigStatus.create(getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_UNSET)),
+                        State.SequenceNum.create(1),
+                        State.AgentDescription.create(new AgentDescription.Builder().build()),
+                        State.Capabilities.create(AgentCapabilities.AgentCapabilities_Unspecified.getValue()),
+                        State.InstanceUid.createRandom(),
+                        State.Flags.create(AgentToServerFlags.AgentToServerFlags_Unspecified.getValue()),
+                        new State.EffectiveConfig() {
                             @Override
-                            public EffectiveConfig get() {
-                                return new EffectiveConfig.Builder().build();
+                            public opamp.proto.EffectiveConfig get() {
+                                return new opamp.proto.EffectiveConfig.Builder().build();
                             }
-
-                            @Override
-                            public boolean set(@NonNull EffectiveConfig value) {
-                                return false;
-                            }
-                        }),
-                        State.Flags.createInMemory(AgentToServerFlags.AgentToServerFlags_Unspecified.getValue()));
+                        });
         client = OpampClientImpl.create(requestService, state);
     }
 

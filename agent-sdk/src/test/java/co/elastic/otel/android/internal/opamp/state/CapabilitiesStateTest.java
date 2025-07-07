@@ -30,7 +30,7 @@ class CapabilitiesStateTest {
 
     @BeforeEach
     void setUp() {
-        capabilitiesState = State.Capabilities.createInMemory(AgentCapabilities.AgentCapabilities_ReportsStatus.getValue());
+        capabilitiesState = State.Capabilities.create(AgentCapabilities.AgentCapabilities_ReportsStatus.getValue());
     }
 
     @Test

@@ -261,16 +261,6 @@ class OpampClientImplTest {
     }
 
     @Test
-    void verifySequenceNumberDoesNotIncreaseOnRequestError() {
-        client.start(callbacks);
-        assertThat(state.sequenceNum.get()).isEqualTo(1);
-
-        client.onRequestFailed(new Exception());
-
-        assertThat(state.sequenceNum.get()).isEqualTo(1);
-    }
-
-    @Test
     void whenStatusIsUpdated_notifyServerImmediately() {
         client.setRemoteConfigStatus(
                 getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_UNSET));

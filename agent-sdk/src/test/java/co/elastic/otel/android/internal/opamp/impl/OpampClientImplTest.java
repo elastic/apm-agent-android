@@ -130,7 +130,7 @@ class OpampClientImplTest {
         assertThat(firstRequest.sequence_num).isEqualTo(1);
         assertThat(firstRequest.capabilities).isEqualTo(state.capabilities.get());
         assertThat(firstRequest.agent_description).isNotNull();
-        assertThat(firstRequest.effective_config).isNotNull();//todo
+        assertThat(firstRequest.effective_config).isNotNull();
         assertThat(firstRequest.remote_config_status).isNotNull();
 
         client.onRequestSuccess(null);

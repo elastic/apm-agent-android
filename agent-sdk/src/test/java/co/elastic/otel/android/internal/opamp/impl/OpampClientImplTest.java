@@ -32,12 +32,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Map;
 
 import co.elastic.otel.android.internal.opamp.OpampClient;
 import co.elastic.otel.android.internal.opamp.request.Request;
 import co.elastic.otel.android.internal.opamp.request.service.RequestService;
 import co.elastic.otel.android.internal.opamp.response.MessageData;
+import co.elastic.otel.android.internal.opamp.response.OpampServerResponseException;
 import co.elastic.otel.android.internal.opamp.response.Response;
 import co.elastic.otel.android.internal.opamp.state.State;
 import okio.ByteString;
@@ -46,9 +48,10 @@ import opamp.proto.AgentConfigFile;
 import opamp.proto.AgentConfigMap;
 import opamp.proto.AgentDescription;
 import opamp.proto.AgentIdentification;
-import opamp.proto.AgentRemoteConfig;
 import opamp.proto.AgentToServer;
 import opamp.proto.AgentToServerFlags;
+import opamp.proto.AnyValue;
+import opamp.proto.KeyValue;
 import opamp.proto.RemoteConfigStatus;
 import opamp.proto.RemoteConfigStatuses;
 import opamp.proto.ServerErrorResponse;
@@ -159,50 +162,30 @@ class OpampClientImplTest {
     }
 
     @Test
-    void onSuccessfulResponse_withRemoteConfigStatusUpdate_notifyServerImmediately() {
-        ServerToAgent response =
-                new ServerToAgent.Builder()
-                        .remote_config(
-                                new AgentRemoteConfig.Builder().config(getAgentConfigMap("fileName", "{}")).build())
-                        .build();
-        TestCallback testCallback =
-                new TestCallback() {
-                    @Override
-                    public void onMessage(OpampClient client, MessageData messageData) {
-                        client.setRemoteConfigStatus(
-                                getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_APPLYING));
-                    }
-                };
-        client.start(testCallback);
-        clearInvocations(requestService);
+    void verifyAgentDescriptionSetter() {
+        KeyValue serviceName = new KeyValue.Builder().key("service.name").value(new AnyValue.Builder().string_value("My service").build()).build();
+        AgentDescription agentDescription = new AgentDescription.Builder()
+                .identifying_attributes(List.of(serviceName)).build();
 
-        client.onRequestSuccess(Response.create(response));
-
+        // Update when changed
+        client.setAgentDescription(agentDescription);
         verify(requestService).sendRequest();
+
+        // Ignore when the provided value is the same as the current one
+        clearInvocations(requestService);
+        client.setAgentDescription(agentDescription);
+        verify(requestService, never()).sendRequest();
     }
 
     @Test
-    void onSuccessfulResponse_withRemoteConfigStatus_withoutChange_doNotNotifyServerImmediately() {
-        ServerToAgent response =
-                new ServerToAgent.Builder()
-                        .remote_config(
-                                new AgentRemoteConfig.Builder().config(getAgentConfigMap("fileName", "{}")).build())
-                        .build();
-        TestCallback testCallback =
-                new TestCallback() {
-                    @Override
-                    public void onMessage(OpampClient client, MessageData messageData) {
-                        client.setRemoteConfigStatus(
-                                getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_APPLYING));
-                    }
-                };
-        client.setRemoteConfigStatus(
-                getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_APPLYING));
-        client.start(testCallback);
+    void verifyRemoteConfigStatusSetter() {
+        // Update when changed
+        client.setRemoteConfigStatus(getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_APPLYING));
+        verify(requestService).sendRequest();
+
+        // Ignore when the provided value is the same as the current one
         clearInvocations(requestService);
-
-        client.onRequestSuccess(Response.create(response));
-
+        client.setRemoteConfigStatus(getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_APPLYING));
         verify(requestService, never()).sendRequest();
     }
 
@@ -217,13 +200,11 @@ class OpampClientImplTest {
     }
 
     @Test
-    void onSuccessfulResponse_withServerErrorData_notifyCallback() {
+    void onFailedResponse_withServerErrorData_notifyCallback() {
         client.start(callbacks);
         ServerErrorResponse errorResponse = new ServerErrorResponse.Builder().build();
-        ServerToAgent serverToAgent =
-                new ServerToAgent.Builder().error_response(errorResponse).build();
 
-        client.onRequestSuccess(Response.create(serverToAgent));
+        client.onRequestFailed(new OpampServerResponseException(errorResponse, "error message"));
 
         verify(callbacks).onErrorResponse(client, errorResponse);
         verify(callbacks, never()).onMessage(any(), any());
@@ -270,12 +251,11 @@ class OpampClientImplTest {
     }
 
     @Test
-    void verifySequenceNumberIncreasesOnServerResponseReceived() {
+    void verifySequenceNumberIncreasesOnCreatingRequest() {
         client.start(callbacks);
         assertThat(state.sequenceNum.get()).isEqualTo(1);
-        ServerToAgent serverToAgent = new ServerToAgent.Builder().build();
 
-        client.onRequestSuccess(Response.create(serverToAgent));
+        client.get();
 
         assertThat(state.sequenceNum.get()).isEqualTo(2);
     }

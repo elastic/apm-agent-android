@@ -121,30 +121,6 @@ class OpampClientImplTest {
     }
 
     @Test
-    void verifyStopOnlyOnce() {
-        client.start(callbacks);
-
-        client.stop();
-
-        try {
-            client.stop();
-            fail("Should have thrown an exception");
-        } catch (IllegalStateException e) {
-            assertThat(e).hasMessage("The client has already been stopped");
-        }
-    }
-
-    @Test
-    void verifyStopOnlyAfterStart() {
-        try {
-            client.stop();
-            fail("Should have thrown an exception");
-        } catch (IllegalStateException e) {
-            assertThat(e).hasMessage("The client has not been started");
-        }
-    }
-
-    @Test
     void checkRequestFields() {
         client.start(callbacks);
 

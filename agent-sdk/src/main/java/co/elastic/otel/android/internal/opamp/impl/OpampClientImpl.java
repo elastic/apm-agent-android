@@ -19,8 +19,7 @@
 package co.elastic.otel.android.internal.opamp.impl;
 
 import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 import co.elastic.otel.android.internal.opamp.OpampClient;
@@ -59,10 +58,9 @@ public final class OpampClientImpl
     private final AgentToServerAppenders appenders;
     private final OpampClientState state;
     private final RecipeManager recipeManager;
-    private final Lock runningLock = new ReentrantLock();
+    private final AtomicBoolean isRunning = new AtomicBoolean(false);
+    private final AtomicBoolean hasStopped = new AtomicBoolean(false);
     private Callbacks callbacks;
-    private boolean isRunning;
-    private boolean isStopped;
 
     /**
      * Fields that must always be sent.
@@ -107,39 +105,26 @@ public final class OpampClientImpl
 
     @Override
     public void start(Callbacks callbacks) {
-        runningLock.lock();
-        try {
-            if (!isRunning) {
-                isRunning = true;
-                this.callbacks = callbacks;
-                observeStateChange();
-                disableCompression();
-                requestService.start(this, this);
-                requestService.sendRequest();
-            } else {
-                throw new IllegalStateException("The client has already been started");
-            }
-        } finally {
-            runningLock.unlock();
+        if (hasStopped.get()) {
+            throw new IllegalStateException("The client cannot start after it has been stopped.");
+        }
+        if (isRunning.compareAndSet(false, true)) {
+            this.callbacks = callbacks;
+            observeStateChange();
+            disableCompression();
+            requestService.start(this, this);
+            requestService.sendRequest();
+        } else {
+            throw new IllegalStateException("The client has already been started");
         }
     }
 
     @Override
     public void stop() {
-        runningLock.lock();
-        try {
-            if (!isRunning) {
-                throw new IllegalStateException("The client has not been started");
-            }
-            if (!isStopped) {
-                isStopped = true;
-                prepareDisconnectRequest();
-                requestService.stop();
-            } else {
-                throw new IllegalStateException("The client has already been stopped");
-            }
-        } finally {
-            runningLock.unlock();
+        if (isRunning.compareAndSet(true, false)) {
+            hasStopped.set(true);
+            prepareDisconnectRequest();
+            requestService.stop();
         }
     }
 

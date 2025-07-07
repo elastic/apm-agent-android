@@ -26,6 +26,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import androidx.annotation.NonNull;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,6 +52,7 @@ import opamp.proto.AgentIdentification;
 import opamp.proto.AgentRemoteConfig;
 import opamp.proto.AgentToServer;
 import opamp.proto.AgentToServerFlags;
+import opamp.proto.EffectiveConfig;
 import opamp.proto.RemoteConfigStatus;
 import opamp.proto.RemoteConfigStatuses;
 import opamp.proto.ServerErrorResponse;
@@ -74,7 +77,17 @@ class OpampClientImplTest {
                         State.AgentDescription.createInMemory(new AgentDescription.Builder().build()),
                         State.Capabilities.createInMemory(AgentCapabilities.AgentCapabilities_Unspecified.getValue()),
                         State.InstanceUid.createRandomInMemory(),
-                        new State.EffectiveConfig(Storage.noop()),
+                        new State.EffectiveConfig(new Storage<>() {
+                            @Override
+                            public EffectiveConfig get() {
+                                return new EffectiveConfig.Builder().build();
+                            }
+
+                            @Override
+                            public boolean set(@NonNull EffectiveConfig value) {
+                                return false;
+                            }
+                        }),
                         State.Flags.createInMemory(AgentToServerFlags.AgentToServerFlags_Unspecified.getValue()));
         client = OpampClientImpl.create(requestService, state);
     }
@@ -141,7 +154,7 @@ class OpampClientImplTest {
         assertThat(firstRequest.sequence_num).isEqualTo(1);
         assertThat(firstRequest.capabilities).isEqualTo(state.capabilities.get());
         assertThat(firstRequest.agent_description).isNotNull();
-        assertThat(firstRequest.effective_config).isNotNull();
+        assertThat(firstRequest.effective_config).isNotNull();//todo
         assertThat(firstRequest.remote_config_status).isNotNull();
 
         client.onRequestSuccess(null);

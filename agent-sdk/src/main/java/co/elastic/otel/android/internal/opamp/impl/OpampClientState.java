@@ -19,6 +19,7 @@
 package co.elastic.otel.android.internal.opamp.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import co.elastic.otel.android.internal.opamp.state.State;
@@ -35,7 +36,7 @@ public final class OpampClientState {
     public final State.InstanceUid instanceUid;
     public final State.Flags flags;
     public final State.EffectiveConfig effectiveConfig;
-    private final List<State<?>> items = new ArrayList<>();
+    private final List<State<?>> items;
 
     public OpampClientState(State.RemoteConfigStatus remoteConfigStatus,
                             State.SequenceNum sequenceNum,
@@ -51,13 +52,17 @@ public final class OpampClientState {
         this.instanceUid = instanceUid;
         this.flags = flags;
         this.effectiveConfig = effectiveConfig;
-        items.add(remoteConfigStatus);
-        items.add(sequenceNum);
-        items.add(agentDescription);
-        items.add(capabilities);
-        items.add(instanceUid);
-        items.add(flags);
-        items.add(effectiveConfig);
+
+        List<State<?>> providedItems = new ArrayList<>();
+        providedItems.add(remoteConfigStatus);
+        providedItems.add(sequenceNum);
+        providedItems.add(agentDescription);
+        providedItems.add(capabilities);
+        providedItems.add(instanceUid);
+        providedItems.add(flags);
+        providedItems.add(effectiveConfig);
+
+        items = Collections.unmodifiableList(providedItems);
     }
 
     public List<State<?>> getAll() {

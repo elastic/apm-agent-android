@@ -112,9 +112,9 @@ public final class OpampClientImpl
         }
         if (isRunning.compareAndSet(false, true)) {
             this.callbacks = callbacks;
-            observeStateChange();
-            disableCompression();
             requestService.start(this, this);
+            disableCompression();
+            startObservingStateChange();
             requestService.sendRequest();
         } else {
             throw new IllegalStateException("The client has already been started");
@@ -125,6 +125,7 @@ public final class OpampClientImpl
     public void stop() {
         if (isRunning.compareAndSet(true, false)) {
             hasStopped.set(true);
+            stopObservingStateChange();
             prepareDisconnectRequest();
             requestService.stop();
         }
@@ -132,20 +133,18 @@ public final class OpampClientImpl
 
     @Override
     public void setAgentDescription(AgentDescription agentDescription) {
-        state.agentDescription.set(agentDescription);
-        addFieldAndSend(Field.AGENT_DESCRIPTION);
+        if (!state.agentDescription.get().equals(agentDescription)) {
+            state.agentDescription.set(agentDescription);
+            addFieldAndSend(Field.AGENT_DESCRIPTION);
+        }
     }
 
     @Override
     public void setRemoteConfigStatus(RemoteConfigStatus remoteConfigStatus) {
-        state.remoteConfigStatus.set(remoteConfigStatus);
-        addFieldAndSend(Field.REMOTE_CONFIG_STATUS);
-    }
-
-    @Override
-    public void setCapabilities(long value) {
-        state.capabilities.set(value);
-        addFieldAndSend(Field.CAPABILITIES);
+        if (!state.remoteConfigStatus.get().equals(remoteConfigStatus)) {
+            state.remoteConfigStatus.set(remoteConfigStatus);
+            addFieldAndSend(Field.REMOTE_CONFIG_STATUS);
+        }
     }
 
     @Override
@@ -220,18 +219,27 @@ public final class OpampClientImpl
 
     @Override
     public Request get() {
-        state.sequenceNum.increment();
         AgentToServer.Builder builder = new AgentToServer.Builder();
         for (Field field : recipeManager.next().build().getFields()) {
             appenders.getForField(field).appendTo(builder);
         }
-        return Request.create(builder.build());
+        Request request = Request.create(builder.build());
+        state.sequenceNum.increment();
+        return request;
     }
 
-    private void observeStateChange() {
+    private void startObservingStateChange() {
         for (State<?> state : state.getAll()) {
             if (state instanceof ObservableState) {
                 ((ObservableState<?>) state).addListener(this);
+            }
+        }
+    }
+
+    private void stopObservingStateChange() {
+        for (State<?> state : state.getAll()) {
+            if (state instanceof ObservableState) {
+                ((ObservableState<?>) state).removeListener(this);
             }
         }
     }

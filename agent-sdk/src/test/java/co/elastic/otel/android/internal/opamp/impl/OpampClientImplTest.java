@@ -33,7 +33,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,6 +49,7 @@ import opamp.proto.AgentConfigFile;
 import opamp.proto.AgentConfigMap;
 import opamp.proto.AgentDescription;
 import opamp.proto.AgentIdentification;
+import opamp.proto.AgentRemoteConfig;
 import opamp.proto.AgentToServer;
 import opamp.proto.AgentToServerFlags;
 import opamp.proto.AnyValue;
@@ -73,7 +73,7 @@ class OpampClientImplTest {
 
     @BeforeEach
     void setUp() {
-        effectiveConfig = new TestEffectiveConfig(createEffectiveConfigForMap(Map.of("first", "first content")));
+        effectiveConfig = new TestEffectiveConfig(new EffectiveConfig.Builder().config_map(createAgentConfigMap("first", "first content")).build());
         state =
                 new OpampClientState(
                         State.RemoteConfigStatus.create(getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_UNSET)),
@@ -94,7 +94,7 @@ class OpampClientImplTest {
 
         // Check state observing
         clearInvocations(requestService);
-        EffectiveConfig otherConfig = createEffectiveConfigForMap(Map.of("other", "other value"));
+        EffectiveConfig otherConfig = new EffectiveConfig.Builder().config_map(createAgentConfigMap("other", "other value")).build();
         effectiveConfig.config = otherConfig;
         effectiveConfig.triggerNotifyUpdate();
 
@@ -164,6 +164,21 @@ class OpampClientImplTest {
 
         Request request = client.get();
         assertThat(request.getAgentToServer().agent_disconnect).isNotNull();
+    }
+
+    @Test
+    void onSuccess_withChangesToReport_notifyCallbackOnMessage() {
+        AgentRemoteConfig remoteConfig = new AgentRemoteConfig.Builder().config(createAgentConfigMap("someKey", "someValue")).build();
+        ServerToAgent serverToAgent = new ServerToAgent.Builder()
+                .remote_config(remoteConfig)
+                .build();
+        client.start(callbacks);
+
+        client.onRequestSuccess(Response.create(serverToAgent));
+
+        verify(callbacks).onMessage(client, MessageData.builder()
+                .setRemoteConfig(remoteConfig)
+                .build());
     }
 
     @Test
@@ -289,7 +304,7 @@ class OpampClientImplTest {
     }
 
     @Test
-    void whenStatusIsNotUpdated_doNotNotifyServerImmediately() {
+    void whenStatusIsNotUpdated_doNotNotifyServer() {
         client.setRemoteConfigStatus(
                 getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_APPLYING));
         client.start(callbacks);
@@ -322,37 +337,8 @@ class OpampClientImplTest {
         return new RemoteConfigStatus.Builder().status(status).build();
     }
 
-    private AgentConfigMap getAgentConfigMap(String configFileName, String content) {
-        AgentConfigMap.Builder builder = new AgentConfigMap.Builder();
-        builder.config_map(Map.of(
-                configFileName,
-                new AgentConfigFile.Builder().body(ByteString.encodeUtf8(content)).build()));
-        return builder.build();
-    }
-
-    private static class TestCallback implements OpampClient.Callbacks {
-
-        @Override
-        public void onConnect(OpampClient client) {
-        }
-
-        @Override
-        public void onConnectFailed(OpampClient client, Throwable throwable) {
-        }
-
-        @Override
-        public void onErrorResponse(OpampClient client, ServerErrorResponse errorResponse) {
-        }
-
-        @Override
-        public void onMessage(OpampClient client, MessageData messageData) {
-        }
-    }
-
-    private static EffectiveConfig createEffectiveConfigForMap(Map<String, String> configContent) {
-        Map<String, AgentConfigFile> files = new HashMap<>();
-        configContent.forEach((key, value) -> files.put(key, new AgentConfigFile.Builder().body(ByteString.encodeUtf8(value)).build()));
-        return new EffectiveConfig.Builder().config_map(new AgentConfigMap.Builder().config_map(files).build()).build();
+    private static AgentConfigMap createAgentConfigMap(String key, String content) {
+        return new AgentConfigMap.Builder().config_map(Map.of(key, new AgentConfigFile.Builder().body(ByteString.encodeUtf8(content)).build())).build();
     }
 
     private static class TestEffectiveConfig extends State.EffectiveConfig {

@@ -37,6 +37,7 @@ import co.elastic.otel.android.internal.opamp.impl.recipe.appenders.SequenceNumb
 import co.elastic.otel.android.internal.opamp.request.Request;
 import co.elastic.otel.android.internal.opamp.request.service.RequestService;
 import co.elastic.otel.android.internal.opamp.response.MessageData;
+import co.elastic.otel.android.internal.opamp.response.OpampServerResponseException;
 import co.elastic.otel.android.internal.opamp.response.Response;
 import co.elastic.otel.android.internal.opamp.state.FieldType;
 import co.elastic.otel.android.internal.opamp.state.State;
@@ -146,12 +147,10 @@ public final class OpampClientImpl
     @Override
     public void onConnectionFailed(Throwable throwable) {
         callbacks.onConnectFailed(this, throwable);
-        preserveFailedRequestRecipe();
     }
 
     @Override
     public void onRequestSuccess(Response response) {
-        state.sequenceNum.increment();
         if (response == null) return;
 
         handleResponsePayload(response.getServerToAgent());
@@ -160,13 +159,13 @@ public final class OpampClientImpl
     @Override
     public void onRequestFailed(Throwable throwable) {
         preserveFailedRequestRecipe();
+        if (throwable instanceof OpampServerResponseException) {
+            ServerErrorResponse errorResponse = ((OpampServerResponseException) throwable).errorResponse;
+            callbacks.onErrorResponse(this, errorResponse);
+        }
     }
 
     private void handleResponsePayload(ServerToAgent response) {
-        if (response.error_response != null) {
-            ServerErrorResponse errorResponse = response.error_response;
-            callbacks.onErrorResponse(this, errorResponse);
-        }
         int reportFullState = ServerToAgentFlags.ServerToAgentFlags_ReportFullState.getValue();
         if ((response.flags & reportFullState) == reportFullState) {
             disableCompression();
@@ -212,6 +211,7 @@ public final class OpampClientImpl
 
     @Override
     public Request get() {
+        state.sequenceNum.increment();
         AgentToServer.Builder builder = new AgentToServer.Builder();
         for (FieldType field : recipeManager.next().build().getFields()) {
             appenders.getForField(field).appendTo(builder);

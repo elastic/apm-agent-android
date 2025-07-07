@@ -41,7 +41,7 @@ import co.elastic.otel.android.internal.opamp.connectivity.http.RetryAfterParser
 import co.elastic.otel.android.internal.opamp.request.Request;
 import co.elastic.otel.android.internal.opamp.request.delay.AcceptsDelaySuggestion;
 import co.elastic.otel.android.internal.opamp.request.delay.PeriodicDelay;
-import co.elastic.otel.android.internal.opamp.response.OpampServerResponseError;
+import co.elastic.otel.android.internal.opamp.response.OpampServerResponseException;
 import co.elastic.otel.android.internal.opamp.response.Response;
 import opamp.proto.AgentToServer;
 import opamp.proto.ServerErrorResponse;
@@ -227,7 +227,8 @@ public final class HttpRequestService implements RequestService {
             }
             connectionStatus.retryAfter(retryAfter);
         }
-        getCallback().onRequestFailed(new OpampServerResponseError(errorResponse.error_message));
+        getCallback().onRequestFailed(new OpampServerResponseException(errorResponse,
+                errorResponse.error_message));
     }
 
     private Callback getCallback() {

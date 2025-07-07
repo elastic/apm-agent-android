@@ -18,19 +18,25 @@
  */
 package co.elastic.otel.android.internal.opamp.response;
 
+import opamp.proto.ServerErrorResponse;
+
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-public class OpampServerResponseError extends Exception {
+public class OpampServerResponseException extends Exception {
     private static final long serialVersionUID = 1L;
+
+    public final ServerErrorResponse errorResponse;
 
     /**
      * Constructs an OpAMP error related exception.
      *
-     * @param message The OpAMP error message.
+     * @param errorResponse The OpAMP error.
+     * @param message       The OpAMP error message.
      */
-    public OpampServerResponseError(String message) {
+    public OpampServerResponseException(ServerErrorResponse errorResponse, String message) {
         super(message);
+        this.errorResponse = errorResponse;
     }
 }

@@ -39,7 +39,7 @@ public abstract class ObservableState<T> implements State<T> {
         listeners.remove(listener);
     }
 
-    protected final void notifyUpdate() {
+    public final void notifyUpdate() {
         synchronized (listeners) {
             for (Listener listener : listeners) {
                 listener.onStateUpdate(getFieldType());

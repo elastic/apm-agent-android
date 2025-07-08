@@ -29,7 +29,7 @@ import javax.annotation.Nonnull;
 abstract class InMemoryState<T> implements State<T> {
     private final AtomicReference<T> state = new AtomicReference<>();
 
-    InMemoryState(T initialValue) {
+    public InMemoryState(T initialValue) {
         state.set(initialValue);
     }
 

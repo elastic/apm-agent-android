@@ -18,11 +18,7 @@
  */
 package co.elastic.otel.android.internal.opamp.state;
 
-import com.github.f4b6a3.uuid.UuidCreator;
-
-import java.nio.ByteBuffer;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
@@ -43,19 +39,7 @@ public interface State<T> extends Supplier<T> {
     }
 
     final class InstanceUid extends InMemoryState<byte[]> {
-        public static InstanceUid createRandom() {
-            UUID uuid = UuidCreator.getTimeOrderedEpoch();
-            ByteBuffer buffer = ByteBuffer.allocate(16);
-            buffer.putLong(uuid.getMostSignificantBits());
-            buffer.putLong(uuid.getLeastSignificantBits());
-            return create(buffer.array());
-        }
-
-        public static InstanceUid create(byte[] value) {
-            return new InstanceUid(value);
-        }
-
-        private InstanceUid(byte[] initialValue) {
+        public InstanceUid(byte[] initialValue) {
             super(initialValue);
         }
 
@@ -66,11 +50,7 @@ public interface State<T> extends Supplier<T> {
     }
 
     final class SequenceNum extends InMemoryState<Integer> {
-        public static SequenceNum create(int value) {
-            return new SequenceNum(value);
-        }
-
-        private SequenceNum(Integer initialValue) {
+        public SequenceNum(Integer initialValue) {
             super(initialValue);
         }
 
@@ -85,11 +65,7 @@ public interface State<T> extends Supplier<T> {
     }
 
     final class AgentDescription extends InMemoryState<opamp.proto.AgentDescription> {
-        public static AgentDescription create(opamp.proto.AgentDescription value) {
-            return new AgentDescription(value);
-        }
-
-        private AgentDescription(opamp.proto.AgentDescription initialValue) {
+        public AgentDescription(opamp.proto.AgentDescription initialValue) {
             super(initialValue);
         }
 
@@ -100,20 +76,8 @@ public interface State<T> extends Supplier<T> {
     }
 
     final class Capabilities extends InMemoryState<Long> {
-        public static Capabilities create(long value) {
-            return new Capabilities(value);
-        }
-
-        private Capabilities(Long initialValue) {
+        public Capabilities(Long initialValue) {
             super(initialValue);
-        }
-
-        public void add(long capabilities) {
-            set(mustGet() | capabilities);
-        }
-
-        public void remove(long capabilities) {
-            set(mustGet() & ~capabilities);
         }
 
         @Override
@@ -124,11 +88,7 @@ public interface State<T> extends Supplier<T> {
 
     final class RemoteConfigStatus extends InMemoryState<opamp.proto.RemoteConfigStatus> {
 
-        public static RemoteConfigStatus create(opamp.proto.RemoteConfigStatus value) {
-            return new RemoteConfigStatus(value);
-        }
-
-        private RemoteConfigStatus(opamp.proto.RemoteConfigStatus initialValue) {
+        public RemoteConfigStatus(opamp.proto.RemoteConfigStatus initialValue) {
             super(initialValue);
         }
 
@@ -140,11 +100,7 @@ public interface State<T> extends Supplier<T> {
 
     final class Flags extends InMemoryState<Integer> {
 
-        public static Flags create(int value) {
-            return new Flags(value);
-        }
-
-        private Flags(Integer initialValue) {
+        public Flags(Integer initialValue) {
             super(initialValue);
         }
 

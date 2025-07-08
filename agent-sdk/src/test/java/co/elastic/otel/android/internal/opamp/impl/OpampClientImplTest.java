@@ -96,7 +96,7 @@ class OpampClientImplTest {
         clearInvocations(requestService);
         EffectiveConfig otherConfig = new EffectiveConfig.Builder().config_map(createAgentConfigMap("other", "other value")).build();
         effectiveConfig.config = otherConfig;
-        effectiveConfig.triggerNotifyUpdate();
+        effectiveConfig.notifyUpdate();
 
         verify(requestService).sendRequest();
         assertThat(client.get().getAgentToServer().effective_config).isEqualTo(otherConfig);
@@ -112,7 +112,7 @@ class OpampClientImplTest {
 
         // Check state observing
         clearInvocations(requestService);
-        effectiveConfig.triggerNotifyUpdate();
+        effectiveConfig.notifyUpdate();
 
         verifyNoInteractions(requestService);
     }
@@ -367,10 +367,6 @@ class OpampClientImplTest {
 
         public TestEffectiveConfig(opamp.proto.EffectiveConfig initialValue) {
             config = initialValue;
-        }
-
-        public void triggerNotifyUpdate() {
-            notifyUpdate();
         }
 
         @Override

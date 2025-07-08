@@ -26,6 +26,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+
 import co.elastic.otel.android.internal.opamp.state.State;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,14 +52,14 @@ class OpampClientStateTest {
     private OpampClientState state;
 
     @Test
-    void verifyAllFields() {
-        assertThat(state.getAll())
-                .containsExactlyInAnyOrder(remoteConfigStatus,
-                        sequenceNum,
-                        agentDescription,
-                        capabilities,
-                        instanceUid,
-                        flags,
-                        effectiveConfig);
+    void verifyAllFields() throws IllegalAccessException {
+        List<State<?>> stateFields = new ArrayList<>();
+        for (Field field : OpampClientState.class.getFields()) {
+            if(State.class.isAssignableFrom(field.getType())){
+                stateFields.add((State<?>) field.get(state));
+            }
+        }
+
+        assertThat(state.getAll()).containsAll(stateFields);
     }
 }

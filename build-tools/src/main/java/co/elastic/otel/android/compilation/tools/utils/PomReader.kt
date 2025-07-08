@@ -18,7 +18,7 @@ class PomReader(pomFile: File) {
         val name = license.name
         val id =
             LicensesIdsMatcher.findId(name)
-                ?: throw RuntimeException("Couldn't find a license id for: $name - it should be added to the 'licenses_ids.txt' file")
+                ?: throw RuntimeException("Couldn't find a license id for: '$name' needed by '${getName()}' - it should be added to the 'licenses_ids.txt' file")
         return id
     }
 

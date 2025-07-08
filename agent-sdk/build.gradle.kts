@@ -62,6 +62,10 @@ dependencies {
 }
 
 // For opamp:
+apiValidation {
+    ignoredPackages.add("opamp.proto")
+}
+
 val opampProtos = tasks.register<DownloadOpampProtos>("opampProtoDownload", download)
 opampProtos.configure {
     group = "opamp"

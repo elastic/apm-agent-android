@@ -18,14 +18,13 @@
  */
 package co.elastic.otel.android.internal.opamp.impl.recipe;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+
+import javax.annotation.Nonnull;
 
 import co.elastic.otel.android.internal.opamp.request.Field;
 
@@ -34,48 +33,33 @@ import co.elastic.otel.android.internal.opamp.request.Field;
  * any time.
  */
 public final class RecipeManager {
-    private final Lock previousRecipeLock = new ReentrantLock();
-    private final Lock recipeBuilderLock = new ReentrantLock();
-    private List<Field> constantFields = new ArrayList<>();
+    private final Object recipeLock = new Object();
+    private final List<Field> constantFields;
     private RequestRecipe previousRecipe = null;
     private RecipeBuilder builder;
 
+    public static RecipeManager create(List<Field> constantFields) {
+        return new RecipeManager(Collections.unmodifiableList(constantFields));
+    }
+
+    private RecipeManager(List<Field> constantFields) {
+        this.constantFields = constantFields;
+    }
+
     public RequestRecipe previous() {
-        previousRecipeLock.lock();
-        try {
+        synchronized (recipeLock) {
             return previousRecipe;
-        } finally {
-            previousRecipeLock.unlock();
         }
     }
 
+    @Nonnull
     public RecipeBuilder next() {
-        recipeBuilderLock.lock();
-        try {
+        synchronized (recipeLock) {
             if (builder == null) {
                 builder = new RecipeBuilder(constantFields);
             }
             return builder;
-        } finally {
-            recipeBuilderLock.unlock();
         }
-    }
-
-    private void setPreviousRecipe(RequestRecipe recipe) {
-        previousRecipeLock.lock();
-        try {
-            this.previousRecipe = recipe;
-        } finally {
-            previousRecipeLock.unlock();
-        }
-    }
-
-    private void clearBuilder() {
-        builder = null;
-    }
-
-    public void setConstantFields(List<Field> constantFields) {
-        this.constantFields = Collections.unmodifiableList(constantFields);
     }
 
     public final class RecipeBuilder {
@@ -96,14 +80,11 @@ public final class RecipeManager {
         }
 
         public RequestRecipe build() {
-            recipeBuilderLock.lock();
-            try {
+            synchronized (recipeLock) {
                 RequestRecipe recipe = new RequestRecipe(Collections.unmodifiableCollection(fields));
-                setPreviousRecipe(recipe);
-                clearBuilder();
+                previousRecipe = recipe;
+                builder = null;
                 return recipe;
-            } finally {
-                recipeBuilderLock.unlock();
             }
         }
 

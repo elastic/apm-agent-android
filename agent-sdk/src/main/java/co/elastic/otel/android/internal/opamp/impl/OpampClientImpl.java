@@ -89,9 +89,7 @@ public final class OpampClientImpl
                         InstanceUidAppender.create(state.instanceUid),
                         FlagsAppender.create(state.flags),
                         AgentDisconnectAppender.create());
-        RecipeManager recipeManager = new RecipeManager();
-        recipeManager.setConstantFields(CONSTANT_FIELDS);
-        return new OpampClientImpl(requestService, appenders, state, recipeManager);
+        return new OpampClientImpl(requestService, appenders, state, RecipeManager.create(CONSTANT_FIELDS));
     }
 
     private OpampClientImpl(

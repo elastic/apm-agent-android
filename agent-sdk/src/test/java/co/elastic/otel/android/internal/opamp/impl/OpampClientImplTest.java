@@ -193,9 +193,7 @@ class OpampClientImplTest {
 
     @Test
     void verifyAgentDescriptionSetter() {
-        KeyValue serviceName = new KeyValue.Builder().key("service.name").value(new AnyValue.Builder().string_value("My service").build()).build();
-        AgentDescription agentDescription = new AgentDescription.Builder()
-                .identifying_attributes(List.of(serviceName)).build();
+        AgentDescription agentDescription = getAgentDescriptionWithOneIdentifyingValue("service.name", "My service");
 
         // Update when changed
         client.setAgentDescription(agentDescription);
@@ -227,6 +225,23 @@ class OpampClientImplTest {
 
         verify(callbacks).onConnect(client);
         verify(callbacks, never()).onConnectFailed(any(), any());
+    }
+
+    @Test
+    void onFailedResponse_keepFieldsForNextRequest() {
+        // Adding a non-constant field
+        AgentDescription agentDescription = getAgentDescriptionWithOneIdentifyingValue("service.namespace", "something");
+        client.setAgentDescription(agentDescription);
+
+        // Assert first request contains it
+        assertThat(client.get().getAgentToServer().agent_description).isEqualTo(agentDescription);
+
+        // On fail, keep agent description field
+        client.onRequestFailed(new Throwable());
+        assertThat(client.get().getAgentToServer().agent_description).isEqualTo(agentDescription);
+
+        // When there's no failure, do not keep it.
+        assertThat(client.get().getAgentToServer().agent_description).isNull();
     }
 
     @Test
@@ -339,6 +354,12 @@ class OpampClientImplTest {
 
     private static AgentConfigMap createAgentConfigMap(String key, String content) {
         return new AgentConfigMap.Builder().config_map(Map.of(key, new AgentConfigFile.Builder().body(ByteString.encodeUtf8(content)).build())).build();
+    }
+
+    private static AgentDescription getAgentDescriptionWithOneIdentifyingValue(String key, String value) {
+        KeyValue serviceName = new KeyValue.Builder().key(key).value(new AnyValue.Builder().string_value(value).build()).build();
+        return new AgentDescription.Builder()
+                .identifying_attributes(List.of(serviceName)).build();
     }
 
     private static class TestEffectiveConfig extends State.EffectiveConfig {

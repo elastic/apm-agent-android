@@ -173,6 +173,13 @@ public final class OpampClientImpl
         }
     }
 
+    private void preserveFailedRequestRecipe() {
+        final RequestRecipe previous = recipeManager.previous();
+        if (previous != null) {
+            recipeManager.next().merge(previous);
+        }
+    }
+
     private void handleResponsePayload(ServerToAgent response) {
         int reportFullState = ServerToAgentFlags.ServerToAgentFlags_ReportFullState.getValue();
         if ((response.flags & reportFullState) == reportFullState) {
@@ -208,13 +215,6 @@ public final class OpampClientImpl
 
     private void prepareDisconnectRequest() {
         recipeManager.next().addField(Field.AGENT_DISCONNECT);
-    }
-
-    private void preserveFailedRequestRecipe() {
-        final RequestRecipe previous = recipeManager.previous();
-        if (previous != null) {
-            recipeManager.next().merge(previous);
-        }
     }
 
     @Override

@@ -172,11 +172,11 @@ public final class OpampClientBuilder {
         OpampClientState state =
                 new OpampClientState(
                         new State.RemoteConfigStatus(new RemoteConfigStatus.Builder().build()),
-                        new State.SequenceNum(1),
+                        new State.SequenceNum(1L),
                         new State.AgentDescription(new AgentDescription.Builder().identifying_attributes(protoIdentifyingAttributes).build()),
                         new State.Capabilities(capabilities),
                         new State.InstanceUid(instanceUid),
-                        new State.Flags(0),
+                        new State.Flags(0L),
                         effectiveConfigState);
         return OpampClientImpl.create(service, state);
     }

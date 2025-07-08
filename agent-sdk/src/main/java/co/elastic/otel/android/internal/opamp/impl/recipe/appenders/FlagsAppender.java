@@ -27,13 +27,13 @@ import opamp.proto.AgentToServer;
  * any time.
  */
 public final class FlagsAppender implements AgentToServerAppender {
-    private final Supplier<Integer> flags;
+    private final Supplier<Long> flags;
 
-    public static FlagsAppender create(Supplier<Integer> flags) {
+    public static FlagsAppender create(Supplier<Long> flags) {
         return new FlagsAppender(flags);
     }
 
-    private FlagsAppender(Supplier<Integer> flags) {
+    private FlagsAppender(Supplier<Long> flags) {
         this.flags = flags;
     }
 

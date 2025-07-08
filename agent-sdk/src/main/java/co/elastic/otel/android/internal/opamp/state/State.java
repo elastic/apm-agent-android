@@ -49,8 +49,8 @@ public interface State<T> extends Supplier<T> {
         }
     }
 
-    final class SequenceNum extends InMemoryState<Integer> {
-        public SequenceNum(Integer initialValue) {
+    final class SequenceNum extends InMemoryState<Long> {
+        public SequenceNum(Long initialValue) {
             super(initialValue);
         }
 
@@ -98,9 +98,9 @@ public interface State<T> extends Supplier<T> {
         }
     }
 
-    final class Flags extends InMemoryState<Integer> {
+    final class Flags extends InMemoryState<Long> {
 
-        public Flags(Integer initialValue) {
+        public Flags(Long initialValue) {
             super(initialValue);
         }
 

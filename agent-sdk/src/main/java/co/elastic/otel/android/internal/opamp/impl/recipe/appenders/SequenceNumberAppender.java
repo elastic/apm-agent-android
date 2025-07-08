@@ -27,13 +27,13 @@ import opamp.proto.AgentToServer;
  * any time.
  */
 public final class SequenceNumberAppender implements AgentToServerAppender {
-    private final Supplier<Integer> sequenceNumber;
+    private final Supplier<Long> sequenceNumber;
 
-    public static SequenceNumberAppender create(Supplier<Integer> sequenceNumber) {
+    public static SequenceNumberAppender create(Supplier<Long> sequenceNumber) {
         return new SequenceNumberAppender(sequenceNumber);
     }
 
-    private SequenceNumberAppender(Supplier<Integer> sequenceNumber) {
+    private SequenceNumberAppender(Supplier<Long> sequenceNumber) {
         this.sequenceNumber = sequenceNumber;
     }
 

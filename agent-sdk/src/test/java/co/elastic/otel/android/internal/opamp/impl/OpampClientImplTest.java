@@ -77,11 +77,11 @@ class OpampClientImplTest {
         state =
                 new OpampClientState(
                         new State.RemoteConfigStatus(getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_UNSET)),
-                        new State.SequenceNum(1),
+                        new State.SequenceNum(1L),
                         new State.AgentDescription(new AgentDescription.Builder().build()),
                         new State.Capabilities((long) AgentCapabilities.AgentCapabilities_Unspecified.getValue()),
                         new State.InstanceUid(new byte[]{1, 2, 3}),
-                        new State.Flags(AgentToServerFlags.AgentToServerFlags_Unspecified.getValue()),
+                        new State.Flags((long) AgentToServerFlags.AgentToServerFlags_Unspecified.getValue()),
                         effectiveConfig);
         client = OpampClientImpl.create(requestService, state);
     }

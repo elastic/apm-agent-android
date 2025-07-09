@@ -90,6 +90,7 @@ class ElasticApmAgent internal constructor(
 
     override fun close() {
         delegate.close()
+        centralConfigurationManager?.close()
     }
 
     /**
@@ -336,7 +337,6 @@ class ElasticApmAgent internal constructor(
 
             val centralConfigurationManager = configureCentralConfigurationManager(
                 serviceManager,
-                systemTimeProvider,
                 managedFeatures
             )
             val sampleRateManager = configureSampleRateManager(
@@ -386,7 +386,6 @@ class ElasticApmAgent internal constructor(
 
         private fun configureCentralConfigurationManager(
             serviceManager: ServiceManager,
-            systemTimeProvider: SystemTimeProvider,
             managedFeatures: ManagedElasticOtelAgent.ManagedFeatures
         ): CentralConfigurationManager? {
             return managementUrl?.let {
@@ -395,7 +394,6 @@ class ElasticApmAgent internal constructor(
                     CentralConfigurationManager.EndpointParameters(
                         it, managementAuthentication, emptyMap()
                     ),
-                    systemTimeProvider,
                     managedFeatures.exporterGateManager
                 )
                 managedFeatures.conditionalDropManager.dropWhen {

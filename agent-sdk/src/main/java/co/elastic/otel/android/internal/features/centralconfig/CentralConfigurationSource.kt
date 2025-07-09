@@ -64,29 +64,6 @@ internal class CentralConfigurationSource internal constructor(
         }
     }
 
-    @Throws(IOException::class)
-    internal fun sync(connectivity: CentralConfigurationConnectivity): Int? {
-        if (refreshTimeoutMillis > systemTimeProvider.getCurrentTimeMillis()) {
-            logger.debug("Ignoring central config sync request")
-            return null
-        }
-        try {
-            val fetchResult = fetcher.fetch(connectivity)
-            if (fetchResult.configurationHasChanged) {
-                loadFromDisk()
-                notifyListener()
-            }
-            val maxAgeInSeconds = fetchResult.maxAgeInSeconds
-            if (maxAgeInSeconds != null) {
-                storeRefreshTimeoutTime(maxAgeInSeconds)
-            }
-            return maxAgeInSeconds
-        } catch (t: Throwable) {
-            logger.error("An error occurred while fetching the central configuration", t)
-            throw t
-        }
-    }
-
     private fun createOpampClient(connectivity: CentralConfigurationConnectivity): OpampClient {
         val builder = OpampClient.builder()
             .enableRemoteConfig()

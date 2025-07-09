@@ -18,7 +18,6 @@
  */
 package co.elastic.otel.android.internal.features.centralconfig
 
-import androidx.annotation.WorkerThread
 import co.elastic.otel.android.common.internal.logging.Elog
 import co.elastic.otel.android.connectivity.Authentication
 import co.elastic.otel.android.internal.connectivity.ConnectivityConfigurationHolder
@@ -26,7 +25,6 @@ import co.elastic.otel.android.internal.features.exportergate.ExporterGateManage
 import co.elastic.otel.android.internal.opentelemetry.ElasticOpenTelemetry
 import co.elastic.otel.android.internal.services.ServiceManager
 import java.io.Closeable
-import java.io.IOException
 import org.slf4j.Logger
 import org.stagemonitor.configuration.ConfigurationRegistry
 
@@ -58,7 +56,6 @@ internal class CentralConfigurationManager private constructor(
         backgroundWorkService.submit {
             try {
                 centralConfigurationSource.initialize(getConnectivityConfiguration(), this)
-                doPoll()
             } catch (t: Throwable) {
                 logger.error("CentralConfiguration initialization error", t)
             } finally {
@@ -77,19 +74,6 @@ internal class CentralConfigurationManager private constructor(
 
     private fun openLatch() {
         gateManager.openLatches(CentralConfigurationManager::class.java)
-    }
-
-    @WorkerThread
-    @Throws(IOException::class)
-    private fun doPoll() {
-        val delayForNextPollInSeconds =
-            centralConfigurationSource.sync(getConnectivityConfiguration())
-        if (delayForNextPollInSeconds != null) {
-            logger.info("Central config returned max age is null")
-            scheduleInSeconds(delayForNextPollInSeconds)
-        } else {
-            scheduleDefault()
-        }
     }
 
     companion object {
@@ -113,17 +97,6 @@ internal class CentralConfigurationManager private constructor(
                 gateManager,
                 initialParameters
             )
-        }
-    }
-
-    private inner class ConfigurationPoll : Runnable {
-        override fun run() {
-            try {
-                doPoll()
-            } catch (t: Throwable) {
-                logger.error("Central config poll error", t)
-                scheduleDefault()
-            }
         }
     }
 

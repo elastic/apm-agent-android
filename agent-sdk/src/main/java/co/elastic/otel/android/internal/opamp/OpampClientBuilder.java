@@ -47,6 +47,7 @@ import opamp.proto.RemoteConfigStatus;
  */
 public final class OpampClientBuilder {
     private final Map<String, String> identifyingAttributes = new HashMap<>();
+    private final Map<String, String> nonIdentifyingAttributes = new HashMap<>();
     private byte[] instanceUid;
     private long capabilities = 0;
     private State.EffectiveConfig effectiveConfigState;
@@ -121,6 +122,19 @@ public final class OpampClientBuilder {
     }
 
     /**
+     * Sets the "deployment.environment.name" attribute into the <a
+     * href="https://github.com/open-telemetry/opamp-spec/blob/main/specification.md#agentdescriptionnon_identifying_attributes">non_identifying_attributes</a>
+     * field.
+     *
+     * @param value The deployment environment name.
+     * @return this
+     */
+    public OpampClientBuilder setDeploymentEnvironmentName(String value) {
+        nonIdentifyingAttributes.put("deployment.environment.name", value);
+        return this;
+    }
+
+    /**
      * Adds the AcceptsRemoteConfig and ReportsRemoteConfig capabilities to the Client so that the
      * Server can offer remote config values as explained <a
      * href="https://github.com/open-telemetry/opamp-spec/blob/main/specification.md#agentdescriptionidentifying_attributes">here</a>.
@@ -162,7 +176,9 @@ public final class OpampClientBuilder {
                     "The request service is not set. You must provide it by calling setRequestService()");
         }
         List<KeyValue> protoIdentifyingAttributes = new ArrayList<>();
+        List<KeyValue> protoNonIdentifyingAttributes = new ArrayList<>();
         identifyingAttributes.forEach((key, value) -> protoIdentifyingAttributes.add(createKeyValue(key, value)));
+        nonIdentifyingAttributes.forEach((key, value) -> protoNonIdentifyingAttributes.add(createKeyValue(key, value)));
         if (instanceUid == null) {
             instanceUid = createRandomInstanceUid();
         }
@@ -173,7 +189,11 @@ public final class OpampClientBuilder {
                 new OpampClientState(
                         new State.RemoteConfigStatus(new RemoteConfigStatus.Builder().build()),
                         new State.SequenceNum(1L),
-                        new State.AgentDescription(new AgentDescription.Builder().identifying_attributes(protoIdentifyingAttributes).build()),
+                        new State.AgentDescription(new AgentDescription.Builder()
+                                .identifying_attributes(protoIdentifyingAttributes)
+                                .non_identifying_attributes(protoNonIdentifyingAttributes)
+                                .build()
+                        ),
                         new State.Capabilities(capabilities),
                         new State.InstanceUid(instanceUid),
                         new State.Flags(0L),

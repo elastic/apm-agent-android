@@ -176,7 +176,7 @@ internal class CentralConfigurationSource internal constructor(
             status,
             remoteConfig.config_hash
         )
-        opampClient.setRemoteConfigStatus(getRemoteConfigStatus(status, remoteConfig.config_hash))
+        client.setRemoteConfigStatus(getRemoteConfigStatus(status, remoteConfig.config_hash))
     }
 
     private fun storeConfig(elasticConfig: AgentConfigFile): Boolean {

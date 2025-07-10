@@ -29,16 +29,10 @@ internal data class CentralConfigurationConnectivity(
     private val url: String,
     private val auth: Authentication,
     private val extraHeaders: Map<String, String>,
-    val serviceName: String,
-    val serviceDeployment: String?
 ) : ConnectivityConfiguration {
-    private val baseUrl by lazy { "$url?service.name=$serviceName" }
 
     override fun getUrl(): String {
-        return when (serviceDeployment) {
-            null -> baseUrl
-            else -> "$baseUrl&service.deployment=$serviceDeployment"
-        }
+        return url
     }
 
     override fun getHeaders(): Map<String, String> {

@@ -49,13 +49,15 @@ internal class CentralConfigurationManager private constructor(
                 initialParameters.url,
                 initialParameters.auth,
                 initialParameters.extraHeaders,
-                openTelemetry.serviceName,
-                openTelemetry.deploymentEnvironment
             )
         )
         backgroundWorkService.submit {
             try {
-                centralConfigurationSource.initialize(getConnectivityConfiguration(), this)
+                centralConfigurationSource.initialize(
+                    getConnectivityConfiguration(),
+                    openTelemetry,
+                    this
+                )
             } catch (t: Throwable) {
                 logger.error("CentralConfiguration initialization error", t)
             } finally {
@@ -66,6 +68,10 @@ internal class CentralConfigurationManager private constructor(
 
     internal fun getCentralConfiguration(): CentralConfiguration {
         return configurationRegistry.getConfig(CentralConfiguration::class.java)
+    }
+
+    internal fun forceSync() {
+        centralConfigurationSource.forceSync()
     }
 
     private fun getConnectivityConfiguration(): CentralConfigurationConnectivity {

@@ -23,6 +23,7 @@ import co.elastic.otel.android.internal.opamp.OpampClient
 import co.elastic.otel.android.internal.opamp.connectivity.http.OkHttpSender
 import co.elastic.otel.android.internal.opamp.request.service.HttpRequestService
 import co.elastic.otel.android.internal.opamp.response.MessageData
+import co.elastic.otel.android.internal.opentelemetry.ElasticOpenTelemetry
 import co.elastic.otel.android.internal.services.ServiceManager
 import com.dslplatform.json.DslJson
 import com.dslplatform.json.MapConverter
@@ -36,7 +37,6 @@ import opamp.proto.RemoteConfigStatus
 import opamp.proto.RemoteConfigStatuses
 import opamp.proto.ServerErrorResponse
 import org.stagemonitor.configuration.source.AbstractConfigurationSource
-
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
@@ -53,9 +53,14 @@ internal class CentralConfigurationSource internal constructor(
     }
     private lateinit var listener: Listener
     private lateinit var opampClient: OpampClient
+    private var requestService: HttpRequestService? = null
 
-    internal fun initialize(connectivity: CentralConfigurationConnectivity, listener: Listener) {
-        this.opampClient = createOpampClient(connectivity)
+    internal fun initialize(
+        connectivity: CentralConfigurationConnectivity,
+        openTelemetry: ElasticOpenTelemetry,
+        listener: Listener
+    ) {
+        this.opampClient = createOpampClient(connectivity, openTelemetry)
         this.listener = listener
         opampClient.start(this)
         loadFromDisk()
@@ -64,14 +69,22 @@ internal class CentralConfigurationSource internal constructor(
         }
     }
 
-    private fun createOpampClient(connectivity: CentralConfigurationConnectivity): OpampClient {
+    internal fun forceSync() {
+        requestService?.sendRequest()
+    }
+
+    private fun createOpampClient(
+        connectivity: CentralConfigurationConnectivity,
+        openTelemetry: ElasticOpenTelemetry
+    ): OpampClient {
         val builder = OpampClient.builder()
             .enableRemoteConfig()
-            .setServiceName(connectivity.serviceName)
-        connectivity.serviceDeployment?.let {
+            .setServiceName(openTelemetry.serviceName)
+        openTelemetry.deploymentEnvironment?.let {
             builder.setDeploymentEnvironmentName(it)
         }
-        builder.setRequestService(HttpRequestService.create(OkHttpSender.create(connectivity.getUrl())))
+        requestService = HttpRequestService.create(OkHttpSender.create(connectivity.getUrl()))
+        builder.setRequestService(requestService)
         return builder.build()
     }
 

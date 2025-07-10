@@ -148,18 +148,23 @@ internal class CentralConfigurationSource internal constructor(
         logger.debug("OpAMP on message: {}", messageData)
         val remoteConfig = messageData.remoteConfig ?: return
 
+        if (remoteConfig.config_hash == null) {
+            logger.debug("OpAMP ignoring remote config without hash")
+            return
+        }
+
         val elasticConfig = remoteConfig.config?.config_map?.get("elastic")
         logger.debug("OpAMP elastic config contents: {}", elasticConfig)
 
-        val status = if (elasticConfig != null) {
-            if (storeConfig(elasticConfig) && loadFromDisk()) {
+        var status = RemoteConfigStatuses.RemoteConfigStatuses_APPLIED
+
+        if (elasticConfig != null) {
+            if (storeConfig(elasticConfig)) {
+                if (!loadFromDisk()) {
+                    status = RemoteConfigStatuses.RemoteConfigStatuses_FAILED
+                }
                 notifyListener()
-                RemoteConfigStatuses.RemoteConfigStatuses_APPLIED
-            } else {
-                RemoteConfigStatuses.RemoteConfigStatuses_FAILED
             }
-        } else {
-            RemoteConfigStatuses.RemoteConfigStatuses_FAILED
         }
 
         logger.debug(

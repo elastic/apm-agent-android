@@ -88,15 +88,17 @@ internal class CentralConfigurationSource internal constructor(
         return builder.build()
     }
 
-    private fun loadFromDisk() {
+    private fun loadFromDisk(): Boolean {
         try {
             val configsFromDisk = readConfigsFromDisk()
             configs.clear()
             configs.putAll(configsFromDisk)
+            return true
         } catch (e: IOException) {
             logger.error("Error wile loading configs from disk", e)
             configs.clear()
         }
+        return false
     }
 
     private fun notifyListener() {
@@ -150,8 +152,7 @@ internal class CentralConfigurationSource internal constructor(
         logger.debug("OpAMP elastic config contents: {}", elasticConfig)
 
         val status = if (elasticConfig != null) {
-            if (storeConfig(elasticConfig)) {
-                loadFromDisk()
+            if (storeConfig(elasticConfig) && loadFromDisk()) {
                 notifyListener()
                 RemoteConfigStatuses.RemoteConfigStatuses_APPLIED
             } else {
@@ -186,7 +187,7 @@ internal class CentralConfigurationSource internal constructor(
     ): RemoteConfigStatus {
         val builder = RemoteConfigStatus.Builder()
             .status(status)
-        if (hash != null && status == RemoteConfigStatuses.RemoteConfigStatuses_APPLIED) {
+        if (hash != null) {
             builder.last_remote_config_hash(hash)
         }
         return builder.build()

@@ -46,7 +46,6 @@ import java.util.Optional
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.jvm.optionals.getOrNull
-import okio.ByteString.Companion.EMPTY
 import okio.ByteString.Companion.encodeUtf8
 import opamp.proto.AgentConfigFile
 import opamp.proto.AgentConfigMap
@@ -304,7 +303,7 @@ class ElasticApmAgentTest {
 
         requestsManager.enqueueResponse {
             withStatus(200)
-                .withBody(createRemoteConfigResponse("{}"))
+                .withBody(createRemoteConfigResponse("{}", "empty_hash"))
         }
         requestsManager.enqueueResponse()
 
@@ -317,7 +316,7 @@ class ElasticApmAgentTest {
         assertRemoteConfigReportedStatus(
             requestsManager.takeNextRequest(),
             RemoteConfigStatuses.RemoteConfigStatuses_APPLIED,
-            null
+            "empty_hash"
         )
 
         sendSpan()
@@ -385,7 +384,7 @@ class ElasticApmAgentTest {
         // Verify recording true value
         requestsManager.enqueueResponse {
             withStatus(200)
-                .withBody(createRemoteConfigResponse("""{"recording":"true"}"""))
+                .withBody(createRemoteConfigResponse("""{"recording":"true"}""", "recording_true"))
         }
         requestsManager.enqueueResponse()
         agent.getCentralConfigurationManager()!!.forceSync()
@@ -395,7 +394,7 @@ class ElasticApmAgentTest {
         assertRemoteConfigReportedStatus(
             requestsManager.takeNextRequest(),
             RemoteConfigStatuses.RemoteConfigStatuses_APPLIED,
-            null
+            "recording_true"
         )
 
         sendSpan()
@@ -414,12 +413,18 @@ class ElasticApmAgentTest {
         // Stub for invalid config
         requestsManager.enqueueResponse {
             withStatus(200)
-                .withBody("NOT_A_JSON")
+                .withBody(createRemoteConfigResponse("NOT_A_JSON", "invalid_config"))
         }
+        requestsManager.enqueueResponse()
         agent.getCentralConfigurationManager()!!.forceSync()
 
         requestsManager.takeNextRequest() // Await for invalid config.
         awaitForCentralConfigurationValues(ExpectedCentralConfiguration())
+        assertRemoteConfigReportedStatus(
+            requestsManager.takeNextRequest(),
+            RemoteConfigStatuses.RemoteConfigStatuses_FAILED,
+            "invalid_config"
+        )
 
         sendSpan()
         sendLog()
@@ -432,33 +437,32 @@ class ElasticApmAgentTest {
         assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
     }
 
-    private fun assertRemoteConfigReportedStatus(
-        statusRequest: Request,
-        status: RemoteConfigStatuses,
-        hash: String?
-    ) {
-        val remoteConfigStatus =
-            AgentToServer.ADAPTER.decode(statusRequest.body).remote_config_status
-        val configHash = hash?.encodeUtf8() ?: EMPTY
-        assertThat(remoteConfigStatus.status).isEqualTo(status)
-        assertThat(remoteConfigStatus.last_remote_config_hash).isEqualTo(configHash)
-    }
-
     @Test
     fun `Verify sampling rate config`() {
         // First: Sample rate: 0.0 and recording false.
-        wireMockRule.stubAllHttpResponses {
+        val requestManager = wireMockRule.stubRequests()
+        requestManager.enqueueResponse {
             withStatus(200)
-                .withBody("""{"session_sample_rate":"0.0", "recording":"false"}""")
-                .withHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
+                .withBody(
+                    createRemoteConfigResponse(
+                        """{"session_sample_rate":"0.0", "recording":"false"}""",
+                        "nothing_available"
+                    )
+                )
         }
+        requestManager.enqueueResponse()
 
         agent = inMemoryAgentBuilder(wireMockRule.url("/"))
             .setManagementUrl(wireMockRule.url("/config/"))
             .build()
 
-        wireMockRule.takeRequest() // Await for central config response
+        requestManager.takeNextRequest() // Await for central config response
         awaitForCentralConfigurationValues(ExpectedCentralConfiguration(false, 0.0))
+        assertRemoteConfigReportedStatus(
+            requestManager.takeNextRequest(),
+            RemoteConfigStatuses.RemoteConfigStatuses_APPLIED,
+            "nothing_available"
+        )
 
         agent.getSessionManager().clearSession()
 
@@ -473,14 +477,25 @@ class ElasticApmAgentTest {
         assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
 
         // Next: Sample rate: 1.0 and recording false.
-        wireMockRule.stubAllHttpResponses {
+        requestManager.enqueueResponse {
             withStatus(200)
-                .withBody("""{"session_sample_rate":"1.0", "recording":"false"}""")
-                .withHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
+                .withBody(
+                    createRemoteConfigResponse(
+                        """{"session_sample_rate":"1.0", "recording":"false"}""",
+                        "sample_rate_available"
+                    )
+                )
         }
+        requestManager.enqueueResponse()
+        agent.getCentralConfigurationManager()!!.forceSync()
 
-        wireMockRule.takeRequest() // Await for central config response
+        requestManager.takeNextRequest() // Await for central config response
         awaitForCentralConfigurationValues(ExpectedCentralConfiguration(false, 1.0))
+        assertRemoteConfigReportedStatus(
+            requestManager.takeNextRequest(),
+            RemoteConfigStatuses.RemoteConfigStatuses_APPLIED,
+            "sample_rate_available"
+        )
 
         agent.getSessionManager().clearSession()
 
@@ -493,14 +508,25 @@ class ElasticApmAgentTest {
         assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
 
         // Next: Sample rate: 1.0 and recording true.
-        wireMockRule.stubAllHttpResponses {
+        requestManager.enqueueResponse {
             withStatus(200)
-                .withBody("""{"session_sample_rate":"1.0", "recording":"true"}""")
-                .withHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
+                .withBody(
+                    createRemoteConfigResponse(
+                        """{"session_sample_rate":"1.0", "recording":"true"}""",
+                        "all_available"
+                    )
+                )
         }
+        requestManager.enqueueResponse()
+        agent.getCentralConfigurationManager()!!.forceSync()
 
-        wireMockRule.takeRequest() // Await for central config response
+        requestManager.takeNextRequest() // Await for central config response
         awaitForCentralConfigurationValues(ExpectedCentralConfiguration(true, 1.0))
+        assertRemoteConfigReportedStatus(
+            requestManager.takeNextRequest(),
+            RemoteConfigStatuses.RemoteConfigStatuses_APPLIED,
+            "all_available"
+        )
 
         agent.getSessionManager().clearSession()
 
@@ -516,13 +542,25 @@ class ElasticApmAgentTest {
 
         // Next: Sample rate: 0.0 and recording true, before evaluating sample rate.
         inMemoryExporters.resetExporters()
-        wireMockRule.stubAllHttpResponses {
+        requestManager.enqueueResponse {
             withStatus(200)
-                .withBody("""{"session_sample_rate":"0.0", "recording":"true"}""")
+                .withBody(
+                    createRemoteConfigResponse(
+                        """{"session_sample_rate":"0.0", "recording":"true"}""",
+                        "recording_available"
+                    )
+                )
         }
+        requestManager.enqueueResponse()
+        agent.getCentralConfigurationManager()!!.forceSync()
 
-        wireMockRule.takeRequest() // Await for central config response
+        requestManager.takeNextRequest() // Await for central config response
         awaitForCentralConfigurationValues(ExpectedCentralConfiguration(true, 0.0))
+        assertRemoteConfigReportedStatus(
+            requestManager.takeNextRequest(),
+            RemoteConfigStatuses.RemoteConfigStatuses_APPLIED,
+            "recording_available"
+        )
 
         sendSpan()
         sendLog()
@@ -548,10 +586,11 @@ class ElasticApmAgentTest {
 
         // Ensure that the config is persisted.
         closeAgent()
-        wireMockRule.stubAllHttpResponses {
+        requestManager.enqueueResponse {
             withStatus(200)
-            withBody("Not a json")
+            withBody(createRemoteConfigResponse("Not a json", "invalid_config"))
         }
+        requestManager.enqueueResponse()
         agent = inMemoryAgentBuilder(wireMockRule.url("/"))
             .setManagementUrl(wireMockRule.url("/config/"))
             .build()
@@ -567,8 +606,13 @@ class ElasticApmAgentTest {
         assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
 
         // When central config fails and the session gets reset, go with default behavior.
-        wireMockRule.takeRequest()
+        requestManager.takeNextRequest()
         awaitForCentralConfigurationValues(ExpectedCentralConfiguration())
+        assertRemoteConfigReportedStatus(
+            requestManager.takeNextRequest(),
+            RemoteConfigStatuses.RemoteConfigStatuses_FAILED,
+            "invalid_config"
+        )
 
         agent.getSessionManager().clearSession()
         inMemoryExporters.resetExporters()
@@ -604,18 +648,23 @@ class ElasticApmAgentTest {
 
         // Next: Setting sample rate during initialization with central config
         closeAgent()
-        wireMockRule.stubAllHttpResponses {
+        requestManager.enqueueResponse {
             withStatus(200)
-                .withBody("{}")
-                .withHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
+                .withBody(createRemoteConfigResponse("{}", "empty_config"))
         }
+        requestManager.enqueueResponse()
         agent = inMemoryAgentBuilder(wireMockRule.url("/"))
             .setSessionSampleRate(0.0)
             .setManagementUrl(wireMockRule.url("/config/"))
             .build()
 
-        wireMockRule.takeRequest() // Await for first central config response
+        requestManager.takeNextRequest() // Await for first central config response
         awaitForCentralConfigurationValues(ExpectedCentralConfiguration())
+        assertRemoteConfigReportedStatus(
+            requestManager.takeNextRequest(),
+            RemoteConfigStatuses.RemoteConfigStatuses_APPLIED,
+            "empty_config"
+        )
 
         // Force refresh session to trigger sampling rate evaluation
         agent.getSessionManager().clearSession()
@@ -632,13 +681,25 @@ class ElasticApmAgentTest {
         assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
 
         // Prepare next poll to contain sample rate
-        wireMockRule.stubAllHttpResponses {
+        requestManager.enqueueResponse {
             withStatus(200)
-                .withBody("""{"session_sample_rate":"1.0"}""")
-                .withHeader("Cache-Control", "max-age=1") // 1 second to wait for the next poll.
+                .withBody(
+                    createRemoteConfigResponse(
+                        """{"session_sample_rate":"1.0"}""",
+                        "with_session_1.0"
+                    )
+                )
         }
-        wireMockRule.takeRequest()
+        requestManager.enqueueResponse()
+        agent.getCentralConfigurationManager()!!.forceSync()
+
+        requestManager.takeNextRequest()
         awaitForCentralConfigurationValues(ExpectedCentralConfiguration(sessionSampleRate = 1.0))
+        assertRemoteConfigReportedStatus(
+            requestManager.takeNextRequest(),
+            RemoteConfigStatuses.RemoteConfigStatuses_APPLIED,
+            "with_session_1.0"
+        )
 
         // Force refresh session to trigger sampling rate evaluation
         agent.getSessionManager().clearSession()
@@ -657,12 +718,20 @@ class ElasticApmAgentTest {
 
         // When central config doesn't provide a sample rate value, check that the behaviour
         // is based on the value provided in during initialization (0.0).
-        wireMockRule.stubAllHttpResponses {
+        requestManager.enqueueResponse {
             withStatus(200)
-                .withBody("Not a json")
+                .withBody(createRemoteConfigResponse("Not a json", "invalid_config"))
         }
-        wireMockRule.takeRequest() // Await for central config response with invalid config
+        requestManager.enqueueResponse()
+        agent.getCentralConfigurationManager()!!.forceSync()
+
+        requestManager.takeNextRequest() // Await for central config response with invalid config
         awaitForCentralConfigurationValues(ExpectedCentralConfiguration())
+        assertRemoteConfigReportedStatus(
+            requestManager.takeNextRequest(),
+            RemoteConfigStatuses.RemoteConfigStatuses_FAILED,
+            "invalid_config"
+        )
 
         // Force refresh session to trigger sampling rate evaluation
         agent.getSessionManager().clearSession()
@@ -835,6 +904,17 @@ class ElasticApmAgentTest {
         simpleProcessorFactory.flushMetrics().join(1, TimeUnit.SECONDS)
     }
 
+    private fun assertRemoteConfigReportedStatus(
+        statusRequest: Request,
+        status: RemoteConfigStatuses,
+        hash: String
+    ) {
+        val remoteConfigStatus =
+            AgentToServer.ADAPTER.decode(statusRequest.body).remote_config_status
+        assertThat(remoteConfigStatus.status).isEqualTo(status)
+        assertThat(remoteConfigStatus.last_remote_config_hash).isEqualTo(hash.encodeUtf8())
+    }
+
     private fun awaitForOpenGates(maxSecondsToWait: Int = 1) {
         try {
             await.atMost(Duration.ofSeconds(maxSecondsToWait.toLong())).until {
@@ -901,14 +981,14 @@ class ElasticApmAgentTest {
         }
     }
 
-    private fun createRemoteConfigResponse(config: String, hash: String? = null): ByteArray {
+    private fun createRemoteConfigResponse(config: String, hash: String): ByteArray {
         val configMap = AgentConfigMap.Builder().config_map(
             mapOf(
                 "elastic" to AgentConfigFile.Builder().body(config.encodeUtf8()).build()
             )
         ).build()
         val configBuilder = AgentRemoteConfig.Builder().config(configMap)
-        hash?.let { configBuilder.config_hash(it.encodeUtf8()) }
+            .config_hash(hash.encodeUtf8())
 
         return ServerToAgent.Builder().remote_config(configBuilder.build()).build().encode()
     }

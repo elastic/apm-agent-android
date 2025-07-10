@@ -31,6 +31,7 @@ import java.io.Closeable
 import java.io.File
 import java.io.IOException
 import java.util.Collections
+import okhttp3.OkHttpClient
 import okio.ByteString
 import opamp.proto.AgentConfigFile
 import opamp.proto.RemoteConfigStatus
@@ -83,7 +84,16 @@ internal class CentralConfigurationSource internal constructor(
         openTelemetry.deploymentEnvironment?.let {
             builder.setDeploymentEnvironmentName(it)
         }
-        requestService = HttpRequestService.create(OkHttpSender.create(connectivity.getUrl()))
+        val okhttpClient = OkHttpClient.Builder()
+            .addInterceptor {
+                val newBuilder = it.request().newBuilder()
+                connectivity.getHeaders().forEach { (key, value) ->
+                    newBuilder.addHeader(key, value)
+                }
+                it.proceed(newBuilder.build())
+            }.build()
+        requestService =
+            HttpRequestService.create(OkHttpSender.create(connectivity.getUrl(), okhttpClient))
         builder.setRequestService(requestService)
         return builder.build()
     }

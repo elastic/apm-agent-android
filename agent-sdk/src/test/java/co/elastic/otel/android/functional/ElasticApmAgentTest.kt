@@ -145,7 +145,7 @@ class ElasticApmAgentTest {
             .build()
 
         val centralConfigRequest = wireMockRule.takeRequest()
-        assertThat(centralConfigRequest.url).isEqualTo("/remote/?service.name=my-app")
+        assertThat(centralConfigRequest.url).isEqualTo("/remote/")
         assertThat(
             centralConfigRequest.headers.getHeader("Extra-header").isPresent
         ).isFalse()
@@ -184,25 +184,22 @@ class ElasticApmAgentTest {
 
     @Test
     fun `Validate changing endpoint config`() {
-        wireMockRule.stubAllHttpResponses {
-            withStatus(404)
-                .withHeader("Cache-Control", "max-age=1")// 1 second to wait for the next poll.
-        }
+        wireMockRule.stubAllHttpResponses { withStatus(404) }
         val secretToken = "secret-token"
         val apiKey = "api-key"
         val headersInterceptorProvider =
             AtomicReference<Interceptor<Map<String, String>>>(Interceptor.noop())
         agent = simpleAgentBuilder(wireMockRule.url("/first/"))
-            .setManagementUrl(wireMockRule.url("/management/"))
             .setExportAuthentication(Authentication.SecretToken(secretToken))
             .setExportHeadersInterceptor { headersInterceptorProvider.get().intercept(it) }
+            .setManagementUrl(wireMockRule.url("/management/"))
             .setManagementAuthentication(Authentication.ApiKey(apiKey))
             .setServiceName("my-app")
             .setDeploymentEnvironment("debug")
             .build()
 
         val centralConfigRequest = wireMockRule.takeRequest()
-        assertThat(centralConfigRequest.url).isEqualTo("/management/?service.name=my-app&service.deployment=debug")
+        assertThat(centralConfigRequest.url).isEqualTo("/management/")
         assertThat(
             centralConfigRequest.headers.getHeader("Authorization").firstValue()
         ).isEqualTo("ApiKey $apiKey")
@@ -243,8 +240,9 @@ class ElasticApmAgentTest {
             )
         )
 
+        agent.getCentralConfigurationManager()!!.forceSync()
         val centralConfigRequest2 = wireMockRule.takeRequest()
-        assertThat(centralConfigRequest2.url).isEqualTo("/management/?service.name=my-app&service.deployment=debug")
+        assertThat(centralConfigRequest2.url).isEqualTo("/management/")
         assertThat(centralConfigRequest2.headers.getHeader("Authorization").firstValue()).isEqualTo(
             "ApiKey $apiKey"
         )

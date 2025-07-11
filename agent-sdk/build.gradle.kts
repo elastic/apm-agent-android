@@ -53,7 +53,7 @@ dependencies {
     // For opamp:
     implementation("com.google.code.findbugs:jsr305:3.0.2")
     implementation(instrumentation.okhttp)
-    implementation("com.github.f4b6a3:uuid-creator:6.0.0")
+    implementation("com.github.f4b6a3:uuid-creator:6.1.1")
     testImplementation("org.mockito:mockito-core:4.11.0")
     testImplementation("org.mockito:mockito-inline:4.11.0")
     testImplementation("org.mockito:mockito-junit-jupiter:4.11.0")

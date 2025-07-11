@@ -83,54 +83,30 @@ public final class OpampClientBuilder {
     }
 
     /**
-     * Sets the "service.name" attribute into the <a
+     * Sets a string attribute into the <a
      * href="https://github.com/open-telemetry/opamp-spec/blob/main/specification.md#agentdescriptionidentifying_attributes">identifying_attributes</a>
      * field.
      *
-     * @param value The service name.
+     * @param key   The attribute key.
+     * @param value The attribute value.
      * @return this
      */
-    public OpampClientBuilder setServiceName(String value) {
-        identifyingAttributes.put("service.name", value);
+    public OpampClientBuilder setIdentifyingAttribute(String key, String value) {
+        identifyingAttributes.put(key, value);
         return this;
     }
 
     /**
-     * Sets the "service.namespace" attribute into the <a
-     * href="https://github.com/open-telemetry/opamp-spec/blob/main/specification.md#agentdescriptionidentifying_attributes">identifying_attributes</a>
-     * field.
-     *
-     * @param value The service namespace.
-     * @return this
-     */
-    public OpampClientBuilder setServiceNamespace(String value) {
-        identifyingAttributes.put("service.namespace", value);
-        return this;
-    }
-
-    /**
-     * Sets the "service.version" attribute into the <a
-     * href="https://github.com/open-telemetry/opamp-spec/blob/main/specification.md#agentdescriptionidentifying_attributes">identifying_attributes</a>
-     * field.
-     *
-     * @param value The service version.
-     * @return this
-     */
-    public OpampClientBuilder setServiceVersion(String value) {
-        identifyingAttributes.put("service.version", value);
-        return this;
-    }
-
-    /**
-     * Sets the "deployment.environment.name" attribute into the <a
+     * Sets an attribute into the <a
      * href="https://github.com/open-telemetry/opamp-spec/blob/main/specification.md#agentdescriptionnon_identifying_attributes">non_identifying_attributes</a>
      * field.
      *
-     * @param value The deployment environment name.
+     * @param key   The attribute key
+     * @param value The attribute value.
      * @return this
      */
-    public OpampClientBuilder setDeploymentEnvironmentName(String value) {
-        nonIdentifyingAttributes.put("deployment.environment.name", value);
+    public OpampClientBuilder setNonIdentifyingAttribute(String key, String value) {
+        nonIdentifyingAttributes.put(key, value);
         return this;
     }
 

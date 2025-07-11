@@ -80,9 +80,9 @@ internal class CentralConfigurationSource internal constructor(
     ): OpampClient {
         val builder = OpampClient.builder()
             .enableRemoteConfig()
-            .setServiceName(openTelemetry.serviceName)
+            .setIdentifyingAttribute("service.name", openTelemetry.serviceName)
         openTelemetry.deploymentEnvironment?.let {
-            builder.setDeploymentEnvironmentName(it)
+            builder.setIdentifyingAttribute("deployment.environment.name", it)
         }
         val okhttpClient = OkHttpClient.Builder()
             .addInterceptor {

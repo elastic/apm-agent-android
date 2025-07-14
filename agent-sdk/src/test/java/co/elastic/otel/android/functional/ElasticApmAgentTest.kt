@@ -433,6 +433,15 @@ class ElasticApmAgentTest {
         assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
         assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
+
+        // Validate properly closed connection
+
+        closeAgent()
+        try {
+            agent.getCentralConfigurationManager()!!.forceSync()
+            fail("Should have failed")
+        } catch (ignored: IllegalStateException) {
+        }
     }
 
     @Test

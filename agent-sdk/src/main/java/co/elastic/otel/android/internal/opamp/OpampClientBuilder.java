@@ -47,6 +47,7 @@ import opamp.proto.RemoteConfigStatus;
  */
 public final class OpampClientBuilder {
     private final Map<String, String> identifyingAttributes = new HashMap<>();
+    private final Map<String, String> nonIdentifyingAttributes = new HashMap<>();
     private byte[] instanceUid;
     private long capabilities = 0;
     private State.EffectiveConfig effectiveConfigState;
@@ -82,41 +83,30 @@ public final class OpampClientBuilder {
     }
 
     /**
-     * Sets the "service.name" attribute into the <a
+     * Sets a string attribute into the <a
      * href="https://github.com/open-telemetry/opamp-spec/blob/main/specification.md#agentdescriptionidentifying_attributes">identifying_attributes</a>
      * field.
      *
-     * @param value The service name.
+     * @param key   The attribute key.
+     * @param value The attribute value.
      * @return this
      */
-    public OpampClientBuilder setServiceName(String value) {
-        identifyingAttributes.put("service.name", value);
+    public OpampClientBuilder setIdentifyingAttribute(String key, String value) {
+        identifyingAttributes.put(key, value);
         return this;
     }
 
     /**
-     * Sets the "service.namespace" attribute into the <a
-     * href="https://github.com/open-telemetry/opamp-spec/blob/main/specification.md#agentdescriptionidentifying_attributes">identifying_attributes</a>
+     * Sets an attribute into the <a
+     * href="https://github.com/open-telemetry/opamp-spec/blob/main/specification.md#agentdescriptionnon_identifying_attributes">non_identifying_attributes</a>
      * field.
      *
-     * @param value The service namespace.
+     * @param key   The attribute key
+     * @param value The attribute value.
      * @return this
      */
-    public OpampClientBuilder setServiceNamespace(String value) {
-        identifyingAttributes.put("service.namespace", value);
-        return this;
-    }
-
-    /**
-     * Sets the "service.version" attribute into the <a
-     * href="https://github.com/open-telemetry/opamp-spec/blob/main/specification.md#agentdescriptionidentifying_attributes">identifying_attributes</a>
-     * field.
-     *
-     * @param value The service version.
-     * @return this
-     */
-    public OpampClientBuilder setServiceVersion(String value) {
-        identifyingAttributes.put("service.version", value);
+    public OpampClientBuilder setNonIdentifyingAttribute(String key, String value) {
+        nonIdentifyingAttributes.put(key, value);
         return this;
     }
 
@@ -162,7 +152,9 @@ public final class OpampClientBuilder {
                     "The request service is not set. You must provide it by calling setRequestService()");
         }
         List<KeyValue> protoIdentifyingAttributes = new ArrayList<>();
+        List<KeyValue> protoNonIdentifyingAttributes = new ArrayList<>();
         identifyingAttributes.forEach((key, value) -> protoIdentifyingAttributes.add(createKeyValue(key, value)));
+        nonIdentifyingAttributes.forEach((key, value) -> protoNonIdentifyingAttributes.add(createKeyValue(key, value)));
         if (instanceUid == null) {
             instanceUid = createRandomInstanceUid();
         }
@@ -173,7 +165,11 @@ public final class OpampClientBuilder {
                 new OpampClientState(
                         new State.RemoteConfigStatus(new RemoteConfigStatus.Builder().build()),
                         new State.SequenceNum(1L),
-                        new State.AgentDescription(new AgentDescription.Builder().identifying_attributes(protoIdentifyingAttributes).build()),
+                        new State.AgentDescription(new AgentDescription.Builder()
+                                .identifying_attributes(protoIdentifyingAttributes)
+                                .non_identifying_attributes(protoNonIdentifyingAttributes)
+                                .build()
+                        ),
                         new State.Capabilities(capabilities),
                         new State.InstanceUid(instanceUid),
                         new State.Flags(0L),

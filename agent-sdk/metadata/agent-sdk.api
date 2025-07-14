@@ -24,6 +24,8 @@ public final class co/elastic/otel/android/ElasticApmAgent$Builder {
 	public final fun setExportUrl (Ljava/lang/String;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
 	public final fun setHttpSpanInterceptor (Lco/elastic/otel/android/interceptor/Interceptor;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
 	public final fun setInternalLoggingPolicy (Lco/elastic/otel/android/logging/LoggingPolicy;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
+	public final fun setManagementAuthentication (Lco/elastic/otel/android/connectivity/Authentication;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
+	public final fun setManagementUrl (Ljava/lang/String;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
 	public final fun setProcessorFactory (Lco/elastic/otel/android/processors/ProcessorFactory;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
 	public final fun setResourceInterceptor (Lco/elastic/otel/android/interceptor/Interceptor;)Lco/elastic/otel/android/ElasticApmAgent$Builder;
 	public final fun setServiceName (Ljava/lang/String;)Lco/elastic/otel/android/ElasticApmAgent$Builder;

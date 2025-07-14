@@ -90,6 +90,7 @@ class ElasticApmAgent internal constructor(
 
     override fun close() {
         delegate.close()
+        centralConfigurationManager?.close()
     }
 
     /**
@@ -294,16 +295,23 @@ class ElasticApmAgent internal constructor(
             diskBufferingConfiguration = value
         }
 
-        internal fun setSessionIdGenerator(value: SessionIdGenerator) = apply {
-            sessionIdGenerator = value
-        }
-
-        internal fun setManagementUrl(value: String) = apply {
+        /**
+         * This is the URL to the OpAMP server, which enables remote management configurations provided via Kibana.
+         * By default it's unset, which means that the remote management feature is disabled until this URL is set.
+         */
+        fun setManagementUrl(value: String) = apply {
             managementUrl = value
         }
 
-        internal fun setManagementAuthentication(value: Authentication) = apply {
+        /**
+         * This is the authentication method needed to connect to the value provided in [setManagementUrl].
+         */
+        fun setManagementAuthentication(value: Authentication) = apply {
             managementAuthentication = value
+        }
+
+        internal fun setSessionIdGenerator(value: SessionIdGenerator) = apply {
+            sessionIdGenerator = value
         }
 
         /**
@@ -336,7 +344,6 @@ class ElasticApmAgent internal constructor(
 
             val centralConfigurationManager = configureCentralConfigurationManager(
                 serviceManager,
-                systemTimeProvider,
                 managedFeatures
             )
             val sampleRateManager = configureSampleRateManager(
@@ -386,7 +393,6 @@ class ElasticApmAgent internal constructor(
 
         private fun configureCentralConfigurationManager(
             serviceManager: ServiceManager,
-            systemTimeProvider: SystemTimeProvider,
             managedFeatures: ManagedElasticOtelAgent.ManagedFeatures
         ): CentralConfigurationManager? {
             return managementUrl?.let {
@@ -395,7 +401,6 @@ class ElasticApmAgent internal constructor(
                     CentralConfigurationManager.EndpointParameters(
                         it, managementAuthentication, emptyMap()
                     ),
-                    systemTimeProvider,
                     managedFeatures.exporterGateManager
                 )
                 managedFeatures.conditionalDropManager.dropWhen {

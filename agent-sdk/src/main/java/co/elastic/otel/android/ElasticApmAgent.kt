@@ -295,16 +295,23 @@ class ElasticApmAgent internal constructor(
             diskBufferingConfiguration = value
         }
 
-        internal fun setSessionIdGenerator(value: SessionIdGenerator) = apply {
-            sessionIdGenerator = value
-        }
-
-        internal fun setManagementUrl(value: String) = apply {
+        /**
+         * This is the URL to the OpAMP server, which enables remote management configurations provided via Kibana.
+         * By default it's unset, which means that the remote management feature is disabled until this URL is set.
+         */
+        fun setManagementUrl(value: String) = apply {
             managementUrl = value
         }
 
-        internal fun setManagementAuthentication(value: Authentication) = apply {
+        /**
+         * This is the authentication method needed to connect to the value provided in [setManagementUrl].
+         */
+        fun setManagementAuthentication(value: Authentication) = apply {
             managementAuthentication = value
+        }
+
+        internal fun setSessionIdGenerator(value: SessionIdGenerator) = apply {
+            sessionIdGenerator = value
         }
 
         /**

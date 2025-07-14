@@ -44,18 +44,6 @@ internal class DiskManager internal constructor(
         return dir
     }
 
-    @Throws(IOException::class)
-    fun getTemporaryDir(): File {
-        val dir = File(appInfoService.getCacheDir(), "opentelemetry/temp")
-        if (!dir.exists()) {
-            if (!dir.mkdirs()) {
-                throw IOException("Could not create dir $dir")
-            }
-        }
-        deleteFilesInside(dir)
-        return dir
-    }
-
     fun getMaxFolderSize(): Int {
         return diskBufferingConfiguration.maxCacheSize / 3
     }

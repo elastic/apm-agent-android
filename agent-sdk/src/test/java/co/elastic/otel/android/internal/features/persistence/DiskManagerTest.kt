@@ -24,7 +24,6 @@ import co.elastic.otel.android.internal.services.appinfo.AppInfoService
 import io.mockk.every
 import io.mockk.mockk
 import java.io.File
-import java.util.Objects
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -51,28 +50,6 @@ class DiskManagerTest {
         val expected = File(cacheDir, "opentelemetry/signals")
         assertEquals(expected, createInstance().getSignalsCacheDir())
         assertTrue(expected.exists())
-    }
-
-    @Test
-    fun provideTemporaryDir() {
-        val expected = File(cacheDir, "opentelemetry/temp")
-        assertEquals(expected, createInstance().getTemporaryDir())
-        assertTrue(expected.exists())
-    }
-
-    @Test
-    fun cleanupTemporaryDirBeforeProvidingIt() {
-        val dir = File(cacheDir, "opentelemetry/temp")
-        assertTrue(dir.mkdirs())
-        assertTrue(File(dir, "somefile.tmp").createNewFile())
-        assertTrue(File(dir, "some_other_file.tmp").createNewFile())
-        assertTrue(File(dir, "somedir").mkdirs())
-        assertTrue(File(dir, "somedir/some_other_file.tmp").createNewFile())
-
-        val temporaryDir = createInstance().getTemporaryDir()
-
-        assertTrue(temporaryDir.exists())
-        assertEquals(0, Objects.requireNonNull(temporaryDir.listFiles()).size.toLong())
     }
 
     @Test

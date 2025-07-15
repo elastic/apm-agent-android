@@ -22,4 +22,5 @@
 -keepclassmembers class io.opentelemetry.sdk.common.CompletableResultCode { join(long,java.util.concurrent.TimeUnit);ofSuccess(); }
 -keep class kotlin.** { *; }
 -keep class okhttp3.** { *; }
+-keep class okio.** { *; }
 -keep class androidx.tracing.** { *; }

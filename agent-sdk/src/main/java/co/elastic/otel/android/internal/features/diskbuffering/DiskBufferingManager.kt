@@ -26,7 +26,6 @@ import co.elastic.otel.android.internal.exporters.configurable.MutableSpanExport
 import co.elastic.otel.android.internal.features.diskbuffering.tools.DiskManager
 import co.elastic.otel.android.internal.features.diskbuffering.tools.ExtendedDelegateLogRecordExporter
 import co.elastic.otel.android.internal.features.exportergate.ExporterGateManager
-import co.elastic.otel.android.internal.features.persistence.SimpleTemporaryFileProvider
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.time.SystemTimeProvider
 import io.opentelemetry.contrib.disk.buffering.LogRecordFromDiskExporter
@@ -36,6 +35,8 @@ import io.opentelemetry.contrib.disk.buffering.MetricToDiskExporter
 import io.opentelemetry.contrib.disk.buffering.SpanFromDiskExporter
 import io.opentelemetry.contrib.disk.buffering.SpanToDiskExporter
 import io.opentelemetry.contrib.disk.buffering.config.StorageConfiguration
+import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage
+import io.opentelemetry.contrib.disk.buffering.internal.utils.SignalTypes
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.metrics.export.MetricExporter
 import io.opentelemetry.sdk.trace.export.SpanExporter
@@ -125,18 +126,25 @@ internal class DiskBufferingManager private constructor(
         serviceManager.getBackgroundWorkService().submit {
             try {
                 val storageConfiguration = createStorageConfiguration(configuration)
-                signalFromDiskExporter = createFromDiskExporter(storageConfiguration)
+                val spanStorage = Storage.builder(SignalTypes.spans)
+                    .setStorageConfiguration(storageConfiguration)
+                    .build()
+                val logStorage = Storage.builder(SignalTypes.logs)
+                    .setStorageConfiguration(storageConfiguration)
+                    .build()
+                val metricStorage = Storage.builder(SignalTypes.metrics)
+                    .setStorageConfiguration(storageConfiguration)
+                    .build()
+                signalFromDiskExporter =
+                    createFromDiskExporter(spanStorage, logStorage, metricStorage)
                 toDiskSpanExporter = interceptedSpanExporter?.let {
-                    SpanToDiskExporter.create(it, storageConfiguration)
+                    SpanToDiskExporter.create(it, spanStorage)
                 }
                 toDiskLogRecordExporter = interceptedLogRecordExporter?.let {
-                    LogRecordToDiskExporter.create(it, storageConfiguration)
+                    LogRecordToDiskExporter.create(it, logStorage)
                 }
                 toDiskMetricExporter = interceptedMetricExporter?.let {
-                    MetricToDiskExporter.create(
-                        it,
-                        storageConfiguration
-                    )
+                    MetricToDiskExporter.create(it, metricStorage)
                 }
                 enableDiskBuffering()
                 startExportSchedule()
@@ -172,23 +180,27 @@ internal class DiskBufferingManager private constructor(
         }
     }
 
-    private fun createFromDiskExporter(storageConfiguration: StorageConfiguration): SignalFromDiskExporter {
+    private fun createFromDiskExporter(
+        spanStorage: Storage,
+        logStorage: Storage,
+        metricStorage: Storage
+    ): SignalFromDiskExporter {
         val builder =
             SignalFromDiskExporter.builder()
         interceptedSpanExporter?.let {
-            builder.setSpanFromDiskExporter(SpanFromDiskExporter.create(it, storageConfiguration))
+            builder.setSpanFromDiskExporter(SpanFromDiskExporter.create(it, spanStorage))
         }
         interceptedLogRecordExporter?.let {
             builder.setLogRecordFromDiskExporter(
                 LogRecordFromDiskExporter.create(
                     ExtendedDelegateLogRecordExporter(it),
-                    storageConfiguration
+                    logStorage
                 )
             )
         }
         interceptedMetricExporter?.let {
             builder.setMetricFromDiskExporter(
-                MetricFromDiskExporter.create(it, storageConfiguration)
+                MetricFromDiskExporter.create(it, metricStorage)
             )
         }
 
@@ -202,12 +214,6 @@ internal class DiskBufferingManager private constructor(
             .setMaxFolderSize(diskManager.getMaxFolderSize())
             .setMaxFileAgeForWriteMillis(TimeUnit.SECONDS.toMillis(2))
             .setMinFileAgeForReadMillis(TimeUnit.SECONDS.toMillis(4))
-            .setTemporaryFileProvider(
-                SimpleTemporaryFileProvider(
-                    systemTimeProvider,
-                    diskManager.getTemporaryDir()
-                )
-            )
             .setRootDir(diskManager.getSignalsCacheDir())
 
         configuration.maxFileAgeForWrite?.let {

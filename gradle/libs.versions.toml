@@ -51,7 +51,7 @@ buildconfig-plugin = "com.github.gmazzo.buildconfig:com.github.gmazzo.buildconfi
 animalsniffer-plugin = "ru.vyarus:gradle-animalsniffer-plugin:2.0.1"
 kotlin-binaryCompatibility = "org.jetbrains.kotlinx.binary-compatibility-validator:org.jetbrains.kotlinx.binary-compatibility-validator.gradle.plugin:0.18.1"
 coreLib = "com.android.tools:desugar_jdk_libs:2.1.5"
-mavenModel = "org.apache.maven:maven-model:3.9.10"
+mavenModel = "org.apache.maven:maven-model:3.9.11"
 
 [bundles]
 mocking = ["mockk"]

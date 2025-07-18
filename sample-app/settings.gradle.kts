@@ -20,7 +20,16 @@ dependencyResolutionManagement {
         google()
     }
 }
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.apache.commons:commons-lang3:3.18.0")
+    }
+}
 rootProject.name = "Android APM Sample app"
 includeBuild("..")
 include(":app")
 include(":backend")
+include(":edot-collector")

@@ -8,7 +8,7 @@ plugins {
     id("de.undercouch.download") version "5.6.0"
 }
 
-val coordinates: EdotCoordinates = getEdotCoordinates()
+val coordinates = getEdotCoordinates()
 
 val findEdotCollector = tasks.register<FindEdotCollectorVersion>("findEdotCollectorVersion") {
     group = "edot"
@@ -77,9 +77,11 @@ abstract class DownloadEdotCollector @Inject constructor(
                 load(it)
             }
         }["version"] ?: throw IllegalStateException("Could not find version")) as String
+        val name =
+            "elastic-agent-$version-${edotCoordinates.os.value}-${edotCoordinates.arch.value}"
 
         download.run {
-            src(getUrl(version))
+            src(getUrl(name))
             dest(downloadedArchive)
         }
         val edotExpanded =
@@ -88,12 +90,17 @@ abstract class DownloadEdotCollector @Inject constructor(
             )
         fileOps.sync {
             from(edotExpanded)
+            include("$name/**")
+            eachFile {
+                relativePath = RelativePath(true, *relativePath.segments.drop(1).toTypedArray())
+            }
+            includeEmptyDirs = false
             into(outputEdotCollectorDir)
         }
     }
 
-    private fun getUrl(version: String): String {
-        return "https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-$version-${edotCoordinates.os.value}-${edotCoordinates.arch.value}.${edotCoordinates.fileFormat}"
+    private fun getUrl(name: String): String {
+        return "https://artifacts.elastic.co/downloads/beats/elastic-agent/$name.${edotCoordinates.fileFormat}"
     }
 }
 

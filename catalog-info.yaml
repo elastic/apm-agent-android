@@ -10,7 +10,6 @@ metadata:
     - gradle-portal
     - maven-central
     - release
-    - user:apmmachine
 spec:
   implementation:
     apiVersion: buildkite.elastic.dev/v1
@@ -51,7 +50,6 @@ metadata:
     - gradle-portal
     - maven-central
     - release
-    - user:apmmachine
     - user:obltmachine
   links:
     - title: GitHub action
@@ -62,5 +60,4 @@ spec:
   lifecycle: production
   dependsOn:
     - "system:github-actions"
-    - "user:apmmachine"
     - "user:obltmachine"

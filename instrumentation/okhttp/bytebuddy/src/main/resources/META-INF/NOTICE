@@ -7,7 +7,6 @@ This product includes software licensed under the 'Apache License Version 2.0' l
 
  - Byte Buddy (without dependencies)
  - Kotlin Stdlib (https://kotlinlang.org/)
- - okhttp (https://square.github.io/okhttp/)
 
 ###############################################################################
 

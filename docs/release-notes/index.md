@@ -31,6 +31,14 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 % next_release_notes
     
+## 1.2.0 [elastic-apm-android-agent-120-release-notes]
+**Release date:** July 29, 2025
+
+### Features and enhancements [elastic-apm-android-agent-120-features-enhancements]
+
+* [Tech-preview] Central configuration via OpAMP: [#565](https://github.com/elastic/apm-agent-android/pull/565)
+* Setting min Kotlin compatibility to 1.9: [#579](https://github.com/elastic/apm-agent-android/pull/579)
+    
 ## 1.1.0 [elastic-apm-android-agent-110-release-notes]
 **Release date:** June 16, 2025
 

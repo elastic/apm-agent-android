@@ -104,6 +104,36 @@ abstract class DownloadEdotCollector @Inject constructor(
     }
 }
 
+abstract class RunEdotCollectorTask @Inject constructor(
+    private val execOperations: ExecOperations,
+    private val edotCoordinates: EdotCoordinates
+) : DefaultTask() {
+    @get:InputDirectory
+    abstract val edotDir: DirectoryProperty
+
+    @get:InputFile
+    abstract val configFile: RegularFileProperty
+
+    @TaskAction
+    fun execute() {
+        val scriptFileFormat = if (edotCoordinates.os == Os.WINDOWS) ".ps1" else ""
+        val scriptFile = File(edotDir.get().asFile, "otelcol$scriptFileFormat")
+        val args = "--config ${configFile.get().asFile.absolutePath}"
+        if (edotCoordinates.os == Os.WINDOWS) {
+            execOperations.exec {
+                commandLine(
+                    "powershell -noexit -executionpolicy bypass -File ${scriptFile.absolutePath}",
+                    args
+                )
+            }
+        } else {
+            execOperations.exec {
+                commandLine(scriptFile.absolutePath, args)
+            }
+        }
+    }
+}
+
 fun getEdotCoordinates(): EdotCoordinates {
     val os = getOs()
     val arch = getArch()

@@ -31,7 +31,7 @@ processors:
     send_batch_size: 1000
     timeout: 1s
     send_batch_max_size: 1500
-  elasticapm: { }
+  elastictrace: { }
 
 exporters:
   debug: { }
@@ -49,15 +49,15 @@ service:
   pipelines:
     traces:
       receivers: [ otlp ]
-      processors: [ batch, elasticapm ]
+      processors: [ batch, elastictrace ]
       exporters: [ debug, elasticsearch/otel ]
     logs:
       receivers: [ otlp ]
-      processors: [ batch, elasticapm ]
+      processors: [ batch ]
       exporters: [ debug, elasticsearch/otel ]
     metrics:
       receivers: [ otlp ]
-      processors: [ batch, elasticapm ]
+      processors: [ batch ]
       exporters: [ debug, elasticsearch/otel ]
     metrics/aggregated-otel-metrics:
       receivers: [ elasticapm ]

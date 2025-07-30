@@ -31,10 +31,10 @@ processors:
     send_batch_size: 1000
     timeout: 1s
     send_batch_max_size: 1500
-  elasticapm: {}
+  elasticapm: { }
 
 exporters:
-  debug: {}
+  debug: { }
   elasticsearch/otel:
     endpoints:
       - ${ELASTIC_ENDPOINT}
@@ -45,21 +45,21 @@ exporters:
       mode: otel
 
 service:
-  extensions: [bearertokenauth, apmconfig]
+  extensions: [ bearertokenauth, apmconfig ]
   pipelines:
     traces:
-      receivers: [otlp]
-      processors: [batch, elasticapm]
-      exporters: [debug, elasticsearch/otel]
+      receivers: [ otlp ]
+      processors: [ batch, elasticapm ]
+      exporters: [ debug, elasticsearch/otel ]
     logs:
-      receivers: [otlp]
-      processors: [batch, elasticapm]
-      exporters: [debug, elasticsearch/otel]
+      receivers: [ otlp ]
+      processors: [ batch, elasticapm ]
+      exporters: [ debug, elasticsearch/otel ]
     metrics:
-      receivers: [otlp]
-      processors: [batch, elasticapm]
-      exporters: [debug, elasticsearch/otel]
+      receivers: [ otlp ]
+      processors: [ batch, elasticapm ]
+      exporters: [ debug, elasticsearch/otel ]
     metrics/aggregated-otel-metrics:
-      receivers: [elasticapm]
-      processors: [] # No processors defined in the original for this pipeline
-      exporters: [debug, elasticsearch/otel]
+      receivers: [ elasticapm ]
+      processors: [ ]
+      exporters: [ debug, elasticsearch/otel ]

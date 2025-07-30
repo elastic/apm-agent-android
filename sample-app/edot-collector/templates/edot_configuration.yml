@@ -1,11 +1,11 @@
 extensions:
   bearertokenauth:
-    scheme: "APIKey"
-    token: "${ELASTIC_API_KEY}"
+    scheme: APIKey
+    token: ELASTIC_API_KEY
   apmconfig:
     source:
       elasticsearch:
-        endpoint: ${ELASTIC_ENDPOINT}
+        endpoint: ELASTIC_ENDPOINT
         auth:
           authenticator: bearertokenauth
         cache_duration: 10s
@@ -37,8 +37,8 @@ exporters:
   debug: { }
   elasticsearch/otel:
     endpoints:
-      - ${ELASTIC_ENDPOINT}
-    api_key: ${ELASTIC_API_KEY}
+      - ELASTIC_ENDPOINT
+    api_key: ELASTIC_API_KEY
     # tls:
     #   insecure_skip_verify: true
     mapping:

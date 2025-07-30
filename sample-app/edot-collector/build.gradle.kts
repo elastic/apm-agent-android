@@ -28,6 +28,12 @@ downloadEdotCollector.configure {
     )
 }
 
+val createConfigFile = tasks.register<CreateEdotConfigurationTask>("createEdotConfiguration") {
+    templateFile.set(project.layout.projectDirectory.file("templates/edot_configuration.yml"))
+    elasticsearchPropertiesFile.set(project.layout.projectDirectory.file("elasticsearch.properties"))
+    configFile.set(project.layout.buildDirectory.file("configuration/edot_configuration.yml"))
+}
+
 abstract class FindEdotCollectorVersion : DefaultTask() {
     @get:OutputFile
     abstract val outputFile: RegularFileProperty
@@ -101,6 +107,31 @@ abstract class DownloadEdotCollector @Inject constructor(
 
     private fun getUrl(name: String): String {
         return "https://artifacts.elastic.co/downloads/beats/elastic-agent/$name.${edotCoordinates.fileFormat}"
+    }
+}
+
+abstract class CreateEdotConfigurationTask : DefaultTask() {
+    @get:InputFile
+    abstract val templateFile: RegularFileProperty
+
+    @get:InputFile
+    abstract val elasticsearchPropertiesFile: RegularFileProperty
+
+    @get:OutputFile
+    abstract val configFile: RegularFileProperty
+
+    @TaskAction
+    fun execute() {
+        val properties = Properties().apply {
+            elasticsearchPropertiesFile.get().asFile.inputStream().use {
+                load(it)
+            }
+        }
+        var text = templateFile.get().asFile.readText()
+        text = text.replace("ELASTIC_ENDPOINT", properties.getProperty("endpoint"))
+        text = text.replace("ELASTIC_API_KEY", properties.getProperty("api_key"))
+
+        configFile.get().asFile.writeText(text)
     }
 }
 

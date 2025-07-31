@@ -26,6 +26,7 @@ buildscript {
     }
     dependencies {
         classpath("org.apache.commons:commons-lang3:3.18.0")
+        classpath("org.apache.commons:commons-compress:1.28.0")
     }
 }
 rootProject.name = "Android APM Sample app"

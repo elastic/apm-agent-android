@@ -1,7 +1,15 @@
 import de.undercouch.gradle.tasks.download.DownloadExtension
 import java.net.HttpURLConnection
 import java.net.URL
+import java.nio.file.Files
+import java.nio.file.attribute.PosixFilePermission
+import java.nio.file.attribute.PosixFilePermissions
 import java.util.Properties
+import java.util.regex.Pattern
+import kotlin.io.path.writeBytes
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
 import org.apache.commons.lang3.SystemUtils
 
 plugins {
@@ -90,18 +98,71 @@ abstract class DownloadEdotCollector @Inject constructor(
             src(getUrl(name))
             dest(downloadedArchive)
         }
-        val edotExpanded =
-            if (edotCoordinates.fileFormat == "zip") archiveOps.zipTree(downloadedArchive) else archiveOps.tarTree(
-                downloadedArchive
-            )
-        fileOps.sync {
-            from(edotExpanded)
-            include("$name/**")
-            eachFile {
-                relativePath = RelativePath(true, *relativePath.segments.drop(1).toTypedArray())
+
+        val outputDir = outputEdotCollectorDir.get().asFile
+
+        // Clean up
+        outputDir.deleteRecursively()
+
+        if (edotCoordinates.os == Os.WINDOWS) {
+            fileOps.copy {
+                from(archiveOps.zipTree(downloadedArchive))
+                include("$name/**")
+                eachFile {
+                    relativePath = RelativePath(true, *relativePath.segments.drop(1).toTypedArray())
+                }
+                includeEmptyDirs = false
+                into(outputEdotCollectorDir)
             }
-            includeEmptyDirs = false
-            into(outputEdotCollectorDir)
+        } else {
+            untar(downloadedArchive.get().asFile, outputDir, name)
+        }
+    }
+
+    private fun untar(archive: File, destinationDir: File, name: String) {
+        val rootDirPattern = Regex("^" + Pattern.quote(name) + "\\/")
+        val destinationDirPath = destinationDir.toPath()
+        TarArchiveInputStream(
+            GzipCompressorInputStream(
+                archive.inputStream().buffered()
+            )
+        ).use { tar ->
+            var entry = tar.nextEntry as TarArchiveEntry?
+            while (entry != null) {
+                if (entry.name == name) {
+                    // Skip root dir
+                    entry = tar.nextEntry as TarArchiveEntry?
+                    continue
+                }
+
+                val curatedEntryName = entry.name.replace(rootDirPattern, "")
+                val extractTo = destinationDirPath.resolve(curatedEntryName)
+
+                if (entry.isSymbolicLink) {
+                    logger.info("Found symlink: '$extractTo' with name: '${entry.linkName}'")
+                    val linkTarget = destinationDirPath.resolve(entry.linkName)
+                    Files.createSymbolicLink(extractTo, linkTarget)
+                } else if (entry.isDirectory) {
+                    Files.createDirectories(extractTo)
+                } else {
+                    Files.createFile(
+                        extractTo,
+                        PosixFilePermissions.asFileAttribute(
+                            setOf(
+                                PosixFilePermission.OWNER_READ,
+                                PosixFilePermission.OWNER_WRITE,
+                                PosixFilePermission.OWNER_EXECUTE,
+                                PosixFilePermission.GROUP_READ,
+                                PosixFilePermission.GROUP_EXECUTE,
+                                PosixFilePermission.OTHERS_READ,
+                                PosixFilePermission.OTHERS_EXECUTE
+                            )
+                        )
+                    )
+                    extractTo.writeBytes(tar.readAllBytes())
+                }
+                entry = tar.nextEntry as TarArchiveEntry?
+            }
         }
     }
 

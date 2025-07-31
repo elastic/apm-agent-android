@@ -1,5 +1,7 @@
 import com.android.build.api.variant.HasHostTestsBuilder
 import com.android.build.api.variant.HostTestBuilder
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
     id("com.android.library")
@@ -7,6 +9,8 @@ plugins {
     id("elastic.animalsniffer-android")
 }
 
+val javaVersionStr = project.property("elastic.java.compatibility") as String
+val minKotlinVersionStr = project.property("elastic.kotlin.compatibility") as String
 android {
     compileSdk = (project.property("elastic.android.compileSdk") as String).toInt()
 
@@ -15,18 +19,23 @@ android {
         consumerProguardFiles.add(rootProject.file("shared-rules.pro"))
     }
 
-    val javaVersionStr = project.property("elastic.java.compatibility") as String
     val javaVersion = JavaVersion.toVersion(javaVersionStr)
     compileOptions {
         sourceCompatibility = javaVersion
         targetCompatibility = javaVersion
     }
-    kotlinOptions {
-        jvmTarget = javaVersionStr
-        freeCompilerArgs = listOf("-Xjvm-default=all")
-    }
     lint {
         disable.add("NewApi")
+    }
+}
+
+val minKotlinVersion = KotlinVersion.fromVersion(minKotlinVersionStr)
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.fromTarget(javaVersionStr)
+        apiVersion = minKotlinVersion
+        languageVersion = minKotlinVersion
+        freeCompilerArgs = listOf("-Xjvm-default=all")
     }
 }
 

@@ -47,6 +47,11 @@ val createConfigFile = tasks.register<CreateEdotConfigurationTask>("createEdotCo
     configFile.set(project.layout.buildDirectory.file("configuration/edot_configuration.yml"))
 }
 
+tasks.register<RunEdotCollectorTask>("runEdotCollector", coordinates).configure {
+    edotDir.set(downloadEdotCollector.flatMap { it.outputEdotCollectorDir })
+    configFile.set(createConfigFile.flatMap { it.configFile })
+}
+
 abstract class FindEdotCollectorVersion : DefaultTask() {
     @get:OutputFile
     abstract val outputFile: RegularFileProperty
@@ -208,8 +213,8 @@ abstract class CreateEdotConfigurationTask : DefaultTask() {
 }
 
 abstract class RunEdotCollectorTask @Inject constructor(
-    private val execOperations: ExecOperations,
-    private val edotCoordinates: EdotCoordinates
+    private val edotCoordinates: EdotCoordinates,
+    private val execOperations: ExecOperations
 ) : DefaultTask() {
     @get:InputDirectory
     abstract val edotDir: DirectoryProperty
@@ -221,18 +226,25 @@ abstract class RunEdotCollectorTask @Inject constructor(
     fun execute() {
         val scriptFileFormat = if (edotCoordinates.os == Os.WINDOWS) ".ps1" else ""
         val scriptFile = File(edotDir.get().asFile, "otelcol$scriptFileFormat")
-        val args = "--config ${configFile.get().asFile.absolutePath}"
+        val command = mutableListOf<String>()
+        val args = listOf("--config", configFile.get().asFile.absolutePath)
         if (edotCoordinates.os == Os.WINDOWS) {
-            execOperations.exec {
-                commandLine(
-                    "powershell -noexit -executionpolicy bypass -File ${scriptFile.absolutePath}",
-                    args
+            command.addAll(
+                listOf(
+                    "powershell",
+                    "-noexit",
+                    "-executionpolicy",
+                    "bypass",
+                    "-File",
+                    scriptFile.absolutePath
                 )
-            }
+            )
         } else {
-            execOperations.exec {
-                commandLine(scriptFile.absolutePath, args)
-            }
+            command.add(scriptFile.absolutePath)
+        }
+        command.addAll(args)
+        execOperations.exec {
+            commandLine(command)
         }
     }
 }

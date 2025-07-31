@@ -42,12 +42,14 @@ downloadEdotCollector.configure {
 }
 
 val createConfigFile = tasks.register<CreateEdotConfigurationTask>("createEdotConfiguration") {
+    group = "edot"
     templateFile.set(project.layout.projectDirectory.file("templates/edot_configuration_template.yml"))
     elasticsearchPropertiesFile.set(project.layout.projectDirectory.file("elasticsearch.properties"))
     configFile.set(project.layout.buildDirectory.file("configuration/edot_configuration.yml"))
 }
 
 tasks.register<RunEdotCollectorTask>("runEdotCollector", coordinates).configure {
+    group = "edot"
     edotDir.set(downloadEdotCollector.flatMap { it.outputEdotCollectorDir })
     configFile.set(createConfigFile.flatMap { it.configFile })
 }

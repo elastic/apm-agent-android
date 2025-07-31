@@ -1,6 +1,10 @@
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import de.undercouch.gradle.tasks.download.DownloadExtension
-import java.net.HttpURLConnection
-import java.net.URL
+import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
 import java.nio.file.Files
 import java.nio.file.attribute.PosixFilePermission
 import java.nio.file.attribute.PosixFilePermissions
@@ -18,16 +22,17 @@ plugins {
 
 val coordinates = getEdotCoordinates()
 
-val findEdotCollector = tasks.register<FindEdotCollectorVersion>("findEdotCollectorVersion") {
-    group = "edot"
-    outputFile.set(project.layout.buildDirectory.file("version.properties"))
-}
+val findEdotCollectorVersion =
+    tasks.register<FindEdotCollectorVersion>("findEdotCollectorVersion") {
+        group = "edot"
+        outputFile.set(project.layout.buildDirectory.file("version.properties"))
+    }
 
 val downloadEdotCollector =
     tasks.register<DownloadEdotCollector>("downloadEdotCollector", coordinates, download)
 downloadEdotCollector.configure {
     group = "edot"
-    versionPropertiesFile.set(findEdotCollector.flatMap { it.outputFile })
+    versionPropertiesFile.set(findEdotCollectorVersion.flatMap { it.outputFile })
     outputEdotCollectorDir.set(project.layout.buildDirectory.dir("bin"))
     downloadedArchive.set(
         project.layout.buildDirectory.file(
@@ -48,23 +53,29 @@ abstract class FindEdotCollectorVersion : DefaultTask() {
 
     @TaskAction
     fun execute() {
-        // Get the latest release tag by following the redirect from GitHub's latest release URL
-        val latestReleaseUrl = "https://github.com/elastic/elastic-agent/releases/latest"
-        val connection = URL(latestReleaseUrl).openConnection() as HttpURLConnection
-        connection.instanceFollowRedirects = false
-        connection.requestMethod = "HEAD"
+        val client = HttpClient.newHttpClient()
+        val request = HttpRequest.newBuilder()
+            .uri(URI.create("https://artifacts.elastic.co/releases/stack.json"))
+            .build()
+        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
+        val moshi = Moshi.Builder()
+            .addLast(KotlinJsonAdapterFactory())
+            .build()
+        val releases = moshi.adapter(Releases::class.java).fromJson(response.body())!!
 
-        val redirectLocation = connection.getHeaderField("Location")
-        connection.disconnect()
+        val versionFound = releases.releases.max().version
 
-        // Extract tag from URL like: https://github.com/elastic/elastic-agent/releases/tag/v9.0.3
-        val versionPattern = Regex("v((?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*))")
-        val version = versionPattern.find(redirectLocation)?.groupValues?.get(1)
-            ?: throw IllegalStateException("Could not find version in '$redirectLocation'")
+        logger.info("Found EDOT Collector version: '{}'", versionFound)
 
-        logger.info("Found EDOT Collector version: '{}'", version)
+        outputFile.get().asFile.writeText("version=$versionFound")
+    }
 
-        outputFile.get().asFile.writeText("version=$version")
+    data class Releases(val releases: List<Release>)
+
+    data class Release(val version: String) : Comparable<Release> {
+        override fun compareTo(other: Release): Int {
+            return version.compareTo(other.version)
+        }
     }
 }
 

@@ -1,22 +1,14 @@
 plugins {
     id("java")
-    id("org.springframework.boot") version "2.7.6"
-    id("io.spring.dependency-management") version "1.1.0"
+    id("org.springframework.boot") version "3.5.4"
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
-
-val elasticApmVersion = "1.35.0"
 
 dependencies {
+    implementation(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("co.elastic.apm:apm-agent-attach:$elasticApmVersion")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-}
-
-tasks.withType(Test::class).configureEach {
-    useJUnitPlatform()
 }

@@ -60,6 +60,7 @@ abstract class FindEdotCollectorVersion : DefaultTask() {
 
     @TaskAction
     fun execute() {
+        val semverPattern = Regex("^\\d+\\.\\d+\\.\\d+\$")
         val client = HttpClient.newHttpClient()
         val request = HttpRequest.newBuilder()
             .uri(URI.create("https://artifacts.elastic.co/releases/stack.json"))
@@ -70,7 +71,9 @@ abstract class FindEdotCollectorVersion : DefaultTask() {
             .build()
         val releases = moshi.adapter(Releases::class.java).fromJson(response.body())!!
 
-        val versionFound = releases.releases.max().version
+        val validVersions = releases.releases.map { it.version }
+            .filter { semverPattern.matches(it) }
+        val versionFound = validVersions.max()
 
         logger.info("Found EDOT Collector version: '{}'", versionFound)
 
@@ -79,11 +82,7 @@ abstract class FindEdotCollectorVersion : DefaultTask() {
 
     data class Releases(val releases: List<Release>)
 
-    data class Release(val version: String) : Comparable<Release> {
-        override fun compareTo(other: Release): Int {
-            return version.compareTo(other.version)
-        }
-    }
+    data class Release(val version: String)
 }
 
 abstract class DownloadEdotCollector @Inject constructor(

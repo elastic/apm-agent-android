@@ -48,10 +48,10 @@ val createConfigFile = tasks.register<CreateEdotConfigurationTask>("createEdotCo
     configFile.set(project.layout.buildDirectory.file("configuration/edot_configuration.yml"))
 }
 
-tasks.register<RunEdotCollectorTask>("runEdotCollector", coordinates).configure {
+tasks.register("prepareEdotCollector") {
     group = "edot"
-    edotDir.set(downloadEdotCollector.flatMap { it.outputEdotCollectorDir })
-    configFile.set(createConfigFile.flatMap { it.configFile })
+    dependsOn(downloadEdotCollector)
+    dependsOn(createConfigFile)
 }
 
 abstract class FindEdotCollectorVersion : DefaultTask() {
@@ -211,43 +211,6 @@ abstract class CreateEdotConfigurationTask : DefaultTask() {
         text = text.replace("ELASTIC_API_KEY", properties.getProperty("api_key"))
 
         configFile.get().asFile.writeText(text)
-    }
-}
-
-abstract class RunEdotCollectorTask @Inject constructor(
-    private val edotCoordinates: EdotCoordinates,
-    private val execOperations: ExecOperations
-) : DefaultTask() {
-    @get:InputDirectory
-    abstract val edotDir: DirectoryProperty
-
-    @get:InputFile
-    abstract val configFile: RegularFileProperty
-
-    @TaskAction
-    fun execute() {
-        val scriptFileFormat = if (edotCoordinates.os == Os.WINDOWS) ".ps1" else ""
-        val scriptFile = File(edotDir.get().asFile, "otelcol$scriptFileFormat")
-        val command = mutableListOf<String>()
-        val args = listOf("--config", configFile.get().asFile.absolutePath)
-        if (edotCoordinates.os == Os.WINDOWS) {
-            command.addAll(
-                listOf(
-                    "powershell",
-                    "-noexit",
-                    "-executionpolicy",
-                    "bypass",
-                    "-File",
-                    scriptFile.absolutePath
-                )
-            )
-        } else {
-            command.add(scriptFile.absolutePath)
-        }
-        command.addAll(args)
-        execOperations.exec {
-            commandLine(command)
-        }
     }
 }
 

@@ -1,21 +1,46 @@
-# Sample Android application for the Elastic APM Agent
-
-> This is part of
-> our [blog post](https://www.elastic.co/blog/monitoring-android-applications-elastic-apm) on
-> Monitoring Android applications with Elastic APM. If you need more detailed information on the
-> overall usage of the Elastic APM Agent, you should take a look at it.
+# Sample application
 
 To showcase an end-to-end scenario including distributed tracing we'll instrument this sample
 weather application that comprises two Android UI fragments and a simple local backend
 service based on Spring Boot.
 
-The first Fragment will have a dropdown list with some city names and also a button that takes you
-to the second one, where you’ll see the selected city’s current temperature. If you pick a
-non-European city on the first screen, you’ll get an error from the (local) backend when you head to
-the second screen. This is to demonstrate how network and backend errors are captured and correlated
-in Elastic APM.
+## Components
+
+![components](assets/components.png)
+
+### Backend service
+
+Located in the [backend](backend) module. This is a simple local backend service based on Spring
+Boot that provides APIs for the application and helps showcasing the
+the [distributed tracing](https://www.elastic.co/docs/reference/opentelemetry/edot-sdks/android#distributed-tracing)
+use-case.
+
+### Android application
+
+Located in the [app](app) module. The first screen will have a dropdown list with some city names
+and also a button that takes you to the second one, where you’ll see the selected city’s current
+temperature. If you pick a non-European city on the first screen, you’ll get an error from the
+(local) backend when you head to the second screen. This is to demonstrate how network and backend
+errors are captured and correlated.
+
+### EDOT Collector
+
+It collects telemetry from both the application and backend service and stores it in Elasticsearch.
+The [edot-collector](edot-collector) module in this project is a helper tool that takes care of
+setting up an EDOT Collector for testing purposes. Refer to
+the [EDOT Collector](https://www.elastic.co/docs/reference/opentelemetry/edot-collector/) docs for
+more information.
 
 ## How to run
+
+### Prerequisites
+
+* Java 17 or higher.
+* An Elasticsearch + Kibana setup of at least version `8.18.0`. If you don't have one yet, you can
+  quickly create it with [start-local](https://github.com/elastic/start-local/).
+* An Elasticsearch API Key. Take a look at how to create
+  one [here](https://www.elastic.co/docs/deploy-manage/api-keys/elasticsearch-api-keys#create-api-key).
+* An [Android emulator](https://developer.android.com/studio/run/emulator#get-started).
 
 ### Launching the local backend service
 

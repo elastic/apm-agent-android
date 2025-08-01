@@ -20,7 +20,18 @@ dependencyResolutionManagement {
         google()
     }
 }
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.apache.commons:commons-lang3:3.18.0")
+        classpath("org.apache.commons:commons-compress:1.28.0")
+        classpath("com.squareup.moshi:moshi-kotlin:1.15.2")
+    }
+}
 rootProject.name = "Android APM Sample app"
 includeBuild("..")
 include(":app")
 include(":backend")
+include(":edot-collector")

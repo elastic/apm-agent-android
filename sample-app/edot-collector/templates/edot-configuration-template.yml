@@ -1,0 +1,65 @@
+extensions:
+  bearertokenauth:
+    scheme: APIKey
+    token: ELASTIC_API_KEY
+  apmconfig:
+    source:
+      elasticsearch:
+        endpoint: ELASTIC_ENDPOINT
+        auth:
+          authenticator: bearertokenauth
+        cache_duration: 10s
+    opamp:
+      protocols:
+        http:
+          endpoint: "localhost:4320"
+
+receivers:
+  # Receiver for logs, traces, and metrics from SDKs
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317 # Listen on all interfaces
+      http:
+        endpoint: 0.0.0.0:4318 # Listen on all interfaces
+
+connectors:
+  elasticapm:
+
+processors:
+  batch:
+    send_batch_size: 1000
+    timeout: 1s
+    send_batch_max_size: 1500
+  elastictrace: { }
+
+exporters:
+  debug: { }
+  elasticsearch/otel:
+    endpoints:
+      - ELASTIC_ENDPOINT
+    api_key: ELASTIC_API_KEY
+    # tls:
+    #   insecure_skip_verify: true
+    mapping:
+      mode: otel
+
+service:
+  extensions: [ bearertokenauth, apmconfig ]
+  pipelines:
+    traces:
+      receivers: [ otlp ]
+      processors: [ batch, elastictrace ]
+      exporters: [ debug, elasticapm, elasticsearch/otel ]
+    logs:
+      receivers: [ otlp ]
+      processors: [ batch ]
+      exporters: [ debug, elasticapm, elasticsearch/otel ]
+    metrics:
+      receivers: [ otlp ]
+      processors: [ batch ]
+      exporters: [ debug, elasticsearch/otel ]
+    metrics/aggregated-otel-metrics:
+      receivers: [ elasticapm ]
+      processors: [ ]
+      exporters: [ debug, elasticsearch/otel ]

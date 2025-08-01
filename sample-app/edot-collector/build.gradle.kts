@@ -44,7 +44,7 @@ downloadEdotCollector.configure {
 val createConfigFile = tasks.register<CreateEdotConfigurationTask>("createEdotConfiguration") {
     group = "edot"
     templateFile.set(project.layout.projectDirectory.file("templates/edot-configuration-template.yml"))
-    elasticsearchPropertiesFile.set(project.layout.projectDirectory.file("elasticsearch.properties"))
+    elasticsearchPropertiesFile.set(project.layout.projectDirectory.file("../elasticsearch.properties"))
     configFile.set(project.layout.buildDirectory.file("configuration/edot-configuration.yml"))
 }
 

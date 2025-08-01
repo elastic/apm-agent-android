@@ -1,0 +1,11 @@
+#!/bin/sh
+set -e
+
+BASEDIR=$(dirname "$0")
+BACKEND_BUILD_DIR="$BASEDIR/backend/build"
+
+"$BASEDIR/gradlew" :backend:bootJar
+
+export OTEL_SERVICE_NAME="weather-backend"
+
+java -jar "$BACKEND_BUILD_DIR/libs/backend.jar"

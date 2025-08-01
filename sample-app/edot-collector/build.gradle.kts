@@ -198,19 +198,42 @@ abstract class CreateEdotConfigurationTask : DefaultTask() {
     @get:OutputFile
     abstract val configFile: RegularFileProperty
 
+    companion object {
+        private const val PROPERTY_ENDPOINT_PLACEHOLDER = "YOUR_ELASTICSEARCH_ENDPOINT"
+        private const val PROPERTY_API_KEY_PLACEHOLDER = "YOUR_ELASTICSEARCH_API_KEY"
+    }
+
     @TaskAction
     fun execute() {
+        val properties = getElasticsearchProperties()
+        var text = templateFile.get().asFile.readText()
+        text = text.replace("ELASTIC_ENDPOINT", properties.endpoint)
+        text = text.replace("ELASTIC_API_KEY", properties.apiKey)
+
+        configFile.get().asFile.writeText(text)
+    }
+
+    private fun getElasticsearchProperties(): ElasticsearchProperties {
         val properties = Properties().apply {
             elasticsearchPropertiesFile.get().asFile.inputStream().use {
                 load(it)
             }
         }
-        var text = templateFile.get().asFile.readText()
-        text = text.replace("ELASTIC_ENDPOINT", properties.getProperty("endpoint"))
-        text = text.replace("ELASTIC_API_KEY", properties.getProperty("api_key"))
 
-        configFile.get().asFile.writeText(text)
+        val endpoint = properties.getProperty("endpoint")
+        val apiKey = properties.getProperty("api_key")
+
+        if (endpoint.isEmpty() || endpoint == PROPERTY_ENDPOINT_PLACEHOLDER) {
+            throw IllegalArgumentException("You must provide your Elasticsearch endpoint in the elasticsearch.properties file.")
+        }
+        if (apiKey.isEmpty() || apiKey == PROPERTY_API_KEY_PLACEHOLDER) {
+            throw IllegalArgumentException("You must provide your Elasticsearch apiKey in the elasticsearch.properties file.")
+        }
+
+        return ElasticsearchProperties(endpoint, apiKey)
     }
+
+    data class ElasticsearchProperties(val endpoint: String, val apiKey: String)
 }
 
 fun getEdotCoordinates(): EdotCoordinates {

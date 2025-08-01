@@ -14,6 +14,9 @@ class MyApp : Application() {
     override fun onCreate() {
         super.onCreate()
         agent = ElasticApmAgent.builder(this)
+            // For Android Emulators, the "10.0.2.2" address is the one of its host machine.
+            // Using it here allows accessing services that are running on the host machine from an
+            // Android application that runs in the emulator.
             .setExportUrl("http://10.0.2.2:4318")
             .setServiceName("weather-sample-app")
             .build()

@@ -4,6 +4,18 @@ To showcase an end-to-end scenario including distributed tracing we'll instrumen
 weather application that comprises two Android UI fragments and a simple local backend
 service based on Spring Boot.
 
+- [Components](#components)
+  * [Backend service](#backend-service)
+  * [Android application](#android-application)
+  * [EDOT Collector](#edot-collector)
+- [How to run](#how-to-run)
+  * [Prerequisites](#prerequisites)
+  * [Step 1: Setting your Elasticsearch properties](#step-1-setting-your-elasticsearch-properties)
+  * [Step 2: Launching the EDOT Collector](#step-2-launching-the-edot-collector)
+  * [Step 3: Launching the backend service](#step-3-launching-the-backend-service)
+  * [Step 4: Launch the Android application](#step-4-launch-the-android-application)
+- [Analyzing the data](#analyzing-the-data)
+
 ## Components
 
 ![components](assets/components.png)

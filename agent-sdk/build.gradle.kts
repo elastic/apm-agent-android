@@ -36,7 +36,6 @@ apiValidation {
 dependencies {
     api(project(":agent-api"))
     api(project(":instrumentation:api"))
-    implementation(instrumentation.opentelemetry.instrumentation.api)
     implementation(libs.opentelemetry.api.incubator)
     implementation(libs.stagemonitor.configuration)
     implementation(libs.opentelemetry.exporter.otlp)
@@ -52,6 +51,7 @@ dependencies {
     testImplementation(libs.awaitility)
 
     // For opamp:
+    implementation(instrumentation.opentelemetry.instrumentation.api)
     implementation("com.google.code.findbugs:jsr305:3.0.2")
     implementation(instrumentation.okhttp)
     implementation("com.github.f4b6a3:uuid-creator:6.1.1")

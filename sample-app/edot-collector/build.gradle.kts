@@ -6,6 +6,7 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.attribute.PosixFilePermission
 import java.nio.file.attribute.PosixFilePermissions
 import java.util.Properties
@@ -158,10 +159,12 @@ abstract class DownloadEdotCollector @Inject constructor(
                 if (entry.isSymbolicLink) {
                     logger.info("Found symlink: '$extractTo' with name: '${entry.linkName}'")
                     val linkTarget = destinationDirPath.resolve(entry.linkName)
+                    ensureParentDirExists(extractTo)
                     Files.createSymbolicLink(extractTo, linkTarget)
                 } else if (entry.isDirectory) {
                     Files.createDirectories(extractTo)
                 } else {
+                    ensureParentDirExists(extractTo)
                     Files.createFile(
                         extractTo,
                         PosixFilePermissions.asFileAttribute(
@@ -179,6 +182,14 @@ abstract class DownloadEdotCollector @Inject constructor(
                     extractTo.writeBytes(tar.readAllBytes())
                 }
                 entry = tar.nextEntry as TarArchiveEntry?
+            }
+        }
+    }
+
+    private fun ensureParentDirExists(filePath: Path) {
+        filePath.parent?.let {
+            if (Files.notExists(it)) {
+                Files.createDirectories(it)
             }
         }
     }

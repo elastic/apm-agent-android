@@ -5,15 +5,15 @@ weather application that comprises two Android UI fragments and a simple local b
 service based on Spring Boot.
 
 - [Components](#components)
-  * [Backend service](#backend-service)
-  * [Android application](#android-application)
-  * [EDOT Collector](#edot-collector)
+    * [Backend service](#backend-service)
+    * [Android application](#android-application)
+    * [EDOT Collector](#edot-collector)
 - [How to run](#how-to-run)
-  * [Prerequisites](#prerequisites)
-  * [Step 1: Setting your Elasticsearch properties](#step-1-setting-your-elasticsearch-properties)
-  * [Step 2: Launching the EDOT Collector](#step-2-launching-the-edot-collector)
-  * [Step 3: Launching the backend service](#step-3-launching-the-backend-service)
-  * [Step 4: Launch the Android application](#step-4-launch-the-android-application)
+    * [Prerequisites](#prerequisites)
+    * [Step 1: Setting your Elasticsearch properties](#step-1-setting-your-elasticsearch-properties)
+    * [Step 2: Launching the EDOT Collector](#step-2-launching-the-edot-collector)
+    * [Step 3: Launching the backend service](#step-3-launching-the-backend-service)
+    * [Step 4: Launch the Android application](#step-4-launch-the-android-application)
 - [Analyzing the data](#analyzing-the-data)
 
 ## Components
@@ -25,7 +25,7 @@ service based on Spring Boot.
 Located in the [backend](backend) module. This is a simple local backend service based on Spring
 Boot that provides APIs for the application and helps showcasing the
 the [distributed tracing](https://www.elastic.co/docs/reference/opentelemetry/edot-sdks/android#distributed-tracing)
-use-case.
+use case.
 
 ### Android application
 
@@ -77,13 +77,18 @@ We're going to use the `edot-collector-launcher` script, which will:
   a [configuration file](https://www.elastic.co/docs/reference/opentelemetry/edot-collector/config/default-config-standalone#gateway-mode)
   using the values from
   the [elasticsearch.properties](elasticsearch.properties) file.
-* Launch the EDOT Collector service and leave it running until manually cancelled.
+* Launch the EDOT Collector service and leave it running until manually stopped.
+
+Once the EDOT Collector is running, its endpoint will be `http://localhost:4318`.
+
+You don't need to set it for this sample application, as it has already been
+done [here](app/src/main/java/co/elastic/otel/android/sample/MyApp.kt). So, for this sample
+application use case, once the EDOT Collector is running, you're ready to go to the next step.
 
 #### For Windows
 
 Execute the [edot-collector-launcher.ps1](edot-collector-launcher.ps1) script with PowerShell. You
-can
-learn how to do so by taking a look
+can learn how to do so by taking a look
 at [this guide](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_scripts#how-to-run-a-script).
 
 #### For Linux and MacOS
@@ -99,6 +104,13 @@ a terminal, navigating to this directory and running the following command:
 
 We're going to use the `backend-launcher` script, which will build and run the Spring Boot backend
 service.
+
+Once the backend service is running, its endpoint will be `http://localhost:8080/v1/`.
+
+You don't need to set it for this sample application, as it has already been
+done [here](app/src/main/java/co/elastic/otel/android/sample/network/WeatherRestManager.kt). So, for
+this sample application use case, once the backend service is running, you're ready to go to the
+next step.
 
 #### For Windows
 
@@ -133,7 +145,8 @@ weather forecast won’t work for New York as the city.
 > endpoint
 > set [here](app/src/main/java/co/elastic/otel/android/sample/MyApp.kt) points to the local EDOT
 > Collector service, and the backend service
-> endpoint [provided here](app/src/main/java/co/elastic/otel/android/sample/network/WeatherRestManager.kt)
+>
+endpoint [provided here](app/src/main/java/co/elastic/otel/android/sample/network/WeatherRestManager.kt)
 > also points to a local backend service. If you wanted to use a real device, you'd need to replace
 > the `10.0.2.2` IP by the one of the machine where you've started the services mentioned in the
 > steps

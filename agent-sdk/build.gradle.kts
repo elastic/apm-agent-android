@@ -36,6 +36,7 @@ apiValidation {
 dependencies {
     api(project(":agent-api"))
     api(project(":instrumentation:api"))
+    implementation(instrumentation.opentelemetry.instrumentation.api)
     implementation(libs.opentelemetry.api.incubator)
     implementation(libs.stagemonitor.configuration)
     implementation(libs.opentelemetry.exporter.otlp)

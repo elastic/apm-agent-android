@@ -29,6 +29,8 @@ interface Instrumentation {
 
     fun install(application: Application, agent: ElasticOtelAgent)
 
+    fun uninstall(agent: ElasticOtelAgent)
+
     fun getId(): String
 
     fun getVersion(): String

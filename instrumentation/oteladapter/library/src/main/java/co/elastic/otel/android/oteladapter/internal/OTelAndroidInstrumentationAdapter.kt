@@ -47,6 +47,10 @@ class OTelAndroidInstrumentationAdapter : Instrumentation {
         }
     }
 
+    override fun uninstall(agent: ElasticOtelAgent) {
+        // noop
+    }
+
     override fun getId(): String {
         return BuildConfig.INSTRUMENTATION_ID
     }

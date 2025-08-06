@@ -51,4 +51,10 @@ internal class InstrumentationManager(
         }
         logger.debug("InstrumentationManager - After installing instrumentations")
     }
+
+    fun shutdown(agent: ElasticOtelAgent) {
+        instrumentations.forEach {
+            it.uninstall(agent)
+        }
+    }
 }

@@ -66,6 +66,7 @@ class ManagedElasticOtelAgent private constructor(
     }
 
     override fun close() {
+        features.instrumentationManager.close()
         features.diskBufferingManager.close()
         features.elasticClockManager.close()
         serviceManager.close()

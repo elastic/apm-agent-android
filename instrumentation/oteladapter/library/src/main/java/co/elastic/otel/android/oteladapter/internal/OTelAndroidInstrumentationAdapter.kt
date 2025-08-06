@@ -35,7 +35,10 @@ import io.opentelemetry.android.session.SessionObserver
 @AutoService(Instrumentation::class)
 class OTelAndroidInstrumentationAdapter : Instrumentation {
 
-    override fun install(application: Application, agent: ElasticOtelAgent) {
+    override fun install(
+        application: Application,
+        agent: ElasticOtelAgent
+    ): Instrumentation.Installation {
         val installationContext = InstallationContext(
             application,
             agent.getOpenTelemetry(),
@@ -45,10 +48,8 @@ class OTelAndroidInstrumentationAdapter : Instrumentation {
         for (androidInstrumentation in AndroidInstrumentationLoader.get().getAll()) {
             androidInstrumentation.install(installationContext)
         }
-    }
 
-    override fun uninstall(agent: ElasticOtelAgent) {
-        // noop
+        return Instrumentation.Installation.NOOP
     }
 
     override fun getId(): String {

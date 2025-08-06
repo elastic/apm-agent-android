@@ -22,7 +22,10 @@ import android.app.Application
 import co.elastic.otel.android.api.ElasticOtelAgent
 import co.elastic.otel.android.common.internal.logging.Elog
 import co.elastic.otel.android.instrumentation.internal.Instrumentation
+import java.io.Closeable
+import java.util.LinkedList
 import java.util.ServiceLoader
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
@@ -31,7 +34,9 @@ import java.util.ServiceLoader
 internal class InstrumentationManager(
     private val application: Application,
     private val instrumentations: List<Instrumentation>
-) {
+) : Closeable {
+    private val closed = AtomicBoolean(false)
+    private val installations = LinkedList<Instrumentation.Installation>()
     private val logger = Elog.getLogger()
 
     companion object {
@@ -47,14 +52,18 @@ internal class InstrumentationManager(
         logger.debug("InstrumentationManager - Before installing instrumentations")
         instrumentations.forEach {
             logger.debug("Installing '${it.getId()}' with version '${it.getVersion()}'")
-            it.install(application, agent)
+            installations.add(it.install(application, agent))
         }
         logger.debug("InstrumentationManager - After installing instrumentations")
     }
 
-    fun shutdown(agent: ElasticOtelAgent) {
-        instrumentations.forEach {
-            it.uninstall(agent)
+    override fun close() {
+        if (closed.compareAndSet(false, true)) {
+            var installation = installations.poll()
+            while (installation != null) {
+                installation.close()
+                installation = installations.poll()
+            }
         }
     }
 }

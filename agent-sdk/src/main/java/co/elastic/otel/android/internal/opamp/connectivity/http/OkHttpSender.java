@@ -18,17 +18,17 @@
  */
 package co.elastic.otel.android.internal.opamp.connectivity.http;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
+import io.opentelemetry.api.internal.InstrumentationUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.CompletableFuture;
-
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.RequestBody;
 import okio.BufferedSink;
 
@@ -65,36 +65,32 @@ public final class OkHttpSender implements HttpSender {
     RequestBody body = new RawRequestBody(writer, contentLength, MEDIA_TYPE);
     builder.post(body);
 
+    InstrumentationUtil.suppressInstrumentation(() -> doMakeCall(builder.build(), future));
+
+    return future;
+  }
+
+  private void doMakeCall(Request call, CompletableFuture<Response> future) {
     client
-        .newCall(builder.build())
+        .newCall(call)
         .enqueue(
             new Callback() {
               @Override
-              public void onResponse(@NotNull Call call, @NotNull okhttp3.Response response) {
-                if (response.isSuccessful() && response.body() != null) {
-                  future.complete(new OkHttpResponse(response));
-                } else {
-                  future.completeExceptionally(
-                      new HttpErrorException(response.code(), response.message()));
-                }
+              public void onResponse(@Nonnull Call call, @Nonnull okhttp3.Response response) {
+                future.complete(new OkHttpResponse(response));
               }
 
               @Override
-              public void onFailure(@NotNull Call call, @NotNull IOException e) {
+              public void onFailure(@Nonnull Call call, @Nonnull IOException e) {
                 future.completeExceptionally(e);
               }
             });
-
-    return future;
   }
 
   private static class OkHttpResponse implements Response {
     private final okhttp3.Response response;
 
     private OkHttpResponse(okhttp3.Response response) {
-      if (response.body() == null) {
-        throw new IllegalStateException("null response body not expected");
-      }
       this.response = response;
     }
 
@@ -147,7 +143,7 @@ public final class OkHttpSender implements HttpSender {
     }
 
     @Override
-    public void writeTo(@NotNull BufferedSink bufferedSink) throws IOException {
+    public void writeTo(@Nonnull BufferedSink bufferedSink) throws IOException {
       writer.writeTo(bufferedSink.outputStream());
     }
   }

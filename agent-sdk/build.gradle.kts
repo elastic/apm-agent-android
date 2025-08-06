@@ -51,6 +51,7 @@ dependencies {
     testImplementation(libs.awaitility)
 
     // For opamp:
+    implementation(libs.opentelemetry.api)
     implementation("com.google.code.findbugs:jsr305:3.0.2")
     implementation(instrumentation.okhttp)
     implementation("com.github.f4b6a3:uuid-creator:6.1.1")

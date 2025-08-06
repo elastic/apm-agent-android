@@ -7,6 +7,7 @@ android = "8.12.0"
 autoService = "1.1.1"
 
 [libraries]
+opentelemetry-api = { module = "io.opentelemetry:opentelemetry-api", version.ref = "opentelemetry" }
 opentelemetry-sdk = { module = "io.opentelemetry:opentelemetry-sdk", version.ref = "opentelemetry" }
 opentelemetry-api-incubator = "io.opentelemetry:opentelemetry-api-incubator:1.52.0-alpha"
 stagemonitor-configuration = "org.stagemonitor:stagemonitor-configuration:0.89.1"

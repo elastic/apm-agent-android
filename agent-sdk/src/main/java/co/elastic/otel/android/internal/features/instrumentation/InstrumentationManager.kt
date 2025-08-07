@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-internal class InstrumentationManager(
+class InstrumentationManager(
     private val application: Application,
     private val instrumentations: List<Instrumentation>
 ) : Closeable {

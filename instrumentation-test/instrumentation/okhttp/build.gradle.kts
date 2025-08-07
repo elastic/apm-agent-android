@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "co.elastic.otel.android.test"
+    namespace = "co.elastic.otel.android.test.okhttp"
 }
 
 dependencies {

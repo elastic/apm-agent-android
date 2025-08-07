@@ -93,6 +93,10 @@ class ManagedElasticOtelAgent private constructor(
         return features.exporterGateManager
     }
 
+    fun getInstrumentationManager(): InstrumentationManager {
+        return features.instrumentationManager
+    }
+
     class ManagedFeatures private constructor(
         internal val exporterGateManager: ExporterGateManager,
         internal val diskBufferingManager: DiskBufferingManager,

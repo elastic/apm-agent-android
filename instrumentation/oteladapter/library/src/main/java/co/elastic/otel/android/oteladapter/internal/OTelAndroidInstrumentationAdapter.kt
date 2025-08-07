@@ -28,6 +28,7 @@ import io.opentelemetry.android.instrumentation.AndroidInstrumentationLoader
 import io.opentelemetry.android.instrumentation.InstallationContext
 import io.opentelemetry.android.session.SessionManager
 import io.opentelemetry.android.session.SessionObserver
+import io.opentelemetry.api.OpenTelemetry
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
@@ -40,10 +41,10 @@ class OTelAndroidInstrumentationAdapter : Instrumentation {
         application: Application,
         agent: ElasticOtelAgent
     ): Instrumentation.Installation {
-        val delegator = OpenTelemetryDelegator(agent.getOpenTelemetry())
+        DELEGATOR.setDelegate(agent.getOpenTelemetry())
         val installationContext = InstallationContext(
             application,
-            delegator,
+            DELEGATOR,
             SESSION_MANAGER_NOOP
         )
 
@@ -51,7 +52,7 @@ class OTelAndroidInstrumentationAdapter : Instrumentation {
             androidInstrumentation.install(installationContext)
         }
 
-        return Instrumentation.Installation { delegator.reset() }
+        return Instrumentation.Installation { DELEGATOR.reset() }
     }
 
     override fun getId(): String {
@@ -63,6 +64,7 @@ class OTelAndroidInstrumentationAdapter : Instrumentation {
     }
 
     companion object {
+        private val DELEGATOR by lazy { OpenTelemetryDelegator(OpenTelemetry.noop()) }
         private val SESSION_MANAGER_NOOP = object : SessionManager {
             override fun addObserver(observer: SessionObserver) {
                 // No-op

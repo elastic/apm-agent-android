@@ -1,6 +1,6 @@
 package co.elastic.otel.android.oteladapter.internal.delegate.context
 
-import co.elastic.otel.android.oteladapter.internal.delegate.Delegator
+import co.elastic.otel.android.oteladapter.internal.delegate.tools.Delegator
 import io.opentelemetry.context.propagation.ContextPropagators
 import io.opentelemetry.context.propagation.TextMapPropagator
 

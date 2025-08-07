@@ -1,4 +1,4 @@
-package co.elastic.otel.android.oteladapter.internal.delegate
+package co.elastic.otel.android.oteladapter.internal.delegate.tools
 
 import java.util.concurrent.atomic.AtomicReference
 

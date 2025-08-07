@@ -1,41 +1,38 @@
 package co.elastic.otel.android.oteladapter.internal.delegate.tracer
 
-import co.elastic.otel.android.oteladapter.internal.delegate.Delegator
-import com.blogspot.mydailyjava.weaklockfree.WeakConcurrentSet
+import co.elastic.otel.android.oteladapter.internal.delegate.tools.Delegator
+import co.elastic.otel.android.oteladapter.internal.delegate.tools.MultipleReference
 import io.opentelemetry.api.trace.Tracer
 import io.opentelemetry.api.trace.TracerBuilder
 import io.opentelemetry.api.trace.TracerProvider
 
 class TracerProviderDelegator(initialValue: TracerProvider) :
     Delegator<TracerProvider>(initialValue), TracerProvider {
-    private val tracers =
-        WeakConcurrentSet<TracerDelegator>(WeakConcurrentSet.Cleaner.INLINE)
+    private val tracerReferences = MultipleReference<Tracer>(TracerDelegator.NoopTracer.INSTANCE) {
+        TracerDelegator(it)
+    }
+    private val tracerBuilderReferences = MultipleReference(TracerBuilderDelegator.NOOP_INSTANCE) {
+        TracerBuilderDelegator(it, tracerReferences)
+    }
 
     override fun get(instrumentationScopeName: String): Tracer? {
-        tracers.expungeStaleEntries()
-        val tracer = getDelegate().get(instrumentationScopeName)
-        maybeStore(tracer)
-        return tracer
+        return tracerReferences.maybeAdd(getDelegate().get(instrumentationScopeName))
     }
 
     override fun get(
         instrumentationScopeName: String,
         instrumentationScopeVersion: String
     ): Tracer? {
-        tracers.expungeStaleEntries()
-        val tracer = getDelegate().get(instrumentationScopeName, instrumentationScopeVersion)
-        maybeStore(tracer)
-        return tracer
+        return tracerReferences.maybeAdd(
+            getDelegate().get(
+                instrumentationScopeName,
+                instrumentationScopeVersion
+            )
+        )
     }
 
     override fun tracerBuilder(instrumentationScopeName: String): TracerBuilder? {
-        return getDelegate().tracerBuilder(instrumentationScopeName)
-    }
-
-    private fun maybeStore(tracer: Tracer) {
-        if (tracer != TracerDelegator.NoopTracer.INSTANCE) {
-            tracers.add(TracerDelegator(tracer))
-        }
+        return tracerBuilderReferences.maybeAdd(getDelegate().tracerBuilder(instrumentationScopeName))
     }
 
     override fun getNoopValue(): TracerProvider {
@@ -44,10 +41,8 @@ class TracerProviderDelegator(initialValue: TracerProvider) :
 
     override fun reset() {
         super.reset()
-        for (delegator in tracers) {
-            delegator?.reset()
-        }
-        tracers.clear()
+        tracerReferences.reset()
+        tracerBuilderReferences.reset()
     }
 
     companion object {

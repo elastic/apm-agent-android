@@ -1,6 +1,7 @@
 package co.elastic.otel.android.oteladapter.internal.delegate
 
 import co.elastic.otel.android.oteladapter.internal.delegate.context.ContextPropagatorsDelegate
+import co.elastic.otel.android.oteladapter.internal.delegate.tools.Delegator
 import co.elastic.otel.android.oteladapter.internal.delegate.tracer.TracerProviderDelegator
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.api.logs.LoggerProvider

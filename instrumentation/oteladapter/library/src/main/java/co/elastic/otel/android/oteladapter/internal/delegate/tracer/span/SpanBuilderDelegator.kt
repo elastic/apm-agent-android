@@ -1,6 +1,6 @@
 package co.elastic.otel.android.oteladapter.internal.delegate.tracer.span
 
-import co.elastic.otel.android.oteladapter.internal.delegate.Delegator
+import co.elastic.otel.android.oteladapter.internal.delegate.tools.Delegator
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.api.trace.Span

@@ -15,7 +15,9 @@ class InstrumentationTest {
 
     @Test
     fun verifyAndroidLogsAreInstrumented() {
-        launchActivity<MainActivity>().onActivity {
+        launchActivity<MainActivity>().onActivity { activity ->
+            activity.sendLog()
+
             agentRule.flushLogs().join(5, TimeUnit.SECONDS)
 
             val finishedLogRecords = agentRule.getFinishedLogRecords()
@@ -25,6 +27,14 @@ class InstrumentationTest {
                 .hasAttributesSatisfying {
                     assertThat(it.get(AttributeKey.stringKey("android.log.tag"))).isEqualTo("elastic")
                 }
+
+            // Closing instrumentation
+            agentRule.getInstrumentationManager().close()
+
+            activity.sendLog()
+
+            agentRule.flushLogs().join(5, TimeUnit.SECONDS)
+            assertThat(agentRule.getFinishedLogRecords()).isEmpty()
         }
     }
 }

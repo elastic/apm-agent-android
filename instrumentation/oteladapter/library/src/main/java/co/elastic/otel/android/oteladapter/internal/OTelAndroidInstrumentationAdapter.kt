@@ -22,6 +22,7 @@ import android.app.Application
 import co.elastic.otel.android.api.ElasticOtelAgent
 import co.elastic.otel.android.instrumentation.generated.oteladapter.BuildConfig
 import co.elastic.otel.android.instrumentation.internal.Instrumentation
+import co.elastic.otel.android.oteladapter.internal.delegate.OpenTelemetryDelegator
 import com.google.auto.service.AutoService
 import io.opentelemetry.android.instrumentation.AndroidInstrumentationLoader
 import io.opentelemetry.android.instrumentation.InstallationContext
@@ -39,9 +40,10 @@ class OTelAndroidInstrumentationAdapter : Instrumentation {
         application: Application,
         agent: ElasticOtelAgent
     ): Instrumentation.Installation {
+        val delegator = OpenTelemetryDelegator(agent.getOpenTelemetry())
         val installationContext = InstallationContext(
             application,
-            agent.getOpenTelemetry(),
+            delegator,
             SESSION_MANAGER_NOOP
         )
 
@@ -49,7 +51,7 @@ class OTelAndroidInstrumentationAdapter : Instrumentation {
             androidInstrumentation.install(installationContext)
         }
 
-        return Instrumentation.Installation.NOOP
+        return Instrumentation.Installation { delegator.reset() }
     }
 
     override fun getId(): String {

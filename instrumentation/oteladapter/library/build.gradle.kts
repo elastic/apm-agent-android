@@ -9,4 +9,5 @@ android {
 dependencies {
     implementation(instrumentation.opentelemetry.android.session)
     implementation(instrumentation.opentelemetry.android.instrumentation)
+    implementation(instrumentation.weakLockFree)
 }

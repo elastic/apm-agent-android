@@ -21,7 +21,8 @@ package co.elastic.otel.android.oteladapter.internal.delegate.logger
 import co.elastic.otel.android.oteladapter.internal.delegate.logger.noop.NoopLogRecordBuilder
 import co.elastic.otel.android.oteladapter.internal.delegate.tools.Delegator
 import io.opentelemetry.api.common.AttributeKey
-import io.opentelemetry.api.logs.LogRecordBuilder
+import io.opentelemetry.api.incubator.common.ExtendedAttributeKey
+import io.opentelemetry.api.incubator.logs.ExtendedLogRecordBuilder
 import io.opentelemetry.api.logs.Severity
 import io.opentelemetry.context.Context
 import java.time.Instant
@@ -31,60 +32,76 @@ import java.util.concurrent.TimeUnit
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-class LogRecordBuilderDelegator(initialValue: LogRecordBuilder) : Delegator<LogRecordBuilder>(
-    initialValue
-), LogRecordBuilder {
+class LogRecordBuilderDelegator(initialValue: ExtendedLogRecordBuilder) :
+    Delegator<ExtendedLogRecordBuilder>(
+        initialValue
+    ), ExtendedLogRecordBuilder {
 
     override fun setTimestamp(
         timestamp: Long,
         unit: TimeUnit
-    ): LogRecordBuilder? {
+    ): ExtendedLogRecordBuilder? {
         return getDelegate().setTimestamp(timestamp, unit)
     }
 
-    override fun setTimestamp(instant: Instant): LogRecordBuilder? {
+    override fun setTimestamp(instant: Instant): ExtendedLogRecordBuilder? {
         return getDelegate().setTimestamp(instant)
     }
 
     override fun setObservedTimestamp(
         timestamp: Long,
         unit: TimeUnit
-    ): LogRecordBuilder? {
+    ): ExtendedLogRecordBuilder? {
         return getDelegate().setObservedTimestamp(timestamp, unit)
     }
 
-    override fun setObservedTimestamp(instant: Instant): LogRecordBuilder? {
+    override fun setObservedTimestamp(instant: Instant): ExtendedLogRecordBuilder? {
         return getDelegate().setObservedTimestamp(instant)
     }
 
-    override fun setContext(context: Context): LogRecordBuilder? {
+    override fun setContext(context: Context): ExtendedLogRecordBuilder? {
         return getDelegate().setContext(context)
     }
 
-    override fun setSeverity(severity: Severity): LogRecordBuilder? {
+    override fun setSeverity(severity: Severity): ExtendedLogRecordBuilder? {
         return getDelegate().setSeverity(severity)
     }
 
-    override fun setSeverityText(severityText: String): LogRecordBuilder? {
+    override fun setSeverityText(severityText: String): ExtendedLogRecordBuilder? {
         return getDelegate().setSeverityText(severityText)
     }
 
-    override fun setBody(body: String): LogRecordBuilder? {
+    override fun setBody(body: String): ExtendedLogRecordBuilder? {
         return getDelegate().setBody(body)
+    }
+
+    override fun setEventName(eventName: String): ExtendedLogRecordBuilder? {
+        return getDelegate().setEventName(eventName)
     }
 
     override fun <T : Any?> setAttribute(
         key: AttributeKey<T?>,
         value: T?
-    ): LogRecordBuilder? {
+    ): ExtendedLogRecordBuilder? {
         return getDelegate().setAttribute(key, value)
+    }
+
+    override fun <T : Any?> setAttribute(
+        key: ExtendedAttributeKey<T?>?,
+        value: T?
+    ): ExtendedLogRecordBuilder? {
+        return getDelegate().setAttribute(key, value)
+    }
+
+    override fun setException(throwable: Throwable?): ExtendedLogRecordBuilder? {
+        return getDelegate().setException(throwable)
     }
 
     override fun emit() {
         getDelegate().emit()
     }
 
-    override fun getNoopValue(): LogRecordBuilder {
+    override fun getNoopValue(): ExtendedLogRecordBuilder {
         return NoopLogRecordBuilder.INSTANCE
     }
 }

@@ -21,16 +21,17 @@ package co.elastic.otel.android.oteladapter.internal.delegate.logger
 import co.elastic.otel.android.oteladapter.internal.delegate.logger.noop.NoopLogRecordBuilder
 import co.elastic.otel.android.oteladapter.internal.delegate.tools.Delegator
 import co.elastic.otel.android.oteladapter.internal.delegate.tools.MultipleReference
-import io.opentelemetry.api.logs.LogRecordBuilder
-import io.opentelemetry.api.logs.Logger
+import io.opentelemetry.api.incubator.logs.ExtendedLogRecordBuilder
+import io.opentelemetry.api.incubator.logs.ExtendedLogger
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-class LoggerDelegator(initialValue: Logger) : Delegator<Logger>(initialValue), Logger {
+class LoggerDelegator(initialValue: ExtendedLogger) : Delegator<ExtendedLogger>(initialValue),
+    ExtendedLogger {
     private val logRecordBuilderReference =
-        MultipleReference<LogRecordBuilder>(NoopLogRecordBuilder.INSTANCE) {
+        MultipleReference<ExtendedLogRecordBuilder>(NoopLogRecordBuilder.INSTANCE) {
             LogRecordBuilderDelegator(it)
         }
 
@@ -39,15 +40,15 @@ class LoggerDelegator(initialValue: Logger) : Delegator<Logger>(initialValue), L
         logRecordBuilderReference.reset()
     }
 
-    override fun logRecordBuilder(): LogRecordBuilder? {
+    override fun logRecordBuilder(): ExtendedLogRecordBuilder? {
         return logRecordBuilderReference.maybeAdd(getDelegate().logRecordBuilder())
     }
 
-    override fun getNoopValue(): Logger {
+    override fun getNoopValue(): ExtendedLogger {
         return NOOP_INSTANCE
     }
 
     companion object {
-        val NOOP_INSTANCE = Logger { NoopLogRecordBuilder.INSTANCE }
+        val NOOP_INSTANCE = ExtendedLogger { NoopLogRecordBuilder.INSTANCE }
     }
 }

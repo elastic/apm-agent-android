@@ -21,6 +21,7 @@ package co.elastic.otel.android.oteladapter.internal.delegate.logger
 import co.elastic.otel.android.oteladapter.internal.delegate.logger.noop.NoopLoggerBuilder
 import co.elastic.otel.android.oteladapter.internal.delegate.tools.Delegator
 import co.elastic.otel.android.oteladapter.internal.delegate.tools.MultipleReference
+import io.opentelemetry.api.incubator.logs.ExtendedLogger
 import io.opentelemetry.api.logs.Logger
 import io.opentelemetry.api.logs.LoggerBuilder
 
@@ -30,7 +31,7 @@ import io.opentelemetry.api.logs.LoggerBuilder
  */
 class LoggerBuilderDelegator(
     initialValue: LoggerBuilder,
-    private val loggerReference: MultipleReference<Logger>
+    private val loggerReference: MultipleReference<ExtendedLogger>
 ) : Delegator<LoggerBuilder>(initialValue), LoggerBuilder {
 
     override fun setSchemaUrl(schemaUrl: String): LoggerBuilder? {
@@ -42,7 +43,7 @@ class LoggerBuilderDelegator(
     }
 
     override fun build(): Logger? {
-        return loggerReference.maybeAdd(getDelegate().build())
+        return loggerReference.maybeAdd(getDelegate().build() as ExtendedLogger)
     }
 
     override fun getNoopValue(): LoggerBuilder {

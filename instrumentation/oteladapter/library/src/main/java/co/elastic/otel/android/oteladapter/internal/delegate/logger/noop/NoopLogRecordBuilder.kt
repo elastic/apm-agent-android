@@ -20,7 +20,8 @@ package co.elastic.otel.android.oteladapter.internal.delegate.logger.noop
 
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Value
-import io.opentelemetry.api.logs.LogRecordBuilder
+import io.opentelemetry.api.incubator.common.ExtendedAttributeKey
+import io.opentelemetry.api.incubator.logs.ExtendedLogRecordBuilder
 import io.opentelemetry.api.logs.Severity
 import io.opentelemetry.context.Context
 import java.time.Instant
@@ -30,44 +31,59 @@ import java.util.concurrent.TimeUnit
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-class NoopLogRecordBuilder private constructor() : LogRecordBuilder {
-    override fun setTimestamp(timestamp: Long, unit: TimeUnit): LogRecordBuilder {
+class NoopLogRecordBuilder private constructor() : ExtendedLogRecordBuilder {
+    override fun setTimestamp(timestamp: Long, unit: TimeUnit): ExtendedLogRecordBuilder {
         return this
     }
 
-    override fun setTimestamp(instant: Instant): LogRecordBuilder {
+    override fun setTimestamp(instant: Instant): ExtendedLogRecordBuilder {
         return this
     }
 
-    override fun setObservedTimestamp(timestamp: Long, unit: TimeUnit): LogRecordBuilder {
+    override fun setObservedTimestamp(timestamp: Long, unit: TimeUnit): ExtendedLogRecordBuilder {
         return this
     }
 
-    override fun setObservedTimestamp(instant: Instant): LogRecordBuilder {
+    override fun setObservedTimestamp(instant: Instant): ExtendedLogRecordBuilder {
         return this
     }
 
-    override fun setContext(context: Context): LogRecordBuilder {
+    override fun setContext(context: Context): ExtendedLogRecordBuilder {
         return this
     }
 
-    override fun setSeverity(severity: Severity): LogRecordBuilder {
+    override fun setSeverity(severity: Severity): ExtendedLogRecordBuilder {
         return this
     }
 
-    override fun setSeverityText(severityText: String): LogRecordBuilder {
+    override fun setSeverityText(severityText: String): ExtendedLogRecordBuilder {
         return this
     }
 
-    override fun setBody(body: String): LogRecordBuilder {
+    override fun setBody(body: String): ExtendedLogRecordBuilder {
         return this
     }
 
-    override fun setBody(body: Value<*>): LogRecordBuilder {
+    override fun setBody(body: Value<*>): ExtendedLogRecordBuilder {
         return this
     }
 
-    override fun <T> setAttribute(key: AttributeKey<T?>, value: T?): LogRecordBuilder {
+    override fun setEventName(eventName: String): ExtendedLogRecordBuilder? {
+        return this
+    }
+
+    override fun <T> setAttribute(key: AttributeKey<T?>, value: T?): ExtendedLogRecordBuilder {
+        return this
+    }
+
+    override fun <T : Any?> setAttribute(
+        key: ExtendedAttributeKey<T?>?,
+        value: T?
+    ): ExtendedLogRecordBuilder? {
+        return this
+    }
+
+    override fun setException(throwable: Throwable?): ExtendedLogRecordBuilder? {
         return this
     }
 

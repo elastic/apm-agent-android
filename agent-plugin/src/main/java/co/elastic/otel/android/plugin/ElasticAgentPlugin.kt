@@ -23,6 +23,7 @@ import co.elastic.otel.android.generated.BuildConfig
 import co.elastic.otel.android.plugin.extensions.ElasticApmExtension
 import co.elastic.otel.android.plugin.internal.BuildVariantListener
 import co.elastic.otel.android.plugin.internal.logging.GradleLoggerFactory
+import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import net.bytebuddy.build.gradle.android.ByteBuddyAndroidPlugin
 import org.gradle.api.Plugin
@@ -35,7 +36,8 @@ class ElasticAgentPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         this.project = target
         Elog.init(GradleLoggerFactory())
-        addByteBuddyPlugin()
+        val androidExtension = project.extensions.getByType(ApplicationExtension::class.java)
+        addByteBuddyPlugin(androidExtension)
         addSdkDependency()
         val extension = project.extensions.create("elasticAgent", ElasticApmExtension::class.java)
         val androidComponents =
@@ -55,8 +57,11 @@ class ElasticAgentPlugin : Plugin<Project> {
         buildVariantListeners.add(listener)
     }
 
-    private fun addByteBuddyPlugin() {
+    private fun addByteBuddyPlugin(androidExtension: ApplicationExtension) {
         project.pluginManager.apply(ByteBuddyAndroidPlugin::class.java)
+        androidExtension.buildTypes.all {
+            project.configurations.maybeCreate(it.name + "ByteBuddy")
+        }
     }
 
     private fun addSdkDependency() {

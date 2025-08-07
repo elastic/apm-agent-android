@@ -1,6 +1,7 @@
 package co.elastic.otel.android.oteladapter.internal.delegate
 
 import co.elastic.otel.android.oteladapter.internal.delegate.context.ContextPropagatorsDelegate
+import co.elastic.otel.android.oteladapter.internal.delegate.logger.LoggerProviderDelegator
 import co.elastic.otel.android.oteladapter.internal.delegate.meter.MeterProviderDelegator
 import co.elastic.otel.android.oteladapter.internal.delegate.tools.Delegator
 import co.elastic.otel.android.oteladapter.internal.delegate.tracer.TracerProviderDelegator
@@ -15,12 +16,14 @@ internal class OpenTelemetryDelegator(initialValue: OpenTelemetry) :
     OpenTelemetry {
     private val tracerProvider = TracerProviderDelegator(initialValue.tracerProvider)
     private val meterProvider = MeterProviderDelegator(initialValue.meterProvider)
+    private val loggerProvider = LoggerProviderDelegator(initialValue.logsBridge)
     private val contextPropagators = ContextPropagatorsDelegate(initialValue.propagators)
 
     override fun setDelegate(value: OpenTelemetry) {
         super.setDelegate(value)
         tracerProvider.setDelegate(value.tracerProvider)
         meterProvider.setDelegate(value.meterProvider)
+        loggerProvider.setDelegate(value.logsBridge)
         contextPropagators.setDelegate(value.propagators)
     }
 
@@ -28,6 +31,7 @@ internal class OpenTelemetryDelegator(initialValue: OpenTelemetry) :
         super.reset()
         tracerProvider.reset()
         meterProvider.reset()
+        loggerProvider.reset()
         contextPropagators.reset()
     }
 
@@ -40,7 +44,7 @@ internal class OpenTelemetryDelegator(initialValue: OpenTelemetry) :
     }
 
     override fun getLogsBridge(): LoggerProvider {
-        return super.getLogsBridge()
+        return loggerProvider
     }
 
     override fun getPropagators(): ContextPropagators {

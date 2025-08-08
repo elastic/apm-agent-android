@@ -16,35 +16,38 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.okhttp.internal
+package co.elastic.otel.android.okhttp.internal.delegate
 
-import android.app.Application
-import co.elastic.otel.android.api.ElasticOtelAgent
-import co.elastic.otel.android.instrumentation.generated.okhttp.BuildConfig
-import co.elastic.otel.android.instrumentation.internal.Instrumentation
-import co.elastic.otel.android.okhttp.internal.plugin.OkHttp3Singletons
-import com.google.auto.service.AutoService
+import java.util.concurrent.atomic.AtomicReference
+import okhttp3.Interceptor
+import okhttp3.Response
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-@AutoService(Instrumentation::class)
-class OkHttpInstrumentation : Instrumentation {
+class InterceptorDelegator private constructor(private val initialValue: Interceptor) :
+    Interceptor {
+    private val delegate: AtomicReference<Interceptor> = AtomicReference(initialValue)
 
-    override fun install(
-        application: Application,
-        agent: ElasticOtelAgent
-    ): Instrumentation.Installation {
-        OkHttp3Singletons.configure(agent.getOpenTelemetry())
-        return Instrumentation.Installation { OkHttp3Singletons.reset() }
+    override fun intercept(chain: Interceptor.Chain): Response {
+        return delegate.get().intercept(chain)
     }
 
-    override fun getId(): String {
-        return BuildConfig.INSTRUMENTATION_ID
+    fun setDelegate(value: Interceptor) {
+        delegate.set(value)
     }
 
-    override fun getVersion(): String {
-        return BuildConfig.INSTRUMENTATION_VERSION
+    fun reset() {
+        setDelegate(initialValue)
+    }
+
+    companion object {
+        private val NOOP_INTERCEPTOR = Interceptor { chain -> chain.proceed(chain.request()) }
+
+        @JvmStatic
+        fun create(): InterceptorDelegator {
+            return InterceptorDelegator(NOOP_INTERCEPTOR)
+        }
     }
 }

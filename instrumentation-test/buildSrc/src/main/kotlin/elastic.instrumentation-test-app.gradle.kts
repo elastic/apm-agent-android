@@ -1,4 +1,5 @@
 import java.util.Properties
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("com.android.application")
@@ -11,6 +12,7 @@ propertiesFile.inputStream().use {
     properties.load(it)
 }
 
+val javaVersionStr = properties.getProperty("elastic.java.compatibility") as String
 android {
     compileSdk = (properties.getProperty("elastic.android.compileSdk") as String).toInt()
 
@@ -32,11 +34,14 @@ android {
         sourceCompatibility = javaVersion
         targetCompatibility = javaVersion
     }
-    kotlinOptions {
-        jvmTarget = javaVersionStr
-    }
     packaging.resources {
         excludes += "META-INF/LICENSE*"
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.fromTarget(javaVersionStr)
     }
 }
 

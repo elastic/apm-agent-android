@@ -16,35 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.okhttp.internal
+package co.elastic.otel.android.oteladapter.internal.delegate.tools
 
-import android.app.Application
-import co.elastic.otel.android.api.ElasticOtelAgent
-import co.elastic.otel.android.instrumentation.generated.okhttp.BuildConfig
-import co.elastic.otel.android.instrumentation.internal.Instrumentation
-import co.elastic.otel.android.okhttp.internal.plugin.OkHttp3Singletons
-import com.google.auto.service.AutoService
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-@AutoService(Instrumentation::class)
-class OkHttpInstrumentation : Instrumentation {
+abstract class Delegator<T>(initialValue: T) {
+    private val delegate = AtomicReference(initialValue)
 
-    override fun install(
-        application: Application,
-        agent: ElasticOtelAgent
-    ): Instrumentation.Installation {
-        OkHttp3Singletons.configure(agent.getOpenTelemetry())
-        return Instrumentation.Installation { OkHttp3Singletons.reset() }
+    abstract fun getNoopValue(): T
+
+    open fun setDelegate(value: T) {
+        delegate.set(value)
     }
 
-    override fun getId(): String {
-        return BuildConfig.INSTRUMENTATION_ID
+    open fun reset() {
+        delegate.set(getNoopValue())
     }
 
-    override fun getVersion(): String {
-        return BuildConfig.INSTRUMENTATION_VERSION
+    fun getDelegate(): T {
+        return delegate.get()
     }
 }

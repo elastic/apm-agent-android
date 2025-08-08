@@ -1,10 +1,10 @@
 package co.elastic.otel.android.test.rule
 
 import android.app.Application
-import co.elastic.otel.android.api.ElasticOtelAgent
 import co.elastic.otel.android.exporters.ExporterProvider
 import co.elastic.otel.android.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
+import co.elastic.otel.android.internal.features.instrumentation.InstrumentationManager
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.time.SystemTimeProvider
 import co.elastic.otel.android.internal.time.ntp.SntpClient
@@ -47,8 +47,8 @@ abstract class AgentRule : TestRule {
         }
     }
 
-    fun getAgent(): ElasticOtelAgent {
-        return agent!!
+    fun getInstrumentationManager(): InstrumentationManager {
+        return agent!!.getInstrumentationManager()
     }
 
     fun getFinishedMetrics(): List<MetricData> {
@@ -100,15 +100,21 @@ abstract class AgentRule : TestRule {
         private val inMemorySpanExporter = InMemorySpanExporter.create()
 
         fun getFinishedMetrics(): List<MetricData> {
-            return inMemoryMetricExporter.finishedMetricItems
+            val values = inMemoryMetricExporter.finishedMetricItems
+            inMemoryMetricExporter.reset()
+            return values
         }
 
         fun getFinishedLogRecords(): List<LogRecordData> {
-            return inMemoryLogRecordExporter.finishedLogRecordItems
+            val values = inMemoryLogRecordExporter.finishedLogRecordItems
+            inMemoryLogRecordExporter.reset()
+            return values
         }
 
         fun getFinishedSpans(): List<SpanData> {
-            return inMemorySpanExporter.finishedSpanItems
+            val values = inMemorySpanExporter.finishedSpanItems
+            inMemorySpanExporter.reset()
+            return values
         }
 
         override fun getSpanExporter(): SpanExporter? {

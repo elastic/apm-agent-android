@@ -4,7 +4,6 @@ import co.elastic.otel.android.test.rule.AndroidTestAgentRule
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.trace.SpanKind
 import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat
-import io.opentelemetry.sdk.trace.data.StatusData
 import java.io.IOException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -52,9 +51,10 @@ class InstrumentationTest {
         val request = webServer.takeRequest()
         agentRule.flushSpans().join(5, TimeUnit.SECONDS)
 
+        val finishedSpans = agentRule.getFinishedSpans()
         assertThat(request.getHeader("traceparent")).isNotNull()
-        assertThat(agentRule.getFinishedSpans()).hasSize(1)
-        assertThat(agentRule.getFinishedSpans().first()).hasName("GET")
+        assertThat(finishedSpans).hasSize(1)
+        assertThat(finishedSpans.first()).hasName("GET")
             .hasKind(SpanKind.CLIENT)
             .hasAttribute(AttributeKey.stringKey("url.full"), url.toString())
             .hasAttribute(AttributeKey.stringKey("http.request.method"), "GET")
@@ -64,14 +64,36 @@ class InstrumentationTest {
     }
 
     @Test
+    fun verifyCallWhenClosingAgent() {
+        val url = webServer.url("/some/path")
+        executeSyncHttpCall("GET", 200, "{}", url)
+
+        webServer.takeRequest()
+        agentRule.flushSpans().join(5, TimeUnit.SECONDS)
+
+        assertThat(agentRule.getFinishedSpans()).hasSize(1)
+
+        // Closing instrumentation
+        agentRule.getInstrumentationManager().close()
+
+        executeSyncHttpCall("GET", 200, "{}", url)
+
+        webServer.takeRequest()
+        agentRule.flushSpans().join(5, TimeUnit.SECONDS)
+
+        assertThat(agentRule.getFinishedSpans()).isEmpty()
+    }
+
+    @Test
     fun verifyOkHttpAsyncCallSpan() {
         val url = webServer.url("/")
         executeAsyncSuccessfulHttpCall("GET", 200, "{}", url)
 
         agentRule.flushSpans().join(5, TimeUnit.SECONDS)
 
-        assertThat(agentRule.getFinishedSpans()).hasSize(1)
-        assertThat(agentRule.getFinishedSpans().first()).hasName("GET")
+        val finishedSpans = agentRule.getFinishedSpans()
+        assertThat(finishedSpans).hasSize(1)
+        assertThat(finishedSpans.first()).hasName("GET")
             .hasKind(SpanKind.CLIENT)
             .hasAttribute(AttributeKey.stringKey("url.full"), url.toString())
             .hasAttribute(AttributeKey.stringKey("http.request.method"), "GET")
@@ -87,8 +109,9 @@ class InstrumentationTest {
 
         agentRule.flushSpans().join(5, TimeUnit.SECONDS)
 
-        assertThat(agentRule.getFinishedSpans()).hasSize(1)
-        assertThat(agentRule.getFinishedSpans().first()).hasName("GET")
+        val finishedSpans = agentRule.getFinishedSpans()
+        assertThat(finishedSpans).hasSize(1)
+        assertThat(finishedSpans.first()).hasName("GET")
             .hasKind(SpanKind.CLIENT)
             .hasAttribute(AttributeKey.stringKey("url.full"), url.toString())
             .hasAttribute(AttributeKey.stringKey("http.request.method"), "GET")

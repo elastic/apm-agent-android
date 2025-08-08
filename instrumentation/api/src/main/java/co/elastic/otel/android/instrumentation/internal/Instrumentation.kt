@@ -20,6 +20,7 @@ package co.elastic.otel.android.instrumentation.internal
 
 import android.app.Application
 import co.elastic.otel.android.api.ElasticOtelAgent
+import java.io.Closeable
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
@@ -27,9 +28,15 @@ import co.elastic.otel.android.api.ElasticOtelAgent
  */
 interface Instrumentation {
 
-    fun install(application: Application, agent: ElasticOtelAgent)
+    fun install(application: Application, agent: ElasticOtelAgent): Installation
 
     fun getId(): String
 
     fun getVersion(): String
+
+    fun interface Installation : Closeable {
+        companion object {
+            val NOOP = Installation {}
+        }
+    }
 }

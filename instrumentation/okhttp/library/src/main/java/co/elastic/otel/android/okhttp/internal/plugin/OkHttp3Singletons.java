@@ -20,8 +20,7 @@ package co.elastic.otel.android.okhttp.internal.plugin;
 
 import static io.opentelemetry.instrumentation.api.internal.HttpConstants.KNOWN_METHODS;
 
-import java.util.Collections;
-
+import co.elastic.otel.android.okhttp.internal.delegate.InterceptorDelegator;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
@@ -34,6 +33,7 @@ import io.opentelemetry.instrumentation.okhttp.v3_0.internal.ConnectionErrorSpan
 import io.opentelemetry.instrumentation.okhttp.v3_0.internal.OkHttpAttributesGetter;
 import io.opentelemetry.instrumentation.okhttp.v3_0.internal.OkHttpClientInstrumenterBuilderFactory;
 import io.opentelemetry.instrumentation.okhttp.v3_0.internal.TracingInterceptor;
+import java.util.Collections;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -43,49 +43,52 @@ import okhttp3.Response;
  * any time.
  */
 public final class OkHttp3Singletons {
-    private static final Interceptor NOOP_INTERCEPTOR = chain -> chain.proceed(chain.request());
-    public static Interceptor CONNECTION_ERROR_INTERCEPTOR = NOOP_INTERCEPTOR;
-    public static Interceptor TRACING_INTERCEPTOR = NOOP_INTERCEPTOR;
+  public static InterceptorDelegator CONNECTION_ERROR_INTERCEPTOR = InterceptorDelegator.create();
+  public static InterceptorDelegator TRACING_INTERCEPTOR = InterceptorDelegator.create();
 
-    public static void configure(OpenTelemetry openTelemetry) {
-        Instrumenter<Interceptor.Chain, Response> instrumenter =
-                OkHttpClientInstrumenterBuilderFactory.create(openTelemetry)
-                        .setKnownMethods(KNOWN_METHODS)
-                        .setSpanNameExtractor(
-                                x -> HttpSpanNameExtractor.builder(OkHttpAttributesGetter.INSTANCE)
-                                        .build())
-                        .addAttributesExtractor(
-                                PeerServiceAttributesExtractor.create(
-                                        OkHttpAttributesGetter.INSTANCE,
-                                        PeerServiceResolver.create(Collections.emptyMap())))
-                        .setEmitExperimentalHttpClientTelemetry(false)
-                        .build();
-        CONNECTION_ERROR_INTERCEPTOR = new ConnectionErrorSpanInterceptor(instrumenter);
-        TRACING_INTERCEPTOR = new TracingInterceptor(instrumenter, openTelemetry.getPropagators());
-    }
+  public static void configure(OpenTelemetry openTelemetry) {
+    Instrumenter<Interceptor.Chain, Response> instrumenter =
+        OkHttpClientInstrumenterBuilderFactory.create(openTelemetry)
+            .setKnownMethods(KNOWN_METHODS)
+            .setSpanNameExtractor(
+                x -> HttpSpanNameExtractor.builder(OkHttpAttributesGetter.INSTANCE).build())
+            .addAttributesExtractor(
+                PeerServiceAttributesExtractor.create(
+                    OkHttpAttributesGetter.INSTANCE,
+                    PeerServiceResolver.create(Collections.emptyMap())))
+            .setEmitExperimentalHttpClientTelemetry(false)
+            .build();
+    CONNECTION_ERROR_INTERCEPTOR.setDelegate(new ConnectionErrorSpanInterceptor(instrumenter));
+    TRACING_INTERCEPTOR.setDelegate(
+        new TracingInterceptor(instrumenter, openTelemetry.getPropagators()));
+  }
 
-    public static final Interceptor CALLBACK_CONTEXT_INTERCEPTOR =
-            chain -> {
-                Request request = chain.request();
-                Context context =
-                        OkHttpCallbackAdviceHelper.tryRecoverPropagatedContextFromCallback(request);
-                if (context != null) {
-                    try (Scope ignored = context.makeCurrent()) {
-                        return chain.proceed(request);
-                    }
-                }
+  public static void reset() {
+    CONNECTION_ERROR_INTERCEPTOR.reset();
+    TRACING_INTERCEPTOR.reset();
+  }
 
-                return chain.proceed(request);
-            };
+  public static final Interceptor CALLBACK_CONTEXT_INTERCEPTOR =
+      chain -> {
+        Request request = chain.request();
+        Context context =
+            OkHttpCallbackAdviceHelper.tryRecoverPropagatedContextFromCallback(request);
+        if (context != null) {
+          try (Scope ignored = context.makeCurrent()) {
+            return chain.proceed(request);
+          }
+        }
 
-    public static final Interceptor RESEND_COUNT_CONTEXT_INTERCEPTOR =
-            chain -> {
-                try (Scope ignored =
-                             HttpClientRequestResendCount.initialize(Context.current()).makeCurrent()) {
-                    return chain.proceed(chain.request());
-                }
-            };
+        return chain.proceed(request);
+      };
 
-    private OkHttp3Singletons() {
-    }
+  public static final Interceptor RESEND_COUNT_CONTEXT_INTERCEPTOR =
+      chain -> {
+        try (Scope ignored =
+            HttpClientRequestResendCount.initialize(Context.current()).makeCurrent()) {
+          return chain.proceed(chain.request());
+        }
+      };
+
+  private OkHttp3Singletons() {}
 }

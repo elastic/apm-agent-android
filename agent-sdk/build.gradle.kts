@@ -8,7 +8,7 @@ plugins {
     // For opamp:
     id("kotlin-kapt")
     id("de.undercouch.download") version "5.6.0"
-    id("com.squareup.wire") version "5.3.7"
+    id("com.squareup.wire") version "5.3.10"
 }
 
 android {

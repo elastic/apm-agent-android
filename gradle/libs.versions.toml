@@ -12,7 +12,7 @@ opentelemetry-sdk = { module = "io.opentelemetry:opentelemetry-sdk", version.ref
 opentelemetry-api-incubator = "io.opentelemetry:opentelemetry-api-incubator:1.53.0-alpha"
 stagemonitor-configuration = "org.stagemonitor:stagemonitor-configuration:0.89.1"
 androidx-annotations = "androidx.annotation:annotation:1.9.1"
-androidx-core = "androidx.core:core:1.16.0"
+androidx-core = "androidx.core:core:1.17.0"
 dsl-json = "com.dslplatform:dsl-json-java8:1.10.0"
 slf4j-api = "org.slf4j:slf4j-api:2.0.17"
 byteBuddy = { module = "net.bytebuddy:byte-buddy", version.ref = "byteBuddy" }

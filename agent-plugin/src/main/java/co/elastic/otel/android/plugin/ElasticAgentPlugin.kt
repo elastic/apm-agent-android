@@ -39,15 +39,29 @@ class ElasticAgentPlugin : Plugin<Project> {
         val androidExtension = project.extensions.getByType(ApplicationExtension::class.java)
         addByteBuddyPlugin(androidExtension)
         addSdkDependency()
+        configureDependencyResolution()
         val extension = project.extensions.create("elasticAgent", ElasticApmExtension::class.java)
         val androidComponents =
             project.extensions.getByType(ApplicationAndroidComponentsExtension::class.java)
-        androidComponents.finalizeDsl { androidExtension ->
+        androidComponents.finalizeDsl { dslExtension ->
             val disableForBuildTypes = extension.bytecodeInstrumentation.disableForBuildTypes.get()
-            androidExtension.buildTypes.forEach { buildType ->
+            dslExtension.buildTypes.forEach { buildType ->
                 val name = buildType.name
                 if (name !in disableForBuildTypes) {
                     buildVariantListeners.forEach { listener -> listener.onBuildVariant(name) }
+                }
+            }
+        }
+    }
+
+    private fun configureDependencyResolution() {
+        project.configurations.all { config ->
+            config.resolutionStrategy.eachDependency {
+                if (it.requested.group == "com.squareup.okhttp3" && it.requested.name == "okhttp-jvm") {
+                    // This replicates what's done in elastic.common-dependency-conventions.gradle.kts to
+                    // address the same issue for consumer projects.
+                    it.useTarget("com.squareup.okhttp3:okhttp:${it.requested.version}")
+                    it.because("choosing okhttp over okhttp-jvm")
                 }
             }
         }

@@ -7,6 +7,7 @@ plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("elastic.animalsniffer-android")
+    id("elastic.common-dependency-conventions")
 }
 
 val javaVersionStr = project.property("elastic.java.compatibility") as String

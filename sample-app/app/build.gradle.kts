@@ -9,7 +9,7 @@ plugins {
 
 android {
     namespace = "co.elastic.otel.android.sample"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "co.elastic.otel.android.sample"

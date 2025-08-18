@@ -58,6 +58,8 @@ class ElasticAgentPlugin : Plugin<Project> {
         project.configurations.all { config ->
             config.resolutionStrategy.eachDependency {
                 if (it.requested.group == "com.squareup.okhttp3" && it.requested.name == "okhttp-jvm") {
+                    // This replicates what's done in elastic.common-dependency-conventions.gradle.kts to
+                    // address the same issue for consumer projects.
                     it.useTarget("com.squareup.okhttp3:okhttp:${it.requested.version}")
                     it.because("choosing okhttp over okhttp-jvm")
                 }

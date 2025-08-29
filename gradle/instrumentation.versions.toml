@@ -8,7 +8,6 @@ opentelemetry-instrumentation-api-incubator = { module = "io.opentelemetry.instr
 opentelemetry-instrumentation-okhttp = { module = "io.opentelemetry.instrumentation:opentelemetry-okhttp-3.0", version.ref = "opentelemetry-instrumentation-alpha" }
 opentelemetry-android-session = { module = "io.opentelemetry.android:session", version.ref = "opentelemetry-android" }
 opentelemetry-android-instrumentation = { module = "io.opentelemetry.android.instrumentation:android-instrumentation", version.ref = "opentelemetry-android" }
-okhttp = "com.squareup.okhttp3:okhttp:5.1.0"
 weakLockFree = "com.blogspot.mydailyjava:weak-lock-free:0.18"
 
 # Testing

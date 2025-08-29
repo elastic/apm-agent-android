@@ -36,6 +36,7 @@ dependencies {
     implementation(libs.androidx.annotations)
     implementation(libs.androidx.core)
     implementation(libs.dsl.json)
+    implementation(libs.okhttp)
     testImplementation(project(":internal-tools:otel-test-common"))
     testImplementation(libs.wireMock)
     testImplementation(libs.opentelemetry.testing)

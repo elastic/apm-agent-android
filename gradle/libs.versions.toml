@@ -19,6 +19,7 @@ byteBuddy = { module = "net.bytebuddy:byte-buddy", version.ref = "byteBuddy" }
 opentelemetry-semconv = "io.opentelemetry.semconv:opentelemetry-semconv:1.37.0"
 opentelemetry-semconv-incubating = "io.opentelemetry.semconv:opentelemetry-semconv-incubating:1.37.0-alpha"
 opentelemetry-diskBuffering = { module = "io.opentelemetry.contrib:opentelemetry-disk-buffering", version.ref = "opentelemetry-contrib" }
+opentelemetry-opamp = { module = "io.opentelemetry.contrib:opentelemetry-opamp-client", version.ref = "opentelemetry-contrib" }
 opentelemetry-exporter-otlp = { module = "io.opentelemetry:opentelemetry-exporter-otlp", version.ref = "opentelemetry" }
 
 #Test tools

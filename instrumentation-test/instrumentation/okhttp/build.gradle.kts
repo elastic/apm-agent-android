@@ -9,6 +9,6 @@ android {
 }
 
 dependencies {
-    androidTestImplementation(instrumentation.okhttp)
+    androidTestImplementation(libs.okhttp)
     androidTestImplementation(instrumentation.mockWebServer)
 }

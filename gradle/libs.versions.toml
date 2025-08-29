@@ -7,7 +7,6 @@ android = "8.12.1"
 autoService = "1.1.1"
 
 [libraries]
-opentelemetry-api = { module = "io.opentelemetry:opentelemetry-api", version.ref = "opentelemetry" }
 opentelemetry-sdk = { module = "io.opentelemetry:opentelemetry-sdk", version.ref = "opentelemetry" }
 opentelemetry-api-incubator = "io.opentelemetry:opentelemetry-api-incubator:1.53.0-alpha"
 stagemonitor-configuration = "org.stagemonitor:stagemonitor-configuration:0.89.1"
@@ -19,7 +18,9 @@ byteBuddy = { module = "net.bytebuddy:byte-buddy", version.ref = "byteBuddy" }
 opentelemetry-semconv = "io.opentelemetry.semconv:opentelemetry-semconv:1.37.0"
 opentelemetry-semconv-incubating = "io.opentelemetry.semconv:opentelemetry-semconv-incubating:1.37.0-alpha"
 opentelemetry-diskBuffering = { module = "io.opentelemetry.contrib:opentelemetry-disk-buffering", version.ref = "opentelemetry-contrib" }
+opentelemetry-opamp = { module = "io.opentelemetry.contrib:opentelemetry-opamp-client", version.ref = "opentelemetry-contrib" }
 opentelemetry-exporter-otlp = { module = "io.opentelemetry:opentelemetry-exporter-otlp", version.ref = "opentelemetry" }
+okhttp = "com.squareup.okhttp3:okhttp:5.1.0"
 
 #Test tools
 junit4 = "junit:junit:4.13.2"

@@ -19,14 +19,14 @@
 package co.elastic.otel.android.internal.features.centralconfig
 
 import co.elastic.otel.android.common.internal.logging.Elog
-import co.elastic.otel.android.internal.opamp.OpampClient
-import co.elastic.otel.android.internal.opamp.connectivity.http.OkHttpSender
-import co.elastic.otel.android.internal.opamp.request.service.HttpRequestService
-import co.elastic.otel.android.internal.opamp.response.MessageData
 import co.elastic.otel.android.internal.opentelemetry.ElasticOpenTelemetry
 import co.elastic.otel.android.internal.services.ServiceManager
 import com.dslplatform.json.DslJson
 import com.dslplatform.json.MapConverter
+import io.opentelemetry.opamp.client.internal.OpampClient
+import io.opentelemetry.opamp.client.internal.connectivity.http.OkHttpSender
+import io.opentelemetry.opamp.client.internal.request.service.HttpRequestService
+import io.opentelemetry.opamp.client.internal.response.MessageData
 import java.io.Closeable
 import java.io.File
 import java.io.IOException
@@ -63,7 +63,6 @@ internal class CentralConfigurationSource internal constructor(
     ) {
         this.opampClient = createOpampClient(connectivity, openTelemetry)
         this.listener = listener
-        opampClient.start(this)
         loadFromDisk()
         if (configs.isNotEmpty()) {
             notifyListener()
@@ -80,9 +79,9 @@ internal class CentralConfigurationSource internal constructor(
     ): OpampClient {
         val builder = OpampClient.builder()
             .enableRemoteConfig()
-            .setIdentifyingAttribute("service.name", openTelemetry.serviceName)
+            .putIdentifyingAttribute("service.name", openTelemetry.serviceName)
         openTelemetry.deploymentEnvironment?.let {
-            builder.setIdentifyingAttribute("deployment.environment.name", it)
+            builder.putIdentifyingAttribute("deployment.environment.name", it)
         }
         val okhttpClient = OkHttpClient.Builder()
             .addInterceptor {
@@ -95,7 +94,7 @@ internal class CentralConfigurationSource internal constructor(
         requestService =
             HttpRequestService.create(OkHttpSender.create(connectivity.getUrl(), okhttpClient))
         builder.setRequestService(requestService)
-        return builder.build()
+        return builder.build(this)
     }
 
     private fun loadFromDisk(): Boolean {
@@ -142,19 +141,19 @@ internal class CentralConfigurationSource internal constructor(
         fun onConfigChange()
     }
 
-    override fun onConnect(client: OpampClient) {
+    override fun onConnect() {
         logger.debug("OpAMP connected successfully")
     }
 
-    override fun onConnectFailed(client: OpampClient, throwable: Throwable?) {
+    override fun onConnectFailed(throwable: Throwable?) {
         logger.debug("OpAMP connection failed", throwable)
     }
 
-    override fun onErrorResponse(client: OpampClient, errorResponse: ServerErrorResponse) {
+    override fun onErrorResponse(errorResponse: ServerErrorResponse) {
         logger.debug("OpAMP failed response: {}", errorResponse)
     }
 
-    override fun onMessage(client: OpampClient, messageData: MessageData) {
+    override fun onMessage(messageData: MessageData) {
         logger.debug("OpAMP on message: {}", messageData)
         val remoteConfig = messageData.remoteConfig ?: return
 
@@ -182,7 +181,7 @@ internal class CentralConfigurationSource internal constructor(
             status,
             remoteConfig.config_hash
         )
-        client.setRemoteConfigStatus(getRemoteConfigStatus(status, remoteConfig.config_hash))
+        opampClient.setRemoteConfigStatus(getRemoteConfigStatus(status, remoteConfig.config_hash))
     }
 
     private fun storeConfig(elasticConfig: AgentConfigFile): Boolean {
@@ -209,6 +208,6 @@ internal class CentralConfigurationSource internal constructor(
     }
 
     override fun close() {
-        opampClient.stop()
+        opampClient.close()
     }
 }

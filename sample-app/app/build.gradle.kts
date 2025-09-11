@@ -54,7 +54,7 @@ kotlin {
 
 dependencies {
     val retrofitVersion = "3.0.0"
-    implementation("androidx.navigation:navigation-fragment-ktx:2.9.3")
+    implementation("androidx.navigation:navigation-fragment-ktx:2.9.4")
     implementation("androidx.navigation:navigation-ui-ktx:2.9.3")
     implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
     implementation("com.squareup.retrofit2:converter-gson:$retrofitVersion")

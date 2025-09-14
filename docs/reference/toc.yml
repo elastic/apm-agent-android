@@ -1,0 +1,7 @@
+toc:
+  - file: index.md
+    children:
+      - file: getting-started.md
+      - file: configuration.md
+      - file: manual-instrumentation.md
+      - file: automatic-instrumentation.md

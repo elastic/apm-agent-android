@@ -5,3 +5,5 @@ toc:
       - file: configuration.md
       - file: manual-instrumentation.md
       - file: automatic-instrumentation.md
+      - title: Troubleshooting
+        crosslink: docs-content://troubleshoot/ingest/opentelemetry/edot-sdks/android/index.md

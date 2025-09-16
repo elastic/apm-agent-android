@@ -7,7 +7,7 @@ cross_links:
   - elastic-agent
 toc:
   - toc: release-notes
-  - toc: reference
+  - toc: reference/edot-android
 subs:
   motlp: Elastic Cloud Managed OTLP Endpoint
   edot: Elastic Distribution of OpenTelemetry

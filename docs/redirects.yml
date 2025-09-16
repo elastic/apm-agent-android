@@ -1,10 +1,10 @@
 # Related to https://github.com/elastic/opentelemetry/issues/228
 redirects:
-  'reference/apm/agents/android/index.md': 'reference/index.md'
-  'reference/apm/agents/android/getting-started.md': 'reference/getting-started.md'
-  'reference/apm/agents/android/configuration.md': 'reference/configuration.md'
-  'reference/apm/agents/android/manual-instrumentation.md': 'reference/manual-instrumentation.md'
-  'reference/apm/agents/android/automatic-instrumentation.md': 'reference/automatic-instrumentation.md'
-  'reference/apm/agents/android/faq.md': 'reference/index.md'
-  'reference/apm/agents/android/how-tos.md': 'reference/getting-started.md'
+  'reference/apm/agents/android/index.md': 'reference/edot-android/index.md'
+  'reference/apm/agents/android/getting-started.md': 'reference/edot-android/getting-started.md'
+  'reference/apm/agents/android/configuration.md': 'reference/edot-android/configuration.md'
+  'reference/apm/agents/android/manual-instrumentation.md': 'reference/edot-android/manual-instrumentation.md'
+  'reference/apm/agents/android/automatic-instrumentation.md': 'reference/edot-android/automatic-instrumentation.md'
+  'reference/apm/agents/android/faq.md': 'reference/edot-android/index.md'
+  'reference/apm/agents/android/how-tos.md': 'reference/edot-android/getting-started.md'
   'reference/apm/agents/android/troubleshooting': 'opentelemetry://reference/edot-sdks/android/troubleshooting.md'

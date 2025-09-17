@@ -6,3 +6,5 @@ toc:
   - file: automatic-instrumentation.md
   - title: Troubleshooting
     crosslink: docs-content://troubleshoot/ingest/opentelemetry/edot-sdks/android/index.md
+  - title: Release notes
+    crosslink: apm-agent-android://release-notes/index.md

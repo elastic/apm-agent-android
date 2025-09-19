@@ -15,7 +15,7 @@ mapped_pages:
   - https://www.elastic.co/guide/en/apm/agent/android/current/manual-instrumentation.html
 ---
 
-# Manual instrumentation for Android with Elastic Open Telemetry SDK
+# Manual instrumentation for Android with the Elastic Distribution of OpenTelemetry
 
 Learn how to manually instrument Android applications using the Elastic Distribution of OpenTelemetry SDK to capture spans, add attributes, and send trace data to Elastic.
 

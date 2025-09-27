@@ -1,9 +1,9 @@
 [versions]
-opentelemetry-instrumentation-alpha = "2.20.0-alpha"
+opentelemetry-instrumentation-alpha = "2.20.1-alpha"
 opentelemetry-android = "0.11.0-alpha"
 
 [libraries]
-opentelemetry-instrumentation-api = "io.opentelemetry.instrumentation:opentelemetry-instrumentation-api:2.20.0"
+opentelemetry-instrumentation-api = "io.opentelemetry.instrumentation:opentelemetry-instrumentation-api:2.20.1"
 opentelemetry-instrumentation-api-incubator = { module = "io.opentelemetry.instrumentation:opentelemetry-instrumentation-api-incubator", version.ref = "opentelemetry-instrumentation-alpha" }
 opentelemetry-instrumentation-okhttp = { module = "io.opentelemetry.instrumentation:opentelemetry-okhttp-3.0", version.ref = "opentelemetry-instrumentation-alpha" }
 opentelemetry-android-session = { module = "io.opentelemetry.android:session", version.ref = "opentelemetry-android" }

@@ -23,7 +23,7 @@ import co.elastic.otel.android.internal.opentelemetry.ElasticOpenTelemetry
 import co.elastic.otel.android.internal.services.ServiceManager
 import com.dslplatform.json.DslJson
 import com.dslplatform.json.MapConverter
-import io.opentelemetry.opamp.client.internal.OpampClient
+import io.opentelemetry.opamp.client.OpampClient
 import io.opentelemetry.opamp.client.internal.connectivity.http.OkHttpSender
 import io.opentelemetry.opamp.client.internal.request.service.HttpRequestService
 import io.opentelemetry.opamp.client.internal.response.MessageData

@@ -40,7 +40,7 @@ wireMock = "org.wiremock:wiremock:3.13.1"
 android-plugin = { module = "com.android.tools.build:gradle", version.ref = "android" }
 apache-commons-text = "org.apache.commons:commons-text:1.14.0"
 commons-io = "commons-io:commons-io:2.20.0"
-spotless-plugin = "com.diffplug.spotless:spotless-plugin-gradle:7.2.1"
+spotless-plugin = "com.diffplug.spotless:spotless-plugin-gradle:8.0.0"
 dokka = "org.jetbrains.dokka:dokka-gradle-plugin:1.9.20"
 mavenCentral-publish-plugin = "com.vanniktech:gradle-maven-publish-plugin:0.34.0"
 gradle-publish-plugin = "com.gradle.publish:plugin-publish-plugin:2.0.0"

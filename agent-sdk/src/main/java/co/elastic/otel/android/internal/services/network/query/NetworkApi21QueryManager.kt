@@ -18,6 +18,7 @@
  */
 package co.elastic.otel.android.internal.services.network.query
 
+import android.Manifest
 import android.net.ConnectivityManager
 import android.net.ConnectivityManager.NetworkCallback
 import android.net.Network
@@ -25,6 +26,7 @@ import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.telephony.TelephonyManager
 import androidx.annotation.GuardedBy
+import androidx.annotation.RequiresPermission
 import co.elastic.otel.android.internal.services.network.listener.NetworkChangeListener
 
 /**
@@ -45,6 +47,7 @@ internal class NetworkApi21QueryManager(
         this.listener = listener
     }
 
+    @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
     override fun getNetworkType(): Int {
         return telephonyManager.networkType
     }

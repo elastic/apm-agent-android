@@ -11,16 +11,16 @@ plugins {
 ```
 
 Table of Contents
-=================  
+=================
 
 * [Creating NOTICE files](#creating-notice-files)
-    * [Troubleshooting](#troubleshooting)
+  * [Troubleshooting](#troubleshooting)
 * [Verifying NOTICE files](#verifying-notice-files)
 * [Adding source headers](#adding-source-headers)
 * [Publishing](#publishing)
-    * [Publishing parameters](#publishing-parameters)
-    * [Publishing to Maven Central](#publishing-to-maven-central)
-    * [Publishing to the Gradle Plugin Portal](#publishing-to-the-gradle-plugin-portal)
+  * [Publishing parameters](#publishing-parameters)
+  * [Publishing to Maven Central](#publishing-to-maven-central)
+  * [Publishing to the Gradle Plugin Portal](#publishing-to-the-gradle-plugin-portal)
 
 ## Creating NOTICE files
 
@@ -164,3 +164,4 @@ this project is:
 ```text
 ./gradlew publishPlugins -Pgradle.publish.key=<key> -Pgradle.publish.secret=<secret> -Prelease=true
 ```
+

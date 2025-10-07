@@ -18,7 +18,7 @@ There are 2 main stages that run on GitHub actions for every push or Pull Reques
 Once a PR has been opened then there are two different ways you can trigger builds in the CI:
 
 1. Commit based.
-1. UI based, any Elasticians can force a build through the GitHub UI
+2. UI based, any Elasticians can force a build through the GitHub UI
 
 ### Branches
 

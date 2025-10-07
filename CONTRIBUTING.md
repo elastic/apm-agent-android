@@ -98,3 +98,4 @@ And email/slack message will be sent with the outcome.
 #### Further details
 
 * There are specific vault secrets accessible only in `secret/ci/elastic-apm-agent-android`
+

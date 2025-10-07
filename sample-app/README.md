@@ -145,8 +145,7 @@ weather forecast won’t work for New York as the city.
 > endpoint
 > set [here](app/src/main/java/co/elastic/otel/android/sample/MyApp.kt) points to the local EDOT
 > Collector service, and the backend service
->
-endpoint [provided here](app/src/main/java/co/elastic/otel/android/sample/network/WeatherRestManager.kt)
+> endpoint [provided here](app/src/main/java/co/elastic/otel/android/sample/network/WeatherRestManager.kt)
 > also points to a local backend service. If you wanted to use a real device, you'd need to replace
 > the `10.0.2.2` IP by the one of the machine where you've started the services mentioned in the
 > steps

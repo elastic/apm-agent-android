@@ -5,15 +5,15 @@ weather application that comprises two Android UI fragments and a simple local b
 service based on Spring Boot.
 
 - [Components](#components)
-    * [Backend service](#backend-service)
-    * [Android application](#android-application)
-    * [EDOT Collector](#edot-collector)
+  * [Backend service](#backend-service)
+  * [Android application](#android-application)
+  * [EDOT Collector](#edot-collector)
 - [How to run](#how-to-run)
-    * [Prerequisites](#prerequisites)
-    * [Step 1: Setting your Elasticsearch properties](#step-1-setting-your-elasticsearch-properties)
-    * [Step 2: Launching the EDOT Collector](#step-2-launching-the-edot-collector)
-    * [Step 3: Launching the backend service](#step-3-launching-the-backend-service)
-    * [Step 4: Launch the Android application](#step-4-launch-the-android-application)
+  * [Prerequisites](#prerequisites)
+  * [Step 1: Setting your Elasticsearch properties](#step-1-setting-your-elasticsearch-properties)
+  * [Step 2: Launching the EDOT Collector](#step-2-launching-the-edot-collector)
+  * [Step 3: Launching the backend service](#step-3-launching-the-backend-service)
+  * [Step 4: Launch the Android application](#step-4-launch-the-android-application)
 - [Analyzing the data](#analyzing-the-data)
 
 ## Components
@@ -139,7 +139,7 @@ weather forecast won’t work for New York as the city.
 > [!IMPORTANT]
 > Make sure you open the `sample-app` directory with Android Studio and **NOT** the root dir of this
 > repo.
-
+>
 > [!NOTE]
 > The reason why is recommended using an emulator is because the agent
 > endpoint

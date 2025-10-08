@@ -56,13 +56,12 @@ more information.
 * An [Android emulator](https://developer.android.com/studio/run/emulator#get-started).
 
 > [!NOTE]
-> The reason why is recommended using an emulator is because the agent
-> endpoint set [here](app/src/main/java/co/elastic/otel/android/sample/MyApp.kt) points to the local EDOT
-> Collector service, and the backend service
-> endpoint [provided here](app/src/main/java/co/elastic/otel/android/sample/network/WeatherRestManager.kt)
-> also points to a local backend service. If you wanted to use a real device, you'd need to replace
-> the `10.0.2.2` IP by the one of the machine where you've started the services mentioned in the
-> steps above.
+> The reason why is recommended using an emulator is because the 
+> endpoints set [here](app/src/main/java/co/elastic/otel/android/sample/MyApp.kt) and
+> [here](app/src/main/java/co/elastic/otel/android/sample/network/WeatherRestManager.kt) point to
+> local services via the emulator's localhost IP ([10.0.2.2](https://developer.android.com/studio/run/emulator-networking#networkaddresses)).
+> If you wanted to use a real device, you'd need to replace the `10.0.2.2` host by the one of the
+> machine where you'll start the services mentioned in the steps below.
 
 ### Step 1: Setting your Elasticsearch properties
 

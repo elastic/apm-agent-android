@@ -142,8 +142,8 @@ To select the build variant to run the bytecode instrumentation for an OTel Andr
 add its `byteBuddy` dependency using the variant-specific byteBuddy name, such as `releaseByteBuddy` or `debugByteBuddy`,
 depending on which variant you'd like to enable the bytecode instrumentation for.
 
-Following the example above, if we'd like to install the `HttpURLConnection` instrumentation only for our app's `release` build type,
-we can change the way we add its byteBuddy dependency as shown below:
+Following the previous example, if you want to install the `HttpURLConnection` instrumentation only for your app's `release` build type,
+you can change the way we add its byteBuddy dependency as shown here:
 
 ```kotlin
 

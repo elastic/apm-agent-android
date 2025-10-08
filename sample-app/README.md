@@ -139,7 +139,9 @@ weather forecast won’t work for New York as the city.
 > [!IMPORTANT]
 > Make sure you open the `sample-app` directory with Android Studio and **NOT** the root dir of this
 > repo.
->
+
+---
+
 > [!NOTE]
 > The reason why is recommended using an emulator is because the agent
 > endpoint

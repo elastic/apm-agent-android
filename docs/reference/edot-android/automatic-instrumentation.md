@@ -136,7 +136,7 @@ As explained in [compilation behavior](#compilation-behavior), the instrumentati
 compilation times, which might not be needed all the time. Because of this, EDOT Android provides a [configuration param](#automatic-instrumentation-configuration)
 that allows to select specific build types for which the bytecode instrumentation will be turned off. This configuration
 only works for EDOT Android's [supported instrumentations](#supported-instrumentations), so it won't have any effect on
-instrumentations added via the OTel Android instrumentations adapter.
+instrumentations added through the OTel Android instrumentations adapter.
 
 In order to select the build variant to run the bytecode instrumentation for an OTel Android instrumentation, you must
 add its `byteBuddy` dependency using the variant-specific byteBuddy name, such as `releaseByteBuddy` or `debugByteBuddy`,

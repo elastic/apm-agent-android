@@ -24,26 +24,12 @@ else
   range="v$major.$((minor - 1)).0..HEAD"
 fi
 
-echo "## Unreleased"
-echo
-echo "### Migration notes"
-echo
-echo
-echo "### 🌟 New instrumentation"
-echo
-echo
-echo "### 📈 Enhancements"
-echo
-echo
-echo "### 🛠️ Bug fixes"
-echo
-echo
-echo "### 🧰 Tooling"
-echo
-
+echo "[$(
 git log --reverse \
         --perl-regexp \
         --author='^((?!elastic-renovate).*)$' \
-        --pretty=format:"- %s" \
+        --pretty=format:"%s" \
         "$range" \
-  | sed -E 's,\(#([0-9]+)\)$,\n  ([#\1](https://github.com/elastic/apm-agent-android/pull/\1)),'
+  | sed -r 's;^(.+) \(#([0-9]+)\)$;{"message":"\1", "prId":"\2"},;g' \
+  | sed '$ s/,$//g'
+)]"

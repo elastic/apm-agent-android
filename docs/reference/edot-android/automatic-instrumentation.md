@@ -132,7 +132,7 @@ dependencies {  // <2>
 
 ### Compilation performance
 
-As explained in [compilation behavior](#compilation-behavior), the instrumentations that perform bytecode weaving can increase the
+As explained in [compilation behavior](#compilation-behavior), the instrumentations that perform bytecode weaving might increase the
 compilation times, which might not be needed all the time. Because of this, EDOT Android provides a [configuration param](#automatic-instrumentation-configuration)
 that allows to select specific build types for which the bytecode instrumentation will be turned off. This configuration
 only works for EDOT Android's [supported instrumentations](#supported-instrumentations), so it won't have any effect on

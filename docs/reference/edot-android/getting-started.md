@@ -27,7 +27,8 @@ Set up the Elastic Distribution of OpenTelemetry Android (EDOT Android) in your 
 | Android API level                                 | 26 (or 21 with [desugaring](https://developer.android.com/studio/write/java8-support#library-desugaring)) |
 
 :::{important}
-If your application's [minSdk](https://developer.android.com/studio/publish/versioning#minsdk) value is lower than 26, you must add [Java 8 desugaring support](https://developer.android.com/studio/write/java8-support#library-desugaring). Refer to [Troubleshooting](docs-content://troubleshoot/ingest/opentelemetry/edot-sdks/android/index.md#why-desugaring) for more information.
+* If your application's [minSdk](https://developer.android.com/studio/publish/versioning#minsdk) value is lower than 26, you must add [Java 8 desugaring support](https://developer.android.com/studio/write/java8-support#library-desugaring). Refer to [Troubleshooting](docs-content://troubleshoot/ingest/opentelemetry/edot-sdks/android/index.md#why-desugaring) for more information.
+* EDOT Android is meant to be used in Android projects only. Hybrid frameworks, such as React Native and Flutter, are not supported.
 :::
 
 ## Gradle setup

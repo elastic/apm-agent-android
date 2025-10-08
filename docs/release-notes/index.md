@@ -31,6 +31,17 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 % next_release_notes
     
+## 1.3.0 [elastic-apm-android-agent-130-release-notes]
+**Release date:** October 8, 2025
+
+### Features and enhancements [elastic-apm-android-agent-130-features-enhancements]
+
+* Avoid central config spans: [#598](https://github.com/elastic/apm-agent-android/pull/598)
+* Adding support to close instrumentations when the agent is closed: [#601](https://github.com/elastic/apm-agent-android/pull/601)
+* Otel core update
+* Using upstream opamp for central config: [#622](https://github.com/elastic/apm-agent-android/pull/622)
+* Removing READ_PHONE_STATE permission from manifest: [#651](https://github.com/elastic/apm-agent-android/pull/651)
+    
 ## 1.2.0 [elastic-apm-android-agent-120-release-notes]
 **Release date:** July 29, 2025
 

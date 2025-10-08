@@ -7,8 +7,7 @@ This product includes software licensed under the 'Apache License Version 2.0' l
 
  - Byte Buddy (without dependencies)
  - Byte Buddy Gradle plugin
- - Core (https://developer.android.com/jetpack/androidx/releases/core#1.16.0)
- - FindBugs-jsr305 (http://findbugs.sourceforge.net/)
+ - Core (https://developer.android.com/jetpack/androidx/releases/core#1.17.0)
  - Kotlin Stdlib (https://kotlinlang.org/)
  - OpenTelemetry Android (https://github.com/open-telemetry/opentelemetry-android)
  - OpenTelemetry Instrumentation for Java (https://github.com/open-telemetry/opentelemetry-java-instrumentation)
@@ -16,13 +15,13 @@ This product includes software licensed under the 'Apache License Version 2.0' l
  - OpenTelemetry Java Contrib (https://github.com/open-telemetry/opentelemetry-java-contrib)
  - OpenTelemetry Semantic Conventions Java (https://github.com/open-telemetry/semantic-conventions-java)
  - org.stagemonitor:stagemonitor-configuration (http://www.stagemonitor.org)
+ - Weakly referenced lock-free data structures (https://github.com/raphw/weak-lock-free)
 
 -------------------------------------------------------------------------------
 
 This product includes software licensed under the 'MIT License' license from the following sources:
 
  - SLF4J API Module (http://www.slf4j.org)
- - uuid-creator (https://github.com/f4b6a3/uuid-creator)
 
 -------------------------------------------------------------------------------
 

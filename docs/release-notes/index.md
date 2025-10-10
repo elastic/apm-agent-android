@@ -31,8 +31,8 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 % next_release_notes
     
-## 1.3.0 [elastic-apm-android-agent-130-release-notes]
-**Release date:** October 8, 2025
+## 1.3.1 [elastic-apm-android-agent-131-release-notes]
+**Release date:** October 10, 2025
 
 ### Features and enhancements [elastic-apm-android-agent-130-features-enhancements]
 

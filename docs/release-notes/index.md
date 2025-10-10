@@ -34,7 +34,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 ## 1.3.1 [elastic-apm-android-agent-131-release-notes]
 **Release date:** October 10, 2025
 
-### Features and enhancements [elastic-apm-android-agent-130-features-enhancements]
+### Features and enhancements [elastic-apm-android-agent-131-features-enhancements]
 
 * Avoid central config spans: [#598](https://github.com/elastic/apm-agent-android/pull/598)
 * Adding support to close instrumentations when the agent is closed: [#601](https://github.com/elastic/apm-agent-android/pull/601)

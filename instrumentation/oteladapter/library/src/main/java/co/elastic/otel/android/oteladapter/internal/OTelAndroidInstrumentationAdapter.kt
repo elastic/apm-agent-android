@@ -20,8 +20,8 @@ package co.elastic.otel.android.oteladapter.internal
 
 import android.app.Application
 import co.elastic.otel.android.api.ElasticOtelAgent
-import co.elastic.otel.android.instrumentation.generated.oteladapter.BuildConfig
 import co.elastic.otel.android.instrumentation.internal.Instrumentation
+import co.elastic.otel.android.instrumentation.oteladapter.BuildConfig
 import co.elastic.otel.android.oteladapter.internal.delegate.OpenTelemetryDelegator
 import com.google.auto.service.AutoService
 import io.opentelemetry.android.instrumentation.AndroidInstrumentationLoader

@@ -20,8 +20,8 @@ package co.elastic.otel.android.okhttp.internal
 
 import android.app.Application
 import co.elastic.otel.android.api.ElasticOtelAgent
-import co.elastic.otel.android.instrumentation.generated.okhttp.BuildConfig
 import co.elastic.otel.android.instrumentation.internal.Instrumentation
+import co.elastic.otel.android.instrumentation.okhttp.BuildConfig
 import co.elastic.otel.android.okhttp.internal.plugin.OkHttp3Singletons
 import com.google.auto.service.AutoService
 

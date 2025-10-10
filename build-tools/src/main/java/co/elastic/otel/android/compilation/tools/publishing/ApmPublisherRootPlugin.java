@@ -6,6 +6,7 @@ import static co.elastic.otel.android.compilation.tools.publishing.PublishingUti
 import co.elastic.otel.android.compilation.tools.NoticeProviderPlugin;
 import co.elastic.otel.android.compilation.tools.plugins.RootNoticeProviderPlugin;
 import co.elastic.otel.android.compilation.tools.sourceheader.ApmSourceHeaderPlugin;
+import com.android.build.api.variant.LibraryAndroidComponentsExtension;
 import com.diffplug.gradle.spotless.SpotlessExtension;
 import com.diffplug.gradle.spotless.SpotlessPlugin;
 import java.util.regex.Matcher;
@@ -87,6 +88,20 @@ public class ApmPublisherRootPlugin implements Plugin<Project> {
     binaryValidatorExtension
         .getNonPublicMarkers()
         .add("co.elastic.otel.android.common.internal.annotations.InternalApi");
+    subproject
+        .getPlugins()
+        .withId(
+            "com.android.library",
+            plugin ->
+                subproject
+                    .getExtensions()
+                    .getByType(LibraryAndroidComponentsExtension.class)
+                    .finalizeDsl(
+                        libraryExtension -> {
+                          binaryValidatorExtension
+                              .getIgnoredClasses()
+                              .add(libraryExtension.getNamespace() + ".BuildConfig");
+                        }));
     binaryValidatorExtension.setApiDumpDirectory("metadata");
   }
 

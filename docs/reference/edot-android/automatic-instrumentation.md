@@ -129,3 +129,28 @@ dependencies {  // <2>
 1. Make sure the adapter is added.
 2. You can find the dependencies needed in the [instrumentation's README file](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation/httpurlconnection#project-dependencies). The same will be the case for any other instrumentation.
 3. The instrumentations that require a `byteBuddy` dependency, do bytecode weaving, as explained in [compilation behavior](#compilation-behavior). An extra plugin named `net.bytebuddy.byte-buddy-gradle-plugin` is required to make this work, as shown [here](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation/httpurlconnection#byte-buddy-compilation-plugin). However, EDOT Android installs this extra plugin on your behalf, so there's no need for you to do so manually.
+
+### Compilation performance
+
+As explained in [compilation behavior](#compilation-behavior), the instrumentations that perform bytecode weaving might increase the
+compilation times. Because of this, EDOT Android provides a [configuration param](#automatic-instrumentation-configuration)
+that allows to select specific build types for which the bytecode instrumentation will be turned off. This configuration
+only works for EDOT Android's [supported instrumentations](#supported-instrumentations), so it won't have any effect on
+instrumentations added through the OTel Android instrumentations adapter.
+
+To select the build variant to run the bytecode instrumentation for an OTel Android instrumentation, you must
+add its `byteBuddy` dependency using the variant-specific byteBuddy name, such as `releaseByteBuddy` or `debugByteBuddy`,
+depending on which variant you'd like to enable the bytecode instrumentation for.
+
+Following the previous example, if you want to install the `HttpURLConnection` instrumentation only for your app's `release` build type,
+you can change the way we add its byteBuddy dependency as shown here:
+
+```kotlin
+
+dependencies { 
+    // ... 
+    releaseByteBuddy("io.opentelemetry.android.instrumentation:httpurlconnection-agent:AUTO_HTTP_URL_INSTRUMENTATION_VERSION") // <1>
+}
+```
+
+1. Will only install the instrumentation for the `release` build type of the app, avoiding to increase the compilation time for other types, such as `debug`, for example.

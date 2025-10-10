@@ -55,6 +55,14 @@ more information.
   one [here](https://www.elastic.co/docs/deploy-manage/api-keys/elasticsearch-api-keys#create-api-key).
 * An [Android emulator](https://developer.android.com/studio/run/emulator#get-started).
 
+> [!NOTE]
+> The reason why is recommended using an emulator is because the 
+> endpoints set [here](app/src/main/java/co/elastic/otel/android/sample/MyApp.kt) and
+> [here](app/src/main/java/co/elastic/otel/android/sample/network/WeatherRestManager.kt) point to
+> local services via the emulator's localhost IP ([10.0.2.2](https://developer.android.com/studio/run/emulator-networking#networkaddresses)).
+> If you wanted to use a real device, you'd need to replace the `10.0.2.2` host by the one of the
+> machine where you'll start the services mentioned in the steps below.
+
 ### Step 1: Setting your Elasticsearch properties
 
 You must set your Elasticsearch endpoint URL
@@ -137,19 +145,8 @@ multiple times. Please, also make sure to select New York at least once. You wil
 weather forecast won’t work for New York as the city.
 
 > [!IMPORTANT]
-> Make sure you open the `sample-app` directory with Android Studio and **NOT** the root dir of this
+> Make sure you open the [sample-app](.) directory with Android Studio and **NOT** [the root dir](..) of this
 > repo.
->
-> [!NOTE]
-> The reason why is recommended using an emulator is because the agent
-> endpoint
-> set [here](app/src/main/java/co/elastic/otel/android/sample/MyApp.kt) points to the local EDOT
-> Collector service, and the backend service
-> endpoint [provided here](app/src/main/java/co/elastic/otel/android/sample/network/WeatherRestManager.kt)
-> also points to a local backend service. If you wanted to use a real device, you'd need to replace
-> the `10.0.2.2` IP by the one of the machine where you've started the services mentioned in the
-> steps
-> above.
 
 ## Analyzing the data
 

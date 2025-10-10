@@ -80,7 +80,7 @@ For [distributed tracing](#distributed-tracing) to work properly, your applicati
 
 A session groups telemetry data within a time frame when your application is active by adding a `session.id` attribute to all the spans and logs that come out of your application. This helps limit the volume of data you need to look at when investigating the steps that led to an error within your app. It can also give you insight into the common actions performed on each use.
 
-A session is created when no previous session exists or when the previous one has expired. Sessions expire after 30 minutes of inactivity. You can extend this for up to 4 hours.
+A session is created when no previous session exists or when the previous one has expired. Sessions expire after 30 minutes of inactivity. If there's constant activity on an app, the session will live up to a maximum of 4 hours.
 
 ### Dynamic configuration [dynamic-configuration]
 

@@ -56,7 +56,7 @@ more information.
 * An [Android emulator](https://developer.android.com/studio/run/emulator#get-started).
 
 > [!NOTE]
-> The reason why is recommended using an emulator is because the 
+> The reason why is recommended using an emulator is because the
 > endpoints set [here](app/src/main/java/co/elastic/otel/android/sample/MyApp.kt) and
 > [here](app/src/main/java/co/elastic/otel/android/sample/network/WeatherRestManager.kt) point to
 > local services via the emulator's localhost IP ([10.0.2.2](https://developer.android.com/studio/run/emulator-networking#networkaddresses)).

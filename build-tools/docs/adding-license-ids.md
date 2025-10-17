@@ -17,7 +17,12 @@ well as providing their license body needed to be present in our NOTICE files.
 
 ## Steps
 
-### 1. Creating the license ID
+### 1. Checking if the licence is valid
+
+Take a look first if the licence you're about to add is allowed
+by [Elastic's license policy](https://github.com/elastic/open-source/blob/main/elastic-product-policy.md).
+
+### 2. Creating the license ID
 
 Within this project, `build-tools`, there's a file located at: `src/resources/licenses_ids.txt`
 which contains all the licenses IDs needed for our NOTICE files generation. If the license you need
@@ -30,7 +35,7 @@ name (without its abbreviation usually provided between parenthesis).
 You should take a look at how the existing IDs are defined in order to get inspiration on how to add
 a new one.
 
-### 2. Creating the license body file
+### 3. Creating the license body file
 
 Each license's full body needs to be provided in the generated NOTICE file, therefore we are also
 going to need to have it handy when it happens.

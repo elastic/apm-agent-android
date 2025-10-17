@@ -14,13 +14,12 @@ Table of Contents
 =================
 
 * [Creating NOTICE files](#creating-notice-files)
-  * [Troubleshooting](#troubleshooting)
-* [Verifying NOTICE files](#verifying-notice-files)
+    * [Troubleshooting](#troubleshooting)
 * [Adding source headers](#adding-source-headers)
 * [Publishing](#publishing)
-  * [Publishing parameters](#publishing-parameters)
-  * [Publishing to Maven Central](#publishing-to-maven-central)
-  * [Publishing to the Gradle Plugin Portal](#publishing-to-the-gradle-plugin-portal)
+    * [Publishing parameters](#publishing-parameters)
+    * [Publishing to Maven Central](#publishing-to-maven-central)
+    * [Publishing to the Gradle Plugin Portal](#publishing-to-the-gradle-plugin-portal)
 
 ## Creating NOTICE files
 
@@ -55,8 +54,8 @@ format: `group:artifact-id:version|[LICENSE_ID]`. The format is composed of the 
 coordinates (same as the ones used when adding them in the `build.gradle` files), then a
 pipeline `|` followed by the licence's ID.
 
-> The license ID must be available within this tool's `resources/licenses_ids.txt` file. More info on
-> [How to add licenses IDs](docs/adding-license-ids.md).
+> The license ID must be available within this tool's `resources/licenses_ids.txt` file. More info
+> on [How to add licenses IDs](docs/adding-license-ids.md).
 
 Example of the contents of a file with two mappings:
 
@@ -79,15 +78,16 @@ licensesConfig {
 ## Adding source headers
 
 This work is triggered when building this project so there's nothing manual to be done about it. The
-source headers are added using [this tool](https://github.com/diffplug/spotless) which is configured
+source headers are added using [spotless](https://github.com/diffplug/spotless) which is configured
 for both `java` and `kotlin` source files
 in [here](src/main/java/co/elastic/apm/compile/tools/sourceheader/subplugins).
 
 ## Publishing
 
-The APM Android Agent project has several modules needed to be deployed. All of them, except for
-one, need to be deployed to maven central. The only exception is for the `android-plugin` module
-which has to go into the [Gradle Plugin Portal](https://plugins.gradle.org/).
+The APM Android Agent project has several modules needed to be deployed. Most of them are deployed
+to [Maven Central](https://central.sonatype.com/), which are the regular Java/Android libraries, and the rest
+are Gradle plugin modules, such as the `agent-plugin` and all of the `instrumentation/*/plugin`
+ones, which will go into the [Gradle Plugin Portal](https://plugins.gradle.org/) instead.
 
 Both kinds of deployments are automatically configured for all the modules available in this
 project, this tool takes care of checking what are the types of the projects (either Java library,
@@ -96,16 +96,16 @@ Android library or Gradle plugin) and sets their deployment configuration accord
 ### Publishing parameters
 
 - `Group ID`: It comes from the root "gradle.properties" file, it's a property named `group`.
-- `Artifact ID`: It's the module's dir name, for example, for the module `android-sdk`, its artifact
-  id will be `android-sdk`.
+- `Artifact ID`: It's the module's dir name, for example, for the module `agent-sdk`, its artifact
+  id will be `agent-sdk`.
 - `Version`: It comes from the root "gradle.properties" file, it's a property named `version`.
 
 ### Publishing to Maven Central
 
-The Maven Central (Sonatype OSSRH Nexus) deployment is configured using the
+The Maven Central deployment is configured using the
 official [Maven Publish plugin](https://docs.gradle.org/current/userguide/publishing_maven.html),
 and the deploy task is handled by
-the [Gradle Nexus publish plugin](https://github.com/gradle-nexus/publish-plugin).
+the [Gradle Maven publish plugin](https://github.com/vanniktech/gradle-maven-publish-plugin/).
 
 #### Requirements
 
@@ -115,14 +115,14 @@ Before executing the publishing command, the following signing environment varia
 - ORG_GRADLE_PROJECT_signingPassword
 
 More info about those variables
-in [here](https://docs.gradle.org/current/userguide/signing_plugin.html#sec:in-memory-keys).
+can be found [here](https://docs.gradle.org/current/userguide/signing_plugin.html#sec:in-memory-keys).
 
 As well as the following Sonatype credentials env vars:
 
-- ORG_GRADLE_PROJECT_sonatypeUsername
-- ORG_GRADLE_PROJECT_sonatypePassword
+- ORG_GRADLE_PROJECT_mavenCentralUsername
+- ORG_GRADLE_PROJECT_mavenCentralUsername
 
-More info on those, [here](https://github.com/gradle-nexus/publish-plugin)
+More info on those, [here](https://vanniktech.github.io/gradle-maven-publish-plugin/central/)
 
 #### Triggering the deploy
 
@@ -130,12 +130,12 @@ After the requirements are set up, the command needed to deploy all the non-grad
 from this project is:
 
 ```text
-./gradlew publishElasticPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository -Prelease=true
+./gradlew publishAndReleaseElasticToMavenCentral -Prelease=true
 ```
 
 ### Publishing to the Gradle Plugin Portal
 
-The module `android-plugin` needs to go to the Gradle Plugin Portal, instead of Maven Central so
+The module `agent-plugin` and also all the `instrumentation/*/plugin` ones, need to go to the Gradle Plugin Portal, instead of Maven Central so
 that it can be applied easily into gradle projects using
 the [Gradle Plugin DSL](https://docs.gradle.org/current/userguide/plugins.html#sec:plugins_block),
 which is the current way of doing so, otherwise people would have to apply our plugin using

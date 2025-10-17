@@ -14,12 +14,12 @@ Table of Contents
 =================
 
 * [Creating NOTICE files](#creating-notice-files)
-    * [Troubleshooting](#troubleshooting)
+  * [Troubleshooting](#troubleshooting)
 * [Adding source headers](#adding-source-headers)
 * [Publishing](#publishing)
-    * [Publishing parameters](#publishing-parameters)
-    * [Publishing to Maven Central](#publishing-to-maven-central)
-    * [Publishing to the Gradle Plugin Portal](#publishing-to-the-gradle-plugin-portal)
+  * [Publishing parameters](#publishing-parameters)
+  * [Publishing to Maven Central](#publishing-to-maven-central)
+  * [Publishing to the Gradle Plugin Portal](#publishing-to-the-gradle-plugin-portal)
 
 ## Creating NOTICE files
 

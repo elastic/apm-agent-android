@@ -80,7 +80,7 @@ licensesConfig {
 This work is triggered when building this project so there's nothing manual to be done about it. The
 source headers are added using [spotless](https://github.com/diffplug/spotless) which is configured
 for both `java` and `kotlin` source files
-in [here](src/main/java/co/elastic/apm/compile/tools/sourceheader/subplugins).
+in [here](src/main/java/co/elastic/otel/android/compilation/tools/sourceheader/subplugins).
 
 ## Publishing
 

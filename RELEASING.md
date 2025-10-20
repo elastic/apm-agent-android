@@ -64,6 +64,6 @@ point to specific ones in a "catch-all" sort of guide. However, here are some gu
 scenarios:
 
 * A repository issue. This might happen when either Maven Central or the Gradle plugin portal have internal issues. The logs should give hints about this. The solution might be to wait until they're back operating as normal.
-* A secrets issue. Our release process involves retrieving secrets that are needed to authenticate against the repositories. You'd need to contact IT to help with those.
+* A secrets issue. Our release process involves retrieving secrets that are needed to authenticate against the repositories. You'd need to contact the platform engineering team to help with those.
 * A compilation issue. There are several reasons and compilation checks that can make a build fail. Refer to the [build-tools's README file](build-tools/README.md) to get a comprehensive guide on the compilation details of this project.
 

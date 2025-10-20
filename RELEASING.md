@@ -5,7 +5,7 @@ This document describes the steps required to publish a release to [Maven Centra
 for this repository. For more technical details of the publishing process and configuration that happens under the hood, take a look at
 the [build-tools's README file](build-tools/README.md).
 
-## Steps
+## Release steps
 
 ### 1. Check version to release
 
@@ -46,3 +46,13 @@ The release action should do the following:
 ### 4. Prepare for the next release
 
 If all went well on step 3, it should have automatically created a PR against `main` to update it and prepare it for a new release. Review and merge it.
+
+## Patch release
+
+A patch release requires to update the relevant release branch (previously created during [step #2](#2-prepare-a-release-branch))
+to ensure that:
+
+* The version is updated, that is, the patch number is increased. You must create a PR against the relevant release branch to update it.
+* The patch/changes are merged into the relevant release branch.
+
+After those items are in place, you can continue with the release process from [step #3](#3-launch-the-release-process).

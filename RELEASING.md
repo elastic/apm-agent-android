@@ -15,8 +15,8 @@ the release process.
 ### 2. Prepare a release branch
 
 This is done by running [this action](https://github.com/elastic/apm-agent-android/actions/workflows/prepare-release.yml), which has 2 parameters:
-  - The branch. This must be `main`.
-  - The release notes. This must be provided as a single-line JSON with [this format](.github/scripts/generate-release-notes/sample.json).
+- The branch. This must be `main`.
+- The release notes. This must be provided as a single-line JSON with [this format](.github/scripts/generate-release-notes/sample.json).
 
 > [!TIP]
 > You can use [this action](https://github.com/elastic/apm-agent-android/actions/workflows/draft-changelog.yml) to generate release notes based on the git diff since the last release.
@@ -28,16 +28,16 @@ This action should create a PR to a new release branch with the release notes an
 ### 3. Launch the release process
 
 This is done by running [this action](https://github.com/elastic/apm-agent-android/actions/workflows/release.yml) where you'll need to provide the following parameters:
-  - The branch. This must be the release branch created as part of the previous step. Its name must be `release/{version}`, where "{version}" is the one you're about to release.
-  - The repo to deploy to. The options are:
-    - `all` - Deploy all the artifacts, the ones that will go to maven central and also the Gradle plugin portal ones. This is the default option and should be left as is for a regular release.
-    - `mavenCentral` - Only deploys the maven central artifacts. This is useful in case a previous release attempt only succeeded at releasing to the Gradle plugin portal but the maven central release failed.
-    - `pluginPortal` - Only deploys the Gradle plugin artifacts. This is useful in case a previous release attempt only succeeded at releasing to maven central but the Gradle plugin portal release failed.
-  - A dry-run checkbox. This is for IT use, leave it unchecked for a release.
+- The branch. This must be the release branch created as part of the previous step. Its name must be `release/{version}`, where "{version}" is the one you're about to release.
+- The repo to deploy to. The options are:
+- `all` - Deploy all the artifacts, the ones that will go to maven central and also the Gradle plugin portal ones. This is the default option and should be left as is for a regular release.
+- `mavenCentral` - Only deploys the maven central artifacts. This is useful in case a previous release attempt only succeeded at releasing to the Gradle plugin portal but the maven central release failed.
+- `pluginPortal` - Only deploys the Gradle plugin artifacts. This is useful in case a previous release attempt only succeeded at releasing to maven central but the Gradle plugin portal release failed.
+- A dry-run checkbox. This is for IT use, leave it unchecked for a release.
 
 The release action should do the following:
-  - Release the artifacts to the specified repos.
-  - Create a GitHub release and a tag with the newly released version.
+- Release the artifacts to the specified repos.
+- Create a GitHub release and a tag with the newly released version.
 
 > [!NOTE]
 > Maven central tends to have a delay of roughly half an hour, more or less, before making the newly published artifacts actually available
@@ -66,3 +66,4 @@ scenarios:
 * A repository issue. This might happen when either Maven Central or the Gradle plugin portal have internal issues. The logs should give hints about this. The solution might be to wait until they're back operating as normal.
 * A secrets issue. Our release process involves retrieving secrets that are needed to authenticate against the repositories. You'd need to contact IT to help with those.
 * A compilation issue. There are several reasons and compilation checks that can make a build fail. Refer to the [build-tools's README file](build-tools/README.md) to get a comprehensive guide on the compilation details of this project.
+

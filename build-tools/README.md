@@ -92,7 +92,7 @@ in [here](src/main/java/co/elastic/otel/android/compilation/tools/sourceheader/s
 
 ### For Markdown files
 
-All markdown files (outside of the [docs](../docs) dir) are formatted using [spotless](https://github.com/diffplug/spotless). This work isn't done automatically, 
+All markdown files (outside of the [docs](../docs) dir) are formatted using [spotless](https://github.com/diffplug/spotless). This work isn't done automatically,
 so to get spotless to do the formatting you must run the `./gradlew spotlessApply` command from this repo's root dir.
 
 ### Formatting troubleshooting

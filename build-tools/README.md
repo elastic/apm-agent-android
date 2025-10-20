@@ -14,8 +14,9 @@ Table of Contents
 =================
 
 * [Creating NOTICE files](#creating-notice-files)
-  * [Troubleshooting](#troubleshooting)
+  * [Troubleshooting](#notice-files-troubleshooting)
 * [Formatting and headers](#formatting-and-headers)
+  * [Troubleshooting](#formatting-troubleshooting)
 * [Publishing](#publishing)
   * [Publishing parameters](#publishing-parameters)
   * [Publishing to Maven Central](#publishing-to-maven-central)
@@ -44,7 +45,7 @@ The following command will trigger the notice files generation process:
 ./gradlew createNoticeFile
 ```
 
-### Troubleshooting
+### Notice files troubleshooting
 
 Some POM files don't contain the dependency's license information, if that's the case,
 the `createNoticeFile` task will raise an error during execution listing which dependencies don't
@@ -89,7 +90,7 @@ in [here](src/main/java/co/elastic/otel/android/compilation/tools/sourceheader/s
 All markdown files (outside of the [docs](../docs) dir) are formatted using [spotless](https://github.com/diffplug/spotless). This work isn't done automatically, 
 so to get spotless to do the formatting you must run the `./gradlew spotlessApply` command from this repo's root dir.
 
-### Troubleshooting
+### Formatting troubleshooting
 
 The CI checks will raise formatting issues in case there are formatting violations in the code base. In order to address them all,
 you need to run the `./gradlew spotlessApply` command from this repo's root dir.

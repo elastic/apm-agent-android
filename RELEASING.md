@@ -18,7 +18,7 @@ This is done by running [this action](https://github.com/elastic/apm-agent-andro
   - The branch. This must be `main`.
   - The release notes. This must be provided as a single-line JSON with [this format](.github/scripts/generate-release-notes/sample.json).
 
-[!TIP]
+> [!TIP]
 > You can use [this action](https://github.com/elastic/apm-agent-android/actions/workflows/draft-changelog.yml) to generate release notes based on the git diff since the last release.
 > You should still check the result manually before entering it into the prepare release action, just in case it contains entries that don't make sense to display on the release notes page.
 > The action will print the release notes to the console in JSON format.
@@ -39,7 +39,7 @@ The release action should do the following:
   - Release the artifacts to the specified repos.
   - Create a GitHub release and a tag with the newly released version.
 
-[!NOTE]
+> [!NOTE]
 > Maven central tends to have a delay of roughly half an hour, more or less, before making the newly published artifacts actually available
 > for fetching them.
 

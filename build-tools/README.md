@@ -16,7 +16,12 @@ Table of Contents
 * [Creating NOTICE files](#creating-notice-files)
   * [Troubleshooting](#notice-files-troubleshooting)
 * [Formatting and headers](#formatting-and-headers)
+  * [For source code](#for-source-code-files)
+  * [For markdown](#for-markdown-files)
   * [Troubleshooting](#formatting-troubleshooting)
+* [API binary compatibility](#api-binary-compatibility-report)
+  * [Ignoring internal packages](#ignoring-internal-packages)
+  * [Troubleshooting](#binary-report-troubleshooting)
 * [Publishing](#publishing)
   * [Publishing parameters](#publishing-parameters)
   * [Publishing to Maven Central](#publishing-to-maven-central)
@@ -94,6 +99,24 @@ so to get spotless to do the formatting you must run the `./gradlew spotlessAppl
 
 The CI checks will raise formatting issues in case there are formatting violations in the code base. In order to address them all,
 you need to run the `./gradlew spotlessApply` command from this repo's root dir.
+
+## API binary compatibility report
+
+To help ensure that we won't introduce breaking changes into our APIs on a new release, we create a
+binary API dump for each module using [binary compatibility validator](https://github.com/Kotlin/binary-compatibility-validator), which
+is validated by the CI checks, raising issues in case that the public APIs don't match the previously generated API dump.
+
+### Ignoring internal packages
+
+We aim to generate a report for public APIs only. The tool we use will automatically ignore Kotlin's `internal` types, however,
+sometimes we can't mark some types as `internal` (because they might be needed for other submodules, for example), or because
+the code is written in Java. In such cases, we'd need to annotate the types to ignore with the `co.elastic.otel.android.common.internal.annotations.InternalApi`
+annotation. For convenience, we can do so for a whole package by using the same annotation within a `package-info.java` file.
+
+### Binary report troubleshooting
+
+The CI checks will raise compatibility issues in case there are unreported public API changes in the code base. In order to address them all,
+you need to run the `./gradlew apiDump` command from this repo's root dir.
 
 ## Publishing
 

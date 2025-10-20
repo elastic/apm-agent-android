@@ -15,7 +15,7 @@ Table of Contents
 
 * [Creating NOTICE files](#creating-notice-files)
   * [Troubleshooting](#troubleshooting)
-* [Adding source headers](#adding-source-headers)
+* [Formatting and headers](#formatting-and-headers)
 * [Publishing](#publishing)
   * [Publishing parameters](#publishing-parameters)
   * [Publishing to Maven Central](#publishing-to-maven-central)
@@ -75,12 +75,24 @@ licensesConfig {
 }
 ```
 
-## Adding source headers
+## Formatting and headers
+
+### For source code files
 
 This work is triggered when building this project so there's nothing manual to be done about it. The
 source headers are added using [spotless](https://github.com/diffplug/spotless) which is configured
 for both `java` and `kotlin` source files
 in [here](src/main/java/co/elastic/otel/android/compilation/tools/sourceheader/subplugins).
+
+### For Markdown files
+
+All markdown files (outside of the [docs](../docs) dir) are formatted using [spotless](https://github.com/diffplug/spotless). This work isn't done automatically, 
+so to get spotless to do the formatting you must run the `./gradlew spotlessApply` command from this repo's root dir.
+
+### Troubleshooting
+
+The CI checks will raise formatting issues in case there are formatting violations in the code base. In order to address them all,
+you need to run the `./gradlew spotlessApply` command from this repo's root dir.
 
 ## Publishing
 

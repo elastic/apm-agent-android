@@ -20,11 +20,11 @@ package co.elastic.otel.android.internal.features.diskbuffering
 
 import androidx.annotation.WorkerThread
 import co.elastic.otel.android.common.internal.logging.Elog
-import io.opentelemetry.contrib.disk.buffering.LogRecordFromDiskExporter
-import io.opentelemetry.contrib.disk.buffering.MetricFromDiskExporter
-import io.opentelemetry.contrib.disk.buffering.SpanFromDiskExporter
+import co.elastic.otel.android.internal.features.diskbuffering.tools.FromDiskExporter
+import io.opentelemetry.sdk.logs.data.LogRecordData
+import io.opentelemetry.sdk.metrics.data.MetricData
+import io.opentelemetry.sdk.trace.data.SpanData
 import java.io.Closeable
-import java.util.concurrent.TimeUnit
 
 /**
  * Entrypoint to read and export previously cached signals.
@@ -33,18 +33,16 @@ import java.util.concurrent.TimeUnit
  * any time.
  */
 internal class SignalFromDiskExporter internal constructor(
-    private val spanDiskExporter: SpanFromDiskExporter?,
-    private val metricDiskExporter: MetricFromDiskExporter?,
-    private val logRecordDiskExporter: LogRecordFromDiskExporter?,
-    private val exportTimeoutInMillis: Long
+    private val spanFromDiskExporter: FromDiskExporter<SpanData>?,
+    private val metricFromDiskExporter: FromDiskExporter<MetricData>?,
+    private val logRecordFromDiskExporter: FromDiskExporter<LogRecordData>?,
 ) : Closeable {
     private val logger = Elog.getLogger()
 
     @WorkerThread
     fun exportBatchOfSpans(): Boolean {
         return try {
-            spanDiskExporter?.exportStoredBatch(exportTimeoutInMillis, TimeUnit.MILLISECONDS)
-                ?: false
+            spanFromDiskExporter?.exportNextBatch() ?: false
         } catch (t: Throwable) {
             logger.error("Error while trying to export spans from disk", t)
             false
@@ -54,8 +52,7 @@ internal class SignalFromDiskExporter internal constructor(
     @WorkerThread
     fun exportBatchOfMetrics(): Boolean {
         return try {
-            metricDiskExporter?.exportStoredBatch(exportTimeoutInMillis, TimeUnit.MILLISECONDS)
-                ?: false
+            metricFromDiskExporter?.exportNextBatch() ?: false
         } catch (t: Throwable) {
             logger.error("Error while trying to export metrics from disk", t)
             false
@@ -65,10 +62,7 @@ internal class SignalFromDiskExporter internal constructor(
     @WorkerThread
     fun exportBatchOfLogs(): Boolean {
         return try {
-            logRecordDiskExporter?.exportStoredBatch(
-                exportTimeoutInMillis,
-                TimeUnit.MILLISECONDS
-            ) ?: false
+            logRecordFromDiskExporter?.exportNextBatch() ?: false
         } catch (t: Throwable) {
             logger.error("Error while trying to export logs from disk", t)
             false
@@ -88,43 +82,36 @@ internal class SignalFromDiskExporter internal constructor(
     }
 
     override fun close() {
-        spanDiskExporter?.shutdown()
-        logRecordDiskExporter?.shutdown()
-        metricDiskExporter?.shutdown()
+        spanFromDiskExporter?.close()
+        logRecordFromDiskExporter?.close()
+        metricFromDiskExporter?.close()
     }
 
     class Builder {
-        private var spanDiskExporter: SpanFromDiskExporter? = null
-        private var metricDiskExporter: MetricFromDiskExporter? = null
-        private var logRecordDiskExporter: LogRecordFromDiskExporter? = null
-        private var exportTimeoutInMillis = TimeUnit.SECONDS.toMillis(5)
+        private var spanFromDiskExporter: FromDiskExporter<SpanData>? = null
+        private var metricFromDiskExporter: FromDiskExporter<MetricData>? = null
+        private var logRecordFromDiskExporter: FromDiskExporter<LogRecordData>? = null
 
-        fun setSpanFromDiskExporter(spanDiskExporter: SpanFromDiskExporter?): Builder {
-            this.spanDiskExporter = spanDiskExporter
+        fun setSpanFromDiskExporter(value: FromDiskExporter<SpanData>?): Builder {
+            this.spanFromDiskExporter = value
             return this
         }
 
-        fun setMetricFromDiskExporter(metricDiskExporter: MetricFromDiskExporter?): Builder {
-            this.metricDiskExporter = metricDiskExporter
+        fun setMetricFromDiskExporter(value: FromDiskExporter<MetricData>?): Builder {
+            this.metricFromDiskExporter = value
             return this
         }
 
-        fun setLogRecordFromDiskExporter(logRecordDiskExporter: LogRecordFromDiskExporter?): Builder {
-            this.logRecordDiskExporter = logRecordDiskExporter
-            return this
-        }
-
-        fun setExportTimeoutInMillis(exportTimeoutInMillis: Long): Builder {
-            this.exportTimeoutInMillis = exportTimeoutInMillis
+        fun setLogRecordFromDiskExporter(value: FromDiskExporter<LogRecordData>?): Builder {
+            this.logRecordFromDiskExporter = value
             return this
         }
 
         fun build(): SignalFromDiskExporter {
             return SignalFromDiskExporter(
-                spanDiskExporter,
-                metricDiskExporter,
-                logRecordDiskExporter,
-                exportTimeoutInMillis
+                spanFromDiskExporter,
+                metricFromDiskExporter,
+                logRecordFromDiskExporter
             )
         }
     }

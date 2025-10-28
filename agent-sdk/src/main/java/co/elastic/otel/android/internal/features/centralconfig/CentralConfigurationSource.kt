@@ -141,19 +141,19 @@ internal class CentralConfigurationSource internal constructor(
         fun onConfigChange()
     }
 
-    override fun onConnect() {
+    override fun onConnect(client: OpampClient) {
         logger.debug("OpAMP connected successfully")
     }
 
-    override fun onConnectFailed(throwable: Throwable?) {
+    override fun onConnectFailed(client: OpampClient, throwable: Throwable?) {
         logger.debug("OpAMP connection failed", throwable)
     }
 
-    override fun onErrorResponse(errorResponse: ServerErrorResponse) {
+    override fun onErrorResponse(client: OpampClient, errorResponse: ServerErrorResponse) {
         logger.debug("OpAMP failed response: {}", errorResponse)
     }
 
-    override fun onMessage(messageData: MessageData) {
+    override fun onMessage(client: OpampClient, messageData: MessageData) {
         logger.debug("OpAMP on message: {}", messageData)
         val remoteConfig = messageData.remoteConfig ?: return
 

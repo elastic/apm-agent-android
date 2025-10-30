@@ -3,7 +3,7 @@
 
     <application>
         <activity
-            android:name="co.elastic.otel.android.test.MainActivity"
+            android:name="co.elastic.otel.android.test.crash.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

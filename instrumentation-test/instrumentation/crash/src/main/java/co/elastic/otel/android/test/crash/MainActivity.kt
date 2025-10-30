@@ -1,4 +1,4 @@
-package co.elastic.otel.android.test
+package co.elastic.otel.android.test.crash
 
 import android.app.Activity
 

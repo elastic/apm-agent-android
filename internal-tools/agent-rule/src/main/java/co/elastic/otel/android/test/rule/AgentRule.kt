@@ -48,6 +48,11 @@ abstract class AgentRule(private val onBeforeInitialization: (() -> Unit)? = nul
         }
     }
 
+    fun closeAgent() {
+        agent!!.close()
+        agent = null
+    }
+
     fun getInstrumentationManager(): InstrumentationManager {
         return agent!!.getInstrumentationManager()
     }

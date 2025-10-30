@@ -1,7 +1,7 @@
 package co.elastic.otel.android.test
 
 import co.elastic.otel.android.test.rule.AndroidTestAgentRule
-import org.assertj.core.api.Assertions.assertThat
+import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat
 import org.junit.After
 import org.junit.Rule
 import org.junit.Test
@@ -26,7 +26,15 @@ class InstrumentationTest {
         Thread.getDefaultUncaughtExceptionHandler()!!
             .uncaughtException(Thread.currentThread(), exception)
 
+        agentRule.flushLogs()
+
         assertThat(testUncaughtExceptionHandler.getUncaughtExceptions()).containsExactly(exception)
+        assertThat(agentRule.getFinishedLogRecords()).hasSize(1)
+        assertThat(agentRule.getFinishedLogRecords().first().attributes)
+            .containsEntry("event.name", "device.crash")
+            .containsEntry("exception.message", "My exception")
+            .containsEntry("exception.type", RuntimeException::class.java.name)
+            .containsKey("exception.stacktrace")
     }
 
     private class TestUncaughtExceptionHandler : Thread.UncaughtExceptionHandler {

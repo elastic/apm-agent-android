@@ -26,11 +26,10 @@ class InstrumentationTest {
         Thread.getDefaultUncaughtExceptionHandler()!!
             .uncaughtException(Thread.currentThread(), exception)
 
-        agentRule.flushLogs()
-
         assertThat(testUncaughtExceptionHandler.getUncaughtExceptions()).containsExactly(exception)
-        assertThat(agentRule.getFinishedLogRecords()).hasSize(1)
-        assertThat(agentRule.getFinishedLogRecords().first().attributes)
+        val finishedLogRecords = agentRule.getFinishedLogRecords()
+        assertThat(finishedLogRecords).hasSize(1)
+        assertThat(finishedLogRecords.first().attributes)
             .containsEntry("event.name", "device.crash")
             .containsEntry("exception.message", "My exception")
             .containsEntry("exception.type", RuntimeException::class.java.name)

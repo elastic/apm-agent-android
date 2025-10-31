@@ -24,7 +24,7 @@ okhttp = "com.squareup.okhttp3:okhttp:5.3.0"
 
 #Test tools
 junit4 = "junit:junit:4.13.2"
-junit-bom = "org.junit:junit-bom:5.14.0"
+junit-bom = "org.junit:junit-bom:5.14.1"
 junit5-vintage = { module = "org.junit.vintage:junit-vintage-engine" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junit-launcher = { module = "org.junit.platform:junit-platform-launcher" }

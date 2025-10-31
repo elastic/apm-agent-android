@@ -7,6 +7,5 @@ android {
 }
 
 dependencies {
-    implementation(instrumentation.opentelemetry.instrumentation.api)
-    implementation(instrumentation.opentelemetry.instrumentation.api.incubator)
+    implementation(libs.bundles.opentelemetry.semconv)
 }

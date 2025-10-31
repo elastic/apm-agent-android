@@ -1,10 +1,11 @@
-package co.elastic.otel.android.test
+package co.elastic.otel.android.test.oteladapter
 
 import androidx.test.core.app.launchActivity
 import co.elastic.otel.android.test.rule.AndroidTestAgentRule
 import io.opentelemetry.api.common.AttributeKey
-import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat
+import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions
 import java.util.concurrent.TimeUnit
+import org.assertj.core.api.Assertions
 import org.junit.Rule
 import org.junit.Test
 
@@ -21,11 +22,12 @@ class InstrumentationTest {
             agentRule.flushLogs().join(5, TimeUnit.SECONDS)
 
             val finishedLogRecords = agentRule.getFinishedLogRecords()
-            assertThat(finishedLogRecords).hasSize(1)
-            assertThat(finishedLogRecords.first())
+            Assertions.assertThat(finishedLogRecords).hasSize(1)
+            OpenTelemetryAssertions.assertThat(finishedLogRecords.first())
                 .hasBody("My log")
                 .hasAttributesSatisfying {
-                    assertThat(it.get(AttributeKey.stringKey("android.log.tag"))).isEqualTo("elastic")
+                    Assertions.assertThat(it.get(AttributeKey.stringKey("android.log.tag")))
+                        .isEqualTo("elastic")
                 }
 
             // Closing instrumentation
@@ -34,7 +36,7 @@ class InstrumentationTest {
             activity.sendLog()
 
             agentRule.flushLogs().join(5, TimeUnit.SECONDS)
-            assertThat(agentRule.getFinishedLogRecords()).isEmpty()
+            Assertions.assertThat(agentRule.getFinishedLogRecords()).isEmpty()
         }
     }
 }

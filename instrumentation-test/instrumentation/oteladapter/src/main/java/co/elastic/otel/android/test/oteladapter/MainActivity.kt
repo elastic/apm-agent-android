@@ -1,4 +1,4 @@
-package co.elastic.otel.android.test
+package co.elastic.otel.android.test.oteladapter
 
 import android.app.Activity
 import android.util.Log

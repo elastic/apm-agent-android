@@ -2,9 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application>
-
         <activity
-            android:name=".MainActivity"
+            android:name="co.elastic.otel.android.test.crash.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

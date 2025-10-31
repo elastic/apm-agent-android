@@ -1,7 +1,0 @@
-public final class co/elastic/otel/android/crash/internal/CrashInstrumentation : co/elastic/otel/android/instrumentation/internal/Instrumentation {
-	public fun <init> ()V
-	public fun getId ()Ljava/lang/String;
-	public fun getVersion ()Ljava/lang/String;
-	public fun install (Landroid/app/Application;Lco/elastic/otel/android/api/ElasticOtelAgent;)Lco/elastic/otel/android/instrumentation/internal/Instrumentation$Installation;
-}
-

@@ -85,6 +85,28 @@ plugins {
 
 1. You can find the latest version [here](https://plugins.gradle.org/plugin/co.elastic.otel.android.instrumentation.okhttp).
 
+### Crash reporting
+
+```{applies_to}
+serverless: unavailable
+stack: 9.2
+product:
+  edot_android: 1.4.0
+```
+
+Reports Android crashes as events using the event name: `device.crash`. These events contain [session](index.md#sessions) information and can be seen from {{kib}}'s Android dashboard under the "Errors & Crashes" tab.
+Take a look at [visualizing telemetry](getting-started.md#visualize-telemetry) for more information on finding {{kib}}'s Android dashboard.
+
+#### Gradle plugin
+
+```kotlin
+plugins {
+    id("co.elastic.otel.android.instrumentation.crash") version "[latest_version]" // <1>
+}
+```
+
+1. You can find the latest version [here](https://plugins.gradle.org/plugin/co.elastic.otel.android.instrumentation.crash).
+
 ## Adapter for OTel Android instrumentations
 
 You can use any instrumentation from the OpenTelemetry Android [available instrumentations](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation) through the OTel instrumentation adapter gradle plugin. The adapter is an [extended](opentelemetry://reference/compatibility/nomenclature.md#extended-components) component.

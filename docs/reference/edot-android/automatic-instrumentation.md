@@ -89,9 +89,9 @@ plugins {
 
 ```{applies_to}
 serverless: unavailable
-stack: 9.2
+stack: ga 9.2
 product:
-  edot_android: 1.4.0
+  edot_android: ga 1.4.0
 ```
 
 Reports Android crashes as events using the event name: `device.crash`. These events contain [session](index.md#sessions) information and can be seen from {{kib}}'s Android dashboard under the "Errors & Crashes" tab.

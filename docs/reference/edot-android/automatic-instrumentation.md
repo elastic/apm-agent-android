@@ -21,7 +21,7 @@ EDOT Android can automatically generate telemetry on your behalf. This allows yo
 
 ## Installation [supported-instrumentations-installation]
 
-All automatic instrumentations are opt-in. Therefore, you have to install the ones you want to use. Specific targets are supported for automatic instrumentation, each with its own Gradle plugin for installation. 
+All automatic instrumentations are optional — they don't come bundled with the agent. You'll need to install the ones you want to use. Specific targets are supported for automatic instrumentation, each with its own Gradle plugin for installation. 
 
 To install a supported automatic instrumentation, follow these steps:
 
@@ -84,6 +84,28 @@ plugins {
 ```
 
 1. You can find the latest version [here](https://plugins.gradle.org/plugin/co.elastic.otel.android.instrumentation.okhttp).
+
+### Crash reporting
+
+```{applies_to}
+serverless: unavailable
+stack: ga 9.2
+product:
+  edot_android: ga 1.4.0
+```
+
+Reports Android crashes as events using the event name: `device.crash`. These events contain [session](index.md#sessions) information and can be seen from {{kib}}'s Android dashboard under the "Errors & Crashes" tab.
+Take a look at [visualizing telemetry](getting-started.md#visualize-telemetry) for more information on finding {{kib}}'s Android dashboard.
+
+#### Gradle plugin
+
+```kotlin
+plugins {
+    id("co.elastic.otel.android.instrumentation.crash") version "[latest_version]" // <1>
+}
+```
+
+1. You can find the latest version [here](https://plugins.gradle.org/plugin/co.elastic.otel.android.instrumentation.crash).
 
 ## Adapter for OTel Android instrumentations
 

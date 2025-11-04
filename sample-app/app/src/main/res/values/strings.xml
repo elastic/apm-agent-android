@@ -5,7 +5,6 @@
     <string name="first_fragment_label">City Selection</string>
     <string name="second_fragment_label">City Weather Forecast</string>
     <string name="next">Next</string>
-    <string name="crash">Crash</string>
     <string name="previous">Previous</string>
 
     <string name="hello_first_fragment">"Select a city and click on the button below to see how the city's temperature is right now!"</string>

@@ -23,7 +23,7 @@ import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
 
-abstract class AgentRule(private val onBeforeInitialization: (() -> Unit)? = null) : TestRule {
+abstract class AgentRule : TestRule {
     @Volatile
     private var agent: ManagedElasticOtelAgent? = null
 
@@ -34,7 +34,6 @@ abstract class AgentRule(private val onBeforeInitialization: (() -> Unit)? = nul
         return try {
             object : Statement() {
                 override fun evaluate() {
-                    onBeforeInitialization?.invoke()
                     inMemoryExporters = InMemoryExporterProvider()
                     runInitialization {
                         agent = createAgent(getApplication())
@@ -46,11 +45,6 @@ abstract class AgentRule(private val onBeforeInitialization: (() -> Unit)? = nul
             agent = null
             inMemoryExporters = null
         }
-    }
-
-    fun closeAgent() {
-        agent!!.close()
-        agent = null
     }
 
     fun getInstrumentationManager(): InstrumentationManager {

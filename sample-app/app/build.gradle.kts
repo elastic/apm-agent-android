@@ -5,7 +5,6 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("co.elastic.otel.android.agent")
     id("co.elastic.otel.android.instrumentation.okhttp")
-    id("co.elastic.otel.android.instrumentation.crash")
 }
 
 android {

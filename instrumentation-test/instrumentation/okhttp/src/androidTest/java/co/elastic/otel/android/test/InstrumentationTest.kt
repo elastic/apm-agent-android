@@ -1,15 +1,15 @@
-package co.elastic.otel.android.test.okhttp
+package co.elastic.otel.android.test
 
 import co.elastic.otel.android.test.rule.AndroidTestAgentRule
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.trace.SpanKind
-import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions
+import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat
 import java.io.IOException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 import java.util.function.Consumer
-import junit.framework.TestCase
+import junit.framework.TestCase.fail
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.HttpUrl
@@ -18,7 +18,6 @@ import okhttp3.Request
 import okhttp3.Response
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import org.assertj.core.api.Assertions
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -53,9 +52,9 @@ class InstrumentationTest {
         agentRule.flushSpans().join(5, TimeUnit.SECONDS)
 
         val finishedSpans = agentRule.getFinishedSpans()
-        Assertions.assertThat(request.getHeader("traceparent")).isNotNull()
-        Assertions.assertThat(finishedSpans).hasSize(1)
-        OpenTelemetryAssertions.assertThat(finishedSpans.first()).hasName("GET")
+        assertThat(request.getHeader("traceparent")).isNotNull()
+        assertThat(finishedSpans).hasSize(1)
+        assertThat(finishedSpans.first()).hasName("GET")
             .hasKind(SpanKind.CLIENT)
             .hasAttribute(AttributeKey.stringKey("url.full"), url.toString())
             .hasAttribute(AttributeKey.stringKey("http.request.method"), "GET")
@@ -72,7 +71,7 @@ class InstrumentationTest {
         webServer.takeRequest()
         agentRule.flushSpans().join(5, TimeUnit.SECONDS)
 
-        Assertions.assertThat(agentRule.getFinishedSpans()).hasSize(1)
+        assertThat(agentRule.getFinishedSpans()).hasSize(1)
 
         // Closing instrumentation
         agentRule.getInstrumentationManager().close()
@@ -82,7 +81,7 @@ class InstrumentationTest {
         webServer.takeRequest()
         agentRule.flushSpans().join(5, TimeUnit.SECONDS)
 
-        Assertions.assertThat(agentRule.getFinishedSpans()).isEmpty()
+        assertThat(agentRule.getFinishedSpans()).isEmpty()
     }
 
     @Test
@@ -93,8 +92,8 @@ class InstrumentationTest {
         agentRule.flushSpans().join(5, TimeUnit.SECONDS)
 
         val finishedSpans = agentRule.getFinishedSpans()
-        Assertions.assertThat(finishedSpans).hasSize(1)
-        OpenTelemetryAssertions.assertThat(finishedSpans.first()).hasName("GET")
+        assertThat(finishedSpans).hasSize(1)
+        assertThat(finishedSpans.first()).hasName("GET")
             .hasKind(SpanKind.CLIENT)
             .hasAttribute(AttributeKey.stringKey("url.full"), url.toString())
             .hasAttribute(AttributeKey.stringKey("http.request.method"), "GET")
@@ -111,8 +110,8 @@ class InstrumentationTest {
         agentRule.flushSpans().join(5, TimeUnit.SECONDS)
 
         val finishedSpans = agentRule.getFinishedSpans()
-        Assertions.assertThat(finishedSpans).hasSize(1)
-        OpenTelemetryAssertions.assertThat(finishedSpans.first()).hasName("GET")
+        assertThat(finishedSpans).hasSize(1)
+        assertThat(finishedSpans.first()).hasName("GET")
             .hasKind(SpanKind.CLIENT)
             .hasAttribute(AttributeKey.stringKey("url.full"), url.toString())
             .hasAttribute(AttributeKey.stringKey("http.request.method"), "GET")
@@ -140,13 +139,13 @@ class InstrumentationTest {
                 try {
                     responseStr.set(response.body!!.string())
                 } catch (e: IOException) {
-                    TestCase.fail(e.message)
+                    fail(e.message)
                 }
             }
         } catch (e: InterruptedException) {
             throw RuntimeException(e)
         }
-        Assertions.assertThat(responseStr.get()).isEqualTo(responseBody)
+        assertThat(responseStr.get()).isEqualTo(responseBody)
     }
 
     private fun executeAsyncHttpCall(request: Request, responseConsumer: Consumer<Response>) {

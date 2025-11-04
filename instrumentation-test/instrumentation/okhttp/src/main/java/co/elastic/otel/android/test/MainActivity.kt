@@ -1,4 +1,4 @@
-package co.elastic.otel.android.test.okhttp
+package co.elastic.otel.android.test
 
 import android.app.Activity
 

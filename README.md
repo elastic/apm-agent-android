@@ -6,7 +6,7 @@ See the [documentation](https://www.elastic.co/docs/reference/opentelemetry/edot
 
 ## Try it out
 
-Follow the [Sample application guide](sample-app) to set up a test environment and take a quick
+Follow the [Demo application guide](https://github.com/elastic/android-agent-demo) to set up a test environment and take a quick
 look at the agent's functionalities.
 
 ## Publishing it locally

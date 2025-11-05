@@ -92,4 +92,4 @@ EDOT Android provides extensions that automatically generate telemetry for commo
 
 ## Try it out
 
-You can follow the [Sample application guide](https://github.com/elastic/apm-agent-android/tree/main/sample-app) to set up a test environment and take a quick look at the agent's functionalities. Or if you're ready to get started with your own app, continue with [Getting started](getting-started.md).
+You can follow the [Demo application guide](https://github.com/elastic/android-agent-demo) to set up a test environment and take a quick look at the agent's functionalities. Or if you're ready to get started with your own app, continue with [Getting started](getting-started.md).

@@ -81,19 +81,7 @@ command to execute those tests:
 
 ### Releasing
 
-The release steps have been defined in `.ci/release.sh` which it gets triggered within the BuildKite
-context.
-
-Releases are triggered manually using GitHub actions, and the GitHub action is the one contacting
-BuildKite.
-To run a release then
-
-* Navigate to
-  the [GitHub job](https://github.com/elastic/apm-agent-android/actions/workflows/release.yml)
-* Choose Run workflow.
-* Fill the form and click `Run workflow` and wait for a few minutes to complete
-
-And email/slack message will be sent with the outcome.
+Take a look at [RELEASING.md](RELEASING.md) to learn how to create a release.
 
 #### Further details
 

@@ -42,10 +42,10 @@ going to need to have it handy when it happens.
 
 The license full body should be gotten preferably from the same website where the license name was
 found, and it should be placed in this location: `src/resources/licenses/[THE_ID]`. The previously
-created ID on step 1 must be the file name (without extensions, just the plain ID as defined before)
+created ID on step 2 must be the file name (without extensions, just the plain ID as defined before)
 .
 
 ---
 
-After those 2 steps are done, the `createNoticeFile` task should be able to use this newly added
+After those 3 steps are done, the `createNoticeFile` task should be able to use this newly added
 license when handling dependencies that make use of it.

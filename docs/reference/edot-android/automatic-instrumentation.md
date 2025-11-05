@@ -21,7 +21,7 @@ EDOT Android can automatically generate telemetry on your behalf. This allows yo
 
 ## Installation [supported-instrumentations-installation]
 
-All automatic instrumentations are optional — they don't come bundled with the agent. You'll need to install the ones you want to use. Specific targets are supported for automatic instrumentation, each with its own Gradle plugin for installation. 
+All automatic instrumentations are optional and aren't bundled with the Android agent. You need to install the instrumentations you want to use. Specific targets are supported for automatic instrumentation, each with its own Gradle plugin for installation. 
 
 To install a supported automatic instrumentation, follow these steps:
 

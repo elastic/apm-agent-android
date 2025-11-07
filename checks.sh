@@ -1,3 +1,3 @@
 set -e
 ./gradlew check
-./gradlew -p "sample-app" :app:assembleRelease
+./gradlew -p "integration-test" :app:assembleRelease

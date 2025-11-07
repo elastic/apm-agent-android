@@ -50,7 +50,7 @@ jobs:
           demo_app_dir="build/demo-app"
           edot_collector_build="$demo_app_dir/edot-collector/build"
           edot_collector_url="http://127.0.0.1:4318"
-          git clone git@github.com:elastic/android-agent-demo.git $demo_app_dir
+          git clone https://github.com/elastic/android-agent-demo.git $demo_app_dir
           
           # Setting ES properties
           cat > "$demo_app_dir/elasticsearch.properties" <<EOF

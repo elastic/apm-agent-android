@@ -31,8 +31,9 @@ es_retrieve_first_item () {
 }
 
 launch_app() {
-  ./gradlew -p "integration-test" :app:assembleRelease
-  adb install -r integration-test/app/build/outputs/apk/release/app-release.apk
+  local app_dir="$1"
+  ./gradlew -p "$app_dir" :app:assembleRelease
+  adb install -r "$app_dir"/app/build/outputs/apk/release/app-release.apk
   adb shell am start -n co.elastic.otel.android.integration/.MainActivity
 }
 
@@ -79,13 +80,18 @@ if [ -z "$ES_LOCAL_URL" ] || [ -z "$ES_LOCAL_API_KEY" ]; then
   exit 1
 fi
 
-launch_app
+app_dir="integration-test"
+launch_app "$app_dir"
 
 echo "Awaiting for data to get exported"
 sleep 20
 
 span=$(es_retrieve_first_item "traces-*" "integration-test-app")
 log=$(es_retrieve_first_item "logs-*" "integration-test-app")
+
+# Storing ES responses
+echo "$span" > "$app_dir/build/es/span.json"
+echo "$log" > "$app_dir/build/es/log.json"
 
 # Validate data
 validate_span "$span"

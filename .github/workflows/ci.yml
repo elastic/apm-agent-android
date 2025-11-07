@@ -97,6 +97,7 @@ jobs:
             **/build/test-results/testDebug*/TEST-*.xml
             **/build/test-results/test/TEST-*.xml
             **/build/outputs/androidTest-results/**/TEST-*.xml
+            **/build/es/*.json
 
   # The very last job to report whether the Workflow passed.
   # This will act as the Branch Protection gatekeeper

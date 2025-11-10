@@ -92,9 +92,10 @@ span=$(es_retrieve_first_item "traces-*" "integration-test-app")
 log=$(es_retrieve_first_item "logs-*" "integration-test-app")
 
 # Storing ES responses
-mkdir -p "$app_dir/build/es"
-echo "$span" > "$app_dir/build/es/span.json"
-echo "$log" > "$app_dir/build/es/log.json"
+es_build_dir="$app_dir/build/es"
+mkdir -p "$es_build_dir"
+echo "$span" > "$es_build_dir/span.json"
+echo "$log" > "$es_build_dir/log.json"
 
 # Validate data
 validate_span "$span"

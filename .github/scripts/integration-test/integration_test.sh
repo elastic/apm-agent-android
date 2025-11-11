@@ -34,7 +34,7 @@ es_retrieve_first_item () {
 
 launch_app() {
   local app_dir="$1"
-  ./gradlew -p "$app_dir" :app:assembleRelease
+  "$app_dir/gradlew" -p "$app_dir" :app:assembleRelease
   adb install -r "$app_dir"/app/build/outputs/apk/release/app-release.apk
   adb shell am start -n co.elastic.otel.android.integration/.MainActivity
 }
@@ -77,12 +77,10 @@ validate_log() {
 }
 
 # Main execution
-if [ -z "$ES_LOCAL_URL" ] || [ -z "$ES_LOCAL_API_KEY" ]; then
-  echo "Must set ES_LOCAL_URL and ES_LOCAL_API_KEY env vars"
-  exit 1
-fi
-
-app_dir="integration-test"
+ES_LOCAL_URL=$1
+ES_LOCAL_API_KEY=$2
+current_dir=$(pwd)
+app_dir="${current_dir%/.github*}/integration-test"
 launch_app "$app_dir"
 
 echo "Awaiting for data to get exported"

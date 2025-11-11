@@ -35,40 +35,8 @@ jobs:
         run: ./gradlew assemble
       - name: Checks and unit tests
         run: ./checks.sh
-      - name: Start ES
-        id: es
-        run: |
-          curl -fsSL https://elastic.co/start-local | sh -s -- --esonly -v 9.2.0
-          source elastic-start-local/.env
-          { 
-            echo "local_url=$ES_LOCAL_URL"
-            echo "local_api_key=$ES_LOCAL_API_KEY"
-          } >> "$GITHUB_OUTPUT"
-      - name: Start EDOT Collector
-        run: |
-          set -e
-          demo_app_dir="build/demo-app"
-          edot_collector_build="$demo_app_dir/edot-collector/build"
-          edot_collector_url="http://127.0.0.1:4318"
-          git clone https://github.com/elastic/android-agent-demo.git $demo_app_dir
-          
-          # Setting ES properties
-          cat > "$demo_app_dir/elasticsearch.properties" <<EOF
-          endpoint=$ES_LOCAL_URL
-          api_key=$ES_LOCAL_API_KEY
-          EOF
-          
-          # Preparing collector binary
-          $demo_app_dir/gradlew -p "$demo_app_dir" :edot-collector:prepareEdotCollector
-          
-          # Launching EDOT Collector
-          "$edot_collector_build/bin/otelcol" --config "$edot_collector_build/configuration/edot-configuration.yml" &
-          
-          # Waiting for EDOT Collector to run
-          .github/scripts/tools/await_port.sh 4318 30
-        env:
-          ES_LOCAL_URL: ${{ steps.es.outputs.local_url }}
-          ES_LOCAL_API_KEY: ${{ steps.es.outputs.local_api_key }}
+      - name: Start ES and EDOT Collector
+        run: make -C .github/scripts/integration-test start-edot-collector
       - name: Enable KVM for Android tests
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -83,7 +51,7 @@ jobs:
             ./android_tests.sh
             
             # Launching integration tests
-            .github/scripts/integration-test/integration_test.sh
+            make -C .github/scripts/integration-test run-tests
         env:
           ES_LOCAL_URL: ${{ steps.es.outputs.local_url }}
           ES_LOCAL_API_KEY: ${{ steps.es.outputs.local_api_key }}

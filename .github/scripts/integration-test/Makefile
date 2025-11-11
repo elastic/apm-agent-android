@@ -6,7 +6,7 @@ demo_app_dir="build/demo-app"
 edot_collector_build="$(demo_app_dir)/edot-collector/build"
 start-edot-collector: elastic-start-local ## Start EDOT Collector
 	git clone https://github.com/elastic/android-agent-demo.git $(demo_app_dir)
-	source elastic-start-local/.env; \
+	. elastic-start-local/.env; \
 	echo "endpoint=$$ES_LOCAL_URL\napi_key=$$ES_LOCAL_API_KEY" > "$(demo_app_dir)/elasticsearch.properties"
 
     # Preparing collector binary
@@ -20,7 +20,7 @@ start-edot-collector: elastic-start-local ## Start EDOT Collector
 
 .PHONY: run-tests
 run-tests: elastic-start-local ## Run integration tests
-	source elastic-start-local/.env; \
+	. elastic-start-local/.env; \
 	./integration_test.sh $$ES_LOCAL_URL $$ES_LOCAL_API_KEY
 
 .PHONY: clean

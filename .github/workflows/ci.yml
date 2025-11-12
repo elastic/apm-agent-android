@@ -31,9 +31,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup
-      - name: Build
-        run: ./gradlew assemble
-      - name: Checks and unit tests
+      - name: Build and Checks
         run: ./checks.sh
       - name: Start ES and EDOT Collector
         run: make -C .github/scripts/integration-test start-edot-collector
@@ -50,7 +48,7 @@ jobs:
             # Running instrumentation tests
             ./android_tests.sh
             
-            # Launching integration tests
+            # Launching ES integration tests
             make -C .github/scripts/integration-test run-tests
         env:
           ES_LOCAL_URL: ${{ steps.es.outputs.local_url }}

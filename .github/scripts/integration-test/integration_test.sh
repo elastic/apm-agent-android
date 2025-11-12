@@ -67,12 +67,12 @@ validate_log() {
   log=$(require "$1")
   local expected_body_text="log body"
   local expected_agent_name="android/java"
-  local counter_value
-  counter_value=$(echo "$log" | jq -r '._source.body.text')
+  local body_text
+  body_text=$(echo "$log" | jq -r '._source.body.text')
   local agent_name
   agent_name=$(echo "$log" | jq -r '._source.resource.attributes."agent.name"')
 
-  assert_equals "$expected_body_text" "$counter_value"
+  assert_equals "$expected_body_text" "$body_text"
   assert_equals "$expected_agent_name" "$agent_name"
 }
 

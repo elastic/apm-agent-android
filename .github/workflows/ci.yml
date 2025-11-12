@@ -31,10 +31,10 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup
-      - name: Build
-        run: ./gradlew assemble
-      - name: Checks and unit tests
+      - name: Build and Checks
         run: ./checks.sh
+      - name: Start ES and EDOT Collector
+        run: make -C .github/scripts/integration-test start-edot-collector
       - name: Enable KVM for Android tests
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -44,7 +44,12 @@ jobs:
         uses: reactivecircus/android-emulator-runner@b530d96654c385303d652368551fb075bc2f0b6b  # v2.35.0
         with:
           api-level: 29
-          script: ./android_tests.sh
+          script: |
+            # Running instrumentation tests
+            ./android_tests.sh
+            
+            # Launching ES integration tests
+            make -C .github/scripts/integration-test run-tests
       - name: Store test results
         if: success() || failure()
         uses: actions/upload-artifact@v5
@@ -55,6 +60,7 @@ jobs:
             **/build/test-results/testDebug*/TEST-*.xml
             **/build/test-results/test/TEST-*.xml
             **/build/outputs/androidTest-results/**/TEST-*.xml
+            **/build/es/*.json
 
   # The very last job to report whether the Workflow passed.
   # This will act as the Branch Protection gatekeeper

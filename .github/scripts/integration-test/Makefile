@@ -1,3 +1,7 @@
+MAKEFLAGS += --no-print-directory
+.SHELLFLAGS = -euc
+SHELL = /bin/bash
+
 elastic-start-local:  ## Start ES locally
 	curl -fsSL https://elastic.co/start-local | sh -s -- --esonly -v 9.2.0
 

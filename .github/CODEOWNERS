@@ -1,5 +1,5 @@
-*.md @elastic/ingest-docs @elastic/apm-agent-android
-/docs/ @elastic/ingest-docs @elastic/apm-agent-android
+*.md @elastic/ingest-docs @elastic/apm-agent-approvers 
+/docs/ @elastic/ingest-docs @elastic/apm-agent-approvers 
 
 /.github/actions @elastic/observablt-ci
 /.github/workflows @elastic/observablt-ci

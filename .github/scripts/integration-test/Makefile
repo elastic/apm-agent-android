@@ -12,7 +12,7 @@ edot_collector_build="$(demo_app_dir)/edot-collector/build"
 start-edot-collector: elastic-start-local ## Start EDOT Collector
 	git clone https://github.com/elastic/android-agent-demo.git $(demo_app_dir)
 	. elastic-start-local/.env; \
-	echo "endpoint=$$ES_LOCAL_URL\napi_key=$$ES_LOCAL_API_KEY" > "$(demo_app_dir)/elasticsearch.properties"
+	printf "endpoint=$$ES_LOCAL_URL\napi_key=$$ES_LOCAL_API_KEY" > "$(demo_app_dir)/elasticsearch.properties"
 
     # Preparing collector binary
 	$(demo_app_dir)/gradlew -p "$(demo_app_dir)" :edot-collector:prepareEdotCollector

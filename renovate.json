@@ -8,8 +8,7 @@
     ".buildkite/**",
     ".github/*",
     ".github/actions/**",
-    ".github/workflows/*",
-    "sample-app/backend/**"
+    ".github/workflows/*"
   ],
   "packageRules": [
     {

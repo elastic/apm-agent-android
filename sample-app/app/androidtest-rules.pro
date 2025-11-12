@@ -1,3 +1,0 @@
--dontwarn org.assertj.core.**.*
--dontwarn org.junit.jupiter.**.*
--dontwarn javax.annotation.**

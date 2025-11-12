@@ -2,8 +2,9 @@ MAKEFLAGS += --no-print-directory
 .SHELLFLAGS = -euc
 SHELL = /bin/bash
 
+elastic_version?=9.2.0
 elastic-start-local:  ## Start ES locally
-	curl -fsSL https://elastic.co/start-local | sh -s -- --esonly -v 9.2.0
+	curl -fsSL https://elastic.co/start-local | sh -s -- --esonly -v $(elastic_version)
 
 .PHONY: start-edot-collector
 demo_app_dir="build/demo-app"

@@ -50,9 +50,6 @@ jobs:
             
             # Launching ES integration tests
             make -C .github/scripts/integration-test run-tests
-        env:
-          ES_LOCAL_URL: ${{ steps.es.outputs.local_url }}
-          ES_LOCAL_API_KEY: ${{ steps.es.outputs.local_api_key }}
       - name: Store test results
         if: success() || failure()
         uses: actions/upload-artifact@v5

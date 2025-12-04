@@ -1,6 +1,6 @@
 # Related to https://github.com/elastic/opentelemetry/issues/228
 redirects:
-  'release-notes/apm/agents/android/index.md": "release-notes/index.md'
+  'release-notes/apm/agents/android/index.md': 'release-notes/index.md'
   'reference/apm/agents/android/index.md': 'reference/edot-android/index.md'
   'reference/apm/agents/android/getting-started.md': 'reference/edot-android/getting-started.md'
   'reference/apm/agents/android/configuration.md': 'reference/edot-android/configuration.md'

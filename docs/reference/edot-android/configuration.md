@@ -73,6 +73,14 @@ class MyApp : android.app.Application {
 To provide these values from outside of your code, using an environment variable or a properties file for example, refer to [Provide config values outside of your code](configuration.md#provide-config-values-from-outside-of-your-code).
 :::
 
+### TLS connections
+
+EDOT Android supports TLS connections to OTLP endpoints and OpAMP (central configuration) endpoints when the server uses a TLS certificate signed by a trusted Certificate Authority (CA).
+
+:::{warning}
+Self-signed certificates are **not supported**. If your endpoint uses a self-signed certificate, EDOT Android will not be able to establish a secure connection. Ensure your server uses a certificate issued by a publicly trusted CA or an internal CA that is trusted by the device.
+:::
+
 ### Intercept export request headers
 
 You can provide an interceptor for the signals' export request headers, where you can read or modify them if needed.

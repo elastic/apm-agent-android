@@ -154,3 +154,15 @@ dependencies {
 ```
 
 1. Will only install the instrumentation for the `release` build type of the app, avoiding to increase the compilation time for other types, such as `debug`, for example.
+## Understanding auto-instrumentation scope
+
+Auto-instrumentation automatically captures telemetry for the frameworks and libraries listed on this page. However, it cannot instrument:
+
+- Custom or proprietary frameworks and libraries
+- Closed-source components without instrumentation support
+- Application-specific business logic
+
+If your application uses technologies not covered by auto-instrumentation, you have two options:
+
+1. **Native OpenTelemetry support** — Some frameworks and libraries include built-in OpenTelemetry instrumentation provided by the vendor.
+2. **Manual instrumentation** — Use the [OpenTelemetry API](manual-instrumentation.md) to add custom spans, metrics, and logs for unsupported components.

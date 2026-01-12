@@ -165,4 +165,4 @@ Auto-instrumentation automatically captures telemetry for the frameworks and lib
 If your application uses technologies not covered by auto-instrumentation, you have two options:
 
 1. **Native OpenTelemetry support** — Some frameworks and libraries include built-in OpenTelemetry instrumentation provided by the vendor.
-2. **Manual instrumentation** — Use the [OpenTelemetry API](https://opentelemetry.io/docs/languages/java/instrumentation/) to add custom spans, metrics, and logs for unsupported components.
+2. **Manual instrumentation** — Use the [OpenTelemetry API](manual-instrumentation.md) to add custom spans, metrics, and logs for unsupported components.

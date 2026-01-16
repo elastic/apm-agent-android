@@ -1,6 +1,6 @@
 #!/usr/bin/env kotlin
 @file:DependsOn("org.jetbrains.kotlin:kotlin-stdlib:2.2.21")
-@file:DependsOn("com.github.ajalt.clikt:clikt-jvm:5.0.3")
+@file:DependsOn("com.github.ajalt.clikt:clikt-jvm:5.1.0")
 @file:DependsOn("com.squareup.moshi:moshi-kotlin:1.15.2")
 
 import com.github.ajalt.clikt.core.CliktCommand

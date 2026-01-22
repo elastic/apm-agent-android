@@ -3,8 +3,7 @@ opentelemetry = "1.58.0"
 opentelemetry-contrib = "1.53.0-alpha"
 byteBuddy = "1.18.4"
 kotlin = "2.3.0"
-android = "8.13.2"
-autoService = "1.1.1"
+android = "9.0.0"
 
 [libraries]
 opentelemetry-sdk = { module = "io.opentelemetry:opentelemetry-sdk", version.ref = "opentelemetry" }
@@ -30,7 +29,7 @@ junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junit-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine" }
 opentelemetry-testing = { module = "io.opentelemetry:opentelemetry-sdk-testing", version.ref = "opentelemetry" }
-robolectric = "org.robolectric:robolectric:4.15.1"
+robolectric = "org.robolectric:robolectric:4.16.1"
 assertj = "org.assertj:assertj-core:3.27.6"
 mockk = "io.mockk:mockk:1.14.7"
 awaitility = "org.awaitility:awaitility-kotlin:4.3.0"
@@ -47,13 +46,14 @@ gradle-publish-plugin = "com.gradle.publish:plugin-publish-plugin:2.0.0"
 gradle-shadow-plugin = "gradle.plugin.com.github.johnrengelman:shadow:8.0.0"
 byteBuddy-plugin = { module = "net.bytebuddy:byte-buddy-gradle-plugin", version.ref = "byteBuddy" }
 kotlin-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
-autoService-annotations = { module = "com.google.auto.service:auto-service-annotations", version.ref = "autoService" }
-autoService-compiler = { module = "com.google.auto.service:auto-service", version.ref = "autoService" }
+autoService-annotations = "com.google.auto.service:auto-service-annotations:1.1.1"
+autoService-compiler = "dev.zacsweers.autoservice:auto-service-ksp:1.2.0"
 buildconfig-plugin = "com.github.gmazzo.buildconfig:com.github.gmazzo.buildconfig.gradle.plugin:6.0.7"
 animalsniffer-plugin = "ru.vyarus:gradle-animalsniffer-plugin:2.0.1"
 kotlin-binaryCompatibility = "org.jetbrains.kotlinx.binary-compatibility-validator:org.jetbrains.kotlinx.binary-compatibility-validator.gradle.plugin:0.18.1"
 coreLib = "com.android.tools:desugar_jdk_libs:2.1.5"
 mavenModel = "org.apache.maven:maven-model:3.9.12"
+ksp-plugin = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:2.3.4"
 
 [bundles]
 mocking = ["mockk"]
@@ -63,5 +63,4 @@ opentelemetry-semconv = ["opentelemetry-semconv", "opentelemetry-semconv-incubat
 [plugins]
 androidApp = { id = "com.android.application", version.ref = "android" }
 androidLib = { id = "com.android.library", version.ref = "android" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

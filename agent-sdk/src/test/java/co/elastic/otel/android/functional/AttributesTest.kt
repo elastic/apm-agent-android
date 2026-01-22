@@ -122,7 +122,7 @@ internal class AttributesTest : ExporterProvider, ProcessorFactory {
         setVersionCode(0)
     }
 
-    @Config(sdk = [21, 23, Config.NEWEST_SDK])
+    @Config(sdk = [23, Config.NEWEST_SDK])
     @Test
     fun `Check resources`() {
         initialize()
@@ -209,7 +209,7 @@ internal class AttributesTest : ExporterProvider, ProcessorFactory {
         assertThat(metricItems.first()).hasResource(expectedResource)
     }
 
-    @Config(sdk = [21, 23, Config.NEWEST_SDK])
+    @Config(sdk = [23, Config.NEWEST_SDK])
     @Test
     fun `Check resources with not provided service version`() {
         setVersionName("1.2.3")
@@ -249,7 +249,7 @@ internal class AttributesTest : ExporterProvider, ProcessorFactory {
         assertThat(metricItems.first()).hasResource(expectedResource)
     }
 
-    @Config(sdk = [21, 23, Config.NEWEST_SDK])
+    @Config(sdk = [23, Config.NEWEST_SDK])
     @Test
     fun `Check global attributes and span status`() {
         initialize()
@@ -266,7 +266,7 @@ internal class AttributesTest : ExporterProvider, ProcessorFactory {
         assertThat(logItems.first()).hasAttributes(getLogRecordDefaultAttributes())
     }
 
-    @Config(sdk = [21, 23, Config.NEWEST_SDK])
+    @Config(sdk = [23, Config.NEWEST_SDK])
     @Test
     fun `Check global attributes with cellular connectivity available`() {
         initialize()
@@ -292,7 +292,7 @@ internal class AttributesTest : ExporterProvider, ProcessorFactory {
         assertThat(logItems.first()).hasAttributes(expectedLogAttributes)
     }
 
-    @Config(sdk = [21, 23, Config.NEWEST_SDK])
+    @Config(sdk = [23, Config.NEWEST_SDK])
     @Test
     fun `Check global attributes with carrier info available`() {
         initialize()

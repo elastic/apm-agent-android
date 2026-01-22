@@ -1,6 +1,6 @@
 plugins {
     id("elastic.android-library")
-    id("kotlin-kapt")
+    id("com.google.devtools.ksp")
 }
 
 val instrumentationGroupId = "${rootProject.group}.instrumentation"
@@ -17,6 +17,6 @@ android {
 val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 dependencies {
     api(project(":instrumentation:api"))
-    compileOnly(libs.findLibrary("autoService-annotations").get())
-    kapt(libs.findLibrary("autoService-compiler").get())
+    implementation(libs.findLibrary("autoService-annotations").get())
+    ksp(libs.findLibrary("autoService-compiler").get())
 }

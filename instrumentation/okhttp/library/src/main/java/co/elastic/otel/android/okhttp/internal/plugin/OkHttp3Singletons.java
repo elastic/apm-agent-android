@@ -50,7 +50,7 @@ public final class OkHttp3Singletons {
     Instrumenter<Interceptor.Chain, Response> instrumenter =
         OkHttpClientInstrumenterBuilderFactory.create(openTelemetry)
             .setKnownMethods(KNOWN_METHODS)
-            .setSpanNameExtractor(
+            .setSpanNameExtractorCustomizer(
                 x -> HttpSpanNameExtractor.builder(OkHttpAttributesGetter.INSTANCE).build())
             .addAttributesExtractor(
                 PeerServiceAttributesExtractor.create(

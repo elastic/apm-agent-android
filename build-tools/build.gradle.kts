@@ -17,6 +17,7 @@ dependencies {
     implementation(rootLibs.android.plugin)
     implementation(rootLibs.kotlin.binaryCompatibility)
     implementation(rootLibs.mavenModel)
+    implementation(rootLibs.ksp.plugin)
     testImplementation(rootLibs.junit4)
 }
 

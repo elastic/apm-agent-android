@@ -30,6 +30,7 @@ jobs:
     env:
       TARBALL_FILE: dist.tar
     permissions:
+      artifact-metadata: write
       attestations: write
       contents: write
       id-token: write

@@ -38,7 +38,7 @@ wireMock = "org.wiremock:wiremock:3.13.2"
 
 #Compilation tools
 android-plugin = { module = "com.android.tools.build:gradle", version.ref = "android" }
-apache-commons-text = "org.apache.commons:commons-text:1.14.0"
+apache-commons-text = "org.apache.commons:commons-text:1.15.0"
 commons-io = "commons-io:commons-io:2.21.0"
 spotless-plugin = "com.diffplug.spotless:spotless-plugin-gradle:8.1.0"
 dokka = "org.jetbrains.dokka:dokka-gradle-plugin:1.9.20"

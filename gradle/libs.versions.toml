@@ -3,8 +3,7 @@ opentelemetry = "1.58.0"
 opentelemetry-contrib = "1.53.0-alpha"
 byteBuddy = "1.18.4"
 kotlin = "2.3.0"
-android = "8.13.2"
-autoService = "1.1.1"
+android = "9.0.0"
 
 [libraries]
 opentelemetry-sdk = { module = "io.opentelemetry:opentelemetry-sdk", version.ref = "opentelemetry" }
@@ -47,13 +46,14 @@ gradle-publish-plugin = "com.gradle.publish:plugin-publish-plugin:2.0.0"
 gradle-shadow-plugin = "gradle.plugin.com.github.johnrengelman:shadow:8.0.0"
 byteBuddy-plugin = { module = "net.bytebuddy:byte-buddy-gradle-plugin", version.ref = "byteBuddy" }
 kotlin-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
-autoService-annotations = { module = "com.google.auto.service:auto-service-annotations", version.ref = "autoService" }
-autoService-compiler = { module = "com.google.auto.service:auto-service", version.ref = "autoService" }
+autoService-annotations = "com.google.auto.service:auto-service-annotations:1.1.1"
+autoService-compiler = "dev.zacsweers.autoservice:auto-service-ksp:1.2.0"
 buildconfig-plugin = "com.github.gmazzo.buildconfig:com.github.gmazzo.buildconfig.gradle.plugin:6.0.7"
 animalsniffer-plugin = "ru.vyarus:gradle-animalsniffer-plugin:2.0.1"
 kotlin-binaryCompatibility = "org.jetbrains.kotlinx.binary-compatibility-validator:org.jetbrains.kotlinx.binary-compatibility-validator.gradle.plugin:0.18.1"
 coreLib = "com.android.tools:desugar_jdk_libs:2.1.5"
 mavenModel = "org.apache.maven:maven-model:3.9.12"
+ksp-plugin = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:2.3.4"
 
 [bundles]
 mocking = ["mockk"]

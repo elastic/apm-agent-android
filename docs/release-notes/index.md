@@ -31,6 +31,13 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 % next_release_notes
     
+## 1.5.0 [elastic-apm-android-agent-150-release-notes]
+**Release date:** January 22, 2026
+
+### Fixes [elastic-apm-android-agent-150-fixes]
+
+* Bumping upstream OTel dependencies
+    
 ## 1.4.0 [elastic-apm-android-agent-140-release-notes]
 **Release date:** November 13, 2025
 

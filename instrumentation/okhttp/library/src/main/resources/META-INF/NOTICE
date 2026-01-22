@@ -1,10 +1,11 @@
 Elastic APM Android Agent
-Copyright 2018-2025 Elasticsearch B.V.
+Copyright 2018-2026 Elasticsearch B.V.
 
 ###############################################################################
 
 This product includes software licensed under the 'Apache License Version 2.0' license from the following sources:
 
+ - AutoService (https://github.com/google/auto/tree/main/service)
  - Kotlin Stdlib (https://kotlinlang.org/)
  - OpenTelemetry Instrumentation for Java (https://github.com/open-telemetry/opentelemetry-java-instrumentation)
 

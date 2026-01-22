@@ -30,7 +30,7 @@ junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junit-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine" }
 opentelemetry-testing = { module = "io.opentelemetry:opentelemetry-sdk-testing", version.ref = "opentelemetry" }
-robolectric = "org.robolectric:robolectric:4.15.1"
+robolectric = "org.robolectric:robolectric:4.16.1"
 assertj = "org.assertj:assertj-core:3.27.6"
 mockk = "io.mockk:mockk:1.14.7"
 awaitility = "org.awaitility:awaitility-kotlin:4.3.0"

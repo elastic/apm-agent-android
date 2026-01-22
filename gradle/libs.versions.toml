@@ -63,5 +63,4 @@ opentelemetry-semconv = ["opentelemetry-semconv", "opentelemetry-semconv-incubat
 [plugins]
 androidApp = { id = "com.android.application", version.ref = "android" }
 androidLib = { id = "com.android.library", version.ref = "android" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

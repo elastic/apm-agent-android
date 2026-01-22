@@ -2,7 +2,6 @@ import java.util.Properties
 
 plugins {
     alias(rootLibs.plugins.androidApp) apply false
-    alias(rootLibs.plugins.kotlin.android) apply false
 }
 
 val agentProperties = Properties()

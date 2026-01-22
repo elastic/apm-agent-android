@@ -7,7 +7,7 @@ inputs:
   java-version:
     description: 'Testing Java version'
     required: true
-    default: '17'
+    default: '21'
   java-distribution:
     description: 'Testing Java distribution'
     required: true

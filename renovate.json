@@ -38,6 +38,13 @@
       ],
       "ignoreUnstable": false,
       "groupName": "otel-instrumentation"
+    },
+    {
+      "matchPackageNames": [
+        "io.opentelemetry.android:**"
+      ],
+      "ignoreUnstable": false,
+      "groupName": "otel-android"
     }
   ]
 }

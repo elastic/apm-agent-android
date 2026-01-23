@@ -1,6 +1,6 @@
 [versions]
 opentelemetry-instrumentation-alpha = "2.24.0-alpha"
-opentelemetry-android = "1.0.1-alpha"
+opentelemetry-android = "1.1.0-alpha"
 
 [libraries]
 opentelemetry-instrumentation-api = "io.opentelemetry.instrumentation:opentelemetry-instrumentation-api:2.24.0"

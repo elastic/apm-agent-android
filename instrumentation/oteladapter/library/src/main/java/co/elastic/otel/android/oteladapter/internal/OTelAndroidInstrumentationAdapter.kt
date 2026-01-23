@@ -26,8 +26,7 @@ import co.elastic.otel.android.oteladapter.internal.delegate.OpenTelemetryDelega
 import com.google.auto.service.AutoService
 import io.opentelemetry.android.instrumentation.AndroidInstrumentationLoader
 import io.opentelemetry.android.instrumentation.InstallationContext
-import io.opentelemetry.android.session.SessionManager
-import io.opentelemetry.android.session.SessionObserver
+import io.opentelemetry.android.session.SessionProvider
 import io.opentelemetry.api.OpenTelemetry
 
 /**
@@ -45,7 +44,7 @@ class OTelAndroidInstrumentationAdapter : Instrumentation {
         val installationContext = InstallationContext(
             application,
             DELEGATOR,
-            SESSION_MANAGER_NOOP
+            SessionProvider.getNoop()
         )
 
         for (androidInstrumentation in AndroidInstrumentationLoader.get().getAll()) {
@@ -65,12 +64,5 @@ class OTelAndroidInstrumentationAdapter : Instrumentation {
 
     companion object {
         private val DELEGATOR by lazy { OpenTelemetryDelegator(OpenTelemetry.noop()) }
-        private val SESSION_MANAGER_NOOP = object : SessionManager {
-            override fun addObserver(observer: SessionObserver) {
-                // No-op
-            }
-
-            override fun getSessionId(): String = ""
-        }
     }
 }

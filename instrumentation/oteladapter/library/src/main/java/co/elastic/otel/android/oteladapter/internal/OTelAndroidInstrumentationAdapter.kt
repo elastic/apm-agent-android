@@ -28,6 +28,7 @@ import io.opentelemetry.android.instrumentation.AndroidInstrumentationLoader
 import io.opentelemetry.android.instrumentation.InstallationContext
 import io.opentelemetry.android.session.SessionProvider
 import io.opentelemetry.api.OpenTelemetry
+import io.opentelemetry.sdk.common.Clock
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
@@ -44,7 +45,8 @@ class OTelAndroidInstrumentationAdapter : Instrumentation {
         val installationContext = InstallationContext(
             application,
             DELEGATOR,
-            SessionProvider.getNoop()
+            SessionProvider.getNoop(),
+            Clock.getDefault()
         )
 
         for (androidInstrumentation in AndroidInstrumentationLoader.get().getAll()) {

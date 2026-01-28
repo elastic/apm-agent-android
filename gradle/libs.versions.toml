@@ -53,7 +53,7 @@ animalsniffer-plugin = "ru.vyarus:gradle-animalsniffer-plugin:2.0.1"
 kotlin-binaryCompatibility = "org.jetbrains.kotlinx.binary-compatibility-validator:org.jetbrains.kotlinx.binary-compatibility-validator.gradle.plugin:0.18.1"
 coreLib = "com.android.tools:desugar_jdk_libs:2.1.5"
 mavenModel = "org.apache.maven:maven-model:3.9.12"
-ksp-plugin = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:2.3.4"
+ksp-plugin = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:2.3.5"
 
 [bundles]
 mocking = ["mockk"]

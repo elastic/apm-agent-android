@@ -1,7 +1,7 @@
 [versions]
 opentelemetry = "1.59.0"
 opentelemetry-contrib = "1.53.0-alpha"
-byteBuddy = "1.18.4"
+byteBuddy = "1.18.5"
 kotlin = "2.3.10"
 android = "9.0.0"
 

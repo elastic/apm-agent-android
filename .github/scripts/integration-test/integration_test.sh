@@ -10,14 +10,14 @@ require() {
   echo "$value"
 }
 
-es_retrieve_first_item () {
+es_search () {
   local index="$1"
-  local service_name="$2"
+  local query="$2"
   local response
   response=$(curl "${ES_LOCAL_URL}/$index/_search" -sS \
    -H "Authorization: ApiKey ${ES_LOCAL_API_KEY}" \
    -H "Content-Type: application/json" \
-   -d "{\"query\":{\"term\":{\"service.name\":{\"value\":\"$service_name\"}}}}"
+   -d "$query"
   )
 
   response=$(require "$response")
@@ -27,6 +27,7 @@ es_retrieve_first_item () {
 
   if [ "$hits" -lt 1 ]; then
     echo ""
+    return
   fi
 
   echo "$response" | jq -r '.hits.hits[0]'
@@ -90,8 +91,11 @@ logcat_pid=$!
 echo "Awaiting for data to get exported"
 sleep 20
 
-span=$(es_retrieve_first_item "traces-*" "integration-test-app")
-log=$(es_retrieve_first_item "logs-*" "integration-test-app")
+span_query='{"query":{"term":{"service.name":{"value":"integration-test-app"}}}}'
+log_query='{"query":{"bool":{"filter":[{"term":{"service.name":{"value":"integration-test-app"}}},{"match":{"body.text":"log body"}}]}}}'
+
+span=$(es_search "traces-*" "$span_query")
+log=$(es_search "logs-*" "$log_query")
 
 # Stop logcat capture
 kill "$logcat_pid" 2>/dev/null || true

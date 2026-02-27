@@ -6,13 +6,15 @@ plugins {
     id("co.elastic.otel.android.instrumentation.okhttp")
 }
 
+val withDesugaring = providers.gradleProperty("withDesugaring").map { it.toBoolean() }.getOrElse(false)
+
 android {
     namespace = "co.elastic.otel.android.integration"
     compileSdk = 36
 
     defaultConfig {
         applicationId = "co.elastic.otel.android.integration"
-        minSdk = 26
+        minSdk = if (withDesugaring) 21 else 26
     }
 
     buildTypes {
@@ -24,6 +26,7 @@ android {
         }
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = withDesugaring
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
@@ -31,5 +34,11 @@ android {
 kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_1_8)
+    }
+}
+
+dependencies {
+    if (withDesugaring) {
+        coreLibraryDesugaring(rootLibs.coreLib)
     }
 }

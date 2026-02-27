@@ -34,7 +34,11 @@ es_retrieve_first_item () {
 
 launch_app() {
   local app_dir="$1"
-  "$app_dir/gradlew" -p "$app_dir" :app:assembleRelease
+  local gradle_args=()
+  if [ "${WITH_DESUGARING:-false}" = "true" ]; then
+    gradle_args+=("-PwithDesugaring=true")
+  fi
+  "$app_dir/gradlew" -p "$app_dir" :app:assembleRelease "${gradle_args[@]}"
   adb install -r "$app_dir"/app/build/outputs/apk/release/app-release.apk
   adb shell am start -n co.elastic.otel.android.integration/.MainActivity
 }

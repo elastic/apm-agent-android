@@ -33,8 +33,6 @@ jobs:
       - uses: ./.github/actions/setup
       - name: Build and Checks
         run: ./checks.sh
-      - name: Start ES and EDOT Collector
-        run: make -C .github/scripts/integration-test start-env
       - name: Enable KVM for Android tests
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -44,12 +42,7 @@ jobs:
         uses: reactivecircus/android-emulator-runner@b530d96654c385303d652368551fb075bc2f0b6b  # v2.35.0
         with:
           api-level: 29
-          script: |
-            # Running instrumentation tests
-            ./android_tests.sh
-            
-            # Launching ES integration tests
-            make -C .github/scripts/integration-test run-tests
+          script: ./android_tests.sh
       - name: Store test results
         if: success() || failure()
         uses: actions/upload-artifact@v6
@@ -60,7 +53,40 @@ jobs:
             **/build/test-results/testDebug*/TEST-*.xml
             **/build/test-results/test/TEST-*.xml
             **/build/outputs/androidTest-results/**/TEST-*.xml
-            **/build/es/*.json
+
+  integration-test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - api-level: 21
+            with-desugaring: true
+          - api-level: 26
+            with-desugaring: false
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - name: Start ES and EDOT Collector
+        run: make -C .github/scripts/integration-test start-env
+      - name: Enable KVM for Android tests
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Integration tests (API ${{ matrix.api-level }})
+        uses: reactivecircus/android-emulator-runner@b530d96654c385303d652368551fb075bc2f0b6b  # v2.35.0
+        with:
+          api-level: ${{ matrix.api-level }}
+          script: make -C .github/scripts/integration-test run-tests
+        env:
+          WITH_DESUGARING: ${{ matrix.with-desugaring }}
+      - name: Store test results
+        if: success() || failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: integration-test-results-api${{ matrix.api-level }}
+          path: "**/build/es/*.json"
 
   # The very last job to report whether the Workflow passed.
   # This will act as the Branch Protection gatekeeper
@@ -70,6 +96,7 @@ jobs:
     needs:
       - lint
       - test
+      - integration-test
     steps:
       - id: check
         uses: elastic/oblt-actions/check-dependent-jobs@v1

@@ -86,7 +86,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: integration-test-results-api${{ matrix.api-level }}
-          path: "**/build/es/*.json"
+          path: "**/build/es/*"
 
   # The very last job to report whether the Workflow passed.
   # This will act as the Branch Protection gatekeeper

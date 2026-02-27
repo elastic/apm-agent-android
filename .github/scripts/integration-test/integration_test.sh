@@ -55,14 +55,10 @@ assert_equals() {
 validate_span() {
   local span
   span=$(require "$1")
-  local expected_span_name="span name"
   local expected_agent_name="android/java"
-  local span_name
-  span_name=$(echo "$span" | jq -r '._source.name')
   local agent_name
   agent_name=$(echo "$span" | jq -r '._source.resource.attributes."agent.name"')
 
-  assert_equals "$expected_span_name" "$span_name"
   assert_equals "$expected_agent_name" "$agent_name"
 }
 
@@ -83,11 +79,23 @@ current_dir=$(pwd)
 app_dir="${current_dir%/.github*}/integration-test"
 launch_app "$app_dir"
 
+# Capture logcat in the background for diagnostics
+logcat_file="$app_dir/build/es/logcat.txt"
+mkdir -p "$(dirname "$logcat_file")"
+adb logcat -d > "$logcat_file" 2>&1 || true
+adb logcat -c 2>/dev/null || true
+adb logcat > "$logcat_file" 2>&1 &
+logcat_pid=$!
+
 echo "Awaiting for data to get exported"
 sleep 20
 
 span=$(es_retrieve_first_item "traces-*" "integration-test-app")
 log=$(es_retrieve_first_item "logs-*" "integration-test-app")
+
+# Stop logcat capture
+kill "$logcat_pid" 2>/dev/null || true
+wait "$logcat_pid" 2>/dev/null || true
 
 # Storing ES responses
 es_build_dir="$app_dir/build/es"

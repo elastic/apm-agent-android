@@ -60,7 +60,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - api-level: 21
+          - api-level: 24
             with-desugaring: true
           - api-level: 26
             with-desugaring: false

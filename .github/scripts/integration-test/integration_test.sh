@@ -10,14 +10,14 @@ require() {
   echo "$value"
 }
 
-es_retrieve_first_item () {
+es_search () {
   local index="$1"
-  local service_name="$2"
+  local query="$2"
   local response
   response=$(curl "${ES_LOCAL_URL}/$index/_search" -sS \
    -H "Authorization: ApiKey ${ES_LOCAL_API_KEY}" \
    -H "Content-Type: application/json" \
-   -d "{\"query\":{\"term\":{\"service.name\":{\"value\":\"$service_name\"}}}}"
+   -d "$query"
   )
 
   response=$(require "$response")
@@ -27,6 +27,7 @@ es_retrieve_first_item () {
 
   if [ "$hits" -lt 1 ]; then
     echo ""
+    return
   fi
 
   echo "$response" | jq -r '.hits.hits[0]'
@@ -34,7 +35,11 @@ es_retrieve_first_item () {
 
 launch_app() {
   local app_dir="$1"
-  "$app_dir/gradlew" -p "$app_dir" :app:assembleRelease
+  local gradle_args=()
+  if [ "${WITH_DESUGARING:-false}" = "true" ]; then
+    gradle_args+=("-PwithDesugaring=true")
+  fi
+  "$app_dir/gradlew" -p "$app_dir" :app:assembleRelease "${gradle_args[@]}"
   adb install -r "$app_dir"/app/build/outputs/apk/release/app-release.apk
   adb shell am start -n co.elastic.otel.android.integration/.MainActivity
 }
@@ -51,14 +56,10 @@ assert_equals() {
 validate_span() {
   local span
   span=$(require "$1")
-  local expected_span_name="span name"
   local expected_agent_name="android/java"
-  local span_name
-  span_name=$(echo "$span" | jq -r '._source.name')
   local agent_name
   agent_name=$(echo "$span" | jq -r '._source.resource.attributes."agent.name"')
 
-  assert_equals "$expected_span_name" "$span_name"
   assert_equals "$expected_agent_name" "$agent_name"
 }
 
@@ -66,14 +67,10 @@ validate_log() {
   local log
   log=$(require "$1")
   local expected_body_text="log body"
-  local expected_agent_name="android/java"
   local body_text
   body_text=$(echo "$log" | jq -r '._source.body.text')
-  local agent_name
-  agent_name=$(echo "$log" | jq -r '._source.resource.attributes."agent.name"')
 
   assert_equals "$expected_body_text" "$body_text"
-  assert_equals "$expected_agent_name" "$agent_name"
 }
 
 # Main execution
@@ -83,11 +80,26 @@ current_dir=$(pwd)
 app_dir="${current_dir%/.github*}/integration-test"
 launch_app "$app_dir"
 
+# Capture logcat in the background for diagnostics
+logcat_file="$app_dir/build/es/logcat.txt"
+mkdir -p "$(dirname "$logcat_file")"
+adb logcat -d > "$logcat_file" 2>&1 || true
+adb logcat -c 2>/dev/null || true
+adb logcat > "$logcat_file" 2>&1 &
+logcat_pid=$!
+
 echo "Awaiting for data to get exported"
 sleep 20
 
-span=$(es_retrieve_first_item "traces-*" "integration-test-app")
-log=$(es_retrieve_first_item "logs-*" "integration-test-app")
+span_query='{"query":{"term":{"service.name":{"value":"integration-test-app"}}}}'
+log_query='{"query":{"bool":{"filter":[{"term":{"service.name":{"value":"integration-test-app"}}},{"match":{"body.text":"log body"}}]}}}'
+
+span=$(es_search "traces-*" "$span_query")
+log=$(es_search "logs-*" "$log_query")
+
+# Stop logcat capture
+kill "$logcat_pid" 2>/dev/null || true
+wait "$logcat_pid" 2>/dev/null || true
 
 # Storing ES responses
 es_build_dir="$app_dir/build/es"

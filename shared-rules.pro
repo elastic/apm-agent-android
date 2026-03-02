@@ -5,6 +5,7 @@
     public static **[] values();
 }
 -keep class io.opentelemetry.api.incubator.** { *; }
+-keep interface io.opentelemetry.api.** { *; }
 -dontwarn com.fasterxml.jackson.**
 -dontwarn com.google.auto.service.AutoService
 -dontwarn com.google.auto.value.**

@@ -2,8 +2,8 @@ MAKEFLAGS += --no-print-directory
 .SHELLFLAGS = -euc
 SHELL = /bin/bash
 
-elastic-start-local:  ## Start ES + Kibana + EDOT Collector locally
-	curl -fsSL https://elastic.co/start-local | sh -s -- --edot
+elastic-start-local:  ## Start ES + EDOT Collector locally
+	curl -fsSL https://elastic.co/start-local | sh -s -- --esonly --edot
 
 .PHONY: start-env
 start-env: elastic-start-local  ## Start the full environment

@@ -77,12 +77,12 @@ jobs:
         run: tar xvf ${{ env.TARBALL_FILE }}
 
       - name: generate build provenance (jar files)
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest@v4
         with:
           subject-path: "${{ github.workspace }}/**/build/libs/*.jar"
 
       - name: generate build provenance (aar files)
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest@v4
         with:
           subject-path: "${{ github.workspace }}/**/build/outputs/aar/*.aar"
 

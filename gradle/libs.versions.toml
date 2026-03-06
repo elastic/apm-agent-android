@@ -48,7 +48,7 @@ byteBuddy-plugin = { module = "net.bytebuddy:byte-buddy-gradle-plugin", version.
 kotlin-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 autoService-annotations = "com.google.auto.service:auto-service-annotations:1.1.1"
 autoService-compiler = "dev.zacsweers.autoservice:auto-service-ksp:1.2.0"
-buildconfig-plugin = "com.github.gmazzo.buildconfig:com.github.gmazzo.buildconfig.gradle.plugin:6.0.8"
+buildconfig-plugin = "com.github.gmazzo.buildconfig:com.github.gmazzo.buildconfig.gradle.plugin:6.0.9"
 animalsniffer-plugin = "ru.vyarus:gradle-animalsniffer-plugin:2.0.1"
 kotlin-binaryCompatibility = "org.jetbrains.kotlinx.binary-compatibility-validator:org.jetbrains.kotlinx.binary-compatibility-validator.gradle.plugin:0.18.1"
 coreLib = "com.android.tools:desugar_jdk_libs:2.1.5"

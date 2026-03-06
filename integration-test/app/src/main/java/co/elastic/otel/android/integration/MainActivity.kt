@@ -63,7 +63,7 @@ class MainActivity : Activity() {
         builder.setAttribute("log-long", 1L)
         builder.setAttribute("log-double", 1.0)
         builder.setAttribute("log-bool", true)
-        builder.setBody("test body")
+        builder.setBody("api test")
         builder.setSeverity(Severity.INFO)
         builder.setSeverityText("INFO")
         builder.emit()

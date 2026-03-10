@@ -104,8 +104,7 @@ public class ApmPublisherRootPlugin implements Plugin<Project> {
                         .getIgnoredClasses()
                         .add(libraryExtension.getNamespace() + ".BuildConfig");
                   });
-              BcvAndroidTaskWire.register(
-                  subproject, binaryValidatorExtension, androidComponents);
+              BcvAndroidTaskWire.register(subproject, binaryValidatorExtension, androidComponents);
             });
   }
 

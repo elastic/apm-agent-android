@@ -4,6 +4,7 @@ import static co.elastic.otel.android.compilation.tools.publishing.PublishingUti
 import static co.elastic.otel.android.compilation.tools.publishing.PublishingUtils.setGroupId;
 
 import co.elastic.otel.android.compilation.tools.NoticeProviderPlugin;
+import co.elastic.otel.android.compilation.tools.binarycheck.BcvAndroidTaskWire;
 import co.elastic.otel.android.compilation.tools.plugins.RootNoticeProviderPlugin;
 import co.elastic.otel.android.compilation.tools.sourceheader.ApmSourceHeaderPlugin;
 import com.android.build.api.variant.LibraryAndroidComponentsExtension;
@@ -88,21 +89,23 @@ public class ApmPublisherRootPlugin implements Plugin<Project> {
     binaryValidatorExtension
         .getNonPublicMarkers()
         .add("co.elastic.otel.android.common.internal.annotations.InternalApi");
+    binaryValidatorExtension.setApiDumpDirectory("metadata");
+
     subproject
         .getPlugins()
         .withId(
             "com.android.library",
-            plugin ->
-                subproject
-                    .getExtensions()
-                    .getByType(LibraryAndroidComponentsExtension.class)
-                    .finalizeDsl(
-                        libraryExtension -> {
-                          binaryValidatorExtension
-                              .getIgnoredClasses()
-                              .add(libraryExtension.getNamespace() + ".BuildConfig");
-                        }));
-    binaryValidatorExtension.setApiDumpDirectory("metadata");
+            plugin -> {
+              LibraryAndroidComponentsExtension androidComponents =
+                  subproject.getExtensions().getByType(LibraryAndroidComponentsExtension.class);
+              androidComponents.finalizeDsl(
+                  libraryExtension -> {
+                    binaryValidatorExtension
+                        .getIgnoredClasses()
+                        .add(libraryExtension.getNamespace() + ".BuildConfig");
+                  });
+              BcvAndroidTaskWire.register(subproject, binaryValidatorExtension, androidComponents);
+            });
   }
 
   private static void configureVersion(Project project) {

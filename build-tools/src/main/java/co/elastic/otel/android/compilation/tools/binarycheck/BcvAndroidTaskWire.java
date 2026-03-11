@@ -17,7 +17,7 @@ import org.gradle.api.tasks.TaskProvider;
  * Workaround for <a
  * href="https://github.com/Kotlin/binary-compatibility-validator/issues/312">BCV #312</a>.
  *
- * <p>AGP 9.x no longer applies the {@code kotlin-android} plugin, so BCV never registers its
+ * <p>With AGP 9.x it's no longer needed to apply the {@code kotlin-android} plugin, so BCV never registers its
  * {@code apiDump}/{@code apiCheck} tasks for Android library modules. This class manually wires
  * them using AGP's variant artifacts API.
  *

@@ -38,10 +38,13 @@ import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator
 import io.opentelemetry.context.propagation.ContextPropagators
 import io.opentelemetry.sdk.OpenTelemetrySdk
 import io.opentelemetry.sdk.common.Clock
+import io.opentelemetry.sdk.common.internal.ScopeConfiguratorBuilder
 import io.opentelemetry.sdk.logs.SdkLoggerProvider
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
 import io.opentelemetry.sdk.metrics.SdkMeterProvider
 import io.opentelemetry.sdk.metrics.export.MetricExporter
+import io.opentelemetry.sdk.metrics.internal.MeterConfig
+import io.opentelemetry.sdk.metrics.internal.SdkMeterProviderUtil
 import io.opentelemetry.sdk.resources.Resource
 import io.opentelemetry.sdk.trace.SdkTracerProvider
 import io.opentelemetry.sdk.trace.export.SpanExporter
@@ -222,13 +225,16 @@ class ElasticOpenTelemetry private constructor(
                     )
                 }
             finalProcessorFactory.createMetricReader(metricExporter)?.let {
-                openTelemetryBuilder.setMeterProvider(
-                    SdkMeterProvider.builder()
-                        .setClock(clock)
-                        .setResource(resource)
-                        .registerMetricReader(it)
-                        .build()
+                val meterProviderBuilder = SdkMeterProvider.builder()
+                    .setClock(clock)
+                    .setResource(resource)
+                    .registerMetricReader(it)
+                SdkMeterProviderUtil.addMeterConfiguratorCondition(
+                    meterProviderBuilder,
+                    ScopeConfiguratorBuilder.nameEquals("io.opentelemetry.sdk.metrics"),
+                    MeterConfig.disabled()
                 )
+                openTelemetryBuilder.setMeterProvider(meterProviderBuilder.build())
             }
             openTelemetryBuilder.setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
             return ElasticOpenTelemetry(

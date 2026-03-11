@@ -56,7 +56,7 @@ class SpanBuilderDelegator(initialValue: SpanBuilder) : Delegator<SpanBuilder>(i
 
     override fun setAttribute(
         key: String,
-        value: String
+        value: String?
     ): SpanBuilder? {
         return getDelegate().setAttribute(key, value)
     }
@@ -84,7 +84,7 @@ class SpanBuilderDelegator(initialValue: SpanBuilder) : Delegator<SpanBuilder>(i
 
     override fun <T : Any?> setAttribute(
         key: AttributeKey<T?>,
-        value: T & Any
+        value: T?
     ): SpanBuilder? {
         return getDelegate().setAttribute(key, value)
     }

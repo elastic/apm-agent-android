@@ -60,7 +60,7 @@ class NoopSpanBuilder private constructor() : SpanBuilder {
         return this
     }
 
-    override fun setAttribute(key: String, value: String): NoopSpanBuilder {
+    override fun setAttribute(key: String, value: String?): NoopSpanBuilder {
         return this
     }
 

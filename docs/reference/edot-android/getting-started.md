@@ -92,26 +92,49 @@ agent.span("My Span") {
 
 ### Visualize telemetry
 
-After your app has sent telemetry data, either [manually](manual-instrumentation.md) or [automatically](automatic-instrumentation.md), view it in {{kib}} by navigating to **Applications**, **Service Inventory**, or by searching for `Service Inventory` in the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md). You should find your application listed there.
+After your app has sent telemetry data, either [manually](manual-instrumentation.md) or [automatically](automatic-instrumentation.md), you can visualize it in {{kib}} using the **Android OpenTelemetry Assets** content package.
 
-:::{image} images/span-visualization/1.png
-:alt: Services
-:width: 350px
+#### Install the content package
+
+1. In {{kib}}, search for **Integrations** in the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md).
+2. Search for **Android OpenTelemetry Assets**.
+3. Open it and click **Install** to add the Android dashboards to your {{kib}} instance.
+
+#### Explore your data in the dashboard
+
+Once the content package is installed, open the **[Android OTel] Application Overview** dashboard:
+
+1. In {{kib}}, search for **Dashboards** in the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md).
+2. Search for **Android OTel** and open the **[Android OTel] Application Overview** dashboard.
+3. Select your application from the **Applications** panel at the top of the dashboard.
+
+:::{image} images/span-visualization/application-overview-dashboard.png
+:alt: Application Overview Dashboard
 :screenshot:
 :::
 
-When you open it, go to the **Transactions** tab, where you should see your app's "outermost" spans listed.
+The dashboard provides a high-level view of your app's health, including span performance, crash analysis, and session-level insights.
 
-:::{image} images/span-visualization/2.png
-:alt: Transactions tab
-:width: 350px
+#### View trace waterfall details
+
+To inspect individual span traces in detail, go to a panel that shows a list of spans in the dashboard and click its **Explore in Discover** button.
+
+:::{image} images/span-visualization/explore-spans-in-discover.png
+:alt: Explore in Discover
 :screenshot:
 :::
 
-After clicking on the span, you should see it in detail.
+In Discover, expand the details for one of the spans by clicking the expand icon on the left.
 
-:::{image} images/span-visualization/3.png
-:alt: Trace sample
+:::{image} images/span-visualization/open-span-details.png
+:alt: Open span details
+:screenshot:
+:::
+
+You'll see the trace waterfall UI, showing the full span hierarchy and timing. You can expand it to fullscreen and drill down into further details from there.
+
+:::{image} images/span-visualization/trace-waterfall-ui.png
+:alt: Trace waterfall UI
 :screenshot:
 :::
 

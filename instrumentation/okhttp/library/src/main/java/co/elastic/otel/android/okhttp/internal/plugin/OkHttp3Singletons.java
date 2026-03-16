@@ -24,8 +24,6 @@ import co.elastic.otel.android.okhttp.internal.delegate.InterceptorDelegator;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
-import io.opentelemetry.instrumentation.api.incubator.semconv.net.PeerServiceAttributesExtractor;
-import io.opentelemetry.instrumentation.api.incubator.semconv.net.PeerServiceResolver;
 import io.opentelemetry.instrumentation.api.instrumenter.Instrumenter;
 import io.opentelemetry.instrumentation.api.semconv.http.HttpClientRequestResendCount;
 import io.opentelemetry.instrumentation.api.semconv.http.HttpSpanNameExtractor;
@@ -33,7 +31,6 @@ import io.opentelemetry.instrumentation.okhttp.v3_0.internal.ConnectionErrorSpan
 import io.opentelemetry.instrumentation.okhttp.v3_0.internal.OkHttpAttributesGetter;
 import io.opentelemetry.instrumentation.okhttp.v3_0.internal.OkHttpClientInstrumenterBuilderFactory;
 import io.opentelemetry.instrumentation.okhttp.v3_0.internal.TracingInterceptor;
-import java.util.Collections;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -52,10 +49,6 @@ public final class OkHttp3Singletons {
             .setKnownMethods(KNOWN_METHODS)
             .setSpanNameExtractorCustomizer(
                 x -> HttpSpanNameExtractor.builder(OkHttpAttributesGetter.INSTANCE).build())
-            .addAttributesExtractor(
-                PeerServiceAttributesExtractor.create(
-                    OkHttpAttributesGetter.INSTANCE,
-                    PeerServiceResolver.create(Collections.emptyMap())))
             .setEmitExperimentalHttpClientTelemetry(false)
             .build();
     CONNECTION_ERROR_INTERCEPTOR.setDelegate(new ConnectionErrorSpanInterceptor(instrumenter));

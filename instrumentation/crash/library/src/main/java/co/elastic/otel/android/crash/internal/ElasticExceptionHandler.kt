@@ -47,17 +47,21 @@ class ElasticExceptionHandler internal constructor(
     }
 
     private fun emitCrashEvent(e: Throwable) {
-        crashEventBuilder.setAllAttributes(
-            Attributes.builder()
-                .put("event.name", "device.crash")
-                .put(ExceptionAttributes.EXCEPTION_MESSAGE, e.message)
-                .put(ExceptionAttributes.EXCEPTION_STACKTRACE, e.stackTraceToString())
-                .put(ExceptionAttributes.EXCEPTION_TYPE, e.javaClass.name)
-                .build(),
-        ).emit()
+        crashEventBuilder
+            .setEventName(EVENT_NAME)
+            .setAllAttributes(
+                Attributes.builder()
+                    .put("otel.event.name", EVENT_NAME)
+                    .put(ExceptionAttributes.EXCEPTION_MESSAGE, e.message)
+                    .put(ExceptionAttributes.EXCEPTION_STACKTRACE, e.stackTraceToString())
+                    .put(ExceptionAttributes.EXCEPTION_TYPE, e.javaClass.name)
+                    .build(),
+            ).emit()
     }
 
     companion object {
+        private const val EVENT_NAME = "app.crash"
+
         internal fun create(
             agent: ElasticOtelAgent,
             delegate: Thread.UncaughtExceptionHandler?,

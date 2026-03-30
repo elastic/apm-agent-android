@@ -78,7 +78,9 @@ jobs:
         uses: reactivecircus/android-emulator-runner@e89f39f1abbbd05b1113a29cf4db69e7540cae5a  # v2.37.0
         with:
           api-level: ${{ matrix.api-level }}
-          script: make -C .github/scripts/integration-test run-tests
+          script: |
+            make -C .github/scripts/integration-test run-tests
+            make -C .github/scripts/integration-test run-crash-test
         env:
           WITH_DESUGARING: ${{ matrix.with-desugaring }}
       - name: Store test results

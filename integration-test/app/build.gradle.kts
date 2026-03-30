@@ -4,6 +4,7 @@ plugins {
     id("com.android.application")
     id("co.elastic.otel.android.agent")
     id("co.elastic.otel.android.instrumentation.okhttp")
+    id("co.elastic.otel.android.instrumentation.crash")
 }
 
 val withDesugaring = providers.gradleProperty("withDesugaring").map { it.toBoolean() }.getOrElse(false)
@@ -15,6 +16,8 @@ android {
     defaultConfig {
         applicationId = "co.elastic.otel.android.integration"
         minSdk = if (withDesugaring) 23 else 26
+        versionCode = 1
+        versionName = "1.0.0"
     }
 
     buildTypes {

@@ -13,6 +13,11 @@ run-tests: elastic-start-local ## Run integration tests
 	. elastic-start-local/.env; \
 	./integration_test.sh $$ES_LOCAL_URL $$ES_LOCAL_API_KEY
 
+.PHONY: run-crash-test
+run-crash-test: elastic-start-local ## Run crash reporting e2e test
+	. elastic-start-local/.env; \
+	./crash_test.sh $$ES_LOCAL_URL $$ES_LOCAL_API_KEY
+
 .PHONY: clean
 clean: ## Stop and uninstall
 	yes | elastic-start-local/stop.sh

@@ -51,7 +51,7 @@ if [ "${WITH_DESUGARING:-false}" = "true" ]; then
   gradle_args+=("-PwithDesugaring=true")
 fi
 
-"$app_dir/gradlew" -p "$app_dir" :app:assembleRelease "${gradle_args[@]}"
+"$app_dir/gradlew" -p "$app_dir" :app:assembleRelease ${gradle_args[@]+"${gradle_args[@]}"}
 
 # ======================== Step 2: Crash the app ============================
 

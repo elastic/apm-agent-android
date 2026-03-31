@@ -60,7 +60,7 @@ class ElasticExceptionHandler internal constructor(
     }
 
     companion object {
-        private const val EVENT_NAME = "app.crash"
+        private const val EVENT_NAME = "device.crash"
 
         internal fun create(
             agent: ElasticOtelAgent,

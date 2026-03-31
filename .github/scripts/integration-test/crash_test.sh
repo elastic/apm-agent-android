@@ -100,7 +100,7 @@ for i in $(seq 1 15); do
   sleep 4
   crash_event_response=$(es_request POST "/_query?format=json" \
     -d '{
-      "query": "FROM logs-generic.otel* | WHERE service.name == \"integration-test-app\" AND event_name == \"app.crash\" | LIMIT 1"
+      "query": "FROM logs-generic.otel* | WHERE service.name == \"integration-test-app\" AND event_name == \"device.crash\" | LIMIT 1"
     }' 2>/dev/null || true)
   crash_event=$(echo "$crash_event_response" | jq -r '.values[0] // empty' 2>/dev/null || true)
   if [ -n "$crash_event" ]; then
@@ -118,7 +118,7 @@ crash_doc_response=$(es_request POST "/logs-generic.otel*/_search" \
       "bool": {
         "filter": [
           {"term": {"service.name": {"value": "integration-test-app"}}},
-          {"term": {"event_name": {"value": "app.crash"}}}
+          {"term": {"event_name": {"value": "device.crash"}}}
         ]
       }
     },

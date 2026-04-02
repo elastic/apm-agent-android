@@ -14,7 +14,7 @@ android {
 
     defaultConfig {
         applicationId = "co.elastic.otel.android.integration"
-        minSdk = if (withDesugaring) 24 else 26
+        minSdk = if (withDesugaring) 23 else 26
     }
 
     buildTypes {

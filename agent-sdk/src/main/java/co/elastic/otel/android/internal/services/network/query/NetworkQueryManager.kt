@@ -34,18 +34,10 @@ internal interface NetworkQueryManager {
             telephonyManager: TelephonyManager
         ): NetworkQueryManager {
             val currentApi = Build.VERSION.SDK_INT
-            return when {
-                currentApi == Build.VERSION_CODES.M -> NetworkApi23QueryManager(
-                    connectivityManager,
-                    telephonyManager
-                )
-
-                currentApi < Build.VERSION_CODES.M -> NetworkApi21QueryManager(
-                    connectivityManager,
-                    telephonyManager
-                )
-
-                else -> NetworkApi24QueryManager(connectivityManager, telephonyManager)
+            return if (currentApi == Build.VERSION_CODES.M) {
+                NetworkApi23QueryManager(connectivityManager, telephonyManager)
+            } else {
+                NetworkApi24QueryManager(connectivityManager, telephonyManager)
             }
         }
     }

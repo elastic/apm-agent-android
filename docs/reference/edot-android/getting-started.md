@@ -24,7 +24,7 @@ Set up the Elastic Distribution of OpenTelemetry Android (EDOT Android) in your 
 | Requirement                                       | Minimum version                                                                                           |
 |---------------------------------------------------|-----------------------------------------------------------------------------------------------------------|
 | [{{stack}}](https://www.elastic.co/elastic-stack) | 8.19 or 9.1                                                                                               |
-| Android API level                                 | 26 (or 21 with [desugaring](https://developer.android.com/studio/write/java8-support#library-desugaring)) |
+| Android API level                                 | 26 (or 23 with [desugaring](https://developer.android.com/studio/write/java8-support#library-desugaring)) |
 
 :::{important}
 * If your application's [minSdk](https://developer.android.com/studio/publish/versioning#minsdk) value is lower than 26, you must add [Java 8 desugaring support](https://developer.android.com/studio/write/java8-support#library-desugaring). Refer to [Troubleshooting](docs-content://troubleshoot/ingest/opentelemetry/edot-sdks/android/index.md#why-desugaring) for more information.

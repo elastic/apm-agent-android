@@ -31,7 +31,6 @@ import co.elastic.otel.android.features.session.Session
 import co.elastic.otel.android.interceptor.Interceptor
 import co.elastic.otel.android.internal.opentelemetry.ElasticOpenTelemetry
 import co.elastic.otel.android.internal.services.ServiceManager
-import co.elastic.otel.android.internal.services.network.query.NetworkApi21QueryManager
 import co.elastic.otel.android.internal.services.network.query.NetworkApi23QueryManager
 import co.elastic.otel.android.internal.services.network.query.NetworkApi24QueryManager
 import co.elastic.otel.android.processors.ProcessorFactory
@@ -387,23 +386,14 @@ internal class AttributesTest : ExporterProvider, ProcessorFactory {
         shadowConnectivityManager.setActiveNetworkInfo(activeNetworkInfo)
         var activeNetwork: Network = ShadowNetwork.newInstance(ConnectivityManager.TYPE_MOBILE)
 
-        when (Build.VERSION.SDK_INT) {
-            in 21..22 -> {
-                assertThat(defaultNetworkCallback).isInstanceOf(NetworkApi21QueryManager::class.java)
-                shadowTelephonyManager.setNetworkType(TelephonyManager.NETWORK_TYPE_EDGE)
-            }
-
-            23 -> {
-                assertThat(defaultNetworkCallback).isInstanceOf(NetworkApi23QueryManager::class.java)
-                shadowTelephonyManager.setNetworkType(TelephonyManager.NETWORK_TYPE_EDGE)
-                activeNetwork = connectivityManager.activeNetwork!!
-            }
-
-            else -> {
-                assertThat(defaultNetworkCallback).isInstanceOf(NetworkApi24QueryManager::class.java)
-                shadowTelephonyManager.setDataNetworkType(TelephonyManager.NETWORK_TYPE_EDGE)
-                activeNetwork = connectivityManager.activeNetwork!!
-            }
+        if (Build.VERSION.SDK_INT == 23) {
+            assertThat(defaultNetworkCallback).isInstanceOf(NetworkApi23QueryManager::class.java)
+            shadowTelephonyManager.setNetworkType(TelephonyManager.NETWORK_TYPE_EDGE)
+            activeNetwork = connectivityManager.activeNetwork!!
+        } else {
+            assertThat(defaultNetworkCallback).isInstanceOf(NetworkApi24QueryManager::class.java)
+            shadowTelephonyManager.setDataNetworkType(TelephonyManager.NETWORK_TYPE_EDGE)
+            activeNetwork = connectivityManager.activeNetwork!!
         }
 
         val capabilities = mockk<NetworkCapabilities>()

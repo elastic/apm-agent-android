@@ -24,10 +24,8 @@ import android.net.ConnectivityManager.NetworkCallback
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
-import android.os.Build
 import android.telephony.TelephonyManager
 import androidx.annotation.GuardedBy
-import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import co.elastic.otel.android.internal.services.network.listener.NetworkChangeListener
 
@@ -35,7 +33,6 @@ import co.elastic.otel.android.internal.services.network.listener.NetworkChangeL
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-@RequiresApi(Build.VERSION_CODES.M)
 internal class NetworkApi23QueryManager(
     private val connectivityManager: ConnectivityManager,
     private val telephonyManager: TelephonyManager

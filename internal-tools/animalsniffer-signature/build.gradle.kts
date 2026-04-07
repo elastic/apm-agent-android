@@ -30,7 +30,7 @@ configurations.create("generatedSignature") {
 }
 
 dependencies {
-    signature("com.toasttab.android:gummy-bears-api-${project.property("elastic.android.minSdk")}:0.9.0@signature")
+    signature("com.toasttab.android:gummy-bears-api-${project.property("elastic.android.minSdk")}:0.12.0@signature")
     signatureJar(libs.coreLib)
 }
 

@@ -1,13 +1,14 @@
 [versions]
 opentelemetry-instrumentation-alpha = "2.27.0-alpha"
-opentelemetry-android = "1.2.0-alpha"
+opentelemetry-android-alpha = "1.3.0-alpha"
 
 [libraries]
 opentelemetry-instrumentation-api = "io.opentelemetry.instrumentation:opentelemetry-instrumentation-api:2.27.0"
 opentelemetry-instrumentation-api-incubator = { module = "io.opentelemetry.instrumentation:opentelemetry-instrumentation-api-incubator", version.ref = "opentelemetry-instrumentation-alpha" }
 opentelemetry-instrumentation-okhttp = { module = "io.opentelemetry.instrumentation:opentelemetry-okhttp-3.0", version.ref = "opentelemetry-instrumentation-alpha" }
-opentelemetry-android-session = { module = "io.opentelemetry.android:session", version.ref = "opentelemetry-android" }
-opentelemetry-android-instrumentation = { module = "io.opentelemetry.android.instrumentation:android-instrumentation", version.ref = "opentelemetry-android" }
+opentelemetry-android-session = { module = "io.opentelemetry.android:session", version = "1.3.0" }
+opentelemetry-android-instrumentation = { module = "io.opentelemetry.android.instrumentation:android-instrumentation", version.ref = "opentelemetry-android-alpha" }
+opentelemetry-android-core = { module = "io.opentelemetry.android:core", version.ref = "opentelemetry-android-alpha" }
 weakLockFree = "com.blogspot.mydailyjava:weak-lock-free:0.18"
 
 # Testing

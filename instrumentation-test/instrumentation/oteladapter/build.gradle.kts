@@ -8,7 +8,7 @@ android {
     namespace = "co.elastic.otel.android.test.oteladapter"
 }
 
-val logInstrumentationVersion = "0.11.0-alpha"
+val logInstrumentationVersion = "1.3.0-alpha"
 dependencies {
     implementation("io.opentelemetry.android.instrumentation:android-log-library:$logInstrumentationVersion")
     byteBuddy("io.opentelemetry.android.instrumentation:android-log-agent:$logInstrumentationVersion")

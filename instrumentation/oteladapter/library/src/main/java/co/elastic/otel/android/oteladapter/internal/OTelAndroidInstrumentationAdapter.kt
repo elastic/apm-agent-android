@@ -23,12 +23,11 @@ import co.elastic.otel.android.api.ElasticOtelAgent
 import co.elastic.otel.android.instrumentation.internal.Instrumentation
 import co.elastic.otel.android.instrumentation.oteladapter.BuildConfig
 import co.elastic.otel.android.oteladapter.internal.delegate.OpenTelemetryDelegator
+import co.elastic.otel.android.oteladapter.internal.delegate.OpenTelemetryRumDelegator
 import com.google.auto.service.AutoService
-import io.opentelemetry.android.instrumentation.AndroidInstrumentationLoader
-import io.opentelemetry.android.instrumentation.InstallationContext
-import io.opentelemetry.android.session.SessionProvider
+import io.opentelemetry.android.instrumentation.AndroidInstrumentation
 import io.opentelemetry.api.OpenTelemetry
-import io.opentelemetry.sdk.common.Clock
+import java.util.ServiceLoader
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
@@ -42,15 +41,10 @@ class OTelAndroidInstrumentationAdapter : Instrumentation {
         agent: ElasticOtelAgent
     ): Instrumentation.Installation {
         DELEGATOR.setDelegate(agent.getOpenTelemetry())
-        val installationContext = InstallationContext(
-            application,
-            DELEGATOR,
-            SessionProvider.getNoop(),
-            Clock.getDefault()
-        )
+        val rumDelegator = OpenTelemetryRumDelegator(DELEGATOR)
 
-        for (androidInstrumentation in AndroidInstrumentationLoader.get().getAll()) {
-            androidInstrumentation.install(installationContext)
+        for (androidInstrumentation in getAllInstrumentations()) {
+            androidInstrumentation.install(application, rumDelegator)
         }
 
         return Instrumentation.Installation { DELEGATOR.reset() }
@@ -62,6 +56,14 @@ class OTelAndroidInstrumentationAdapter : Instrumentation {
 
     override fun getVersion(): String {
         return BuildConfig.INSTRUMENTATION_VERSION
+    }
+
+    private fun getAllInstrumentations(): List<AndroidInstrumentation> {
+        return ServiceLoader
+            .load(AndroidInstrumentation::class.java)
+            .associateBy { it.javaClass }
+            .toMutableMap()
+            .values.toList()
     }
 
     companion object {

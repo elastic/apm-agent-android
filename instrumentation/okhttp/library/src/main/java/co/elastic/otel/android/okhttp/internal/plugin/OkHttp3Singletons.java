@@ -48,7 +48,7 @@ public final class OkHttp3Singletons {
         OkHttpClientInstrumenterBuilderFactory.create(openTelemetry)
             .setKnownMethods(KNOWN_METHODS)
             .setSpanNameExtractorCustomizer(
-                x -> HttpSpanNameExtractor.builder(OkHttpAttributesGetter.INSTANCE).build())
+                x -> HttpSpanNameExtractor.builder(new OkHttpAttributesGetter()).build())
             .setEmitExperimentalHttpClientTelemetry(false)
             .build();
     CONNECTION_ERROR_INTERCEPTOR.setDelegate(new ConnectionErrorSpanInterceptor(instrumenter));

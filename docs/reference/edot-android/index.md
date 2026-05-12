@@ -71,7 +71,7 @@ Your application's telemetry data is stored locally before being sent to the {{s
 ### Crash reporting
 
 Crash events are automatically reported to your {{stack}} when your application encounters an unhandled exception. These events include [session](#sessions) information to help correlate contextual data and provide a more detailed view of what might have caused the crash.
-This feature is an [automatic instrumentation](automatic-instrumentation.md), which need to be installed individually, so you'll need to follow the instructions there to enable it.
+This feature is an [automatic instrumentation](automatic-instrumentation.md), which need to be installed individually, so you'll need to follow the instructions [there](automatic-instrumentation.md) to enable it.
 
 ### Central configuration
 

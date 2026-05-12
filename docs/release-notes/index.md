@@ -31,6 +31,16 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 % next_release_notes
     
+## 1.6.0 [elastic-apm-android-agent-160-release-notes]
+**Release date:** May 12, 2026
+
+### Features and enhancements [elastic-apm-android-agent-160-features-enhancements]
+
+* Upgrade OpenTelemetry Android libraries to 1.3.0: [#792](https://github.com/elastic/apm-agent-android/pull/792)
+* Upgrade OpenTelemetry Java instrumentation to 2.27.0: [#791](https://github.com/elastic/apm-agent-android/pull/791)
+* [Breaking] Raise the minimum Android API level with desugaring to 23: [#772](https://github.com/elastic/apm-agent-android/pull/772)
+* Add crash reporting instrumentation for unhandled exceptions: [#796](https://github.com/elastic/apm-agent-android/pull/796)
+    
 ## 1.5.0 [elastic-apm-android-agent-150-release-notes]
 **Release date:** January 22, 2026
 

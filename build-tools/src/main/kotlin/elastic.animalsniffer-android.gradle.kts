@@ -7,12 +7,7 @@ plugins {
 }
 
 dependencies {
-    signature(
-        project(
-            path = ":internal-tools:animalsniffer-signature",
-            configuration = "generatedSignature"
-        )
-    )
+    signature("com.toasttab.android:gummy-bears-api-${project.property("elastic.android.minSdk")}:0.14.0:coreLib2@signature")
 }
 
 val capitalizedVariantNames = mutableListOf<String>()

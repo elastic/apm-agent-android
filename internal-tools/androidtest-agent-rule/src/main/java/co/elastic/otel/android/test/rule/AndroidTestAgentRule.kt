@@ -5,7 +5,8 @@ import android.app.Application
 import androidx.test.internal.runner.junit4.statement.UiThreadStatement.runOnUiThread
 import androidx.test.platform.app.InstrumentationRegistry
 
-class AndroidTestAgentRule : AgentRule() {
+class AndroidTestAgentRule(onBeforeInitialization: (() -> Unit)? = null) :
+    AgentRule(onBeforeInitialization) {
 
     @SuppressLint("RestrictedApi")
     override fun runInitialization(initialization: () -> Unit) {

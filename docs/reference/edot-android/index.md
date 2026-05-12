@@ -68,6 +68,11 @@ EDOT Android provides additional features on top of those that come with the [Op
 
 Your application's telemetry data is stored locally before being sent to the {{stack}}. Then it's removed either after being successfully exported or to make room for new telemetry data if needed. This minimizes the risk of data loss due to internet connectivity issues.
 
+### Crash reporting
+
+Crash events are automatically reported to your {{stack}} when your application encounters an unhandled exception. These events include [session](#sessions) information to help correlate contextual data and provide a more detailed view of what might have caused the crash.
+This feature is an [automatic instrumentation](automatic-instrumentation.md), which need to be installed individually, so you'll need to follow the instructions [there](automatic-instrumentation.md) to enable it.
+
 ### Central configuration
 
 You can remotely manage how EDOT Android behaves through {{kib}}. Refer to [Central configuration](configuration.md#central-configuration) for more details.

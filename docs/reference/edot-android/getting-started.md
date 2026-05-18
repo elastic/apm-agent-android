@@ -138,6 +138,11 @@ You'll see the trace waterfall UI, showing the full span hierarchy and timing. Y
 :screenshot:
 :::
 
+#### Learn more
+
+- [View crash details](https://www.elastic.co/docs/reference/integrations/otel_android_dashboards#viewing-details-from-a-crash) — Learn how to visualize and drill into Android crash reports in the dashboard.
+- [Troubleshoot dashboard issues](https://www.elastic.co/docs/reference/integrations/otel_android_dashboards#troubleshooting) — Find solutions to common issues with the {{kib}} dashboard experience.
+
 ## What’s next? [whats-next]
 
 - This guide uses the minimum configuration options needed to initialize EDOT Android. If you'd like to explore what else you can customize, take a look at the [configuration page](configuration.md).

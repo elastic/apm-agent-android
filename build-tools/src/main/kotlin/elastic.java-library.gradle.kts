@@ -20,7 +20,7 @@ kotlin.compilerOptions {
     jvmTarget.set(JvmTarget.fromTarget(javaVersionStr))
     apiVersion = minKotlinVersion
     languageVersion = minKotlinVersion
-    freeCompilerArgs = listOf("-Xjvm-default=all")
+    freeCompilerArgs = listOf("-jvm-default=no-compatibility")
 }
 
 tasks.withType(Test::class).configureEach {

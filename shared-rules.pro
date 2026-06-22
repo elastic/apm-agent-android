@@ -12,5 +12,6 @@
 -dontwarn com.google.common.io.ByteStreams
 -dontwarn com.google.errorprone.annotations.**
 -dontwarn io.grpc.**
+-dontwarn io.opentelemetry.sdk.autoconfigure.spi.**
 -dontwarn java.awt.**
 -dontwarn javax.json.bind.spi.JsonbProvider

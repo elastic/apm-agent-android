@@ -121,7 +121,7 @@ jobs:
           repositories: >-
             ["apm-agent-android"]
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           token: ${{ steps.get_token.outputs.token }}
 

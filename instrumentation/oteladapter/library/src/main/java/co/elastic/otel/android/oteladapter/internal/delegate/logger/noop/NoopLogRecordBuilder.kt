@@ -20,7 +20,6 @@ package co.elastic.otel.android.oteladapter.internal.delegate.logger.noop
 
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Value
-import io.opentelemetry.api.incubator.common.ExtendedAttributeKey
 import io.opentelemetry.api.incubator.logs.ExtendedLogRecordBuilder
 import io.opentelemetry.api.logs.Severity
 import io.opentelemetry.context.Context
@@ -73,13 +72,6 @@ class NoopLogRecordBuilder private constructor() : ExtendedLogRecordBuilder {
     }
 
     override fun <T> setAttribute(key: AttributeKey<T?>, value: T?): ExtendedLogRecordBuilder {
-        return this
-    }
-
-    override fun <T : Any?> setAttribute(
-        key: ExtendedAttributeKey<T?>?,
-        value: T?
-    ): ExtendedLogRecordBuilder? {
         return this
     }
 

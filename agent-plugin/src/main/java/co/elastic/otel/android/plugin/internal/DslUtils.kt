@@ -20,26 +20,27 @@ package co.elastic.otel.android.plugin.internal
 
 import co.elastic.otel.android.plugin.extensions.ElasticVariantExtension
 import com.android.build.api.variant.ApplicationVariant
-import org.gradle.api.Project
+import org.gradle.api.provider.Provider
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-class ByteBuddyDependencyAttacher(
-    private val project: Project,
-    private val dependencyUri: String
-) : ApplicationVariantListener {
-
-    override fun onApplicationVariant(
-        variant: ApplicationVariant,
-        elastic: ElasticVariantExtension,
-    ) {
-        if (elastic.bytecodeInstrumentation.disabled.getOrElse(false)) {
-            return
+internal object DslUtils {
+    fun <T : Any> mergeDslValue(
+        projectValue: Provider<T>,
+        flavorValues: List<Provider<T>>,
+        buildTypeValue: Provider<T>,
+    ): Provider<T> {
+        var merged = projectValue
+        flavorValues.forEach { flavorValue ->
+            merged = flavorValue.orElse(merged)
         }
-        project.configurations.maybeCreate("${variant.name}ByteBuddy").dependencies.add(
-            project.dependencies.create(dependencyUri)
-        )
+        return buildTypeValue.orElse(merged)
+    }
+
+    fun elasticExtension(variant: ApplicationVariant): ElasticVariantExtension {
+        return variant.getExtension(ElasticVariantExtension::class.java)
+            ?: error("Elastic extension was not registered for variant '${variant.name}'")
     }
 }

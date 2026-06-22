@@ -1,6 +1,6 @@
 public final class co/elastic/otel/android/plugin/ElasticAgentPlugin : org/gradle/api/Plugin {
 	public fun <init> ()V
-	public final fun addApplicationVariantListener (Lco/elastic/otel/android/plugin/internal/ApplicationVariantListener;)V
+	public final fun addByteBuddyDependency (Ljava/lang/String;)V
 	public synthetic fun apply (Ljava/lang/Object;)V
 	public fun apply (Lorg/gradle/api/Project;)V
 }
@@ -25,7 +25,6 @@ public abstract class co/elastic/otel/android/plugin/extensions/ElasticExtension
 public abstract class co/elastic/otel/android/plugin/extensions/ElasticVariantExtension : com/android/build/api/variant/VariantExtension, java/io/Serializable {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun getBuildId ()Lorg/gradle/api/provider/Property;
-	public final fun getBytecodeInstrumentation ()Lco/elastic/otel/android/plugin/extensions/BytecodeInstrumentation;
 }
 
 public abstract interface class co/elastic/otel/android/plugin/extensions/LegacyBytecodeInstrumentation {

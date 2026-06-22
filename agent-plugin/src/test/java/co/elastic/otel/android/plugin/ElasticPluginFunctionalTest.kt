@@ -21,6 +21,7 @@ package co.elastic.otel.android.plugin
 import java.io.File
 import java.nio.file.Path
 import org.gradle.testkit.runner.GradleRunner
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
@@ -31,7 +32,7 @@ class ElasticPluginFunctionalTest {
     lateinit var projectDir: Path
 
     @Test
-    fun `bytebuddy dependencies are added only when bytecode instrumentation is enabled`() {
+    fun `bytebuddy transform task is wired only when bytecode instrumentation is enabled`() {
         writeAndroidProject(
             """
             import co.elastic.otel.android.plugin.extensions.ElasticExtension
@@ -41,16 +42,11 @@ class ElasticPluginFunctionalTest {
                 id("co.elastic.otel.android.agent")
             }
 
-            val listenerClass = Class.forName("co.elastic.otel.android.plugin.internal.ApplicationVariantListener")
-            val attacherClass = Class.forName("co.elastic.otel.android.plugin.internal.ByteBuddyDependencyAttacher")
             plugins.withId("co.elastic.otel.android.agent") {
-                val attacher = attacherClass
-                    .getConstructor(org.gradle.api.Project::class.java, String::class.java)
-                    .newInstance(project, "co.elastic.test:bytebuddy-plugin:1.0")
                 plugins.getPlugin("co.elastic.otel.android.agent")
                     .javaClass
-                    .getMethod("addApplicationVariantListener", listenerClass)
-                    .invoke(plugins.getPlugin("co.elastic.otel.android.agent"), attacher)
+                    .getMethod("addByteBuddyDependency", String::class.java)
+                    .invoke(plugins.getPlugin("co.elastic.otel.android.agent"), "co.elastic.test:bytebuddy-plugin:1.0")
             }
 
             android {
@@ -95,45 +91,21 @@ class ElasticPluginFunctionalTest {
                 @Suppress("DEPRECATION")
                 bytecodeInstrumentation.disableForBuildTypes.set(listOf("staging"))
             }
-
-            androidComponents {
-                onVariants { variant ->
-                    val extensionClass = Class.forName("co.elastic.otel.android.plugin.extensions.ElasticVariantExtension") as Class<Any>
-                    val extension = variant.getExtension(extensionClass)!!
-                    val bytecodeInstrumentation = extension.javaClass.getMethod("getBytecodeInstrumentation").invoke(extension)
-                    val disabled = bytecodeInstrumentation.javaClass.getMethod("getDisabled").invoke(bytecodeInstrumentation) as org.gradle.api.provider.Property<*>
-                    println("variantDisabled=" + variant.name + ":" + disabled.get())
-                }
-            }
-
-            tasks.register("printByteBuddyDependencies") {
-                doLast {
-                    listOf("demoDebug", "demoRelease", "demoStaging", "fullDebug", "fullRelease", "fullStaging").forEach { variantName ->
-                        val dependencies = configurations.findByName("${'$'}{variantName}ByteBuddy")?.dependencies
-                            ?.joinToString { "${'$'}{it.group}:${'$'}{it.name}:${'$'}{it.version}" }
-                            .orEmpty()
-                        println("byteBuddyDependencies=${'$'}variantName:${'$'}dependencies")
-                    }
-                }
-            }
             """.trimIndent(),
         )
 
-        val output = gradleRunner("printByteBuddyDependencies").build().output
+        val output = gradleRunner(
+            "assembleFullRelease",
+            "assembleFullDebug",
+            "assembleFullStaging",
+            "assembleDemoRelease",
+            "--dry-run",
+        ).build().output
 
-        assertTrue(output.contains("variantDisabled=fullRelease:false"))
-        assertTrue(output.contains("variantDisabled=fullDebug:true"))
-        assertTrue(output.contains("variantDisabled=demoDebug:true"))
-        assertTrue(output.contains("variantDisabled=demoRelease:true"))
-        assertTrue(output.contains("variantDisabled=demoStaging:true"))
-        assertTrue(output.contains("variantDisabled=fullStaging:true"))
-
-        assertTrue(output.contains("byteBuddyDependencies=fullRelease:co.elastic.test:bytebuddy-plugin:1.0"))
-        assertTrue(output.contains("byteBuddyDependencies=fullDebug:"))
-        assertTrue(output.contains("byteBuddyDependencies=fullStaging:"))
-        assertTrue(output.contains("byteBuddyDependencies=demoDebug:"))
-        assertTrue(output.contains("byteBuddyDependencies=demoRelease:"))
-        assertTrue(output.contains("byteBuddyDependencies=demoStaging:"))
+        assertTrue(output.contains(":fullReleaseBytebuddyTransform SKIPPED"))
+        assertFalse(output.contains(":fullDebugBytebuddyTransform"))
+        assertFalse(output.contains(":fullStagingBytebuddyTransform"))
+        assertFalse(output.contains(":demoReleaseBytebuddyTransform"))
     }
 
     @Test

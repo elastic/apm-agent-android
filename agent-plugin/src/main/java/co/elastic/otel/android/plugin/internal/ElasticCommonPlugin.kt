@@ -18,7 +18,6 @@
  */
 package co.elastic.otel.android.plugin.internal
 
-import co.elastic.otel.android.plugin.extensions.ElasticApmExtension
 import co.elastic.otel.android.plugin.extensions.ElasticExtension
 import co.elastic.otel.android.plugin.extensions.ElasticVariantExtension
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
@@ -73,39 +72,13 @@ internal class ElasticCommonPlugin : Plugin<Project> {
         variant: ApplicationVariant,
     ) {
         variantExtension.buildId.convention(
-            merge(projectExtension.buildId, flavorExtensions.map { it.buildId }, buildTypeExtension.buildId)
+            DslUtils.mergeDslValue(
+                projectExtension.buildId,
+                flavorExtensions.map { it.buildId },
+                buildTypeExtension.buildId,
+            )
                 .orElse(defaultBuildId(variant)),
         )
-        val mergedBytecodeDisabled = merge(
-            projectExtension.bytecodeInstrumentation.disabled,
-            flavorExtensions.map { it.bytecodeInstrumentation.disabled },
-            buildTypeExtension.bytecodeInstrumentation.disabled,
-        ).orElse(false)
-        val legacyBytecodeDisabled = legacyBytecodeDisabledFor(variant)
-        variantExtension.bytecodeInstrumentation.disabled.convention(
-            targetProvider(mergedBytecodeDisabled, legacyBytecodeDisabled),
-        )
-    }
-
-    private fun <T : Any> merge(
-        projectValue: Provider<T>,
-        flavorValues: List<Provider<T>>,
-        buildTypeValue: Provider<T>,
-    ): Provider<T> {
-        var merged = projectValue
-        flavorValues.forEach { flavorValue ->
-            merged = flavorValue.orElse(merged)
-        }
-        return buildTypeValue.orElse(merged)
-    }
-
-    @Suppress("DEPRECATION")
-    private fun legacyBytecodeDisabledFor(variant: ApplicationVariant): Provider<Boolean> {
-        return project.extensions.findByType(ElasticApmExtension::class.java)
-            ?.bytecodeInstrumentation?.disableForBuildTypes
-            ?.map { variant.buildType != null && variant.buildType in it }
-            ?.orElse(false)
-            ?: project.providers.provider { false }
     }
 
     private fun defaultBuildId(variant: ApplicationVariant): Provider<String> {
@@ -119,13 +92,6 @@ internal class ElasticCommonPlugin : Plugin<Project> {
     private fun sha256(input: String): String {
         val digest = MessageDigest.getInstance("SHA-256")
         return digest.digest(input.toByteArray(Charsets.UTF_8)).joinToString("") { "%02x".format(it) }
-    }
-
-    private fun targetProvider(
-        primary: Provider<Boolean>,
-        secondary: Provider<Boolean>,
-    ): Provider<Boolean> {
-        return primary.zip(secondary) { first, second -> first || second }
     }
 
     companion object {

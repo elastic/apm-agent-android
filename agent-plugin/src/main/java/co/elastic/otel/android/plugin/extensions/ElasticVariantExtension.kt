@@ -28,5 +28,4 @@ abstract class ElasticVariantExtension @Inject constructor(
     objects: ObjectFactory,
 ) : VariantExtension, Serializable {
     val buildId: Property<String> = objects.property(String::class.java)
-    val bytecodeInstrumentation: BytecodeInstrumentation = objects.newInstance(BytecodeInstrumentation::class.java)
 }

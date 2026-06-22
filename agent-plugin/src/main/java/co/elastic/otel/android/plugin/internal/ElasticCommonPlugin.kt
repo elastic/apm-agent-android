@@ -81,12 +81,7 @@ internal class ElasticCommonPlugin : Plugin<Project> {
             flavorExtensions.map { it.bytecodeInstrumentation.disabled },
             buildTypeExtension.bytecodeInstrumentation.disabled,
         ).orElse(false)
-        @Suppress("DEPRECATION")
-        val legacyBytecodeDisabled = project.extensions.findByType(ElasticApmExtension::class.java)
-            ?.bytecodeInstrumentation?.disableForBuildTypes
-            ?.map { variant.buildType != null && variant.buildType in it }
-            ?.orElse(false)
-            ?: project.providers.provider { false }
+        val legacyBytecodeDisabled = legacyBytecodeDisabledFor(variant)
         variantExtension.bytecodeInstrumentation.disabled.convention(
             targetProvider(mergedBytecodeDisabled, legacyBytecodeDisabled),
         )
@@ -102,6 +97,15 @@ internal class ElasticCommonPlugin : Plugin<Project> {
             merged = flavorValue.orElse(merged)
         }
         return buildTypeValue.orElse(merged)
+    }
+
+    @Suppress("DEPRECATION")
+    private fun legacyBytecodeDisabledFor(variant: ApplicationVariant): Provider<Boolean> {
+        return project.extensions.findByType(ElasticApmExtension::class.java)
+            ?.bytecodeInstrumentation?.disableForBuildTypes
+            ?.map { variant.buildType != null && variant.buildType in it }
+            ?.orElse(false)
+            ?: project.providers.provider { false }
     }
 
     private fun defaultBuildId(variant: ApplicationVariant): Provider<String> {

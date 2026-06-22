@@ -263,6 +263,50 @@ class MyApp : android.app.Application {
 }
 ```
 
+## Gradle configuration
+
+Gradle configuration is available from the `elasticOtel` block inside Android's `android` block. These values are configured at build time.
+
+### Build ID
+
+EDOT Android adds the `app.build_id` resource attribute to telemetry when the Gradle plugin is applied. This value can be used to correlate application telemetry with build artifacts.
+
+By default, EDOT Android generates the build ID from the app's final application ID, version name, and version code:
+
+```text
+sha256("<applicationId>-<versionName>-<versionCode>")
+```
+
+If the app doesn't define a version name, the version name part is empty.
+
+To set a custom build ID for all variants, configure `buildId` in the project-level `elasticOtel` block:
+
+```kotlin
+android {
+    elasticOtel {
+        buildId.set("my-build-id")
+    }
+}
+```
+
+You can also override `buildId` for specific build types or product flavors:
+
+```kotlin
+import co.elastic.otel.android.plugin.extensions.ElasticExtension
+
+android {
+    buildTypes {
+        release {
+            extensions.configure<ElasticExtension> {
+                buildId.set("release-build-id")
+            }
+        }
+    }
+}
+```
+
+When multiple values match a variant, EDOT Android uses the most specific value in this order: build type, product flavor, project-level `elasticOtel`, then the generated default.
+
 ## Dynamic configuration
 
 Dynamic configuration settings are available from an already built [agent](https://github.com/elastic/apm-agent-android/blob/main/agent-sdk/src/main/java/co/elastic/otel/android/ElasticApmAgent.kt).

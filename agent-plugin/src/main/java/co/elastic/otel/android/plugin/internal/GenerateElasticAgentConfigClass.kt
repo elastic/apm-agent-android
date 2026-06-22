@@ -18,28 +18,29 @@
  */
 package co.elastic.otel.android.plugin.internal
 
-import co.elastic.otel.android.plugin.extensions.ElasticVariantExtension
-import com.android.build.api.variant.ApplicationVariant
-import org.gradle.api.Project
+import org.gradle.api.DefaultTask
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.CacheableTask
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.TaskAction
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-class ByteBuddyDependencyAttacher(
-    private val project: Project,
-    private val dependencyUri: String
-) : ApplicationVariantListener {
+@CacheableTask
+internal abstract class GenerateElasticAgentConfigClass : DefaultTask() {
 
-    override fun onApplicationVariant(
-        variant: ApplicationVariant,
-        elastic: ElasticVariantExtension,
-    ) {
-        if (elastic.bytecodeInstrumentation.disabled.getOrElse(false)) {
-            return
-        }
-        project.configurations.maybeCreate("${variant.name}ByteBuddy").dependencies.add(
-            project.dependencies.create(dependencyUri)
-        )
+    @get:Input
+    abstract val buildId: Property<String>
+
+    @get:OutputDirectory
+    abstract val outputDirectory: DirectoryProperty
+
+    @TaskAction
+    fun generate() {
+        ElasticAgentConfigClassGenerator.generate(outputDirectory.get().asFile, buildId.get())
     }
 }

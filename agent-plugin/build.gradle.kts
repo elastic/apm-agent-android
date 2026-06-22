@@ -9,6 +9,8 @@ dependencies {
     implementation(libs.byteBuddy)
     implementation(libs.byteBuddy.plugin)
     compileOnly(libs.android.plugin)
+    testImplementation(gradleTestKit())
+    testImplementation(libs.android.plugin)
 }
 
 buildConfig {

@@ -18,10 +18,14 @@
  */
 package co.elastic.otel.android.plugin.internal
 
+import co.elastic.otel.android.plugin.extensions.ElasticVariantExtension
+import com.android.build.api.variant.ApplicationVariant
+
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-interface BuildVariantListener {
-    fun onBuildVariant(name: String)
+internal fun ApplicationVariant.elasticExtension(): ElasticVariantExtension {
+    return getExtension(ElasticVariantExtension::class.java)
+        ?: error("Elastic extension was not registered for variant '$name'")
 }

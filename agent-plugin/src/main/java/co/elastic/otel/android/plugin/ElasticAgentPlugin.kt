@@ -21,54 +21,50 @@ package co.elastic.otel.android.plugin
 import co.elastic.otel.android.common.internal.logging.Elog
 import co.elastic.otel.android.generated.BuildConfig
 import co.elastic.otel.android.plugin.extensions.ElasticApmExtension
-import co.elastic.otel.android.plugin.internal.BuildVariantListener
+import co.elastic.otel.android.plugin.extensions.ElasticVariantExtension
+import co.elastic.otel.android.plugin.internal.ApplicationVariantListener
+import co.elastic.otel.android.plugin.internal.ElasticCommonPlugin
+import co.elastic.otel.android.plugin.internal.GenerateElasticAgentConfigClass
+import co.elastic.otel.android.plugin.internal.elasticExtension
 import co.elastic.otel.android.plugin.internal.logging.GradleLoggerFactory
+import com.android.build.api.artifact.ScopedArtifact
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
+import com.android.build.api.variant.ApplicationVariant
+import com.android.build.api.variant.ScopedArtifacts
 import net.bytebuddy.build.gradle.android.ByteBuddyAndroidPlugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
 class ElasticAgentPlugin : Plugin<Project> {
     private lateinit var project: Project
-    private val buildVariantListeners = mutableSetOf<BuildVariantListener>()
+    private val applicationVariantListeners = mutableSetOf<ApplicationVariantListener>()
+    private val configuredVariants = mutableListOf<Pair<ApplicationVariant, ElasticVariantExtension>>()
 
     override fun apply(target: Project) {
         this.project = target
         Elog.init(GradleLoggerFactory())
+        project.pluginManager.apply(ElasticCommonPlugin::class.java)
         val androidExtension = project.extensions.getByType(ApplicationExtension::class.java)
         addByteBuddyPlugin(androidExtension)
         addSdkDependency()
-        configureDependencyResolution()
-        val extension = project.extensions.create("elasticAgent", ElasticApmExtension::class.java)
+        @Suppress("DEPRECATION")
+        project.extensions.create("elasticAgent", ElasticApmExtension::class.java)
         val androidComponents =
             project.extensions.getByType(ApplicationAndroidComponentsExtension::class.java)
-        androidComponents.finalizeDsl { dslExtension ->
-            val disableForBuildTypes = extension.bytecodeInstrumentation.disableForBuildTypes.get()
-            dslExtension.buildTypes.forEach { buildType ->
-                val name = buildType.name
-                if (name !in disableForBuildTypes) {
-                    buildVariantListeners.forEach { listener -> listener.onBuildVariant(name) }
-                }
+        androidComponents.onVariants { variant ->
+            val variantExtension = variant.elasticExtension()
+            configureBuildIdClass(variant, variantExtension)
+            configuredVariants.add(variant to variantExtension)
+            applicationVariantListeners.forEach { listener ->
+                listener.onApplicationVariant(variant, variantExtension)
             }
         }
     }
 
-    private fun configureDependencyResolution() {
-        project.configurations.all { config ->
-            config.resolutionStrategy.eachDependency {
-                if (it.requested.group == "com.squareup.okhttp3" && it.requested.name == "okhttp-jvm") {
-                    // This replicates what's done in elastic.common-dependency-conventions.gradle.kts to
-                    // address the same issue for consumer projects.
-                    it.useTarget("com.squareup.okhttp3:okhttp:${it.requested.version}")
-                    it.because("choosing okhttp over okhttp-jvm")
-                }
-            }
-        }
-    }
-
-    fun addBuildVariantListener(listener: BuildVariantListener) {
-        buildVariantListeners.add(listener)
+    fun addApplicationVariantListener(listener: ApplicationVariantListener) {
+        applicationVariantListeners.add(listener)
+        configuredVariants.forEach { (variant, elastic) -> listener.onApplicationVariant(variant, elastic) }
     }
 
     private fun addByteBuddyPlugin(androidExtension: ApplicationExtension) {
@@ -80,5 +76,29 @@ class ElasticAgentPlugin : Plugin<Project> {
 
     private fun addSdkDependency() {
         project.dependencies.add("implementation", BuildConfig.SDK_DEPENDENCY_URI)
+    }
+
+    private fun configureBuildIdClass(
+        variant: ApplicationVariant,
+        elasticExtension: ElasticVariantExtension,
+    ) {
+        val variantName = variant.name
+        val taskProvider = project.tasks.register(
+            "${variantName}GenerateElasticAgentConfigClass",
+            GenerateElasticAgentConfigClass::class.java,
+        ) { task ->
+            task.buildId.set(elasticExtension.buildId)
+            task.outputDirectory.set(
+                project.layout.buildDirectory.dir("intermediates/elastic/agent/$variantName/classes"),
+            )
+        }
+
+        variant.artifacts
+            .forScope(ScopedArtifacts.Scope.PROJECT)
+            .use(taskProvider)
+            .toAppend(
+                ScopedArtifact.CLASSES,
+                GenerateElasticAgentConfigClass::outputDirectory,
+            )
     }
 }

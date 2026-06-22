@@ -43,12 +43,14 @@ Bytecode instrumentation is a common technique which may already be used in your
 
 ## Configuration [automatic-instrumentation-configuration]
 
-For large projects, you can avoid the added compilation time caused by the [compilation behavior](#compilation-behavior) by excluding build types that don't need the functionality. 
+For large projects, you can avoid the added compilation time caused by the [compilation behavior](#compilation-behavior) by disabling byte code instrumentation for build types or flavors that don't need the functionality. 
 
-Use the following configuration to exclude build types:
+Use the following configuration to disable byte code instrumentation for a build type:
 
 ```kotlin
 // Your app's build.gradle.kts file
+import co.elastic.otel.android.plugin.extensions.ElasticExtension
+
 plugins {
     // ...
     id("co.elastic.otel.android.agent")
@@ -56,15 +58,21 @@ plugins {
 
 // ...
 
-elasticAgent {
-    bytecodeInstrumentation.disableForBuildTypes.set(listOf("debug")) // <1>
+android {
+    buildTypes {
+        debug {
+            extensions.configure<ElasticExtension> {
+                bytecodeInstrumentation.disabled.set(true) // <1>
+            }
+        }
+    }
 }
 ```
 
-1. By default, the `disableForBuildTypes` list is empty. Add any [build type](https://developer.android.com/build/build-variants#build-types) names for which you want to turn off byte code instrumentation.
+1. By default, byte code instrumentation is enabled. Set `disabled` to `true` in a [build type](https://developer.android.com/build/build-variants#build-types) or product flavor's `elasticOtel` extension to turn it off for matching variants.
 
 :::{note}
-Turning off byte-code instrumentation might affect the ability of some [automatic instrumentations](#supported-instrumentations) to generate telemetry.
+Turning off byte code instrumentation might affect the ability of some [automatic instrumentations](#supported-instrumentations) to generate telemetry.
 :::
 
 ## Supported instrumentations [supported-instrumentations]

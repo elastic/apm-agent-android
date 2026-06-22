@@ -18,28 +18,36 @@
  */
 package co.elastic.otel.android.plugin.internal
 
-import co.elastic.otel.android.plugin.extensions.ElasticVariantExtension
-import com.android.build.api.variant.ApplicationVariant
-import org.gradle.api.Project
+import java.io.File
+import net.bytebuddy.ByteBuddy
+import net.bytebuddy.description.modifier.FieldManifestation
+import net.bytebuddy.description.modifier.Ownership
+import net.bytebuddy.description.modifier.Visibility
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
  * any time.
  */
-class ByteBuddyDependencyAttacher(
-    private val project: Project,
-    private val dependencyUri: String
-) : ApplicationVariantListener {
+internal object ElasticAgentConfigClassGenerator {
+    const val GENERATED_CLASS_NAME = "co.elastic.otel.android.internal.generated.ElasticAgentConfig"
+    const val BUILD_ID_FIELD_NAME = "BUILD_ID"
 
-    override fun onApplicationVariant(
-        variant: ApplicationVariant,
-        elastic: ElasticVariantExtension,
-    ) {
-        if (elastic.bytecodeInstrumentation.disabled.getOrElse(false)) {
-            return
-        }
-        project.configurations.maybeCreate("${variant.name}ByteBuddy").dependencies.add(
-            project.dependencies.create(dependencyUri)
-        )
+    fun generate(outputDirectory: File, buildId: String) {
+        outputDirectory.deleteRecursively()
+        outputDirectory.mkdirs()
+
+        ByteBuddy()
+            .subclass(Any::class.java)
+            .name(GENERATED_CLASS_NAME)
+            .defineField(
+                BUILD_ID_FIELD_NAME,
+                String::class.java,
+                Visibility.PUBLIC,
+                Ownership.STATIC,
+                FieldManifestation.FINAL,
+            )
+            .value(buildId)
+            .make()
+            .saveIn(outputDirectory)
     }
 }

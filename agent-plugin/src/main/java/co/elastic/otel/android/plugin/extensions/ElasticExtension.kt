@@ -18,8 +18,16 @@
  */
 package co.elastic.otel.android.plugin.extensions
 
+import javax.inject.Inject
+import org.gradle.api.Action
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 
-interface BytecodeInstrumentation {
-    val disabled: Property<Boolean>
+abstract class ElasticExtension @Inject constructor(objects: ObjectFactory) {
+    val buildId: Property<String> = objects.property(String::class.java)
+    val bytecodeInstrumentation: BytecodeInstrumentation = objects.newInstance(BytecodeInstrumentation::class.java)
+
+    fun bytecodeInstrumentation(action: Action<BytecodeInstrumentation>) {
+        action.execute(bytecodeInstrumentation)
+    }
 }

@@ -22,10 +22,33 @@ import javax.inject.Inject
 import org.gradle.api.Action
 import org.gradle.api.model.ObjectFactory
 
+@Deprecated(
+    """Use the android.elasticOtel config option instead. For example:
+android {
+    elasticOtel {
+        bytecodeInstrumentation {
+            disabled.set(...)
+        }
+    }
+}""",
+)
 abstract class ElasticApmExtension @Inject constructor(objects: ObjectFactory) {
-    val bytecodeInstrumentation = objects.newInstance(BytecodeInstrumentation::class.java)
+    @Suppress("DEPRECATION")
+    val bytecodeInstrumentation: LegacyBytecodeInstrumentation =
+        objects.newInstance(LegacyBytecodeInstrumentation::class.java)
 
-    fun bytecodeInstrumentation(action: Action<BytecodeInstrumentation>) {
+    @Deprecated(
+        """Use the android.elasticOtel bytecodeInstrumentation config option instead. For example:
+android {
+    elasticOtel {
+        bytecodeInstrumentation {
+            disabled.set(...)
+        }
+    }
+}""",
+    )
+    @Suppress("DEPRECATION")
+    fun bytecodeInstrumentation(action: Action<LegacyBytecodeInstrumentation>) {
         action.execute(bytecodeInstrumentation)
     }
 }

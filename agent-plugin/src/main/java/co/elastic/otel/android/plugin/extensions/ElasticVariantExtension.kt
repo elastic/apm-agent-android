@@ -18,8 +18,15 @@
  */
 package co.elastic.otel.android.plugin.extensions
 
+import com.android.build.api.variant.VariantExtension
+import java.io.Serializable
+import javax.inject.Inject
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 
-interface BytecodeInstrumentation {
-    val disabled: Property<Boolean>
+abstract class ElasticVariantExtension @Inject constructor(
+    objects: ObjectFactory,
+) : VariantExtension, Serializable {
+    val buildId: Property<String> = objects.property(String::class.java)
+    val bytecodeInstrumentation: BytecodeInstrumentation = objects.newInstance(BytecodeInstrumentation::class.java)
 }

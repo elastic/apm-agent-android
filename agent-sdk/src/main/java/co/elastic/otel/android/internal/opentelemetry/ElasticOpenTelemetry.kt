@@ -154,7 +154,7 @@ class ElasticOpenTelemetry private constructor(
             }
             val finalProcessorFactory = processorFactory
                 ?: DefaultProcessorFactory(serviceManager.getBackgroundWorkService())
-            var resource = Resource.builder()
+            val resourceBuilder = Resource.builder()
                 .put(ServiceAttributes.SERVICE_NAME, serviceName)
                 .put(
                     ServiceAttributes.SERVICE_VERSION,
@@ -179,7 +179,10 @@ class ElasticOpenTelemetry private constructor(
                 .put(TelemetryAttributes.TELEMETRY_SDK_NAME, "android")
                 .put(TelemetryAttributes.TELEMETRY_SDK_VERSION, BuildConfig.APM_AGENT_VERSION)
                 .put(TelemetryAttributes.TELEMETRY_SDK_LANGUAGE, "java")
-                .build()
+            serviceManager.getAppInfoService().getBuildId()?.let {
+                resourceBuilder.put(AttributeKey.stringKey("app.build_id"), it)
+            }
+            var resource = resourceBuilder.build()
             resource = resourceInterceptor?.intercept(resource) ?: resource
             val openTelemetryBuilder = OpenTelemetrySdk.builder()
             val spanExporter = exporterProvider.getSpanExporter()?.let {

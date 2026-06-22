@@ -16,10 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.plugin.extensions
+package co.elastic.otel.android.internal.services.appinfo
 
-import org.gradle.api.provider.Property
+import android.content.Context
+import io.mockk.mockk
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.Test
 
-interface BytecodeInstrumentation {
-    val disabled: Property<Boolean>
+class AppInfoServiceTest {
+
+    @Test
+    fun `getBuildId returns generated config class value`() {
+        val service = AppInfoService(mockk<Context>(relaxed = true))
+
+        assertThat(service.getBuildId()).isEqualTo("build-123")
+    }
 }

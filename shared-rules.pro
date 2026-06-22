@@ -15,3 +15,6 @@
 -dontwarn io.opentelemetry.sdk.autoconfigure.spi.**
 -dontwarn java.awt.**
 -dontwarn javax.json.bind.spi.JsonbProvider
+-keep class co.elastic.otel.android.internal.generated.ElasticAgentConfig {
+    public static final java.lang.String BUILD_ID;
+}

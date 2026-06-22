@@ -29,6 +29,7 @@ import android.telephony.TelephonyManager
 import co.elastic.otel.android.exporters.ExporterProvider
 import co.elastic.otel.android.features.session.Session
 import co.elastic.otel.android.interceptor.Interceptor
+import co.elastic.otel.android.internal.generated.ElasticAgentConfig
 import co.elastic.otel.android.internal.opentelemetry.ElasticOpenTelemetry
 import co.elastic.otel.android.internal.services.ServiceManager
 import co.elastic.otel.android.internal.services.network.query.NetworkApi23QueryManager
@@ -92,6 +93,7 @@ internal class AttributesTest : ExporterProvider, ProcessorFactory {
         private const val SIM_COUNTRY_ISO: String = "us"
         private const val OS_BUILD: String = "OS Build"
         private const val VERSION_CODE: Long = 10
+        private const val BUILD_ID: String = ElasticAgentConfig.BUILD_ID
     }
 
     @Before
@@ -127,6 +129,7 @@ internal class AttributesTest : ExporterProvider, ProcessorFactory {
         initialize()
         val expectedResource = Resource.builder()
             .put("deployment.environment", "test")
+            .put("app.build_id", BUILD_ID)
             .put("app.installation.id", "installation-id")
             .put("device.manufacturer", DEVICE_MANUFACTURER)
             .put("device.model.identifier", DEVICE_MODEL_NAME)
@@ -174,6 +177,7 @@ internal class AttributesTest : ExporterProvider, ProcessorFactory {
         })
         val expectedResource = Resource.builder()
             .put("deployment.environment", "test")
+            .put("app.build_id", BUILD_ID)
             .put("app.installation.id", "installation-id")
             .put("device.manufacturer", DEVICE_MANUFACTURER)
             .put("device.model.identifier", DEVICE_MODEL_NAME)
@@ -215,6 +219,7 @@ internal class AttributesTest : ExporterProvider, ProcessorFactory {
         initialize(serviceVersion = null)
         val expectedResource = Resource.builder()
             .put("deployment.environment", "test")
+            .put("app.build_id", BUILD_ID)
             .put("app.installation.id", "installation-id")
             .put("device.manufacturer", DEVICE_MANUFACTURER)
             .put("device.model.identifier", DEVICE_MODEL_NAME)

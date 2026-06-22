@@ -18,8 +18,23 @@
  */
 package co.elastic.otel.android.plugin.extensions
 
-import org.gradle.api.provider.Property
+import org.gradle.api.provider.ListProperty
 
-interface BytecodeInstrumentation {
-    val disabled: Property<Boolean>
+@Deprecated("Use the per-buildType or per-flavor elasticOtel extension instead.")
+interface LegacyBytecodeInstrumentation {
+    @Deprecated(
+        """Use the matching android build type or product flavor elasticOtel config option instead. For example:
+import co.elastic.otel.android.plugin.extensions.ElasticExtension
+
+android {
+    buildTypes {
+        debug {
+            extensions.configure<ElasticExtension> {
+                bytecodeInstrumentation.disabled.set(true)
+            }
+        }
+    }
+}""",
+    )
+    val disableForBuildTypes: ListProperty<String>
 }

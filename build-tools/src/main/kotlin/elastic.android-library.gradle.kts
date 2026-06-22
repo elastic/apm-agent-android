@@ -6,7 +6,6 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 plugins {
     id("com.android.library")
     id("elastic.animalsniffer-android")
-    id("elastic.common-dependency-conventions")
 }
 
 val javaVersionStr = project.property("elastic.java.compatibility") as String

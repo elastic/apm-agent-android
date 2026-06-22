@@ -58,6 +58,17 @@ internal class AppInfoService(private val context: Context) : Service {
         return getPackageInfo()?.versionName
     }
 
+    fun getBuildId(): String? {
+        return try {
+            val buildId = Class.forName(GENERATED_CONFIG_CLASS_NAME)
+                .getField(BUILD_ID_FIELD_NAME)
+                .get(null) as? String
+            buildId?.takeIf { it.isNotBlank() }
+        } catch (_: ReflectiveOperationException) {
+            null
+        }
+    }
+
     fun getCacheDir(): File = context.cacheDir
 
     fun getFilesDir(): File = context.filesDir
@@ -110,5 +121,10 @@ internal class AppInfoService(private val context: Context) : Service {
             Elog.getLogger().error("Package info not found", e)
             null
         }
+    }
+
+    companion object {
+        private const val GENERATED_CONFIG_CLASS_NAME = "co.elastic.otel.android.internal.generated.ElasticAgentConfig"
+        private const val BUILD_ID_FIELD_NAME = "BUILD_ID"
     }
 }

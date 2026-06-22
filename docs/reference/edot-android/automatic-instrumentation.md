@@ -39,16 +39,18 @@ You can also use instrumentations from [OpenTelemetry Android](https://github.co
 
 Some automatic instrumentations perform bytecode instrumentation, also known as _bytecode weaving_, where your application's code, including code from the libraries it uses, is modified at compile-time. This is similar to what `isMinifyEnabled` does with R8 functionalities, automating code changes that you would otherwise need to make manually. 
 
-Bytecode instrumentation is a common technique which may already be used in your project for use cases such as [code optimization](https://developer.android.com/build/shrink-code#optimization) through R8. While useful, bytecode instrumentation can make compilation take longer to complete. Because of this, EDOT Android provides [a way to exclude](#automatic-instrumentation-configuration) specific build types in your app from byte code changes.
+Bytecode instrumentation is a common technique which may already be used in your project for use cases such as [code optimization](https://developer.android.com/build/shrink-code#optimization) through R8. While useful, bytecode instrumentation can make compilation take longer to complete. Because of this, EDOT Android provides [a way to disable](#automatic-instrumentation-configuration) bytecode instrumentation for specific build types or product flavors.
 
 ## Configuration [automatic-instrumentation-configuration]
 
-For large projects, you can avoid the added compilation time caused by the [compilation behavior](#compilation-behavior) by excluding build types that don't need the functionality. 
+For large projects, you can avoid the added compilation time caused by the [compilation behavior](#compilation-behavior) by disabling bytecode instrumentation for build types or flavors that don't need the functionality. 
 
-Use the following configuration to exclude build types:
+Use the following configuration to disable bytecode instrumentation for a build type:
 
 ```kotlin
 // Your app's build.gradle.kts file
+import co.elastic.otel.android.plugin.extensions.ElasticExtension
+
 plugins {
     // ...
     id("co.elastic.otel.android.agent")
@@ -56,15 +58,21 @@ plugins {
 
 // ...
 
-elasticAgent {
-    bytecodeInstrumentation.disableForBuildTypes.set(listOf("debug")) // <1>
+android {
+    buildTypes {
+        debug {
+            extensions.configure<ElasticExtension> {
+                bytecodeInstrumentation.disabled.set(true) // <1>
+            }
+        }
+    }
 }
 ```
 
-1. By default, the `disableForBuildTypes` list is empty. Add any [build type](https://developer.android.com/build/build-variants#build-types) names for which you want to turn off byte code instrumentation.
+1. By default, bytecode instrumentation is enabled. Set `disabled` to `true` in the `ElasticExtension` attached to a [build type](https://developer.android.com/build/build-variants#build-types) or product flavor to turn it off for matching variants.
 
 :::{note}
-Turning off byte-code instrumentation might affect the ability of some [automatic instrumentations](#supported-instrumentations) to generate telemetry.
+Turning off bytecode instrumentation might affect the ability of some [automatic instrumentations](#supported-instrumentations) to generate telemetry.
 :::
 
 ## Supported instrumentations [supported-instrumentations]
@@ -169,7 +177,8 @@ dependencies {
 ```
 
 1. Will only install the instrumentation for the `release` build type of the app, avoiding to increase the compilation time for other types, such as `debug`, for example.
-## Understanding auto-instrumentation scope
+
+## Understanding auto-instrumentation scope
 
 Auto-instrumentation automatically captures telemetry for the frameworks and libraries listed on this page. However, it cannot instrument:
 

@@ -16,12 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.plugin.internal
+package co.elastic.otel.android.plugin.extensions
 
-/**
- * This class is internal and is hence not for public use. Its APIs are unstable and can change at
- * any time.
- */
-interface BuildVariantListener {
-    fun onBuildVariant(name: String)
+import javax.inject.Inject
+import org.gradle.api.Action
+import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
+
+abstract class ElasticExtension @Inject constructor(objects: ObjectFactory) {
+    val buildId: Property<String> = objects.property(String::class.java)
+    val bytecodeInstrumentation: BytecodeInstrumentation = objects.newInstance(BytecodeInstrumentation::class.java)
+
+    fun bytecodeInstrumentation(action: Action<BytecodeInstrumentation>) {
+        action.execute(bytecodeInstrumentation)
+    }
 }

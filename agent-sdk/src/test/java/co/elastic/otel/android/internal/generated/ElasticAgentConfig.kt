@@ -16,10 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.plugin.extensions
+package co.elastic.otel.android.internal.generated
 
-import org.gradle.api.provider.Property
-
-interface BytecodeInstrumentation {
-    val disabled: Property<Boolean>
+object ElasticAgentConfig {
+    const val BUILD_ID = "build-123"
 }

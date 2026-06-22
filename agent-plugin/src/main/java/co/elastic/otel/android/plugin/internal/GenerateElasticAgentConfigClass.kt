@@ -16,10 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.plugin.extensions
+package co.elastic.otel.android.plugin.internal
 
+import org.gradle.api.DefaultTask
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.CacheableTask
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.TaskAction
 
-interface BytecodeInstrumentation {
-    val disabled: Property<Boolean>
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
+@CacheableTask
+internal abstract class GenerateElasticAgentConfigClass : DefaultTask() {
+
+    @get:Input
+    abstract val buildId: Property<String>
+
+    @get:OutputDirectory
+    abstract val outputDirectory: DirectoryProperty
+
+    @TaskAction
+    fun generate() {
+        ElasticAgentConfigClassGenerator.generate(outputDirectory.get().asFile, buildId.get())
+    }
 }

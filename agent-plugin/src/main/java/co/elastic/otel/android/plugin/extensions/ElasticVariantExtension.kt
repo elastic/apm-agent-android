@@ -16,22 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.plugin.internal
+package co.elastic.otel.android.plugin.extensions
 
-import org.gradle.api.Project
+import com.android.build.api.variant.VariantExtension
+import java.io.Serializable
+import javax.inject.Inject
+import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
 
-/**
- * This class is internal and is hence not for public use. Its APIs are unstable and can change at
- * any time.
- */
-class ByteBuddyDependencyAttacher(
-    private val project: Project,
-    private val dependencyUri: String
-) : BuildVariantListener {
-
-    override fun onBuildVariant(name: String) {
-        project.configurations.maybeCreate("${name}ByteBuddy").dependencies.add(
-            project.dependencies.create(dependencyUri)
-        )
-    }
+abstract class ElasticVariantExtension @Inject constructor(
+    objects: ObjectFactory,
+) : VariantExtension, Serializable {
+    val buildId: Property<String> = objects.property(String::class.java)
 }

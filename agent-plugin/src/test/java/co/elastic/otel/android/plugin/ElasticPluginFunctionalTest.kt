@@ -20,6 +20,7 @@ package co.elastic.otel.android.plugin
 
 import java.io.File
 import java.nio.file.Path
+import java.security.MessageDigest
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -109,7 +110,7 @@ class ElasticPluginFunctionalTest {
     }
 
     @Test
-    fun `elasticOtel DSL is compatible with AGP 8_0_0`() {
+    fun `elasticOtel DSL configures build ids`() {
         writeAndroidProject(
             """
             import co.elastic.otel.android.plugin.extensions.ElasticExtension
@@ -137,10 +138,6 @@ class ElasticPluginFunctionalTest {
                         }
                     }
                 }
-
-                elasticOtel {
-                    buildId.set("project-level")
-                }
             }
 
             tasks.register("printBuildIds") {
@@ -159,7 +156,7 @@ class ElasticPluginFunctionalTest {
         val result = gradleRunner("printBuildIds").build()
 
         assertTrue(result.output.contains("releaseBuildId=release-override"))
-        assertTrue(result.output.contains("debugBuildId=project-level"))
+        assertTrue(result.output.contains("debugBuildId=${sha256("co.elastic.test-1.0-1")}"))
     }
 
     private fun writeAndroidProject(buildFile: String) {
@@ -203,5 +200,10 @@ class ElasticPluginFunctionalTest {
 
     companion object {
         private const val ANDROID_PLUGIN_VERSION = "9.2.1"
+
+        private fun sha256(input: String): String {
+            val digest = MessageDigest.getInstance("SHA-256")
+            return digest.digest(input.toByteArray(Charsets.UTF_8)).joinToString("") { "%02x".format(it) }
+        }
     }
 }

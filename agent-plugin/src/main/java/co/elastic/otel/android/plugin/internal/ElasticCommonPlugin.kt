@@ -84,8 +84,12 @@ internal class ElasticCommonPlugin : Plugin<Project> {
     private fun defaultBuildId(variant: ApplicationVariant): Provider<String> {
         val output = variant.outputs.firstOrNull { it.outputType == VariantOutputConfiguration.OutputType.SINGLE }
             ?: variant.outputs.first()
-        return variant.applicationId.zip(output.versionName) { appId, versionName ->
-            sha256("$appId-$versionName-${output.versionCode.get()}")
+        val versionName = output.versionName.orElse("")
+        val appIdAndVersionName = variant.applicationId.zip(versionName) { appId, versionNameValue ->
+            "$appId-$versionNameValue"
+        }
+        return appIdAndVersionName.zip(output.versionCode) { prefix, versionCode ->
+            sha256("$prefix-$versionCode")
         }
     }
 

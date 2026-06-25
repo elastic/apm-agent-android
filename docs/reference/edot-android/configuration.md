@@ -287,7 +287,7 @@ elasticOtel {
 }
 ```
 
-You can also override `buildId` for specific build types or product flavors:
+You can also override `buildId` for specific build types or product flavors when using Android Gradle Plugin 8.2.0 or later:
 
 ```kotlin
 import co.elastic.otel.android.plugin.extensions.ElasticExtension

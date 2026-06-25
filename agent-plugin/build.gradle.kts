@@ -4,7 +4,9 @@ plugins {
     id("com.github.gmazzo.buildconfig")
 }
 
-val agpTestVersions = listOf("8.7.0", "8.8.0", "9.2.1")
+// AGP versions under test. Each version needs its own Gradle configuration so the JARs
+// can be injected into the TestKit plugin classpath at test time.
+val agpTestVersions = listOf("8.0.0", "8.7.0", "8.8.0", "9.2.1")
 
 val agpTestConfigs = agpTestVersions.associateWith { version ->
     configurations.create("agp${version.replace(".", "")}") {

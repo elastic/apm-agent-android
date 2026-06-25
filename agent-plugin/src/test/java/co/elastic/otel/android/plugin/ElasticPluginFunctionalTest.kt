@@ -43,8 +43,9 @@ class ElasticPluginFunctionalTest {
      */
     @ParameterizedTest(name = "AGP {0}")
     @MethodSource("agpVersions")
-    fun `elasticOtel DSL - default build id is SHA-256 of appId versionName versionCode`(agpVersion: String, compileSdk: Int) {
+    fun `elasticOtel DSL - default build id is SHA-256 of appId versionName versionCode`(agpVersion: String, compileSdk: Int, gradleVersion: String) {
         writeAndroidProject(
+            agpVersion,
             """
             plugins {
                 id("com.android.application")
@@ -76,7 +77,7 @@ class ElasticPluginFunctionalTest {
             """.trimIndent(),
         )
 
-        val result = gradleRunner(agpVersion, "printBuildIds").build()
+        val result = gradleRunner(agpVersion, gradleVersion, "printBuildIds").build()
 
         val expectedBuildId = sha256("co.elastic.test-1.0-1")
         assertTrue(result.output.contains("releaseBuildId=$expectedBuildId"), result.output)
@@ -91,9 +92,10 @@ class ElasticPluginFunctionalTest {
      * - A project-level override beats the default
      */
     @ParameterizedTest(name = "AGP {0}")
-    @MethodSource("agpVersions")
-    fun `elasticOtel DSL - build ids merge precedence across project, flavor, and build type`(agpVersion: String, compileSdk: Int) {
+    @MethodSource("agpVersionsWithPerVariantDsl")
+    fun `elasticOtel DSL - build ids merge precedence across project, flavor, and build type`(agpVersion: String, compileSdk: Int, gradleVersion: String) {
         writeAndroidProject(
+            agpVersion,
             """
             import co.elastic.otel.android.plugin.extensions.ElasticExtension
 
@@ -154,7 +156,7 @@ class ElasticPluginFunctionalTest {
             """.trimIndent(),
         )
 
-        val result = gradleRunner(agpVersion, "printBuildIds").build()
+        val result = gradleRunner(agpVersion, gradleVersion, "printBuildIds").build()
 
         // Build type wins over flavor and project
         assertTrue(result.output.contains("fullReleaseBuildId=release-override"), result.output)
@@ -171,8 +173,9 @@ class ElasticPluginFunctionalTest {
      */
     @ParameterizedTest(name = "AGP {0}")
     @MethodSource("agpVersions")
-    fun `bytecodeInstrumentation - project level disabled prevents all bytebuddy transforms`(agpVersion: String, compileSdk: Int) {
+    fun `bytecodeInstrumentation - project level disabled prevents all bytebuddy transforms`(agpVersion: String, compileSdk: Int, gradleVersion: String) {
         writeAndroidProject(
+            agpVersion,
             """
             plugins {
                 id("com.android.application")
@@ -204,7 +207,7 @@ class ElasticPluginFunctionalTest {
             """.trimIndent(),
         )
 
-        val output = gradleRunner(agpVersion, "assembleRelease", "assembleDebug", "--dry-run").build().output
+        val output = gradleRunner(agpVersion, gradleVersion, "assembleRelease", "assembleDebug", "--dry-run").build().output
 
         assertFalse(output.contains("BytebuddyTransform"), "Expected no BytebuddyTransform tasks but found some:\n$output")
     }
@@ -215,9 +218,10 @@ class ElasticPluginFunctionalTest {
      * elasticAgent.bytecodeInstrumentation.disableForBuildTypes API.
      */
     @ParameterizedTest(name = "AGP {0}")
-    @MethodSource("agpVersions")
-    fun `bytecodeInstrumentation - build type and flavor level controls bytebuddy wiring`(agpVersion: String, compileSdk: Int) {
+    @MethodSource("agpVersionsWithPerVariantDsl")
+    fun `bytecodeInstrumentation - build type and flavor level controls bytebuddy wiring`(agpVersion: String, compileSdk: Int, gradleVersion: String) {
         writeAndroidProject(
+            agpVersion,
             """
             import co.elastic.otel.android.plugin.extensions.ElasticExtension
 
@@ -280,6 +284,7 @@ class ElasticPluginFunctionalTest {
 
         val output = gradleRunner(
             agpVersion,
+            gradleVersion,
             "assembleFullRelease",
             "assembleFullDebug",
             "assembleFullStaging",
@@ -294,7 +299,7 @@ class ElasticPluginFunctionalTest {
         assertFalse(output.contains(":demoReleaseBytebuddyTransform"), output)   // disabled by flavor
     }
 
-    private fun writeAndroidProject(buildFile: String) {
+    private fun writeAndroidProject(agpVersion: String, buildFile: String) {
         // Each AGP version loads a large number of classes; without extra metaspace the Gradle
         // daemon running test builds runs OOM when sequential test invocations reuse the daemon.
         projectDir.resolve("gradle.properties").toFile().writeText(
@@ -324,11 +329,12 @@ class ElasticPluginFunctionalTest {
         projectDir.resolve("build.gradle.kts").toFile().writeText(buildFile)
     }
 
-    private fun gradleRunner(agpVersion: String, vararg arguments: String): GradleRunner {
+    private fun gradleRunner(agpVersion: String, gradleVersion: String, vararg arguments: String): GradleRunner {
         return GradleRunner.create()
             .withProjectDir(projectDir.toFile())
             .withArguments(*arguments, "--stacktrace")
             .withPluginClasspath(elasticPluginClasspath() + agpClasspath(agpVersion))
+            .withGradleVersion(gradleVersion)
             .forwardOutput()
     }
 
@@ -353,18 +359,29 @@ class ElasticPluginFunctionalTest {
 
     companion object {
         /**
-         * AGP versions that are fully compatible with Gradle 9.6.0 (the project's Gradle version).
-         *
-         * Excluded ranges:
-         * - 8.0.0–8.6.x: call DependencyHandler.module() removed in Gradle 9.x → NoSuchMethodError
-         * - 8.9.0–8.13.x: use org.gradle.api.problems.internal.InternalProblems, a Gradle
-         *   internal API removed in 9.6.0 (https://docs.gradle.org/9.6.0/userguide/upgrading_version_9.html#agp_8x_incompatible)
+         * AGP versions under test, paired with their recommended Gradle version and compileSdk.
+         * See https://developer.android.com/build/releases/about-agp#updating-gradle
          */
         @JvmStatic
         fun agpVersions(): Stream<Arguments> = Stream.of(
-            arguments("8.7.0", 35),
-            arguments("8.8.0", 35),
-            arguments("9.2.1", 36),
+            arguments("8.0.0", 34, "8.4"),
+            arguments("8.7.0", 35, "8.11.1"),
+            arguments("8.8.0", 35, "8.11.1"),
+            arguments("9.2.1", 36, "9.6.0"),
+        )
+
+        /**
+         * AGP versions that support per-variant DSL extensions (extendBuildTypeWith /
+         * extendProductFlavorWith). AGP 8.0.0 has the same class of bug as extendProjectWith
+         * (issuetracker.google.com/issues/260100335) — extensions are not attached during the
+         * android {} configuration phase, so extensions.configure<ElasticExtension> {} inside
+         * productFlavors or buildTypes blocks throws UnknownDomainObjectException.
+         */
+        @JvmStatic
+        fun agpVersionsWithPerVariantDsl(): Stream<Arguments> = Stream.of(
+            arguments("8.7.0", 35, "8.11.1"),
+            arguments("8.8.0", 35, "8.11.1"),
+            arguments("9.2.1", 36, "9.6.0"),
         )
 
         private fun sha256(input: String): String {

@@ -6,7 +6,8 @@ plugins {
 
 // AGP versions under test. Each version needs its own Gradle configuration so the JARs
 // can be injected into the TestKit plugin classpath at test time.
-val agpTestVersions = listOf("8.0.0", "8.2.0", "8.7.0", "8.8.0", "9.2.1")
+val agpProjectVersion = libs.versions.android.get()
+val agpTestVersions = listOf("8.0.0", "8.2.0", "8.7.0", "8.8.0", agpProjectVersion).distinct()
 
 val agpTestConfigs = agpTestVersions.associateWith { version ->
     configurations.create("agp${version.replace(".", "")}") {
@@ -27,6 +28,9 @@ dependencies {
 }
 
 tasks.named("test", Test::class.java) {
+    systemProperty("test.agp.project.version", agpProjectVersion)
+    systemProperty("test.agp.project.compileSdk", providers.gradleProperty("elastic.android.compileSdk").get())
+    systemProperty("test.agp.project.gradleVersion", gradle.gradleVersion)
     agpTestConfigs.forEach { (version, config) ->
         inputs.files(config)
         doFirst {

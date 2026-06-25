@@ -367,7 +367,7 @@ class ElasticPluginFunctionalTest {
             arguments("8.0.0", 34, "8.4"),
             arguments("8.7.0", 35, "8.11.1"),
             arguments("8.8.0", 35, "8.11.1"),
-            arguments("9.2.1", 36, "9.6.0"),
+            projectAgpArguments(),
         )
 
         /**
@@ -383,8 +383,18 @@ class ElasticPluginFunctionalTest {
             arguments("8.2.0", 34, "8.6"),
             arguments("8.7.0", 35, "8.11.1"),
             arguments("8.8.0", 35, "8.11.1"),
-            arguments("9.2.1", 36, "9.6.0"),
+            projectAgpArguments(),
         )
+
+        private fun projectAgpArguments(): Arguments {
+            val version = System.getProperty("test.agp.project.version")
+                ?: error("System property 'test.agp.project.version' not set. Check test task setup in build.gradle.kts")
+            val compileSdk = System.getProperty("test.agp.project.compileSdk")?.toInt()
+                ?: error("System property 'test.agp.project.compileSdk' not set. Check test task setup in build.gradle.kts")
+            val gradleVersion = System.getProperty("test.agp.project.gradleVersion")
+                ?: error("System property 'test.agp.project.gradleVersion' not set. Check test task setup in build.gradle.kts")
+            return arguments(version, compileSdk, gradleVersion)
+        }
 
         private fun sha256(input: String): String {
             val digest = MessageDigest.getInstance("SHA-256")

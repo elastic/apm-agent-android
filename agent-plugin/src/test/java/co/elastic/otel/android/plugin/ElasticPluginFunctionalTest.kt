@@ -372,13 +372,15 @@ class ElasticPluginFunctionalTest {
 
         /**
          * AGP versions that support per-variant DSL extensions (extendBuildTypeWith /
-         * extendProductFlavorWith). AGP 8.0.0 has the same class of bug as extendProjectWith
-         * (issuetracker.google.com/issues/260100335) — extensions are not attached during the
-         * android {} configuration phase, so extensions.configure<ElasticExtension> {} inside
-         * productFlavors or buildTypes blocks throws UnknownDomainObjectException.
+         * extendProductFlavorWith). AGP 8.0.x and 8.1.x have the same class of bug as
+         * extendProjectWith (issuetracker.google.com/issues/260100335) where extensions are not
+         * attached during the android {} configuration phase, so extensions.configure<ElasticExtension>
+         * inside productFlavors or buildTypes blocks throws UnknownDomainObjectException.
+         * Fixed in AGP 8.2.0.
          */
         @JvmStatic
         fun agpVersionsWithPerVariantDsl(): Stream<Arguments> = Stream.of(
+            arguments("8.2.0", 34, "8.6"),
             arguments("8.7.0", 35, "8.11.1"),
             arguments("8.8.0", 35, "8.11.1"),
             arguments("9.2.1", 36, "9.6.0"),

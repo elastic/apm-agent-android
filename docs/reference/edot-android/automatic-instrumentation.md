@@ -45,7 +45,7 @@ Bytecode instrumentation is a common technique which may already be used in your
 
 For large projects, you can avoid the added compilation time caused by the [compilation behavior](#compilation-behavior) by disabling bytecode instrumentation for build types or flavors that don't need the functionality. 
 
-Use the following configuration to disable bytecode instrumentation for a build type:
+Use the following configuration to disable bytecode instrumentation for a build type when using Android Gradle Plugin 8.2.0 or later:
 
 ```kotlin
 // Your app's build.gradle.kts file

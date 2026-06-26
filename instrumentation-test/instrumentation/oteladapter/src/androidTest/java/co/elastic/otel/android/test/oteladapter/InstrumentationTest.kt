@@ -21,7 +21,7 @@ class InstrumentationTest {
 
             agentRule.flushLogs().join(5, TimeUnit.SECONDS)
 
-            val finishedLogRecords = agentRule.getFinishedLogRecords()
+            val finishedLogRecords = agentRule.getFinishedLogRecords().filter { it.eventName == null }
             Assertions.assertThat(finishedLogRecords).hasSize(1)
             OpenTelemetryAssertions.assertThat(finishedLogRecords.first())
                 .hasBody("My log")

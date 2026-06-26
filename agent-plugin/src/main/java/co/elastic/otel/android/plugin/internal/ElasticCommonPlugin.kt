@@ -41,14 +41,13 @@ internal class ElasticCommonPlugin : Plugin<Project> {
         target.pluginManager.withPlugin("com.android.application") {
             val androidComponents =
                 target.extensions.getByType(ApplicationAndroidComponentsExtension::class.java)
+            val projectExtension = target.extensions.create(EXTENSION_NAME, ElasticExtension::class.java)
             androidComponents.registerExtension(
                 DslExtension.Builder(EXTENSION_NAME)
-                    .extendProjectWith(ElasticExtension::class.java)
                     .extendBuildTypeWith(ElasticExtension::class.java)
                     .extendProductFlavorWith(ElasticExtension::class.java)
                     .build(),
             ) { config ->
-                val projectExtension = config.projectExtension(ElasticExtension::class.java)
                 val buildTypeExtension = config.buildTypeExtension(ElasticExtension::class.java)
                 val flavorExtensions = config.productFlavorsExtensions(ElasticExtension::class.java)
                 target.objects.newInstance(ElasticVariantExtension::class.java).also { variantExtension ->

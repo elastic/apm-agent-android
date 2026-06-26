@@ -42,7 +42,7 @@ abstract class ElasticApmExtension @Inject constructor(objects: ObjectFactory) {
         objects.newInstance(LegacyBytecodeInstrumentation::class.java)
 
     @Deprecated(
-        """Use the per-build-type or per-flavor elasticOtel extension instead. For example:
+        """Use the per-buildType or per-flavor elasticOtel extension instead. For example:
 import co.elastic.otel.android.plugin.extensions.ElasticExtension
 
 android {

@@ -30,6 +30,13 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [elastic-apm-android-agent-versionext-fixes]
 
 % next_release_notes
+
+## 1.7.1 [elastic-apm-android-agent-171-release-notes]
+**Release date:** June 26, 2026
+
+### Fixes [elastic-apm-android-agent-171-fixes]
+
+* Fix the `elasticOtel {}` project-level Gradle DSL not working due to a broken `DslExtension.Builder.extendProjectWith()` AGP API: [#838](https://github.com/elastic/apm-agent-android/pull/838)
     
 ## 1.7.0 [elastic-apm-android-agent-170-release-notes]
 **Release date:** June 22, 2026

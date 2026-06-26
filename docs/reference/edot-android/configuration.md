@@ -265,7 +265,7 @@ class MyApp : android.app.Application {
 
 ## Gradle configuration
 
-Gradle configuration is available from the `elasticOtel` block inside Android's `android` block. These values are configured at build time.
+Gradle configuration is available from the `elasticOtel` block. These values are configured at build time.
 
 ### Build ID
 
@@ -282,14 +282,12 @@ If the app doesn't define a version name, the version name part is empty.
 To set a custom build ID for all variants, configure `buildId` in the project-level `elasticOtel` block:
 
 ```kotlin
-android {
-    elasticOtel {
-        buildId.set("my-build-id")
-    }
+elasticOtel {
+    buildId.set("my-build-id")
 }
 ```
 
-You can also override `buildId` for specific build types or product flavors:
+You can also override `buildId` for specific build types or product flavors when using Android Gradle Plugin 8.2.0 or later:
 
 ```kotlin
 import co.elastic.otel.android.plugin.extensions.ElasticExtension

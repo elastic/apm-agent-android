@@ -38,7 +38,6 @@ import com.android.build.api.variant.ScopedArtifacts
 import net.bytebuddy.build.gradle.android.ByteBuddyAndroidPlugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.Provider
 
 class ElasticAgentPlugin : Plugin<Project> {
@@ -94,9 +93,7 @@ class ElasticAgentPlugin : Plugin<Project> {
     ): Boolean {
         val buildTypeName = variantBuilder.buildType
             ?: error("Build type for variant '${variantBuilder.name}' was null")
-        val projectExtension = (androidExtension as ExtensionAware)
-            .extensions
-            .getByType(ElasticExtension::class.java)
+        val projectExtension = project.extensions.getByType(ElasticExtension::class.java)
         val buildTypeExtension = androidExtension.buildTypes
             .getByName(buildTypeName)
             .extensions

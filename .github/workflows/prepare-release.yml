@@ -9,6 +9,9 @@ on:
         required: true
         type: string
 
+permissions:
+  contents: read
+
 jobs:
   prepare_release:
     name: Prepare release

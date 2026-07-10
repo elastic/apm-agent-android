@@ -7,7 +7,7 @@ plugins {
 }
 
 dependencies {
-    signature("com.toasttab.android:gummy-bears-api-${project.property("elastic.android.minSdk")}:0.14.0:coreLib2@signature")
+    signature("com.toasttab.android:gummy-bears-api-${project.property("elastic.android.minSdk")}:0.15.0:coreLib2@signature")
 }
 
 val capitalizedVariantNames = mutableListOf<String>()

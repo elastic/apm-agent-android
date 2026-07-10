@@ -28,6 +28,8 @@ Initialization configuration is available from the EDOT Android builder shown in
 Provide your application name, version, and environment. For example:
 
 ```kotlin
+import co.elastic.otel.android.ElasticApmAgent
+
 class MyApp : android.app.Application {
 
     override fun onCreate() {
@@ -51,6 +53,10 @@ class MyApp : android.app.Application {
 Configure where your app's telemetry is exported:
 
 ```kotlin
+import co.elastic.otel.android.ElasticApmAgent
+import co.elastic.otel.android.connectivity.Authentication
+import co.elastic.otel.android.exporters.configuration.ExportProtocol
+
 class MyApp : android.app.Application {
 
     override fun onCreate() {
@@ -86,6 +92,8 @@ Self-signed certificates are **not supported**. If your endpoint uses a self-sig
 You can provide an interceptor for the signals' export request headers, where you can read or modify them if needed.
 
 ```kotlin
+import co.elastic.otel.android.ElasticApmAgent
+
 class MyApp : android.app.Application {
 
     override fun onCreate() {
@@ -105,6 +113,8 @@ You can provide global interceptors for all spans and logs [attributes](https://
 This is useful for setting dynamic global attributes. If you'd like to set static global attributes, which are also applied to metrics, take a look at [Intercept resources](#intercept-resources).
 
 ```kotlin
+import co.elastic.otel.android.ElasticApmAgent
+
 class MyApp : android.app.Application {
 
     override fun onCreate() {
@@ -123,6 +133,8 @@ class MyApp : android.app.Application {
 You can configure how [sessions](index.md#sessions) work. For example:
 
 ```kotlin
+import co.elastic.otel.android.ElasticApmAgent
+
 class MyApp : android.app.Application {
 
     override fun onCreate() {
@@ -142,6 +154,9 @@ class MyApp : android.app.Application {
 You can configure how [disk buffering](index.md#disk-buffering) works. For example:
 
 ```kotlin
+import co.elastic.otel.android.ElasticApmAgent
+import co.elastic.otel.android.features.diskbuffering.DiskBufferingConfiguration
+
 class MyApp : android.app.Application {
 
     override fun onCreate() {
@@ -163,6 +178,8 @@ EDOT Android creates a [resource](https://opentelemetry.io/docs/specs/otel/overv
 You can intercept these resources and read or modify them as shown in the following example.
 
 ```kotlin
+import co.elastic.otel.android.ElasticApmAgent
+
 class MyApp : android.app.Application {
 
     override fun onCreate() {
@@ -186,6 +203,8 @@ EDOT Android configures exporters for each signal ([spans](https://opentelemetry
 You can intercept exporters to add your own logic, such as logging each signal that gets exported, or filtering some items that don't make sense for you to export. For example:
 
 ```kotlin
+import co.elastic.otel.android.ElasticApmAgent
+
 class MyApp : android.app.Application {
 
     override fun onCreate() {
@@ -207,6 +226,8 @@ This is a convenience tool to intercept HTTP-related spans. By default, EDOT And
 You can override this behavior by setting your own interceptor, or you can choose to set it to `null` to just turn it off. For example:
 
 ```kotlin
+import co.elastic.otel.android.ElasticApmAgent
+
 class MyApp : android.app.Application {
 
     override fun onCreate() {
@@ -226,6 +247,8 @@ Part of the work that EDOT Android does when configuring the OpenTelemetry SDK o
 If you want to provide your own processors, you can do so by setting a custom [ProcessorFactory](https://github.com/elastic/apm-agent-android/blob/main/agent-sdk/src/main/java/co/elastic/otel/android/processors/ProcessorFactory.kt), as shown in the example:
 
 ```kotlin
+import co.elastic.otel.android.ElasticApmAgent
+
 class MyApp : android.app.Application {
 
    override fun onCreate() {
@@ -251,6 +274,10 @@ EDOT Android creates logs using [Android's Log](https://developer.android.com/re
 If you want to show specific logs from EDOT Android, or even turn off logs altogether, you can do so by providing your own `LoggingPolicy` configuration. The following example shows how to allow all logs of level `WARN` and higher to be printed, whereas those lower than `WARN` are ignored.
 
 ```kotlin
+import co.elastic.otel.android.ElasticApmAgent
+import co.elastic.otel.android.logging.LogLevel
+import co.elastic.otel.android.logging.LoggingPolicy
+
 class MyApp : android.app.Application {
 
     override fun onCreate() {
@@ -314,6 +341,8 @@ Dynamic configuration settings are available from an already built [agent](https
 You can change any of the configuration values provided as part of the [export connectivity](#export-connectivity) setters, at any time by setting a new [ExportEndpointConfiguration](https://github.com/elastic/apm-agent-android/blob/main/agent-sdk/src/main/java/co/elastic/otel/android/connectivity/ExportEndpointConfiguration.kt) object, which overrides them all. For example:
 
 ```kotlin
+import co.elastic.otel.android.ElasticApmAgent
+
 class MyApp : android.app.Application {
 
     override fun onCreate() {
@@ -342,6 +371,9 @@ Starting from version `1.2.0`, you can remotely manage the EDOT Android behavior
 The remote management is turned off by default. To turn it on, provide your central configuration endpoint when initializing EDOT Android, as shown here:
 
 ```kotlin
+import co.elastic.otel.android.ElasticApmAgent
+import co.elastic.otel.android.connectivity.Authentication
+
 class MyApp : android.app.Application {
 
     override fun onCreate() {
@@ -459,6 +491,8 @@ After adding [build config fields](https://developer.android.com/build/gradle-ti
 2. Find them within your app's `BuildConfig` generated type, as shown in the following example:
 
 ```kotlin
+import co.elastic.otel.android.ElasticApmAgent
+import co.elastic.otel.android.connectivity.Authentication
 import my.app.namespace.BuildConfig // <1>
 // ...
 

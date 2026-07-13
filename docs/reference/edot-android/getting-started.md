@@ -49,6 +49,9 @@ plugins {
 After you've configured Gradle, initialize the agent within your app's code:
 
 ```kotlin
+import co.elastic.otel.android.ElasticApmAgent
+import co.elastic.otel.android.connectivity.Authentication
+
 val agent = ElasticApmAgent.builder(application) // <1>
     .setServiceName("My app name") // <2>
     .setExportUrl("http://10.0.2.2:4318") // <3>
@@ -74,6 +77,9 @@ With EDOT Android fully initialized, you can start sending telemetry to your {{s
 The following snippet shows how to generate telemetry through [manual instrumentation](manual-instrumentation.md):
 
 ```kotlin
+import co.elastic.otel.android.ElasticApmAgent
+import co.elastic.otel.android.extensions.span
+
 val agent = ElasticApmAgent.builder(application)
     .setServiceName("My app name")
     //...

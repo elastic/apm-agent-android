@@ -30,6 +30,8 @@ After completing the [setup](getting-started.md) process, EDOT Android has confi
 Here's an example of how to create telemetry using the OpenTelemetry Java APIs:
 
 ```kotlin
+import co.elastic.otel.android.ElasticApmAgent
+
 fun myMethod() {
     val agent: ElasticApmAgent
 
@@ -66,6 +68,8 @@ The convenience methods make use of the same [OpenTelemetry APIs](#opentelemetry
 The following example shows how to manually create a span using the convenience extension:
 
 ```kotlin
+import co.elastic.otel.android.ElasticApmAgent
+import co.elastic.otel.android.extensions.span
 
 fun myMethod() {
     val agent: ElasticApmAgent
@@ -83,6 +87,8 @@ fun myMethod() {
 The following example shows how to manually create a log record using the convenience extension:
 
 ```kotlin
+import co.elastic.otel.android.ElasticApmAgent
+import co.elastic.otel.android.extensions.log
 
 fun myMethod() {
     val agent: ElasticApmAgent

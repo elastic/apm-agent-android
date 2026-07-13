@@ -45,6 +45,12 @@
       ],
       "ignoreUnstable": false,
       "groupName": "otel-android"
+    },
+    {
+      "matchPackageNames": [
+        "net.bytebuddy:*"
+      ],
+      "allowedVersions": "!/-jdk5$/"
     }
   ]
 }

@@ -1,7 +1,7 @@
 import com.github.gmazzo.buildconfig.BuildConfigExtension
 
 plugins {
-    id("elastic.java-library")
+    id("elastic.gradle-plugin-library")
     id("java-gradle-plugin")
     id("com.github.gmazzo.buildconfig")
 }

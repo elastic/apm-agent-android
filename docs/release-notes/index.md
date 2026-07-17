@@ -1,6 +1,6 @@
 ---
-navigation_title: "EDOT Android"
-description: Release notes for the Elastic Distribution of OpenTelemetry Android.
+navigation_title: "Elastic OTel Android"
+description: Release notes for Elastic OTel Android.
 applies_to:
   stack:
   serverless:
@@ -14,7 +14,7 @@ mapped_pages:
   - https://www.elastic.co/guide/en/apm/agent/android/current/release-notes-0.x.html
 ---
 
-# Elastic Distribution of OpenTelemetry Android release notes
+# Elastic OTel Android release notes [elastic-distribution-of-opentelemetry-android-release-notes]
 
 Review the changes, fixes, and more in each version of {{edot}} Android.
 

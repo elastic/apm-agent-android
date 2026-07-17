@@ -1,6 +1,6 @@
 ---
 navigation_title: Automatic instrumentation
-description: Instrument Android applications automatically using EDOT Android.
+description: Instrument Android applications automatically using Elastic OTel Android.
 applies_to:
   stack:
   serverless:
@@ -15,9 +15,9 @@ mapped_pages:
   - https://www.elastic.co/guide/en/apm/agent/android/current/supported-technologies.html
 ---
 
-# Automatic instrumentation for Android with EDOT SDK
+# Automatic instrumentation for Android with Elastic OTel SDK [automatic-instrumentation-for-android-with-edot-sdk]
 
-EDOT Android can automatically generate telemetry on your behalf. This allows you to get telemetry data for supported targets without having to write [manual instrumentation](manual-instrumentation.md).
+Elastic OTel Android can automatically generate telemetry on your behalf. This allows you to get telemetry data for supported targets without having to write [manual instrumentation](manual-instrumentation.md).
 
 ## Installation [supported-instrumentations-installation]
 
@@ -27,9 +27,9 @@ To install a supported automatic instrumentation, follow these steps:
 
 1. Choose a [supported instrumentation](#supported-instrumentations).
 2. Add its Gradle plugin to your project in the same location where the [agent](getting-started.md#gradle-setup) is added.
-3. [Initialize EDOT Android](getting-started.md#agent-setup) the same way you would without using automatic instrumentation.
+3. [Initialize Elastic OTel Android](getting-started.md#agent-setup) the same way you would without using automatic instrumentation.
 
-Automatic instrumentations will get installed during EDOT Android's initialization.
+Automatic instrumentations will get installed during Elastic OTel Android's initialization.
 
 ```{tip}
 You can also use instrumentations from [OpenTelemetry Android](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation) through the [OTel Android instrumentation adapter](#adapter-for-otel-android-instrumentations).
@@ -39,7 +39,7 @@ You can also use instrumentations from [OpenTelemetry Android](https://github.co
 
 Some automatic instrumentations perform bytecode instrumentation, also known as _bytecode weaving_, where your application's code, including code from the libraries it uses, is modified at compile-time. This is similar to what `isMinifyEnabled` does with R8 functionalities, automating code changes that you would otherwise need to make manually. 
 
-Bytecode instrumentation is a common technique which may already be used in your project for use cases such as [code optimization](https://developer.android.com/build/shrink-code#optimization) through R8. While useful, bytecode instrumentation can make compilation take longer to complete. Because of this, EDOT Android provides [a way to disable](#automatic-instrumentation-configuration) bytecode instrumentation for specific build types or product flavors.
+Bytecode instrumentation is a common technique which may already be used in your project for use cases such as [code optimization](https://developer.android.com/build/shrink-code#optimization) through R8. While useful, bytecode instrumentation can make compilation take longer to complete. Because of this, Elastic OTel Android provides [a way to disable](#automatic-instrumentation-configuration) bytecode instrumentation for specific build types or product flavors.
 
 ## Configuration [automatic-instrumentation-configuration]
 
@@ -151,14 +151,14 @@ dependencies {  // <2>
 
 1. Make sure the adapter is added.
 2. You can find the dependencies needed in the [instrumentation's README file](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation/httpurlconnection#project-dependencies). The same will be the case for any other instrumentation.
-3. The instrumentations that require a `byteBuddy` dependency, do bytecode weaving, as explained in [compilation behavior](#compilation-behavior). An extra plugin named `net.bytebuddy.byte-buddy-gradle-plugin` is required to make this work, as shown [here](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation/httpurlconnection#byte-buddy-compilation-plugin). However, EDOT Android installs this extra plugin on your behalf, so there's no need for you to do so manually.
+3. The instrumentations that require a `byteBuddy` dependency, do bytecode weaving, as explained in [compilation behavior](#compilation-behavior). An extra plugin named `net.bytebuddy.byte-buddy-gradle-plugin` is required to make this work, as shown [here](https://github.com/open-telemetry/opentelemetry-android/tree/main/instrumentation/httpurlconnection#byte-buddy-compilation-plugin). However, Elastic OTel Android installs this extra plugin on your behalf, so there's no need for you to do so manually.
 
 ### Compilation performance
 
 As explained in [compilation behavior](#compilation-behavior), the instrumentations that perform bytecode weaving might increase the
-compilation times. Because of this, EDOT Android provides a [configuration param](#automatic-instrumentation-configuration)
+compilation times. Because of this, Elastic OTel Android provides a [configuration param](#automatic-instrumentation-configuration)
 that allows to select specific build types for which the bytecode instrumentation will be turned off. This configuration
-only works for EDOT Android's [supported instrumentations](#supported-instrumentations), so it won't have any effect on
+only works for Elastic OTel Android's [supported instrumentations](#supported-instrumentations), so it won't have any effect on
 instrumentations added through the OTel Android instrumentations adapter.
 
 To select the build variant to run the bytecode instrumentation for an OTel Android instrumentation, you must

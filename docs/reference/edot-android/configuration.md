@@ -1,6 +1,6 @@
 ---
 navigation_title: Configuration
-description: Comprehensive list of configuration parameters for the Elastic Distribution of OpenTelemetry Android (EDOT Android).
+description: Comprehensive list of configuration parameters for the Elastic OTel Android SDK.
 applies_to:
   stack:
   serverless:
@@ -15,13 +15,13 @@ mapped_pages:
   - https://www.elastic.co/guide/en/apm/agent/android/current/configuration.html
 ---
 
-# Configure the EDOT Android SDK [configuration]
+# Configure the Elastic OTel Android SDK [configuration]
 
-This section contains a comprehensive list of all the configurable parameters available for EDOT Android, including those you can set during initialization and those you can adjust dynamically afterward.
+This section contains a comprehensive list of all the configurable parameters available for Elastic OTel Android, including those you can set during initialization and those you can adjust dynamically afterward.
 
 ## Initialization configuration 
 
-Initialization configuration is available from the EDOT Android builder shown in [Agent setup](getting-started.md#agent-setup). The following are its available parameters.
+Initialization configuration is available from the Elastic OTel Android builder shown in [Agent setup](getting-started.md#agent-setup). The following are its available parameters.
 
 ### Application metadata
 
@@ -81,10 +81,10 @@ To provide these values from outside of your code, using an environment variable
 
 ### TLS connections
 
-EDOT Android supports TLS connections to OTLP endpoints and OpAMP (central configuration) endpoints when the server uses a TLS certificate signed by a trusted Certificate Authority (CA).
+Elastic OTel Android supports TLS connections to OTLP endpoints and OpAMP (central configuration) endpoints when the server uses a TLS certificate signed by a trusted Certificate Authority (CA).
 
 :::{warning}
-Self-signed certificates are **not supported**. If your endpoint uses a self-signed certificate, EDOT Android will not be able to establish a secure connection. Ensure your server uses a certificate issued by a publicly trusted CA or an internal CA that is trusted by the device.
+Self-signed certificates are **not supported**. If your endpoint uses a self-signed certificate, Elastic OTel Android will not be able to establish a secure connection. Ensure your server uses a certificate issued by a publicly trusted CA or an internal CA that is trusted by the device.
 :::
 
 ### Intercept export request headers
@@ -173,7 +173,7 @@ class MyApp : android.app.Application {
 
 ### Intercept resources
 
-EDOT Android creates a [resource](https://opentelemetry.io/docs/specs/otel/overview/#resources) for your signals, which is a set of static global attributes. These attributes help {{kib}} properly display your application's data.
+Elastic OTel Android creates a [resource](https://opentelemetry.io/docs/specs/otel/overview/#resources) for your signals, which is a set of static global attributes. These attributes help {{kib}} properly display your application's data.
 
 You can intercept these resources and read or modify them as shown in the following example.
 
@@ -198,7 +198,7 @@ The resource interceptor is only applied during initialization, as this is the o
 
 ### Intercept exporters
 
-EDOT Android configures exporters for each signal ([spans](https://opentelemetry.io/docs/languages/java/sdk/#spanexporter), [logs](https://opentelemetry.io/docs/languages/java/sdk/#logrecordexporter), and [metrics](https://opentelemetry.io/docs/languages/java/sdk/#metricexporter)) to manage features like [disk buffering](index.md#disk-buffering) and also to establish a connection with the Elastic export endpoint based on the provided [export connectivity](#export-connectivity) values.
+Elastic OTel Android configures exporters for each signal ([spans](https://opentelemetry.io/docs/languages/java/sdk/#spanexporter), [logs](https://opentelemetry.io/docs/languages/java/sdk/#logrecordexporter), and [metrics](https://opentelemetry.io/docs/languages/java/sdk/#metricexporter)) to manage features like [disk buffering](index.md#disk-buffering) and also to establish a connection with the Elastic export endpoint based on the provided [export connectivity](#export-connectivity) values.
 
 You can intercept exporters to add your own logic, such as logging each signal that gets exported, or filtering some items that don't make sense for you to export. For example:
 
@@ -221,7 +221,7 @@ class MyApp : android.app.Application {
 
 ### Intercept HTTP spans
 
-This is a convenience tool to intercept HTTP-related spans. By default, EDOT Android enhances HTTP span names to include `domain:port` when only an HTTP verb is set. This is [often the case](https://opentelemetry.io/docs/specs/semconv/http/http-spans/#name) for HTTP client span names.
+This is a convenience tool to intercept HTTP-related spans. By default, Elastic OTel Android enhances HTTP span names to include `domain:port` when only an HTTP verb is set. This is [often the case](https://opentelemetry.io/docs/specs/semconv/http/http-spans/#name) for HTTP client span names.
 
 You can override this behavior by setting your own interceptor, or you can choose to set it to `null` to just turn it off. For example:
 
@@ -242,7 +242,7 @@ class MyApp : android.app.Application {
 
 ### Provide processors
 
-Part of the work that EDOT Android does when configuring the OpenTelemetry SDK on your behalf is to provide processors, which are needed to delegate data to the exporters. For spans, EDOT Android provides a [BatchSpanProcessor](https://www.javadoc.io/doc/io.opentelemetry/opentelemetry-sdk-trace/latest/io/opentelemetry/sdk/trace/export/BatchSpanProcessor.html); for logs, a [BatchLogRecordProcessor](https://www.javadoc.io/doc/io.opentelemetry/opentelemetry-sdk-logs/latest/io/opentelemetry/sdk/logs/export/BatchLogRecordProcessor.html); whereas for metrics, it's a [PeriodicMetricReader](https://www.javadoc.io/doc/io.opentelemetry/opentelemetry-sdk-metrics/latest/io/opentelemetry/sdk/metrics/export/PeriodicMetricReader.html), which is analogous to a processor.
+Part of the work that Elastic OTel Android does when configuring the OpenTelemetry SDK on your behalf is to provide processors, which are needed to delegate data to the exporters. For spans, Elastic OTel Android provides a [BatchSpanProcessor](https://www.javadoc.io/doc/io.opentelemetry/opentelemetry-sdk-trace/latest/io/opentelemetry/sdk/trace/export/BatchSpanProcessor.html); for logs, a [BatchLogRecordProcessor](https://www.javadoc.io/doc/io.opentelemetry/opentelemetry-sdk-logs/latest/io/opentelemetry/sdk/logs/export/BatchLogRecordProcessor.html); whereas for metrics, it's a [PeriodicMetricReader](https://www.javadoc.io/doc/io.opentelemetry/opentelemetry-sdk-metrics/latest/io/opentelemetry/sdk/metrics/export/PeriodicMetricReader.html), which is analogous to a processor.
 
 If you want to provide your own processors, you can do so by setting a custom [ProcessorFactory](https://github.com/elastic/apm-agent-android/blob/main/agent-sdk/src/main/java/co/elastic/otel/android/processors/ProcessorFactory.kt), as shown in the example:
 
@@ -266,12 +266,12 @@ The factory is called once during initialization and needs to provide a processo
 ### Internal logging policy
 
 :::{note}
-Not to be confused with OpenTelemetry's [log signals](https://opentelemetry.io/docs/concepts/signals/logs/). The internal logging policy is about EDOT Android's internal logs that you should see in [logcat](https://developer.android.com/studio/debug/logcat) only.
+Not to be confused with OpenTelemetry's [log signals](https://opentelemetry.io/docs/concepts/signals/logs/). The internal logging policy is about Elastic OTel Android's internal logs that you should see in [logcat](https://developer.android.com/studio/debug/logcat) only.
 :::
 
-EDOT Android creates logs using [Android's Log](https://developer.android.com/reference/android/util/Log) type to notify about its internal events, so that you can check them out in [logcat](https://developer.android.com/studio/debug/logcat) for debugging purposes. By default, all logs are printed for a debuggable app build. However, in the case of non-debuggable builds, only logs at the `INFO` level and higher are printed.
+Elastic OTel Android creates logs using [Android's Log](https://developer.android.com/reference/android/util/Log) type to notify about its internal events, so that you can check them out in [logcat](https://developer.android.com/studio/debug/logcat) for debugging purposes. By default, all logs are printed for a debuggable app build. However, in the case of non-debuggable builds, only logs at the `INFO` level and higher are printed.
 
-If you want to show specific logs from EDOT Android, or even turn off logs altogether, you can do so by providing your own `LoggingPolicy` configuration. The following example shows how to allow all logs of level `WARN` and higher to be printed, whereas those lower than `WARN` are ignored.
+If you want to show specific logs from Elastic OTel Android, or even turn off logs altogether, you can do so by providing your own `LoggingPolicy` configuration. The following example shows how to allow all logs of level `WARN` and higher to be printed, whereas those lower than `WARN` are ignored.
 
 ```kotlin
 import co.elastic.otel.android.ElasticApmAgent
@@ -296,9 +296,9 @@ Gradle configuration is available from the `elasticOtel` block. These values are
 
 ### Build ID
 
-EDOT Android adds the `app.build_id` resource attribute to telemetry when the Gradle plugin is applied. This value can be used to correlate application telemetry with build artifacts.
+Elastic OTel Android adds the `app.build_id` resource attribute to telemetry when the Gradle plugin is applied. This value can be used to correlate application telemetry with build artifacts.
 
-By default, EDOT Android generates the build ID from the app's final application ID, version name, and version code:
+By default, Elastic OTel Android generates the build ID from the app's final application ID, version name, and version code:
 
 ```text
 sha256("<applicationId>-<versionName>-<versionCode>")
@@ -330,7 +330,7 @@ android {
 }
 ```
 
-When multiple values match a variant, EDOT Android uses the most specific value in this order: build type, product flavor, project-level `elasticOtel`, then the generated default.
+When multiple values match a variant, Elastic OTel Android uses the most specific value in this order: build type, product flavor, project-level `elasticOtel`, then the generated default.
 
 ## Dynamic configuration
 
@@ -364,11 +364,11 @@ product:
   edot_android: preview 1.2.0
 ```
 
-Starting from version `1.2.0`, you can remotely manage the EDOT Android behavior through [Central configuration](opentelemetry://reference/central-configuration.md).
+Starting from version `1.2.0`, you can remotely manage the Elastic OTel Android behavior through [Central configuration](opentelemetry://reference/central-configuration.md).
 
 ### Activate central configuration
 
-The remote management is turned off by default. To turn it on, provide your central configuration endpoint when initializing EDOT Android, as shown here:
+The remote management is turned off by default. To turn it on, provide your central configuration endpoint when initializing Elastic OTel Android, as shown here:
 
 ```kotlin
 import co.elastic.otel.android.ElasticApmAgent
@@ -387,16 +387,16 @@ class MyApp : android.app.Application {
 }
 ```
 
-1. Provide your EDOT Collector OpAMP endpoint. Refer to [Central configuration](opentelemetry://reference/central-configuration.md) for more details.
+1. Provide your {{agent}} OpAMP endpoint. Refer to [Central configuration](opentelemetry://reference/central-configuration.md) for more details.
 2. In case your OpAMP endpoint [requires authentication](elastic-agent://reference/edot-collector/config/default-config-standalone.md#authentication-settings), this is how you can provide your API Key value.
 
 ### Available settings
 
-You can modify the following settings for EDOT Android through the Central Configuration:
+You can modify the following settings for Elastic OTel Android through the Central Configuration:
 
 | Setting | Central configuration name | Description | Type |
 |---------|----------------------------|-------------|------|
-| Recording | `recording` | Whether EDOT Android should record and export telemetry or not. By default it's enabled, disabling it is effectively turning EDOT Android off where only the central configuration polling will be performed. | Dynamic |
+| Recording | `recording` | Whether Elastic OTel Android should record and export telemetry or not. By default it's enabled, disabling it is effectively turning Elastic OTel Android off where only the central configuration polling will be performed. | Dynamic |
 | Session sample rate | `session_sample_rate` | To reduce overhead and storage requirements, you can set the sample rate to a value between 0.0 and 1.0. Data will be sampled per session, this is so context in a given session isn't lost. | Dynamic |
 
 Dynamic settings can be changed without having to restart the application.
@@ -438,7 +438,7 @@ You've properly created build config fields from environment variables. To use t
 
 ### Provide data from a properties file
 
-[Properties](https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html) are a common way to provide values to JVM apps through files. Here's an example of how you could use them to provide config values to EDOT Android.
+[Properties](https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html) are a common way to provide values to JVM apps through files. Here's an example of how you could use them to provide config values to Elastic OTel Android.
 
 Given the following example properties file:
 

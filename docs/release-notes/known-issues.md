@@ -1,6 +1,6 @@
 ---
 navigation_title: "Known issues"
-description: Known issues for the Elastic Distribution of OpenTelemetry Android.
+description: Known issues for Elastic OTel Android.
 applies_to:
   stack:
   serverless:
@@ -11,7 +11,7 @@ products:
   - id: edot-sdk
 ---
 
-# Elastic Distribution of OpenTelemetry Android known issues
+# Elastic OTel Android known issues [elastic-distribution-of-opentelemetry-android-known-issues]
 
 Known issues are significant defects or limitations that may impact your implementation. These issues are actively being worked on and will be addressed in a future release. Review known issues to help you make informed decisions, such as upgrading to a new version.
 

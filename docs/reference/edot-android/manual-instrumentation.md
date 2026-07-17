@@ -1,6 +1,6 @@
 ---
 navigation_title: Manual instrumentation
-description: Learn how to manually instrument Android applications using the Elastic Distribution of OpenTelemetry SDK to capture spans, add attributes, and send trace data to Elastic.
+description: Learn how to manually instrument Android applications using the Elastic OTel SDK to capture spans, add attributes, and send trace data to Elastic.
 applies_to:
   stack:
   serverless:
@@ -15,17 +15,17 @@ mapped_pages:
   - https://www.elastic.co/guide/en/apm/agent/android/current/manual-instrumentation.html
 ---
 
-# Manual instrumentation using the Elastic Distribution of OpenTelemetry Android
+# Manual instrumentation using Elastic OTel Android [manual-instrumentation-using-the-elastic-distribution-of-opentelemetry-android]
 
-Learn how to manually instrument Android applications using the Elastic Distribution of OpenTelemetry SDK to capture spans, add attributes, and send trace data to Elastic.
+Learn how to manually instrument Android applications using the Elastic OTel SDK to capture spans, add attributes, and send trace data to Elastic.
 
 You can create your custom spans, metrics, and logs, using the [OpenTelemetry SDK APIs](https://opentelemetry.io/docs/languages/java/api/#opentelemetry-api), which you can find in the [OpenTelemetry](https://www.javadoc.io/doc/io.opentelemetry/opentelemetry-api/latest/io/opentelemetry/api/OpenTelemetry.html) object provided through the `getOpenTelemetry()` method. 
 
-Alternatively, for common operations, you can use the [convenience EDOT Android extensions](#convenience-extensions) to create telemetry in a less verbose way.
+Alternatively, for common operations, you can use the [convenience Elastic OTel Android extensions](#convenience-extensions) to create telemetry in a less verbose way.
 
 ## OpenTelemetry APIs
 
-After completing the [setup](getting-started.md) process, EDOT Android has configured an [OpenTelemetry](https://www.javadoc.io/doc/io.opentelemetry/opentelemetry-api/latest/io/opentelemetry/api/OpenTelemetry.html) object for you, which is available through the `getOpenTelemetry()` method. 
+After completing the [setup](getting-started.md) process, Elastic OTel Android has configured an [OpenTelemetry](https://www.javadoc.io/doc/io.opentelemetry/opentelemetry-api/latest/io/opentelemetry/api/OpenTelemetry.html) object for you, which is available through the `getOpenTelemetry()` method. 
 
 Here's an example of how to create telemetry using the OpenTelemetry Java APIs:
 
@@ -59,7 +59,7 @@ For more details on creating signals using the OpenTelemetry APIs, refer to the 
 
 ## Convenience extensions
 
-For common use cases, such as spans and logs creation, EDOT Android provides a couple of Kotlin extension methods to allow you to create telemetry in a less verbose way.
+For common use cases, such as spans and logs creation, Elastic OTel Android provides a couple of Kotlin extension methods to allow you to create telemetry in a less verbose way.
 
 The convenience methods make use of the same [OpenTelemetry APIs](#opentelemetry-apis) internally to create telemetry. While they're not the only way to create the following signals, they make it easier to create them.
 

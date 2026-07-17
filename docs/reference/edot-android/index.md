@@ -1,6 +1,6 @@
 ---
-navigation_title: EDOT Android
-description: The Elastic Distribution of OpenTelemetry Android (EDOT Android) is an APM agent based on OpenTelemetry. It provides built-in tools and configurations to make the OpenTelemetry SDK work with Elastic using as little code as possible while fully leveraging the combined forces of Elasticsearch and Kibana for your Android application.
+navigation_title: Elastic OTel Android
+description: The Elastic OTel Android SDK is an APM agent based on OpenTelemetry. It provides built-in tools and configurations to make the OpenTelemetry SDK work with Elastic using as little code as possible while fully leveraging the combined forces of Elasticsearch and Kibana for your Android application.
 applies_to:
   stack:
   serverless:
@@ -16,11 +16,11 @@ mapped_pages:
   - https://www.elastic.co/guide/en/apm/agent/android/current/index.html
 ---
 
-# Elastic Distribution of OpenTelemetry Android
+# Elastic OTel Android [elastic-distribution-of-opentelemetry-android]
 
-The Elastic Distribution of OpenTelemetry Android (EDOT Android) is an APM agent based on [OpenTelemetry](https://opentelemetry.io/). EDOT Android provides built-in tools and configurations to make the [OpenTelemetry SDK](https://opentelemetry.io/docs/languages/java/) work with your {{stack}} using as little code as possible.
+Elastic OTel Android is an APM agent based on [OpenTelemetry](https://opentelemetry.io/). Elastic OTel Android provides built-in tools and configurations to make the [OpenTelemetry SDK](https://opentelemetry.io/docs/languages/java/) work with your {{stack}} using as little code as possible.
 
-All the features provided by the [OpenTelemetry SDK](https://github.com/open-telemetry/opentelemetry-java) are available for you to use and are pre-configured by EDOT Android to work properly out of the box. This allows you to fulfill various use cases to better understand your app's performance, such as:
+All the features provided by the [OpenTelemetry SDK](https://github.com/open-telemetry/opentelemetry-java) are available for you to use and are pre-configured by Elastic OTel Android to work properly out of the box. This allows you to fulfill various use cases to better understand your app's performance, such as:
 
 - [Distributed tracing](#distributed-tracing)
 - [Session review](#session-review)
@@ -49,20 +49,20 @@ For distributed tracing to work properly, configure your backend services to sen
 
 ## Session review [session-review]
 
-EDOT Android attaches [session](#sessions) information to each span and log generated from your application. This allows you to create queries that group all the telemetry that belongs to a session and form a session event timeline. This is useful to identify the most common actions performed by your users, as well as tracing the steps leading up to errors they might encounter.
+Elastic OTel Android attaches [session](#sessions) information to each span and log generated from your application. This allows you to create queries that group all the telemetry that belongs to a session and form a session event timeline. This is useful to identify the most common actions performed by your users, as well as tracing the steps leading up to errors they might encounter.
 
 For example, let's say you have a screen "A" in your app that can be opened from other screens, such as "B". If you create a log event when the user clicks on a button on screen "B" that takes them to screen "A", along with a log when screen "A" opens (or a span if you'd like to measure how long it takes for screen "A" to fully load), both items will contain a session.id attribute with the same value per session. This allows you to create Elasticsearch queries, for example in Kibana's Discover tool, to list all events during that session and better understand a user's journey within your application.
 
 ## Alerts, dashboards, and more [alerts-and-dashboards]
 
-Because EDOT Android also provides [direct access](manual-instrumentation.md) to the [OpenTelemetry SDK](https://opentelemetry.io/docs/languages/java/), you can generate your own data in ways that best suit your needs and take advantage of {{stack}}'s tools, such as:
+Because Elastic OTel Android also provides [direct access](manual-instrumentation.md) to the [OpenTelemetry SDK](https://opentelemetry.io/docs/languages/java/), you can generate your own data in ways that best suit your needs and take advantage of {{stack}}'s tools, such as:
 
  * [Create alerts](docs-content://explore-analyze/alerts-cases.md) when something interesting happens; for example, when an error is recorded.
  * [Build custom dashboards](docs-content://explore-analyze/dashboards.md) to display your data the way you need to see it
 
 ## Features
 
-EDOT Android provides additional features on top of those that come with the [OpenTelemetry SDK](https://opentelemetry.io/docs/languages/java/).
+Elastic OTel Android provides additional features on top of those that come with the [OpenTelemetry SDK](https://opentelemetry.io/docs/languages/java/).
 
 ### Disk buffering [disk-buffering]
 
@@ -75,11 +75,11 @@ This feature is an [automatic instrumentation](automatic-instrumentation.md), wh
 
 ### Central configuration
 
-You can remotely manage how EDOT Android behaves through {{kib}}. Refer to [Central configuration](configuration.md#central-configuration) for more details.
+You can remotely manage how Elastic OTel Android behaves through {{kib}}. Refer to [Central configuration](configuration.md#central-configuration) for more details.
 
 ### Real time [real-time]
 
-For [distributed tracing](#distributed-tracing) to work properly, your application's time should be in sync with the [coordinated universal time](https://en.wikipedia.org/wiki/Coordinated_Universal_Time). This is sometimes an issue for Android applications, as the time provided by the OS is often not accurate enough. EDOT Android aims to synchronize telemetry timestamps with the universal time to ensure a reliable view of event timelines.
+For [distributed tracing](#distributed-tracing) to work properly, your application's time should be in sync with the [coordinated universal time](https://en.wikipedia.org/wiki/Coordinated_Universal_Time). This is sometimes an issue for Android applications, as the time provided by the OS is often not accurate enough. Elastic OTel Android aims to synchronize telemetry timestamps with the universal time to ensure a reliable view of event timelines.
 
 ### Sessions [sessions]
 
@@ -89,11 +89,11 @@ A session is created when no previous session exists or when the previous one ha
 
 ### Dynamic configuration [dynamic-configuration]
 
-EDOT Android allows you to modify some values after its initialization has finished. Refer to [configuration](configuration.md).
+Elastic OTel Android allows you to modify some values after its initialization has finished. Refer to [configuration](configuration.md).
 
 ### Automatic instrumentation [automatic-instrumentation]
 
-EDOT Android provides extensions that automatically generate telemetry for common tools and use cases. Refer to [Automatic Instrumentation](automatic-instrumentation.md) for more details.
+Elastic OTel Android provides extensions that automatically generate telemetry for common tools and use cases. Refer to [Automatic Instrumentation](automatic-instrumentation.md) for more details.
 
 ## Try it out
 

@@ -102,9 +102,8 @@ After your app has sent telemetry data, either [manually](manual-instrumentation
 
 #### Install the content package
 
-1. In {{kib}}, search for **Integrations** in the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md).
-2. Search for **Android OpenTelemetry Assets**.
-3. Open it and click **Install** to add the Android dashboards to your {{kib}} instance.
+1. In {{kib}}, search for **Android OpenTelemetry Assets** in the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md).
+2. Open it and click **Install** to add the Android dashboards to your {{kib}} instance.
 
 #### Explore your data in the dashboard
 

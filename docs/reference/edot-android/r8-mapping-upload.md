@@ -27,9 +27,39 @@ Before uploading a mapping:
 * Enable the [crash reporting instrumentation](automatic-instrumentation.md#crash-reporting) to capture unhandled exceptions.
 * Enable R8 for the variant whose mapping you want to upload.
 * Make the {{es}} endpoint reachable from the environment that runs Gradle.
-* Create a {{es}} API key that can create and write to `.android-r8-mappings-*` indices.
+* Create a dedicated {{es}} API key for mapping uploads.
 
-The {{es}} credentials used for mapping uploads are build-time credentials. Don't package them in the application or commit them to source control.
+### Create a dedicated API key
+
+Create an API key specifically for R8 mapping uploads. Don't reuse the API key that the application uses to export telemetry. Keeping these credentials separate limits the impact if a build-time credential is exposed and allows each key to be rotated or revoked independently.
+
+The mapping uploader only needs permission to create mapping indices and index documents into them. The following request creates a key restricted to `.android-r8-mappings-*`:
+
+```bash
+curl --fail-with-body -X POST "$ELASTICSEARCH_ENDPOINT/_security/api_key" \
+  --user "$ELASTICSEARCH_USERNAME:$ELASTICSEARCH_PASSWORD" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "name": "edot-android-r8-mapping-upload",
+    "expiration": "90d",
+    "role_descriptors": {
+      "r8_mapping_uploader": {
+        "indices": [
+          {
+            "names": [".android-r8-mappings-*"],
+            "privileges": ["create_index", "index"]
+          }
+        ]
+      }
+    }
+  }'
+```
+
+The user creating the key must have `manage_own_api_key` or `manage_api_key` and the index privileges being granted. Adjust the expiration to match your release process. Store the `encoded` value from the response as the `ELASTICSEARCH_API_KEY` CI secret.
+
+For more details about the request and available options, refer to the {{es}} [Create an API key](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-create-api-key) API documentation.
+
+This API key is a build-time credential. Don't package it in the application or commit it to source control.
 
 ## Configure mapping uploads
 

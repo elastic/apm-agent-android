@@ -5,6 +5,12 @@ public final class co/elastic/otel/android/plugin/ElasticAgentPlugin : org/gradl
 	public fun apply (Lorg/gradle/api/Project;)V
 }
 
+public final class co/elastic/otel/android/plugin/ElasticMappingPlugin : org/gradle/api/Plugin {
+	public fun <init> ()V
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun apply (Lorg/gradle/api/Project;)V
+}
+
 public abstract interface class co/elastic/otel/android/plugin/extensions/BytecodeInstrumentation {
 	public abstract fun getDisabled ()Lorg/gradle/api/provider/Property;
 }
@@ -20,11 +26,25 @@ public abstract class co/elastic/otel/android/plugin/extensions/ElasticExtension
 	public final fun bytecodeInstrumentation (Lorg/gradle/api/Action;)V
 	public final fun getBuildId ()Lorg/gradle/api/provider/Property;
 	public final fun getBytecodeInstrumentation ()Lco/elastic/otel/android/plugin/extensions/BytecodeInstrumentation;
+	public final fun getMapping ()Lco/elastic/otel/android/plugin/extensions/ElasticMappingExtension;
+	public final fun mapping (Lorg/gradle/api/Action;)V
+}
+
+public abstract class co/elastic/otel/android/plugin/extensions/ElasticMappingExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun elasticsearch (Lorg/gradle/api/Action;)V
+	public final fun getElasticsearch ()Lco/elastic/otel/android/plugin/extensions/Elasticsearch;
 }
 
 public abstract class co/elastic/otel/android/plugin/extensions/ElasticVariantExtension : com/android/build/api/variant/VariantExtension, java/io/Serializable {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun getBuildId ()Lorg/gradle/api/provider/Property;
+	public final fun getMapping ()Lco/elastic/otel/android/plugin/extensions/ElasticMappingExtension;
+}
+
+public abstract interface class co/elastic/otel/android/plugin/extensions/Elasticsearch {
+	public abstract fun getApiKey ()Lorg/gradle/api/provider/Property;
+	public abstract fun getEndpoint ()Lorg/gradle/api/provider/Property;
 }
 
 public abstract interface class co/elastic/otel/android/plugin/extensions/LegacyBytecodeInstrumentation {

@@ -37,6 +37,72 @@ class ElasticPluginFunctionalTest {
     @TempDir
     lateinit var projectDir: Path
 
+    @ParameterizedTest(name = "AGP {0}")
+    @MethodSource("agpVersions")
+    fun `android elasticOtel DSL wires mapping task inputs`(agpVersion: String, compileSdk: Int, gradleVersion: String) {
+        writeAndroidProject(
+            agpVersion,
+            """
+            plugins {
+                id("com.android.application")
+                id("co.elastic.otel.android.agent")
+                id("co.elastic.otel.android.mapping")
+            }
+
+            android {
+                namespace = "co.elastic.test"
+                compileSdk = $compileSdk
+
+                defaultConfig {
+                    applicationId = "co.elastic.test"
+                    minSdk = 23
+                    versionCode = 7
+                    versionName = "1.2.3"
+                }
+
+                elasticOtel {
+                    buildId.set("kit-build")
+
+                    mapping {
+                        elasticsearch {
+                            endpoint.set("http://example.invalid")
+                            apiKey.set("secret")
+                        }
+                    }
+                }
+            }
+
+            tasks.register("printElasticConfig") {
+                doLast {
+                    fun property(taskName: String, getter: String): org.gradle.api.provider.Property<*> {
+                        val task = tasks.named(taskName).get()
+                        return task.javaClass.getMethod(getter).invoke(task) as org.gradle.api.provider.Property<*>
+                    }
+
+                    fun fileProperty(taskName: String, getter: String): org.gradle.api.file.RegularFileProperty {
+                        val task = tasks.named(taskName).get()
+                        return task.javaClass.getMethod(getter).invoke(task) as org.gradle.api.file.RegularFileProperty
+                    }
+
+                    println("generateIndexName=" + property("releaseGenerateElasticsearchBulkRequestBody", "getIndexName").get())
+                    println("uploadIndexName=" + property("releaseUploadMappingToElasticsearch", "getIndexName").get())
+                    println("releaseEndpoint=" + property("releaseUploadMappingToElasticsearch", "getEndpoint").get())
+                    println("releaseApiKey=" + property("releaseUploadMappingToElasticsearch", "getApiKey").get())
+                    println("requestBody=" + fileProperty("releaseGenerateElasticsearchBulkRequestBody", "getRequestBodyFile").get().asFile.invariantSeparatorsPath)
+                }
+            }
+            """.trimIndent(),
+        )
+
+        val result = gradleRunner(agpVersion, gradleVersion, "printElasticConfig").build()
+
+        assertTrue(result.output.contains("generateIndexName=.android-r8-mappings-kit-build"), result.output)
+        assertTrue(result.output.contains("uploadIndexName=.android-r8-mappings-kit-build"), result.output)
+        assertTrue(result.output.contains("releaseEndpoint=http://example.invalid"), result.output)
+        assertTrue(result.output.contains("releaseApiKey=secret"), result.output)
+        assertTrue(result.output.contains("requestBody=${projectPath()}/build/intermediates/elastic/mapping/release/requestbody.ndjson"), result.output)
+    }
+
     /**
      * Tests that the default build ID is the SHA-256 of "appId-versionName-versionCode"
      * when no overrides are configured, across all supported AGP versions.
@@ -299,6 +365,166 @@ class ElasticPluginFunctionalTest {
         assertFalse(output.contains(":demoReleaseBytebuddyTransform"), output)   // disabled by flavor
     }
 
+    @ParameterizedTest(name = "AGP {0}")
+    @MethodSource("agpVersions")
+    fun `buildId is consistent across agent and mapping plugins when set explicitly`(agpVersion: String, compileSdk: Int, gradleVersion: String) {
+        writeAndroidProject(
+            agpVersion,
+            """
+            plugins {
+                id("com.android.application")
+                id("co.elastic.otel.android.agent")
+                id("co.elastic.otel.android.mapping")
+            }
+
+            android {
+                namespace = "co.elastic.test"
+                compileSdk = $compileSdk
+
+                defaultConfig {
+                    applicationId = "co.elastic.test"
+                    minSdk = 23
+                    versionCode = 1
+                    versionName = "1.0"
+                }
+
+                elasticOtel {
+                    buildId.set("explicit-id")
+                }
+            }
+
+            tasks.register("printBuildIds") {
+                doLast {
+                    fun property(taskName: String, getter: String): org.gradle.api.provider.Property<*> {
+                        val task = tasks.named(taskName).get()
+                        return task.javaClass.getMethod(getter).invoke(task) as org.gradle.api.provider.Property<*>
+                    }
+                    println("agentBuildId=" + property("releaseGenerateElasticAgentConfigClass", "getBuildId").get())
+                    println("mappingIndexName=" + property("releaseGenerateElasticsearchBulkRequestBody", "getIndexName").get())
+                }
+            }
+            """.trimIndent(),
+        )
+
+        val output = gradleRunner(agpVersion, gradleVersion, "printBuildIds").build().output
+
+        assertTrue(output.contains("agentBuildId=explicit-id"), output)
+        assertTrue(output.contains("mappingIndexName=.android-r8-mappings-explicit-id"), output)
+    }
+
+    @ParameterizedTest(name = "AGP {0}")
+    @MethodSource("agpVersions")
+    fun `buildId default is consistent across agent and mapping plugins`(agpVersion: String, compileSdk: Int, gradleVersion: String) {
+        writeAndroidProject(
+            agpVersion,
+            """
+            plugins {
+                id("com.android.application")
+                id("co.elastic.otel.android.agent")
+                id("co.elastic.otel.android.mapping")
+            }
+
+            android {
+                namespace = "co.elastic.test"
+                compileSdk = $compileSdk
+
+                defaultConfig {
+                    applicationId = "co.elastic.test"
+                    minSdk = 23
+                    versionCode = 7
+                    versionName = "1.2.3"
+                }
+            }
+
+            tasks.register("printBuildIds") {
+                doLast {
+                    fun property(taskName: String, getter: String): org.gradle.api.provider.Property<*> {
+                        val task = tasks.named(taskName).get()
+                        return task.javaClass.getMethod(getter).invoke(task) as org.gradle.api.provider.Property<*>
+                    }
+                    println("agentBuildId=" + property("releaseGenerateElasticAgentConfigClass", "getBuildId").get())
+                    println("mappingIndexName=" + property("releaseGenerateElasticsearchBulkRequestBody", "getIndexName").get())
+                }
+            }
+            """.trimIndent(),
+        )
+
+        val output = gradleRunner(agpVersion, gradleVersion, "printBuildIds").build().output
+        val expectedBuildId = sha256("co.elastic.test-1.2.3-7")
+
+        assertTrue(output.contains("agentBuildId=$expectedBuildId"), output)
+        assertTrue(output.contains("mappingIndexName=.android-r8-mappings-$expectedBuildId"), output)
+    }
+
+    @ParameterizedTest(name = "AGP {0}")
+    @MethodSource("agpVersionsWithPerVariantDsl")
+    fun `elasticOtel DSL configures build ids`(agpVersion: String, compileSdk: Int, gradleVersion: String) {
+        writeAndroidProject(
+            agpVersion,
+            """
+            import co.elastic.otel.android.plugin.extensions.ElasticExtension
+
+            plugins {
+                id("com.android.application")
+                id("co.elastic.otel.android.agent")
+                id("co.elastic.otel.android.mapping")
+            }
+
+            android {
+                namespace = "co.elastic.test"
+                compileSdk = $compileSdk
+
+                defaultConfig {
+                    applicationId = "co.elastic.test"
+                    minSdk = 23
+                    versionCode = 1
+                    versionName = "1.0"
+                }
+
+                buildTypes {
+                    release {
+                        extensions.configure<ElasticExtension> {
+                            buildId.set("release-override")
+                        }
+                    }
+                }
+
+                elasticOtel {
+                    buildId.set("project-level")
+                    mapping {
+                        elasticsearch {
+                            endpoint.set("http://example.invalid")
+                            apiKey.set("secret")
+                        }
+                    }
+                }
+            }
+
+            tasks.register("printElasticConfig") {
+                doLast {
+                    fun property(taskName: String, getter: String): org.gradle.api.provider.Property<*> {
+                        val task = tasks.named(taskName).get()
+                        return task.javaClass.getMethod(getter).invoke(task) as org.gradle.api.provider.Property<*>
+                    }
+                    println("releaseBuildId=" + property("releaseGenerateElasticAgentConfigClass", "getBuildId").get())
+                    println("debugBuildId=" + property("debugGenerateElasticAgentConfigClass", "getBuildId").get())
+                    println("releaseIndexName=" + property("releaseGenerateElasticsearchBulkRequestBody", "getIndexName").get())
+                    println("debugIndexName=" + property("debugGenerateElasticsearchBulkRequestBody", "getIndexName").get())
+                    println("endpoint=" + property("releaseUploadMappingToElasticsearch", "getEndpoint").get())
+                }
+            }
+            """.trimIndent(),
+        )
+
+        val result = gradleRunner(agpVersion, gradleVersion, "printElasticConfig").build()
+
+        assertTrue(result.output.contains("releaseBuildId=release-override"), result.output)
+        assertTrue(result.output.contains("debugBuildId=project-level"), result.output)
+        assertTrue(result.output.contains("releaseIndexName=.android-r8-mappings-release-override"), result.output)
+        assertTrue(result.output.contains("debugIndexName=.android-r8-mappings-project-level"), result.output)
+        assertTrue(result.output.contains("endpoint=http://example.invalid"), result.output)
+    }
+
     private fun writeAndroidProject(agpVersion: String, buildFile: String) {
         // Each AGP version loads a large number of classes; without extra metaspace the Gradle
         // daemon running test builds runs OOM when sequential test invocations reuse the daemon.
@@ -337,6 +563,8 @@ class ElasticPluginFunctionalTest {
             .withGradleVersion(gradleVersion)
             .forwardOutput()
     }
+
+    private fun projectPath(): String = projectDir.toFile().canonicalPath.replace(File.separatorChar, '/')
 
     // Reads the elastic plugin's own classpath from the metadata file generated by java-gradle-plugin.
     // This contains only implementation/api deps — not compileOnly (i.e. AGP is excluded here).

@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     id("com.android.application")
     id("co.elastic.otel.android.agent")
+    id("co.elastic.otel.android.mapping")
     id("co.elastic.otel.android.instrumentation.okhttp")
     id("co.elastic.otel.android.instrumentation.crash")
 }
@@ -12,6 +13,17 @@ val withDesugaring = providers.gradleProperty("withDesugaring").map { it.toBoole
 android {
     namespace = "co.elastic.otel.android.integration"
     compileSdk = 36
+
+    elasticOtel {
+        buildId.set("integration-test-build")
+
+        mapping {
+            elasticsearch {
+                endpoint.set(providers.gradleProperty("esEndpoint"))
+                apiKey.set(providers.gradleProperty("esApiKey"))
+            }
+        }
+    }
 
     defaultConfig {
         applicationId = "co.elastic.otel.android.integration"

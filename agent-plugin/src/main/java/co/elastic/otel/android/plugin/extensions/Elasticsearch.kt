@@ -18,15 +18,9 @@
  */
 package co.elastic.otel.android.plugin.extensions
 
-import com.android.build.api.variant.VariantExtension
-import java.io.Serializable
-import javax.inject.Inject
-import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 
-abstract class ElasticVariantExtension @Inject constructor(
-    objects: ObjectFactory,
-) : VariantExtension, Serializable {
-    val buildId: Property<String> = objects.property(String::class.java)
-    val mapping: ElasticMappingExtension = objects.newInstance(ElasticMappingExtension::class.java)
+interface Elasticsearch {
+    val endpoint: Property<String>
+    val apiKey: Property<String>
 }

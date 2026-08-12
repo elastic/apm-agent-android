@@ -332,6 +332,12 @@ android {
 
 When multiple values match a variant, EDOT Android uses the most specific value in this order: build type, product flavor, project-level `elasticOtel`, then the generated default.
 
+### R8 mapping upload
+
+EDOT Android can upload the R8 mapping generated for an optimized application build to {{es}}. The mapping and the application's telemetry share the same build ID, allowing obfuscated crash stacktraces to be associated with the correct build artifacts.
+
+Refer to [R8 mapping upload](r8-mapping-upload.md) to configure the mapping plugin and trigger uploads from your release workflow.
+
 ## Dynamic configuration
 
 Dynamic configuration settings are available from an already built [agent](https://github.com/elastic/apm-agent-android/blob/main/agent-sdk/src/main/java/co/elastic/otel/android/ElasticApmAgent.kt).

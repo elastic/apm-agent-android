@@ -2,8 +2,8 @@ MAKEFLAGS += --no-print-directory
 .SHELLFLAGS = -euc
 SHELL = /bin/bash
 
-elastic-start-local:  ## Start ES + EDOT Collector locally
-	curl -fsSL https://elastic.co/start-local | sh -s -- --esonly --edot
+elastic-start-local:  ## Start ES + Kibana + EDOT Collector locally
+	curl -fsSL https://elastic.co/start-local | sh -s -- --edot
 
 .PHONY: start-env
 start-env: elastic-start-local  ## Start the full environment
@@ -17,6 +17,15 @@ run-tests: elastic-start-local ## Run integration tests
 run-crash-test: elastic-start-local ## Run crash reporting e2e test
 	. elastic-start-local/.env; \
 	./crash_test.sh $$ES_LOCAL_URL $$ES_LOCAL_API_KEY
+
+.PHONY: run-crash-deobfuscation-test
+run-crash-deobfuscation-test: elastic-start-local ## Run crash deobfuscation test
+	. elastic-start-local/.env; \
+	./crash_deobfuscation_test.sh \
+		$$ES_LOCAL_URL \
+		$$ES_LOCAL_API_KEY \
+		http://localhost:$$KIBANA_LOCAL_PORT \
+		$$ES_LOCAL_PASSWORD
 
 .PHONY: clean
 clean: ## Stop and uninstall

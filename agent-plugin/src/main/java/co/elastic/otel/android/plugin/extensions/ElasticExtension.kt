@@ -26,8 +26,13 @@ import org.gradle.api.provider.Property
 abstract class ElasticExtension @Inject constructor(objects: ObjectFactory) {
     val buildId: Property<String> = objects.property(String::class.java)
     val bytecodeInstrumentation: BytecodeInstrumentation = objects.newInstance(BytecodeInstrumentation::class.java)
+    val mapping: ElasticMappingExtension = objects.newInstance(ElasticMappingExtension::class.java)
 
     fun bytecodeInstrumentation(action: Action<BytecodeInstrumentation>) {
         action.execute(bytecodeInstrumentation)
+    }
+
+    fun mapping(action: Action<ElasticMappingExtension>) {
+        action.execute(mapping)
     }
 }

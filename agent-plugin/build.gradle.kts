@@ -20,6 +20,9 @@ dependencies {
     api(project(":agent-common"))
     implementation(libs.byteBuddy)
     implementation(libs.byteBuddy.plugin)
+    implementation(libs.okhttp)
+    implementation(libs.moshi)
+    implementation(libs.moshi.kotlin)
     compileOnly(libs.android.plugin)
     testImplementation(gradleTestKit())
     agpTestVersions.forEach { version ->
@@ -52,6 +55,13 @@ gradlePlugin {
             displayName = "Elastic OTel Android Agent"
             description = project.description
             tags.addAll("Android", "APM", "Elastic", "ELK", "opentelemetry")
+        }
+        create("elasticAndroidMapping") {
+            id = "co.elastic.otel.android.mapping"
+            implementationClass = "co.elastic.otel.android.plugin.ElasticMappingPlugin"
+            displayName = "Elastic OTel Android R8 mapping upload"
+            description = "Uploads Android R8 mapping files for Elastic stacktrace deobfuscation."
+            tags.addAll("Android", "R8", "mapping", "Elastic", "opentelemetry")
         }
     }
 }

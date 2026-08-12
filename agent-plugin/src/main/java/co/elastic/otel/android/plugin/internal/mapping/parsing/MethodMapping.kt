@@ -16,17 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.plugin.extensions
+package co.elastic.otel.android.plugin.internal.mapping.parsing
 
-import com.android.build.api.variant.VariantExtension
-import java.io.Serializable
-import javax.inject.Inject
-import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.Property
-
-abstract class ElasticVariantExtension @Inject constructor(
-    objects: ObjectFactory,
-) : VariantExtension, Serializable {
-    val buildId: Property<String> = objects.property(String::class.java)
-    val mapping: ElasticMappingExtension = objects.newInstance(ElasticMappingExtension::class.java)
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ */
+internal data class MethodMapping(
+    val obfuscatedName: String,
+    val lines: List<Line>,
+) {
+    data class Line(
+        val value: String,
+        val obfuscatedLineNumberRange: Range,
+        val originalLineNumberRange: Range,
+        val extras: List<String>,
+    ) {
+        data class Range(val start: String, val end: String)
+    }
 }

@@ -2,6 +2,7 @@ toc:
   - file: index.md
   - file: getting-started.md
   - file: configuration.md
+  - file: r8-mapping-upload.md
   - file: manual-instrumentation.md
   - file: automatic-instrumentation.md
   - title: Troubleshooting

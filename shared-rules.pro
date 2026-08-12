@@ -6,6 +6,9 @@
 }
 -keep class io.opentelemetry.api.incubator.** { *; }
 -keep interface io.opentelemetry.api.** { *; }
+-keep class co.elastic.otel.android.internal.generated.ElasticAgentConfig {
+    public static final java.lang.String BUILD_ID;
+}
 -dontwarn com.fasterxml.jackson.**
 -dontwarn com.google.auto.service.AutoService
 -dontwarn com.google.auto.value.**
@@ -15,6 +18,3 @@
 -dontwarn io.opentelemetry.sdk.autoconfigure.spi.**
 -dontwarn java.awt.**
 -dontwarn javax.json.bind.spi.JsonbProvider
--keep class co.elastic.otel.android.internal.generated.ElasticAgentConfig {
-    public static final java.lang.String BUILD_ID;
-}

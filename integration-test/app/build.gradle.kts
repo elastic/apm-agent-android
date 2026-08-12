@@ -14,17 +14,6 @@ android {
     namespace = "co.elastic.otel.android.integration"
     compileSdk = 36
 
-    elasticOtel {
-        buildId.set("integration-test-build")
-
-        mapping {
-            elasticsearch {
-                endpoint.set(providers.gradleProperty("esEndpoint"))
-                apiKey.set(providers.gradleProperty("esApiKey"))
-            }
-        }
-    }
-
     defaultConfig {
         applicationId = "co.elastic.otel.android.integration"
         minSdk = if (withDesugaring) 23 else 26
@@ -49,6 +38,16 @@ android {
 kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_1_8)
+    }
+}
+elasticOtel {
+    buildId.set("integration-test-build")
+
+    mapping {
+        elasticsearch {
+            endpoint.set(providers.gradleProperty("esEndpoint"))
+            apiKey.set(providers.gradleProperty("esApiKey"))
+        }
     }
 }
 

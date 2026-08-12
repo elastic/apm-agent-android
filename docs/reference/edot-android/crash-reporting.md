@@ -37,6 +37,11 @@ Crash events are available in the "Crashes" section of the {{kib}} Android dashb
 
 ## Deobfuscate R8 stacktraces
 
+```{applies_to}
+product:
+  edot_android: ga 1.8.0
+```
+
 Android's R8 optimizer can rename classes and methods in release builds. When an optimized application crashes, its stacktrace contains these obfuscated names. EDOT Android can upload the R8 `mapping.txt` file for each application build to {{es}} so that the stacktrace can be restored to its original class, method, file, and line information.
 
 EDOT Android identifies the correct mapping using the `app.build_id` resource attribute included with application telemetry. Mapping documents for a build are stored in a {{es}} index named `.android-r8-mappings-<build_id>`.

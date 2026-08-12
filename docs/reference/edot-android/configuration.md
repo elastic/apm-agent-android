@@ -334,6 +334,11 @@ When multiple values match a variant, EDOT Android uses the most specific value 
 
 ### R8 mapping upload
 
+```{applies_to}
+product:
+  edot_android: ga 1.8.0
+```
+
 EDOT Android can upload the R8 mapping generated for an optimized application build to {{es}}. The mapping and the application's telemetry share the same build ID, allowing obfuscated crash stacktraces to be associated with the correct build artifacts.
 
 Refer to [Crash reporting](crash-reporting.md#deobfuscate-r8-stacktraces) to configure the mapping plugin and trigger uploads from your release workflow.

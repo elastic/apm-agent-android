@@ -114,7 +114,7 @@ android {
 }
 ```
 > [!NOTE]
-> The endpoint must be the {{es}} HTTP endpoint, not the EDOT Collector OTLP endpoint used to export telemetry.
+> The endpoint must be the {{es}} HTTP endpoint, not the OTLP endpoint used to export telemetry.
 
 ### Build ID
 

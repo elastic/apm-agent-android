@@ -43,11 +43,10 @@ EDOT Android identifies the correct mapping using the `app.build_id` resource at
 
 ### Prerequisites
 
-Before uploading a mapping:
-
 * Enable R8 for the variant whose mapping you want to upload.
-* Make the {{es}} endpoint reachable from the environment that runs Gradle.
+* Have your {{es}} endpoint URL at hand to use it in the Gradle task later.
 * Create a dedicated {{es}} API key for mapping uploads.
+* Install version 1.0.0 or later of the **Android OpenTelemetry Assets** integration in {{kib}}. Refer to [Visualize telemetry](getting-started.md#visualize-telemetry) for instructions on how to do so.
 
 ### Create a dedicated API key
 

@@ -63,8 +63,8 @@ android {
     }
 }
 ```
-
-The endpoint must be the {{es}} HTTP endpoint, not the EDOT Collector OTLP endpoint used to export telemetry.
+> [!NOTE]
+> The endpoint must be the {{es}} HTTP endpoint, not the EDOT Collector OTLP endpoint used to export telemetry.
 
 ### Build ID
 
@@ -101,7 +101,7 @@ For a flavored variant such as `paidRelease`, run:
 
 The upload task:
 
-1. Runs R8 for the selected variant to produce `mapping.txt`.
+1. Ensures R8 has produced `mapping.txt` for the selected variant.
 2. Converts the mapping into one {{es}} document per obfuscated class.
 3. Creates `.android-r8-mappings-<build_id>` if it doesn't already exist.
 4. Uploads the documents using the {{es}} Bulk API.
@@ -109,20 +109,6 @@ The upload task:
 Mapping upload is manual and isn't attached to `assemble` or `bundle`. Run the upload task in the release workflow for every optimized application binary that you distribute.
 
 Uploading the same build again updates documents with deterministic IDs instead of creating duplicates.
-
-## Verify an upload
-
-Use the {{es}} API to confirm that the build's index exists and contains mapping documents:
-
-```http
-GET /_cat/indices/.android-r8-mappings-*?v
-```
-
-```http
-GET /.android-r8-mappings-<build_id>/_count
-```
-
-The index suffix must match the `app.build_id` resource attribute on telemetry from the corresponding application binary.
 
 ## Troubleshoot mapping uploads
 

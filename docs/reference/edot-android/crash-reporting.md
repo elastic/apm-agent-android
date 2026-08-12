@@ -77,7 +77,7 @@ curl --fail-with-body -X POST "$ELASTICSEARCH_ENDPOINT/_security/api_key" \
 
 The user creating the key must have `manage_own_api_key` or `manage_api_key` and the index privileges being granted. Adjust the expiration to match your release process. Store the `encoded` value from the response as the `ELASTICSEARCH_API_KEY` CI secret.
 
-For more details about the request and available options, refer to the {{es}} [Create an API key](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-create-api-key) API documentation.
+This example uses basic authentication. For alternative authentication methods and other request options, refer to the {{es}} [Create an API key](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-create-api-key) API documentation.
 
 This API key is a build-time credential. Don't package it in the application or commit it to source control.
 

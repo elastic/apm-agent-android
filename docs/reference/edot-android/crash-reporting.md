@@ -25,9 +25,13 @@ First, [set up EDOT Android](getting-started.md#gradle-setup) in your applicatio
 plugins {
     id("com.android.application")
     id("co.elastic.otel.android.agent") version "[latest_version]"
-    id("co.elastic.otel.android.instrumentation.crash") version "[latest_version]"
+    id("co.elastic.otel.android.instrumentation.crash") version "[latest_version]" // <1>
 }
 ```
+
+1. Find the latest crash reporting plugin version in the [Gradle Plugin Portal](https://plugins.gradle.org/plugin/co.elastic.otel.android.instrumentation.crash).
+
+The instrumentation automatically captures crashes when an unhandled exception occurs. Because the application process is terminating, EDOT Android stores the crash event on disk and exports it after EDOT Android initializes the next time the application is launched.
 
 Crash events are available in the "Crashes" section of the {{kib}} Android dashboard. Refer to [Visualize your telemetry](getting-started.md#visualize-telemetry) for instructions to install and open the dashboard.
 

@@ -160,6 +160,10 @@ Mapping upload is manual and isn't attached to `assemble` or `bundle`. Run the u
 
 Uploading the same build again updates documents with deterministic IDs instead of creating duplicates.
 
+### Visualize deobfuscated stacktraces
+
+After the crash event and its corresponding R8 mapping are available in your {{stack}}, you can retrace the stacktrace from the {{kib}} Android dashboard. Refer to [Deobfuscating stacktraces](https://www.elastic.co/docs/reference/integrations/otel_android_dashboards#deobfuscating-stacktraces) for instructions to open the crash details and view the original class names, methods, source files, and line numbers.
+
 ### Troubleshoot mapping uploads
 
 **No mapping file is generated**

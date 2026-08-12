@@ -19,9 +19,11 @@
 package co.elastic.otel.android.plugin.internal.mapping.upload
 
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import java.io.File
+import java.io.IOException
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -33,6 +35,7 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
@@ -52,7 +55,7 @@ internal abstract class UploadMappingToElasticsearch : DefaultTask() {
     @get:Input
     abstract val endpoint: Property<String>
 
-    @get:Input
+    @get:Internal
     abstract val apiKey: Property<String>
 
     @get:Input
@@ -115,12 +118,13 @@ internal abstract class UploadMappingToElasticsearch : DefaultTask() {
             .build()
 
         client.newCall(request).execute().use { response ->
+            val responseBody = response.body.string()
             if (!response.isSuccessful) {
-                val responseBody = response.body.string()
                 throw GradleException(
                     "Failed to upload mapping to Elasticsearch: ${response.code}\n$responseBody",
                 )
             }
+            validateBulkResponse(responseBody)
             logger.lifecycle("Successfully uploaded mapping to Elasticsearch (${response.code})")
         }
     }
@@ -142,6 +146,42 @@ internal abstract class UploadMappingToElasticsearch : DefaultTask() {
                 ),
             ),
         )
+
+        private val BULK_RESPONSE_ADAPTER = Moshi.Builder()
+            .addLast(KotlinJsonAdapterFactory())
+            .build()
+            .adapter(BulkResponse::class.java)
+
+        internal fun validateBulkResponse(responseBody: String) {
+            val bulkResponse = try {
+                BULK_RESPONSE_ADAPTER.fromJson(responseBody)
+            } catch (exception: IOException) {
+                throw GradleException("Failed to parse Elasticsearch bulk response", exception)
+            } catch (exception: JsonDataException) {
+                throw GradleException("Failed to parse Elasticsearch bulk response", exception)
+            } ?: throw GradleException("Elasticsearch returned an empty bulk response")
+
+            if (!bulkResponse.errors) {
+                return
+            }
+
+            val itemErrors = bulkResponse.items.flatMap { operations ->
+                operations.mapNotNull { (operation, item) ->
+                    item.error?.let { error ->
+                        "$operation document ${item.id ?: "<unknown>"} " +
+                            "(status ${item.status}): ${error.type}: ${error.reason}"
+                    }
+                }
+            }
+            val details = if (itemErrors.isEmpty()) {
+                responseBody
+            } else {
+                itemErrors.joinToString(separator = "\n", limit = 5)
+            }
+            throw GradleException(
+                "Elasticsearch failed to index one or more mapping documents:\n$details",
+            )
+        }
     }
 
     /**
@@ -174,5 +214,21 @@ internal abstract class UploadMappingToElasticsearch : DefaultTask() {
     internal data class FieldType(
         val type: String,
         val enabled: Boolean? = null,
+    )
+
+    internal data class BulkResponse(
+        val errors: Boolean,
+        val items: List<Map<String, BulkItem>> = emptyList(),
+    )
+
+    internal data class BulkItem(
+        @Json(name = "_id") val id: String? = null,
+        val status: Int,
+        val error: BulkError? = null,
+    )
+
+    internal data class BulkError(
+        val type: String,
+        val reason: String,
     )
 }

@@ -66,7 +66,7 @@ android {
 
 The endpoint must be the {{es}} HTTP endpoint, not the EDOT Collector OTLP endpoint used to export telemetry.
 
-### Configure the build ID
+### Build ID
 
 By default, EDOT Android generates the build ID as:
 
@@ -74,21 +74,9 @@ By default, EDOT Android generates the build ID as:
 sha256("<applicationId>-<versionName>-<versionCode>")
 ```
 
-The agent adds this value to telemetry as `app.build_id`, and the mapping plugin uses the same value in the mapping index name. You can instead set a [custom build ID](configuration.md#build-id):
+The agent adds this value to telemetry as `app.build_id`, and the mapping plugin uses the same value in the mapping index name. Increment the application's version code for each release so that every distinct application binary has a unique build ID.
 
-```kotlin
-elasticOtel {
-    buildId.set("my-build-id")
-
-    mapping {
-        // ...
-    }
-}
-```
-
-Each distinct application binary must have a stable, unique build ID. If you use the generated default, increment the application's version code for each release.
-
-## Upload a mapping
+## Upload a mapping file
 
 The plugin creates an upload task for every application variant. The task name follows this pattern:
 
@@ -145,4 +133,4 @@ The index suffix must match the `app.build_id` resource attribute on telemetry f
 : Confirm that the endpoint is the {{es}} HTTP endpoint and that the API key can create and write to `.android-r8-mappings-*` indices.
 
 **The mapping can't be associated with a crash**
-: Confirm that the mapping index suffix matches the crash event's `app.build_id`. Avoid reusing a custom build ID for different application binaries.
+: Confirm that the mapping index suffix matches the crash event's `app.build_id`.

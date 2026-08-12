@@ -1,6 +1,6 @@
 ---
-navigation_title: R8 mapping upload
-description: Upload Android R8 mapping files to {{es}} for crash stacktrace deobfuscation.
+navigation_title: Crash reporting
+description: Capture Android crashes and deobfuscate R8 stacktraces with EDOT Android.
 applies_to:
   stack:
   serverless:
@@ -13,18 +13,34 @@ products:
   - id: edot-sdk
 ---
 
-# Upload R8 mappings for crash deobfuscation
+# Report Android crashes
+
+EDOT Android can capture unhandled exceptions and report them to your {{stack}} as crash events. Each event includes exception details, a stacktrace, and [session](index.md#sessions) information that helps correlate the crash with other telemetry from the application.
+
+## Enable crash reporting
+
+First, [set up EDOT Android](getting-started.md#gradle-setup) in your application. Then add the crash reporting instrumentation plugin to the application module's `build.gradle.kts` file:
+
+```kotlin
+plugins {
+    id("com.android.application")
+    id("co.elastic.otel.android.agent") version "[latest_version]"
+    id("co.elastic.otel.android.instrumentation.crash") version "[latest_version]"
+}
+```
+
+Crash events are available in the "Crashes" section of the {{kib}} Android dashboard. Refer to [Visualize your telemetry](getting-started.md#visualize-telemetry) for instructions to install and open the dashboard.
+
+## Deobfuscate R8 stacktraces
 
 Android's R8 optimizer can rename classes and methods in release builds. When an optimized application crashes, its stacktrace contains these obfuscated names. EDOT Android can upload the R8 `mapping.txt` file for each application build to {{es}} so that the stacktrace can be restored to its original class, method, file, and line information.
 
 EDOT Android identifies the correct mapping using the `app.build_id` resource attribute included with application telemetry. Mapping documents for a build are stored in a {{es}} index named `.android-r8-mappings-<build_id>`.
 
-## Prerequisites
+### Prerequisites
 
 Before uploading a mapping:
 
-* [Set up EDOT Android](getting-started.md#gradle-setup) in your application.
-* Enable the [crash reporting instrumentation](automatic-instrumentation.md#crash-reporting) to capture unhandled exceptions.
 * Enable R8 for the variant whose mapping you want to upload.
 * Make the {{es}} endpoint reachable from the environment that runs Gradle.
 * Create a dedicated {{es}} API key for mapping uploads.
@@ -61,7 +77,7 @@ For more details about the request and available options, refer to the {{es}} [C
 
 This API key is a build-time credential. Don't package it in the application or commit it to source control.
 
-## Configure mapping uploads
+### Configure mapping uploads
 
 Add the R8 mapping plugin to the application module's `build.gradle.kts` file. Use the same version as the EDOT Android agent plugin:
 
@@ -106,7 +122,7 @@ sha256("<applicationId>-<versionName>-<versionCode>")
 
 The agent adds this value to telemetry as `app.build_id`, and the mapping plugin uses the same value in the mapping index name. Increment the application's version code for each release so that every distinct application binary has a unique build ID.
 
-## Upload a mapping file
+### Upload a mapping file
 
 The plugin creates an upload task for every application variant. The task name follows this pattern:
 
@@ -140,7 +156,7 @@ Mapping upload is manual and isn't attached to `assemble` or `bundle`. Run the u
 
 Uploading the same build again updates documents with deterministic IDs instead of creating duplicates.
 
-## Troubleshoot mapping uploads
+### Troubleshoot mapping uploads
 
 **No mapping file is generated**
 : Confirm that R8 is enabled for the selected variant with `isMinifyEnabled = true`, and invoke the task for that variant.

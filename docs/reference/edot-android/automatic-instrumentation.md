@@ -96,17 +96,8 @@ plugins {
 ### Crash reporting
 
 Reports Android crashes as log events using the OpenTelemetry [Events API](https://opentelemetry.io/docs/specs/otel/logs/event-api/). Each crash event includes [session](index.md#sessions) information, exception details, and a stacktrace. These events can be viewed from {{kib}}'s Android dashboard under the "Crashes" section.
-Take a look at [visualizing telemetry](getting-started.md#visualize-telemetry) for more information on finding {{kib}}'s Android dashboard.
 
-#### Gradle plugin
-
-```kotlin
-plugins {
-    id("co.elastic.otel.android.instrumentation.crash") version "[latest_version]" // <1>
-}
-```
-
-1. You can find the latest version [here](https://plugins.gradle.org/plugin/co.elastic.otel.android.instrumentation.crash).
+Refer to [Crash reporting](crash-reporting.md) to enable this instrumentation and configure deobfuscation for R8-optimized builds.
 
 ## Adapter for OTel Android instrumentations
 

@@ -88,9 +88,11 @@ Add the R8 mapping plugin to the application module's `build.gradle.kts` file. U
 plugins {
     id("com.android.application")
     id("co.elastic.otel.android.agent") version "[latest_version]"
-    id("co.elastic.otel.android.mapping") version "[latest_version]"
+    id("co.elastic.otel.android.mapping") version "[latest_version]" // <1>
 }
 ```
+
+1. Find the latest mapping plugin version in the [Gradle Plugin Portal](https://plugins.gradle.org/plugin/co.elastic.otel.android.mapping).
 
 Configure the {{es}} endpoint and API key in the `elasticOtel` block. Gradle providers allow CI to supply these values without storing credentials in the build script:
 

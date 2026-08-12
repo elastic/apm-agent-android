@@ -98,7 +98,9 @@ agent.span("My Span") {
 
 ### Visualize telemetry
 
-After your app has sent telemetry data, either [manually](manual-instrumentation.md) or [automatically](automatic-instrumentation.md), you can visualize it in {{kib}} using the **Android OpenTelemetry Assets** content package.
+The [Android OpenTelemetry Assets](https://www.elastic.co/docs/reference/integrations/otel_android_dashboards) integration provides {{kib}} dashboards designed for telemetry from Android applications. These dashboards provide an overview of application health and dedicated views for spans, crashes, sessions, and other Android telemetry.
+
+After your app has sent telemetry data, either [manually](manual-instrumentation.md) or [automatically](automatic-instrumentation.md), install the integration's content package to visualize it in {{kib}}.
 
 #### Install the content package
 

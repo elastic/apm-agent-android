@@ -88,6 +88,7 @@ internal abstract class UploadMappingToElasticsearch : DefaultTask() {
             .url("$base/$indexName")
             .put(body.toRequestBody(JSON_MEDIA_TYPE))
             .header("Authorization", "ApiKey ${apiKey.get()}")
+            .header(PRODUCT_ORIGIN_HEADER, PRODUCT_ORIGIN)
             .build()
 
         client.newCall(request).execute().use { response ->
@@ -115,6 +116,7 @@ internal abstract class UploadMappingToElasticsearch : DefaultTask() {
             .url(url)
             .post(file.asRequestBody(NDJSON_MEDIA_TYPE))
             .header("Authorization", "ApiKey ${apiKey.get()}")
+            .header(PRODUCT_ORIGIN_HEADER, PRODUCT_ORIGIN)
             .build()
 
         client.newCall(request).execute().use { response ->
@@ -132,6 +134,10 @@ internal abstract class UploadMappingToElasticsearch : DefaultTask() {
     companion object {
         private val JSON_MEDIA_TYPE = "application/json".toMediaType()
         private val NDJSON_MEDIA_TYPE = "application/x-ndjson".toMediaType()
+
+        // Serverless requires an Elastic product origin to access dot-prefixed indices.
+        private const val PRODUCT_ORIGIN_HEADER = "X-Elastic-Product-Origin"
+        private const val PRODUCT_ORIGIN = "observability"
 
         private val CREATE_INDEX_REQUEST = CreateIndexRequest(
             mappings = CreateIndexRequest.Mappings(

@@ -26,6 +26,7 @@ import java.util.stream.Stream
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -36,6 +37,52 @@ class ElasticPluginFunctionalTest {
 
     @TempDir
     lateinit var projectDir: Path
+
+    @Test
+    fun `mapping generation fails clearly and removes stale output when R8 is disabled`() {
+        val agpVersion = System.getProperty("test.agp.project.version")
+        val compileSdk = System.getProperty("test.agp.project.compileSdk").toInt()
+        val gradleVersion = System.getProperty("test.agp.project.gradleVersion")
+        writeAndroidProject(
+            agpVersion,
+            """
+            plugins {
+                id("com.android.application")
+                id("co.elastic.otel.android.mapping")
+            }
+
+            android {
+                namespace = "co.elastic.test"
+                compileSdk = $compileSdk
+
+                defaultConfig {
+                    applicationId = "co.elastic.test"
+                    minSdk = 23
+                }
+            }
+            """.trimIndent(),
+        )
+
+        val staleOutput = projectDir
+            .resolve("build/intermediates/elastic/mapping/debug/requestbody.ndjson")
+            .toFile()
+        staleOutput.parentFile.mkdirs()
+        staleOutput.writeText("stale")
+
+        val result = gradleRunner(
+            agpVersion,
+            gradleVersion,
+            "debugGenerateElasticsearchBulkRequestBody",
+        ).buildAndFail()
+
+        assertTrue(
+            result.output.contains(
+                "No R8 mapping file was generated. Ensure R8 minification is enabled for the selected build variant.",
+            ),
+            result.output,
+        )
+        assertFalse(staleOutput.exists())
+    }
 
     @ParameterizedTest(name = "AGP {0}")
     @MethodSource("agpVersions")

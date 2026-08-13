@@ -20,6 +20,7 @@ package co.elastic.otel.android.plugin.internal.mapping.upload
 
 import co.elastic.otel.android.plugin.internal.mapping.parsing.R8MappingParser
 import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
@@ -53,8 +54,13 @@ internal abstract class GenerateElasticsearchBulkRequestBody : DefaultTask() {
     fun generate() {
         val mapping = mappingFile.orNull?.asFile
         if (mapping == null || !mapping.exists()) {
-            logger.lifecycle("No mapping file found. Skipping bulk request body generation.")
-            return
+            val output = requestBodyFile.get().asFile
+            if (output.exists() && !output.delete()) {
+                throw GradleException("Failed to remove stale bulk request body: ${output.absolutePath}")
+            }
+            throw GradleException(
+                "No R8 mapping file was generated. Ensure R8 minification is enabled for the selected build variant.",
+            )
         }
 
         val indexName = indexName.get()

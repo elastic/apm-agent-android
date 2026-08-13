@@ -57,33 +57,31 @@ EDOT Android identifies the correct mapping using the `app.build_id` resource at
 
 Create an API key specifically for R8 mapping uploads. Don't reuse the API key that the application uses to export telemetry. Keeping these credentials separate limits the impact if a build-time credential is exposed and allows each key to be rotated or revoked independently.
 
-The mapping uploader only needs permission to create mapping indices and index documents into them. The following request creates a key restricted to `.android-r8-mappings-*`:
+The mapping uploader only needs permission to create mapping indices and index documents into them. Create a least-privilege key in {{kib}}:
 
-```bash
-curl --fail-with-body -X POST "$ELASTICSEARCH_ENDPOINT/_security/api_key" \
-  --user "$ELASTICSEARCH_USERNAME:$ELASTICSEARCH_PASSWORD" \
-  --header "Content-Type: application/json" \
-  --data '{
-    "name": "edot-android-r8-mapping-upload",
-    "expiration": "90d",
-    "role_descriptors": {
-      "r8_mapping_uploader": {
-        "indices": [
-          {
-            "names": [".android-r8-mappings-*"],
-            "privileges": ["create_index", "index"]
-          }
-        ]
+1. Open the **API keys** management page using the navigation menu or the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md).
+2. Select **Create API key** and give the key a descriptive name, such as `edot-android-r8-mapping-upload`.
+3. Select **Control security privileges**.
+4. Use the following role descriptor to restrict the key to mapping uploads:
+
+```json
+{
+  "r8_mapping_uploader": {
+    "indices": [
+      {
+        "names": [".android-r8-mappings-*"],
+        "privileges": ["create_index", "index"]
       }
-    }
-  }'
+    ]
+  }
+}
 ```
 
-The user creating the key must have `manage_own_api_key` or `manage_api_key` and the index privileges being granted. Adjust the expiration to match your release process. Store the `encoded` value from the response as the `ELASTICSEARCH_API_KEY` CI secret.
-
-This example uses basic authentication. For alternative authentication methods and other request options, refer to the {{es}} [Create an API key](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-create-api-key) API documentation.
+5. Set an expiration that matches your release process, create the key, and store its encoded value as the `ELASTICSEARCH_API_KEY` CI secret.
 
 This API key is a build-time credential. Don't package it in the application or commit it to source control.
+
+The user creating the key must have permission to create API keys and the index privileges being granted. Refer to [Elastic API keys](https://www.elastic.co/docs/deploy-manage/api-keys) for deployment-specific requirements and instructions.
 
 ### Configure mapping uploads
 

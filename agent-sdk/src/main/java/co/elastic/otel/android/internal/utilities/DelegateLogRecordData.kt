@@ -19,6 +19,7 @@
 package co.elastic.otel.android.internal.utilities
 
 import io.opentelemetry.api.common.Attributes
+import io.opentelemetry.api.common.Value
 import io.opentelemetry.api.logs.Severity
 import io.opentelemetry.api.trace.SpanContext
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo
@@ -65,11 +66,19 @@ internal open class DelegateLogRecordData(private val delegate: LogRecordData) :
         return delegate.body
     }
 
+    override fun getBodyValue(): Value<*>? {
+        return delegate.bodyValue
+    }
+
     override fun getAttributes(): Attributes {
         return delegate.attributes
     }
 
     override fun getTotalAttributeCount(): Int {
         return delegate.totalAttributeCount
+    }
+
+    override fun getEventName(): String? {
+        return delegate.eventName
     }
 }

@@ -83,7 +83,7 @@ The mapping uploader only needs permission to create mapping indices and index d
 
 This API key is a build-time credential. Don't package it in the application or commit it to source control.
 
-The user creating the key must have API key creation permissions and must already hold the index privileges being granted. Refer to [Elastic API keys](docs-content://deploy-manage/api-keys/elasticsearch-api-keys) for deployment-specific requirements and instructions.
+The user creating the key must have API key creation permissions and must already hold the index privileges being granted. Refer to [Elastic API keys](docs-content://deploy-manage/api-keys/elasticsearch-api-keys.md) for deployment-specific requirements and instructions.
 
 ### Configure mapping uploads
 

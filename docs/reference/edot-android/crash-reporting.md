@@ -29,7 +29,7 @@ plugins {
 }
 ```
 
-1. Find the latest crash reporting plugin version in the [Gradle Plugin Portal](https://plugins.gradle.org/plugin/co.elastic.otel.android.instrumentation.crash).
+Find the latest crash reporting plugin version in the [Gradle Plugin Portal](https://plugins.gradle.org/plugin/co.elastic.otel.android.instrumentation.crash).
 
 The instrumentation automatically captures crashes when an unhandled exception occurs. Because the application process is terminating, EDOT Android stores the crash event on disk and exports it after EDOT Android initializes the next time the application is launched.
 
@@ -81,7 +81,7 @@ The mapping uploader only needs permission to create mapping indices and index d
 
 This API key is a build-time credential. Don't package it in the application or commit it to source control.
 
-The user creating the key must have permission to create API keys and the index privileges being granted. Refer to [Elastic API keys](https://www.elastic.co/docs/deploy-manage/api-keys) for deployment-specific requirements and instructions.
+The user creating the key must have API key creation permissions and must already hold the index privileges being granted. Refer to [Elastic API keys](docs-content://deploy-manage/api-keys) for deployment-specific requirements and instructions.
 
 ### Configure mapping uploads
 
@@ -95,7 +95,7 @@ plugins {
 }
 ```
 
-1. Find the latest mapping plugin version in the [Gradle Plugin Portal](https://plugins.gradle.org/plugin/co.elastic.otel.android.mapping).
+Find the latest mapping plugin version in the [Gradle Plugin Portal](https://plugins.gradle.org/plugin/co.elastic.otel.android.mapping).
 
 Configure the {{es}} endpoint and API key in the `elasticOtel` block. Gradle providers allow CI to supply these values without storing credentials in the build script:
 
@@ -117,8 +117,9 @@ android {
     }
 }
 ```
-> [!NOTE]
-> The endpoint must be the {{es}} HTTP endpoint, not the OTLP endpoint used to export telemetry.
+:::{note}
+The endpoint must be the {{es}} HTTP endpoint, not the OTLP endpoint used to export telemetry.
+:::
 
 ### Build ID
 

@@ -341,6 +341,8 @@ product:
 
 EDOT Android can upload the R8 mapping generated for an optimized application build to {{es}}. The mapping and the application's telemetry share the same build ID, allowing obfuscated crash stacktraces to be associated with the correct build artifacts.
 
+Viewing deobfuscated stacktraces in {{kib}} requires version 1.0.0 or later of the [Android OpenTelemetry Assets](https://www.elastic.co/docs/reference/integrations/otel_android_dashboards) integration. Refer to the integration page for the minimum supported {{kib}} versions.
+
 Refer to [Crash reporting](crash-reporting.md#deobfuscate-r8-stacktraces) to configure the mapping plugin and trigger uploads from your release workflow.
 
 ## Dynamic configuration

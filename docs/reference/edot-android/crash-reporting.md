@@ -46,12 +46,14 @@ Android's R8 optimizer can rename classes and methods in release builds. When an
 
 EDOT Android identifies the correct mapping using the `app.build_id` resource attribute included with application telemetry. Mapping documents for a build are stored in a {{es}} index named `.android-r8-mappings-<build_id>`.
 
+Deobfuscating stacktraces in {{kib}} requires version 1.0.0 or later of the [Android OpenTelemetry Assets](https://www.elastic.co/docs/reference/integrations/otel_android_dashboards) integration. Refer to the integration page for the minimum supported {{kib}} versions.
+
 ### Prerequisites
 
 * Enable R8 for the variant whose mapping you want to upload.
 * Have your {{es}} endpoint URL at hand to use it in the Gradle task later.
 * Create a dedicated {{es}} API key for mapping uploads.
-* Install version 1.0.0 or later of the **Android OpenTelemetry Assets** integration in {{kib}}. Refer to [Visualize telemetry](getting-started.md#visualize-telemetry) for instructions on how to do so.
+* Install version 1.0.0 or later of the [Android OpenTelemetry Assets](https://www.elastic.co/docs/reference/integrations/otel_android_dashboards) integration in {{kib}}. The integration page lists the minimum supported {{kib}} versions. Refer to [Visualize telemetry](getting-started.md#visualize-telemetry) for installation instructions.
 
 ### Create a dedicated API key
 

@@ -22,12 +22,13 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
+import java.nio.charset.StandardCharsets
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
@@ -112,28 +113,29 @@ internal abstract class UploadMappingToElasticsearch : DefaultTask() {
         val url = "$base/_bulk?_source=false"
         logger.lifecycle("Uploading mapping to: $url")
 
-        val request = Request.Builder()
-            .url(url)
-            .post(file.asRequestBody(NDJSON_MEDIA_TYPE))
-            .header("Authorization", "ApiKey ${apiKey.get()}")
-            .header(PRODUCT_ORIGIN_HEADER, PRODUCT_ORIGIN)
-            .build()
+        val batchCount = uploadBulkBatches(file, MAX_BULK_BATCH_SIZE_BYTES) { requestBody ->
+            val request = Request.Builder()
+                .url(url)
+                .post(requestBody.toRequestBody(NDJSON_MEDIA_TYPE))
+                .header("Authorization", "ApiKey ${apiKey.get()}")
+                .header(PRODUCT_ORIGIN_HEADER, PRODUCT_ORIGIN)
+                .build()
 
-        client.newCall(request).execute().use { response ->
-            val responseBody = response.body.string()
-            if (!response.isSuccessful) {
-                throw GradleException(
-                    "Failed to upload mapping to Elasticsearch: ${response.code}\n$responseBody",
+            client.newCall(request).execute().use { response ->
+                BulkUploadResponse(
+                    code = response.code,
+                    successful = response.isSuccessful,
+                    body = response.body.string(),
                 )
             }
-            validateBulkResponse(responseBody)
-            logger.lifecycle("Successfully uploaded mapping to Elasticsearch (${response.code})")
         }
+        logger.lifecycle("Successfully uploaded mapping to Elasticsearch ($batchCount batches)")
     }
 
     companion object {
         private val JSON_MEDIA_TYPE = "application/json".toMediaType()
         private val NDJSON_MEDIA_TYPE = "application/x-ndjson".toMediaType()
+        private const val MAX_BULK_BATCH_SIZE_BYTES = 50 * 1024 * 1024
 
         // Serverless requires an Elastic product origin to access dot-prefixed indices.
         private const val PRODUCT_ORIGIN_HEADER = "X-Elastic-Product-Origin"
@@ -157,6 +159,64 @@ internal abstract class UploadMappingToElasticsearch : DefaultTask() {
             .addLast(KotlinJsonAdapterFactory())
             .build()
             .adapter(BulkResponse::class.java)
+
+        internal fun uploadBulkBatches(
+            file: File,
+            maxBatchSizeBytes: Int,
+            uploadBatch: (ByteArray) -> BulkUploadResponse,
+        ): Int {
+            require(maxBatchSizeBytes > 0) { "Bulk batch size must be greater than zero" }
+
+            var batchNumber = 0
+            val batch = ByteArrayOutputStream(minOf(maxBatchSizeBytes, DEFAULT_BUFFER_SIZE))
+
+            fun sendBatch() {
+                if (batch.size() == 0) {
+                    return
+                }
+
+                batchNumber++
+                val response = uploadBatch(batch.toByteArray())
+                if (!response.successful) {
+                    throw GradleException(
+                        "Failed to upload mapping batch $batchNumber to Elasticsearch: " +
+                            "${response.code}\n${response.body}",
+                    )
+                }
+                try {
+                    validateBulkResponse(response.body)
+                } catch (exception: GradleException) {
+                    throw GradleException(
+                        "Failed to upload mapping batch $batchNumber: ${exception.message}",
+                        exception,
+                    )
+                }
+                batch.reset()
+            }
+
+            file.bufferedReader(StandardCharsets.UTF_8).use { reader ->
+                while (true) {
+                    val actionLine = reader.readLine() ?: break
+                    val documentLine = reader.readLine()
+                        ?: throw GradleException(
+                            "Invalid bulk request body: action line is missing its document line",
+                        )
+                    val pair = "$actionLine\n$documentLine\n".toByteArray(StandardCharsets.UTF_8)
+                    if (pair.size > maxBatchSizeBytes) {
+                        throw GradleException(
+                            "A mapping document requires ${pair.size} bytes, exceeding the " +
+                                "$maxBatchSizeBytes-byte bulk batch limit",
+                        )
+                    }
+                    if (batch.size() > 0 && batch.size() + pair.size > maxBatchSizeBytes) {
+                        sendBatch()
+                    }
+                    batch.write(pair)
+                }
+            }
+            sendBatch()
+            return batchNumber
+        }
 
         internal fun validateBulkResponse(responseBody: String) {
             val bulkResponse = try {
@@ -236,5 +296,11 @@ internal abstract class UploadMappingToElasticsearch : DefaultTask() {
     internal data class BulkError(
         val type: String,
         val reason: String,
+    )
+
+    internal data class BulkUploadResponse(
+        val code: Int,
+        val successful: Boolean,
+        val body: String,
     )
 }

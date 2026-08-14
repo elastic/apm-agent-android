@@ -80,7 +80,7 @@ jobs:
           api-level: ${{ matrix.api-level }}
           script: |
             make -C .github/scripts/integration-test run-tests
-            make -C .github/scripts/integration-test run-crash-deobfuscation-test
+            make -C .github/scripts/integration-test run-crash-and-deobfuscation-test
         env:
           WITH_DESUGARING: ${{ matrix.with-desugaring }}
       - name: Store test results

@@ -18,10 +18,10 @@ run-crash-test: elastic-start-local ## Run crash reporting e2e test
 	. elastic-start-local/.env; \
 	./crash_test.sh $$ES_LOCAL_URL $$ES_LOCAL_API_KEY
 
-.PHONY: run-crash-deobfuscation-test
-run-crash-deobfuscation-test: elastic-start-local ## Run crash deobfuscation test
+.PHONY: run-crash-and-deobfuscation-test
+run-crash-and-deobfuscation-test: elastic-start-local ## Run crash reporting and deobfuscation test
 	. elastic-start-local/.env; \
-	./crash_deobfuscation_test.sh \
+	./crash_and_deobfuscation_test.sh \
 		$$ES_LOCAL_URL \
 		$$ES_LOCAL_API_KEY \
 		http://localhost:$$KIBANA_LOCAL_PORT \

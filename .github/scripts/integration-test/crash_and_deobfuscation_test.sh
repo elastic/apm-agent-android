@@ -3,7 +3,7 @@
 set -euo pipefail
 
 # --------------------------------------------------------------------------
-# Crash deobfuscation end-to-end test
+# Crash reporting and deobfuscation end-to-end test
 #
 # 1. Build the release APK (R8-minified) to produce mapping.txt
 # 2. Upload the R8 mapping to Elasticsearch via the Gradle plugin task
@@ -20,7 +20,7 @@ KIBANA_LOCAL_URL=$3
 KIBANA_LOCAL_PASSWORD=$4
 current_dir=$(pwd)
 app_dir="${current_dir%/.github*}/integration-test"
-build_dir="$app_dir/build/es/crash-deobfuscation"
+build_dir="$app_dir/build/es/crash-and-deobfuscation"
 mkdir -p "$build_dir"
 
 mapping_file="$app_dir/app/build/outputs/mapping/release/mapping.txt"
@@ -288,4 +288,4 @@ fi
 
 echo ""
 echo "=== Kibana output matches Google R8 retrace ==="
-echo "=== Crash deobfuscation test PASSED ==="
+echo "=== Crash reporting and deobfuscation test PASSED ==="

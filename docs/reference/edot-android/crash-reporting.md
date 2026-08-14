@@ -25,7 +25,7 @@ First, [set up EDOT Android](getting-started.md#gradle-setup) in your applicatio
 plugins {
     id("com.android.application")
     id("co.elastic.otel.android.agent") version "[latest_version]"
-    id("co.elastic.otel.android.instrumentation.crash") version "[latest_version]" // <1>
+    id("co.elastic.otel.android.instrumentation.crash") version "[latest_version]"
 }
 ```
 
@@ -83,7 +83,7 @@ The mapping uploader only needs permission to create mapping indices and index d
 
 This API key is a build-time credential. Don't package it in the application or commit it to source control.
 
-The user creating the key must have API key creation permissions and must already hold the index privileges being granted. Refer to [Elastic API keys](docs-content://deploy-manage/api-keys) for deployment-specific requirements and instructions.
+The user creating the key must have API key creation permissions and must already hold the index privileges being granted. Refer to [Elastic API keys](docs-content://deploy-manage/api-keys/elasticsearch-api-keys) for deployment-specific requirements and instructions.
 
 ### Configure mapping uploads
 
@@ -93,7 +93,7 @@ Add the R8 mapping plugin to the application module's `build.gradle.kts` file. U
 plugins {
     id("com.android.application")
     id("co.elastic.otel.android.agent") version "[latest_version]"
-    id("co.elastic.otel.android.mapping") version "[latest_version]" // <1>
+    id("co.elastic.otel.android.mapping") version "[latest_version]"
 }
 ```
 

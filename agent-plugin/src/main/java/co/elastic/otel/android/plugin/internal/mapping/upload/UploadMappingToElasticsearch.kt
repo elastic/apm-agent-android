@@ -68,10 +68,7 @@ internal abstract class UploadMappingToElasticsearch : DefaultTask() {
     @TaskAction
     fun upload() {
         val file = requestBodyFile.get().asFile
-        if (!file.exists() || file.length() == 0L) {
-            logger.lifecycle("No bulk request body found. Skipping upload.")
-            return
-        }
+        validateRequestBodyFile(file)
 
         val indexName = indexName.get()
         createIndex(indexName)
@@ -159,6 +156,17 @@ internal abstract class UploadMappingToElasticsearch : DefaultTask() {
             .addLast(KotlinJsonAdapterFactory())
             .build()
             .adapter(BulkResponse::class.java)
+
+        internal fun validateRequestBodyFile(file: File) {
+            if (!file.exists()) {
+                throw GradleException("R8 mapping bulk request body does not exist: ${file.absolutePath}")
+            }
+            if (file.length() == 0L) {
+                throw GradleException(
+                    "R8 mapping bulk request body is empty; no mapping documents were generated",
+                )
+            }
+        }
 
         internal fun uploadBulkBatches(
             file: File,

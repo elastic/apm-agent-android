@@ -26,10 +26,14 @@ import co.elastic.otel.android.plugin.internal.mapping.upload.UploadMappingToEla
 import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import com.android.build.api.variant.ApplicationVariant
+import java.nio.charset.StandardCharsets
+import java.util.Locale
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
 private const val INDEX_PREFIX = ".android-r8-mappings-"
+private val INVALID_INDEX_NAME_CHARACTERS = setOf('\\', '/', '*', '?', '"', '<', '>', '|', ',', '#', ':')
 
 class ElasticMappingPlugin : Plugin<Project> {
     private lateinit var project: Project
@@ -52,7 +56,7 @@ class ElasticMappingPlugin : Plugin<Project> {
         extension: ElasticVariantExtension,
     ) {
         val variantName = variant.name
-        val indexName = extension.buildId.map { buildId -> "$INDEX_PREFIX$buildId" }
+        val indexName = extension.buildId.map(::mappingIndexName)
 
         val generateTask = project.tasks.register(
             "${variantName}GenerateElasticsearchBulkRequestBody",
@@ -80,4 +84,21 @@ class ElasticMappingPlugin : Plugin<Project> {
         }
     }
 
+}
+
+internal fun mappingIndexName(buildId: String): String {
+    val indexName = "$INDEX_PREFIX$buildId"
+    val invalidReason = when {
+        buildId.isEmpty() -> "the build ID must not be empty"
+        indexName != indexName.lowercase(Locale.ROOT) -> "the resulting index name must be lowercase"
+        indexName.any { it.isWhitespace() || it in INVALID_INDEX_NAME_CHARACTERS } ->
+            "the resulting index name contains a forbidden character"
+        indexName.toByteArray(StandardCharsets.UTF_8).size > 255 ->
+            "the resulting index name exceeds Elasticsearch's 255-byte limit"
+        else -> return indexName
+    }
+    throw GradleException(
+        "Invalid build ID for R8 mapping uploads: $invalidReason. " +
+            "Configure elasticOtel.buildId with an Elasticsearch-compatible value.",
+    )
 }

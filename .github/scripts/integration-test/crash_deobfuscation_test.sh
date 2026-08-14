@@ -217,6 +217,10 @@ if [ ! -s "$stacktrace_file" ]; then
   exit 1
 fi
 
+exception_type=$(jq -r '.hits.hits[0]._source.attributes."exception.type" // empty' \
+  "$build_dir/crash_event.json")
+assert_not_empty "$exception_type" "Crash event has no exception.type field"
+
 build_id=$(jq -r '.hits.hits[0]._source.resource.attributes."app.build_id" // empty' \
   "$build_dir/crash_event.json")
 assert_not_empty "$build_id" "Crash event has no app.build_id"

@@ -80,6 +80,18 @@ class UploadMappingToElasticsearchTest {
     }
 
     @Test
+    fun `rejects an empty bulk request body`() {
+        val requestBody = tempDir.resolve("request.ndjson")
+        requestBody.writeText("")
+
+        val exception = assertThrows<GradleException> {
+            UploadMappingToElasticsearch.validateRequestBodyFile(requestBody.toFile())
+        }
+
+        assertTrue(exception.message!!.contains("no mapping documents were generated"))
+    }
+
+    @Test
     fun `uploads bounded batches without splitting action and document pairs`() {
         val pair = """{"index":{"_id":"class-id"}}""" + "\n" + """{"class":"example"}""" + "\n"
         val requestBody = tempDir.resolve("request.ndjson")

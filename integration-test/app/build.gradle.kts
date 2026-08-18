@@ -12,7 +12,7 @@ val withDesugaring = providers.gradleProperty("withDesugaring").map { it.toBoole
 
 android {
     namespace = "co.elastic.otel.android.integration"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "co.elastic.otel.android.integration"

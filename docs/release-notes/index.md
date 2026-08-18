@@ -30,6 +30,18 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [elastic-apm-android-agent-versionext-fixes]
 
 % next_release_notes
+    
+## 1.8.0 [elastic-apm-android-agent-180-release-notes]
+**Release date:** August 18, 2026
+
+### Features and enhancements [elastic-apm-android-agent-180-features-enhancements]
+
+* Add support for uploading R8 mapping files to Elasticsearch to deobfuscate crash stacktraces: [#877](https://github.com/elastic/apm-agent-android/pull/877)
+* Update OpenTelemetry Java to 1.65.0: [#875](https://github.com/elastic/apm-agent-android/pull/875)
+* Update OpenTelemetry Java Instrumentation to 2.30.0: [#865](https://github.com/elastic/apm-agent-android/pull/865)
+* Update OpenTelemetry Android SDK libraries to 1.6.0: [#870](https://github.com/elastic/apm-agent-android/pull/870)
+* Update OpenTelemetry Android instrumentation to 1.6.0: [#869](https://github.com/elastic/apm-agent-android/pull/869)
+* Update OpenTelemetry Java Contrib to 1.59.0-alpha: [#867](https://github.com/elastic/apm-agent-android/pull/867)
 
 ## 1.7.1 [elastic-apm-android-agent-171-release-notes]
 **Release date:** June 26, 2026

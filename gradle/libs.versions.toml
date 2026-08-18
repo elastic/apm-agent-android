@@ -20,6 +20,8 @@ opentelemetry-diskBuffering = { module = "io.opentelemetry.contrib:opentelemetry
 opentelemetry-opamp = { module = "io.opentelemetry.contrib:opentelemetry-opamp-client", version.ref = "opentelemetry-contrib" }
 opentelemetry-exporter-otlp = { module = "io.opentelemetry:opentelemetry-exporter-otlp", version.ref = "opentelemetry" }
 okhttp = "com.squareup.okhttp3:okhttp:5.4.0"
+moshi = "com.squareup.moshi:moshi:1.15.2"
+moshi-kotlin = "com.squareup.moshi:moshi-kotlin:1.15.2"
 
 #Test tools
 junit4 = "junit:junit:4.13.2"

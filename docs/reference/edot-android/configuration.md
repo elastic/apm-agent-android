@@ -332,6 +332,19 @@ android {
 
 When multiple values match a variant, EDOT Android uses the most specific value in this order: build type, product flavor, project-level `elasticOtel`, then the generated default.
 
+### R8 mapping upload
+
+```{applies_to}
+product:
+  edot_android: ga 1.8.0
+```
+
+EDOT Android can upload the R8 mapping generated for an optimized application build to {{es}}. The mapping and the application's telemetry share the same build ID, allowing obfuscated crash stacktraces to be associated with the correct build artifacts.
+
+Viewing deobfuscated stacktraces in {{kib}} requires version 1.0.0 or later of the [Android OpenTelemetry Assets](https://www.elastic.co/docs/reference/integrations/otel_android_dashboards) integration. Refer to the integration page for the minimum supported {{kib}} versions.
+
+Refer to [Crash reporting](crash-reporting.md#deobfuscate-r8-stacktraces) to configure the mapping plugin and trigger uploads from your release workflow.
+
 ## Dynamic configuration
 
 Dynamic configuration settings are available from an already built [agent](https://github.com/elastic/apm-agent-android/blob/main/agent-sdk/src/main/java/co/elastic/otel/android/ElasticApmAgent.kt).

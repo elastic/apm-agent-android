@@ -16,23 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.plugin.extensions
+package co.elastic.otel.android.internal.utilities
 
-import javax.inject.Inject
-import org.gradle.api.Action
-import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.Property
+import io.opentelemetry.api.common.Attributes
+import io.opentelemetry.api.common.Value
+import io.opentelemetry.sdk.testing.logs.TestLogRecordData
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
-abstract class ElasticExtension @Inject constructor(objects: ObjectFactory) {
-    val buildId: Property<String> = objects.property(String::class.java)
-    val bytecodeInstrumentation: BytecodeInstrumentation = objects.newInstance(BytecodeInstrumentation::class.java)
-    val mapping: ElasticMappingExtension = objects.newInstance(ElasticMappingExtension::class.java)
+class DelegateLogRecordDataTest {
 
-    fun bytecodeInstrumentation(action: Action<BytecodeInstrumentation>) {
-        action.execute(bytecodeInstrumentation)
-    }
+    @Test
+    fun `forwards fields added to LogRecordData`() {
+        val body = Value.of(true)
+        val original = TestLogRecordData.builder()
+            .setBodyValue(body)
+            .setEventName("app.crash")
+            .build()
+        val delegate = AttributesOverrideLogRecordData(
+            original,
+            Attributes.empty(),
+            0,
+        )
 
-    fun mapping(action: Action<ElasticMappingExtension>) {
-        action.execute(mapping)
+        assertEquals(body, delegate.bodyValue)
+        assertEquals("app.crash", delegate.eventName)
     }
 }

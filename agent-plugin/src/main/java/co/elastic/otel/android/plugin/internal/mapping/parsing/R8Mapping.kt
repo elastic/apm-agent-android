@@ -16,17 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.android.plugin.extensions
+package co.elastic.otel.android.plugin.internal.mapping.parsing
 
-import com.android.build.api.variant.VariantExtension
-import java.io.Serializable
-import javax.inject.Inject
-import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.Property
-
-abstract class ElasticVariantExtension @Inject constructor(
-    objects: ObjectFactory,
-) : VariantExtension, Serializable {
-    val buildId: Property<String> = objects.property(String::class.java)
-    val mapping: ElasticMappingExtension = objects.newInstance(ElasticMappingExtension::class.java)
-}
+/**
+ * This class is internal and is hence not for public use. Its APIs are unstable and can change at
+ * any time.
+ *
+ * Top-level parsed representation of an R8 `mapping.txt`.
+ *
+ * [mapVersion] carries the value declared by R8 at the top of the file:
+ *
+ *     # {"id":"com.android.tools.r8.mapping","version":"2.2"}
+ *
+ * It is `null` for legacy R8 mappings that pre-date the version comment
+ * (R8 < 8 / map-version 1.x) where R8 itself defaults to map-version 1.0.
+ */
+internal data class R8Mapping(
+    val classMappings: List<ClassMapping>,
+    val mapVersion: String? = null,
+)

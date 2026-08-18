@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     id("com.android.application")
     id("co.elastic.otel.android.agent")
+    id("co.elastic.otel.android.mapping")
     id("co.elastic.otel.android.instrumentation.okhttp")
     id("co.elastic.otel.android.instrumentation.crash")
 }
@@ -37,6 +38,16 @@ android {
 kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_1_8)
+    }
+}
+elasticOtel {
+    buildId.set("integration-test-build")
+
+    mapping {
+        elasticsearch {
+            endpoint.set(providers.gradleProperty("esEndpoint"))
+            apiKey.set(providers.gradleProperty("esApiKey"))
+        }
     }
 }
 

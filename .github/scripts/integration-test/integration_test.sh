@@ -39,7 +39,7 @@ launch_app() {
   if [ "${WITH_DESUGARING:-false}" = "true" ]; then
     gradle_args+=("-PwithDesugaring=true")
   fi
-  "$app_dir/gradlew" -p "$app_dir" :app:assembleRelease "${gradle_args[@]}"
+  "$app_dir/gradlew" -p "$app_dir" :app:assembleRelease ${gradle_args[@]+"${gradle_args[@]}"}
   adb install -r "$app_dir"/app/build/outputs/apk/release/app-release.apk
   adb shell am start -n co.elastic.otel.android.integration/.MainActivity
 }
@@ -51,6 +51,16 @@ assert_equals() {
     echo "Expected value: '$expected' not matching actual value: '$actual'"
     exit 1
   fi
+}
+
+validate_build_id() {
+  local document
+  document=$(require "$1")
+  local expected_build_id="integration-test-build"
+  local build_id
+  build_id=$(echo "$document" | jq -r '._source.resource.attributes."app.build_id"')
+
+  assert_equals "$expected_build_id" "$build_id"
 }
 
 validate_span() {
@@ -110,5 +120,7 @@ echo "$log" > "$es_build_dir/log.json"
 # Validate data
 validate_span "$span"
 validate_log "$log"
+validate_build_id "$span"
+validate_build_id "$log"
 
 echo "Integration tests succeeded"

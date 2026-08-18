@@ -67,7 +67,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
-      - name: Start ES and EDOT Collector
+      - name: Start Elastic Stack and EDOT Collector
         run: make -C .github/scripts/integration-test start-env
       - name: Enable KVM for Android tests
         run: |
@@ -80,7 +80,7 @@ jobs:
           api-level: ${{ matrix.api-level }}
           script: |
             make -C .github/scripts/integration-test run-tests
-            make -C .github/scripts/integration-test run-crash-test
+            make -C .github/scripts/integration-test run-crash-and-deobfuscation-test
         env:
           WITH_DESUGARING: ${{ matrix.with-desugaring }}
       - name: Store test results

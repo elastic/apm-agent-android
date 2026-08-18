@@ -78,6 +78,20 @@ internal class ElasticCommonPlugin : Plugin<Project> {
             )
                 .orElse(defaultBuildId(variant)),
         )
+        variantExtension.mapping.elasticsearch.endpoint.convention(
+            DslUtils.mergeDslValue(
+                projectExtension.mapping.elasticsearch.endpoint,
+                flavorExtensions.map { it.mapping.elasticsearch.endpoint },
+                buildTypeExtension.mapping.elasticsearch.endpoint,
+            ),
+        )
+        variantExtension.mapping.elasticsearch.apiKey.convention(
+            DslUtils.mergeDslValue(
+                projectExtension.mapping.elasticsearch.apiKey,
+                flavorExtensions.map { it.mapping.elasticsearch.apiKey },
+                buildTypeExtension.mapping.elasticsearch.apiKey,
+            ),
+        )
     }
 
     private fun defaultBuildId(variant: ApplicationVariant): Provider<String> {

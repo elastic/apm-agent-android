@@ -8,6 +8,8 @@ This product includes software licensed under the 'Apache License Version 2.0' l
  - Byte Buddy (without dependencies)
  - Byte Buddy Gradle plugin
  - Kotlin Stdlib (https://kotlinlang.org/)
+ - moshi (https://github.com/square/moshi/)
+ - moshi-kotlin (https://github.com/square/moshi/)
 
 ###############################################################################
 

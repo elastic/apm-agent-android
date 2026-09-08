@@ -128,7 +128,7 @@ internal class AttributesTest : ExporterProvider, ProcessorFactory {
     fun `Check resources`() {
         initialize()
         val expectedResource = Resource.builder()
-            .put("deployment.environment", "test")
+            .put("deployment.environment.name", "test")
             .put("app.build_id", BUILD_ID)
             .put("app.installation.id", "installation-id")
             .put("device.manufacturer", DEVICE_MANUFACTURER)
@@ -161,6 +161,9 @@ internal class AttributesTest : ExporterProvider, ProcessorFactory {
         assertThat(spanItems.first()).hasResource(expectedResource)
         assertThat(logItems.first()).hasResource(expectedResource)
         assertThat(metricItems.first()).hasResource(expectedResource)
+        assertThat(spanItems.first().resource.attributes)
+            .describedAs("resource containing deployment.environment.name")
+            .doesNotContainKey("deployment.environment")
     }
 
     @Test
@@ -176,7 +179,7 @@ internal class AttributesTest : ExporterProvider, ProcessorFactory {
             )
         })
         val expectedResource = Resource.builder()
-            .put("deployment.environment", "test")
+            .put("deployment.environment.name", "test")
             .put("app.build_id", BUILD_ID)
             .put("app.installation.id", "installation-id")
             .put("device.manufacturer", DEVICE_MANUFACTURER)
@@ -218,7 +221,7 @@ internal class AttributesTest : ExporterProvider, ProcessorFactory {
         setVersionName("1.2.3")
         initialize(serviceVersion = null)
         val expectedResource = Resource.builder()
-            .put("deployment.environment", "test")
+            .put("deployment.environment.name", "test")
             .put("app.build_id", BUILD_ID)
             .put("app.installation.id", "installation-id")
             .put("device.manufacturer", DEVICE_MANUFACTURER)

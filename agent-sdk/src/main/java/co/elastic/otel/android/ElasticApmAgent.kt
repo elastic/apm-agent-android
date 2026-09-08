@@ -170,7 +170,7 @@ class ElasticApmAgent internal constructor(
         }
 
         /**
-         * This value is set as the [deployment.environment](https://opentelemetry.io/docs/specs/semconv/attributes-registry/deployment/#deployment-environment) resource attribute.
+         * This value is set as the [deployment.environment.name](https://opentelemetry.io/docs/specs/semconv/registry/attributes/deployment/#deployment-environment-name) resource attribute.
          * It provides a place for Android applications to specify their environment/flavor or buildType.
          */
         fun setDeploymentEnvironment(value: String) = apply {

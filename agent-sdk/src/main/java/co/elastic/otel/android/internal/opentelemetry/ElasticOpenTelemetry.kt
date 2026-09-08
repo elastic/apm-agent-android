@@ -48,9 +48,9 @@ import io.opentelemetry.sdk.metrics.internal.SdkMeterProviderUtil
 import io.opentelemetry.sdk.resources.Resource
 import io.opentelemetry.sdk.trace.SdkTracerProvider
 import io.opentelemetry.sdk.trace.export.SpanExporter
+import io.opentelemetry.semconv.DeploymentAttributes
 import io.opentelemetry.semconv.ServiceAttributes
 import io.opentelemetry.semconv.TelemetryAttributes
-import io.opentelemetry.semconv.incubating.DeploymentIncubatingAttributes
 import io.opentelemetry.semconv.incubating.DeviceIncubatingAttributes
 import io.opentelemetry.semconv.incubating.OsIncubatingAttributes
 import io.opentelemetry.semconv.incubating.ProcessIncubatingAttributes
@@ -161,7 +161,10 @@ class ElasticOpenTelemetry private constructor(
                     serviceVersion ?: serviceManager.getAppInfoService().getVersionName()
                     ?: "unknown"
                 )
-                .put(DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT, deploymentEnvironment)
+                .put(
+                    DeploymentAttributes.DEPLOYMENT_ENVIRONMENT_NAME,
+                    deploymentEnvironment
+                )
                 .put(
                     AttributeKey.stringKey("app.installation.id"),
                     appInstallationIdProvider!!.get()

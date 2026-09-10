@@ -576,7 +576,7 @@ class ElasticPluginFunctionalTest {
         // Each AGP version loads a large number of classes; without extra metaspace the Gradle
         // daemon running test builds runs OOM when sequential test invocations reuse the daemon.
         projectDir.resolve("gradle.properties").toFile().writeText(
-            "org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m\n",
+            "org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=1g\n",
         )
         projectDir.resolve("settings.gradle.kts").toFile().writeText(
             """

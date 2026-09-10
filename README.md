@@ -1,6 +1,6 @@
-# apm-agent-android
+# EDOT Android
 
-Elastic OTel Android Agent
+Elastic Distribution of OpenTelemetry Android (EDOT Android), the OpenTelemetry-based SDK for Android apps.
 
 See the [documentation](https://www.elastic.co/docs/reference/opentelemetry/edot-sdks/android) to find out more about its features, how to setup, and configuration details.
 

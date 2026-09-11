@@ -400,7 +400,7 @@ class MyApp : android.app.Application {
 }
 ```
 
-1. Provide your EDOT Collector OpAMP endpoint. Refer to [Central configuration](opentelemetry://reference/central-configuration.md) for more details.
+1. Provide your central configuration (OpAMP) endpoint. Refer to [Central configuration](opentelemetry://reference/central-configuration.md) for more details.
 2. In case your OpAMP endpoint [requires authentication](elastic-agent://reference/edot-collector/config/default-config-standalone.md#authentication-settings), this is how you can provide your API Key value.
 
 ### Available settings

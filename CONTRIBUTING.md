@@ -1,6 +1,6 @@
-# Contributing to the Elastic APM Android agent
+# Contributing to EDOT Android
 
-The APM Agent is open source and we love to receive contributions from our community — you!
+EDOT Android is open source and we love to receive contributions from our community — you!
 
 There are many ways to contribute, from writing tutorials or blog posts, improving the
 documentation, submitting bug reports and feature requests or writing code.

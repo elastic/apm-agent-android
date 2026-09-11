@@ -31,6 +31,18 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 % next_release_notes
     
+## 1.9.0 [elastic-apm-android-agent-190-release-notes]
+**Release date:** September 11, 2026
+
+### Features and enhancements [elastic-apm-android-agent-190-features-enhancements]
+
+* Use the stable deployment.environment.name resource attribute: [#898](https://github.com/elastic/apm-agent-android/pull/898)
+* Raise the compile SDK to 37: [#883](https://github.com/elastic/apm-agent-android/pull/883)
+* Update OpenTelemetry Java Instrumentation to 2.31.1: [#885](https://github.com/elastic/apm-agent-android/pull/885)
+* Update OpenTelemetry Android SDK libraries to 1.7.0: [#883](https://github.com/elastic/apm-agent-android/pull/883)
+* Update OpenTelemetry Android instrumentation to 1.7.0: [#895](https://github.com/elastic/apm-agent-android/pull/895)
+* Update OpenTelemetry Java Contrib to 1.60.0-alpha: [#883](https://github.com/elastic/apm-agent-android/pull/883)
+    
 ## 1.8.0 [elastic-apm-android-agent-180-release-notes]
 **Release date:** August 18, 2026
 

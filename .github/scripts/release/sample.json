@@ -1,0 +1,25 @@
+{
+  "dependencies": [
+    {
+      "message": "Update the Android Gradle Plugin",
+      "prId": "901"
+    }
+  ],
+  "featuresEnhancements": [
+    {
+      "message": "Improve automatic instrumentation",
+      "prId": "902"
+    },
+    {
+      "message": "[Breaking] Remove a deprecated configuration option",
+      "prId": "903"
+    }
+  ],
+  "fixes": [
+    {
+      "message": "Fix offline span delivery",
+      "prId": "904"
+    }
+  ],
+  "uncategorized": []
+}

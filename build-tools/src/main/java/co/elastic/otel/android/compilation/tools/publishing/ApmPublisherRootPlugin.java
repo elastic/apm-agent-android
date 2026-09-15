@@ -72,7 +72,7 @@ public class ApmPublisherRootPlugin implements Plugin<Project> {
     spotlessExtension.flexmark(
         extension -> {
           extension.target("**/*.md");
-          extension.targetExclude("docs/**");
+          extension.targetExclude("docs/**", "skills/**", ".agents/**", ".claude/**");
           extension.flexmark();
         });
   }

@@ -3,6 +3,9 @@
   "extends": [
     "local>elastic/renovate-config"
   ],
+  "addLabels": [
+    "dependencies"
+  ],
   "ignorePaths": [
     ".ci/**",
     ".buildkite/**",

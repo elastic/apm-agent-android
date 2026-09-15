@@ -26,7 +26,8 @@ Every time there is a merge to main or any release branches the main workflow wi
 
 ## Release
 
-The release automation relies on Buildkite for generating and publishing the artifacts,
+The release process is described in [RELEASING.md](../../RELEASING.md). The
+release automation relies on Buildkite for generating and publishing the artifacts,
 for further details please go to [the buildkite folder](../../.buildkite/README.md).
 
 ## OpenTelemetry

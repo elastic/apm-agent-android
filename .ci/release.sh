@@ -13,7 +13,7 @@
 #   release_sha       the merged commit; must be what Buildkite checked out
 #   release_version   the version being released, for example 1.10.0
 #   target_specifier  all | mavenCentral | pluginPortal
-#   dry_run           true | false
+#   dry_run           true | false (default true; only false publishes)
 #   TARBALL_FILE      archive name for the built artifacts (default dist.tar)
 #
 # Credentials are injected by the Buildkite pipeline:
@@ -33,7 +33,9 @@ set -euo pipefail
 
 : "${release_sha:?release_sha is required}"
 : "${target_specifier:?target_specifier is required}"
-: "${dry_run:?dry_run is required}"
+# A trigger that does not say otherwise is a dry run: publishing is the one
+# outcome that must be asked for explicitly.
+dry_run=${dry_run:-true}
 if [[ $dry_run == false ]]; then
   : "${release_version:?release_version is required for a real publish}"
 else

@@ -13,6 +13,20 @@
 # so, so a failed run can be re-run and picks up where it stopped without
 # repeating anything. `create-tag` is the guard's verdict: `false` means the
 # tag already exists at the merged commit.
+#
+# Arguments:
+#   release-sha       the merged commit, 40 hexadecimal characters
+#   release-version   the version being released, X.Y.Z
+#   base-ref          the release branch, releasing/X.Y.Z
+#   create-tag        true to create the tag, false when it already exists
+#
+# Environment:
+#   GITHUB_REPOSITORY  owner/repo of the release repository (required)
+#   GH_TOKEN           GitHub App token with contents and pull-requests
+#                      write access, used by every gh call (required)
+#   GITHUB_SERVER_URL  GitHub base URL (default https://github.com)
+#   GITHUB_OUTPUT      step output file; release_url and
+#                      main_pull_request_url are written when it is set
 
 set -euo pipefail
 
@@ -22,11 +36,27 @@ if [[ $# -ne 4 ]]; then
 fi
 
 script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-release_sha=$1
-release_version=$2
-base_ref=$3
-create_tag=$4
+release_sha=${1:?release-sha is required}
+release_version=${2:?release-version is required}
+base_ref=${3:?base-ref is required}
+create_tag=${4:?create-tag is required}
 repository=${GITHUB_REPOSITORY:?GITHUB_REPOSITORY is required}
+: "${GH_TOKEN:?GH_TOKEN is required}"
+
+# Reject malformed values before anything is created; an empty or wrong
+# argument must never reach the tag or release commands.
+if [[ ! $release_sha =~ ^[0-9a-f]{40}$ ]]; then
+  echo "release-sha '$release_sha' is not a full commit SHA." >&2
+  exit 2
+fi
+if [[ ! $release_version =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  echo "release-version '$release_version' is not X.Y.Z." >&2
+  exit 2
+fi
+if [[ $create_tag != true && $create_tag != false ]]; then
+  echo "create-tag '$create_tag' must be true or false." >&2
+  exit 2
+fi
 work_dir=build/release-automation
 tag="v$release_version"
 tag_url="${GITHUB_SERVER_URL:-https://github.com}/$repository/releases/tag/$tag"

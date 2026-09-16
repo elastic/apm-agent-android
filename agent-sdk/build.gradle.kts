@@ -36,6 +36,10 @@ apiValidation {
     ignoredClasses.add("co.elastic.otel.android.BuildConfig")
 }
 
+dependencyFloors {
+    testUnitTestsAtFloors()
+}
+
 dependencies {
     api(project(":agent-api"))
     api(project(":instrumentation:api"))
@@ -46,7 +50,6 @@ dependencies {
     implementation(libs.opentelemetry.diskBuffering)
     implementation(libs.opentelemetry.opamp)
     implementation(libs.androidx.annotations)
-    implementation(libs.androidx.core)
     implementation(libs.dsl.json)
     implementation(libs.okhttp)
     testImplementation(project(":internal-tools:otel-test-common"))

@@ -2,7 +2,7 @@ import java.util.Properties
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    id("com.android.application")
+    id("elastic.android-app")
 }
 
 val properties = Properties()
@@ -11,10 +11,9 @@ propertiesFile.inputStream().use {
     properties.load(it)
 }
 
-val javaVersionStr = properties.getProperty("elastic.java.compatibility") as String
+val javaVersionString = properties.getProperty("elastic.java.compatibility")
+val javaVersion = JavaVersion.toVersion(javaVersionString)
 android {
-    compileSdk = (properties.getProperty("elastic.android.compileSdk") as String).toInt()
-
     defaultConfig {
         minSdk = 26
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -27,8 +26,6 @@ android {
         animationsDisabled = true
     }
 
-    val javaVersionStr = properties.getProperty("elastic.java.compatibility") as String
-    val javaVersion = JavaVersion.toVersion(javaVersionStr)
     compileOptions {
         sourceCompatibility = javaVersion
         targetCompatibility = javaVersion
@@ -40,7 +37,7 @@ android {
 
 kotlin {
     compilerOptions {
-        jvmTarget = JvmTarget.fromTarget(javaVersionStr)
+        jvmTarget = JvmTarget.fromTarget(javaVersionString)
     }
 }
 

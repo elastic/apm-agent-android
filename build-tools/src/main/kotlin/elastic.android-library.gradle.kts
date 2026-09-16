@@ -1,17 +1,17 @@
 import com.android.build.api.variant.HasHostTestsBuilder
 import com.android.build.api.variant.HostTestBuilder
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
     id("com.android.library")
     id("elastic.animalsniffer-android")
+    id("elastic.dependency-floors")
 }
 
 val javaVersionStr = project.property("elastic.java.compatibility") as String
-val minKotlinVersionStr = project.property("elastic.kotlin.compatibility") as String
+val sdkCompileVersion = (project.property("elastic.android.compileSdk") as String).toInt()
 android {
-    compileSdk = (project.property("elastic.android.compileSdk") as String).toInt()
+    compileSdk = sdkCompileVersion
 
     defaultConfig {
         minSdk = (project.property("elastic.android.minSdk") as String).toInt()
@@ -28,13 +28,10 @@ android {
     }
 }
 
-val minKotlinVersion = KotlinVersion.fromVersion(minKotlinVersionStr)
 kotlin {
     compilerOptions {
         jvmTarget = JvmTarget.fromTarget(javaVersionStr)
-        apiVersion = minKotlinVersion
-        languageVersion = minKotlinVersion
-        freeCompilerArgs = listOf("-jvm-default=no-compatibility")
+        freeCompilerArgs.add("-jvm-default=no-compatibility")
     }
 }
 

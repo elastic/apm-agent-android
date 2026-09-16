@@ -105,8 +105,8 @@ jobs:
       - uses: ./.github/actions/setup
       - name: Publish artifacts for the baseline build
         run: ./gradlew publishAllPublicationsToBaselineRepository
-      - name: Build the core consumer baseline
-        run: ./baseline-test/gradlew -p baseline-test :app:assembleRelease
+      - name: Build the core consumer baseline and verify the published floors
+        run: ./baseline-test/gradlew -p baseline-test :app:assembleRelease :app:verifyBaselineFloors
 
   # The very last job to report whether the Workflow passed.
   # This will act as the Branch Protection gatekeeper

@@ -3,9 +3,17 @@ pluginManagement {
     file("../gradle.properties").inputStream().use {
         agentProperties.load(it)
     }
-    val agentVersion = agentProperties.getProperty("version")
     plugins {
-        id("co.elastic.otel.android.agent") version agentVersion
+        // The baseline: the oldest Android Gradle plugin that supports compile SDK 36, and the
+        // Kotlin Gradle plugin at exactly the published Kotlin floor.
+        id("com.android.application") version "8.10.0"
+        id("org.jetbrains.kotlin.android") version
+            agentProperties.getProperty("elastic.dependencies.kotlin.floor")
+        id("co.elastic.otel.android.agent") version agentProperties.getProperty("version")
+    }
+    gradle.rootProject {
+        extra["kotlinFloorVersion"] = agentProperties.getProperty("elastic.dependencies.kotlin.floor")
+        extra["okhttpFloorVersion"] = agentProperties.getProperty("elastic.dependencies.okhttp.floor")
     }
 }
 

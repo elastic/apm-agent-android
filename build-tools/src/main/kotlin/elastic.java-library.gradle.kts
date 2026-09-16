@@ -15,7 +15,6 @@ java {
 
 kotlin.compilerOptions {
     jvmTarget.set(JvmTarget.fromTarget(javaVersionStr))
-    freeCompilerArgs.add("-jvm-default=no-compatibility")
 }
 
 tasks.withType(Test::class).configureEach {

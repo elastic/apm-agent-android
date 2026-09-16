@@ -1,29 +1,31 @@
 /*
  * Dependency-floor feature map:
- * - This plugin owns published dependency floors, Kotlin compatibility and
- *   metadata, the Android AAR compile SDK floor, and floor-test opt-ins.
+ * - This plugin owns the published dependency floors, the Android AAR compile
+ *   SDK floor, and floor-test opt-ins. `gradle.properties` holds the floor
+ *   values. `elastic.kotlin-compatibility` derives the Kotlin compatibility
+ *   line and emitted metadata version from the Kotlin floor.
  * - Direct OkHttp declarations identify owning Android libraries. This plugin
  *   publishes their floor and exclusions without resolving dependency graphs.
- * - The external test builds keep their settings/catalog wiring, baseline-test
- *   owns the consumer fixture, and the root build plus fixture settings each
- *   declare the baseline repository.
+ * - `elastic.latest-dependency-resolution` forces development builds to the
+ *   catalog versions.
+ * - The external test builds keep their settings/catalog wiring.
+ *   `baseline-test` owns the consumer fixture: it reads the floors from the
+ *   root `gradle.properties` for its Kotlin Gradle plugin version and for its
+ *   `verifyBaselineFloors` task, which fails when the published graph
+ *   resolves `kotlin-stdlib` or `okhttp` above its floor. The root build and
+ *   the fixture settings each declare the baseline repository.
  * - CI owns the floor jobs; Renovate owns the excluded floor and fixture paths.
  */
 
 import co.elastic.otel.android.compilation.tools.dependencies.DependencyFloorsExtension
 import com.android.build.api.dsl.LibraryExtension
 import org.gradle.api.artifacts.ExternalModuleDependency
-import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
 plugins {
+    id("elastic.kotlin-compatibility")
     id("elastic.latest-dependency-resolution")
 }
 
-val kotlinCompatibility =
-    KotlinVersion.fromVersion(providers.gradleProperty("elastic.kotlin.compatibility").get())
-// Metadata versions are MAJOR.MINOR.PATCH; the compatibility floor fixes patch at 0.
-val kotlinMetadataVersion = "${kotlinCompatibility.version}.0"
 val kotlinFloorVersion = providers.gradleProperty("elastic.dependencies.kotlin.floor").get()
 val okhttpFloorVersion = providers.gradleProperty("elastic.dependencies.okhttp.floor").get()
 
@@ -41,12 +43,6 @@ pluginManager.withPlugin("com.android.library") {
                     okhttp.version {
                         require(okhttpFloorVersion)
                     }
-                    okhttp.exclude(
-                        mapOf(
-                            "group" to "org.jetbrains.kotlin",
-                            "module" to "kotlin-stdlib"
-                        )
-                    )
                     externalDependencies
                         .filter { it.group?.startsWith("io.opentelemetry") == true }
                         .forEach {
@@ -60,18 +56,7 @@ pluginManager.withPlugin("com.android.library") {
                 }
         }
     }
-}
 
-tasks.withType<KotlinCompilationTask<*>>().configureEach {
-    compilerOptions {
-        apiVersion.set(kotlinCompatibility)
-        languageVersion.set(kotlinCompatibility)
-        // Kotlin -X flags carry no stability promise; baseline-test proves this one works.
-        freeCompilerArgs.add("-Xmetadata-version=$kotlinMetadataVersion")
-    }
-}
-
-pluginManager.withPlugin("com.android.library") {
     val compileSdk = providers.gradleProperty("elastic.android.compileSdk").get().toInt()
     extensions.configure<LibraryExtension> {
         defaultConfig {

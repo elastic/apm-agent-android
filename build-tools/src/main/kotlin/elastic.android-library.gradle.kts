@@ -31,7 +31,6 @@ android {
 kotlin {
     compilerOptions {
         jvmTarget = JvmTarget.fromTarget(javaVersionStr)
-        freeCompilerArgs.add("-jvm-default=no-compatibility")
     }
 }
 

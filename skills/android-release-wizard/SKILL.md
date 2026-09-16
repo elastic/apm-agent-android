@@ -24,6 +24,8 @@ them, so the operator sees exactly what will run.
 
 ## Propose
 
+Before drafting, ensure the local repository reflects the latest remote state.
+
 1. Run from the repository root:
 
    ```sh

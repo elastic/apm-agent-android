@@ -15,7 +15,10 @@ tag. Merging the preparation PR is what publishes.
 
 Use either path:
 
-- Ask an agent to use the `android-release-wizard` skill.
+- Ask an agent to prepare the release with the
+  [`android-release-wizard`](skills/android-release-wizard/SKILL.md)
+  skill. It proposes the notes and bump, then dispatches after you
+  approve.
 - Open the
   [Prepare release workflow](https://github.com/elastic/apm-agent-android/actions/workflows/prepare-release.yml)
   on `main`, provide the release-note JSON, and select `major` only for a

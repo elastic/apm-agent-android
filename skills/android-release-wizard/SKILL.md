@@ -11,6 +11,10 @@ tag. Do not run the dispatch until the operator explicitly approves.
 The ideal run is one round: the operator reads your proposal and says "go
 ahead". Do the work up front so that is possible.
 
+Before you start, ensure the local repository reflects the latest remote
+state. If this skill or the release scripts changed, continue from the
+updated versions.
+
 ## Inputs
 
 The Prepare release workflow takes these inputs. Every round shows all of
@@ -24,12 +28,11 @@ them, so the operator sees exactly what will run.
 
 ## Propose
 
-Before drafting, ensure the local repository reflects the latest remote state.
-
-1. Run from the repository root:
+1. Run from the repository root, with `<main-ref>` as the up-to-date `main`
+   ref, normally `origin/main`:
 
    ```sh
-   .github/scripts/release/draft-release-notes.sh origin/main
+   GITHUB_REPOSITORY=elastic/apm-agent-android .github/scripts/release/draft-release-notes.sh <main-ref>
    ```
 
 2. Read the last two or three versions in `docs/release-notes/index.md` and
@@ -75,7 +78,7 @@ approved, ask.
 
    ```sh
    since=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-   gh workflow run prepare-release.yml --ref main -F release_notes=@- -f bump='<minor-or-major>' <<'EOF'
+   gh workflow run prepare-release.yml -R elastic/apm-agent-android --ref main -F release_notes=@- -f bump='<minor-or-major>' <<'EOF'
    <json>
    EOF
    ```
@@ -84,5 +87,5 @@ approved, ask.
    seconds to appear; repeat the command until it prints a URL:
 
    ```sh
-   gh run list --workflow prepare-release.yml --event workflow_dispatch --limit 5 --json url,createdAt --jq ".[] | select(.createdAt > \"$since\") | .url"
+   gh run list -R elastic/apm-agent-android --workflow prepare-release.yml --event workflow_dispatch --limit 5 --json url,createdAt --jq ".[] | select(.createdAt > \"$since\") | .url"
    ```

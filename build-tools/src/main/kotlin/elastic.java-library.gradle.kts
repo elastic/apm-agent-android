@@ -1,25 +1,20 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
     id("java-library")
     id("org.jetbrains.kotlin.jvm")
+    id("elastic.dependency-floors")
 }
 
 val javaVersionStr = project.property("elastic.java.compatibility") as String
-val minKotlinVersionStr = project.property("elastic.kotlin.compatibility") as String
 val javaVersion = JavaVersion.toVersion(javaVersionStr)
 java {
     sourceCompatibility = javaVersion
     targetCompatibility = javaVersion
 }
 
-val minKotlinVersion = KotlinVersion.fromVersion(minKotlinVersionStr)
 kotlin.compilerOptions {
     jvmTarget.set(JvmTarget.fromTarget(javaVersionStr))
-    apiVersion = minKotlinVersion
-    languageVersion = minKotlinVersion
-    freeCompilerArgs = listOf("-jvm-default=no-compatibility")
 }
 
 tasks.withType(Test::class).configureEach {

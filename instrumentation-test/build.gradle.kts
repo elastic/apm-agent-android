@@ -7,13 +7,6 @@ propertiesFile.inputStream().use {
 }
 val agentVersion = agentProperties["version"]
 
-extra.apply {
-    set("jvmCompatibility", JavaVersion.VERSION_17)
-    set("androidCompileSdk", 35)
-    set("androidMinSdk", 26)
-    set("agentVersion", agentVersion)
-}
-
 val instrumentationProjectPattern = Regex(":instrumentation:([^:]+)$")
 subprojects {
     instrumentationProjectPattern.matchEntire(path)?.let {

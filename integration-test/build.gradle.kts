@@ -1,8 +1,8 @@
 import java.util.Properties
 
 plugins {
-    alias(rootLibs.plugins.androidApp) apply false
-    alias(rootLibs.plugins.kotlin.jvm) apply false
+    alias(libs.plugins.androidApp) apply false
+    alias(libs.plugins.kotlin.jvm) apply false
 }
 
 val agentProperties = Properties()
@@ -12,6 +12,7 @@ propertiesFile.inputStream().use {
 }
 
 val agentVersion = agentProperties["version"]
+
 subprojects {
     if (name == "app") {
         configurations.all {

@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    id("com.android.application")
+    id("elastic.android-app")
     id("co.elastic.otel.android.agent")
     id("co.elastic.otel.android.mapping")
     id("co.elastic.otel.android.instrumentation.okhttp")
@@ -12,7 +12,6 @@ val withDesugaring = providers.gradleProperty("withDesugaring").map { it.toBoole
 
 android {
     namespace = "co.elastic.otel.android.integration"
-    compileSdk = 37
 
     defaultConfig {
         applicationId = "co.elastic.otel.android.integration"
@@ -53,6 +52,6 @@ elasticOtel {
 
 dependencies {
     if (withDesugaring) {
-        coreLibraryDesugaring(rootLibs.coreLib)
+        coreLibraryDesugaring(libs.coreLib)
     }
 }

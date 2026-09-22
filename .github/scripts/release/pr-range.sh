@@ -4,6 +4,16 @@
 #
 # Usage: pr-range.sh [ref] [previous-tag]
 #
+# Arguments:
+#   ref           commit or ref at the end of the range (default HEAD)
+#   previous-tag  release tag at the start of the range (default highest
+#                 vX.Y.Z tag)
+#
+# Environment:
+#   GITHUB_REPOSITORY  owner/repository to query (default current gh repo)
+#   GH_TOKEN           GitHub CLI authentication in CI; local gh
+#                      authentication is used when unset
+#
 # Walks the first-parent commits between the previous release tag and `ref`
 # (default HEAD) and resolves each one to its merged pull request through the
 # GitHub API. Because `main` is squash-merged, each commit is one PR. A commit

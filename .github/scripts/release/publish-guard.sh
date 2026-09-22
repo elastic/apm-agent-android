@@ -4,6 +4,15 @@
 #
 # Usage: publish-guard.sh <base-ref> <head-ref> <merge-commit>
 #
+# Arguments:
+#   base-ref      target releasing branch from the merged PR
+#   head-ref      source preparation branch from the merged PR
+#   merge-commit  commit produced by merging the preparation PR
+#
+# Environment:
+#   GITHUB_OUTPUT  GitHub Actions output file for the validated release facts
+#                  (optional)
+#
 # publish-release.yml runs when a PR into a `releasing/*` branch is merged.
 # GitHub's merge button already decided who may merge and whether the checks
 # passed, so this script only confirms two things before anything

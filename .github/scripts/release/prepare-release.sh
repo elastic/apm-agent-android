@@ -2,9 +2,17 @@
 #
 # Prepare a release: create the release branches and open the preparation PR.
 #
-# Called by prepare-release.yml on `main`. Environment inputs:
-#   RELEASE_NOTES   the release-note JSON authored by the operator
-#   BUMP            minor (default) | major
+# Usage: prepare-release.sh
+#
+# Arguments: none
+#
+# Environment:
+#   RELEASE_NOTES       release-note JSON authored by the operator (required)
+#   GITHUB_REPOSITORY   owner/repository where the PR is opened (required)
+#   BUMP                minor (default) | major
+#   GITHUB_SHA          commit to prepare (default HEAD)
+#   GITHUB_STEP_SUMMARY GitHub Actions summary file (optional)
+#   GH_TOKEN             GitHub CLI authentication (required in CI)
 #
 # Derives the release version from the highest `vX.Y.Z` tag and the bump,
 # after checking that gradle.properties holds the expected `-SNAPSHOT`

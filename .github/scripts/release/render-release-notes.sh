@@ -5,6 +5,14 @@
 #
 # Usage: render-release-notes.sh <source-json> <version>
 #
+# Arguments:
+#   source-json  release-note JSON to validate and render
+#   version      release version in X.Y.Z form
+#
+# Environment:
+#   GITHUB_REPOSITORY  owner/repository used in pull-request links
+#                      (default elastic/apm-agent-android)
+#
 # Validates the JSON shape, refuses input that still has `uncategorized`
 # items or has no items, and prints a `## X.Y.Z` section with the anchors the
 # docs site expects: an untitled list for dependencies, then "Features and
@@ -23,7 +31,6 @@ source_file=$1
 version=$2
 release_date=$(date +'%B %d, %Y' | sed 's/ 0/ /')
 repository=${GITHUB_REPOSITORY:-elastic/apm-agent-android}
-server_url=${GITHUB_SERVER_URL:-https://github.com}
 
 if [[ ! $version =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
   echo "Invalid release version: $version" >&2
@@ -69,14 +76,13 @@ anchor="$anchor_base-release-notes"
 render_items() {
   local filter=$1
   jq -r \
-    --arg server "$server_url" \
     --arg repository "$repository" \
     "$filter
      | sort_by(if (.message | startswith(\"[Breaking]\")) then 0 else 1 end)
      | .[]
      | \"* \" + .message
        + (if .prId == null then \"\"
-          else \": [#\" + (.prId | tostring) + \"](\" + \$server + \"/\" + \$repository + \"/pull/\" + (.prId | tostring) + \")\"
+          else \": [#\" + (.prId | tostring) + \"](https://github.com/\" + \$repository + \"/pull/\" + (.prId | tostring) + \")\"
           end)" \
     "$source_file"
 }

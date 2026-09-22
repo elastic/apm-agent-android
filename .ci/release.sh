@@ -111,79 +111,97 @@ is_public() {
   [[ $(curl -s -o /dev/null -w '%{http_code}' -I "$1") == 200 ]]
 }
 
-if [[ $target_specifier == all || $target_specifier == mavenCentral ]]; then
-  if [[ $dry_run == true ]]; then
-    echo "--- Release the binaries to Maven Central :package: (dry-run)"
-    ./gradlew assemble
-  else
-    echo "--- Release the binaries to Maven Central"
-    if ! ./gradlew publishAndReleaseElasticToMavenCentral "${common_gradle_deploy_params[@]}"; then
-      # All modules go to Maven Central in one deployment that is released or
-      # dropped as a whole, so one module's POM tells whether this version is
-      # already public.
-      central_pom="https://repo1.maven.org/maven2/co/elastic/otel/android/agent-sdk/$release_version/agent-sdk-$release_version.pom"
-      if is_public "$central_pom"; then
-        echo "Maven Central already has $release_version; nothing to publish."
-      else
-        echo "Publishing to Maven Central failed and $release_version is not public." >&2
-        exit 1
-      fi
+release_dry_run() {
+  local target=$1
+
+  echo "--- Release the binaries to $target :package: (dry-run)"
+  ./gradlew assemble
+}
+
+release_maven_central() {
+  local central_pom
+
+  echo "--- Release the binaries to Maven Central"
+  if ! ./gradlew publishAndReleaseElasticToMavenCentral "${common_gradle_deploy_params[@]}"; then
+    # All modules go to Maven Central in one deployment that is released or
+    # dropped as a whole, so one module's POM tells whether this version is
+    # already public.
+    central_pom="https://repo1.maven.org/maven2/co/elastic/otel/android/agent-sdk/$release_version/agent-sdk-$release_version.pom"
+    if is_public "$central_pom"; then
+      echo "Maven Central already has $release_version; nothing to publish."
+    else
+      echo "Publishing to Maven Central failed and $release_version is not public." >&2
+      exit 1
     fi
+  fi
+}
+
+release_plugin_portal() {
+  local plugin_list
+  local -a failed_projects=()
+  local project_path already_public plugin_id marker
+
+  echo "--- Release the binaries to the Gradle Plugin Portal"
+  # Unlike Maven Central, each plugin project uploads on its own, so a
+  # failed run can leave some projects published and others not. Publish
+  # project by project, keep going when one fails so the others get
+  # through, and treat a failure as success when the Portal already has
+  # every plugin of that project. Report what is still missing at the end
+  # so a rerun can finish it.
+  #
+  # The project is the finest retry unit there is: `publishPlugins` is one
+  # task per project and the Portal plugin offers no per-plugin publish, so
+  # a project that declares several plugins (agent-plugin declares two)
+  # cannot be retried plugin by plugin. If such a project ever ends up with
+  # some plugins public and others missing, the marker check below reports
+  # exactly which ones, and a person finishes it. This is an accepted
+  # trade-off, not an oversight.
+  plugin_list=$(./gradlew -q listPublishedGradlePlugins)
+  for project_path in $(awk '{print $1}' <<<"$plugin_list" | sort -u); do
+    # The credentials go on the command line here. Make sure tracing is off
+    # so they can never be echoed to the log, even if someone enables
+    # `set -x` above while debugging.
+    set +x
+    if ./gradlew "$project_path:publishPlugins" \
+      "-Pgradle.publish.key=$PLUGIN_PORTAL_KEY" \
+      "-Pgradle.publish.secret=$PLUGIN_PORTAL_SECRET" \
+      "${common_gradle_deploy_params[@]}"; then
+      continue
+    fi
+    already_public=true
+    while read -r plugin_id; do
+      marker="https://plugins.gradle.org/m2/${plugin_id//.//}/$plugin_id.gradle.plugin/$release_version/$plugin_id.gradle.plugin-$release_version.pom"
+      if ! is_public "$marker"; then
+        already_public=false
+        echo "$plugin_id $release_version is not on the Gradle Plugin Portal." >&2
+      fi
+    done < <(awk -v path="$project_path" '$1 == path {print $2}' <<<"$plugin_list")
+    if [[ $already_public == true ]]; then
+      echo "$project_path is already on the Gradle Plugin Portal; nothing to publish."
+    else
+      echo "$project_path failed to publish; continuing with the remaining plugins." >&2
+      failed_projects+=("$project_path")
+    fi
+  done
+  if ((${#failed_projects[@]} != 0)); then
+    echo "Gradle Plugin Portal publication is incomplete for: ${failed_projects[*]}. Rerun the release to retry what is still missing." >&2
+    exit 1
+  fi
+}
+
+if [[ $target_specifier == all || $target_specifier == mavenCentral ]]; then
+  if [[ $dry_run == false ]]; then
+    release_maven_central
+  else
+    release_dry_run "Maven Central"
   fi
 fi
 
 if [[ $target_specifier == all || $target_specifier == pluginPortal ]]; then
-  if [[ $dry_run == true ]]; then
-    echo "--- Release the binaries to the Gradle Plugin Portal :package: (dry-run)"
-    ./gradlew assemble
+  if [[ $dry_run == false ]]; then
+    release_plugin_portal
   else
-    echo "--- Release the binaries to the Gradle Plugin Portal"
-    # Unlike Maven Central, each plugin project uploads on its own, so a
-    # failed run can leave some projects published and others not. Publish
-    # project by project, keep going when one fails so the others get
-    # through, and treat a failure as success when the Portal already has
-    # every plugin of that project. Report what is still missing at the end
-    # so a rerun can finish it.
-    #
-    # The project is the finest retry unit there is: `publishPlugins` is one
-    # task per project and the Portal plugin offers no per-plugin publish, so
-    # a project that declares several plugins (agent-plugin declares two)
-    # cannot be retried plugin by plugin. If such a project ever ends up with
-    # some plugins public and others missing, the marker check below reports
-    # exactly which ones, and a person finishes it. This is an accepted
-    # trade-off, not an oversight.
-    plugin_list=$(./gradlew -q listPublishedGradlePlugins)
-    failed_projects=()
-    for project_path in $(awk '{print $1}' <<<"$plugin_list" | sort -u); do
-      # The credentials go on the command line here. Make sure tracing is off
-      # so they can never be echoed to the log, even if someone enables
-      # `set -x` above while debugging.
-      set +x
-      if ./gradlew "$project_path:publishPlugins" \
-        "-Pgradle.publish.key=$PLUGIN_PORTAL_KEY" \
-        "-Pgradle.publish.secret=$PLUGIN_PORTAL_SECRET" \
-        "${common_gradle_deploy_params[@]}"; then
-        continue
-      fi
-      already_public=true
-      while read -r _ plugin_id; do
-        marker="https://plugins.gradle.org/m2/${plugin_id//.//}/$plugin_id.gradle.plugin/$release_version/$plugin_id.gradle.plugin-$release_version.pom"
-        if ! is_public "$marker"; then
-          already_public=false
-          echo "$plugin_id $release_version is not on the Gradle Plugin Portal." >&2
-        fi
-      done < <(awk -v path="$project_path" '$1 == path' <<<"$plugin_list")
-      if [[ $already_public == true ]]; then
-        echo "$project_path is already on the Gradle Plugin Portal; nothing to publish."
-      else
-        echo "$project_path failed to publish; continuing with the remaining plugins." >&2
-        failed_projects+=("$project_path")
-      fi
-    done
-    if ((${#failed_projects[@]} != 0)); then
-      echo "Gradle Plugin Portal publication is incomplete for: ${failed_projects[*]}. Rerun the release to retry what is still missing." >&2
-      exit 1
-    fi
+    release_dry_run "the Gradle Plugin Portal"
   fi
 fi
 

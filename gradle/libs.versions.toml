@@ -1,16 +1,15 @@
 [versions]
 opentelemetry = "1.66.0"
 opentelemetry-contrib = "1.60.0-alpha"
-byteBuddy = "1.18.12"
+byteBuddy = "1.18.13"
 kotlin = "2.4.20"
-android = "9.4.0"
+android = "9.4.1"
 
 [libraries]
 opentelemetry-sdk = { module = "io.opentelemetry:opentelemetry-sdk", version.ref = "opentelemetry" }
 opentelemetry-api-incubator = "io.opentelemetry:opentelemetry-api-incubator:1.66.0-alpha"
 stagemonitor-configuration = "org.stagemonitor:stagemonitor-configuration:0.89.1"
 androidx-annotations = "androidx.annotation:annotation:1.10.0"
-androidx-core = "androidx.core:core:1.19.0"
 dsl-json = "com.dslplatform:dsl-json-java8:1.10.0"
 slf4j-api = "org.slf4j:slf4j-api:2.0.19"
 byteBuddy = { module = "net.bytebuddy:byte-buddy", version.ref = "byteBuddy" }
@@ -31,7 +30,7 @@ junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junit-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine" }
 opentelemetry-testing = { module = "io.opentelemetry:opentelemetry-sdk-testing", version.ref = "opentelemetry" }
-robolectric = "org.robolectric:robolectric:4.16.1"
+robolectric = "org.robolectric:robolectric:4.17"
 assertj = "org.assertj:assertj-core:3.27.7"
 mockk = "io.mockk:mockk:1.14.11"
 awaitility = "org.awaitility:awaitility-kotlin:4.3.0"

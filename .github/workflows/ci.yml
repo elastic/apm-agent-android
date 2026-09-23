@@ -90,6 +90,24 @@ jobs:
           name: integration-test-results-api${{ matrix.api-level }}
           path: "**/build/es/*"
 
+  dependency-floor-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - name: Unit tests with published dependency floors
+        run: ./gradlew :agent-sdk:testDebugUnitTest -Pelastic.dependencies.useFloors=true
+
+  consumer-baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - name: Publish artifacts for the baseline build
+        run: ./gradlew publishAllPublicationsToBaselineRepository
+      - name: Build the core consumer baseline and verify the published floors
+        run: ./baseline-test/gradlew -p baseline-test :app:assembleRelease :app:verifyBaselineFloors
+
   # The very last job to report whether the Workflow passed.
   # This will act as the Branch Protection gatekeeper
   ci:
@@ -99,6 +117,8 @@ jobs:
       - lint
       - test
       - integration-test
+      - dependency-floor-test
+      - consumer-baseline
     steps:
       - id: check
         uses: elastic/oblt-actions/check-dependent-jobs@v1

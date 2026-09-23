@@ -11,7 +11,9 @@
     ".buildkite/**",
     ".github/*",
     ".github/actions/**",
-    ".github/workflows/*"
+    ".github/workflows/*",
+    "baseline-test/**",
+    "gradle.properties"
   ],
   "packageRules": [
     {

@@ -145,18 +145,19 @@ the [Gradle Maven publish plugin](https://github.com/vanniktech/gradle-maven-pub
 
 #### Requirements
 
-Before executing the publishing command, the following signing environment variables must be set:
+Before executing the publishing command, the following signing environment variables must be set. The
+publishing plugin reads them and passes them to Gradle's in-memory signing keys:
 
-- ORG_GRADLE_PROJECT_signingKey
-- ORG_GRADLE_PROJECT_signingPassword
+- SECRING_ASC: the armored private signing key
+- KEYPASS_SECRET: its passphrase
 
-More info about those variables
+More info about in-memory signing keys
 can be found [here](https://docs.gradle.org/current/userguide/signing_plugin.html#sec:in-memory-keys).
 
 As well as the following Sonatype credentials env vars:
 
 - ORG_GRADLE_PROJECT_mavenCentralUsername
-- ORG_GRADLE_PROJECT_mavenCentralUsername
+- ORG_GRADLE_PROJECT_mavenCentralPassword
 
 More info on those, [here](https://vanniktech.github.io/gradle-maven-publish-plugin/central/)
 

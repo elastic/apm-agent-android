@@ -1,0 +1,31 @@
+---
+name: Draft release notes
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  draft:
+    runs-on: ubuntu-slim
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Draft release-note JSON
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          notes=$(.github/scripts/release/draft-release-notes.sh "$GITHUB_SHA")
+          echo "$notes" | jq .
+          {
+            echo '### Draft release-note JSON'
+            echo
+            echo '```json'
+            echo "$notes" | jq .
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

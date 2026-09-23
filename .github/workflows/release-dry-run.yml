@@ -1,0 +1,68 @@
+---
+name: Release dry run
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Publication target to assemble.
+        required: true
+        default: all
+        type: choice
+        options:
+          - all
+          - mavenCentral
+          - pluginPortal
+
+permissions:
+  contents: read
+
+jobs:
+  dry-run:
+    name: Release dry run
+    runs-on: ubuntu-latest
+    permissions:
+      artifact-metadata: write
+      attestations: write
+      contents: read
+      id-token: write
+    env:
+      TARBALL_FILE: dist.tar
+    steps:
+      - name: Run release dry run in Buildkite
+        id: buildkite
+        uses: elastic/oblt-actions/buildkite/run@v1
+        with:
+          branch: ${{ github.ref_name }}
+          commit: ${{ github.sha }}
+          pipeline: apm-agent-android-release
+          token: ${{ secrets.BUILDKITE_TOKEN }}
+          wait-for: true
+          env-vars: |
+            release_sha=${{ github.sha }}
+            target_specifier=${{ inputs.target || 'all' }}
+            dry_run=true
+            TARBALL_FILE=${{ env.TARBALL_FILE }}
+
+      - name: Download dry-run artifacts
+        uses: elastic/oblt-actions/buildkite/download-artifact@v1
+        with:
+          build-number: ${{ steps.buildkite.outputs.number }}
+          path: ${{ env.TARBALL_FILE }}
+          pipeline: ${{ steps.buildkite.outputs.pipeline }}
+          token: ${{ secrets.BUILDKITE_TOKEN }}
+
+      - name: Extract dry-run artifacts
+        run: tar xvf "$TARBALL_FILE"
+
+      - name: Attest JAR files
+        uses: actions/attest@v4
+        with:
+          subject-path: "${{ github.workspace }}/**/build/libs/*.jar"
+
+      - name: Attest AAR files
+        uses: actions/attest@v4
+        with:
+          subject-path: "${{ github.workspace }}/**/build/outputs/aar/*.aar"

@@ -5,115 +5,62 @@ on:
   workflow_dispatch:
     inputs:
       release_notes:
-        description: The release note items to add, in JSON format. See scripts/generate-release-notes/sample.json.
+        description: Release-note JSON. Use the draft workflow or the release wizard.
         required: true
         type: string
+      bump:
+        description: Release version bump.
+        required: true
+        default: minor
+        type: choice
+        options:
+          - minor
+          - major
 
 permissions:
   contents: read
 
+# One preparation at a time, so two dispatches cannot both pass the
+# release-in-flight check before either has pushed its branches.
+concurrency:
+  group: prepare-release
+  cancel-in-progress: false
+
 jobs:
-  prepare_release:
+  prepare-release:
     name: Prepare release
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
-
     steps:
-      - name: Verify prerequisites
+      - name: Require main
+        if: github.ref_name != 'main'
         run: |
-          if [[ $GITHUB_REF_NAME != main ]]; then
-            echo This workflow should only be run against main
-            exit 1
-          fi
+          echo "::error::Prepare release must be dispatched from main."
+          exit 1
 
-      - name: Get token
-        id: get_token
-        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
+      - name: Get automation token
+        id: token
+        uses: actions/create-github-app-token@v3
         with:
-          app_id: ${{ secrets.OBS_AUTOMATION_APP_ID }}
-          private_key: ${{ secrets.OBS_AUTOMATION_APP_PEM }}
-          permissions: >-
-            {
-              "contents": "write",
-              "pull_requests": "write"
-            }
-          repositories: >-
-            ["apm-agent-android"]
+          app-id: ${{ secrets.OBS_AUTOMATION_APP_ID }}
+          private-key: ${{ secrets.OBS_AUTOMATION_APP_PEM }}
+          permission-contents: write
+          permission-pull-requests: write
 
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-          token: ${{ steps.get_token.outputs.token }}
+          token: ${{ steps.token.outputs.token }}
 
       - uses: elastic/oblt-actions/git/setup@v1
         with:
-          github-token: ${{ steps.get_token.outputs.token }}
+          github-token: ${{ steps.token.outputs.token }}
 
-      - name: Setting variables
-        id: variables
-        run: |
-          version=$(cat gradle.properties | grep -Po "(?<=version=)\d+\.\d+\.\d+")
-          echo "The version is $version"
-          { 
-            echo "version=$version"
-            echo "release_branch=release/$version"
-          } >> "$GITHUB_OUTPUT"
-
-      - name: Switching to release branch
-        run: |
-          if git ls-remote --heads $REMOTE $RELEASE_BRANCH | grep -q $RELEASE_BRANCH; then
-            echo "Branch '$RELEASE_BRANCH' exists remotely. Checking out..."
-            git switch $RELEASE_BRANCH
-            git pull
-          else
-            echo "Branch '$RELEASE_BRANCH' does not exist remotely. Creating..."
-            git checkout -b $RELEASE_BRANCH
-            git push -u $REMOTE $RELEASE_BRANCH
-          fi
+      - name: Prepare release
         env:
-          REMOTE: "origin"
-          RELEASE_BRANCH: ${{ steps.variables.outputs.release_branch }}
-
-      - name: Updating notice files
-        run: ./gradlew createNoticeFile
-
-      - name: Updating the release notes
-        run: |
-          tempdir="build/actions/prepare-release"
-          mkdir -p $tempdir
-          
-          source_file_path=$tempdir/source.json
-          dest_file_path=$tempdir/dest.md
-          
-          echo $RELEASE_NOTES > $source_file_path
-          
-          ./.github/scripts/generate-release-notes/script.main.kts --source="$source_file_path" --version="$VERSION" > $dest_file_path
-          
-          echo "Generated notes:"
-          cat $dest_file_path
-          
-          sed -i "/next_release_notes/r $dest_file_path" docs/release-notes/index.md
-        env:
-          VERSION: ${{ steps.variables.outputs.version }}
+          BUMP: ${{ inputs.bump }}
+          GH_TOKEN: ${{ steps.token.outputs.token }}
           RELEASE_NOTES: ${{ inputs.release_notes }}
-
-      - name: Creating release branch PR
-        run: |
-          message="Prepare release $VERSION"
-          branch="pre-release/$VERSION"
-          
-          git checkout -b $branch
-          git commit -a -m "$message"
-          git push --set-upstream origin $branch
-          
-          echo "About to create PR"
-          
-          gh pr create --title "[$RELEASE_BRANCH] $message" \
-                       --body "$message." \
-                       --base $RELEASE_BRANCH
-        env:
-          GH_TOKEN: ${{ steps.get_token.outputs.token }}
-          VERSION: ${{ steps.variables.outputs.version }}
-          RELEASE_BRANCH: ${{ steps.variables.outputs.release_branch }}
+        run: .github/scripts/release/prepare-release.sh

@@ -41,7 +41,7 @@ metadata:
   name: apm-agent-android-release
   description: GitHub action to run the release process for the APM Agent Android
   annotations:
-    backstage.io/source-location: url:https://github.com/elastic/apm-agent-android/blob/main/.github/workflows/release.yml
+    backstage.io/source-location: url:https://github.com/elastic/apm-agent-android/blob/main/.github/workflows/publish-release.yml
     github.com/project-slug: elastic/apm-agent-android
     github.com/team-slug: elastic/apm-agent-android
   tags:
@@ -53,7 +53,7 @@ metadata:
     - user:obltmachine
   links:
     - title: GitHub action
-      url: https://github.com/elastic/apm-agent-android/actions/workflows/release.yml
+      url: https://github.com/elastic/apm-agent-android/actions/workflows/publish-release.yml
 spec:
   type: github-actions
   owner: group:apm-agent-android

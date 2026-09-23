@@ -1,69 +1,127 @@
 # Releasing
 
-This document describes the steps required to publish a release to [Maven Central](https://central.sonatype.com/) and the
-[Gradle Plugin Portal](https://plugins.gradle.org/), for all the regular libraries and Gradle plugin modules respectively, via the Github Actions configured
-for this repository. For more technical details of the publishing process and configuration that happens under the hood, take a look at
-the [build-tools's README file](build-tools/README.md).
+This guide describes how to publish EDOT Android to
+[Maven Central](https://central.sonatype.com/) and the
+[Gradle Plugin Portal](https://plugins.gradle.org/). For publishing
+configuration details, see the [build-tools README](build-tools/README.md).
 
 ## Release steps
 
-### 1. Check version to release
+A release takes three steps: dispatch the preparation, merge the preparation
+PR, merge the release PR. The version is derived from the highest release
+tag. Merging the preparation PR is what publishes.
 
-Make sure that the [gradle.properties](gradle.properties) `version` property is set to the value you want to release. If not, create a PR to change it before continuing with
-the release process.
+### 1. Prepare the release
 
-### 2. Prepare a release branch
+Use either path:
 
-This is done by running [this action](https://github.com/elastic/apm-agent-android/actions/workflows/prepare-release.yml), which has 2 parameters:
-- The branch. This must be `main`.
-- The release notes. This must be provided as a single-line JSON with [this format](.github/scripts/generate-release-notes/sample.json).
+- Ask an agent to prepare the release with the
+  [`android-release-wizard`](skills/android-release-wizard/SKILL.md)
+  skill. It proposes the notes and bump, then dispatches after you
+  approve.
+- Open the
+  [Prepare release workflow](https://github.com/elastic/apm-agent-android/actions/workflows/prepare-release.yml)
+  on `main`, provide the release-note JSON, and select `major` only for a
+  breaking release. The default is `minor`.
 
-> [!TIP]
-> You can use [this action](https://github.com/elastic/apm-agent-android/actions/workflows/draft-changelog.yml) to generate release notes based on the git diff since the last release.
-> You should still check the result manually before entering it into the prepare release action, just in case it contains entries that don't make sense to display on the release notes page.
-> The action will print the release notes to the console in JSON format.
+Both paths dispatch the same workflow with the same inputs. The workflow
+verifies that `gradle.properties` holds the next-minor `-SNAPSHOT` version
+after the highest release tag, then creates two branches from the dispatched
+`main` commit:
 
-This action should create a PR to a new release branch with the release notes and NOTICE file changes, if any. Review it and merge it.
+- `releasing/x.y.z`, an unchanged copy of `main` that lives until the
+  release is finished.
+- `prepare/x.y.z`, with one commit: the release version, the release notes,
+  updated documentation versions, and regenerated NOTICE files.
 
-### 3. Launch the release process
+It opens the preparation PR from `prepare/x.y.z` into `releasing/x.y.z`, so
+the PR diff shows exactly what the release adds. Review it. Push prose or
+NOTICE fixes to `prepare/x.y.z` if needed. For a code fix, land it on `main`,
+close the PR, delete both branches, and dispatch again.
 
-This is done by running [this action](https://github.com/elastic/apm-agent-android/actions/workflows/release.yml) where you'll need to provide the following parameters:
-- The branch. This must be the release branch created as part of the previous step. Its name must be `release/{version}`, where "{version}" is the one you're about to release.
-- The repo to deploy to. The options are:
-- `all` - Deploy all the artifacts, the ones that will go to maven central and also the Gradle plugin portal ones. This is the default option and should be left as is for a regular release.
-- `mavenCentral` - Only deploys the maven central artifacts. This is useful in case a previous release attempt only succeeded at releasing to the Gradle plugin portal but the maven central release failed.
-- `pluginPortal` - Only deploys the Gradle plugin artifacts. This is useful in case a previous release attempt only succeeded at releasing to maven central but the Gradle plugin portal release failed.
-- A dry-run checkbox. This is for IT use, leave it unchecked for a release.
+#### Release-note JSON
 
-The release action should do the following:
-- Release the artifacts to the specified repos.
-- Create a GitHub release and a tag with the newly released version.
+The
+[Draft release notes workflow](https://github.com/elastic/apm-agent-android/actions/workflows/draft-release-notes.yml)
+prints editable JSON built from the pull requests merged since the last
+release. Labels only group the draft; none is required:
 
-> [!NOTE]
-> Maven central tends to have a delay of roughly half an hour, more or less, before making the newly published artifacts actually available
-> for fetching them.
+- `dependencies` → `dependencies`. Several updates of one dependency collapse
+  into the last one merged.
+- `enhancement` → `featuresEnhancements`
+- `bug` → `fixes`
+- anything else → `uncategorized`
 
-### 4. Prepare for the next release
+Move every `uncategorized` item into a category or delete it. Prefix the
+message of a breaking change with `[Breaking]` and dispatch with
+`bump=major`. Prepare release rejects JSON that still has `uncategorized`
+items or has no items at all.
 
-If all went well on step 3, it should have automatically created a PR against `main` to update it and prepare it for a new release. Review and merge it.
+Each item has a `message` and an optional `prId`. See
+[`sample.json`](.github/scripts/release/sample.json).
 
-## Patch release
+### 2. Merge the preparation PR
 
-A patch release requires to update the relevant release branch (previously created during [step #2](#2-prepare-a-release-branch))
-to ensure that:
+When the checks are green and the content is right, merge the preparation PR
+into `releasing/x.y.z`. The merge starts the publish workflow, which:
 
-* The version is updated, that is, the patch number is increased. You must create a PR against the relevant release branch to update it.
-* The patch/changes are merged into the relevant release branch.
+1. Confirms the merged commit carries release version `x.y.z` and that no
+   `vx.y.z` tag exists yet.
+2. Publishes to Maven Central and the Gradle Plugin Portal once, in Buildkite,
+   from the merged commit.
+3. Attests the built JAR and AAR files.
+4. Creates the `vx.y.z` tag at the merged commit.
+5. Creates the GitHub Release.
+6. Commits the next `-SNAPSHOT` version on `releasing/x.y.z`.
+7. Opens the release PR from `releasing/x.y.z` into `main`.
 
-After those items are in place, you can continue with the release process from [step #3](#3-launch-the-release-process).
+The team's Slack channel receives the outcome with links to the GitHub Release
+and the release PR, or to the failed run.
 
-## Troubleshooting
+### 3. Merge the release PR
 
-Different issues can occur during a release process as there are a lot of parts involved in it, so it is difficult to
-point to specific ones in a "catch-all" sort of guide. However, here are some guidelines on what to look out for based on some common
-scenarios:
+Review and merge the PR from `releasing/x.y.z` into `main`. It brings the
+release notes, documentation versions, NOTICE files, and the next development
+version to `main`. Delete the branch after merging if it was not deleted
+automatically. Until this PR merges, Prepare release stops with a message
+naming the branch that is still in flight.
 
-* A repository issue. This might happen when either Maven Central or the Gradle plugin portal have internal issues. The logs should give hints about this. The solution might be to wait until they're back operating as normal.
-* A secrets issue. Our release process involves retrieving secrets that are needed to authenticate against the repositories. You'd need to contact the platform engineering team to help with those.
-* A compilation issue. There are several reasons and compilation checks that can make a build fail. Refer to the [build-tools's README file](build-tools/README.md) to get a comprehensive guide on the compilation details of this project.
+## Release dry run
+
+The
+[Release dry run workflow](https://github.com/elastic/apm-agent-android/actions/workflows/release-dry-run.yml)
+runs on every push to `main` and can be dispatched for all targets, Maven
+Central, or the Gradle Plugin Portal. It exercises the Buildkite build and
+attestation path without publishing.
+
+## Failure and recovery
+
+Use **Re-run failed jobs** on the failed publish run. Every publish and
+finalization step checks the real system before acting and skips work that is
+already done, so the rerun continues from the failed step.
+
+- Registry visibility can lag. Wait, then rerun. An upload that fails
+  because the version is already public counts as done: Maven Central as a
+  whole, and each Gradle plugin project on its own.
+- If the log names a plugin that is not on the Gradle Plugin Portal although
+  its project failed to publish, the upload was interrupted. Rerun once the
+  Portal is reachable; if the same plugin keeps failing, ask whoever owns the
+  publishing credentials.
+- If the run log says the tag already exists, do not push or move it. Rerun so
+  the remaining steps finish.
+- If a tag exists at another commit, stop. Do not move it.
+- If the preparation PR needs different content before it is merged, close
+  it, delete both branches, land the correction on `main`, and prepare again.
+- If preparation fails after it pushed its branches, for example when opening
+  the PR fails, delete `releasing/x.y.z` and `prepare/x.y.z` and dispatch
+  again. The next dispatch refuses while a `releasing/*` branch exists.
+- If Maven Central or the Gradle Plugin Portal is down, wait for the service
+  to recover, then rerun.
+- Secret or credential failures require help from whoever owns the pipeline
+  secrets.
+- For compilation failures, see the
+  [build-tools README](build-tools/README.md).
+- NOTICE generation failures name the missing license data. Update
+  [`manual_licenses_map.txt`](manual_licenses_map.txt) on `main`, then prepare
+  again.
 

@@ -16,9 +16,9 @@
 # Validates the JSON shape, refuses input that still has `uncategorized`
 # items or has no items, and prints a `## X.Y.Z` section with the anchors the
 # docs site expects: an untitled list for dependencies, then "Features and
-# enhancements" and "Fixes" subsections. Empty groups are omitted and
-# `[Breaking]` items sort first. The same section becomes the GitHub Release
-# body.
+# enhancements" and "Fixes" subsections. Empty groups are omitted. Items with
+# `breaking: true` render with a `[Breaking]` prefix and sort first. The same
+# section becomes the GitHub Release body.
 
 set -euo pipefail
 
@@ -47,6 +47,7 @@ jq -e '
     | all(
         type == "object"
         and (.message | type == "string" and length > 0 and (test("[\\r\\n]") | not))
+        and (.breaking == null or (.breaking | type == "boolean"))
         and (
           .prId == null
           or (.prId | type == "number" and . == floor and . > 0)
@@ -58,6 +59,12 @@ jq -e '
   echo "Release notes must contain valid dependencies, featuresEnhancements, fixes, and uncategorized arrays." >&2
   exit 1
 }
+
+if jq -e '[.dependencies[], .featuresEnhancements[], .fixes[], .uncategorized[]]
+  | any(.message | startswith("[Breaking]"))' "$source_file" >/dev/null; then
+  echo "Release-note messages must not start with [Breaking]; set breaking: true instead." >&2
+  exit 1
+fi
 
 if [[ $(jq '.uncategorized | length' "$source_file") -ne 0 ]]; then
   echo "Release notes contain uncategorized items; place every item before preparing the release." >&2
@@ -78,9 +85,9 @@ render_items() {
   jq -r \
     --arg repository "$repository" \
     "$filter
-     | sort_by(if (.message | startswith(\"[Breaking]\")) then 0 else 1 end)
+     | sort_by(if .breaking == true then 0 else 1 end)
      | .[]
-     | \"* \" + .message
+     | \"* \" + (if .breaking == true then \"[Breaking] \" else \"\" end) + .message
        + (if .prId == null then \"\"
           else \": [#\" + (.prId | tostring) + \"](https://github.com/\" + \$repository + \"/pull/\" + (.prId | tostring) + \")\"
           end)" \

@@ -72,7 +72,7 @@ Your application's telemetry data is stored locally before being sent to the {{s
 
 Crash events are automatically reported to your {{stack}} when your application encounters an unhandled exception. These events include [session](#sessions) information to help correlate contextual data and provide a more detailed view of what might have caused the crash.
 
-Refer to [Crash reporting](crash-reporting.md) to enable this instrumentation and deobfuscate stacktraces from R8-optimized builds.
+Refer to [Crash reporting](crash-reporting.md) to enable this instrumentation and deobfuscate stack traces from R8-optimized builds.
 
 ### Central configuration
 

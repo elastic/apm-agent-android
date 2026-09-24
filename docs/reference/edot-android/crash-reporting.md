@@ -1,6 +1,6 @@
 ---
 navigation_title: Crash reporting
-description: Capture Android crashes and deobfuscate R8 stacktraces with EDOT Android.
+description: Capture Android crashes and deobfuscate R8 stack traces with EDOT Android.
 applies_to:
   stack:
   serverless:
@@ -15,7 +15,7 @@ products:
 
 # Report Android crashes
 
-EDOT Android can capture unhandled exceptions and report them to your {{stack}} as crash events. Each event includes exception details, a stacktrace, and [session](index.md#sessions) information that helps correlate the crash with other telemetry from the application.
+EDOT Android can capture unhandled exceptions and report them to your {{stack}} as crash events. Each event includes exception details, a stack trace, and [session](index.md#sessions) information that helps correlate the crash with other telemetry from the application.
 
 ## Enable crash reporting
 
@@ -35,18 +35,18 @@ The instrumentation automatically captures crashes when an unhandled exception o
 
 Crash events are available in the "Crashes" section of the {{kib}} Android dashboard. Refer to [Visualize your telemetry](getting-started.md#visualize-telemetry) for instructions to install and open the dashboard.
 
-## Deobfuscate R8 stacktraces
+## Deobfuscate R8 stack traces
 
 ```{applies_to}
 product:
   edot_android: ga 1.8.0
 ```
 
-Android's R8 optimizer can rename classes and methods in release builds. When an optimized application crashes, its stacktrace contains these obfuscated names. EDOT Android can upload the R8 `mapping.txt` file for each application build to {{es}} so that the stacktrace can be restored to its original class, method, file, and line information.
+Android's R8 optimizer can rename classes and methods in release builds. When an optimized application crashes, its stack trace contains these obfuscated names. EDOT Android can upload the R8 `mapping.txt` file for each application build to {{es}} so that the stack trace can be restored to its original class, method, file, and line information.
 
 EDOT Android identifies the correct mapping using the `app.build_id` resource attribute included with application telemetry. Mapping documents for a build are stored in a {{es}} index named `.android-r8-mappings-<build_id>`.
 
-Deobfuscating stacktraces in {{kib}} requires version 1.0.0 or later of the [Android OpenTelemetry Assets](https://www.elastic.co/docs/reference/integrations/otel_android_dashboards) integration. Refer to the integration page for the minimum supported {{kib}} versions.
+Deobfuscating stack traces in {{kib}} requires version 1.0.0 or later of the [Android OpenTelemetry Assets](https://www.elastic.co/docs/reference/integrations/otel_android_dashboards) integration. Refer to the integration page for the minimum supported {{kib}} versions.
 
 ### Prerequisites
 
@@ -167,9 +167,9 @@ Mapping upload is manual and isn't attached to `assemble` or `bundle`. Run the u
 
 Uploading the same build again updates documents with deterministic IDs instead of creating duplicates.
 
-### Visualize deobfuscated stacktraces
+### Visualize deobfuscated stack traces
 
-After the crash event and its corresponding R8 mapping are available in your {{stack}}, you can retrace the stacktrace from the {{kib}} Android dashboard. Refer to [Deobfuscating stacktraces](https://www.elastic.co/docs/reference/integrations/otel_android_dashboards#deobfuscating-stacktraces) for instructions to open the crash details and view the original class names, methods, source files, and line numbers.
+After the crash event and its corresponding R8 mapping are available in your {{stack}}, open the **[Android OTel] Exception Details** dashboard and scroll down to the **Stack trace** section. Open the menu for the stack trace row, then select **Retrace stack trace**. Refer to [Deobfuscating stack traces](https://www.elastic.co/docs/reference/integrations/otel_android_dashboards#deobfuscating-stack-traces) for more information.
 
 ### Troubleshoot mapping uploads
 

@@ -113,7 +113,7 @@ Once the content package is installed, open the **[Android OTel] Application Ove
 
 1. In {{kib}}, search for **Dashboards** in the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md).
 2. Search for **Android OTel** and open the **[Android OTel] Application Overview** dashboard.
-3. Select your application from the **Applications** panel at the top of the dashboard.
+3. Select your application by clicking its name in the **Applications** table of the **Overview** section.
 
 :::{image} images/span-visualization/application-overview-dashboard.png
 :alt: Application Overview Dashboard

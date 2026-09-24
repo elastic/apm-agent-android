@@ -55,8 +55,8 @@ release. Labels only group the draft; none is required:
 Move every `uncategorized` item into a category or delete it. Add
 `"breaking": true` to a breaking item. Any breaking item makes the release
 major; otherwise it is minor. Prepare release rejects JSON that still has
-`uncategorized` items, has no items, or places the rendered breaking prefix
-inside `message`.
+`uncategorized` items, has no items, or has a `message` that starts with
+`[Breaking]`; the flag adds that prefix when the notes are rendered.
 
 Each item has a `message`, an optional `prId`, and an optional boolean
 `breaking`. See

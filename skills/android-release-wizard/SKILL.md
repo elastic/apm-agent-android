@@ -23,8 +23,8 @@ form so the operator sees exactly what will run.
 - `release_notes`: JSON with `dependencies`, `featuresEnhancements`, `fixes`,
   and `uncategorized` arrays. Each item has `message`, optional `prId`, and
   optional boolean `breaking`. Prepare release rejects leftover
-  `uncategorized` items, empty notes, and messages that include the rendered
-  breaking prefix.
+  `uncategorized` items, empty notes, and a `message` that starts with
+  `[Breaking]`; the flag adds that prefix when the notes are rendered.
 
 The version follows from the notes. Any `breaking: true` item produces a
 major release; otherwise the next minor.

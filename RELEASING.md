@@ -7,10 +7,10 @@ configuration details, see the [build-tools README](build-tools/README.md).
 
 ## Release steps
 
-A release takes three steps: dispatch the preparation, merge the preparation
-PR, merge the release PR. The version is derived from the highest release
-tag and the release-note content. Merging the preparation PR is what
-publishes.
+A release from `main` takes three steps: dispatch the preparation, merge the
+preparation PR, then merge the resulting PR into `main`. The version is
+derived from the highest release tag and the release-note content. Merging
+the preparation PR is what publishes.
 
 ### 1. Prepare the release
 
@@ -74,19 +74,45 @@ into `releasing/x.y.z`. The merge starts the publish workflow, which:
 3. Attests the built JAR and AAR files.
 4. Creates the `vx.y.z` tag at the merged commit.
 5. Creates the GitHub Release.
-6. Commits the next `-SNAPSHOT` version on `releasing/x.y.z`.
-7. Opens the release PR from `releasing/x.y.z` into `main`.
+6. For a release from `main`, commits the next `-SNAPSHOT` version on
+   `releasing/x.y.z` and opens its PR into `main`.
+7. For a patch, opens a notes-only PR into `main` and deletes the
+   `patching/x.y.z` and `releasing/x.y.z` branches.
 
 The team's Slack channel receives the outcome with links to the GitHub Release
 and the release PR, or to the failed run.
 
-### 3. Merge the release PR
+### 3. Merge the PR into main
 
-Review and merge the PR from `releasing/x.y.z` into `main`. It brings the
-release notes, documentation versions, NOTICE files, and the next development
-version to `main`. Delete the branch after merging if it was not deleted
-automatically. Until this PR merges, Prepare release stops with a message
-naming the branch that is still in flight.
+For a release from `main`, review and merge the PR from `releasing/x.y.z`.
+It brings the release notes, documentation versions, NOTICE files, and the
+next development version to `main`. Delete the branch after merging if it was
+not deleted automatically. Until this PR merges, Prepare release stops with a
+message naming the branch that is still in flight.
+
+For a patch, review and merge the notes-only PR from
+`patch-notes/x.y.z`. The publish workflow already deleted the patch and
+releasing branches after it opened this PR.
+
+## Patch release
+
+Use the release wizard or the
+[Start patch workflow](https://github.com/elastic/apm-agent-android/actions/workflows/start-patch.yml)
+on `main`. Supply the `X.Y` release line and, optionally, merged `main` pull
+requests to cherry-pick. The wizard proposes `bug`-labeled candidates merged
+after the source tag.
+
+Start patch selects the highest `vX.Y.Z` tag, creates
+`patching/X.Y.(Z+1)` from it, and cherry-picks the selected fixes. It pushes
+only after every cherry-pick succeeds. Add later fixes by opening pull
+requests into the patch branch. The branch releases with the tooling of its
+tag, so only releases made by this automation can be patched this way.
+
+Draft and approve release notes from `patching/x.y.z`, then dispatch Prepare
+release from that branch. Patch preparation leaves `applies_to` metadata
+unchanged. Review and merge the preparation PR to publish. Finally, merge the
+notes-only PR into `main`; the automation deletes `patching/x.y.z` and
+`releasing/x.y.z`.
 
 ## Release dry run
 
@@ -126,4 +152,13 @@ already done, so the rerun continues from the failed step.
 - NOTICE generation failures name the missing license data. Update
   [`manual_licenses_map.txt`](manual_licenses_map.txt) on `main`, then prepare
   again.
+- Start patch stops when the line has no release, the newest tag predates this
+  automation, or the patch branch already exists. For an existing branch, add
+  fixes through pull requests into it.
+- If a Start patch cherry-pick conflicts, dispatch again without that pull
+  request. Cherry-pick it by hand through a pull request into the named patch
+  branch.
+- If patch finalization reports that `releasing/x.y.z` moved after the merged
+  commit, remove the unexpected change before rerunning. The automation does
+  not delete either patch branch in this state.
 

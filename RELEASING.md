@@ -9,7 +9,8 @@ configuration details, see the [build-tools README](build-tools/README.md).
 
 A release takes three steps: dispatch the preparation, merge the preparation
 PR, merge the release PR. The version is derived from the highest release
-tag. Merging the preparation PR is what publishes.
+tag and the release-note content. Merging the preparation PR is what
+publishes.
 
 ### 1. Prepare the release
 
@@ -17,14 +18,13 @@ Use either path:
 
 - Ask an agent to prepare the release with the
   [`android-release-wizard`](skills/android-release-wizard/SKILL.md)
-  skill. It proposes the notes and bump, then dispatches after you
-  approve.
+  skill. It proposes the notes and resulting version, then dispatches after
+  you approve.
 - Open the
   [Prepare release workflow](https://github.com/elastic/apm-agent-android/actions/workflows/prepare-release.yml)
-  on `main`, provide the release-note JSON, and select `major` only for a
-  breaking release. The default is `minor`.
+  on `main` and provide the release-note JSON.
 
-Both paths dispatch the same workflow with the same inputs. The workflow
+Both paths dispatch the same workflow with the same input. The workflow
 verifies that `gradle.properties` holds the next-minor `-SNAPSHOT` version
 after the highest release tag, then creates two branches from the dispatched
 `main` commit:
@@ -52,12 +52,14 @@ release. Labels only group the draft; none is required:
 - `bug` → `fixes`
 - anything else → `uncategorized`
 
-Move every `uncategorized` item into a category or delete it. Prefix the
-message of a breaking change with `[Breaking]` and dispatch with
-`bump=major`. Prepare release rejects JSON that still has `uncategorized`
-items or has no items at all.
+Move every `uncategorized` item into a category or delete it. Add
+`"breaking": true` to a breaking item. Any breaking item makes the release
+major; otherwise it is minor. Prepare release rejects JSON that still has
+`uncategorized` items, has no items, or places the rendered breaking prefix
+inside `message`.
 
-Each item has a `message` and an optional `prId`. See
+Each item has a `message`, an optional `prId`, and an optional boolean
+`breaking`. See
 [`sample.json`](.github/scripts/release/sample.json).
 
 ### 2. Merge the preparation PR

@@ -1,6 +1,6 @@
 ---
 name: android-release-wizard
-description: Propose every input of the Prepare release workflow for EDOT Android, such as the release notes and the version bump, refine them with the operator, and dispatch once the operator explicitly approves. Use when the operator asks to prepare or start an Android SDK release.
+description: Propose the release notes of the Prepare release workflow for EDOT Android, including which items are breaking and the version that follows, refine them with the operator, and dispatch once the operator explicitly approves. Use when the operator asks to prepare or start an Android SDK release.
 ---
 
 # Android release wizard
@@ -17,14 +17,17 @@ updated versions.
 
 ## Inputs
 
-The Prepare release workflow takes these inputs. Every round shows all of
-them, so the operator sees exactly what will run.
+Prepare release takes one input. Every proposal round shows it in readable
+form so the operator sees exactly what will run.
 
 - `release_notes`: JSON with `dependencies`, `featuresEnhancements`, `fixes`,
-  and `uncategorized` arrays of `{message, prId}` items. Prepare release
-  rejects leftover `uncategorized` items and empty notes.
-- `bump`: `minor`, or `major` when the release contains a breaking change.
-  A breaking item's message starts with `[Breaking]`.
+  and `uncategorized` arrays. Each item has `message`, optional `prId`, and
+  optional boolean `breaking`. Prepare release rejects leftover
+  `uncategorized` items, empty notes, and messages that include the rendered
+  breaking prefix.
+
+The version follows from the notes. Any `breaking: true` item produces a
+major release; otherwise the next minor.
 
 ## Propose
 
@@ -45,9 +48,10 @@ them, so the operator sees exactly what will run.
    deleting it when it does not belong in user-facing notes, for example
    release bookkeeping or CI-only changes. Mark each such decision as
    proposed and say why in a few words.
-5. Propose the bump. Propose `minor` unless a change looks breaking; then
-   propose `major`, prefix the item with `[Breaking]`, and say why. Mark the
-   bump as proposed either way.
+5. Mark an item `breaking: true` when it looks breaking and state the reason.
+   Show the release version that follows from the complete notes. If the
+   operator asks for a major release and no item is breaking, explain that a
+   major requires a breaking item and ask which change is breaking.
 6. Show the summary described below.
 
 ## Refine until approved
@@ -56,9 +60,11 @@ Repeat until the operator explicitly approves:
 
 1. Show the summary of every input as it stands:
    - The release notes as readable Markdown, not JSON: a list per group,
-     one line per item as `message (#prId)`, `[Breaking]` items first.
+     one line per item as `message (#prId)`, with breaking items marked and
+     listed first.
    - Items proposed for deletion, each with its reason.
-   - The bump and its reason.
+   - Each proposed `breaking` flag and its reason.
+   - The release version that follows.
    - Anything still marked as proposed and not yet confirmed.
 2. Ask the operator to confirm, or to say what to change.
 3. Apply the requested changes in the conversation. Use the operator's
@@ -74,11 +80,11 @@ approved, ask.
 
 1. Record the time, then dispatch with the approved JSON on standard input
    through a quoted heredoc, so no character in the notes is interpreted by
-   the shell, and the approved bump substituted:
+   the shell:
 
    ```sh
    since=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-   gh workflow run prepare-release.yml -R elastic/apm-agent-android --ref main -F release_notes=@- -f bump='<minor-or-major>' <<'EOF'
+   gh workflow run prepare-release.yml -R elastic/apm-agent-android --ref main -F release_notes=@- <<'EOF'
    <json>
    EOF
    ```

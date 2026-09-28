@@ -8,8 +8,7 @@
 # create the `vX.Y.Z` tag at the merged commit, create the GitHub Release
 # from the release-notes section, then finish according to the patch digit.
 # A main release commits the next `-SNAPSHOT` on `releasing/X.Y.Z` and opens
-# that branch's PR into `main`. A patch opens a notes-only PR and removes its
-# ephemeral `patching/X.Y.Z` and `releasing/X.Y.Z` branches.
+# that branch's PR into `main`. A patch opens a notes-only PR into `main`.
 #
 # Every step first checks whether its result already exists and skips it if
 # so, so a failed run can be re-run and picks up where it stopped without
@@ -70,10 +69,7 @@ if [[ $base_ref != "releasing/$release_version" ]]; then
 fi
 
 mkdir -p "$work_dir"
-git fetch --quiet --tags origin main
-if git ls-remote --exit-code --heads origin "refs/heads/$base_ref" >/dev/null 2>&1; then
-  git fetch --quiet origin "$base_ref"
-fi
+git fetch --quiet --tags origin main "$base_ref"
 
 find_main_pr() {
   local head_ref=$1
@@ -175,23 +171,16 @@ if [[ $patch_version =~ ^0+$ ]]; then
   fi
 else
   # The notes-only PR into main. A previous run may have pushed the notes
-  # branch and failed before opening the PR: reuse that branch when its only
-  # change over main is the index and it carries this section. Otherwise
-  # build it from main, inserting the section above the first heading with a
-  # lower version; the index is in descending order, so that is its place.
+  # branch and failed before opening the PR: open the PR from that branch.
+  # Otherwise build it from main, inserting the section above the first
+  # heading with a lower version; the index is in descending order, so that
+  # is its place.
   notes_branch="patch-notes/$release_version"
   notes_index=docs/release-notes/index.md
   main_pr=$(find_main_pr "$notes_branch")
   if [[ -z $main_pr ]]; then
-    notes_tip=$(git ls-remote --heads origin "refs/heads/$notes_branch" | awk '{print $1}')
-    if [[ -n $notes_tip ]]; then
-      git fetch --quiet origin "$notes_branch"
-      if [[ $(git diff --name-only "$(git merge-base origin/main "$notes_tip")" "$notes_tip") != "$notes_index" ]] \
-        || ! git show "$notes_tip:$notes_index" | grep -Eq "^## $release_version "; then
-        echo "$notes_branch exists at $notes_tip but does not carry only the $release_version release notes. Not reusing it." >&2
-        exit 1
-      fi
-      echo "$notes_branch already carries the $release_version release notes."
+    if git ls-remote --exit-code --heads origin "refs/heads/$notes_branch" >/dev/null 2>&1; then
+      echo "$notes_branch already exists; opening its pull request."
     else
       if git show "origin/main:$notes_index" | grep -Eq "^## $release_version "; then
         echo "Release notes for $release_version are already on main, but no open or merged $notes_branch pull request was found." >&2
@@ -236,26 +225,6 @@ else
         --body-file "$body_file"
     )
   fi
-
-  # Validate both ephemeral remote tips before deleting either branch. Each
-  # deletion is leased on the validated tip, so a branch that moves in
-  # between is left alone rather than deleted.
-  releasing_tip=$(git ls-remote --heads origin "refs/heads/$base_ref" | awk '{print $1}')
-  if [[ -n $releasing_tip && $releasing_tip != "$release_sha" ]]; then
-    echo "$base_ref moved: its tip is $releasing_tip, expected $release_sha. No patch branch was deleted." >&2
-    exit 1
-  fi
-  patch_branch="patching/$release_version"
-  patching_tip=$(git ls-remote --heads origin "refs/heads/$patch_branch" | awk '{print $1}')
-  if [[ -n $patching_tip ]]; then
-    git fetch --quiet origin "$patch_branch"
-    if ! git merge-base --is-ancestor "$patching_tip" "$release_sha"; then
-      echo "$patch_branch tip $patching_tip is not an ancestor of $release_sha. No patch branch was deleted." >&2
-      exit 1
-    fi
-  fi
-  [[ -z $releasing_tip ]] || git push --force-with-lease="refs/heads/$base_ref:$releasing_tip" origin --delete "$base_ref"
-  [[ -z $patching_tip ]] || git push --force-with-lease="refs/heads/$patch_branch:$patching_tip" origin --delete "$patch_branch"
 fi
 
 if [[ -n ${GITHUB_OUTPUT:-} ]]; then

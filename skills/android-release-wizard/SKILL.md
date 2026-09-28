@@ -17,8 +17,14 @@ updated versions. Then read GitHub state:
 
 - List `patching/*` and `releasing/*` branches.
 - List open pull requests whose base is one of those branches.
-- If a `releasing/*` branch exists, report its preparation pull request and
-  stop. The operator's next action is to review and merge that pull request.
+- If a `releasing/*` branch exists, report the operator's next action and
+  stop:
+  - While its preparation pull request is open, review and merge it.
+  - After a release from `main` published, merge the pull request from
+    `releasing/x.y.z` into `main` and delete that branch.
+  - After a patch published, merge the notes pull request from
+    `patch-notes/x.y.z` into `main`, then delete `patching/x.y.z` and
+    `releasing/x.y.z`.
 
 ## Inputs
 

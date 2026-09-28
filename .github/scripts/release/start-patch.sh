@@ -21,11 +21,6 @@ pull_requests=${PULL_REQUESTS:-}
 repository=${GITHUB_REPOSITORY:?GITHUB_REPOSITORY is required}
 work_dir=build/release-automation
 
-if [[ ! $line =~ ^[0-9]+\.[0-9]+$ ]]; then
-  echo "Invalid release line '$line'; expected X.Y." >&2
-  exit 1
-fi
-
 source_tag=$("$script_dir/version.sh" highest-tag "$line")
 if ! git cat-file -e "$source_tag:.github/scripts/release/publish-guard.sh" 2>/dev/null; then
   echo "$source_tag predates the automated release process; patch this release by hand." >&2
@@ -42,30 +37,18 @@ fi
 mkdir -p "$work_dir"
 requested_file="$work_dir/patch-pull-requests.tsv"
 : >"$requested_file"
-seen=' '
 for token in ${pull_requests//,/ }; do
   number=${token#\#}
   if [[ ! $number =~ ^[1-9][0-9]*$ ]]; then
     echo "Invalid pull request '$token'; expected numbers separated by spaces or commas." >&2
     exit 1
   fi
-  if [[ $seen == *" $number "* ]]; then
-    continue
-  fi
-  seen+="$number "
   pr=$(
     gh pr view "$number" \
       --repo "$repository" \
       --json number,state,baseRefName,mergedAt,mergeCommit
   )
-  if ! jq -e \
-    --argjson number "$number" \
-    '.number == $number
-     and .state == "MERGED"
-     and .baseRefName == "main"
-     and (.mergedAt | type == "string" and length > 0)
-     and (.mergeCommit.oid | type == "string" and test("^[0-9a-fA-F]{40}$"))' \
-    <<<"$pr" >/dev/null; then
+  if ! jq -e '.state == "MERGED" and .baseRefName == "main"' <<<"$pr" >/dev/null; then
     echo "Pull request #$number must be merged into main in $repository." >&2
     exit 1
   fi

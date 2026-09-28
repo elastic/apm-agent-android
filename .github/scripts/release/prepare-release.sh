@@ -16,8 +16,8 @@
 #
 # On main, derives the bump from the notes and the version from the highest
 # `vX.Y.Z` tag after checking the expected `-SNAPSHOT`. On a patch branch,
-# takes the release version from `patching/X.Y.Z` and validates its source tag
-# and unchanged version file. The shared path then pushes `releasing/X.Y.Z`,
+# takes the release version from `patching/X.Y.Z` and checks that the branch
+# contains its source tag. The shared path then pushes `releasing/X.Y.Z`,
 # commits the release changes on `prepare/X.Y.Z`, and opens the preparation PR.
 #
 # All checks run before anything is pushed. If no PR was merged since the
@@ -43,18 +43,8 @@ if [[ $release_ref_name == patching/* ]]; then
     exit 1
   fi
   previous_tag="v${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.$((BASH_REMATCH[3] - 1))"
-  if ! previous_tag_sha=$(git rev-parse "$previous_tag^{commit}" 2>/dev/null); then
-    echo "Previous patch source tag $previous_tag does not exist." >&2
-    exit 1
-  fi
-  base_sha=$(git merge-base "$previous_tag" "$release_ref")
-  if [[ $base_sha != "$previous_tag_sha" ]]; then
-    echo "$previous_tag must be the merge base of $release_ref_name; found $base_sha." >&2
-    exit 1
-  fi
-  expected_version=${previous_tag#v}
-  if [[ $development_version != "$expected_version" ]]; then
-    echo "Patch branch $release_ref_name must keep version $expected_version from $previous_tag; found $development_version." >&2
+  if ! git merge-base --is-ancestor "$previous_tag" "$release_ref" 2>/dev/null; then
+    echo "$release_ref_name must contain its source tag $previous_tag." >&2
     exit 1
   fi
 else
@@ -172,7 +162,7 @@ body_file="$work_dir/pull-request-body.md"
   printf -- '- Previous release: `%s`\n' "$previous_tag"
   printf -- '- Included pull requests:\n%s\n\n' "$summary"
   if [[ $patch_release == true ]]; then
-    ending="opens a release-notes pull request into \`main\` and deletes \`patching/$release_version\` and \`$release_branch\`"
+    ending="opens a release-notes pull request into \`main\`"
   else
     ending="opens a second pull request from \`$release_branch\` into \`main\`"
   fi

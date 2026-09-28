@@ -76,8 +76,7 @@ into `releasing/x.y.z`. The merge starts the publish workflow, which:
 5. Creates the GitHub Release.
 6. For a release from `main`, commits the next `-SNAPSHOT` version on
    `releasing/x.y.z` and opens its PR into `main`.
-7. For a patch, opens a notes-only PR into `main` and deletes the
-   `patching/x.y.z` and `releasing/x.y.z` branches.
+7. For a patch, opens a notes-only PR into `main`.
 
 The team's Slack channel receives the outcome with links to the GitHub Release
 and the release PR, or to the failed run.
@@ -91,8 +90,9 @@ not deleted automatically. Until this PR merges, Prepare release stops with a
 message naming the branch that is still in flight.
 
 For a patch, review and merge the notes-only PR from
-`patch-notes/x.y.z`. The publish workflow already deleted the patch and
-releasing branches after it opened this PR.
+`patch-notes/x.y.z`, then delete the `patching/x.y.z` and `releasing/x.y.z`
+branches. Until `releasing/x.y.z` is deleted, Prepare release stops with a
+message naming it.
 
 ## Patch release
 
@@ -111,8 +111,7 @@ tag, so only releases made by this automation can be patched this way.
 Draft and approve release notes from `patching/x.y.z`, then dispatch Prepare
 release from that branch. Patch preparation leaves `applies_to` metadata
 unchanged. Review and merge the preparation PR to publish. Finally, merge the
-notes-only PR into `main`; the automation deletes `patching/x.y.z` and
-`releasing/x.y.z`.
+notes-only PR into `main` and delete `patching/x.y.z` and `releasing/x.y.z`.
 
 ## Release dry run
 
@@ -158,7 +157,4 @@ already done, so the rerun continues from the failed step.
 - If a Start patch cherry-pick conflicts, dispatch again without that pull
   request. Cherry-pick it by hand through a pull request into the named patch
   branch.
-- If patch finalization reports that `releasing/x.y.z` moved after the merged
-  commit, remove the unexpected change before rerunning. The automation does
-  not delete either patch branch in this state.
 

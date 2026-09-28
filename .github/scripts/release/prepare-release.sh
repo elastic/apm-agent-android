@@ -9,14 +9,14 @@
 # Environment:
 #   RELEASE_NOTES       release-note JSON authored by the operator (required)
 #   GITHUB_REPOSITORY   owner/repository where the PR is opened (required)
-#   BUMP                minor (default) | major
 #   GITHUB_SHA          commit to prepare (default HEAD)
 #   GITHUB_STEP_SUMMARY GitHub Actions summary file (optional)
 #   GH_TOKEN             GitHub CLI authentication (required in CI)
 #
-# Derives the release version from the highest `vX.Y.Z` tag and the bump,
-# after checking that gradle.properties holds the expected `-SNAPSHOT`
-# version. Then pushes `releasing/X.Y.Z`, an unchanged copy of the
+# Derives the bump from the release notes (`major` when any item is
+# `breaking`, else `minor`) and the release version from the highest `vX.Y.Z`
+# tag and that bump, after checking that gradle.properties holds the expected
+# `-SNAPSHOT` version. Then pushes `releasing/X.Y.Z`, an unchanged copy of the
 # dispatched commit that serves as the PR base, and commits once on
 # `prepare/X.Y.Z`: the version, the rendered release-notes section, the
 # documentation `applies_to` versions on a major bump, and the regenerated
@@ -31,18 +31,12 @@ set -euo pipefail
 script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 work_dir=build/release-automation
 release_notes=${RELEASE_NOTES:?RELEASE_NOTES is required}
-bump=${BUMP:-minor}
 repository=${GITHUB_REPOSITORY:?GITHUB_REPOSITORY is required}
 release_ref=${GITHUB_SHA:-HEAD}
 
 mkdir -p "$work_dir"
 previous_tag=$("$script_dir/version.sh" highest-tag)
 development_version=$(sed -n 's/^version=//p' gradle.properties)
-release_version=$(
-  "$script_dir/version.sh" release-version "$previous_tag" "$development_version" "$bump"
-)
-release_branch="releasing/$release_version"
-prepare_branch="prepare/$release_version"
 
 # Only one release can be in flight. A releasing branch exists from the
 # moment preparation pushes it until the release PR into main is merged and
@@ -68,6 +62,17 @@ fi
 notes_file="$work_dir/release-notes.json"
 rendered_file="$work_dir/release-notes.md"
 printf '%s\n' "$release_notes" | jq . >"$notes_file"
+bump=$(
+  jq -r \
+    '[.dependencies[], .featuresEnhancements[], .fixes[], .uncategorized[]]
+     | if any(.breaking == true) then "major" else "minor" end' \
+    "$notes_file"
+)
+release_version=$(
+  "$script_dir/version.sh" release-version "$previous_tag" "$development_version" "$bump"
+)
+release_branch="releasing/$release_version"
+prepare_branch="prepare/$release_version"
 "$script_dir/render-release-notes.sh" "$notes_file" "$release_version" >"$rendered_file"
 
 marker='% next_release_notes'

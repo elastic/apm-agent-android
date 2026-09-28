@@ -8,14 +8,6 @@ on:
         description: Release-note JSON. Use the draft workflow or the release wizard.
         required: true
         type: string
-      bump:
-        description: Release version bump.
-        required: true
-        default: minor
-        type: choice
-        options:
-          - minor
-          - major
 
 permissions:
   contents: read
@@ -60,7 +52,6 @@ jobs:
 
       - name: Prepare release
         env:
-          BUMP: ${{ inputs.bump }}
           GH_TOKEN: ${{ steps.token.outputs.token }}
           RELEASE_NOTES: ${{ inputs.release_notes }}
         run: .github/scripts/release/prepare-release.sh

@@ -11,8 +11,9 @@
       "prId": "902"
     },
     {
-      "message": "[Breaking] Remove a deprecated configuration option",
-      "prId": "903"
+      "message": "Remove a deprecated configuration option",
+      "prId": "903",
+      "breaking": true
     }
   ],
   "fixes": [

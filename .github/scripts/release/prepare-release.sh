@@ -34,21 +34,21 @@ release_ref_name=${RELEASE_REF_NAME:-main}
 
 mkdir -p "$work_dir"
 development_version=$(sed -n 's/^version=//p' gradle.properties)
+previous_tag=$("$script_dir/version.sh" previous-tag "$release_ref_name")
 patch_release=false
 if [[ $release_ref_name == patching/* ]]; then
   patch_release=true
   release_version=${release_ref_name#patching/}
-  if [[ ! $release_version =~ ^([0-9]+)\.([0-9]+)\.([1-9][0-9]*)$ ]]; then
-    echo "Patch branch '$release_ref_name' must end in X.Y.Z with a nonzero patch version." >&2
-    exit 1
-  fi
-  previous_tag="v${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.$((BASH_REMATCH[3] - 1))"
   if ! git merge-base --is-ancestor "$previous_tag" "$release_ref" 2>/dev/null; then
     echo "$release_ref_name must contain its source tag $previous_tag." >&2
     exit 1
   fi
-else
-  previous_tag=$("$script_dir/version.sh" highest-tag)
+  # A leftover branch of a shipped patch would otherwise pass here and stop
+  # only at the publish guard, after its preparation PR was merged.
+  if git rev-parse -q --verify "refs/tags/v$release_version" >/dev/null; then
+    echo "v$release_version is already released; delete $release_ref_name instead of preparing it again." >&2
+    exit 1
+  fi
 fi
 
 # Only one release can be in flight. A releasing branch exists from the

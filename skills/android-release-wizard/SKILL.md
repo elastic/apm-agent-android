@@ -91,9 +91,10 @@ When the operator wants a patch:
 6. If `patching/x.y.z` already exists, do not dispatch Start patch. List new
    candidates and explain that each selected fix must be cherry-picked by
    hand through a pull request into that branch.
-7. For an existing patch branch, offer to draft notes from that branch. Use
-   that branch and its previous tag with `draft-release-notes.sh`. After the
-   notes are approved, dispatch Prepare release with
+7. For an existing patch branch, offer to draft notes from that branch with
+   `RELEASE_REF_NAME=patching/x.y.z` set for `draft-release-notes.sh` and
+   the branch as `<ref>`, so the range starts at the branch's source tag.
+   After the notes are approved, dispatch Prepare release with
    `--ref patching/x.y.z`.
 
 ## Refine until approved

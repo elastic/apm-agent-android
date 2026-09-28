@@ -108,8 +108,9 @@ only after every cherry-pick succeeds. Add later fixes by opening pull
 requests into the patch branch. The branch releases with the tooling of its
 tag, so only releases made by this automation can be patched this way.
 
-Draft and approve release notes from `patching/x.y.z`, then dispatch Prepare
-release from that branch. Patch preparation leaves `applies_to` metadata
+Draft release notes with the wizard or by dispatching the Draft release notes
+workflow on `patching/x.y.z`; the draft then covers only that branch's
+changes. Approve them, then dispatch Prepare release from that branch. Patch preparation leaves `applies_to` metadata
 unchanged. Review and merge the preparation PR to publish. Finally, merge the
 notes-only PR into `main` and delete `patching/x.y.z` and `releasing/x.y.z`.
 

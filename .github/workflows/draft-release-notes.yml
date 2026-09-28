@@ -19,6 +19,7 @@ jobs:
       - name: Draft release-note JSON
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_REF_NAME: ${{ github.ref_name }}
         run: |
           notes=$(.github/scripts/release/draft-release-notes.sh "$GITHUB_SHA")
           echo "$notes" | jq .

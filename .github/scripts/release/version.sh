@@ -5,6 +5,9 @@
 #
 #   highest-tag [line]                 the latest release tag by version order,
 #                                      optionally restricted to X.Y
+#   previous-tag [ref-name]            the release a new one from <ref-name>
+#                                      follows: `vX.Y.(Z-1)` for
+#                                      `patching/X.Y.Z`, else highest-tag
 #   next-patch <tag-or-version>        the next patch version
 #   release-version <tag> <dev> <bump> the version to release; fails when
 #                                      <dev> is not the next minor `-SNAPSHOT`
@@ -19,6 +22,7 @@ usage() {
   cat >&2 <<'EOF'
 Usage:
   version.sh highest-tag [line]
+  version.sh previous-tag [ref-name]
   version.sh next-patch <release-version-or-tag>
   version.sh release-version <previous-tag> <development-version> <minor|major>
   version.sh next-development <release-version-or-tag>
@@ -72,6 +76,18 @@ case ${1:-} in
     fi
     parse_version "$tag"
     printf '%s\n' "$tag"
+    ;;
+  previous-tag)
+    [[ $# -le 2 ]] || usage
+    ref_name=${2:-}
+    if [[ $ref_name != patching/* ]]; then
+      exec "$0" highest-tag
+    fi
+    if [[ ! ${ref_name#patching/} =~ ^([0-9]+)\.([0-9]+)\.([1-9][0-9]*)$ ]]; then
+      echo "Patch branch '$ref_name' must end in X.Y.Z with a nonzero patch version." >&2
+      exit 1
+    fi
+    printf 'v%s.%s.%s\n' "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}" "$((BASH_REMATCH[3] - 1))"
     ;;
   next-patch)
     [[ $# -eq 2 ]] || usage

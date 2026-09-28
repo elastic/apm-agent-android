@@ -10,18 +10,15 @@
 #   RELEASE_NOTES       release-note JSON authored by the operator (required)
 #   GITHUB_REPOSITORY   owner/repository where the PR is opened (required)
 #   GITHUB_SHA          commit to prepare (default HEAD)
+#   RELEASE_REF_NAME    dispatched ref name (default main)
 #   GITHUB_STEP_SUMMARY GitHub Actions summary file (optional)
 #   GH_TOKEN             GitHub CLI authentication (required in CI)
 #
-# Derives the bump from the release notes (`major` when any item is
-# `breaking`, else `minor`) and the release version from the highest `vX.Y.Z`
-# tag and that bump, after checking that gradle.properties holds the expected
-# `-SNAPSHOT` version. Then pushes `releasing/X.Y.Z`, an unchanged copy of the
-# dispatched commit that serves as the PR base, and commits once on
-# `prepare/X.Y.Z`: the version, the rendered release-notes section, the
-# documentation `applies_to` versions on a major bump, and the regenerated
-# NOTICE files. Opens the PR from `prepare/X.Y.Z` into `releasing/X.Y.Z`.
-# Merging that PR publishes the release.
+# On main, derives the bump from the notes and the version from the highest
+# `vX.Y.Z` tag after checking the expected `-SNAPSHOT`. On a patch branch,
+# takes the release version from `patching/X.Y.Z` and checks that the branch
+# contains its source tag. The shared path then pushes `releasing/X.Y.Z`,
+# commits the release changes on `prepare/X.Y.Z`, and opens the preparation PR.
 #
 # All checks run before anything is pushed. If no PR was merged since the
 # last release, the script exits successfully without creating anything.
@@ -33,10 +30,26 @@ work_dir=build/release-automation
 release_notes=${RELEASE_NOTES:?RELEASE_NOTES is required}
 repository=${GITHUB_REPOSITORY:?GITHUB_REPOSITORY is required}
 release_ref=${GITHUB_SHA:-HEAD}
+release_ref_name=${RELEASE_REF_NAME:-main}
 
 mkdir -p "$work_dir"
-previous_tag=$("$script_dir/version.sh" highest-tag)
 development_version=$(sed -n 's/^version=//p' gradle.properties)
+previous_tag=$("$script_dir/version.sh" previous-tag "$release_ref_name")
+patch_release=false
+if [[ $release_ref_name == patching/* ]]; then
+  patch_release=true
+  release_version=${release_ref_name#patching/}
+  if ! git merge-base --is-ancestor "$previous_tag" "$release_ref" 2>/dev/null; then
+    echo "$release_ref_name must contain its source tag $previous_tag." >&2
+    exit 1
+  fi
+  # A leftover branch of a shipped patch would otherwise pass here and stop
+  # only at the publish guard, after its preparation PR was merged.
+  if git rev-parse -q --verify "refs/tags/v$release_version" >/dev/null; then
+    echo "v$release_version is already released; delete $release_ref_name instead of preparing it again." >&2
+    exit 1
+  fi
+fi
 
 # Only one release can be in flight. A releasing branch exists from the
 # moment preparation pushes it until the release PR into main is merged and
@@ -68,9 +81,15 @@ bump=$(
      | if any(.breaking == true) then "major" else "minor" end' \
     "$notes_file"
 )
-release_version=$(
-  "$script_dir/version.sh" release-version "$previous_tag" "$development_version" "$bump"
-)
+if [[ $patch_release == true && $bump == major ]]; then
+  echo "A patch release cannot contain a breaking item." >&2
+  exit 1
+fi
+if [[ $patch_release == false ]]; then
+  release_version=$(
+    "$script_dir/version.sh" release-version "$previous_tag" "$development_version" "$bump"
+  )
+fi
 release_branch="releasing/$release_version"
 prepare_branch="prepare/$release_version"
 "$script_dir/render-release-notes.sh" "$notes_file" "$release_version" >"$rendered_file"
@@ -92,7 +111,7 @@ rm gradle.properties.bak
 # were written against the development version; on a major bump that version
 # is never released, so rewrite them to the release version.
 development_base=${development_version%-SNAPSHOT}
-if [[ $release_version != "$development_base" ]]; then
+if [[ $patch_release == false && $release_version != "$development_base" ]]; then
   while IFS= read -r -d '' file; do
     OLD_VERSION=$development_base NEW_VERSION=$release_version perl -0pi -e '
       s/(edot_android:\s+[a-z_]+\s+)\Q$ENV{OLD_VERSION}\E\b/$1$ENV{NEW_VERSION}/g
@@ -142,7 +161,12 @@ body_file="$work_dir/pull-request-body.md"
   printf -- '- Bump: `%s`\n' "$bump"
   printf -- '- Previous release: `%s`\n' "$previous_tag"
   printf -- '- Included pull requests:\n%s\n\n' "$summary"
-  printf '> Merging this pull request publishes %s to Maven Central and the Gradle Plugin Portal and tags the merge commit. Review it, then merge when the checks are green. The automation then opens a second pull request from `%s` into `main`.\n' "$release_version" "$release_branch"
+  if [[ $patch_release == true ]]; then
+    ending="opens a release-notes pull request into \`main\`"
+  else
+    ending="opens a second pull request from \`$release_branch\` into \`main\`"
+  fi
+  printf '> Merging this pull request publishes %s to Maven Central and the Gradle Plugin Portal and tags the merge commit. Review it, then merge when the checks are green. The automation then %s.\n' "$release_version" "$ending"
 } >"$body_file"
 
 pr_url=$(

@@ -3,7 +3,12 @@
 # Version arithmetic for the release scripts. Nobody types a version; every
 # version is derived here from the highest `vX.Y.Z` tag.
 #
-#   highest-tag                        the latest release tag by version order
+#   highest-tag [line]                 the latest release tag by version order,
+#                                      optionally restricted to X.Y
+#   previous-tag [ref-name]            the release a new one from <ref-name>
+#                                      follows: `vX.Y.(Z-1)` for
+#                                      `patching/X.Y.Z`, else highest-tag
+#   next-patch <tag-or-version>        the next patch version
 #   release-version <tag> <dev> <bump> the version to release; fails when
 #                                      <dev> is not the next minor `-SNAPSHOT`
 #                                      after <tag>, which catches an unmerged
@@ -16,7 +21,9 @@ set -euo pipefail
 usage() {
   cat >&2 <<'EOF'
 Usage:
-  version.sh highest-tag
+  version.sh highest-tag [line]
+  version.sh previous-tag [ref-name]
+  version.sh next-patch <release-version-or-tag>
   version.sh release-version <previous-tag> <development-version> <minor|major>
   version.sh next-development <release-version-or-tag>
 EOF
@@ -41,20 +48,51 @@ next_development() {
 
 case ${1:-} in
   highest-tag)
-    [[ $# -eq 1 ]] || usage
+    [[ $# -le 2 ]] || usage
+    line=${2:-}
+    if [[ -n $line && ! $line =~ ^[0-9]+\.[0-9]+$ ]]; then
+      echo "Invalid release line '$line'; expected X.Y." >&2
+      exit 1
+    fi
     # Only exact vX.Y.Z tags count; a glob alone would also match names such
     # as v2.0.0-rc1 and make preparation fail on them.
+    pattern='^v[0-9]+\.[0-9]+\.[0-9]+$'
+    if [[ -n $line ]]; then
+      pattern="^v${line//./\\.}\\.[0-9]+$"
+    fi
     tag=$(
       git tag --list 'v*' --sort=-version:refname \
-        | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' \
-        | head -n 1
+        | grep -E "$pattern" \
+        | head -n 1 \
+        || true
     )
     if [[ -z $tag ]]; then
+      if [[ -n $line ]]; then
+        echo "No release exists on line $line." >&2
+        exit 1
+      fi
       echo "No release tag matching vX.Y.Z was found." >&2
       exit 1
     fi
     parse_version "$tag"
     printf '%s\n' "$tag"
+    ;;
+  previous-tag)
+    [[ $# -le 2 ]] || usage
+    ref_name=${2:-}
+    if [[ $ref_name != patching/* ]]; then
+      exec "$0" highest-tag
+    fi
+    if [[ ! ${ref_name#patching/} =~ ^([0-9]+)\.([0-9]+)\.([1-9][0-9]*)$ ]]; then
+      echo "Patch branch '$ref_name' must end in X.Y.Z with a nonzero patch version." >&2
+      exit 1
+    fi
+    printf 'v%s.%s.%s\n' "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}" "$((BASH_REMATCH[3] - 1))"
+    ;;
+  next-patch)
+    [[ $# -eq 2 ]] || usage
+    parse_version "$2"
+    printf '%s.%s.%s\n' "$VERSION_MAJOR" "$VERSION_MINOR" "$((VERSION_PATCH + 1))"
     ;;
   release-version)
     [[ $# -eq 4 ]] || usage

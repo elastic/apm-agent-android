@@ -124,7 +124,7 @@ jobs:
           message: |
             :tada: [${{ github.repository }}] EDOT Android ${{ steps.guard.outputs.release_version }} was released.
             Release: ${{ steps.finalize.outputs.release_url }}
-            Release PR into main: ${{ steps.finalize.outputs.main_pull_request_url }}
+            PR into main: ${{ steps.finalize.outputs.main_pull_request_url }}
 
       - name: Report release failure to Slack
         if: failure()

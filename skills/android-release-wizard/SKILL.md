@@ -1,6 +1,6 @@
 ---
 name: android-release-wizard
-description: Propose the release notes of the Prepare release workflow for EDOT Android, including which items are breaking and the version that follows, refine them with the operator, and dispatch once the operator explicitly approves. Use when the operator asks to prepare or start an Android SDK release.
+description: Guide an EDOT Android main or patch release from current GitHub state. Propose patch candidates or release notes, refine them with the operator, and dispatch the appropriate workflow only after explicit approval. Use when the operator asks to prepare, start, or continue an Android SDK release.
 ---
 
 # Android release wizard
@@ -13,7 +13,18 @@ ahead". Do the work up front so that is possible.
 
 Before you start, ensure the local repository reflects the latest remote
 state. If this skill or the release scripts changed, continue from the
-updated versions.
+updated versions. Then read GitHub state:
+
+- List `patching/*` and `releasing/*` branches.
+- List open pull requests whose base is one of those branches.
+- If a `releasing/*` branch exists, report the operator's next action and
+  stop:
+  - While its preparation pull request is open, review and merge it.
+  - After a release from `main` published, merge the pull request from
+    `releasing/x.y.z` into `main` and delete that branch.
+  - After a patch published, merge the notes pull request from
+    `patch-notes/x.y.z` into `main`, then delete `patching/x.y.z` and
+    `releasing/x.y.z`.
 
 ## Inputs
 
@@ -27,9 +38,12 @@ form so the operator sees exactly what will run.
   `[Breaking]`; the flag adds that prefix when the notes are rendered.
 
 The version follows from the notes. Any `breaking: true` item produces a
-major release; otherwise the next minor.
+major release; otherwise the main flow produces the next minor. A patch
+cannot contain a breaking item.
 
-## Propose
+## Main release
+
+When the operator wants the next release from `main`:
 
 1. Run from the repository root, with `<main-ref>` as the up-to-date `main`
    ref, normally `origin/main`:
@@ -52,7 +66,36 @@ major release; otherwise the next minor.
    Show the release version that follows from the complete notes. If the
    operator asks for a major release and no item is breaking, explain that a
    major requires a breaking item and ask which change is breaking.
-6. Show the summary described below.
+6. Continue with the approval loop.
+
+## Patch release
+
+When the operator wants a patch:
+
+1. If no `patching/*` branch exists, ask for an `X.Y` release line or accept
+   `latest`.
+2. Resolve `latest` to the line of the highest release tag. Resolve the
+   source with `version.sh highest-tag <line>` and the version with
+   `version.sh next-patch <tag>`.
+3. Read the source tag date. List merged `main` pull requests labeled `bug`
+   whose merge time is after that date. Add any pull requests the operator
+   names.
+4. Show the source tag, patch version, and proposed cherry-pick candidates.
+   Explain briefly why each candidate belongs.
+5. After explicit approval, dispatch:
+
+   ```sh
+   gh workflow run start-patch.yml -R elastic/apm-agent-android --ref main -f line='<X.Y>' -f pull_requests='<numbers>'
+   ```
+
+6. If `patching/x.y.z` already exists, do not dispatch Start patch. List new
+   candidates and explain that each selected fix must be cherry-picked by
+   hand through a pull request into that branch.
+7. For an existing patch branch, offer to draft notes from that branch with
+   `RELEASE_REF_NAME=patching/x.y.z` set for `draft-release-notes.sh` and
+   the branch as `<ref>`, so the range starts at the branch's source tag.
+   After the notes are approved, dispatch Prepare release with
+   `--ref patching/x.y.z`.
 
 ## Refine until approved
 
@@ -78,13 +121,13 @@ approved, ask.
 
 ## Dispatch
 
-1. Record the time, then dispatch with the approved JSON on standard input
-   through a quoted heredoc, so no character in the notes is interpreted by
-   the shell:
+1. Record the time, then dispatch from the selected ref with the approved JSON
+   on standard input through a quoted heredoc, so no character in the notes is
+   interpreted by the shell:
 
    ```sh
    since=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-   gh workflow run prepare-release.yml -R elastic/apm-agent-android --ref main -F release_notes=@- <<'EOF'
+   gh workflow run prepare-release.yml -R elastic/apm-agent-android --ref '<main-or-patching/x.y.z>' -F release_notes=@- <<'EOF'
    <json>
    EOF
    ```

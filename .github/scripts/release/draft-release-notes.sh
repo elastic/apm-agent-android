@@ -4,6 +4,12 @@
 #
 # Usage: draft-release-notes.sh [ref] [previous-tag]
 #
+# Environment:
+#   RELEASE_REF_NAME  branch the release is prepared from (default main).
+#                     Without an explicit previous tag, the range starts at
+#                     the tag Prepare release uses for this branch, so a
+#                     patch branch drafts only its own line's changes.
+#
 # Lists the pull requests merged since the previous release (see pr-range.sh)
 # and groups them by label into the JSON shape that prepare-release.yml
 # accepts: `dependencies`, `featuresEnhancements`, `fixes`, and
@@ -15,7 +21,8 @@
 set -euo pipefail
 
 script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-range=$("$script_dir/pr-range.sh" "${1:-HEAD}" "${2:-}")
+previous_tag=${2:-$("$script_dir/version.sh" previous-tag "${RELEASE_REF_NAME:-}")}
+range=$("$script_dir/pr-range.sh" "${1:-HEAD}" "$previous_tag")
 
 jq 'def has_label($name):
       any(.labels[]?; ascii_downcase == $name);

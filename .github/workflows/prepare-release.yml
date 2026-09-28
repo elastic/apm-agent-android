@@ -26,10 +26,10 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - name: Require main
-        if: github.ref_name != 'main'
+      - name: Require main or a patch branch
+        if: github.ref_name != 'main' && !startsWith(github.ref_name, 'patching/')
         run: |
-          echo "::error::Prepare release must be dispatched from main."
+          echo "::error::Prepare release must be dispatched from main or patching/x.y.z."
           exit 1
 
       - name: Get automation token
@@ -54,4 +54,5 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.token.outputs.token }}
           RELEASE_NOTES: ${{ inputs.release_notes }}
+          RELEASE_REF_NAME: ${{ github.ref_name }}
         run: .github/scripts/release/prepare-release.sh

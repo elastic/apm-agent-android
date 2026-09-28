@@ -6,8 +6,9 @@
 #
 # Called by publish-release.yml once Buildkite has published. In order:
 # create the `vX.Y.Z` tag at the merged commit, create the GitHub Release
-# from the release-notes section, commit the next `-SNAPSHOT` version on the
-# `releasing/X.Y.Z` branch, and open the PR from that branch into `main`.
+# from the release-notes section, then finish according to the patch digit.
+# A main release commits the next `-SNAPSHOT` on `releasing/X.Y.Z` and opens
+# that branch's PR into `main`. A patch opens a notes-only PR into `main`.
 #
 # Every step first checks whether its result already exists and skips it if
 # so, so a failed run can be re-run and picks up where it stopped without
@@ -70,28 +71,52 @@ fi
 mkdir -p "$work_dir"
 git fetch --quiet --tags origin main "$base_ref"
 
+find_main_pr() {
+  local head_ref=$1
+  local found=
+  local state
+  for state in open merged; do
+    found=$(
+      gh pr list \
+        --repo "$repository" \
+        --state "$state" \
+        --base main \
+        --head "$head_ref" \
+        --limit 1 \
+        --json url \
+        --jq '.[0].url // empty'
+    )
+    [[ -z $found ]] || break
+  done
+  printf '%s\n' "$found"
+}
+
 # The guard already validated an existing tag; create it only when absent.
 if [[ $create_tag == true ]]; then
   git tag "$tag" "$release_sha"
   git push origin "refs/tags/$tag"
 fi
 
-# The GitHub Release body is the release-notes section for this version,
-# read from the released commit, plus the link to the published docs.
+# Extract the released section once. It is shared by the GitHub Release and
+# the patch notes-only PR.
+release_section="$work_dir/release-section.md"
+git show "$release_sha:docs/release-notes/index.md" \
+  | awk -v version="$release_version" '
+      $0 ~ "^## " version " " { capture = 1 }
+      capture && $0 ~ "^## " && $0 !~ "^## " version " " { exit }
+      capture { print }
+    ' >"$release_section"
+if [[ ! -s $release_section ]]; then
+  echo "Could not extract release notes for $release_version." >&2
+  exit 1
+fi
+
+# The GitHub Release body is the section plus the published-docs link.
 if gh release view "$tag" --repo "$repository" >/dev/null 2>&1; then
   release_url=$(gh release view "$tag" --repo "$repository" --json url --jq .url)
 else
   release_body="$work_dir/github-release.md"
-  git show "$release_sha:docs/release-notes/index.md" \
-    | awk -v version="$release_version" '
-        $0 ~ "^## " version " " { capture = 1 }
-        capture && $0 ~ "^## " && $0 !~ "^## " version " " { exit }
-        capture { print }
-      ' >"$release_body"
-  if [[ ! -s $release_body ]]; then
-    echo "Could not extract release notes for $release_version." >&2
-    exit 1
-  fi
+  cp "$release_section" "$release_body"
   {
     printf '\n'
     printf '[Published documentation](%s)\n' "$docs_url"
@@ -105,62 +130,101 @@ else
   )
 fi
 
-# Move the release branch to the next development version. The tag stays on
-# the merged commit; this commit comes right after it. The branch must still
-# point at the merged commit, or at the bump commit from a previous run of
-# this script: anything else means something was pushed after the merge and
-# would reach main without having been published, so stop.
-next_development=$("$script_dir/version.sh" next-development "$release_version")
-branch_tip=$(git rev-parse "origin/$base_ref")
-if [[ $branch_tip == "$release_sha" ]]; then
-  git switch -C "$base_ref" "$release_sha"
-  sed -i.bak "s/^version=.*/version=$next_development/" gradle.properties
-  rm gradle.properties.bak
-  git add -- gradle.properties
-  git commit -m "Prepare for the next release"
-  git push origin "$base_ref"
-elif [[ $(git rev-parse "$branch_tip^") == "$release_sha" \
-  && $(git diff --name-only "$release_sha" "$branch_tip") == gradle.properties \
-  && $(git show "$branch_tip:gradle.properties" | sed -n 's/^version=//p') == "$next_development" ]]; then
-  # Exactly one commit on top of the merged one, touching only the version
-  # file: that is this script's own bump from a previous run.
-  echo "$base_ref already carries the next development version."
-else
-  echo "$base_ref moved after the merge: its tip is $branch_tip, expected $release_sha or its bump commit. Not opening a release PR from unpublished changes." >&2
-  exit 1
-fi
+patch_version=${release_version##*.}
+if [[ $patch_version =~ ^0+$ ]]; then
+  # Move the release branch to the next development version. The tag stays on
+  # the merged commit; this commit comes right after it. The branch must still
+  # point at the merged commit, or at this script's bump from a previous run.
+  next_development=$("$script_dir/version.sh" next-development "$release_version")
+  branch_tip=$(git rev-parse "origin/$base_ref")
+  if [[ $branch_tip == "$release_sha" ]]; then
+    git switch -C "$base_ref" "$release_sha"
+    sed -i.bak "s/^version=.*/version=$next_development/" gradle.properties
+    rm gradle.properties.bak
+    git add -- gradle.properties
+    git commit -m "Prepare for the next release"
+    git push origin "$base_ref"
+  elif [[ $(git rev-parse "$branch_tip^") == "$release_sha" \
+    && $(git diff --name-only "$release_sha" "$branch_tip") == gradle.properties \
+    && $(git show "$branch_tip:gradle.properties" | sed -n 's/^version=//p') == "$next_development" ]]; then
+    echo "$base_ref already carries the next development version."
+  else
+    echo "$base_ref moved after the merge: its tip is $branch_tip, expected $release_sha or its bump commit. Not opening a release PR from unpublished changes." >&2
+    exit 1
+  fi
 
-# The PR into main carries the release changes and the version bump. An
-# operator merges it; the bot never does. Reuse an open or merged PR; a PR
-# that was closed without merging does not count, so a rerun opens a new one.
-main_pr=
-for state in open merged; do
-  main_pr=$(
-    gh pr list \
-      --repo "$repository" \
-      --state "$state" \
-      --base main \
-      --head "$base_ref" \
-      --limit 1 \
-      --json url \
-      --jq '.[0].url // empty'
-  )
-  [[ -z $main_pr ]] || break
-done
-if [[ -z $main_pr ]]; then
-  body_file="$work_dir/main-pull-request-body.md"
-  {
-    printf 'EDOT Android %s is published: [%s](%s), [GitHub Release](%s).\n\n' "$release_version" "$tag" "$tag_url" "$release_url"
-    printf 'This pull request brings the release changes into `main` and sets the development version to `%s`. Merge it to finish the release.\n' "$next_development"
-  } >"$body_file"
-  main_pr=$(
-    gh pr create \
-      --repo "$repository" \
-      --base main \
-      --head "$base_ref" \
-      --title "Release $release_version" \
-      --body-file "$body_file"
-  )
+  main_pr=$(find_main_pr "$base_ref")
+  if [[ -z $main_pr ]]; then
+    body_file="$work_dir/main-pull-request-body.md"
+    {
+      printf 'EDOT Android %s is published: [%s](%s), [GitHub Release](%s).\n\n' "$release_version" "$tag" "$tag_url" "$release_url"
+      printf 'This pull request brings the release changes into `main` and sets the development version to `%s`. Merge it to finish the release.\n' "$next_development"
+    } >"$body_file"
+    main_pr=$(
+      gh pr create \
+        --repo "$repository" \
+        --base main \
+        --head "$base_ref" \
+        --title "Release $release_version" \
+        --body-file "$body_file"
+    )
+  fi
+else
+  # The notes-only PR into main. A previous run may have pushed the notes
+  # branch and failed before opening the PR: open the PR from that branch.
+  # Otherwise build it from main, inserting the section above the first
+  # heading with a lower version; the index is in descending order, so that
+  # is its place.
+  notes_branch="patch-notes/$release_version"
+  notes_index=docs/release-notes/index.md
+  main_pr=$(find_main_pr "$notes_branch")
+  if [[ -z $main_pr ]]; then
+    if git ls-remote --exit-code --heads origin "refs/heads/$notes_branch" >/dev/null 2>&1; then
+      echo "$notes_branch already exists; opening its pull request."
+    else
+      if git show "origin/main:$notes_index" | grep -Eq "^## $release_version "; then
+        echo "Release notes for $release_version are already on main, but no open or merged $notes_branch pull request was found." >&2
+        exit 1
+      fi
+      git switch -C "$notes_branch" origin/main
+      updated_index="$work_dir/release-notes-index.md"
+      if ! awk -v version="$release_version" -v notes="$release_section" '
+        function lower(a, b,    x, y, i) {
+          split(a, x, "."); split(b, y, ".")
+          for (i = 1; i <= 3; i++) if (x[i] != y[i]) return x[i] + 0 < y[i] + 0
+          return 0
+        }
+        !inserted && /^## [0-9]+\.[0-9]+\.[0-9]+ / && lower($2, version) {
+          while ((getline entry < notes) > 0) print entry
+          close(notes)
+          inserted = 1
+        }
+        { print }
+        END { exit !inserted }
+      ' "$notes_index" >"$updated_index"; then
+        echo "main has no release-notes section older than $release_version; cannot place its notes." >&2
+        exit 1
+      fi
+      mv "$updated_index" "$notes_index"
+      git add -- "$notes_index"
+      git commit -m "Add $release_version release notes"
+      git push --set-upstream origin "$notes_branch"
+    fi
+
+    body_file="$work_dir/main-pull-request-body.md"
+    {
+      printf 'EDOT Android %s is published: [%s](%s), [GitHub Release](%s).\n\n' "$release_version" "$tag" "$tag_url" "$release_url"
+      printf 'Merging this pull request publishes the release notes on the documentation site.\n'
+    } >"$body_file"
+    main_pr=$(
+      gh pr create \
+        --repo "$repository" \
+        --base main \
+        --head "$notes_branch" \
+        --title "Release notes for $release_version" \
+        --body-file "$body_file"
+    )
+  fi
 fi
 
 if [[ -n ${GITHUB_OUTPUT:-} ]]; then

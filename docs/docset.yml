@@ -6,6 +6,7 @@ cross_links:
   - opentelemetry
   - elastic-agent
   - apm-agent-android
+  - integration-docs
 toc:
   - toc: release-notes
   - toc: reference/edot-android

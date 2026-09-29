@@ -95,7 +95,7 @@ plugins {
 
 ### Crash reporting
 
-Reports Android crashes as log events using the OpenTelemetry [Events API](https://opentelemetry.io/docs/specs/otel/logs/event-api/). Each crash event includes [session](index.md#sessions) information, exception details, and a stacktrace. These events can be viewed from {{kib}}'s Android dashboard under the "Crashes" section.
+Reports Android crashes as log events using the OpenTelemetry [Events API](https://opentelemetry.io/docs/specs/otel/logs/event-api/). Each crash event includes [session](index.md#sessions) information, exception details, and a stack trace. These events can be viewed from {{kib}}'s Android dashboard under the "Crashes" section.
 
 Refer to [Crash reporting](crash-reporting.md) to enable this instrumentation and configure deobfuscation for R8-optimized builds.
 

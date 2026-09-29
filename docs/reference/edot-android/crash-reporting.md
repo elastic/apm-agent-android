@@ -46,14 +46,14 @@ Android's R8 optimizer can rename classes and methods in release builds. When an
 
 EDOT Android identifies the correct mapping using the `app.build_id` resource attribute included with application telemetry. Mapping documents for a build are stored in a {{es}} index named `.android-r8-mappings-<build_id>`.
 
-Deobfuscating stack traces in {{kib}} requires version 1.0.0 or later of the [Android OpenTelemetry Assets](https://www.elastic.co/docs/reference/integrations/otel_android_dashboards) integration. Refer to the integration page for the minimum supported {{kib}} versions.
+Deobfuscating stack traces in {{kib}} requires version 1.0.0 or later of the [Android OpenTelemetry Assets](integration-docs://reference/otel_android_dashboards.md) integration. Refer to the integration page for the minimum supported {{kib}} versions.
 
 ### Prerequisites
 
 * Enable R8 for the variant whose mapping you want to upload.
 * Have your {{es}} endpoint URL at hand to use it in the Gradle task later.
 * Create a dedicated {{es}} API key for mapping uploads.
-* Install version 1.0.0 or later of the [Android OpenTelemetry Assets](https://www.elastic.co/docs/reference/integrations/otel_android_dashboards) integration in {{kib}}. The integration page lists the minimum supported {{kib}} versions. Refer to [Visualize telemetry](getting-started.md#visualize-telemetry) for installation instructions.
+* Install version 1.0.0 or later of the [Android OpenTelemetry Assets](integration-docs://reference/otel_android_dashboards.md) integration in {{kib}}. The integration page lists the minimum supported {{kib}} versions. Refer to [Visualize telemetry](getting-started.md#visualize-telemetry) for installation instructions.
 
 ### Create a dedicated API key
 
@@ -169,7 +169,7 @@ Uploading the same build again updates documents with deterministic IDs instead 
 
 ### Visualize deobfuscated stack traces
 
-After the crash event and its corresponding R8 mapping are available in your {{stack}}, open the **[Android OTel] Exception Details** dashboard and scroll down to the **Stack trace** section. Open the menu for the stack trace row, then select **Retrace stack trace**. Refer to [Deobfuscating stack traces](https://www.elastic.co/docs/reference/integrations/otel_android_dashboards#deobfuscating-stack-traces) for more information.
+After the crash event and its corresponding R8 mapping are available in your {{stack}}, open the **[Android OTel] Exception Details** dashboard and scroll down to the **Stack trace** section. Open the menu for the stack trace row, then select **Retrace stack trace**. Refer to [Deobfuscating stack traces](integration-docs://reference/otel_android_dashboards.md#deobfuscating-stack-traces) for more information.
 
 ### Troubleshoot mapping uploads
 

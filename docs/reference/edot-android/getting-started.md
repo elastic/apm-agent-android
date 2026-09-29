@@ -98,7 +98,7 @@ agent.span("My Span") {
 
 ### Visualize telemetry
 
-The [Android OpenTelemetry Assets](https://www.elastic.co/docs/reference/integrations/otel_android_dashboards) integration provides {{kib}} dashboards designed for telemetry from Android applications. These dashboards provide an overview of application health and dedicated views for spans, crashes, sessions, and other Android telemetry.
+The [Android OpenTelemetry Assets](integration-docs://reference/otel_android_dashboards.md) integration provides {{kib}} dashboards designed for telemetry from Android applications. These dashboards provide an overview of application health and dedicated views for spans, crashes, sessions, and other Android telemetry.
 
 After your app has sent telemetry data, either [manually](manual-instrumentation.md) or [automatically](automatic-instrumentation.md), install the integration's content package to visualize it in {{kib}}.
 
@@ -147,8 +147,8 @@ You'll see the trace waterfall UI, showing the full span hierarchy and timing. Y
 
 #### Learn more
 
-- [View crash details](https://www.elastic.co/docs/reference/integrations/otel_android_dashboards#viewing-details-from-a-crash) — Learn how to visualize and drill into Android crash reports in the dashboard.
-- [Troubleshoot dashboard issues](https://www.elastic.co/docs/reference/integrations/otel_android_dashboards#troubleshooting) — Find solutions to common issues with the {{kib}} dashboard experience.
+- [View crash details](integration-docs://reference/otel_android_dashboards.md#viewing-details-from-a-crash) — Learn how to visualize and drill into Android crash reports in the dashboard.
+- [Troubleshoot dashboard issues](integration-docs://reference/otel_android_dashboards.md#troubleshooting) — Find solutions to common issues with the {{kib}} dashboard experience.
 
 ## What’s next? [whats-next]
 

@@ -30,6 +30,7 @@ jobs:
       pull-requests: write
     env:
       TARBALL_FILE: dist.tar
+      SLACK_CHANNEL: "#apm-agent-mobile"
     steps:
       - name: Get automation token
         id: token
@@ -62,6 +63,19 @@ jobs:
           HEAD_REF: ${{ github.event.pull_request.head.ref }}
           MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
         run: .github/scripts/release/publish-guard.sh "$BASE_REF" "$HEAD_REF" "$MERGE_SHA"
+
+      # A notification failure must not stop the release.
+      - name: Report release start
+        continue-on-error: true
+        uses: elastic/oblt-actions/slack/send@v1
+        with:
+          bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
+          channel-id: ${{ env.SLACK_CHANNEL }}
+          message: |
+            :rocket: [${{ github.repository }}] EDOT Android ${{ steps.guard.outputs.release_version }} ${{ steps.guard.outputs.publish_required == 'true' && 'release started' || 'release finalization resumed' }}.
+            Merged by ${{ github.event.pull_request.merged_by.login }} from ${{ github.event.pull_request.html_url }} into ${{ github.event.pull_request.base.ref }}.
+            Commit: ${{ steps.guard.outputs.release_sha }}
+            Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
       - name: Run release in Buildkite
         if: steps.guard.outputs.publish_required == 'true'
@@ -120,7 +134,7 @@ jobs:
         uses: elastic/oblt-actions/slack/send@v1
         with:
           bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
-          channel-id: "#apm-agent-mobile"
+          channel-id: ${{ env.SLACK_CHANNEL }}
           message: |
             :tada: [${{ github.repository }}] EDOT Android ${{ steps.guard.outputs.release_version }} was released.
             Release: ${{ steps.finalize.outputs.release_url }}
@@ -131,7 +145,7 @@ jobs:
         uses: elastic/oblt-actions/slack/send@v1
         with:
           bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
-          channel-id: "#apm-agent-mobile"
+          channel-id: ${{ env.SLACK_CHANNEL }}
           message: |
             :ghost: [${{ github.repository }}] EDOT Android release automation failed.
             Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

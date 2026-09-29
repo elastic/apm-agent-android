@@ -78,8 +78,10 @@ into `releasing/x.y.z`. The merge starts the publish workflow, which:
    `releasing/x.y.z` and opens its PR into `main`.
 7. For a patch, opens a notes-only PR into `main`.
 
-The team's Slack channel receives the outcome with links to the GitHub Release
-and the release PR, or to the failed run.
+The team's Slack channel receives a start message once the merged commit is
+confirmed, with the version, the merged PR, the release commit, and the run.
+It then receives the outcome with links to the GitHub Release and the release
+PR, or to the failed run.
 
 ### 3. Merge the PR into main
 

@@ -1,0 +1,11 @@
+{
+  "tagPrefix": "v",
+  "productName": "EDOT Android",
+  "versionFile": "gradle.properties",
+  "versionLine": "version={version}",
+  "appliesToKey": "edot_android",
+  "headingAnchorPrefix": "elastic-apm-android-agent-",
+  "subsectionAnchorPrefix": "elastic-apm-android-agent-",
+  "docsUrl": "https://www.elastic.co/docs/release-notes/edot/sdks/android",
+  "stagePaths": ["gradle.properties", "docs", "NOTICE", ":(glob)**/src/main/resources/META-INF/NOTICE"]
+}

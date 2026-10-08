@@ -43,8 +43,9 @@ close the PR, delete both branches, and dispatch again.
 
 The
 [Draft release notes workflow](https://github.com/elastic/apm-agent-android/actions/workflows/draft-release-notes.yml)
-prints editable JSON built from the pull requests merged since the last
-release. Labels only group the draft; none is required:
+builds editable JSON from the pull requests merged since the last release. It
+shows the JSON in its run summary and attaches it to the run as the
+`release-notes` artifact. Labels only group the draft; none is required:
 
 - `dependencies` → `dependencies`. Several updates of one dependency collapse
   into the last one merged.
@@ -59,8 +60,23 @@ major; otherwise it is minor. Prepare release rejects JSON that still has
 `[Breaking]`; the flag adds that prefix when the notes are rendered.
 
 Each item has a `message`, an optional `prId`, and an optional boolean
-`breaking`. See
-[`sample.json`](.github/scripts/release/sample.json).
+`breaking`:
+
+```json
+{
+  "dependencies": [
+    { "message": "Update the Android Gradle Plugin", "prId": "901" }
+  ],
+  "featuresEnhancements": [
+    { "message": "Improve automatic instrumentation", "prId": "902" },
+    { "message": "Remove a deprecated configuration option", "prId": "903", "breaking": true }
+  ],
+  "fixes": [
+    { "message": "Fix offline span delivery", "prId": "904" }
+  ],
+  "uncategorized": []
+}
+```
 
 ### 2. Merge the preparation PR
 
@@ -77,6 +93,10 @@ into `releasing/x.y.z`. The merge starts the publish workflow, which:
 6. For a release from `main`, commits the next `-SNAPSHOT` version on
    `releasing/x.y.z` and opens its PR into `main`.
 7. For a patch, opens a notes-only PR into `main`.
+8. Deletes `prepare/x.y.z`. For a patch, it also deletes `patching/x.y.z` and
+   `releasing/x.y.z`. The branch of the PR into `main` stays until you merge
+   that PR and delete it, because this repository does not delete merged
+   branches.
 
 The team's Slack channel receives a start message once the merged commit is
 confirmed, with the version, the merged PR, the release commit, and the run.
@@ -87,34 +107,42 @@ PR, or to the failed run.
 
 For a release from `main`, review and merge the PR from `releasing/x.y.z`.
 It brings the release notes, documentation versions, NOTICE files, and the
-next development version to `main`. Delete the branch after merging if it was
-not deleted automatically. Until this PR merges, Prepare release stops with a
-message naming the branch that is still in flight.
+next development version to `main`. After merging, delete `releasing/x.y.z`
+by hand: this repository does not delete merged branches, and Prepare release
+stops while any `releasing/*` branch exists, naming it.
 
 For a patch, review and merge the notes-only PR from
-`patch-notes/x.y.z`, then delete the `patching/x.y.z` and `releasing/x.y.z`
-branches. Until `releasing/x.y.z` is deleted, Prepare release stops with a
-message naming it.
+`patch-notes/x.y.z`, then delete `patch-notes/x.y.z` by hand. The publish
+workflow has already deleted `patching/x.y.z` and `releasing/x.y.z`.
 
 ## Patch release
 
 Use the release wizard or the
 [Start patch workflow](https://github.com/elastic/apm-agent-android/actions/workflows/start-patch.yml)
 on `main`. Supply the `X.Y` release line and, optionally, merged `main` pull
-requests to cherry-pick. The wizard proposes `bug`-labeled candidates merged
-after the source tag.
+requests to cherry-pick, as numbers separated by commas, such as `1135,527`.
+The wizard proposes `bug`-labeled candidates merged after the source tag.
 
 Start patch selects the highest `vX.Y.Z` tag, creates
 `patching/X.Y.(Z+1)` from it, and cherry-picks the selected fixes. It pushes
 only after every cherry-pick succeeds. Add later fixes by opening pull
-requests into the patch branch. The branch releases with the tooling of its
-tag, so only releases made by this automation can be patched this way.
+requests into the patch branch. A pull request that changes
+`.github/workflows/*` cannot be cherry-picked by Start patch: if its push is
+rejected, dispatch again without that pull request and add it through a pull
+request into the patch branch.
+
+The branch releases with the workflows of its tag. Releases up to `v1.10.0`
+are patched by hand: create `patching/1.10.1` from `v1.10.0`, add fixes
+through pull requests into that branch, and release it as described in the
+[`RELEASING.md` of `v1.10.0`](https://github.com/elastic/apm-agent-android/blob/v1.10.0/RELEASING.md),
+whose workflows that branch runs.
 
 Draft release notes with the wizard or by dispatching the Draft release notes
 workflow on `patching/x.y.z`; the draft then covers only that branch's
 changes. Approve them, then dispatch Prepare release from that branch. Patch preparation leaves `applies_to` metadata
 unchanged. Review and merge the preparation PR to publish. Finally, merge the
-notes-only PR into `main` and delete `patching/x.y.z` and `releasing/x.y.z`.
+notes-only PR into `main` and delete `patch-notes/x.y.z`. The publish
+workflow deletes `patching/x.y.z` and `releasing/x.y.z`.
 
 ## Release dry run
 
@@ -142,9 +170,10 @@ already done, so the rerun continues from the failed step.
 - If a tag exists at another commit, stop. Do not move it.
 - If the preparation PR needs different content before it is merged, close
   it, delete both branches, land the correction on `main`, and prepare again.
-- If preparation fails after it pushed its branches, for example when opening
-  the PR fails, delete `releasing/x.y.z` and `prepare/x.y.z` and dispatch
-  again. The next dispatch refuses while a `releasing/*` branch exists.
+- If opening the preparation PR fails, Prepare release deletes
+  `releasing/x.y.z` and `prepare/x.y.z` and fails; dispatch again. If its log
+  says it could not delete them, delete both by hand first. The next dispatch
+  refuses while a `releasing/*` branch exists.
 - If Maven Central or the Gradle Plugin Portal is down, wait for the service
   to recover, then rerun.
 - Secret or credential failures require help from whoever owns the pipeline

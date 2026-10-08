@@ -5,26 +5,30 @@ description: Guide an EDOT Android main or patch release from current GitHub sta
 
 # Android release wizard
 
-Work in the conversation only. Do not edit files, push, merge, publish, or
-tag. Do not run the dispatch until the operator explicitly approves.
+Work in the conversation only. Do not edit repository files, push, merge,
+publish, or tag. Do not dispatch Prepare release or Start patch until the
+operator explicitly approves.
+
+The helper scripts in `scripts/` do the mechanical reads, the notes draft,
+and the dispatches. Run them from the repository root, use their output, and
+do not repeat their steps by hand.
 
 The ideal run is one round: the operator reads your proposal and says "go
 ahead". Do the work up front so that is possible.
 
-Before you start, ensure the local repository reflects the latest remote
-state. If this skill or the release scripts changed, continue from the
-updated versions. Then read GitHub state:
+## Start
 
-- List `patching/*` and `releasing/*` branches.
-- List open pull requests whose base is one of those branches.
-- If a `releasing/*` branch exists, report the operator's next action and
-  stop:
-  - While its preparation pull request is open, review and merge it.
-  - After a release from `main` published, merge the pull request from
-    `releasing/x.y.z` into `main` and delete that branch.
-  - After a patch published, merge the notes pull request from
-    `patch-notes/x.y.z` into `main`, then delete `patching/x.y.z` and
-    `releasing/x.y.z`.
+1. Ensure the local repository reflects the latest remote state. If this
+   skill, its scripts, or the release workflows changed, continue from the
+   updated versions.
+2. Run `skills/android-release-wizard/scripts/release-state.sh`. It prints
+   the `phase`, the release branches, their open pull requests, and the
+   operator's `nextActions`.
+3. Report every entry of `nextActions` to the operator.
+4. If `phase` is `in-flight`, stop: a `releasing/*` branch exists, and the
+   next preparation stops until it is gone.
+5. If `phase` is `patching`, continue with "Existing patch branch" unless the
+   operator asks for something else.
 
 ## Inputs
 
@@ -41,17 +45,28 @@ The version follows from the notes. Any `breaking: true` item produces a
 major release; otherwise the main flow produces the next minor. A patch
 cannot contain a breaking item.
 
+## Draft notes
+
+Draft the release-note JSON on the release ref, `main` or `patching/x.y.z`:
+
+```sh
+skills/android-release-wizard/scripts/draft-notes.sh '<main-or-patching/x.y.z>'
+```
+
+It dispatches the Draft release notes workflow, waits for the run, and
+prints the JSON the run attaches.
+
+- If it reports "The run has no release-notes artifact", the branch runs
+  workflows that predate the automation. Point the operator to the
+  `RELEASING.md` of the branch's source tag and stop.
+- If it fails otherwise, report its message, including the run URL, and
+  stop.
+
 ## Main release
 
 When the operator wants the next release from `main`:
 
-1. Run from the repository root, with `<main-ref>` as the up-to-date `main`
-   ref, normally `origin/main`:
-
-   ```sh
-   GITHUB_REPOSITORY=elastic/apm-agent-android .github/scripts/release/draft-release-notes.sh <main-ref>
-   ```
-
+1. Draft notes on `main`.
 2. Read the last two or three versions in `docs/release-notes/index.md` and
    match their style: short, user-facing, one line per change.
 3. For each pull request, write the message you believe belongs in the
@@ -70,32 +85,54 @@ When the operator wants the next release from `main`:
 
 ## Patch release
 
-When the operator wants a patch:
+When the operator wants a patch and no `patching/*` branch exists:
 
-1. If no `patching/*` branch exists, ask for an `X.Y` release line or accept
-   `latest`.
-2. Resolve `latest` to the line of the highest release tag. Resolve the
-   source with `version.sh highest-tag <line>` and the version with
-   `version.sh next-patch <tag>`.
-3. Read the source tag date. List merged `main` pull requests labeled `bug`
-   whose merge time is after that date. Add any pull requests the operator
-   names.
-4. Show the source tag, patch version, and proposed cherry-pick candidates.
-   Explain briefly why each candidate belongs.
-5. After explicit approval, dispatch:
+1. Ask for an `X.Y` release line or accept `latest`.
+2. Run the preview, adding any pull request numbers the operator names:
 
    ```sh
-   gh workflow run start-patch.yml -R elastic/apm-agent-android --ref main -f line='<X.Y>' -f pull_requests='<numbers>'
+   skills/android-release-wizard/scripts/patch-preview.sh '<X.Y-or-latest>' [<number> ...]
    ```
 
-6. If `patching/x.y.z` already exists, do not dispatch Start patch. List new
-   candidates and explain that each selected fix must be cherry-picked by
-   hand through a pull request into that branch.
-7. For an existing patch branch, offer to draft notes from that branch with
-   `RELEASE_REF_NAME=patching/x.y.z` set for `draft-release-notes.sh` and
-   the branch as `<ref>`, so the range starts at the branch's source tag.
-   After the notes are approved, dispatch Prepare release with
-   `--ref patching/x.y.z`.
+   It prints the source tag, the patch version, and the cherry-pick
+   candidates: `main` pull requests labeled `bug` merged after the source
+   tag, plus the named ones. If it fails, report its message and stop.
+3. Show the source tag, patch version, and proposed cherry-pick candidates.
+   Explain briefly why each candidate belongs.
+   - Do not put a candidate with `changesWorkflows: true` in the Start patch
+     list. Propose a hand-made pull request into the patch branch for it.
+4. After explicit approval, dispatch Start patch:
+
+   ```sh
+   skills/android-release-wizard/scripts/dispatch.sh start-patch.yml main -f line='<X.Y>' -f pull_requests='<numbers>'
+   ```
+
+   `<numbers>` are pull request numbers separated by commas with no spaces,
+   such as `1135,527`.
+5. If the run fails, relay the failure message from the script's output
+   with the next step:
+   - The tag predates the automated release process: patch the release by
+     hand as described under "Patch release" in `RELEASING.md`.
+   - The patch branch already exists: cherry-pick each selected fix by hand
+     through a pull request into that branch.
+   - A cherry-pick conflicts, or the push is rejected because a pull request
+     changes `.github/workflows/*`: dispatch again without that pull
+     request, and add it through a hand-made pull request into the patch
+     branch.
+6. When the run succeeds, continue with step 2 of "Existing patch branch".
+
+## Existing patch branch
+
+For `patching/x.y.z`:
+
+1. Run the preview for line `x.y`, adding any pull request numbers the
+   operator names. Propose the candidates whose fix is not on the branch
+   yet. Explain that each selected fix must be cherry-picked by hand through
+   a pull request into that branch.
+2. Offer to draft notes on `patching/x.y.z`, so the range starts at the
+   branch's source tag.
+3. After the notes are approved, dispatch Prepare release on
+   `patching/x.y.z` as described in "Dispatch".
 
 ## Refine until approved
 
@@ -121,20 +158,17 @@ approved, ask.
 
 ## Dispatch
 
-1. Record the time, then dispatch from the selected ref with the approved JSON
-   on standard input through a quoted heredoc, so no character in the notes is
-   interpreted by the shell:
+After explicit approval, dispatch Prepare release from the selected ref with
+the approved JSON on standard input through a quoted heredoc, so no
+character in the notes is interpreted by the shell:
 
-   ```sh
-   since=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-   gh workflow run prepare-release.yml -R elastic/apm-agent-android --ref '<main-or-patching/x.y.z>' -F release_notes=@- <<'EOF'
-   <json>
-   EOF
-   ```
+```sh
+skills/android-release-wizard/scripts/dispatch.sh prepare-release.yml '<main-or-patching/x.y.z>' -F release_notes=@- <<'EOF'
+<json>
+EOF
+```
 
-2. Report the URL of the run created after that time. The run can take a few
-   seconds to appear; repeat the command until it prints a URL:
-
-   ```sh
-   gh run list -R elastic/apm-agent-android --workflow prepare-release.yml --event workflow_dispatch --limit 5 --json url,createdAt --jq ".[] | select(.createdAt > \"$since\") | .url"
-   ```
+`dispatch.sh` dispatches the workflow, waits for the run, and prints the run
+ID and URL. Report the run URL. If the run fails, the script prints the
+failed steps' log and the run URL; relay the failure message to the
+operator.

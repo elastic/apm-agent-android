@@ -122,6 +122,7 @@ jobs:
 
       - name: Report release success
         if: success()
+        continue-on-error: true
         uses: elastic/oblt-actions/slack/send@v1
         with:
           bot-token: ${{ secrets.SLACK_BOT_TOKEN }}

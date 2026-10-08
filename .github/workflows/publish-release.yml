@@ -41,8 +41,9 @@ jobs:
           permission-contents: write
           permission-pull-requests: write
 
-      # Pin to the merged commit so the scripts below are the reviewed ones,
-      # not whatever the releasing branch points at when the job starts.
+      # Pin to the merged commit so the release configuration the steps below
+      # read is the reviewed one, not whatever the releasing branch points at
+      # when the job starts.
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
@@ -53,16 +54,9 @@ jobs:
         with:
           github-token: ${{ steps.token.outputs.token }}
 
-      # Ref names reach the shell through environment variables, never by
-      # expression interpolation into the script source.
       - name: Guard merged release
         id: guard
-        env:
-          GH_TOKEN: ${{ steps.token.outputs.token }}
-          BASE_REF: ${{ github.event.pull_request.base.ref }}
-          HEAD_REF: ${{ github.event.pull_request.head.ref }}
-          MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
-        run: .github/scripts/release/publish-guard.sh "$BASE_REF" "$HEAD_REF" "$MERGE_SHA"
+        uses: elastic/oblt-actions/edot-release/publish-guard@v1
 
       # A notification failure must not stop the release.
       - name: Report release start
@@ -72,30 +66,30 @@ jobs:
           bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
           channel-id: ${{ env.SLACK_CHANNEL }}
           message: |
-            :rocket: [${{ github.repository }}] EDOT Android ${{ steps.guard.outputs.release_version }} ${{ steps.guard.outputs.publish_required == 'true' && 'release started' || 'release finalization resumed' }}.
+            :rocket: [${{ github.repository }}] EDOT Android ${{ steps.guard.outputs.version }} ${{ steps.guard.outputs.tag-exists == 'false' && 'release started' || 'release finalization resumed' }}.
             Merged by ${{ github.event.pull_request.merged_by.login }} from ${{ github.event.pull_request.html_url }} into ${{ github.event.pull_request.base.ref }}.
-            Commit: ${{ steps.guard.outputs.release_sha }}
+            Commit: ${{ github.event.pull_request.merge_commit_sha }}
             Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
       - name: Run release in Buildkite
-        if: steps.guard.outputs.publish_required == 'true'
+        if: steps.guard.outputs.tag-exists == 'false'
         id: buildkite
         uses: elastic/oblt-actions/buildkite/run@v1
         with:
           branch: ${{ github.event.pull_request.base.ref }}
-          commit: ${{ steps.guard.outputs.release_sha }}
+          commit: ${{ github.event.pull_request.merge_commit_sha }}
           pipeline: apm-agent-android-release
           token: ${{ secrets.BUILDKITE_TOKEN }}
           wait-for: true
           env-vars: |
-            release_sha=${{ steps.guard.outputs.release_sha }}
-            release_version=${{ steps.guard.outputs.release_version }}
+            release_sha=${{ github.event.pull_request.merge_commit_sha }}
+            release_version=${{ steps.guard.outputs.version }}
             target_specifier=all
             dry_run=false
             TARBALL_FILE=${{ env.TARBALL_FILE }}
 
       - name: Download release artifacts
-        if: steps.guard.outputs.publish_required == 'true'
+        if: steps.guard.outputs.tag-exists == 'false'
         uses: elastic/oblt-actions/buildkite/download-artifact@v1
         with:
           build-number: ${{ steps.buildkite.outputs.number }}
@@ -104,41 +98,39 @@ jobs:
           token: ${{ secrets.BUILDKITE_TOKEN }}
 
       - name: Extract release artifacts
-        if: steps.guard.outputs.publish_required == 'true'
+        if: steps.guard.outputs.tag-exists == 'false'
         run: tar xvf "$TARBALL_FILE"
 
       - name: Attest JAR files
-        if: steps.guard.outputs.publish_required == 'true'
+        if: steps.guard.outputs.tag-exists == 'false'
         uses: actions/attest@v4
         with:
           subject-path: "${{ github.workspace }}/**/build/libs/*.jar"
 
       - name: Attest AAR files
-        if: steps.guard.outputs.publish_required == 'true'
+        if: steps.guard.outputs.tag-exists == 'false'
         uses: actions/attest@v4
         with:
           subject-path: "${{ github.workspace }}/**/build/outputs/aar/*.aar"
 
       - name: Finalize release
         id: finalize
-        env:
-          GH_TOKEN: ${{ steps.token.outputs.token }}
-          BASE_REF: ${{ github.event.pull_request.base.ref }}
-          RELEASE_SHA: ${{ steps.guard.outputs.release_sha }}
-          RELEASE_VERSION: ${{ steps.guard.outputs.release_version }}
-          PUBLISH_REQUIRED: ${{ steps.guard.outputs.publish_required }}
-        run: .github/scripts/release/finalize-release.sh "$RELEASE_SHA" "$RELEASE_VERSION" "$BASE_REF" "$PUBLISH_REQUIRED"
+        uses: elastic/oblt-actions/edot-release/finalize@v1
+        with:
+          release: ${{ steps.guard.outputs.release }}
+          github-token: ${{ steps.token.outputs.token }}
 
       - name: Report release success
         if: success()
+        continue-on-error: true
         uses: elastic/oblt-actions/slack/send@v1
         with:
           bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
           channel-id: ${{ env.SLACK_CHANNEL }}
           message: |
-            :tada: [${{ github.repository }}] EDOT Android ${{ steps.guard.outputs.release_version }} was released.
-            Release: ${{ steps.finalize.outputs.release_url }}
-            PR into main: ${{ steps.finalize.outputs.main_pull_request_url }}
+            :tada: [${{ github.repository }}] EDOT Android ${{ steps.guard.outputs.version }} was released.
+            Release: ${{ steps.finalize.outputs.release-url }}
+            PR into main: ${{ steps.finalize.outputs.main-pull-request-url }}
 
       - name: Report release failure to Slack
         if: failure()

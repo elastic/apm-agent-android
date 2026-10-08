@@ -100,7 +100,7 @@ When the operator wants a patch and no `patching/*` branch exists:
 4. After explicit approval, dispatch Start patch:
 
    ```sh
-   skills/android-release-wizard/scripts/dispatch.sh start-patch.yml main -f line='<X.Y>' -f pull_requests='<numbers>'
+   skills/android-release-wizard/scripts/dispatch.sh start-patch.yml main line='<X.Y>' pull_requests='<numbers>'
    ```
 
    `<numbers>` are pull request numbers separated by commas with no spaces,
@@ -157,7 +157,7 @@ the approved JSON on standard input through a quoted heredoc, so no
 character in the notes is interpreted by the shell:
 
 ```sh
-skills/android-release-wizard/scripts/dispatch.sh prepare-release.yml '<main-or-patching/x.y.z>' -F release_notes=@- <<'EOF'
+skills/android-release-wizard/scripts/dispatch.sh prepare-release.yml '<main-or-patching/x.y.z>' release_notes=@- <<'EOF'
 <json>
 EOF
 ```

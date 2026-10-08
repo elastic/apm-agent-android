@@ -15,10 +15,7 @@
 # Progress goes to standard error. It writes nothing to the repository.
 #
 # Exit status: 0 when the JSON is printed; 1 otherwise, with the run URL on
-# standard error when there is a run; 2 on a usage error. When the run's
-# artifact list has no `release-notes` artifact, standard error says
-# "The run has no release-notes artifact": the branch runs workflows that
-# predate it. Any other failure says what failed.
+# standard error when there is a run; 2 on a usage error.
 
 set -euo pipefail
 
@@ -39,20 +36,6 @@ run_url=${run#* }
 notes_dir=$(mktemp -d)
 trap 'rm -rf "$notes_dir"' EXIT
 
-# A branch whose workflows predate the artifact finishes without one. Read
-# that from the run's artifact list, so a failed download is not mistaken
-# for it.
-if ! artifacts=$(
-  gh api "repos/$repository/actions/runs/$run_id/artifacts" \
-    --jq '[.artifacts[] | select(.name == "release-notes")] | length'
-); then
-  echo "Could not list the artifacts of the run: $run_url" >&2
-  exit 1
-fi
-if [[ $artifacts -eq 0 ]]; then
-  echo "The run has no release-notes artifact: $run_url" >&2
-  exit 1
-fi
 if ! gh run download "$run_id" --repo "$repository" --name release-notes \
   --dir "$notes_dir" >&2; then
   echo "Could not download the release-notes artifact of the run: $run_url" >&2

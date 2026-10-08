@@ -56,11 +56,7 @@ skills/android-release-wizard/scripts/draft-notes.sh '<main-or-patching/x.y.z>'
 It dispatches the Draft release notes workflow, waits for the run, and
 prints the JSON the run attaches.
 
-- If it reports "The run has no release-notes artifact", the branch runs
-  workflows that predate the automation. Point the operator to the
-  `RELEASING.md` of the branch's source tag and stop.
-- If it fails otherwise, report its message, including the run URL, and
-  stop.
+- If it fails, report its message, including the run URL, and stop.
 
 ## Main release
 
@@ -111,8 +107,6 @@ When the operator wants a patch and no `patching/*` branch exists:
    such as `1135,527`.
 5. If the run fails, relay the failure message from the script's output
    with the next step:
-   - The tag predates the automated release process: patch the release by
-     hand as described under "Patch release" in `RELEASING.md`.
    - The patch branch already exists: cherry-pick each selected fix by hand
      through a pull request into that branch.
    - A cherry-pick conflicts, or the push is rejected because a pull request

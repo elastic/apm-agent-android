@@ -131,11 +131,7 @@ requests into the patch branch. A pull request that changes
 rejected, dispatch again without that pull request and add it through a pull
 request into the patch branch.
 
-The branch releases with the workflows of its tag. Releases up to `v1.10.0`
-are patched by hand: create `patching/1.10.1` from `v1.10.0`, add fixes
-through pull requests into that branch, and release it as described in the
-[`RELEASING.md` of `v1.10.0`](https://github.com/elastic/apm-agent-android/blob/v1.10.0/RELEASING.md),
-whose workflows that branch runs.
+The branch releases with the workflows of its tag.
 
 Draft release notes with the wizard or by dispatching the Draft release notes
 workflow on `patching/x.y.z`; the draft then covers only that branch's
@@ -183,9 +179,8 @@ already done, so the rerun continues from the failed step.
 - NOTICE generation failures name the missing license data. Update
   [`manual_licenses_map.txt`](manual_licenses_map.txt) on `main`, then prepare
   again.
-- Start patch stops when the line has no release, the newest tag predates this
-  automation, or the patch branch already exists. For an existing branch, add
-  fixes through pull requests into it.
+- Start patch stops when the line has no release or the patch branch already
+  exists. For an existing branch, add fixes through pull requests into it.
 - If a Start patch cherry-pick conflicts, dispatch again without that pull
   request. Cherry-pick it by hand through a pull request into the named patch
   branch.

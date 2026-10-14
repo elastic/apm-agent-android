@@ -37,7 +37,9 @@ after the highest release tag, then creates two branches from the dispatched
 It opens the preparation PR from `prepare/x.y.z` into `releasing/x.y.z`, so
 the PR diff shows exactly what the release adds. Review it. Push prose or
 NOTICE fixes to `prepare/x.y.z` if needed. For a code fix, land it on `main`,
-close the PR, delete both branches, and dispatch again.
+close the PR, delete both branches, and dispatch again. If no pull request
+merged since the previous release, the run succeeds, creates nothing, and
+says so in a warning on the run page.
 
 #### Release-note JSON
 

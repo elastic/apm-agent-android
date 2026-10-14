@@ -19,8 +19,6 @@ jobs:
       - name: Draft release-note JSON
         id: draft
         uses: elastic/oblt-actions/edot-release/draft-release-notes@v1
-        with:
-          tag-prefix: v
 
       - name: Show release-note JSON
         env:

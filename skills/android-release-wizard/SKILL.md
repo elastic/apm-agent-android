@@ -163,6 +163,13 @@ EOF
 ```
 
 `dispatch.sh` dispatches the workflow, waits for the run, and prints the run
-ID and URL. Report the run URL. If the run fails, the script prints the
-failed steps' log and the run URL; relay the failure message to the
-operator.
+ID and URL. If the run fails, the script prints the failed steps' log and
+the run URL; relay the failure message to the operator.
+
+When the run succeeds, run `skills/android-release-wizard/scripts/release-state.sh`
+again and report the run URL with the outcome:
+
+- `phase` is `in-flight`: report the preparation pull request from
+  `nextActions`. The operator reviews and merges it.
+- `phase` is still `idle`: nothing was prepared, because no pull request
+  merged since the previous release. Say so.

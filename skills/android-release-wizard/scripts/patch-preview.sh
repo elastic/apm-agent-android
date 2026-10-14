@@ -56,7 +56,7 @@ done
 work_dir=$(mktemp -d)
 trap 'rm -rf "$work_dir"' EXIT
 
-git fetch --quiet --tags origin
+git fetch --quiet --tags "https://github.com/$repository"
 
 # Run the shared version arithmetic rather than a copy of it.
 version_sh="$work_dir/version.sh"

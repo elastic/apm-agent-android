@@ -26,12 +26,6 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - name: Require main or a patch branch
-        if: github.ref_name != 'main' && !startsWith(github.ref_name, 'patching/')
-        run: |
-          echo "::error::Prepare release must be dispatched from main or patching/x.y.z."
-          exit 1
-
       - name: Get automation token
         id: token
         uses: actions/create-github-app-token@v3
@@ -50,9 +44,26 @@ jobs:
         with:
           github-token: ${{ steps.token.outputs.token }}
 
-      - name: Prepare release
-        env:
-          GH_TOKEN: ${{ steps.token.outputs.token }}
-          RELEASE_NOTES: ${{ inputs.release_notes }}
-          RELEASE_REF_NAME: ${{ github.ref_name }}
-        run: .github/scripts/release/prepare-release.sh
+      - name: Prepare release changes
+        id: prepare
+        uses: elastic/oblt-actions/edot-release/prepare-start@v1
+        with:
+          notes: ${{ inputs.release_notes }}
+          github-token: ${{ steps.token.outputs.token }}
+
+      # Regenerate the NOTICE files in the working tree, so the preparation
+      # commit ships them with the release changes.
+      - name: Regenerate NOTICE files
+        if: steps.prepare.outputs.prepared == 'true'
+        run: |
+          if ! ./gradlew createNoticeFile; then
+            echo "NOTICE generation failed. Update manual_licenses_map.txt for dependencies whose licenses cannot be resolved, then dispatch again." >&2
+            exit 1
+          fi
+
+      - name: Open preparation pull request
+        if: steps.prepare.outputs.prepared == 'true'
+        uses: elastic/oblt-actions/edot-release/prepare-finish@v1
+        with:
+          release: ${{ steps.prepare.outputs.release }}
+          github-token: ${{ steps.token.outputs.token }}

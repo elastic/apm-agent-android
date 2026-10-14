@@ -6,6 +6,9 @@
 }
 -keep class io.opentelemetry.api.incubator.** { *; }
 -keep interface io.opentelemetry.api.** { *; }
+-keepclassmembers class io.opentelemetry.sdk.resources.Resource {
+    java.util.Collection getEntities();
+}
 -keep class co.elastic.otel.android.internal.generated.ElasticAgentConfig {
     public static final java.lang.String BUILD_ID;
 }

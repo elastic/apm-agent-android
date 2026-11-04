@@ -24,6 +24,7 @@ import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.any
 import com.github.tomakehurst.wiremock.client.WireMock.anyUrl
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.github.tomakehurst.wiremock.http.Request
 import com.github.tomakehurst.wiremock.http.RequestListener
 import java.io.Closeable
@@ -39,7 +40,7 @@ import org.awaitility.kotlin.await
 import org.junit.rules.ExternalResource
 
 class WireMockRule : ExternalResource() {
-    private val wireMock = WireMockServer()
+    private val wireMock = WireMockServer(wireMockConfig().dynamicPort())
     private val requestManagers = LinkedList<RequestManager>()
     private var allResponsesStubId = UUID.randomUUID()
 
@@ -48,12 +49,15 @@ class WireMockRule : ExternalResource() {
     }
 
     override fun after() {
-        var manager = requestManagers.poll()
-        while (manager != null) {
-            manager.close()
-            manager = requestManagers.poll()
+        try {
+            var manager = requestManagers.poll()
+            while (manager != null) {
+                manager.close()
+                manager = requestManagers.poll()
+            }
+        } finally {
+            wireMock.stop()
         }
-        wireMock.stop()
     }
 
     fun url(path: String): String {

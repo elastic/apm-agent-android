@@ -93,6 +93,13 @@ class ElasticApmAgentTest {
         }
     }
 
+    private fun closeAgent(requestManager: WireMockRule.RequestManager) {
+        requestManager.enqueueResponse()
+        closeAgent()
+        val request = AgentToServer.ADAPTER.decode(requestManager.takeNextRequest().body)
+        assertThat(request.agent_disconnect).isNotNull()
+    }
+
     @Test
     fun `Validate url is present`() {
         val exception = assertThrows<NullPointerException> {
@@ -357,7 +364,7 @@ class ElasticApmAgentTest {
         assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
 
         // Ensure that the config was persisted
-        closeAgent()
+        closeAgent(requestsManager)
         requestsManager.enqueueResponse {
             withStatus(404)
         }
@@ -436,7 +443,7 @@ class ElasticApmAgentTest {
 
         // Validate properly closed connection
 
-        closeAgent()
+        closeAgent(requestsManager)
         try {
             agent.getCentralConfigurationManager()!!.forceSync()
             fail("Should have failed")
@@ -592,7 +599,7 @@ class ElasticApmAgentTest {
         assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
 
         // Ensure that the config is persisted.
-        closeAgent()
+        closeAgent(requestManager)
         requestManager.enqueueResponse {
             withStatus(200)
             withBody(createRemoteConfigResponse("Not a json", "invalid_config"))
@@ -635,7 +642,7 @@ class ElasticApmAgentTest {
         assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
 
         // Next: Setting sample rate during initialization without central config
-        closeAgent()
+        closeAgent(requestManager)
         agent = inMemoryAgentBuilder(wireMockRule.url("/"))
             .setSessionSampleRate(0.0)
             .build()
@@ -755,6 +762,8 @@ class ElasticApmAgentTest {
         assertThat(inMemoryExporters.getFinishedSpans()).isEmpty()
         assertThat(inMemoryExporters.getFinishedLogRecords()).isEmpty()
         assertThat(inMemoryExporters.getFinishedMetrics()).isEmpty()
+
+        closeAgent(requestManager)
     }
 
     @Test

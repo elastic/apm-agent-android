@@ -30,6 +30,20 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [elastic-apm-android-agent-versionext-fixes]
 
 % next_release_notes
+## 1.11.0 [elastic-apm-android-agent-1110-release-notes]
+**Release date:** November 4, 2026
+
+* Update Byte Buddy to 1.18.17: [#952](https://github.com/elastic/apm-agent-android/pull/952)
+* Update OpenTelemetry semantic conventions to 1.45.0: [#949](https://github.com/elastic/apm-agent-android/pull/949)
+
+### Features and enhancements [elastic-apm-android-agent-1110-features-enhancements]
+
+* Update OpenTelemetry Java to 1.67.0: [#936](https://github.com/elastic/apm-agent-android/pull/936)
+* Update OpenTelemetry Java Instrumentation to 2.33.1: [#944](https://github.com/elastic/apm-agent-android/pull/944)
+* Update OpenTelemetry Android SDK libraries to 1.8.0: [#941](https://github.com/elastic/apm-agent-android/pull/941)
+* Update OpenTelemetry Android instrumentation to 1.8.0: [#940](https://github.com/elastic/apm-agent-android/pull/940)
+* Update OpenTelemetry Java Contrib to 1.62.0-alpha: [#953](https://github.com/elastic/apm-agent-android/pull/953)
+
 ## 1.10.0 [elastic-apm-android-agent-1100-release-notes]
 **Release date:** September 29, 2026
 

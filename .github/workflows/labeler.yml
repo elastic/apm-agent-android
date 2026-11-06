@@ -1,39 +1,41 @@
 name: "Issue Labeler"
+
+# pull_request_target is kept so that PRs from forks can be labeled (the pull_request token
+# is read-only for forks and has no access to secrets). No PR code is checked out or run:
+# only event metadata is read, and the labeler config is read from the base branch.
 on:
   issues:
     types: [opened]
   pull_request_target:
     types: [opened]
-permissions:
-  contents: read
-  issues: write
-  pull-requests: write
+permissions: {}
 
 jobs:
   triage:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
     steps:
     - name: Get token
       id: get_token
-      uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
+      uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
       with:
-        app_id: ${{ secrets.OBS_AUTOMATION_APP_ID }}
-        private_key: ${{ secrets.OBS_AUTOMATION_APP_PEM }}
-        permissions: >-
-          {
-            "members": "read",
-            "organization_projects": "write",
-            "issues": "read"
-          }
+        app-id: ${{ secrets.OBS_AUTOMATION_APP_ID }}
+        private-key: ${{ secrets.OBS_AUTOMATION_APP_PEM }}
+        permission-members: read
+        permission-organization-projects: write
+        permission-issues: read
 
     - name: Add agent-android and agent-mobile labels
-      uses: AlexanderWert/issue-labeler@32be4a3c3d8f009c2741af471994337c34b4cb6f  # v2.3
+      uses: AlexanderWert/issue-labeler@32be4a3c3d8f009c2741af471994337c34b4cb6f # v2.3
       with:
         repo-token: "${{ secrets.GITHUB_TOKEN }}"
         configuration-path: .github/labeler-config.yml
         enable-versioned-regex: 0
     - name: Check team membership for user
-      uses: elastic/get-user-teams-membership@1.1.0
+      uses: elastic/get-user-teams-membership@5fa8d08135326e44d74d0ec4ef8705d8e36df12d # 1.1.0
       id: checkUserMember
       with:
         username: ${{ github.actor }}
@@ -44,12 +46,15 @@ jobs:
           dependabot[bot]
         GITHUB_TOKEN: ${{ steps.get_token.outputs.token }}
     - name: Show team membership
+      env:
+        IS_TEAM_MEMBER: ${{ steps.checkUserMember.outputs.isTeamMember }}
+        IS_EXCLUDED: ${{ steps.checkUserMember.outputs.isExcluded }}
       run: |
-        echo "::debug::isTeamMember: ${{ steps.checkUserMember.outputs.isTeamMember }}"
-        echo "::debug::isExcluded: ${{ steps.checkUserMember.outputs.isExcluded }}"
+        echo "::debug::isTeamMember: ${IS_TEAM_MEMBER}"
+        echo "::debug::isExcluded: ${IS_EXCLUDED}"
     - name: Add community and triage labels
       if: steps.checkUserMember.outputs.isTeamMember != 'true' && steps.checkUserMember.outputs.isExcluded != 'true'
-      uses: AlexanderWert/issue-labeler@32be4a3c3d8f009c2741af471994337c34b4cb6f  # v2.3
+      uses: AlexanderWert/issue-labeler@32be4a3c3d8f009c2741af471994337c34b4cb6f # v2.3
       with:
         repo-token: "${{ secrets.GITHUB_TOKEN }}"
         configuration-path: .github/community-label.yml

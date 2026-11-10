@@ -16,3 +16,4 @@ maven local repo. To do so, open up a terminal in this project's root dir and
 run: `./gradlew publishToMavenLocal`. After that, you can apply the agent into an Android
 application project (that uses [mavenLocal()](https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api.artifacts.dsl/-repository-handler/maven-local.html) as one of its dependency repositories)
 by following the [Getting started](https://www.elastic.co/docs/reference/opentelemetry/edot-sdks/android/getting-started) guide and using the version defined [here](gradle.properties).
+

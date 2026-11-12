@@ -30,6 +30,13 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [elastic-apm-android-agent-versionext-fixes]
 
 % next_release_notes
+
+## Next version [elastic-apm-android-dataset-release-notes]
+
+### Breaking changes
+
+* Set `data_stream.dataset` to `android` by default. Explicit resource customization can override this value. With default Elastic OTel-native routing, new telemetry uses the `android.otel` dataset. Existing data stays in its original streams. Check stream-specific permissions, queries, and retention settings. Set the dataset to `generic` to retain the previous ingest default. Refer to [Data stream routing](../reference/edot-android/configuration.md#data-stream-routing).
+
 ## 1.11.0 [elastic-apm-android-agent-1110-release-notes]
 **Release date:** November 4, 2026
 

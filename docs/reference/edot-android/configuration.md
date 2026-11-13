@@ -519,3 +519,49 @@ fun myMethod() {
 ```
 
 1. There might be multiple `BuildConfig` types available to use in your code. The one that belongs to your app has a package name equal to your [app's namespace](https://developer.android.com/build/configure-app-module#set-namespace) value. So, for example, if your app's namespace is set to `com.my.app`, then the `BuildConfig` type you must use would be `com.my.app.BuildType`.
+
+## Data stream routing [data-stream-routing]
+
+EDOT Android sets the resource attribute `data_stream.dataset` to `android`
+before applying resource customization. Other resource attributes, including
+`data_stream.namespace`, keep their existing behavior.
+
+With default Elastic OTel-native routing, traces and logs use
+`traces-android.otel-<namespace>` and `logs-android.otel-<namespace>`.
+Metrics exported with the same resource use `metrics-android.otel-<namespace>`.
+This setting does not enable metrics collection. The namespace is `default`
+unless another value is configured. Scope or record routing attributes and
+ingest configuration can change the destination.
+
+Use a dataset value without the `.otel` suffix. Elastic OTel-native routing
+adds that suffix. This is an Elastic routing attribute, not an OpenTelemetry
+semantic convention.
+
+To override the dataset, use `setResourceInterceptor` during initialization:
+
+```kotlin
+import co.elastic.otel.android.interceptor.Interceptor
+import io.opentelemetry.sdk.resources.Resource
+
+val interceptor = Interceptor<Resource> { resource ->
+    resource.toBuilder()
+        .put("data_stream.dataset", "storefront")
+        .put("data_stream.namespace", "production")
+        .build()
+}
+// Pass interceptor to ElasticApmAgent.builder(application).setResourceInterceptor(interceptor).
+```
+
+If you already use a resource interceptor, add these attributes to that
+interceptor. `setResourceInterceptor` replaces the previously configured
+interceptor.
+
+### Migration
+
+New telemetry moves to the new dataset unless you configure an override.
+Existing data stays in its original streams. Check ingest and read permissions,
+dashboards, queries, and retention settings that target only the previous
+streams. Include both old and new streams when querying across the upgrade.
+
+To retain the previous ingest default, explicitly set `data_stream.dataset`
+to `generic`. To retain a custom destination, keep its explicit dataset value.

@@ -22,6 +22,7 @@ import android.app.Application
 import android.content.Intent
 import co.elastic.otel.android.features.diskbuffering.DiskBufferingConfiguration
 import co.elastic.otel.android.features.session.SessionIdGenerator
+import co.elastic.otel.android.interceptor.Interceptor
 import co.elastic.otel.android.internal.api.ManagedElasticOtelAgent
 import co.elastic.otel.android.internal.features.clock.ElasticClockBroadcastReceiver
 import co.elastic.otel.android.internal.services.ServiceManager
@@ -43,6 +44,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
+import io.opentelemetry.sdk.resources.Resource
 import io.opentelemetry.sdk.logs.LogRecordProcessor
 import io.opentelemetry.sdk.logs.export.BatchLogRecordProcessor
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
@@ -94,6 +96,59 @@ class ManagedElasticOtelAgentTest {
             inMemoryExporters.reset()
         } catch (ignored: UninitializedPropertyAccessException) {
         }
+    }
+
+    @Test
+    fun `Default dataset is shared by all signals`() {
+        agent = initialize()
+        assertExportedDataset("android")
+    }
+
+    @Test
+    fun `Resource customization preserves the default dataset and other attributes`() {
+        agent = initialize(resourceInterceptor = Interceptor { resource ->
+            resource.toBuilder().put("data_stream.namespace", "production").build()
+        })
+        assertExportedDataset("android", "production")
+    }
+
+    @Test
+    fun `Explicit datasets override the default on all signals`() {
+        for (dataset in listOf("generic", "storefront", "react_native")) {
+            agent = initialize(resourceInterceptor = Interceptor { resource ->
+                resource.toBuilder()
+                    .put("data_stream.dataset", dataset)
+                    .put("data_stream.namespace", "production")
+                    .build()
+            })
+            assertExportedDataset(dataset, "production")
+            closeAgent()
+            simpleProcessorFactory = SimpleProcessorFactory()
+        }
+    }
+
+    private fun assertExportedDataset(dataset: String, namespace: String? = null) {
+        awaitForOpenGates()
+        sendSpan()
+        sendLog()
+        sendMetric()
+        assertThat(inMemoryExporters.getFinishedSpans()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedLogRecords()).hasSize(1)
+        assertThat(inMemoryExporters.getFinishedMetrics()).hasSize(1)
+        val resources = listOf(
+            inMemoryExporters.getFinishedSpans().single().resource,
+            inMemoryExporters.getFinishedLogRecords().single().resource,
+            inMemoryExporters.getFinishedMetrics().single().resource
+        )
+        for (resource in resources) {
+            assertThat(resource.getAttribute(AttributeKey.stringKey("data_stream.dataset")))
+                .isEqualTo(dataset)
+            assertThat(resource.getAttribute(AttributeKey.stringKey("data_stream.namespace")))
+                .isEqualTo(namespace)
+            assertThat(resource.getAttribute(AttributeKey.stringKey("os.name")))
+                .isEqualTo("Android")
+        }
+        assertThat(resources.toSet()).hasSize(1)
     }
 
     @Test
@@ -754,7 +809,8 @@ class ManagedElasticOtelAgentTest {
         sntpClient: SntpClient = DummySntpClient(),
         gateSignalBufferSize: Int? = null,
         sessionIdGenerator: SessionIdGenerator? = null,
-        processorFactory: ProcessorFactory = simpleProcessorFactory
+        processorFactory: ProcessorFactory = simpleProcessorFactory,
+        resourceInterceptor: Interceptor<Resource>? = null
     ): ManagedElasticOtelAgent {
         val featuresBuilder =
             ManagedElasticOtelAgent.ManagedFeatures.Builder(application)
@@ -765,6 +821,7 @@ class ManagedElasticOtelAgentTest {
         return ManagedElasticOtelAgent.Builder()
             .setProcessorFactory(processorFactory)
             .setExporterProvider(inMemoryExporters)
+            .apply { resourceInterceptor?.let { setResourceInterceptor(it) } }
             .build(serviceManager, featuresBuilder.build(serviceManager, systemTimeProvider))
     }
 

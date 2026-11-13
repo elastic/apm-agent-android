@@ -13,15 +13,15 @@
 #                `release_notes=@-`
 #
 # The release wizard dispatches every workflow through this script, so the
-# dispatch and the wait exist once. The dispatch API returns the ID of the
-# run it creates, so the script watches exactly that run. Progress goes to
-# standard error.
+# dispatch exists once. The dispatch API returns the ID of the run it
+# creates, so the script waits for exactly that run through watch-run.sh.
+# Progress goes to standard error.
 #
 # On success, prints `<run-id> <run-url>` on standard output.
 #
-# Exit status: 0 when the run succeeds; 1 when the dispatch fails, returns
-# no run, or the run fails, with the failed steps' log and the run URL on
-# standard error; 2 on a usage error.
+# Exit status: 0 when the run succeeds; 1 when the dispatch fails or returns
+# no run, or with watch-run.sh's message when the run fails or its outcome
+# is unknown; 2 on a usage error.
 
 set -euo pipefail
 
@@ -55,24 +55,16 @@ for input in "$@"; do
 done
 
 # return_run_details makes the API answer with the run it created.
-if ! run=$(
+if ! run_id=$(
   gh api --method POST "repos/$repository/actions/workflows/$workflow/dispatches" \
-    "${fields[@]}" --jq '"\(.workflow_run_id // "") \(.html_url // "")"'
+    "${fields[@]}" --jq '.workflow_run_id // ""'
 ); then
   echo "The $workflow dispatch on $ref failed." >&2
   exit 1
 fi
-run_id=${run%% *}
-run_url=${run#* }
-if [[ -z $run_id || -z $run_url ]]; then
+if [[ -z $run_id ]]; then
   echo "The $workflow dispatch on $ref returned no run details." >&2
   exit 1
 fi
-echo "Waiting for $run_url" >&2
 
-if ! gh run watch "$run_id" --repo "$repository" --exit-status >&2; then
-  gh run view "$run_id" --repo "$repository" --log-failed >&2 || true
-  echo "The $workflow run failed: $run_url" >&2
-  exit 1
-fi
-echo "$run_id $run_url"
+exec "$script_dir/watch-run.sh" "$run_id"

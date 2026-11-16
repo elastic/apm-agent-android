@@ -40,6 +40,8 @@ form so the operator sees exactly what will run.
   optional boolean `breaking`. Prepare release rejects leftover
   `uncategorized` items, empty notes, and a `message` that starts with
   `[Breaking]`; the flag adds that prefix when the notes are rendered.
+  Prepare release renders each item as `message: [#prId](url)`, so a
+  `message` must not end with a period.
 
 The version follows from the notes. Any `breaking: true` item produces a
 major release; otherwise the main flow produces the next minor. A patch
@@ -134,8 +136,9 @@ Repeat until the operator explicitly approves:
 
 1. Show the summary of every input as it stands:
    - The release notes as readable Markdown, not JSON: a list per group,
-     one line per item as `message (#prId)`, with breaking items marked and
-     listed first.
+     one line per item as it will be rendered, `message: #prId`, with
+     breaking items marked and listed first. Keep your remarks about an
+     item off its line.
    - Items proposed for deletion, each with its reason.
    - Each proposed `breaking` flag and its reason.
    - The release version that follows.
@@ -165,6 +168,11 @@ EOF
 `dispatch.sh` dispatches the workflow, waits for the run, and prints the run
 ID and URL. If the run fails, the script prints the failed steps' log and
 the run URL; relay the failure message to the operator.
+
+If the script reports that the run's outcome is unknown, the run exists.
+Do not dispatch again. Run the command the message names,
+`skills/android-release-wizard/scripts/watch-run.sh <run-id>`, until it
+reports success or failure, then continue from that outcome.
 
 When the run succeeds, run `skills/android-release-wizard/scripts/release-state.sh`
 again and report the run URL with the outcome:

@@ -21,7 +21,6 @@ package co.elastic.otel.android.functional
 import android.Manifest
 import android.content.Context
 import android.net.ConnectivityManager
-import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkInfo
 import android.os.Build
@@ -32,7 +31,6 @@ import co.elastic.otel.android.interceptor.Interceptor
 import co.elastic.otel.android.internal.generated.ElasticAgentConfig
 import co.elastic.otel.android.internal.opentelemetry.ElasticOpenTelemetry
 import co.elastic.otel.android.internal.services.ServiceManager
-import co.elastic.otel.android.internal.services.network.query.NetworkApi23QueryManager
 import co.elastic.otel.android.internal.services.network.query.NetworkApi24QueryManager
 import co.elastic.otel.android.processors.ProcessorFactory
 import co.elastic.otel.android.test.common.ElasticAttributes.getLogRecordDefaultAttributes
@@ -72,7 +70,6 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.Shadows
 import org.robolectric.annotation.Config
-import org.robolectric.shadows.ShadowNetwork
 import org.robolectric.util.ReflectionHelpers
 
 @RunWith(RobolectricTestRunner::class)
@@ -123,7 +120,7 @@ internal class AttributesTest : ExporterProvider, ProcessorFactory {
         setVersionCode(0)
     }
 
-    @Config(sdk = [23, Config.NEWEST_SDK])
+    @Config(sdk = [24, Config.NEWEST_SDK])
     @Test
     fun `Check resources`() {
         initialize()
@@ -215,7 +212,7 @@ internal class AttributesTest : ExporterProvider, ProcessorFactory {
         assertThat(metricItems.first()).hasResource(expectedResource)
     }
 
-    @Config(sdk = [23, Config.NEWEST_SDK])
+    @Config(sdk = [24, Config.NEWEST_SDK])
     @Test
     fun `Check resources with not provided service version`() {
         setVersionName("1.2.3")
@@ -256,7 +253,7 @@ internal class AttributesTest : ExporterProvider, ProcessorFactory {
         assertThat(metricItems.first()).hasResource(expectedResource)
     }
 
-    @Config(sdk = [23, Config.NEWEST_SDK])
+    @Config(sdk = [24, Config.NEWEST_SDK])
     @Test
     fun `Check global attributes and span status`() {
         initialize()
@@ -273,7 +270,7 @@ internal class AttributesTest : ExporterProvider, ProcessorFactory {
         assertThat(logItems.first()).hasAttributes(getLogRecordDefaultAttributes())
     }
 
-    @Config(sdk = [23, Config.NEWEST_SDK])
+    @Config(sdk = [24, Config.NEWEST_SDK])
     @Test
     fun `Check global attributes with cellular connectivity available`() {
         initialize()
@@ -299,7 +296,7 @@ internal class AttributesTest : ExporterProvider, ProcessorFactory {
         assertThat(logItems.first()).hasAttributes(expectedLogAttributes)
     }
 
-    @Config(sdk = [23, Config.NEWEST_SDK])
+    @Config(sdk = [24, Config.NEWEST_SDK])
     @Test
     fun `Check global attributes with carrier info available`() {
         initialize()
@@ -392,17 +389,9 @@ internal class AttributesTest : ExporterProvider, ProcessorFactory {
         val activeNetworkInfo = mockk<NetworkInfo>()
         every { activeNetworkInfo.type }.returns(ConnectivityManager.TYPE_MOBILE)
         shadowConnectivityManager.setActiveNetworkInfo(activeNetworkInfo)
-        var activeNetwork: Network = ShadowNetwork.newInstance(ConnectivityManager.TYPE_MOBILE)
-
-        if (Build.VERSION.SDK_INT == 23) {
-            assertThat(defaultNetworkCallback).isInstanceOf(NetworkApi23QueryManager::class.java)
-            shadowTelephonyManager.setNetworkType(TelephonyManager.NETWORK_TYPE_EDGE)
-            activeNetwork = connectivityManager.activeNetwork!!
-        } else {
-            assertThat(defaultNetworkCallback).isInstanceOf(NetworkApi24QueryManager::class.java)
-            shadowTelephonyManager.setDataNetworkType(TelephonyManager.NETWORK_TYPE_EDGE)
-            activeNetwork = connectivityManager.activeNetwork!!
-        }
+        assertThat(defaultNetworkCallback).isInstanceOf(NetworkApi24QueryManager::class.java)
+        shadowTelephonyManager.setDataNetworkType(TelephonyManager.NETWORK_TYPE_EDGE)
+        val activeNetwork = connectivityManager.activeNetwork!!
 
         val capabilities = mockk<NetworkCapabilities>()
         every {

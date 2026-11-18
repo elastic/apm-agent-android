@@ -128,6 +128,7 @@ internal class AttributesTest : ExporterProvider, ProcessorFactory {
     fun `Check resources`() {
         initialize()
         val expectedResource = Resource.builder()
+            .put("data_stream.dataset", "android")
             .put("deployment.environment.name", "test")
             .put("app.build_id", BUILD_ID)
             .put("app.installation.id", "installation-id")
@@ -179,6 +180,7 @@ internal class AttributesTest : ExporterProvider, ProcessorFactory {
             )
         })
         val expectedResource = Resource.builder()
+            .put("data_stream.dataset", "android")
             .put("deployment.environment.name", "test")
             .put("app.build_id", BUILD_ID)
             .put("app.installation.id", "installation-id")
@@ -221,6 +223,7 @@ internal class AttributesTest : ExporterProvider, ProcessorFactory {
         setVersionName("1.2.3")
         initialize(serviceVersion = null)
         val expectedResource = Resource.builder()
+            .put("data_stream.dataset", "android")
             .put("deployment.environment.name", "test")
             .put("app.build_id", BUILD_ID)
             .put("app.installation.id", "installation-id")

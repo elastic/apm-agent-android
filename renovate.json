@@ -4,7 +4,8 @@
     "local>elastic/renovate-config"
   ],
   "addLabels": [
-    "dependencies"
+    "dependencies",
+    "oblt-aw/ai/merge-ready"
   ],
   "ignorePaths": [
     ".ci/**",

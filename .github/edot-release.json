@@ -1,4 +1,5 @@
 {
+  "repository": "elastic/apm-agent-android",
   "tagPrefix": "v",
   "productName": "EDOT Android",
   "versionFile": "gradle.properties",

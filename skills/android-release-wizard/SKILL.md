@@ -9,9 +9,9 @@ Work in the conversation only. Do not edit repository files, push, merge,
 publish, or tag. Do not dispatch Prepare release or Start patch until the
 operator explicitly approves.
 
-The helper scripts in `scripts/` do the mechanical reads, the notes draft,
-and the dispatches. Run them from the repository root, use their output, and
-do not repeat their steps by hand.
+The shared helper scripts fetched below do the mechanical reads, the notes
+draft, and the dispatches. Run them from the repository root, use their
+output, and do not repeat their steps by hand.
 
 The ideal run is one round: the operator reads your proposal and says "go
 ahead". Do the work up front so that is possible.
@@ -19,16 +19,42 @@ ahead". Do the work up front so that is possible.
 ## Start
 
 1. Ensure the local repository reflects the latest remote state. If this
-   skill, its scripts, or the release workflows changed, continue from the
-   updated versions.
-2. Run `skills/android-release-wizard/scripts/release-state.sh`. It prints
+   skill or the release workflows changed, continue from the updated versions.
+2. Fetch the shared helpers from `elastic/oblt-actions` at `v1`:
+
+   ```bash
+   set -euo pipefail
+   wizard_dir=$(mktemp -d)
+   if ! wizard_scripts=$(gh api \
+     'repos/elastic/oblt-actions/contents/edot-release/wizard?ref=v1' \
+     --jq '.[] | select(.type == "file" and (.name | endswith(".sh"))) | .name'); then
+     rm -rf "$wizard_dir"
+     exit 1
+   fi
+   while IFS= read -r script; do
+     if ! gh api -H 'Accept: application/vnd.github.raw' \
+       "repos/elastic/oblt-actions/contents/edot-release/wizard/$script?ref=v1" \
+       > "$wizard_dir/$script"; then
+       rm -rf "$wizard_dir"
+       exit 1
+     fi
+     chmod +x "$wizard_dir/$script"
+   done <<< "$wizard_scripts"
+   ```
+
+   If fetching fails, report the error and stop.
+3. Run `"$wizard_dir/release-state.sh"`. It prints
    the `phase`, the release branches, their open pull requests, and the
    operator's `nextActions`.
-3. Report every entry of `nextActions` to the operator.
-4. If `phase` is `in-flight`, stop: a `releasing/*` branch exists, and the
+4. Report every entry of `nextActions` to the operator.
+5. If `phase` is `in-flight`, stop: a `releasing/*` branch exists, and the
    next preparation stops until it is gone.
-5. If `phase` is `patching`, continue with "Existing patch branch" unless the
+6. If `phase` is `patching`, continue with "Existing patch branch" unless the
    operator asks for something else.
+
+Retain `wizard_dir` for helper calls in this session. If shell state does not
+persist between calls, use its absolute path instead. Remove the temporary
+directory with `rm -rf "$wizard_dir"` when finished.
 
 ## Inputs
 
@@ -52,7 +78,7 @@ cannot contain a breaking item.
 Draft the release-note JSON on the release ref, `main` or `patching/x.y.z`:
 
 ```sh
-skills/android-release-wizard/scripts/draft-notes.sh '<main-or-patching/x.y.z>'
+"$wizard_dir/draft-notes.sh" '<main-or-patching/x.y.z>'
 ```
 
 It dispatches the Draft release notes workflow, waits for the run, and
@@ -89,7 +115,7 @@ When the operator wants a patch and no `patching/*` branch exists:
 2. Run the preview, adding any pull request numbers the operator names:
 
    ```sh
-   skills/android-release-wizard/scripts/patch-preview.sh '<X.Y-or-latest>' [<number> ...]
+   "$wizard_dir/patch-preview.sh" '<X.Y-or-latest>' [<number> ...]
    ```
 
    It prints the source tag, the patch version, and the cherry-pick
@@ -102,7 +128,7 @@ When the operator wants a patch and no `patching/*` branch exists:
 4. After explicit approval, dispatch Start patch:
 
    ```sh
-   skills/android-release-wizard/scripts/dispatch.sh start-patch.yml main line='<X.Y>' pull_requests='<numbers>'
+   "$wizard_dir/dispatch.sh" start-patch.yml main line='<X.Y>' pull_requests='<numbers>'
    ```
 
    `<numbers>` are pull request numbers separated by commas with no spaces,
@@ -160,7 +186,7 @@ the approved JSON on standard input through a quoted heredoc, so no
 character in the notes is interpreted by the shell:
 
 ```sh
-skills/android-release-wizard/scripts/dispatch.sh prepare-release.yml '<main-or-patching/x.y.z>' release_notes=@- <<'EOF'
+"$wizard_dir/dispatch.sh" prepare-release.yml '<main-or-patching/x.y.z>' release_notes=@- <<'EOF'
 <json>
 EOF
 ```
@@ -171,10 +197,10 @@ the run URL; relay the failure message to the operator.
 
 If the script reports that the run's outcome is unknown, the run exists.
 Do not dispatch again. Run the command the message names,
-`skills/android-release-wizard/scripts/watch-run.sh <run-id>`, until it
+`"$wizard_dir/watch-run.sh" <run-id>`, until it
 reports success or failure, then continue from that outcome.
 
-When the run succeeds, run `skills/android-release-wizard/scripts/release-state.sh`
+When the run succeeds, run `"$wizard_dir/release-state.sh"`
 again and report the run URL with the outcome:
 
 - `phase` is `in-flight`: report the preparation pull request from

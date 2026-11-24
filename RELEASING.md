@@ -97,8 +97,7 @@ into `releasing/x.y.z`. The merge starts the publish workflow, which:
 7. For a patch, opens a notes-only PR into `main`.
 8. Deletes `prepare/x.y.z`. For a patch, it also deletes `patching/x.y.z` and
    `releasing/x.y.z`. The branch of the PR into `main` stays until you merge
-   that PR and delete it, because this repository does not delete merged
-   branches.
+   that PR.
 
 The team's Slack channel receives a start message once the merged commit is
 confirmed, with the version, the merged PR, the release commit, and the run.
@@ -109,13 +108,11 @@ PR, or to the failed run.
 
 For a release from `main`, review and merge the PR from `releasing/x.y.z`.
 It brings the release notes, documentation versions, NOTICE files, and the
-next development version to `main`. After merging, delete `releasing/x.y.z`
-by hand: this repository does not delete merged branches, and Prepare release
-stops while any `releasing/*` branch exists, naming it.
+next development version to `main`.
 
 For a patch, review and merge the notes-only PR from
-`patch-notes/x.y.z`, then delete `patch-notes/x.y.z` by hand. The publish
-workflow has already deleted `patching/x.y.z` and `releasing/x.y.z`.
+`patch-notes/x.y.z`. The publish workflow has already deleted `patching/x.y.z`
+and `releasing/x.y.z`.
 
 ## Patch release
 
@@ -139,8 +136,8 @@ Draft release notes with the wizard or by dispatching the Draft release notes
 workflow on `patching/x.y.z`; the draft then covers only that branch's
 changes. Approve them, then dispatch Prepare release from that branch. Patch preparation leaves `applies_to` metadata
 unchanged. Review and merge the preparation PR to publish. Finally, merge the
-notes-only PR into `main` and delete `patch-notes/x.y.z`. The publish
-workflow deletes `patching/x.y.z` and `releasing/x.y.z`.
+notes-only PR into `main`. The publish workflow deletes `patching/x.y.z` and
+`releasing/x.y.z`.
 
 ## Release dry run
 

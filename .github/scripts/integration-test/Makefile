@@ -2,8 +2,11 @@ MAKEFLAGS += --no-print-directory
 .SHELLFLAGS = -euc
 SHELL = /bin/bash
 
+# Pin for collector config compatibility; remove once start-local or the collector is fixed upstream.
+ELASTIC_STACK_VERSION := 9.5.6
+
 elastic-start-local:  ## Start ES + Kibana + EDOT Collector locally
-	curl -fsSL https://elastic.co/start-local | sh -s -- --edot
+	curl -fsSL https://elastic.co/start-local | sh -s -- -v $(ELASTIC_STACK_VERSION) --edot
 
 .PHONY: start-env
 start-env: elastic-start-local  ## Start the full environment

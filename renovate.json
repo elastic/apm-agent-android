@@ -18,6 +18,13 @@
   ],
   "packageRules": [
     {
+      "description": "Distributed oblt-aw client triggers — pins owned by distribute-client-workflow",
+      "enabled": false,
+      "matchFileNames": [
+        ".github/workflows/trigger-*-aw-*.yml"
+      ]
+    },
+    {
       "matchPackageNames": [
         "io.opentelemetry:**"
       ],

@@ -3,7 +3,7 @@ opentelemetry = "1.68.0"
 opentelemetry-contrib = "1.62.1-alpha"
 byteBuddy = "1.18.17"
 kotlin = "2.4.21"
-android = "9.5.2"
+android = "9.5.3"
 
 [libraries]
 opentelemetry-sdk = { module = "io.opentelemetry:opentelemetry-sdk", version.ref = "opentelemetry" }

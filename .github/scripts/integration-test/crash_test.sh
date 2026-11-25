@@ -100,7 +100,7 @@ for i in $(seq 1 15); do
   sleep 4
   crash_event_response=$(es_request POST "/_query?format=json" \
     -d '{
-      "query": "FROM logs-android.otel* | WHERE service.name == \"integration-test-app\" AND event_name == \"app.crash\" | LIMIT 1"
+      "query": "FROM logs-android.otel-* | WHERE service.name == \"integration-test-app\" AND event_name == \"app.crash\" | LIMIT 1"
     }' 2>/dev/null || true)
   crash_event=$(echo "$crash_event_response" | jq -r '.values[0] // empty' 2>/dev/null || true)
   if [ -n "$crash_event" ]; then
@@ -112,7 +112,7 @@ done
 
 echo "$crash_event_response" > "$build_dir/crash_event_esql.json"
 
-crash_doc_response=$(es_request POST "/logs-android.otel*/_search" \
+crash_doc_response=$(es_request POST "/logs-android.otel-*/_search" \
   -d '{
     "query": {
       "bool": {

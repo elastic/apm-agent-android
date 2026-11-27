@@ -155,6 +155,7 @@ class ElasticOpenTelemetry private constructor(
             val finalProcessorFactory = processorFactory
                 ?: DefaultProcessorFactory(serviceManager.getBackgroundWorkService())
             val resourceBuilder = Resource.builder()
+                .put("data_stream.dataset", "android")
                 .put(ServiceAttributes.SERVICE_NAME, serviceName)
                 .put(
                     ServiceAttributes.SERVICE_VERSION,

@@ -117,7 +117,7 @@ echo "Verified: documents do not contain build_id field"
 # =================== Step 3: Crash the app ================================
 
 echo "=== Installing app and triggering crash ==="
-es_request POST "/logs-generic.otel*/_delete_by_query?conflicts=proceed&refresh=true&allow_no_indices=true" \
+es_request POST "/logs-android.otel-*/_delete_by_query?conflicts=proceed&refresh=true&allow_no_indices=true" \
   -d '{
     "query": {
       "bool": {
@@ -183,7 +183,7 @@ crash_query='{
 }'
 for i in $(seq 1 15); do
   sleep 4
-  crash_doc_response=$(es_request POST "/logs-generic.otel*/_search" \
+  crash_doc_response=$(es_request POST "/logs-android.otel-*/_search" \
     -d "$crash_query" 2>/dev/null || true)
   crash_event=$(echo "$crash_doc_response" | jq -r '.hits.hits[0] // empty' 2>/dev/null || true)
   if [ -n "$crash_event" ]; then

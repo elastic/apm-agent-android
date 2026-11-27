@@ -33,7 +33,7 @@ opentelemetry-testing = { module = "io.opentelemetry:opentelemetry-sdk-testing",
 robolectric = "org.robolectric:robolectric:4.18.1"
 assertj = "org.assertj:assertj-core:3.27.7"
 mockk = "io.mockk:mockk:1.14.12"
-awaitility = "org.awaitility:awaitility-kotlin:4.3.0"
+awaitility = "org.awaitility:awaitility-kotlin:4.4.0"
 wireMock = "org.wiremock:wiremock:3.13.2"
 
 #Compilation tools

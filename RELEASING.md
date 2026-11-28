@@ -17,7 +17,7 @@ the preparation PR is what publishes.
 Use either path:
 
 - Ask an agent to prepare the release with the
-  [`android-release-wizard`](skills/android-release-wizard/SKILL.md)
+  [`android-release-wizard`](.agents/skills/android-release-wizard/SKILL.md)
   skill. It proposes the notes and resulting version, then dispatches after
   you approve.
 - Open the
